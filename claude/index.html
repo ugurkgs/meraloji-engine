@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MERALOJİ v35 | Akıllı Av Analizi</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        :root { 
+            --dark: #0f172a; 
+            --panel: rgba(15, 23, 42, 0.98); 
+            --blue: #38bdf8; 
+            --green: #4ade80; 
+            --red: #f87171; 
+            --yellow: #facc15; 
+            --orange: #fb923c;
+            --gray: #94a3b8;
+            --purple: #a78bfa;
+            --cyan: #22d3ee;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Montserrat', sans-serif; background: #000; color: white; height: 100vh; overflow: hidden; }
+
+        #map { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; cursor: crosshair; }
+        
+        .radar-pin { width: 20px; height: 20px; background: rgba(56, 189, 248, 0.9); border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px rgba(56, 189, 248, 0.8); position: relative; }
+        .radar-pin::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border-radius: 50%; border: 2px solid rgba(56, 189, 248, 0.5); animation: pulse 1.5s infinite; pointer-events: none; }
+        @keyframes pulse { 0% { width: 0; height: 0; opacity: 1; } 100% { width: 80px; height: 80px; opacity: 0; } }
+
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--dark); background-image: radial-gradient(circle, #1e293b 0%, #020617 80%); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity 0.8s ease-in-out; }
+        .splash-logo { width: 200px; height: 200px; animation: logoBreath 3s infinite ease-in-out; filter: drop-shadow(0 0 40px rgba(56, 189, 248, 0.3)); margin-bottom: 20px;}
+        .splash-title { font-size: 3.2em; font-weight: 900; color: #f8fafc; letter-spacing: 8px; text-transform: uppercase; margin-top: 10px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .splash-sub { font-size: 0.85em; color: var(--blue); font-family: 'Montserrat', sans-serif; font-weight: 600; margin-top: 5px; letter-spacing: 3px; opacity: 0.8; }
+        .splash-version { font-size: 0.7em; color: var(--green); margin-top: 15px; font-family: 'Share Tech Mono', monospace; }
+        @keyframes logoBreath { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        #controls-bar { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 95%; max-width: 500px; z-index: 2000; display: flex; gap: 10px; align-items: center; pointer-events: none; opacity: 0; transition: opacity 1s ease 0.5s; }
+        #controls-bar.visible { opacity: 1; }
+        #controls-bar > * { pointer-events: auto; }
+        .control-group { background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; display: flex; align-items: center; padding: 5px; flex: 1; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .btn-glass { background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.15); color: white; width: 45px; height: 45px; border-radius: 12px; font-size: 1.2em; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: all 0.2s; }
+        .btn-glass:hover { background: rgba(56, 189, 248, 0.3); transform: scale(1.05); }
+        .search-input { background: transparent; border: none; color: white; padding: 10px; width: 100%; font-family: 'Montserrat', sans-serif; font-size: 1em; outline: none; }
+        #suggestions { position: absolute; top: 75px; left: 65px; right: 65px; background: var(--panel); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; max-height: 200px; overflow-y: auto; display: none; flex-direction: column; z-index: 3000; pointer-events: auto; }
+        .suggestion-item { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; font-size: 0.9em; transition: background 0.2s; }
+        .suggestion-item:hover { background: rgba(255,255,255,0.1); }
+
+        .calc-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(5px); z-index: 2500; display: none; align-items: center; justify-content: center; flex-direction: column; font-family: 'Share Tech Mono', monospace; pointer-events: auto; }
+        .calc-overlay.active { display: flex; }
+        .radar-spinner { width: 80px; height: 80px; border-radius: 50%; border: 2px solid rgba(56, 189, 248, 0.1); border-top-color: var(--blue); animation: radar 1.5s linear infinite; margin-bottom: 20px; box-shadow: 0 0 40px rgba(56, 189, 248, 0.2); }
+        @keyframes radar { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .calc-title { color: var(--blue); font-size: 1.5em; margin-bottom: 20px; letter-spacing: 2px; }
+        .terminal-log { width: 90%; max-width: 400px; min-height: 150px; color: var(--green); font-size: 0.9em; text-align: left; border-left: 2px solid var(--green); padding-left: 15px; display: flex; flex-direction: column; justify-content: flex-end; text-shadow: 0 0 5px rgba(74, 222, 128, 0.5); }
+        .log-line { margin-bottom: 5px; opacity: 0; animation: fadeIn 0.3s forwards; }
+        .log-val { color: white; font-weight: bold; }
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        #hud-panel { position: absolute; bottom: 0; left: 0; width: 100%; max-height: 92vh; background: var(--panel); border-radius: 20px 20px 0 0; z-index: 2000; display: none; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,0.8); border-top: 1px solid rgba(56, 189, 248, 0.3); pointer-events: auto; }
+        @media(min-width: 768px) { #hud-panel { bottom: 20px; right: 20px; left: auto; width: 480px; border-radius: 16px; max-height: 90vh; border: 1px solid rgba(255,255,255,0.1); } }
+        .panel-header { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .panel-content { padding: 15px; overflow-y: auto; max-height: calc(92vh - 60px); }
+        
+        .score-box { text-align: center; margin-bottom: 15px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .main-score { font-size: 3.5em; font-weight: 900; line-height: 1; color: var(--green); text-shadow: 0 0 20px rgba(74, 222, 128, 0.3); }
+        .rating-badge { font-size: 0.9em; font-weight: bold; color: var(--yellow); letter-spacing: 1px; margin-bottom: 5px; display:block;}
+        .conf-badge { font-size: 0.65em; font-weight: bold; color: #cbd5e1; background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 20px; display: inline-block; border: 1px solid rgba(255,255,255,0.1); margin-top: 5px; }
+        
+        .tactic-box { background: rgba(56, 189, 248, 0.1); border-left: 4px solid var(--blue); padding: 12px; margin-bottom: 15px; font-size: 0.85em; border-radius: 4px; color: #e2e8f0; line-height: 1.4; display:flex; align-items:center; gap:10px;}
+
+        /* YENİ: 5 sütunlu grid - daha compact */
+        .metric-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 20px; }
+        .metric-card { background: rgba(255,255,255,0.05); padding: 8px 4px; border-radius: 8px; text-align: center; display:flex; flex-direction:column; justify-content:center; min-height:65px; position: relative;}
+        .m-val { font-weight: bold; color: var(--blue); font-size: 0.8em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .m-sub { font-size: 0.55em; color: var(--orange); position: absolute; top: 2px; right: 4px; font-weight: bold;}
+        .m-lbl { font-size: 0.5em; color: #888; margin-top: 2px; text-transform: uppercase;}
+        
+        /* YENİ METRİK İKONLARI */
+        .m-icon { font-size: 1.2em; margin-bottom: 2px; }
+        
+        .fish-item { padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 3px solid #555; margin-bottom: 6px; transition: all 0.2s; cursor:pointer; position: relative; overflow: hidden; }
+        .fish-item:hover { background: rgba(255,255,255,0.08); transform: translateX(5px); }
+        .fish-header { display: flex; align-items: center; gap: 10px; }
+        .fish-details { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.8em; color: #cbd5e1; animation: slideDown 0.3s ease-out; }
+        .fish-item.open .fish-details { display: block; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .breakdown-container { margin: 10px 0; }
+        .bd-title { font-size: 0.65em; color: #888; margin-bottom: 5px; letter-spacing: 1px; }
+        .breakdown-bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
+        .bd-seg { height: 100%; transition: width 0.3s; }
+        .bd-legend { display: flex; gap: 10px; font-size: 0.7em; flex-wrap: wrap; }
+
+        .day-nav { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; padding: 5px 0; }
+        .day-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 0.75em; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
+        .day-btn:hover { background: rgba(56, 189, 248, 0.2); }
+        .day-btn.active { background: var(--blue); font-weight: bold; }
+
+        #side-menu { position: fixed; right: -300px; top: 0; width: 300px; height: 100%; background: var(--panel); z-index: 3000; transition: right 0.3s; box-shadow: -5px 0 20px rgba(0,0,0,0.5); }
+        #side-menu.active { right: 0; }
+        .menu-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold; font-size: 1.2em; }
+        .menu-item { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.2s; }
+        .menu-item:hover { background: rgba(255,255,255,0.1); }
+        #menu-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2999; }
+
+        .fav-item { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; cursor: pointer; transition: background 0.2s; }
+        .fav-item:hover { background: rgba(255,255,255,0.1); }
+
+        #weekly-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 3500; align-items: center; justify-content: center; }
+        .modal-content { background: var(--panel); padding: 20px; border-radius: 16px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .day-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 8px; }
+        .day-score-badge { padding: 8px 15px; border-radius: 20px; font-weight: bold; }
+
+        /* YENİ: Gelişmiş göstergeler */
+        .advanced-metrics { margin-top: 15px; padding: 12px; background: rgba(167, 139, 250, 0.1); border-radius: 8px; border-left: 3px solid var(--purple); }
+        .adv-title { font-size: 0.75em; color: var(--purple); margin-bottom: 8px; font-weight: bold; letter-spacing: 1px; }
+        .adv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .adv-item { display: flex; align-items: center; gap: 8px; font-size: 0.75em; }
+        .adv-icon { font-size: 1.2em; }
+        .adv-label { color: #888; }
+        .adv-value { color: white; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="splash-screen">
+        <svg class="splash-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#38bdf8;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <path d="M 20 100 Q 50 80, 80 100 T 140 100 T 200 100 L 200 150 Q 150 130, 100 150 T 20 150 Z" fill="url(#waveGrad)" opacity="0.8"/>
+            <path d="M 20 120 Q 50 100, 80 120 T 140 120 T 200 120 L 200 170 Q 150 150, 100 170 T 20 170 Z" fill="url(#waveGrad)" opacity="0.6"/>
+            <circle cx="100" cy="60" r="8" fill="#f87171"/>
+            <line x1="100" y1="68" x2="100" y2="95" stroke="#f87171" stroke-width="2"/>
+            <circle cx="100" cy="95" r="3" fill="#f87171"/>
+        </svg>
+        <div class="splash-title">MERALOJİ</div>
+        <div class="splash-sub">Akıllı Av Analizi</div>
+        <div class="splash-version">v35.0 ENHANCED • Gelgit • Berraklık • Tuzluluk</div>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="controls-bar">
+        <div class="control-group">
+            <div class="btn-glass" onclick="locateMe()">📍</div>
+            <input type="text" class="search-input" id="search-input" placeholder="Mera Ara...">
+        </div>
+        <div class="btn-glass" onclick="toggleMenu()">☰</div>
+    </div>
+    <div id="suggestions"></div>
+
+    <div class="calc-overlay" id="calc-overlay">
+        <div class="radar-spinner"></div>
+        <div class="calc-title">MERALOJİ SİSTEMİ AKTİF</div>
+        <div class="terminal-log" id="terminal-log"></div>
+    </div>
+
+    <div id="hud-panel">
+        <div class="panel-header">
+            <div>
+                <div style="font-weight:bold; font-size:1.1em;" id="region-title">MERA ANALİZİ</div>
+                <div style="font-size:0.7em; color:#888;" id="coord-display">--</div>
+            </div>
+            <div style="cursor:pointer; font-size:1.5em;" onclick="closePanel()">✕</div>
+        </div>
+        <div class="panel-content">
+            <div class="day-nav" id="day-nav"></div>
+            
+            <div class="score-box">
+                <span class="rating-badge" id="rating-badge">⭐⭐⭐</span>
+                <div class="main-score" id="main-score">--</div>
+                <div style="font-size:0.85em; color:#888; margin-top:5px;">AVLANMA SKORU</div>
+                <span class="conf-badge" id="conf-badge">Güven: --%</span>
+            </div>
+
+            <div class="tactic-box">
+                <span style="font-size:1.3em;">💡</span>
+                <div id="tactic-text">Koşullar analiz ediliyor...</div>
+            </div>
+
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <div class="m-icon">🌡️</div>
+                    <div class="m-val" id="val-temp">--</div>
+                    <div class="m-sub" id="val-temp-chg"></div>
+                    <div class="m-lbl">Sıcaklık</div>
+                </div>
+                <div class="metric-card">
+                    <div class="m-icon">🌊</div>
+                    <div class="m-val" id="val-wave">--</div>
+                    <div class="m-lbl">Dalga</div>
+                </div>
+                <div class="metric-card">
+                    <div class="m-icon">💨</div>
+                    <div class="m-val" id="val-wind">--</div>
+                    <div class="m-lbl">Rüzgar</div>
+                </div>
+                <div class="metric-card">
+                    <div class="m-icon">⚡</div>
+                    <div class="m-val" id="val-current">--</div>
+                    <div class="m-lbl">Akıntı</div>
+                </div>
+                <div class="metric-card">
+                    <div class="m-icon">🌙</div>
+                    <div class="m-val" id="val-moon">--</div>
+                    <div class="m-lbl">Ay</div>
+                </div>
+                <div class="metric-card">
+                    <div class="m-icon">🔽</div>
+                    <div class="m-val" id="val-press">--</div>
+                    <div class="m-lbl">Basınç</div>
+                </div>
+                <div class="metric-card">
+                    <div class="m-icon">☁️</div>
+                    <div class="m-val" id="val-cloud">--</div>
+                    <div class="m-lbl">Bulut</div>
+                </div>
+                <div class="metric-card">
+                    <div class="m-icon">🌧️</div>
+                    <div class="m-val" id="val-rain">--</div>
+                    <div class="m-lbl">Yağış</div>
+                </div>
+                <div class="metric-card">
+                    <div class="m-icon">💎</div>
+                    <div class="m-val" id="val-clarity">--</div>
+                    <div class="m-lbl">Berraklık</div>
+                </div>
+                <div class="metric-card">
+                    <div class="m-icon">🔄</div>
+                    <div class="m-val" id="val-tidal">--</div>
+                    <div class="m-lbl">Gelgit</div>
+                </div>
+            </div>
+
+            <!-- YENİ: Gelişmiş Metrikler Bölümü -->
+            <div class="advanced-metrics">
+                <div class="adv-title">🔬 GELİŞMİŞ ANALİZ</div>
+                <div class="adv-grid">
+                    <div class="adv-item">
+                        <span class="adv-icon">🧂</span>
+                        <span class="adv-label">Tuzluluk:</span>
+                        <span class="adv-value" id="val-salinity">-- PSU</span>
+                    </div>
+                    <div class="adv-item">
+                        <span class="adv-icon">🧬</span>
+                        <span class="adv-label">Bio-Aktivite:</span>
+                        <span class="adv-value" id="val-bio">--%</span>
+                    </div>
+                    <div class="adv-item">
+                        <span class="adv-icon">🌊</span>
+                        <span class="adv-label">Gelgit Hızı:</span>
+                        <span class="adv-value" id="val-tidal-rate">-- m/h</span>
+                    </div>
+                    <div class="adv-item">
+                        <span class="adv-icon">🎯</span>
+                        <span class="adv-label">Bölge:</span>
+                        <span class="adv-value" id="val-region">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin: 15px 0; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                <div style="font-weight:bold; margin-bottom:10px; display:flex; justify-content:space-between;">
+                    <span>🎣 AV TAHMİNİ</span>
+                    <span style="font-size:0.8em; color:var(--blue); cursor:pointer;" onclick="showWeeklyModal()">7 Gün Özet →</span>
+                </div>
+                <div id="fish-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="side-menu">
+        <div class="menu-header">⚙️ AYARLAR</div>
+        <div class="menu-item" onclick="changeMapLayer()">🗺️ Harita Değiştir</div>
+        <div class="menu-item" onclick="saveFavorite()">⭐ Meraya Ekle</div>
+        <div class="menu-item" onclick="showWeeklyModal()">📊 7 Günlük Tahmin</div>
+        <div style="padding:15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); color:#888; font-size:0.85em;">
+            <div style="font-weight:bold; margin-bottom:10px;">📍 Kayıtlı Meralar</div>
+            <div id="fav-list"></div>
+        </div>
+    </div>
+    <div id="menu-overlay" onclick="toggleMenu()"></div>
+
+    <div id="weekly-modal" onclick="this.style.display='none'">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div style="font-weight:bold; font-size:1.2em;">📊 7 Günlük Tahmin</div>
+                <div style="cursor:pointer; font-size:1.5em;" onclick="document.getElementById('weekly-modal').style.display='none'">✕</div>
+            </div>
+            <div id="weekly-content"></div>
+        </div>
+    </div>
+
+    <script>
+        const API = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
+        
+        let map, layers, currentLayer = 'satellite', markerLayer = null, lastLatLon = null, weeklyDataCache = [];
+
+        setTimeout(() => {
+            document.getElementById('splash-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.display = 'none';
+                document.getElementById('controls-bar').classList.add('visible');
+            }, 800);
+        }, 2500);
+
+        map = L.map('map', { zoomControl: false }).setView([38.5, 28.0], 7);
+        
+        layers = {
+            satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri' }),
+            street: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'OSM' })
+        };
+        layers.satellite.addTo(map);
+
+        map.on('click', async (e) => {
+            const { lat, lng: lon } = e.latlng;
+            lastLatLon = { lat, lon };
+
+            if (markerLayer) map.removeLayer(markerLayer);
+            markerLayer = L.marker([lat, lon], { icon: L.divIcon({ className: 'radar-pin', iconSize: [20, 20] }) }).addTo(map);
+
+            document.getElementById('calc-overlay').classList.add('active');
+            const log = document.getElementById('terminal-log');
+            log.innerHTML = '';
+
+            const addLog = (msg) => {
+                const line = document.createElement('div');
+                line.className = 'log-line';
+                line.innerHTML = msg;
+                log.appendChild(line);
+                setTimeout(() => log.scrollTop = log.scrollHeight, 50);
+            };
+
+            addLog(`> SİSTEM BAŞLATILDI`);
+            await new Promise(r => setTimeout(r, 300));
+            addLog(`> Koordinat: <span class="log-val">${lat.toFixed(3)}, ${lon.toFixed(3)}</span>`);
+            await new Promise(r => setTimeout(r, 300));
+            addLog(`> Veri kaynakları sorgulanıyor...`);
+            await new Promise(r => setTimeout(r, 400));
+
+            try {
+                const res = await fetch(`${API}/api/forecast?lat=${lat}&lon=${lon}`);
+                const data = await res.json();
+
+                addLog(`> Hava & Deniz Verileri: <span class="log-val">✓ ALINDI</span>`);
+                await new Promise(r => setTimeout(r, 300));
+                addLog(`> Gelgit Analizi: <span class="log-val">✓ HESAPLANDI</span>`);
+                await new Promise(r => setTimeout(r, 300));
+                addLog(`> Biyolojik Aktivite: <span class="log-val">✓ TAHMİN EDİLDİ</span>`);
+                await new Promise(r => setTimeout(r, 300));
+                addLog(`> ${data.forecast[0].fishList.length} Tür Analiz Edildi`);
+                await new Promise(r => setTimeout(r, 300));
+                addLog(`> <span class="log-val">ANALİZ TAMAMLANDI</span>`);
+                await new Promise(r => setTimeout(r, 500));
+
+                document.getElementById('calc-overlay').classList.remove('active');
+
+                weeklyDataCache = data.forecast;
+                renderForecast(data, 0);
+
+                const panel = document.getElementById('hud-panel');
+                panel.style.display = 'flex';
+                
+                document.getElementById('region-title').innerText = `${data.region} MERASI`;
+                document.getElementById('coord-display').innerText = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                document.getElementById('val-region').innerText = data.region;
+                document.getElementById('val-salinity').innerText = data.salinity + ' PSU';
+
+                const nav = document.getElementById('day-nav');
+                nav.innerHTML = '';
+                data.forecast.forEach((d, i) => {
+                    const date = new Date(d.date);
+                    const dayName = date.toLocaleDateString('tr-TR', { weekday: 'short', day: 'numeric' });
+                    const btn = document.createElement('div');
+                    btn.className = 'day-btn' + (i === 0 ? ' active' : '');
+                    btn.innerText = dayName;
+                    btn.onclick = () => {
+                        document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        renderForecast(data, i);
+                    };
+                    nav.appendChild(btn);
+                });
+
+            } catch (err) {
+                addLog(`> <span style="color:var(--red)">HATA: ${err.message}</span>`);
+                await new Promise(r => setTimeout(r, 2000));
+                document.getElementById('calc-overlay').classList.remove('active');
+            }
+        });
+
+        loadFavorites();
+
+        function getMoonName(p) {
+            if (p < 0.1) return "🌑 Yeni";
+            if (p < 0.25) return "🌒 Hilal";
+            if (p < 0.4) return "🌓 İlk";
+            if (p < 0.6) return "🌔 Şişman";
+            if (p < 0.75) return "🌕 Dolunay";
+            if (p < 0.9) return "🌖 Son";
+            return "🌘 Hılal";
+        }
+
+        function renderForecast(data, dayIndex) {
+            const today = data.forecast[dayIndex];
+
+            document.getElementById('main-score').innerText = today.score;
+            document.getElementById('main-score').style.color = getColor(today.score);
+            document.getElementById('rating-badge').innerText = today.rating;
+            document.getElementById('conf-badge').innerText = `Güven: ${today.confidence}%`;
+            document.getElementById('tactic-text').innerText = today.tactic || "Standart şartlar.";
+
+            document.getElementById('val-temp').innerText = today.temp + "°";
+            const tempChgEl = document.getElementById('val-temp-chg');
+            if(today.tempChange > 3) {
+                tempChgEl.innerText = "⚠️" + today.tempChange;
+                tempChgEl.style.color = "var(--red)";
+            } else {
+                tempChgEl.innerText = "";
+            }
+
+            document.getElementById('val-wave').innerText = today.wave + "m";
+            document.getElementById('val-wind').innerText = today.wind + " km";
+            document.getElementById('val-current').innerText = today.current;
+            document.getElementById('val-moon').innerText = getMoonName(today.moonPhase); 
+            document.getElementById('val-press').innerText = today.pressure;
+            document.getElementById('val-cloud').innerText = today.cloud;
+            document.getElementById('val-rain').innerText = today.rain;
+            
+            // YENİ METRİKLER
+            document.getElementById('val-clarity').innerText = today.clarity + '%';
+            document.getElementById('val-tidal').innerText = today.tidal;
+            document.getElementById('val-bio').innerText = today.bioActivity + '%';
+            document.getElementById('val-tidal-rate').innerText = today.tidalRate + ' m/h';
+
+            const list = document.getElementById('fish-list'); 
+            list.innerHTML = '';
+            today.fishList.forEach(f => {
+                const c = getColor(f.score);
+                let breakdownHTML = '';
+                if(f.breakdown) {
+                    breakdownHTML = `
+                    <div class="breakdown-container">
+                        <div class="bd-title">PUAN ANALİZİ</div>
+                        <div class="breakdown-bar">
+                            <div class="bd-seg" style="width:${(f.breakdown.base/f.score)*100}%; background:#94a3b8;"></div>
+                            <div class="bd-seg" style="width:${(f.breakdown.env/f.score)*100}%; background:#38bdf8;"></div>
+                            <div class="bd-seg" style="width:${(f.breakdown.mom/f.score)*100}%; background:#fb923c;"></div>
+                            <div class="bd-seg" style="width:${(f.breakdown.trigger/f.score)*100}%; background:#facc15;"></div>
+                        </div>
+                        <div class="bd-legend">
+                            <div>TAB:${f.breakdown.base}</div>
+                            <div style="color:#38bdf8">ORT:${f.breakdown.env}</div>
+                            <div style="color:#fb923c">IVM:${f.breakdown.mom}</div>
+                            <div style="color:#facc15">+${f.breakdown.trigger}</div>
+                        </div>
+                    </div>`;
+                }
+
+                list.innerHTML += `
+                    <div class="fish-item" style="border-left-color:${c}" onclick="this.classList.toggle('open')">
+                        <div class="fish-header">
+                            <span style="font-size:1.5em;">${f.icon}</span>
+                            <div style="flex:1;"><div style="font-weight:700;">${f.name}</div><div style="font-size:0.7em; color:#888;">${f.method || 'Genel Avcılık'}</div></div>
+                            <div style="font-weight:800; color:${c}">%${f.score.toFixed(1)}</div>
+                        </div>
+                        <div class="fish-details">
+                            <div style="color:var(--yellow); margin-bottom:5px;">⚡ <b>Durum:</b> ${f.activation}</div>
+                            ${breakdownHTML}
+                            <div style="margin-top:8px;">🎯 <b>Yem:</b> ${f.bait}</div>
+                            <div>💡 <b>İpucu:</b> ${f.note}</div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function getColor(s) { return s >= 80 ? 'var(--green)' : (s >= 50 ? 'var(--yellow)' : 'var(--red)'); }
+        
+        function closePanel() { 
+            document.getElementById('hud-panel').style.display = 'none'; 
+            if(markerLayer) map.removeLayer(markerLayer); 
+        }
+        
+        function toggleMenu() { 
+            document.getElementById('side-menu').classList.toggle('active'); 
+            document.getElementById('menu-overlay').style.display = document.getElementById('side-menu').classList.contains('active') ? 'block' : 'none'; 
+        }
+        
+        function changeMapLayer() { 
+            if(currentLayer === 'satellite') { 
+                map.removeLayer(layers.satellite); 
+                layers.street.addTo(map); 
+                currentLayer = 'street'; 
+            } else { 
+                map.removeLayer(layers.street); 
+                layers.satellite.addTo(map); 
+                currentLayer = 'satellite'; 
+            } 
+            toggleMenu(); 
+        }
+        
+        function saveFavorite() { 
+            if(!lastLatLon) return; 
+            const name = prompt("Mera Adı:", document.getElementById('region-title').innerText); 
+            if(!name) return; 
+            let f = JSON.parse(localStorage.getItem('fish_favs') || '[]'); 
+            f.push({ name, ...lastLatLon }); 
+            localStorage.setItem('fish_favs', JSON.stringify(f)); 
+            loadFavorites(); 
+            alert("Kaydedildi!"); 
+        }
+        
+        function loadFavorites() { 
+            const l = document.getElementById('fav-list'); 
+            const f = JSON.parse(localStorage.getItem('fish_favs') || '[]'); 
+            l.innerHTML = ''; 
+            if(f.length===0) l.innerHTML='<div style="color:#666; font-size:0.9em;">Kayıt yok.</div>'; 
+            f.forEach((fav, i) => l.innerHTML += `<div class="fav-item" onclick="map.flyTo([${fav.lat},${fav.lon}],14); toggleMenu(); map.fire('click',{latlng:{lat:${fav.lat},lng:${fav.lon}}})"><span>📍 ${fav.name}</span><span style="color:var(--red);" onclick="event.stopPropagation(); deleteFav(${i})">✕</span></div>`); 
+        }
+        
+        function deleteFav(i) { 
+            let f = JSON.parse(localStorage.getItem('fish_favs')); 
+            f.splice(i, 1); 
+            localStorage.setItem('fish_favs', JSON.stringify(f)); 
+            loadFavorites(); 
+        }
+        
+        function showWeeklyModal() { 
+            const m = document.getElementById('weekly-modal'); 
+            const c = document.getElementById('weekly-content'); 
+            c.innerHTML=''; 
+            weeklyDataCache.forEach(d => { 
+                const date = new Date(d.date).toLocaleDateString('tr-TR', {weekday:'short', day:'numeric'}); 
+                c.innerHTML += `<div class="day-row">
+                    <div>
+                        <div style="font-weight:bold; color:white;">${date}</div>
+                        <div style="color:#aaa; font-size:0.8em;">🌊 ${d.wave}m 💨 ${d.wind}km 💎 ${d.clarity}%</div>
+                    </div>
+                    <div class="day-score-badge" style="color:${getColor(d.score)}; border:1px solid ${getColor(d.score)}">%${d.score.toFixed(1)}</div>
+                </div>`; 
+            }); 
+            m.style.display='flex'; 
+        }
+        
+        let debounceTimer; 
+        document.getElementById('search-input').addEventListener('input', (e) => { 
+            clearTimeout(debounceTimer); 
+            if(e.target.value.length < 3) { 
+                document.getElementById('suggestions').style.display='none'; 
+                return; 
+            } 
+            debounceTimer = setTimeout(async () => { 
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(e.target.value)}`); 
+                const d = await res.json(); 
+                const b = document.getElementById('suggestions'); 
+                b.innerHTML=''; 
+                if(d.length>0) { 
+                    b.style.display='flex'; 
+                    d.slice(0,5).forEach(i => { 
+                        const div=document.createElement('div'); 
+                        div.className='suggestion-item'; 
+                        div.innerText=i.display_name; 
+                        div.onclick=()=>{ 
+                            map.flyTo([i.lat,i.lon],13); 
+                            b.style.display='none'; 
+                            e.target.value = '';
+                        }; 
+                        b.appendChild(div); 
+                    }); 
+                } 
+            }, 500); 
+        });
+        
+        function locateMe() { 
+            navigator.geolocation.getCurrentPosition(p => map.flyTo([p.coords.latitude, p.coords.longitude], 14)); 
+        }
+    </script>
+</body>
+</html>
