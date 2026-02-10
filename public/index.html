@@ -30,6 +30,9 @@
         .radar-pin::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--blue); animation: pulse 2s infinite; pointer-events: none; opacity: 0.5; }
         @keyframes pulse { 0% { width: 0; height: 0; opacity: 0.8; } 100% { width: 100px; height: 100px; opacity: 0; } }
 
+        /* YEMCİ İKONU */
+        .bait-icon { font-size: 24px; text-align: center; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+
         /* UI ELEMENTS */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--dark); background-image: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity 0.8s ease-in-out; padding: 20px; text-align: center; }
         .splash-title-top { font-size: 2.8em; font-weight: 900; color: white; letter-spacing: 4px; margin-bottom: 20px; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
@@ -77,6 +80,7 @@
         .status-neutral { color: var(--blue); background: rgba(56, 189, 248, 0.1); }
         
         .action-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--blue), #2563eb); border: none; color: white; font-weight: 800; border-radius: 12px; cursor: pointer; margin-top: 10px; box-shadow: 0 5px 20px rgba(37, 99, 235, 0.4); font-size: 1em; letter-spacing: 1px; }
+        .bait-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--orange), #f59e0b); border: none; color: white; font-weight: 800; border-radius: 12px; cursor: pointer; margin-top: 10px; box-shadow: 0 5px 20px rgba(245, 158, 11, 0.4); font-size: 0.9em; letter-spacing: 1px; text-align: center; }
 
         .fish-item { padding: 14px; background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, transparent 100%); border-radius: 12px; border-left: 4px solid #555; margin-bottom: 8px; cursor:pointer; position: relative; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .fish-details { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.85em; color: #cbd5e1; line-height: 1.6; }
@@ -139,14 +143,14 @@
                 <button class="secondary-btn" onclick="openTechModal()">🧠 Algoritma Detayı</button>
             </div>
         </div>
-        <div style="text-align:center; color:#666; font-size:0.8em; margin-top:20px;">Geliştirici: Uğur Kögüs<br>v1.9.1 Tactical</div>
+        <div style="text-align:center; color:#666; font-size:0.8em; margin-top:20px;">Geliştirici: Uğur Kögüs<br>v2.0 Master</div>
     </div>
     
     <div id="map"></div>
     
     <div class="calc-overlay" id="loading">
         <div class="radar-spinner"></div>
-        <div style="color:var(--blue); font-family:'Share Tech Mono';">OLASILIKLAR HESAPLANIYOR...</div>
+        <div style="color:var(--blue); font-family:'Share Tech Mono';">ANALİZ YAPILIYOR...</div>
     </div>
     
     <div id="hud-panel">
@@ -167,7 +171,9 @@
             
             <div class="metric-grid" id="main-grid"></div>
 
-            <div style="font-size:0.85em; color:var(--gray); margin-bottom:10px; font-weight:800;">TÜRLER (DETAY İÇİN TIKLA)</div>
+            <button class="bait-btn" onclick="findBaitShops()">🪱 YEMCİLERİ BUL</button>
+
+            <div style="font-size:0.85em; color:var(--gray); margin-bottom:10px; font-weight:800; margin-top:20px;">TÜRLER (DETAY İÇİN TIKLA)</div>
             <div id="fish-list"></div>
             <button class="action-btn" onclick="showWeeklyModal()">📅 7 GÜNLÜK RAPOR</button>
             <button class="secondary-btn" style="text-align:center;" onclick="saveFavorite()">⭐ KAYDET</button>
@@ -246,68 +252,17 @@
     </div>
 
     <script>
-        // TAKTİKSEL METRİK VERİTABANI
         const METRIC_DATA = {
-            "temp": { 
-                icon: "🌡️", title: "SU ISISI", 
-                desc: "Balıklar soğukkanlıdır, metabolizmaları ve yeme istekleri su sıcaklığına zincirlidir. Ani düşüşler şok etkisi yaratır.",
-                ref: "Ege: <span class='ref-green'>18-24°C</span> | Marmara: <span class='ref-green'>14-19°C</span>",
-                algo: "Backend, 'Gaussian Çan Eğrisi' ile sıcaklık sapmalarını hesaplar. Delta-T (Hava-Su farkı) > 5°C ise puan düşer."
-            },
-            "clarity": { 
-                icon: "👁️", title: "SU GÖRÜŞÜ", 
-                desc: "Avcı balıkların (Levrek, Lüfer) yemi görme mesafesidir. Berrak suda balık misinayı görür.",
-                ref: "İdeal: <span class='ref-green'>%50 - %85</span> (Ne çok bulanık ne çok berrak)",
-                algo: "Berraklık > %90 ise 'Görünmez Takım' uyarısı tetiklenir. Bulanıklık < %40 ise 'Koku/Ses' bonusu devreye girer."
-            },
-            "wind": { 
-                icon: "💨", title: "RÜZGAR YÖNÜ/HIZI", 
-                desc: "Rüzgar planktonu kıyıya taşır. Yönü (Lodos/Poyraz) suyun ısısını ve berraklığını değiştirir.",
-                ref: "Güvenli: <span class='ref-green'>0-25 km/s</span> | Riskli: <span class='ref-red'>40+ km/s</span>",
-                algo: "Lodos (Güney) rüzgarı Marmara'da +15 Puan bonus verir. 35km üzeri hız 'Güvenlik Kesintisi' uygular."
-            },
-            "wave": { 
-                icon: "🌊", title: "DALGA BOYU", 
-                desc: "Köpüklü su oksijen ve kamuflaj sağlar. Levrek gibi avcılar dalgalı suyu sever.",
-                ref: "Avcı İçin: <span class='ref-green'>0.5m - 1.2m</span> | LRF İçin: <span class='ref-green'>0.1m - 0.4m</span>",
-                algo: "Dalga > 0.6m olduğunda Levrek ve Sargoz için 'Pusu Bonusu' (+20 Puan) eklenir."
-            },
-            "salinity": { 
-                icon: "🧂", title: "TUZLULUK & OZMOTİK DENGE", 
-                desc: "Tuzluluk, balığın kaldırma kuvvetini ve enerji tüketimini (Ozmotik Basınç) etkiler. Tatlı suyun denize karıştığı (Tuzluluğun düştüğü) nehir ağızları, avcı balıkların en sevdiği pusu alanlarıdır. Ege'de (Tuzlu) sahteler daha zor batar (Askıda kalır), Marmara'da daha hızlı batar.",
-                ref: "Ege: <span class='ref-green'>~38 PSU (Yüksek)</span> | Marmara: <span class='ref-green'>~22 PSU (Düşük)</span>",
-                algo: "Bölge tespitinde kullanılır. Ayrıca sistem yağmur verisine bakarak 'Nehir Ağzı' simülasyonu yapar; yağmur sonrası tuzluluk düşeceği için Levrek puanına 'Brackish Water' (Acı Su) bonusu ekler."
-            },
-            "pressure": { 
-                icon: "📉", title: "HAVA BASINCI (BAROMETRE)", 
-                desc: "Denizlerin 'Fırtına Alarmı'dır. Basınç düşerken (Düşük Basınç) balıkların hava kesesi üzerindeki baskı azalır. Balıklar yaklaşan kötü havayı hisseder ve fırtına boyunca aç kalmamak için 'Stok Yapma' (Gorging) içgüdüsüyle çılgınca beslenir.",
-                ref: "Süper Av: <span class='ref-green'>1008 - 1012 hPa (Düşen)</span> | Kötü: <span class='ref-red'>1020+ hPa (Yüksek)</span>",
-                algo: "Basınç düşüş trendindeyse (Dün > Bugün) sistem 'Feeding Frenzy' (Beslenme Çılgınlığı) modunu açar ve skoru 1.2x (Çarpan) ile artırır."
-            },
-            "moon": { 
-                icon: "🌑", title: "AY FAZI & SOLUNAR", 
-                desc: "Ay sadece fener değil, okyanusun motorudur. Dolunay ve Yeni Ay'da yerçekimi artar, akıntılar hızlanır (Spring Tides). Dolunayda ışık suya girdiği için avcı balıklar 'görerek' avlanır. Yeni Ay (Karanlık) döneminde ise 'titreşim ve koku' ile avlanırlar.",
-                ref: "Dolunay: <span class='ref-green'>Koyu Renk (Siyah/Mor)</span> | Yeni Ay: <span class='ref-green'>Glow (Fosfor)</span>",
-                algo: "Dolunayda (Işık %80+) sistem 'Silüet Bonusu' verir ve Koyu Renk sahte önerir. Yeni Ayda 'Duyu Bonusu' devreye girer, sesli/kokulu yem puanı artar."
-            },
-            "tide": { 
-                icon: "🌊", title: "GELGİT (MEDCEZİR)", 
-                desc: "Denizdeki 'Yemek Zili'dir. Sular yükselirken veya alçalırken oluşan akıntı, kayaların arasındaki yemleri açığa çıkarır ve sürükler. Avcı balıklar bu akıntının önünde pusu kurar. Su en tepede veya en dipte durduğunda (Slack Tide) av bıçak gibi kesilir.",
-                ref: "İdeal: <span class='ref-green'>Su Hareketli (Akış)</span> | Kötü: <span class='ref-red'>Su Durması (Slack)</span>",
-                algo: "Gelgit değişim hızı > 0.3 m/s ise 'Aktif Av' bonusu eklenir. Su hareketsizse (Değişim < 0.1 m/s) sistem 'Durgun Su Cezası' keser."
-            },
-            "current": { 
-                icon: "🔄", title: "AKINTI HIZI", 
-                desc: "Boğaz'ın can damarıdır. Suyu oksijenlendirir ve besin taşır. Avcı balıklar (Lüfer, Palamut) akıntının tam içinde değil, akıntının kenarında (Ayna yapan yerlerde) pusuya yatar. Akıntı durursa av biter.",
-                ref: "LRF/Yemli: <span class='ref-green'>< 0.4 m/s</span> | Kurşun Arkası: <span class='ref-green'>0.6 - 1.2 m/s</span>",
-                algo: "Akıntı > 0.7 m/s ise Pelajik (Göç) balıklarının puanı %30 artar. Ancak sistem '200gr+ Kurşun' ve 'İnce İp' kullanılması gerektiğini karta işler."
-            },
-            "cloud": { 
-                icon: "☁️", title: "BULUTLULUK", 
-                desc: "Işığı yayar (Difüzyon). Avcı balıkların güneşten kör olmasını engeller, böylece saklandıkları taşlardan çıkıp serbestçe gezerler. Av süresini tüm güne yayar.",
-                ref: "Avcı İçin: <span class='ref-green'>%60 - %100 (Kapalı)</span> | Riskli: <span class='ref-red'>%0 (Parlak Güneş)</span>",
-                algo: "Bulut > %70 ise 'Yüzey Sahtesi' (Topwater) bonusu eklenir. Krom/Parlak renkler yerine **Mat/Opak (Bone/Beyaz)** renkler kullanılması önerilir."
-            }
+            "temp": { icon: "🌡️", title: "SU ISISI", desc: "Balıklar soğukkanlıdır, metabolizmaları ve yeme istekleri su sıcaklığına zincirlidir. Ani düşüşler şok etkisi yaratır.", ref: "Ege: <span class='ref-green'>18-24°C</span> | Marmara: <span class='ref-green'>14-19°C</span>", algo: "Backend, 'Gaussian Çan Eğrisi' ile sıcaklık sapmalarını hesaplar. Delta-T (Hava-Su farkı) > 5°C ise puan düşer." },
+            "clarity": { icon: "👁️", title: "SU GÖRÜŞÜ", desc: "Avcı balıkların (Levrek, Lüfer) yemi görme mesafesidir. Berrak suda balık misinayı görür.", ref: "İdeal: <span class='ref-green'>%50 - %85</span> (Ne çok bulanık ne çok berrak)", algo: "Berraklık > %90 ise 'Görünmez Takım' uyarısı tetiklenir. Bulanıklık < %40 ise 'Koku/Ses' bonusu devreye girer." },
+            "wind": { icon: "💨", title: "RÜZGAR YÖNÜ/HIZI", desc: "Rüzgar planktonu kıyıya taşır. Yönü (Lodos/Poyraz) suyun ısısını ve berraklığını değiştirir.", ref: "Güvenli: <span class='ref-green'>0-25 km/s</span> | Riskli: <span class='ref-red'>40+ km/s</span>", algo: "Lodos (Güney) rüzgarı Marmara'da +15 Puan bonus verir. 35km üzeri hız 'Güvenlik Kesintisi' uygular." },
+            "wave": { icon: "🌊", title: "DALGA BOYU", desc: "Köpüklü su oksijen ve kamuflaj sağlar. Levrek gibi avcılar dalgalı suyu sever.", ref: "Avcı İçin: <span class='ref-green'>0.5m - 1.2m</span> | LRF İçin: <span class='ref-green'>0.1m - 0.4m</span>", algo: "Dalga > 0.6m olduğunda Levrek ve Sargoz için 'Pusu Bonusu' (+20 Puan) eklenir." },
+            "salinity": { icon: "🧂", title: "TUZLULUK & OZMOTİK DENGE", desc: "Tuzluluk, balığın kaldırma kuvvetini ve enerji tüketimini (Ozmotik Basınç) etkiler. Tatlı suyun denize karıştığı (Tuzluluğun düştüğü) nehir ağızları, avcı balıkların en sevdiği pusu alanlarıdır.", ref: "Ege: <span class='ref-green'>~38 PSU (Yüksek)</span> | Marmara: <span class='ref-green'>~22 PSU (Düşük)</span>", algo: "Bölge tespitinde kullanılır. Ayrıca sistem yağmur verisine bakarak 'Nehir Ağzı' simülasyonu yapar; yağmur sonrası tuzluluk düşeceği için Levrek puanına 'Brackish Water' (Acı Su) bonusu ekler." },
+            "pressure": { icon: "📉", title: "HAVA BASINCI", desc: "Denizlerin 'Fırtına Alarmı'dır. Basınç düşerken balığın hava kesesi şişer, açgözlü olur (Gorging).", ref: "Süper Av: <span class='ref-green'>1008 - 1012 hPa (Düşen)</span> | Kötü: <span class='ref-red'>1020+ hPa (Yüksek)</span>", algo: "Basınç düşüş trendindeyse (Dün > Bugün) sistem 'Feeding Frenzy' (Beslenme Çılgınlığı) modunu açar ve skoru 1.2x (Çarpan) ile artırır." },
+            "moon": { icon: "🌑", title: "AY FAZI & SOLUNAR", desc: "Ay sadece fener değil, okyanusun motorudur. Dolunay ve Yeni Ay'da yerçekimi artar (Spring Tides).", ref: "Dolunay: <span class='ref-green'>Koyu Renk (Siyah/Mor)</span> | Yeni Ay: <span class='ref-green'>Glow (Fosfor)</span>", algo: "Dolunayda (Işık %80+) sistem 'Silüet Bonusu' verir. Yeni Ayda 'Duyu Bonusu' devreye girer." },
+            "tide": { icon: "🌊", title: "GELGİT (MEDCEZİR)", desc: "Denizdeki 'Yemek Zili'dir. Su hareketliyse av vardır. Su durursa (Slack Tide) av biter.", ref: "İdeal: <span class='ref-green'>Su Hareketli</span> | Kötü: <span class='ref-red'>Su Durması (Slack)</span>", algo: "Gelgit değişim hızı > 0.3 m/s ise 'Aktif Av' bonusu eklenir." },
+            "current": { icon: "🔄", title: "AKINTI HIZI", desc: "Boğaz'ın can damarıdır. Suyu oksijenlendirir ve besin taşır. Avcı balıklar akıntının kıyısında (Ayna) bekler.", ref: "LRF: <span class='ref-green'>< 0.4 m/s</span> | Kurşun Arkası: <span class='ref-green'>0.6+ m/s</span>", algo: "Akıntı > 0.7 m/s ise Pelajik (Göç) balıklarının puanı %30 artar." },
+            "cloud": { icon: "☁️", title: "BULUTLULUK", desc: "Işığı yayar (Difüzyon). Balık güneşten kör olmaz, daha cesur gezer.", ref: "Avcı İçin: <span class='ref-green'>%60 - %100 (Kapalı)</span>", algo: "Bulut > %70 ise 'Yüzey Sahtesi' (Topwater) bonusu eklenir." }
         };
 
         const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([38.4237, 27.1428], 10);
@@ -317,6 +272,7 @@
         };
         let currentLayer = 'street'; layers.street.addTo(map); 
         let markerLayer = null; let weeklyDataCache = null; let lastLatLon = null;
+        let baitMarkers = []; // Yemci markerlarını tutmak için
 
         window.addEventListener('load', () => {
             setTimeout(() => {
@@ -332,31 +288,15 @@
             let status = 'neutral';
             let label = '';
             if (key === 'temp') {
-                if (val >= 16 && val <= 24) { status = 'good'; label = 'İdeal'; }
-                else if (val < 12) { status = 'bad'; label = 'Soğuk'; }
-                else if (val > 26) { status = 'warn'; label = 'Sıcak'; }
-                else { status = 'neutral'; label = 'Normal'; }
-            }
-            else if (key === 'wind') {
-                if (val <= 15) { status = 'good'; label = 'Sakin'; }
-                else if (val <= 30) { status = 'warn'; label = 'Sert'; }
-                else { status = 'bad'; label = 'Fırtına'; }
-            }
-            else if (key === 'wave') {
-                if (val >= 0.3 && val <= 1.0) { status = 'good'; label = 'İdeal'; }
-                else if (val < 0.3) { status = 'warn'; label = 'Durgun'; }
-                else { status = 'bad'; label = 'Tehlikeli'; }
-            }
-            else if (key === 'clarity') {
-                if (val > 85) { status = 'warn'; label = 'Çok Net'; } 
-                else if (val >= 50) { status = 'good'; label = 'Net'; } 
-                else if (val >= 30) { status = 'warn'; label = 'Puslu'; } 
-                else { status = 'bad'; label = 'Çamur'; } 
-            }
-            else if (key === 'pressure') {
-                if (val >= 1010 && val <= 1018) { status = 'good'; label = 'Stabil'; }
-                else if (val < 1008) { status = 'warn'; label = 'Düşük'; }
-                else { status = 'neutral'; label = 'Yüksek'; }
+                if (val >= 16 && val <= 24) { status = 'good'; label = 'İdeal'; } else if (val < 12) { status = 'bad'; label = 'Soğuk'; } else if (val > 26) { status = 'warn'; label = 'Sıcak'; } else { status = 'neutral'; label = 'Normal'; }
+            } else if (key === 'wind') {
+                if (val <= 15) { status = 'good'; label = 'Sakin'; } else if (val <= 30) { status = 'warn'; label = 'Sert'; } else { status = 'bad'; label = 'Fırtına'; }
+            } else if (key === 'wave') {
+                if (val >= 0.3 && val <= 1.0) { status = 'good'; label = 'İdeal'; } else if (val < 0.3) { status = 'warn'; label = 'Durgun'; } else { status = 'bad'; label = 'Tehlikeli'; }
+            } else if (key === 'clarity') {
+                if (val > 85) { status = 'warn'; label = 'Çok Net'; } else if (val >= 50) { status = 'good'; label = 'Net'; } else if (val >= 30) { status = 'warn'; label = 'Puslu'; } else { status = 'bad'; label = 'Çamur'; }
+            } else if (key === 'pressure') {
+                if (val >= 1010 && val <= 1018) { status = 'good'; label = 'Stabil'; } else if (val < 1008) { status = 'warn'; label = 'Düşük'; } else { status = 'neutral'; label = 'Yüksek'; }
             }
             return { status: `status-${status}`, label: label, val: val };
         }
@@ -375,6 +315,9 @@
         map.on('click', async (e) => {
             const lat = e.latlng.lat.toFixed(4); const lon = e.latlng.lng.toFixed(4); lastLatLon = { lat, lon };
             if(markerLayer) map.removeLayer(markerLayer);
+            // Yemci markerlarını temizle
+            baitMarkers.forEach(m => map.removeLayer(m)); baitMarkers = [];
+
             markerLayer = L.marker([lat, lon], { icon: L.divIcon({ className: 'radar-pin', iconSize: [24, 24], iconAnchor: [12, 12] }) }).addTo(map);
             
             document.getElementById('hud-panel').style.display = 'none';
@@ -391,6 +334,41 @@
                 alert("Bağlantı hatası."); 
             }
         });
+
+        // --- YEMCİ BULMA FONKSİYONU ---
+        async function findBaitShops() {
+            if (!lastLatLon) { alert("Önce haritadan bir nokta seçin!"); return; }
+            alert("Yakındaki av bayileri ve yemciler taranıyor (5km)...");
+            
+            try {
+                const res = await fetch(`/api/places?lat=${lastLatLon.lat}&lon=${lastLatLon.lon}`);
+                const places = await res.json();
+                
+                if (places.length === 0) { alert("Yakında kayıtlı yemci bulunamadı."); return; }
+                
+                // Haritaya ekle
+                places.forEach(p => {
+                    const marker = L.marker([p.lat, p.lon], { 
+                        icon: L.divIcon({ 
+                            html: '🪱', 
+                            className: 'bait-icon', 
+                            iconSize: [24, 24], 
+                            iconAnchor: [12, 24] 
+                        }) 
+                    }).addTo(map);
+                    
+                    marker.bindPopup(`<b>${p.name}</b><br>📞 ${p.phone}`);
+                    baitMarkers.push(marker);
+                });
+                
+                // Paneli kapatıp haritayı göster
+                document.getElementById('hud-panel').style.display = 'none';
+                alert(`${places.length} adet yemci bulundu! Haritadaki turuncu ikonlara tıklayın.`);
+                
+            } catch (err) {
+                alert("Arama başarısız.");
+            }
+        }
 
         function showResults(data, today) {
             document.getElementById('hud-panel').style.display = 'flex';
@@ -459,11 +437,9 @@
             if(!data) return;
             document.getElementById('metric-icon').innerText = data.icon;
             document.getElementById('metric-title').innerText = data.title;
-            
             document.getElementById('metric-desc').innerText = data.desc;
             document.getElementById('metric-ref').innerHTML = data.ref;
             document.getElementById('metric-algo').innerText = data.algo;
-
             document.getElementById('metric-modal').style.display = 'flex';
         }
 
