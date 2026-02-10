@@ -1,5 +1,4 @@
-// server.js - MERALOJİ ENGINE v40.0 (GRAND MASTER UPDATE)
-// Features: Bait Shop Locator, Octopus Added, Squid Balanced, Calculation Simulation
+// server.js - MERALOJİ v40.1 (OCTOPUS BUFF & SQUID NERF)
 
 const express = require('express');
 const cors = require('cors');
@@ -118,7 +117,7 @@ function getWeatherCondition(rain, wind, cloud, clarity) {
     return "☀️ AÇIK / GÜNEŞLİ";
 }
 
-// --- DATABASE (OCTOPUS ADDED & SQUID UPDATED) ---
+// --- DATABASE (REBALANCED) ---
 const SPECIES_DB = {
   "levrek": { 
     name: "Levrek", icon: "🐟", 
@@ -177,35 +176,38 @@ const SPECIES_DB = {
   },
   "kalamar": { 
     name: "Kalamar", icon: "🦑", 
-    baseEff: { winter: 0.75, spring: 0.50, summer: 0.15, autumn: 0.80 }, // Düşürüldü (0.95 -> 0.75)
+    // Kalamar Kış puanı düşürüldü (0.75 -> 0.60)
+    baseEff: { winter: 0.60, spring: 0.50, summer: 0.15, autumn: 0.75 }, 
     tempRanges: [10, 13, 20, 24], waveIdeal: 0.2, waveSigma: 0.2,
     triggers: ["moon_full", "clean_water", "cold_water"],
     advice: { 
         EGE: { bait: "Kırmızı/Turuncu Zoka", hook: "Şemsiye İğne", jig: "3.0 Yamashita", depth: "Dip Üstü" }, 
         MARMARA: { bait: "Fosforlu Zoka", hook: "Şemsiye İğne", jig: "2.5 DTD", depth: "Orta Su" } 
     },
-    note: "Mürekkep atar. Kamışı sert çektirme, yumuşak vurdur (Whipping). Bulanık suda (Clarity < %60) av vermez."
+    note: "Mürekkep atar. Kamışı sert çektirme, yumuşak vurdur (Whipping)."
   },
   "ahtapot": { 
     name: "Ahtapot", icon: "🐙", 
-    baseEff: { winter: 0.80, spring: 0.60, summer: 0.40, autumn: 0.70 },
-    tempRanges: [10, 14, 22, 26], waveIdeal: 0.1, waveSigma: 0.3,
+    // Ahtapot Puanları ARTIRILDI (0.80 -> 0.95)
+    baseEff: { winter: 0.95, spring: 0.85, summer: 0.60, autumn: 0.85 },
+    // Sıcaklık aralığı genişletildi
+    tempRanges: [8, 12, 24, 28], waveIdeal: 0.1, waveSigma: 0.4, 
     triggers: ["calm_water", "rocky_bottom"],
     advice: { 
-        EGE: { bait: "Yengeç / Tavuk But", hook: "Çarpmalı Ahtapot Zokası", jig: "Ahtapot Zokası", depth: "Dip (Taşlık)" }, 
+        EGE: { bait: "Yengeç / Tavuk But", hook: "Çarpmalı Zoka", jig: "Ahtapot Zokası", depth: "Dip (Taşlık)" }, 
         MARMARA: { bait: "Beyaz Yapay Yengeç", hook: "Çarpmalı", jig: "Plastik Yengeç", depth: "Dip (Kayalık)" } 
     },
     note: "Yemi sarıp yapışır, ağırlık hissedince tasmayı sert vur. Taşın içine girerse misinayı gergin tut bekle."
   }
 };
 
-// --- YEMCİ BULUCU API (OpenStreetMap) ---
+// --- YEMCİ BULUCU API (Genişletilmiş Alan - 50km) ---
 app.get('/api/places', async (req, res) => {
     try {
         const lat = req.query.lat;
         const lon = req.query.lon;
-        // 5km çapındaki 'fishing', 'hunting' veya 'bait' etiketli yerleri bul
-        const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["shop"="fishing"](around:10000,${lat},${lon});node["shop"="hunting"](around:10000,${lat},${lon});node["leisure"="fishing"](around:10000,${lat},${lon}););out;`;
+        // 50km (50000m) yarıçapında arama yapıyoruz
+        const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["shop"="fishing"](around:50000,${lat},${lon});node["shop"="hunting"](around:50000,${lat},${lon});node["leisure"="fishing"](around:50000,${lat},${lon}););out;`;
         
         const response = await fetch(overpassUrl);
         const data = await response.json();
@@ -219,7 +221,7 @@ app.get('/api/places', async (req, res) => {
 
         res.json(places);
     } catch (error) {
-        res.json([]); // Hata olursa boş döndür
+        res.json([]); 
     }
 });
 
@@ -228,9 +230,9 @@ app.get('/api/forecast', async (req, res) => {
     try {
         const lat = parseFloat(req.query.lat).toFixed(4);
         const lon = parseFloat(req.query.lon).toFixed(4);
-        const cacheKey = `forecast_v40_${lat}_${lon}`;
+        const cacheKey = `forecast_v40_1_${lat}_${lon}`;
 
-        // YAPAY BEKLEME (Simülasyon)
+        // YAPAY BEKLEME
         await new Promise(r => setTimeout(r, 1500)); 
 
         if (myCache.get(cacheKey)) return res.json(myCache.get(cacheKey));
@@ -254,11 +256,10 @@ app.get('/api/forecast', async (req, res) => {
         for (let i = 0; i < 7; i++) {
             const targetDate = new Date();
             targetDate.setDate(targetDate.getDate() + i);
-            
             const dailyIdx = i + 1; 
             const hourlyIdx = currentHour + (i * 24);
 
-            if (!weather.daily.temperature_2m_max[dailyIdx] || !marine.hourly.sea_surface_temperature[hourlyIdx]) continue;
+            if (!weather.daily.temperature_2m_max[dailyIdx]) continue;
 
             const tempWater = marine.hourly.sea_surface_temperature[hourlyIdx];
             const tempAir = weather.hourly.temperature_2m[hourlyIdx];
@@ -275,7 +276,6 @@ app.get('/api/forecast', async (req, res) => {
             const tide = calculateTide(targetDate, moon.fraction);
             const solunarScore = getSolunarScore(targetDate, parseFloat(lat), parseFloat(lon));
             const windScore = calculateWindScore(windDir, windSpeed, regionName);
-            
             const tempDiff = tempAir - tempWater;
             let tempDiffScore = 1.0;
             if (tempDiff < -5) tempDiffScore = 0.7;
@@ -296,27 +296,30 @@ app.get('/api/forecast', async (req, res) => {
                 if (fish.triggers.includes("turbid_water") && clarity < 50) { triggerBonus += 5; activeTriggers.push("Bulanık Su"); }
                 if (fish.triggers.includes("solunar_peak") && solunarScore > 0.9) { triggerBonus += 8; activeTriggers.push("Solunar"); }
                 if (fish.triggers.includes("night_dark") && moon.fraction < 0.3) { triggerBonus += 5; activeTriggers.push("Karanlık"); }
-                if (fish.triggers.includes("rocky_bottom")) { triggerBonus += 5; } // Varsayılan bonus
-
+                
                 triggerBonus = Math.min(15, triggerBonus);
                 let noise = getUncertaintyNoise(2);
                 let finalScore = Math.min(98, Math.max(15, s_bio + s_env + 10 + triggerBonus + noise));
                 let regionalAdvice = fish.advice[regionName] || fish.advice["EGE"];
 
-                // KALAMAR DENGESİ (NERF)
+                // --- KALAMAR NERF (Zayıflatma) ---
                 if (key === 'kalamar') {
-                    if (clarity < 65) { finalScore *= 0.6; } // Bulanık suda çok düşür
-                    if (rain > 1) { finalScore *= 0.8; } // Tuzluluk düşerse düşür
+                    if (clarity < 65) { finalScore *= 0.4; } // Bulanık suda çok sert düşür
+                    if (rain > 1) { finalScore *= 0.6; } // Yağmurda düşür
+                }
+
+                // --- AHTAPOT BUFF (Güçlendirme) ---
+                if (key === 'ahtapot') {
+                    if (wave < 0.5) finalScore += 15; // Durgun suda bonus ver
                 }
 
                 // NEDEN ANALİZİ
                 let reason = "";
                 if (finalScore < 45) {
-                    if (key === 'kalamar' && clarity < 65) reason = "Su bulanık, göremez.";
+                    if (key === 'kalamar' && clarity < 65) reason = "Su bulanık, av vermez.";
                     else if (s_bio < 15) reason = "Mevsimi değil";
                     else if (f_temp < 0.5) reason = "Su sıcaklığı uygun değil";
-                    else if (windScore < 0.6) reason = `Rüzgar yönü (${windDir}°) ters`;
-                    else reason = "Genel koşullar zayıf";
+                    else reason = "Koşullar zayıf";
                 } else if (finalScore > 75) {
                     if (activeTriggers.length > 0) reason = `${activeTriggers[0]} avantajı!`;
                     else reason = "Şartlar ideal!";
@@ -342,9 +345,7 @@ app.get('/api/forecast', async (req, res) => {
             let tacticText = "Koşullar standart.";
             if (weatherSummary.includes("FIRTINA")) tacticText = "⚠️ FIRTINA ALARMI! Kıyıya yaklaşma.";
             else if (wave > 1.5) tacticText = "Sert hava. Levrek için pusu ortamı.";
-            else if (tempDiff < -5) tacticText = "Hava sudan çok soğuk. Balık dipte uyuşuk.";
             else if (clarity > 90) tacticText = "Su cam gibi. Görünmez misina kullan.";
-            else if (moon.fraction > 0.9) tacticText = "Dolunay gecesi. Koyu renk sahte kullan.";
 
             forecast.push({
                 date: targetDate.toISOString(),
@@ -358,7 +359,7 @@ app.get('/api/forecast', async (req, res) => {
                 salinity: salinity,
                 tide: tide.flow.toFixed(1),
                 current: currentEst.toFixed(1),
-                score: parseFloat(fishList.length > 0 ? fishList[0].score.toFixed(0) : 40),
+                score: parseFloat(fishList.length > 0 ? fishList[0].score.toFixed(1) : 40),
                 confidence: 90 - (i * 5),
                 tactic: tacticText,
                 weatherSummary: weatherSummary,
@@ -367,22 +368,15 @@ app.get('/api/forecast', async (req, res) => {
             });
         }
 
-        const responseData = { 
-            version: "v40.0 MASTER", 
-            region: regionName,
-            isLand: false,
-            forecast: forecast 
-        };
-        
+        const responseData = { version: "v40.1 FIX", region: regionName, isLand: false, forecast: forecast };
         myCache.set(cacheKey, responseData);
         res.json(responseData);
 
     } catch (error) {
-        console.error(error);
         res.status(500).json({ error: error.message });
     }
 });
 
 app.listen(PORT, () => {
-    console.log(`\n⚓ MERALOJİ ENGINE v40.0 (GRAND MASTER UPDATE) AKTİF!`);
+    console.log(`\n⚓ MERALOJİ ENGINE v40.1 AKTİF!`);
 });
