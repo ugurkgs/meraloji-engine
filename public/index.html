@@ -362,6 +362,8 @@
 
         map.on('click', async (e) => {
             const lat = e.latlng.lat.toFixed(4); const lon = e.latlng.lng.toFixed(4); lastLatLon = { lat, lon };
+            const currentHour = new Date().getHours(); // ✅ Şu anki saati al
+            
             if(markerLayer) map.removeLayer(markerLayer);
             baitMarkers.forEach(m => map.removeLayer(m)); baitMarkers = [];
 
@@ -372,7 +374,8 @@
             document.getElementById('log-container').innerHTML = ''; // Reset
             
             try {
-                const res = await fetch(`/api/forecast?lat=${lat}&lon=${lon}`); const data = await res.json();
+                const res = await fetch(`/api/forecast?lat=${lat}&lon=${lon}&hour=${currentHour}`); // ✅ Saati gönder
+                const data = await res.json();
                 weeklyDataCache = data.forecast; 
                 // Animasyonu başlat
                 runMatrixAnimation(data, data.forecast[0]);
@@ -434,7 +437,17 @@
                 document.getElementById('score-val').innerHTML = '<span style="font-size:0.4em; vertical-align:super; opacity:0.8;">%</span>' + today.score.toFixed(1);
                 document.getElementById('score-val').style.color = getColor(today.score);
                 document.getElementById('conf-val').innerText = "GÜVEN: %" + today.confidence;
-                document.getElementById('weather-val').innerText = today.weatherSummary ? `${today.weatherSummary.emoji} ${today.weatherSummary.text}` : "";
+                
+                // ✅ YENİ: ZAMAN BİLGİSİ + MAJOR/MINOR
+                let timeText = `${today.timeEmoji} ${today.timeName}`;
+                if (today.majorWindow) timeText += ` • 🎯 ${today.majorWindow}`;
+                else if (today.minorWindow) timeText += ` • ⭐ ${today.minorWindow}`;
+                
+                document.getElementById('weather-val').innerHTML = `
+                    ${timeText}<br>
+                    <span style="font-size:0.85em; opacity:0.8;">${today.weatherSummary ? today.weatherSummary.emoji + ' ' + today.weatherSummary.text : ''}</span>
+                `;
+                
                 document.getElementById('tactic-text').innerText = today.tactic;
                 renderFishList(today.fishList, 'fish-list');
             }
@@ -462,6 +475,9 @@
                 const depth = f.depth || '--';
                 const reason = f.reason ? `<div style="font-size:0.8em; color:${f.score > 50 ? 'var(--green)' : 'var(--red)'}; margin-bottom:5px; font-weight:bold;">${f.score > 50 ? '✅' : '⚠️'} ${f.reason}</div>` : '';
                 
+                // ✅ YENİ: ZAMAN AKTİVİTESİ
+                const timeActivity = f.timeActivity ? `<div style="background:rgba(56,189,248,0.1); padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85em; color:var(--blue); border-left:2px solid var(--blue);">⏰ <b>Bu Saatte:</b> ${f.timeActivity}</div>` : '';
+                
                 container.innerHTML += `
                     <div class="fish-item" style="border-left-color:${c}" onclick="this.classList.toggle('open')">
                         <div style="display:flex; align-items:center; justify-content:space-between;">
@@ -470,6 +486,7 @@
                         </div>
                         <div class="fish-details">
                             ${reason}
+                            ${timeActivity}
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
                                 <div style="background:rgba(255,255,255,0.05); padding:5px; border-radius:4px;">
                                     <div style="font-size:0.7em; color:var(--gray);">İDEAL JIG</div>
@@ -481,7 +498,7 @@
                                 </div>
                             </div>
                             <div>🎯 <b>Yem:</b> ${f.bait}</div>
-                            <div>🎣 <b>İğne:</b> ${f.method}</div>
+                            <div>🎣 <b>İğne:</b> ${f.hook}</div>
                             <div style="margin-top:5px; color:#e2e8f0; font-style:italic; font-size:0.9em;">💡 ${f.note}</div>
                         </div>
                     </div>`;
@@ -514,11 +531,19 @@
             c.innerHTML = '';
             weeklyDataCache.forEach((d, i) => {
                 const date = new Date(d.date).toLocaleDateString('tr-TR', {weekday:'long', day:'numeric', month:'short'});
+                
+                // ✅ YENİ: ZAMAN BİLGİSİ
+                let timeInfo = `${d.timeEmoji} ${d.timeName}`;
+                if (d.majorWindow) timeInfo += ` • 🎯 ${d.majorWindow}`;
+                else if (d.minorWindow) timeInfo += ` • ⭐ ${d.minorWindow}`;
+                
                 const weatherText = d.weatherSummary ? `${d.weatherSummary.emoji} ${d.weatherSummary.text}` : '';
+                
                 c.innerHTML += `
                     <div class="day-row" onclick="openDayDetail(${i})">
                         <div>
                             <div style="font-weight:800; color:white; font-size:1.1em;">${date}</div>
+                            <div style="color:var(--blue); font-size:0.8em; margin-top:2px;">${timeInfo}</div>
                             <div style="color:#aaa; font-size:0.85em; margin-top:4px;">${weatherText}</div>
                         </div>
                         <div class="day-score-badge" style="color:${getColor(d.score)}; border:2px solid ${getColor(d.score)};">%${d.score.toFixed(1)}</div>
@@ -530,11 +555,18 @@
         function openDayDetail(index) {
             const d = weeklyDataCache[index];
             const dateStr = new Date(d.date).toLocaleDateString('tr-TR', {weekday:'long', day:'numeric'});
+            
+            // ✅ YENİ: ZAMAN BİLGİSİ
+            let timeInfo = `${d.timeEmoji} ${d.timeName}`;
+            if (d.majorWindow) timeInfo += ` • 🎯 MAJOR: ${d.majorWindow}`;
+            else if (d.minorWindow) timeInfo += ` • ⭐ MINOR: ${d.minorWindow}`;
+            
             const weatherText = d.weatherSummary ? `${d.weatherSummary.emoji} ${d.weatherSummary.text}` : '--';
+            
             document.getElementById('dd-date').innerText = dateStr;
             document.getElementById('dd-score').innerText = "%" + d.score.toFixed(1);
             document.getElementById('dd-score').style.color = getColor(d.score);
-            document.getElementById('dd-weather').innerText = weatherText;
+            document.getElementById('dd-weather').innerHTML = `${timeInfo}<br><span style="font-size:0.85em; opacity:0.8;">${weatherText}</span>`;
             document.getElementById('dd-tactic').innerText = d.tactic;
             renderFishList(d.fishList, 'dd-fish-list');
             document.getElementById('day-detail-modal').style.display = 'flex';
