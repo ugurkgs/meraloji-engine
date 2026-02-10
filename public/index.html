@@ -424,7 +424,7 @@
                 document.getElementById('score-val').innerHTML = '<span style="font-size:0.4em; opacity:0.5;">KARA</span>';
                 document.getElementById('score-val').style.color = 'var(--red)';
                 document.getElementById('conf-val').innerText = "VERİ YOK";
-                document.getElementById('weather-val').innerText = today.weatherSummary || "ATMOSFERİK VERİ";
+                document.getElementById('weather-val').innerText = today.weatherSummary ? `${today.weatherSummary.emoji} ${today.weatherSummary.text}` : "ATMOSFERİK VERİ";
                 document.getElementById('tactic-text').innerText = "Burası kara parçası veya çok sığ bir alan. Deniz tahminleri (Dalga, Akıntı) hesaplanamıyor. Ancak aşağıdaki butondan yakındaki yemcileri bulabilirsin.";
                 
                 // Balık listesini gizle
@@ -434,7 +434,7 @@
                 document.getElementById('score-val').innerHTML = '<span style="font-size:0.4em; vertical-align:super; opacity:0.8;">%</span>' + today.score.toFixed(1);
                 document.getElementById('score-val').style.color = getColor(today.score);
                 document.getElementById('conf-val').innerText = "GÜVEN: %" + today.confidence;
-                document.getElementById('weather-val').innerText = today.weatherSummary || "";
+                document.getElementById('weather-val').innerText = today.weatherSummary ? `${today.weatherSummary.emoji} ${today.weatherSummary.text}` : "";
                 document.getElementById('tactic-text').innerText = today.tactic;
                 renderFishList(today.fishList, 'fish-list');
             }
@@ -514,11 +514,12 @@
             c.innerHTML = '';
             weeklyDataCache.forEach((d, i) => {
                 const date = new Date(d.date).toLocaleDateString('tr-TR', {weekday:'long', day:'numeric', month:'short'});
+                const weatherText = d.weatherSummary ? `${d.weatherSummary.emoji} ${d.weatherSummary.text}` : '';
                 c.innerHTML += `
                     <div class="day-row" onclick="openDayDetail(${i})">
                         <div>
                             <div style="font-weight:800; color:white; font-size:1.1em;">${date}</div>
-                            <div style="color:#aaa; font-size:0.85em; margin-top:4px;">${d.weatherSummary || ''}</div>
+                            <div style="color:#aaa; font-size:0.85em; margin-top:4px;">${weatherText}</div>
                         </div>
                         <div class="day-score-badge" style="color:${getColor(d.score)}; border:2px solid ${getColor(d.score)};">%${d.score.toFixed(1)}</div>
                     </div>`;
@@ -529,10 +530,11 @@
         function openDayDetail(index) {
             const d = weeklyDataCache[index];
             const dateStr = new Date(d.date).toLocaleDateString('tr-TR', {weekday:'long', day:'numeric'});
+            const weatherText = d.weatherSummary ? `${d.weatherSummary.emoji} ${d.weatherSummary.text}` : '--';
             document.getElementById('dd-date').innerText = dateStr;
             document.getElementById('dd-score').innerText = "%" + d.score.toFixed(1);
             document.getElementById('dd-score').style.color = getColor(d.score);
-            document.getElementById('dd-weather').innerText = d.weatherSummary || '--';
+            document.getElementById('dd-weather').innerText = weatherText;
             document.getElementById('dd-tactic').innerText = d.tactic;
             renderFishList(d.fishList, 'dd-fish-list');
             document.getElementById('day-detail-modal').style.display = 'flex';
