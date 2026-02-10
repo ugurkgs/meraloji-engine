@@ -1,4 +1,5 @@
-// server.js - MERALOJİ v40.1 (OCTOPUS BUFF & SQUID NERF)
+// server.js - MERALOJİ v40.2 (TACTICAL INTELLIGENCE UPDATE)
+// Features: Enhanced Tactic Logic (No more "Standard"), Octopus Buff, Bait Shop Finder
 
 const express = require('express');
 const cors = require('cors');
@@ -117,7 +118,6 @@ function getWeatherCondition(rain, wind, cloud, clarity) {
     return "☀️ AÇIK / GÜNEŞLİ";
 }
 
-// --- DATABASE (REBALANCED) ---
 const SPECIES_DB = {
   "levrek": { 
     name: "Levrek", icon: "🐟", 
@@ -176,7 +176,6 @@ const SPECIES_DB = {
   },
   "kalamar": { 
     name: "Kalamar", icon: "🦑", 
-    // Kalamar Kış puanı düşürüldü (0.75 -> 0.60)
     baseEff: { winter: 0.60, spring: 0.50, summer: 0.15, autumn: 0.75 }, 
     tempRanges: [10, 13, 20, 24], waveIdeal: 0.2, waveSigma: 0.2,
     triggers: ["moon_full", "clean_water", "cold_water"],
@@ -188,9 +187,7 @@ const SPECIES_DB = {
   },
   "ahtapot": { 
     name: "Ahtapot", icon: "🐙", 
-    // Ahtapot Puanları ARTIRILDI (0.80 -> 0.95)
     baseEff: { winter: 0.95, spring: 0.85, summer: 0.60, autumn: 0.85 },
-    // Sıcaklık aralığı genişletildi
     tempRanges: [8, 12, 24, 28], waveIdeal: 0.1, waveSigma: 0.4, 
     triggers: ["calm_water", "rocky_bottom"],
     advice: { 
@@ -201,12 +198,10 @@ const SPECIES_DB = {
   }
 };
 
-// --- YEMCİ BULUCU API (Genişletilmiş Alan - 50km) ---
 app.get('/api/places', async (req, res) => {
     try {
         const lat = req.query.lat;
         const lon = req.query.lon;
-        // 50km (50000m) yarıçapında arama yapıyoruz
         const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["shop"="fishing"](around:50000,${lat},${lon});node["shop"="hunting"](around:50000,${lat},${lon});node["leisure"="fishing"](around:50000,${lat},${lon}););out;`;
         
         const response = await fetch(overpassUrl);
@@ -225,14 +220,12 @@ app.get('/api/places', async (req, res) => {
     }
 });
 
-// --- FORECAST API ---
 app.get('/api/forecast', async (req, res) => {
     try {
         const lat = parseFloat(req.query.lat).toFixed(4);
         const lon = parseFloat(req.query.lon).toFixed(4);
-        const cacheKey = `forecast_v40_1_${lat}_${lon}`;
+        const cacheKey = `forecast_v40_2_${lat}_${lon}`;
 
-        // YAPAY BEKLEME
         await new Promise(r => setTimeout(r, 1500)); 
 
         if (myCache.get(cacheKey)) return res.json(myCache.get(cacheKey));
@@ -302,18 +295,15 @@ app.get('/api/forecast', async (req, res) => {
                 let finalScore = Math.min(98, Math.max(15, s_bio + s_env + 10 + triggerBonus + noise));
                 let regionalAdvice = fish.advice[regionName] || fish.advice["EGE"];
 
-                // --- KALAMAR NERF (Zayıflatma) ---
                 if (key === 'kalamar') {
-                    if (clarity < 65) { finalScore *= 0.4; } // Bulanık suda çok sert düşür
-                    if (rain > 1) { finalScore *= 0.6; } // Yağmurda düşür
+                    if (clarity < 65) { finalScore *= 0.4; } 
+                    if (rain > 1) { finalScore *= 0.6; } 
                 }
 
-                // --- AHTAPOT BUFF (Güçlendirme) ---
                 if (key === 'ahtapot') {
-                    if (wave < 0.5) finalScore += 15; // Durgun suda bonus ver
+                    if (wave < 0.5) finalScore += 15; 
                 }
 
-                // NEDEN ANALİZİ
                 let reason = "";
                 if (finalScore < 45) {
                     if (key === 'kalamar' && clarity < 65) reason = "Su bulanık, av vermez.";
@@ -342,10 +332,46 @@ app.get('/api/forecast', async (req, res) => {
             }
             fishList.sort((a, b) => b.score - a.score);
 
-            let tacticText = "Koşullar standart.";
-            if (weatherSummary.includes("FIRTINA")) tacticText = "⚠️ FIRTINA ALARMI! Kıyıya yaklaşma.";
-            else if (wave > 1.5) tacticText = "Sert hava. Levrek için pusu ortamı.";
-            else if (clarity > 90) tacticText = "Su cam gibi. Görünmez misina kullan.";
+            // --- GÜÇLENDİRİLMİŞ TAKTİK MANTIĞI ---
+            let tacticText = "";
+            
+            // 1. ÖNCELİK: TEHLİKE VE EKSTREM DURUMLAR
+            if (weatherSummary.includes("FIRTINA")) {
+                tacticText = "⚠️ FIRTINA ALARMI! Kıyıya yaklaşma, güvenli limanları tercih et.";
+            } 
+            else if (windSpeed > 35) {
+                tacticText = "Rüzgar çok sert. Sahte atışı zorlaşır (Wind Knot riski). Ağır jig (40g+) veya kıyıya yakın dip takımı kullan.";
+            }
+            else if (wave > 1.5) {
+                tacticText = "Deniz çok kaba. Levrek için pusu ortamı oluştu. Köpüklü sulara 'Su Üstü' (Topwater) sahte at, aksiyonu sert ver.";
+            }
+            else if (clarity > 90) {
+                tacticText = "Su kristal gibi berrak. Balık misinayı görür. Mutlaka Fluorocarbon lider (0.25mm altı) kullan, sessiz ol.";
+            }
+            else if (tempDiff < -5) {
+                tacticText = "Hava sudan çok daha soğuk (Şok Etkisi). Balık dipte uyuşuk. Yemi 'Dead Slow' (Ölü gibi yavaş) sar.";
+            }
+            
+            // 2. ÖNCELİK: "KOŞULLAR STANDART" YERİNE GEÇEN MANTIK (NORMAL HAVALAR)
+            else {
+                // Eğer ekstrem bir durum yoksa, saate ve ışığa göre taktik ver
+                const isDay = (currentHour > 6 && currentHour < 19);
+                
+                if (isDay) {
+                    if (cloud > 60) {
+                        tacticText = "Hava kapalı, ışık kırılıyor. Balık saklandığı yerden çıkıp gezinebilir. Mat/Doğal (Bone/Zebra) renklerle merayı geniş tara.";
+                    } else {
+                        tacticText = "Atmosfer stabil. Balık üzerinde baskı yok ama güneş tepede. Gölgelik alanları ve derin kanalları yokla. Tek noktada bekleme (Search & Destroy).";
+                    }
+                } else {
+                    // GECE
+                    if (moon.fraction > 0.8) {
+                        tacticText = "Dolunay ışığı var. Silüet veren koyu renk (Siyah/Mor) sahteler kullan. Balık yukarı bakar, sığ suları dene.";
+                    } else {
+                        tacticText = "Gece karanlık ve sakin. Balık kıyıya (erişte otlarına) yanaşır. Fosforlu (Glow) veya sesli (Rattling) sahtelerle balığı kendine çek.";
+                    }
+                }
+            }
 
             forecast.push({
                 date: targetDate.toISOString(),
@@ -361,14 +387,14 @@ app.get('/api/forecast', async (req, res) => {
                 current: currentEst.toFixed(1),
                 score: parseFloat(fishList.length > 0 ? fishList[0].score.toFixed(1) : 40),
                 confidence: 90 - (i * 5),
-                tactic: tacticText,
+                tactic: tacticText, // Yeni taktik metni
                 weatherSummary: weatherSummary,
                 fishList: fishList.slice(0, 7),
                 moonPhase: moon.phase
             });
         }
 
-        const responseData = { version: "v40.1 FIX", region: regionName, isLand: false, forecast: forecast };
+        const responseData = { version: "v40.2 TACTIC FIX", region: regionName, isLand: false, forecast: forecast };
         myCache.set(cacheKey, responseData);
         res.json(responseData);
 
@@ -378,5 +404,5 @@ app.get('/api/forecast', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`\n⚓ MERALOJİ ENGINE v40.1 AKTİF!`);
+    console.log(`\n⚓ MERALOJİ ENGINE v40.2 (TACTICAL INTELLIGENCE) AKTİF!`);
 });
