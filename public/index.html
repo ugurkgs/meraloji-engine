@@ -277,37 +277,32 @@
                 desc: "Tuzluluk, balığın kaldırma kuvvetini ve enerji tüketimini (Ozmotik Basınç) etkiler. Tatlı suyun denize karıştığı (Tuzluluğun düştüğü) nehir ağızları, avcı balıkların en sevdiği pusu alanlarıdır. Ege'de (Tuzlu) sahteler daha zor batar (Askıda kalır), Marmara'da daha hızlı batar.",
                 ref: "Ege: <span class='ref-green'>~38 PSU (Yüksek)</span> | Marmara: <span class='ref-green'>~22 PSU (Düşük)</span>",
                 algo: "Bölge tespitinde kullanılır. Ayrıca sistem yağmur verisine bakarak 'Nehir Ağzı' simülasyonu yapar; yağmur sonrası tuzluluk düşeceği için Levrek puanına 'Brackish Water' (Acı Su) bonusu ekler."
-            }
             },
             "pressure": { 
                 icon: "📉", title: "HAVA BASINCI (BAROMETRE)", 
                 desc: "Denizlerin 'Fırtına Alarmı'dır. Basınç düşerken (Düşük Basınç) balıkların hava kesesi üzerindeki baskı azalır. Balıklar yaklaşan kötü havayı hisseder ve fırtına boyunca aç kalmamak için 'Stok Yapma' (Gorging) içgüdüsüyle çılgınca beslenir.",
                 ref: "Süper Av: <span class='ref-green'>1008 - 1012 hPa (Düşen)</span> | Kötü: <span class='ref-red'>1020+ hPa (Yüksek)</span>",
                 algo: "Basınç düşüş trendindeyse (Dün > Bugün) sistem 'Feeding Frenzy' (Beslenme Çılgınlığı) modunu açar ve skoru 1.2x (Çarpan) ile artırır."
-            }
             },
             "moon": { 
                 icon: "🌑", title: "AY FAZI & SOLUNAR", 
                 desc: "Ay sadece fener değil, okyanusun motorudur. Dolunay ve Yeni Ay'da yerçekimi artar, akıntılar hızlanır (Spring Tides). Dolunayda ışık suya girdiği için avcı balıklar 'görerek' avlanır. Yeni Ay (Karanlık) döneminde ise 'titreşim ve koku' ile avlanırlar.",
                 ref: "Dolunay: <span class='ref-green'>Koyu Renk (Siyah/Mor)</span> | Yeni Ay: <span class='ref-green'>Glow (Fosfor)</span>",
                 algo: "Dolunayda (Işık %80+) sistem 'Silüet Bonusu' verir ve Koyu Renk sahte önerir. Yeni Ayda 'Duyu Bonusu' devreye girer, sesli/kokulu yem puanı artar."
-            }
             },
             "tide": { 
                 icon: "🌊", title: "GELGİT (MEDCEZİR)", 
                 desc: "Denizdeki 'Yemek Zili'dir. Sular yükselirken veya alçalırken oluşan akıntı, kayaların arasındaki yemleri açığa çıkarır ve sürükler. Avcı balıklar bu akıntının önünde pusu kurar. Su en tepede veya en dipte durduğunda (Slack Tide) av bıçak gibi kesilir.",
                 ref: "İdeal: <span class='ref-green'>Su Hareketli (Akış)</span> | Kötü: <span class='ref-red'>Su Durması (Slack)</span>",
                 algo: "Gelgit değişim hızı > 0.3 m/s ise 'Aktif Av' bonusu eklenir. Su hareketsizse (Değişim < 0.1 m/s) sistem 'Durgun Su Cezası' keser."
-            }
             },
             "current": { 
                 icon: "🔄", title: "AKINTI HIZI", 
                 desc: "Boğaz'ın can damarıdır. Suyu oksijenlendirir ve besin taşır. Avcı balıklar (Lüfer, Palamut) akıntının tam içinde değil, akıntının kenarında (Ayna yapan yerlerde) pusuya yatar. Akıntı durursa av biter.",
                 ref: "LRF/Yemli: <span class='ref-green'>< 0.4 m/s</span> | Kurşun Arkası: <span class='ref-green'>0.6 - 1.2 m/s</span>",
                 algo: "Akıntı > 0.7 m/s ise Pelajik (Göç) balıklarının puanı %30 artar. Ancak sistem '200gr+ Kurşun' ve 'İnce İp' kullanılması gerektiğini karta işler."
-            }
             },
-                "cloud": { 
+            "cloud": { 
                 icon: "☁️", title: "BULUTLULUK", 
                 desc: "Işığı yayar (Difüzyon). Avcı balıkların güneşten kör olmasını engeller, böylece saklandıkları taşlardan çıkıp serbestçe gezerler. Av süresini tüm güne yayar.",
                 ref: "Avcı İçin: <span class='ref-green'>%60 - %100 (Kapalı)</span> | Riskli: <span class='ref-red'>%0 (Parlak Güneş)</span>",
@@ -353,11 +348,10 @@
                 else { status = 'bad'; label = 'Tehlikeli'; }
             }
             else if (key === 'clarity') {
-                if (val > 85) { status = 'warn'; label = 'Çok Net'; } // Eski "Kristal" - Çok berrak, balık misinayı görür.
-                else if (val >= 50) { status = 'good'; label = 'Net'; } // İdeal av suyu.
-                else if (val >= 30) { status = 'warn'; label = 'Puslu'; } // Biraz bulanık, koku/ses gerekir.
-                else { status = 'bad'; label = 'Çamur'; } // Görüş yok, av çok zor.
-            }
+                if (val > 85) { status = 'warn'; label = 'Çok Net'; } 
+                else if (val >= 50) { status = 'good'; label = 'Net'; } 
+                else if (val >= 30) { status = 'warn'; label = 'Puslu'; } 
+                else { status = 'bad'; label = 'Çamur'; } 
             }
             else if (key === 'pressure') {
                 if (val >= 1010 && val <= 1018) { status = 'good'; label = 'Stabil'; }
