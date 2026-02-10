@@ -30,7 +30,7 @@
         .radar-pin::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--blue); animation: pulse 2s infinite; pointer-events: none; opacity: 0.5; }
         @keyframes pulse { 0% { width: 0; height: 0; opacity: 0.8; } 100% { width: 100px; height: 100px; opacity: 0; } }
 
-        /* SPLASH & UI */
+        /* UI ELEMENTS */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--dark); background-image: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity 0.8s ease-in-out; padding: 20px; text-align: center; }
         .splash-title-top { font-size: 2.8em; font-weight: 900; color: white; letter-spacing: 4px; margin-bottom: 20px; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .splash-logo { width: 240px; height: 240px; filter: drop-shadow(0 0 40px rgba(56, 189, 248, 0.5)); margin-bottom: 20px; animation: float 3s ease-in-out infinite;}
@@ -60,7 +60,7 @@
         
         .score-box { text-align: center; margin-bottom: 20px; padding: 20px; background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%); border-radius: 16px; border: var(--glass-border); }
         .main-score { font-size: 4em; font-weight: 900; line-height: 1; color: var(--green); text-shadow: 0 0 30px rgba(74, 222, 128, 0.4); margin: 5px 0; }
-        .weather-summary { font-family: 'Share Tech Mono'; color: var(--blue); font-size: 1em; letter-spacing: 1px; margin-top: 5px; font-weight: 700; }
+        .weather-summary { font-family: 'Share Tech Mono'; color: var(--blue); font-size: 1.1em; letter-spacing: 1px; margin-top: 5px; font-weight: 700; text-transform: uppercase; }
 
         .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 24px; }
         @media(min-width: 480px) { .metric-grid { grid-template-columns: repeat(5, 1fr); } }
@@ -98,6 +98,13 @@
         .calc-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(5px); z-index: 2500; display: none; align-items: center; justify-content: center; flex-direction: column; font-family: 'Share Tech Mono', monospace; pointer-events: auto; }
         .radar-spinner { width: 80px; height: 80px; border-radius: 50%; border: 3px solid rgba(56, 189, 248, 0.1); border-top-color: var(--blue); animation: radar 1s linear infinite; margin-bottom: 30px; box-shadow: 0 0 40px rgba(56, 189, 248, 0.2); }
         @keyframes radar { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* METRIC MODAL STYLES (NEW) */
+        .metric-info-row { margin-bottom: 15px; text-align: left; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; }
+        .metric-label { color: var(--blue); font-size: 0.8em; font-weight: bold; margin-bottom: 4px; letter-spacing: 1px; }
+        .metric-val { color: white; font-size: 0.95em; line-height: 1.4; }
+        .ref-green { color: var(--green); font-weight: bold; }
+        .ref-red { color: var(--red); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -105,7 +112,7 @@
         <div class="splash-title-top">MERALOJİ</div>
         <img src="logo.png" alt="Meraloji" class="splash-logo" onerror="this.style.display='none'">
         <div class="splash-fish">F.I.S.H.</div>
-        <div class="splash-sub">FIND INSPECT SEE HUNT</div>
+        <div class="splash-sub">FISH INSPECT SEE HUNT</div>
     </div>
     
     <div id="controls-bar">
@@ -132,7 +139,7 @@
                 <button class="secondary-btn" onclick="openTechModal()">🧠 Algoritma Detayı</button>
             </div>
         </div>
-        <div style="text-align:center; color:#666; font-size:0.8em; margin-top:20px;">Geliştirici: Uğur Kögüs<br>v1.9 Master</div>
+        <div style="text-align:center; color:#666; font-size:0.8em; margin-top:20px;">Geliştirici: Uğur Kögüs<br>v1.9.1 Tactical</div>
     </div>
     
     <div id="map"></div>
@@ -191,54 +198,116 @@
     <div id="tech-modal" class="modal-overlay">
         <button class="secondary-btn" style="width:auto; margin-bottom:20px; background:rgba(255,255,255,0.05); text-align:center;" onclick="document.getElementById('tech-modal').style.display='none'">KAPAT</button>
         <h2 style="text-align:center; color:var(--blue); font-weight:900; letter-spacing:1px; margin-bottom:30px;">F.I.S.H. ALGORİTMASI</h2>
-        <div class="tech-item">
+        <div class="tech-content">
+            <div class="tech-item">
                 <span class="tech-title">1. BULANIK MANTIK & VERİ FÜZYONU (Fuzzy Logic)</span>
-                Sistem, atmosferik verileri "İyi/Kötü" gibi basit ikili sistemle değil, <strong>Bulanık Mantık (Fuzzy Logic)</strong> ile işler. Örneğin; su sıcaklığı 18°C olduğunda Levrek için %100, 24°C olduğunda %40, 12°C olduğunda %60 verimlilik atayan <strong>Gaussian Çan Eğrisi</strong> algoritmaları kullanılır. 12 farklı değişken (Isı, Basınç, Rüzgar, Tuzluluk vb.) tek bir potada eritilir.
+                Sistem, atmosferik verileri "İyi/Kötü" gibi basit ikili sistemle değil, <strong>Bulanık Mantık</strong> ile işler. Örneğin; su sıcaklığı 18°C olduğunda Levrek için %100, 24°C olduğunda %40 verimlilik atayan <strong>Gaussian Çan Eğrisi</strong> algoritmaları kullanılır. 12 farklı değişken (Isı, Basınç, Rüzgar vb.) tek bir potada eritilir.
             </div>
-
             <div class="tech-item">
                 <span class="tech-title">2. BİYORİTİM & SOLUNAR OLASILIĞI</span>
-                Balıkların metabolik hızları (Delta-T) ve beslenme dürtüleri hesaplanır. Ay'ın çekim gücü (Gravitational Pull) ve Güneş'in konumu (Civil Twilight) birleştirilerek, balığın avlanma ihtimali <strong>Olasılıksal (Probabilistic)</strong> olarak puanlanır. "Balık aç mı?" sorusuna matematiksel yanıt aranır.
+                Balıkların metabolik hızları (Delta-T) ve beslenme dürtüleri hesaplanır. Ay'ın çekim gücü (Gravitational Pull) ve Güneş'in konumu (Civil Twilight) birleştirilerek, balığın avlanma ihtimali <strong>Olasılıksal (Probabilistic)</strong> olarak puanlanır.
             </div>
-
             <div class="tech-item">
                 <span class="tech-title">3. KAOS TEORİSİ & RİSK ANALİZİ</span>
-                Doğa doğrusal değildir. Algoritmamız, rüzgar yönü sapmaları (Lodos/Poyraz vektörleri) ve ani basınç düşüşlerini (Barometrik Şok) bir <strong>Kaos İndeksi</strong> olarak işler. Standart hava tahminlerinin ötesinde, doğanın anlık belirsizliği (Uncertainty Noise) hesaba katılarak yapay bir "Güven Skoru" üretilir.
+                Doğa doğrusal değildir. Rüzgar yönü sapmaları (Lodos/Poyraz vektörleri) ve ani basınç düşüşlerini (Barometrik Şok) bir <strong>Kaos İndeksi</strong> olarak işler. Standart hava tahminlerinin ötesinde, doğanın anlık belirsizliği hesaba katılarak yapay bir "Güven Skoru" üretilir.
             </div>
-
             <div class="tech-item">
                 <span class="tech-title">4. JEOTERMAL & OŞİNOGRAFİK ADAPTASYON</span>
-                Motor, GPS verisine göre dinamik olarak mod değiştirir. Marmara Denizi için <strong>Hidrodinamik Akıntı Modeli</strong> (Boğaz suyu hesaplaması) devreye girerken, Ege Denizi için <strong>Yüksek Tuzluluk (38 PSU)</strong> katsayıları ve kıyı topografyası analizi devreye girer.
+                Motor, GPS verisine göre dinamik olarak mod değiştirir. Marmara Denizi için <strong>Hidrodinamik Akıntı Modeli</strong> (Boğaz suyu) devreye girerken, Ege Denizi için <strong>Yüksek Tuzluluk (38 PSU)</strong> katsayıları ve kıyı topografyası analizi devreye girer.
             </div>
-
-            <div style="text-align:center; font-size:0.8em; opacity:0.6; margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
-                <strong>Akademik Referanslar:</strong><br>
-                E. İştipliler (2025) - Ege Canlı Yem Selektivitesi<br>
-                E. Çiftçi (2025) - Marmara Avcılık Dinamikleri<br>
-                M. Peksu (2017) - LRF vs Çapari Verimlilik Analizi
+            <div style="text-align:center; font-size:0.8em; opacity:0.6; margin-top:20px;">
+                Sources: E. İştipliler (2025), E. Çiftçi (2025), M. Peksu (2017)<br>System Code: FISH-INSPECT-SEE-HUNT
             </div>
+        </div>
+    </div>
 
     <div id="metric-modal" class="modal-overlay" style="justify-content:center; background:rgba(0,0,0,0.85);">
         <div style="background:var(--panel); border:1px solid var(--blue); padding:25px; border-radius:16px; width:90%; max-width:400px; text-align:center; position:relative;">
             <div id="metric-icon" style="font-size:3em; margin-bottom:10px;">🌡️</div>
-            <h3 id="metric-title" style="color:var(--blue); margin-top:0;">SU ISISI</h3>
-            <p id="metric-desc" style="color:#cbd5e1; font-size:0.95em; line-height:1.6;">...</p>
-            <button class="action-btn" style="margin-top:20px; padding:10px;" onclick="document.getElementById('metric-modal').style.display='none'">ANLAŞILDI</button>
+            <h3 id="metric-title" style="color:var(--blue); margin-top:0; margin-bottom:20px;">SU ISISI</h3>
+            
+            <div class="metric-info-row">
+                <div class="metric-label">NEDİR?</div>
+                <div class="metric-val" id="metric-desc">...</div>
+            </div>
+
+            <div class="metric-info-row">
+                <div class="metric-label">REFERANS ARALIĞI (İDEAL)</div>
+                <div class="metric-val" id="metric-ref">...</div>
+            </div>
+
+            <div class="metric-info-row">
+                <div class="metric-label">ALGORİTMA ETKİSİ</div>
+                <div class="metric-val" id="metric-algo" style="color:#a78bfa;">...</div>
+            </div>
+
+            <button class="action-btn" style="margin-top:10px; padding:12px;" onclick="document.getElementById('metric-modal').style.display='none'">KAPAT</button>
         </div>
     </div>
 
     <script>
+        // TAKTİKSEL METRİK VERİTABANI
         const METRIC_DATA = {
-            "temp": { icon: "🌡️", title: "SU ISISI", desc: "Balıklar soğukkanlı canlılardır. Su sıcaklığı metabolizmayı (yeme isteğini) doğrudan belirler. Ani düşüşler (Şok) balığı kilitler. Yavaş yükselişler avcı balıkları harekete geçirir. Ege'de 18-22°C, Marmara'da 14-18°C arası en verimli aralıklardır." },
-            "clarity": { icon: "👁️", title: "SU GÖRÜŞÜ", desc: "Avcı balıklar (Levrek, Lüfer) avını görmek ister. %80+ berraklıkta balık yemi çok net görür, bu yüzden 'Hayalet Misina' (Florokarbon) kullanmak şarttır. Bulanık suda (%30 altı) balık göremez, kokuya ve sese gelir (Sesli sahteler/Yemli)." },
-            "wind": { icon: "💨", title: "RÜZGAR YÖNÜ", desc: "Rüzgar sadece dalga yapmaz, suyu taşır ve besini sürükler. Marmara'da Lodos (Güneyden eser) balığı kıyılatır, Poyraz (Kuzeyden eser) suyu soğutur ve balığı açığa iter. Sert rüzgarda kuytu meraları seç." },
-            "wave": { icon: "🌊", title: "DALGA BOYU", desc: "Köpüklü su 'Oksijen' demektir. Durgun suda balık ürkek olur. 0.5m - 1.0m arası dalga, Levrek ve Sargoz gibi türlerin en sevdiği, kendilerini güvende hissettikleri kamuflaj ortamıdır." },
-            "salinity": { icon: "🧂", title: "TUZLULUK", desc: "Suyun kaldırma kuvvetini etkiler. Ege çok tuzludur (38 PSU), sahteler daha çok batar. Marmara az tuzludur (22 PSU). Kullandığın maket balığın (Rapala) yüzüşü bile buna göre değişir." },
-            "pressure": { icon: "📉", title: "HAVA BASINCI", desc: "Basınç düşerken balıkların hava kesesi şişer, bu onları huzursuz ve agresif yapar. Fırtına öncesi basınç düşüşü (1010 hPa altı) balığın en çok saldırdığı 'altın saatler'dir." },
-            "moon": { icon: "🌑", title: "AY FAZI", desc: "Dolunay gecelerinde ışık yüzeye vurduğu için balıklar derine kaçmaz, yüzeyde avlanır. Yeni ay (zifiri karanlık) ise ışığa duyarlı dip balıkları (Eşkina, Mırmır) için idealdir." },
-            "tide": { icon: "🌊", title: "GELGİT", desc: "Suların yükselip alçalması yem balıklarını hareket ettirir. Avcılar bu akıntıyı bekler. 'Su dönerken' veya 'Su basarken' av verimi artar. Durgun suda av zordur." },
-            "current": { icon: "🔄", title: "AKINTI HIZI", desc: "Özellikle İstanbul Boğazı'nda hayati önem taşır. Hızlı akıntı (0.8+) balığı kanallara iter, 200gr+ kurşun gerekir. Yavaş akıntıda balık daha seçicidir, ince takım ister." },
-            "cloud": { icon: "☁️", title: "BULUTLULUK", desc: "Bulutlu hava doğal gölge yaratır, balığın saklanma ihtiyacını azaltır ve avcılar cesurlaşır. Açık ve güneşli havada balık gölgede veya derinde saklanır." }
+            "temp": { 
+                icon: "🌡️", title: "SU ISISI", 
+                desc: "Balıklar soğukkanlıdır, metabolizmaları ve yeme istekleri su sıcaklığına zincirlidir. Ani düşüşler şok etkisi yaratır.",
+                ref: "Ege: <span class='ref-green'>18-24°C</span> | Marmara: <span class='ref-green'>14-19°C</span>",
+                algo: "Backend, 'Gaussian Çan Eğrisi' ile sıcaklık sapmalarını hesaplar. Delta-T (Hava-Su farkı) > 5°C ise puan düşer."
+            },
+            "clarity": { 
+                icon: "👁️", title: "SU GÖRÜŞÜ", 
+                desc: "Avcı balıkların (Levrek, Lüfer) yemi görme mesafesidir. Berrak suda balık misinayı görür.",
+                ref: "İdeal: <span class='ref-green'>%50 - %85</span> (Ne çok bulanık ne çok berrak)",
+                algo: "Berraklık > %90 ise 'Görünmez Takım' uyarısı tetiklenir. Bulanıklık < %40 ise 'Koku/Ses' bonusu devreye girer."
+            },
+            "wind": { 
+                icon: "💨", title: "RÜZGAR YÖNÜ/HIZI", 
+                desc: "Rüzgar planktonu kıyıya taşır. Yönü (Lodos/Poyraz) suyun ısısını ve berraklığını değiştirir.",
+                ref: "Güvenli: <span class='ref-green'>0-25 km/s</span> | Riskli: <span class='ref-red'>40+ km/s</span>",
+                algo: "Lodos (Güney) rüzgarı Marmara'da +15 Puan bonus verir. 35km üzeri hız 'Güvenlik Kesintisi' uygular."
+            },
+            "wave": { 
+                icon: "🌊", title: "DALGA BOYU", 
+                desc: "Köpüklü su oksijen ve kamuflaj sağlar. Levrek gibi avcılar dalgalı suyu sever.",
+                ref: "Avcı İçin: <span class='ref-green'>0.5m - 1.2m</span> | LRF İçin: <span class='ref-green'>0.1m - 0.4m</span>",
+                algo: "Dalga > 0.6m olduğunda Levrek ve Sargoz için 'Pusu Bonusu' (+20 Puan) eklenir."
+            },
+            "salinity": { 
+                icon: "🧂", title: "TUZLULUK (PSU)", 
+                desc: "Suyun kaldırma kuvvetini etkiler. Tuzlu suda sahteler daha yavaş batar.",
+                ref: "Ege: <span class='ref-green'>~38 PSU</span> | Marmara: <span class='ref-green'>~22 PSU</span>",
+                algo: "Bölge tespitinde kullanılır. Ege modunda 'Canlı Yem', Marmara modunda 'Kurşun Arkası' algoritmasını seçer."
+            },
+            "pressure": { 
+                icon: "📉", title: "HAVA BASINCI", 
+                desc: "Basınç düştüğünde balığın hava kesesi şişer, huzursuz ve saldırgan olur. Fırtına öncesi sessizliktir.",
+                ref: "Süper Av: <span class='ref-green'>1008 - 1012 hPa</span> (Düşüş Trendi)",
+                algo: "Basınç < 1012 hPa ise 'Feeding Frenzy' (Beslenme Çılgınlığı) katsayısı ile skor 1.2x çarpılır."
+            },
+            "moon": { 
+                icon: "🌑", title: "AY FAZI", 
+                desc: "Gece avını belirler. Dolunayda ışık yüzeye vurur, balık derine kaçmaz.",
+                ref: "Kıyı Avı: <span class='ref-green'>Yeni Ay (Karanlık)</span> | Tekne: <span class='ref-green'>Dolunay</span>",
+                algo: "Dolunay varsa 'Yüzey Sahtesi' önerilir. Yeni Ay varsa 'Fosforlu/Glow' yem bonusu eklenir."
+            },
+            "tide": { 
+                icon: "🌊", title: "GELGİT", 
+                desc: "Suların yükselip alçalmasıyla oluşan akıntıdır. Balık bu akıntıda gelen yemi bekler.",
+                ref: "En İyi: <span class='ref-green'>Su Değişimi (High/Low arası)</span>",
+                algo: "Saatlik veride Gelgit akışı > 0.5 m/s ise 'Hareketlilik Bonusu' eklenir."
+            },
+            "current": { 
+                icon: "🔄", title: "AKINTI HIZI", 
+                desc: "Boğaz'da kurşunun dibe inmesini engeller. Balığı kanallara hapseder.",
+                ref: "Yemli: <span class='ref-green'>Az Akıntı</span> | Kurşun Arkası: <span class='ref-green'>Orta/Güçlü Akıntı</span>",
+                algo: "Akıntı > 0.8 m/s ise sistem otomatik olarak 'Ağır Kurşun (150gr+)' uyarısı verir."
+            },
+            "cloud": { 
+                icon: "☁️", title: "BULUTLULUK", 
+                desc: "Doğal gölge yaratır. Balık saklanma ihtiyacı hissetmeden kıyıya yanaşır.",
+                ref: "Gündüz Avı: <span class='ref-green'>%50 - %100 (Kapalı)</span>",
+                algo: "Bulutluluk > %70 ise 'Gündüz Avı Skoru' artırılır ve yüzey sahteleri önerilir."
+            }
         };
 
         const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([38.4237, 27.1428], 10);
@@ -354,10 +423,9 @@
             container.innerHTML = '';
             list.forEach(f => {
                 const c = getColor(f.score);
-                // Yeni Veriler (Jig, Derinlik, Neden)
                 const jig = f.jig || '--';
                 const depth = f.depth || '--';
-                const reason = f.reason ? `<div style="font-size:0.8em; color:var(--red); margin-bottom:5px;">⚠️ ${f.reason}</div>` : '';
+                const reason = f.reason ? `<div style="font-size:0.8em; color:${f.score > 50 ? 'var(--green)' : 'var(--red)'}; margin-bottom:5px; font-weight:bold;">${f.score > 50 ? '✅' : '⚠️'} ${f.reason}</div>` : '';
                 
                 container.innerHTML += `
                     <div class="fish-item" style="border-left-color:${c}" onclick="this.classList.toggle('open')">
@@ -370,16 +438,16 @@
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
                                 <div style="background:rgba(255,255,255,0.05); padding:5px; border-radius:4px;">
                                     <div style="font-size:0.7em; color:var(--gray);">İDEAL JIG</div>
-                                    <div style="font-weight:bold; font-size:0.9em;">${jig}</div>
+                                    <div style="font-weight:bold; font-size:0.85em;">${jig}</div>
                                 </div>
                                 <div style="background:rgba(255,255,255,0.05); padding:5px; border-radius:4px;">
                                     <div style="font-size:0.7em; color:var(--gray);">DERİNLİK</div>
-                                    <div style="font-weight:bold; font-size:0.9em;">${depth}</div>
+                                    <div style="font-weight:bold; font-size:0.85em;">${depth}</div>
                                 </div>
                             </div>
                             <div>🎯 <b>Yem:</b> ${f.bait}</div>
                             <div>🎣 <b>İğne:</b> ${f.method}</div>
-                            <div style="margin-top:5px; color:#e2e8f0; font-style:italic;">💡 ${f.note}</div>
+                            <div style="margin-top:5px; color:#e2e8f0; font-style:italic; font-size:0.9em;">💡 ${f.note}</div>
                         </div>
                     </div>`;
             });
@@ -390,7 +458,11 @@
             if(!data) return;
             document.getElementById('metric-icon').innerText = data.icon;
             document.getElementById('metric-title').innerText = data.title;
+            
             document.getElementById('metric-desc').innerText = data.desc;
+            document.getElementById('metric-ref').innerHTML = data.ref;
+            document.getElementById('metric-algo').innerText = data.algo;
+
             document.getElementById('metric-modal').style.display = 'flex';
         }
 
