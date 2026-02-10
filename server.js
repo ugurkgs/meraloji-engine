@@ -1,15 +1,10 @@
-// server.js - MERALOJİ ENGINE v42.0 MASTER
-// Core: v39 Master Model + v41 New Features
-// - Basınç Trendi ✓
-// - Sıcaklık Şoku ✓
-// - Solunar Additive ✓
-// - Current Scoring ✓
-// - 12 Trigger Logic ✓
-// - Dynamic Confidence ✓
-// - Weather Summary ✓
-// - Land Detection ✓
-// - Places API ✓
-// - Ahtapot ✓
+// server.js - MERALOJİ ENGINE v43.0 CHRONO MASTER
+// v42 Base + TIME-BASED INTELLIGENCE
+// - Hour-Specific Calculations ✓
+// - Day/Night/Twilight Modes ✓
+// - Major/Minor Feeding Windows ✓
+// - Species Time Behavior ✓
+// - Hourly Activity Cards ✓
 
 const express = require('express');
 const cors = require('cors');
@@ -27,6 +22,183 @@ const PORT = process.env.PORT || 3000;
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 600 });
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use('/api/', limiter);
+
+// --- TIME INTELLIGENCE KERNEL (NEW v43) ---
+function getTimeOfDay(hour, sunTimes) {
+    const sunrise = sunTimes.sunrise.getHours() + sunTimes.sunrise.getMinutes() / 60;
+    const sunset = sunTimes.sunset.getHours() + sunTimes.sunset.getMinutes() / 60;
+    const dawn = sunTimes.dawn.getHours() + sunTimes.dawn.getMinutes() / 60;
+    const dusk = sunTimes.dusk.getHours() + sunTimes.dusk.getMinutes() / 60;
+    
+    if (hour >= dawn && hour < sunrise) return 'DAWN'; // Şafak
+    if (hour >= sunrise && hour < 12) return 'MORNING'; // Sabah
+    if (hour >= 12 && hour < sunset) return 'AFTERNOON'; // Öğleden sonra
+    if (hour >= sunset && hour < dusk) return 'DUSK'; // Alacakaranlık
+    return 'NIGHT'; // Gece
+}
+
+function getSolunarWindows(date, lat, lon) {
+    const moon = SunCalc.getMoonPosition(date, lat, lon);
+    const sun = SunCalc.getPosition(date, lat, lon);
+    const times = SunCalc.getTimes(date, lat, lon);
+    
+    // Major Periods: Ay tepe noktası (üst/alt geçiş) ±2 saat
+    const moonTransit = SunCalc.getMoonTimes(date, lat, lon);
+    const majorWindows = [];
+    const minorWindows = [];
+    
+    // Gün doğumu/batımı = MAJOR
+    const sunrise = times.sunrise.getHours();
+    const sunset = times.sunset.getHours();
+    majorWindows.push({ start: sunrise - 1, end: sunrise + 1, label: 'Gün Doğumu' });
+    majorWindows.push({ start: sunset - 1, end: sunset + 1, label: 'Gün Batımı' });
+    
+    // Ay doğumu/batımı = MINOR
+    if (moonTransit.rise) {
+        const moonrise = moonTransit.rise.getHours();
+        minorWindows.push({ start: moonrise - 0.5, end: moonrise + 0.5, label: 'Ay Doğumu' });
+    }
+    if (moonTransit.set) {
+        const moonset = moonTransit.set.getHours();
+        minorWindows.push({ start: moonset - 0.5, end: moonset + 0.5, label: 'Ay Batımı' });
+    }
+    
+    // Gece yarısı (Ay tepe) = MINOR
+    minorWindows.push({ start: 23, end: 1, label: 'Gece Yarısı' });
+    minorWindows.push({ start: 11, end: 13, label: 'Öğle' });
+    
+    return { major: majorWindows, minor: minorWindows };
+}
+
+function isInWindow(hour, windows) {
+    for (const w of windows) {
+        if (w.start < w.end) {
+            if (hour >= w.start && hour <= w.end) return w.label;
+        } else {
+            // Gece yarısı geçişi
+            if (hour >= w.start || hour <= w.end) return w.label;
+        }
+    }
+    return null;
+}
+
+function getHourlyBonus(hour, timeOfDay, moonPhase, species) {
+    let bonus = 0;
+    let reasons = [];
+    
+    // Gece/Gündüz bonusları
+    if (species === 'kalamar') {
+        if (timeOfDay === 'NIGHT' && moonPhase > 0.8) {
+            bonus += 25;
+            reasons.push('🌕 Dolunay gecesi avı');
+        } else if (timeOfDay === 'NIGHT') {
+            bonus += 15;
+            reasons.push('🌙 Gece aktif');
+        } else if (timeOfDay === 'DAWN' || timeOfDay === 'DUSK') {
+            bonus += 10;
+            reasons.push('🌅 Alacakaranlık hareketi');
+        } else {
+            bonus -= 20;
+            reasons.push('☀️ Gündüz pasif');
+        }
+    }
+    
+    if (species === 'mirmir') {
+        if (timeOfDay === 'NIGHT') {
+            bonus += 20;
+            reasons.push('🌙 Gece kıyıya yaklaşır');
+        } else if (timeOfDay === 'DUSK') {
+            bonus += 15;
+            reasons.push('🌅 Akşam besin arar');
+        } else {
+            bonus -= 10;
+            reasons.push('☀️ Gündüz derin suda');
+        }
+    }
+    
+    if (species === 'levrek') {
+        if (timeOfDay === 'DAWN') {
+            bonus += 20;
+            reasons.push('🌅 Şafak avı zirvede');
+        } else if (timeOfDay === 'DUSK') {
+            bonus += 18;
+            reasons.push('🌆 Akşam beslenme');
+        } else if (timeOfDay === 'NIGHT') {
+            bonus += 10;
+            reasons.push('🌙 Gece pusu');
+        } else if (timeOfDay === 'AFTERNOON') {
+            bonus -= 8;
+            reasons.push('☀️ Öğleden sonra yavaş');
+        }
+    }
+    
+    if (species === 'lufer') {
+        if (timeOfDay === 'MORNING') {
+            bonus += 15;
+            reasons.push('🌅 Sabah sürü aktif');
+        } else if (timeOfDay === 'DUSK') {
+            bonus += 12;
+            reasons.push('🌆 Akşam avlanma');
+        }
+    }
+    
+    if (species === 'cipura') {
+        if (timeOfDay === 'MORNING' || timeOfDay === 'AFTERNOON') {
+            bonus += 10;
+            reasons.push('☀️ Gündüz otlayıcı');
+        } else if (timeOfDay === 'NIGHT') {
+            bonus -= 15;
+            reasons.push('🌙 Gece hareketsiz');
+        }
+    }
+    
+    if (species === 'istavrit') {
+        if (timeOfDay === 'NIGHT') {
+            bonus += 18;
+            reasons.push('💡 Gece ışık altında toplanır');
+        } else if (timeOfDay === 'DUSK') {
+            bonus += 12;
+            reasons.push('🌅 Akşam sürü hareketi');
+        }
+    }
+    
+    if (species === 'ahtapot') {
+        if (timeOfDay === 'NIGHT') {
+            bonus += 15;
+            reasons.push('🌙 Gece avcı');
+        } else if (timeOfDay === 'DAWN' || timeOfDay === 'DUSK') {
+            bonus += 10;
+            reasons.push('🌅 Alacakaranlık aktif');
+        } else {
+            bonus -= 8;
+            reasons.push('☀️ Gündüz saklanır');
+        }
+    }
+    
+    return { bonus, reasons };
+}
+
+function getTimeEmoji(timeOfDay) {
+    switch(timeOfDay) {
+        case 'DAWN': return '🌅';
+        case 'MORNING': return '☀️';
+        case 'AFTERNOON': return '🌤️';
+        case 'DUSK': return '🌆';
+        case 'NIGHT': return '🌙';
+        default: return '⏰';
+    }
+}
+
+function getTimeName(timeOfDay) {
+    switch(timeOfDay) {
+        case 'DAWN': return 'Şafak';
+        case 'MORNING': return 'Sabah';
+        case 'AFTERNOON': return 'Öğleden Sonra';
+        case 'DUSK': return 'Alacakaranlık';
+        case 'NIGHT': return 'Gece';
+        default: return 'Bilinmeyen';
+    }
+}
 
 // --- MATH KERNEL ---
 function getFuzzyScore(val, min, optMin, optMax, max) {
@@ -52,16 +224,6 @@ function calculateWindScore(direction, speed, region) {
         else score = 0.6;
     }
     return score;
-}
-
-function getSolunarScore(date, lat, lon) {
-    const times = SunCalc.getTimes(date, lat, lon);
-    const now = date.getTime();
-    const sunriseDiff = Math.abs(now - times.sunrise.getTime()) / (1000 * 60);
-    const sunsetDiff = Math.abs(now - times.sunset.getTime()) / (1000 * 60);
-    if (sunriseDiff < 60 || sunsetDiff < 60) return 1.0; 
-    if (sunriseDiff < 120 || sunsetDiff < 120) return 0.7; 
-    return 0.5; 
 }
 
 function calculateClarity(wave, windSpeed, rain) {
@@ -117,7 +279,6 @@ function getUncertaintyNoise(sigma) {
     return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v ) * sigma;
 }
 
-// ✅ YENİ: HAVA DURUMU ÖZETİ (v41)
 function getWeatherSummary(windSpeed, rain, wave, cloud, tempWater) {
     let conditions = [];
     let emoji = '☀️';
@@ -166,7 +327,6 @@ function getWeatherSummary(windSpeed, rain, wave, cloud, tempWater) {
     return { emoji, text: summary };
 }
 
-// ✅ YENİ: BALIK ÇEŞİTLİLİĞİ ANALİZİ (v39)
 function analyzeDiversity(fishList, tempWater, clarity, wave, season) {
     let reasons = [];
     
@@ -213,7 +373,7 @@ function getWindDirName(deg) {
     return "Kuzeybatı (Karayel)";
 }
 
-// --- DATABASE (v42 UPDATED) ---
+// --- DATABASE (v43 UPDATED with TIME PATTERNS) ---
 const SPECIES_DB = {
   "levrek": { 
     name: "Levrek", icon: "🐟", 
@@ -222,6 +382,7 @@ const SPECIES_DB = {
     waveIdeal: 0.9, waveSigma: 0.5,
     currentIdeal: 0.7, currentSigma: 0.5,
     triggers: ["pressure_drop", "wave_high", "solunar_peak", "turbid_water"],
+    timePreference: ['DAWN', 'DUSK', 'NIGHT'], // Yeni
     advice: { 
         EGE: { bait: "Canlı Mamun / Silikon", hook: "Circle No:1", jig: "10-15gr Jighead", depth: "0-8m" }, 
         MARMARA: { bait: "Limon/Kırmızı Rapala", hook: "Üçlü İğne No:2", jig: "30-50g Metal (Parlak)", depth: "5-15m" } 
@@ -236,6 +397,7 @@ const SPECIES_DB = {
     waveIdeal: 0.6, waveSigma: 0.3,
     currentIdeal: 1.0, currentSigma: 0.6,
     triggers: ["current_high", "pressure_drop", "school_fish"],
+    timePreference: ['MORNING', 'DUSK'],
     advice: { 
         EGE: { bait: "Canlı Zargana", hook: "Uzun Pala 2/0", jig: "Kaşık Sahte (Gümüş)", depth: "0-10m" }, 
         MARMARA: { bait: "Yaprak Zargana / Rapala", hook: "Mantarhı İğne", jig: "Kastmaster 28g", depth: "5-20m" } 
@@ -250,6 +412,7 @@ const SPECIES_DB = {
     waveIdeal: 0.3, waveSigma: 0.3,
     currentIdeal: 0.3, currentSigma: 0.3,
     triggers: ["stable_weather", "calm_water", "warm_water"],
+    timePreference: ['MORNING', 'AFTERNOON'],
     advice: { 
         EGE: { bait: "Mamun/Yengeç/Midye", hook: "Chinu No:2-4", jig: "Dip Jig 10-20g", depth: "3-15m" }, 
         MARMARA: { bait: "Boru Kurdu", hook: "Kısa Pala No:4", jig: "Bottom Rig", depth: "5-20m" } 
@@ -264,6 +427,7 @@ const SPECIES_DB = {
     waveIdeal: 0.4, waveSigma: 0.3,
     currentIdeal: 0.4, currentSigma: 0.4,
     triggers: ["night_dark", "turbid_water"],
+    timePreference: ['NIGHT', 'DUSK'],
     advice: { 
         EGE: { bait: "Boru Kurdu / Sülünez", hook: "Uzun Pala No:6", jig: "Hafif Sabiki", depth: "0-5m" }, 
         MARMARA: { bait: "Boru Kurdu/Tırtıl", hook: "İnce Tel No:8", jig: "Float Rig", depth: "2-8m" } 
@@ -278,6 +442,7 @@ const SPECIES_DB = {
     waveIdeal: 0.2, waveSigma: 0.5,
     currentIdeal: 0.5, currentSigma: 0.5,
     triggers: ["light_night", "school_fish"],
+    timePreference: ['NIGHT', 'DUSK'],
     advice: { 
         EGE: { bait: "Tavuk Derisi/LRF", hook: "İnce No:8-10", jig: "1-3g Mikro Jig", depth: "0-15m" }, 
         MARMARA: { bait: "Çapari (Yeşil)", hook: "Çapari Takımı", jig: "Sabiki", depth: "5-30m" } 
@@ -292,6 +457,7 @@ const SPECIES_DB = {
     waveIdeal: 0.2, waveSigma: 0.2,
     currentIdeal: 0.2, currentSigma: 0.25,
     triggers: ["moon_full", "clean_water", "cold_water"],
+    timePreference: ['NIGHT', 'DUSK', 'DAWN'],
     advice: { 
         EGE: { bait: "Kırmızı/Turuncu Zoka", hook: "Şemsiye İğne 2.5-3.5", jig: "Egi Jig", depth: "2-10m" }, 
         MARMARA: { bait: "Fosforlu Zoka", hook: "Şemsiye İğne 3.0", jig: "LED Zoka", depth: "3-15m" } 
@@ -306,6 +472,7 @@ const SPECIES_DB = {
     waveIdeal: 0.2, waveSigma: 0.4,
     currentIdeal: 0.3, currentSigma: 0.4,
     triggers: ["calm_water", "rocky_bottom", "stable_weather"],
+    timePreference: ['NIGHT', 'DAWN', 'DUSK'],
     advice: { 
         EGE: { bait: "Yengeç / Tavuk But", hook: "Çarpmalı Zoka", jig: "Ahtapot Zokası", depth: "5-25m (Taşlık)" }, 
         MARMARA: { bait: "Beyaz Yapay Yengeç", hook: "Çarpmalı", jig: "Plastik Yengeç", depth: "8-30m (Kayalık)" } 
@@ -315,7 +482,7 @@ const SPECIES_DB = {
   }
 };
 
-// ✅ YENİ: PLACES API (v41)
+// --- PLACES API ---
 app.get('/api/places', async (req, res) => {
     try {
         const lat = req.query.lat;
@@ -335,12 +502,13 @@ app.get('/api/places', async (req, res) => {
     }
 });
 
-// --- MAIN FORECAST API ---
+// --- MAIN FORECAST API (v43 TIME-AWARE) ---
 app.get('/api/forecast', async (req, res) => {
     try {
         const lat = parseFloat(req.query.lat).toFixed(4);
         const lon = parseFloat(req.query.lon).toFixed(4);
-        const cacheKey = `forecast_v42_0_${lat}_${lon}`;
+        const clickHour = parseInt(req.query.hour) || new Date().getHours(); // ✅ YENİ: Tıklama saati
+        const cacheKey = `forecast_v43_0_${lat}_${lon}_${clickHour}`;
 
         if (myCache.get(cacheKey)) return res.json(myCache.get(cacheKey));
 
@@ -351,7 +519,6 @@ app.get('/api/forecast', async (req, res) => {
         const weather = await weatherRes.json();
         const marine = await marineRes.json();
 
-        // ✅ LAND DETECTION (v41)
         let isLand = false;
         if (!marine.hourly || !marine.hourly.wave_height || marine.hourly.wave_height.slice(0, 24).every(val => val === null)) {
             isLand = true;
@@ -360,29 +527,27 @@ app.get('/api/forecast', async (req, res) => {
         const forecast = [];
         const regionName = getRegion(lat, lon);
         const salinity = getSalinity(regionName);
-        const currentHour = new Date().getHours();
 
         for (let i = 0; i < 7; i++) {
             const targetDate = new Date();
             targetDate.setDate(targetDate.getDate() + i);
+            targetDate.setHours(clickHour); // ✅ Tıklanan saati kullan
             
             const dailyIdx = i + 1; 
-            const hourlyIdx = 24 + currentHour + (i * 24);
+            const hourlyIdx = 24 + clickHour + (i * 24); // ✅ Saate özel index
             const hourlyIdx_3h = hourlyIdx - 3;
             const hourlyIdx_24h = hourlyIdx - 24;
 
             if (!weather.daily.temperature_2m_max[dailyIdx]) continue;
 
-            // ✅ KARA İSE DUMMY VALUES (v41)
             const tempWater = isLand ? 0 : (marine.hourly.sea_surface_temperature[hourlyIdx] || 0);
             const tempWater_yesterday = isLand ? 0 : (marine.hourly.sea_surface_temperature[hourlyIdx_24h] || tempWater);
             const wave = isLand ? 0 : (marine.daily.wave_height_max[dailyIdx] || 0);
             
             const tempAir = weather.hourly.temperature_2m[hourlyIdx];
-            const windSpeed = weather.daily.wind_speed_10m_max[dailyIdx];
+            const windSpeed = weather.hourly.wind_speed_10m[hourlyIdx] || weather.daily.wind_speed_10m_max[dailyIdx];
             const windDir = weather.daily.wind_direction_10m_dominant[dailyIdx];
             
-            // ✅ BASINÇ TRENDİ (v39 CORE)
             const pressure = weather.hourly.surface_pressure[hourlyIdx];
             const pressure_3h = weather.hourly.surface_pressure[hourlyIdx_3h] || pressure;
             const pressureTrend = (pressure - pressure_3h) / 3;
@@ -391,13 +556,18 @@ app.get('/api/forecast', async (req, res) => {
             const rain = weather.hourly.rain[hourlyIdx];
             const moon = SunCalc.getMoonIllumination(targetDate);
 
+            // ✅ YENİ: ZAMAN ANALİZİ
+            const sunTimes = SunCalc.getTimes(targetDate, parseFloat(lat), parseFloat(lon));
+            const timeOfDay = getTimeOfDay(clickHour, sunTimes);
+            const solunarWindows = getSolunarWindows(targetDate, parseFloat(lat), parseFloat(lon));
+            const majorWindow = isInWindow(clickHour, solunarWindows.major);
+            const minorWindow = isInWindow(clickHour, solunarWindows.minor);
+
             const currentEst = isLand ? 0 : estimateCurrent(wave, windSpeed, regionName);
             const clarity = isLand ? 0 : calculateClarity(wave, windSpeed, rain);
             const tide = calculateTide(targetDate, moon.fraction);
-            const solunarScore = getSolunarScore(targetDate, parseFloat(lat), parseFloat(lon));
             const windScore = calculateWindScore(windDir, windSpeed, regionName);
             
-            // ✅ SICAKLIK ŞOKU (v39 CORE)
             const tempShock = isLand ? 0 : Math.abs(tempWater - tempWater_yesterday);
             let tempShockPenalty = 1.0;
             if (tempShock > 5) tempShockPenalty = 0.6;
@@ -407,7 +577,6 @@ app.get('/api/forecast', async (req, res) => {
             let tempDiffScore = 1.0;
             if (tempDiff < -5) tempDiffScore = 0.7;
 
-            // ✅ BASINÇ SKORLAMASI (v39 CORE)
             let pressureScore = 0.5;
             if (pressureTrend < -0.5) pressureScore = 1.0;
             else if (pressureTrend < -0.2) pressureScore = 0.8;
@@ -417,24 +586,23 @@ app.get('/api/forecast', async (req, res) => {
 
             let fishList = [];
             
-            // ✅ SADECE DENİZDE BALIK HESAPLAMA
             if (!isLand) {
                 for (const [key, fish] of Object.entries(SPECIES_DB)) {
                     let s_bio = (fish.baseEff[getSeason(targetDate.getMonth())] || 0.4) * 25;
                     
-                    // ✅ SICAKLIK + ŞOKU (v39 CORE)
                     let f_temp = getFuzzyScore(tempWater, fish.tempRanges[0], fish.tempRanges[1], fish.tempRanges[2], fish.tempRanges[3]);
                     f_temp *= tempShockPenalty;
                     
                     let f_wave = getBellCurveScore(wave, fish.waveIdeal, fish.waveSigma);
-                    
-                    // ✅ CURRENT SCORING (v39 CORE)
                     let f_current = getBellCurveScore(currentEst, fish.currentIdeal, fish.currentSigma);
                     
-                    // ✅ SOLUNAR ADDİTİVE (v39 CORE)
-                    let solunarBonus = (solunarScore - 0.5) * 10;
+                    // ✅ YENİ: SAATE ÖZEL BONUS
+                    const hourlyData = getHourlyBonus(clickHour, timeOfDay, moon.fraction, key);
                     
-                    // ✅ DOĞRU WEIGHT DAĞıLıMı (v42)
+                    let solunarBonus = 0;
+                    if (majorWindow) solunarBonus = 15;
+                    else if (minorWindow) solunarBonus = 8;
+                    
                     let envScoreRaw = (
                         (f_temp * 0.25) + 
                         (f_wave * 0.15) + 
@@ -446,7 +614,6 @@ app.get('/api/forecast', async (req, res) => {
                     );
                     let s_env = envScoreRaw * 50;
 
-                    // ✅ 12 TRİGGER LOGIC (v39 CORE)
                     let triggerBonus = 0;
                     let activeTriggers = [];
                     
@@ -469,10 +636,6 @@ app.get('/api/forecast', async (req, res) => {
                     if (fish.triggers.includes("turbid_water") && clarity < 50) { 
                         triggerBonus += 5; 
                         activeTriggers.push("Bulanık Su"); 
-                    }
-                    if (fish.triggers.includes("solunar_peak") && solunarScore > 0.9) { 
-                        triggerBonus += 8; 
-                        activeTriggers.push("Solunar Zirve"); 
                     }
                     if (fish.triggers.includes("night_dark") && moon.fraction < 0.3) { 
                         triggerBonus += 5; 
@@ -515,10 +678,9 @@ app.get('/api/forecast', async (req, res) => {
                     
                     let noise = getUncertaintyNoise(2);
                     
-                    // ✅ FINAL SCORE (v39 ADDİTİVE)
-                    let finalScore = Math.min(98, Math.max(20, s_bio + s_env + solunarBonus + triggerBonus + noise));
+                    // ✅ YENİ: SAATE ÖZEL BONUS EKLENİYOR
+                    let finalScore = Math.min(98, Math.max(20, s_bio + s_env + solunarBonus + triggerBonus + hourlyData.bonus + noise));
                     
-                    // ✅ TÜR-SPESİFİK PENALTY (ADDİTİVE - v42)
                     if (key === 'kalamar') {
                         if (clarity < 65) { finalScore -= 25; }
                         if (rain > 1) { finalScore -= 15; }
@@ -531,9 +693,11 @@ app.get('/api/forecast', async (req, res) => {
                     
                     let regionalAdvice = fish.advice[regionName] || fish.advice["EGE"];
 
-                    // ✅ REASON FİELD (v41)
+                    // ✅ YENİ: ZAMAN BAZLI REASON
                     let reason = "";
-                    if (finalScore < 45) {
+                    if (hourlyData.reasons.length > 0) {
+                        reason = hourlyData.reasons[0];
+                    } else if (finalScore < 45) {
                         if (key === 'kalamar' && clarity < 65) reason = "Su bulanık, av vermez";
                         else if (s_bio < 15) reason = "Mevsimi değil";
                         else if (f_temp < 0.5) reason = "Su sıcaklığı uygun değil";
@@ -559,52 +723,47 @@ app.get('/api/forecast', async (req, res) => {
                             note: fish.note,
                             tips: fish.tips,
                             activation: activeTriggers.length > 0 ? activeTriggers.join(", ") : "Standart koşullar",
-                            reason: reason
+                            reason: reason,
+                            timeActivity: hourlyData.reasons.join(', ') || 'Normal aktivite' // ✅ YENİ
                         });
                     }
                 }
                 fishList.sort((a, b) => b.score - a.score);
             }
 
-            // ✅ ÇEŞİTLİLİK ANALİZİ (v39)
             const diversity = isLand ? null : analyzeDiversity(fishList, tempWater, clarity, wave, getSeason(targetDate.getMonth()));
 
-            // ✅ TAKTÄ°K TEXT (v41 + v42 Enhanced)
+            // ✅ YENİ: ZAMAN BAZLI TAKTİK
             let tacticText = "";
             if (isLand) {
-                tacticText = "Burası kara parçası veya sığlık. Balıkçılık verisi hesaplanamıyor. Yakın yemci aramak için haritaya sağ tıklayın.";
+                tacticText = "Burası kara parçası veya sığlık. Balıkçılık verisi hesaplanamıyor.";
             } else {
-                if (windSpeed > 45) {
-                    tacticText = "⚠️ FIRTINA ALARMI! Kıyıya yaklaşma, güvenli limanları tercih et.";
-                } else if (pressureTrend < -0.5 && wave > 1.0) {
-                    tacticText = "Basınç düşüyor + Dalgalı → Levrek avcı modunda! 🎯 Köpüklü sulara atış yap.";
-                } else if (wave > 1.5) {
-                    tacticText = "Sert hava. Kıyı dövülüyor, Levrek yapabilir. Ağır sahte (40g+) kullan.";
-                } else if (windSpeed > 30) {
-                    tacticText = `Rüzgar çok sert (${windSpeed} km). Korunaklı koylara git. Wind Knot riski yüksek.`;
-                } else if (currentEst > 1.0 && regionName === 'MARMARA') {
-                    tacticText = "Akıntı çok güçlü. Ağır kurşun şart (60g+). Akıntıya karşı at, bırak sürüklensin.";
-                } else if (clarity > 90 && moon.fraction > 0.8) {
-                    tacticText = "Berrak su + Dolunay → Kalamar gecesi! 🦑 Fluorocarbon lider kullan.";
-                } else if (tempShock > 4) {
-                    tacticText = `Sıcaklık şoku (${tempShock.toFixed(1)}°C) → Balık adaptasyon döneminde. Yemi çok yavaş sar.`;
-                } else if (solunarScore > 0.9) {
-                    tacticText = "Solunar zirve penceresi → Golden hour! ⏰ Aktif hareket et.";
-                } else if (clarity < 40) {
-                    tacticText = "Su çok bulanık. Titreşimli (Rattling) sahteler + kokulu yem kullan.";
+                const timeEmoji = getTimeEmoji(timeOfDay);
+                const timeName = getTimeName(timeOfDay);
+                
+                if (majorWindow) {
+                    tacticText = `${timeEmoji} ${timeName} - 🎯 MAJOR PENCERE (${majorWindow})! En yüksek aktivite bekleniyor. `;
+                } else if (minorWindow) {
+                    tacticText = `${timeEmoji} ${timeName} - ⭐ Minor Pencere (${minorWindow}). İyi aktivite olabilir. `;
                 } else {
-                    const isDay = (currentHour > 6 && currentHour < 19);
-                    if (isDay) {
-                        if (cloud > 60) tacticText = "Hava kapalı. Mat/Doğal renkler tercih et, geniş alan tara.";
-                        else tacticText = "Atmosfer stabil. Gölgelik alanları ve derin kanalları yokla.";
-                    } else {
-                        if (moon.fraction > 0.8) tacticText = "Dolunay ışığı var. Koyu renk (Siyah/Mor) sahteler silüet verir.";
-                        else tacticText = "Gece karanlık. Fosforlu (Glow) veya sesli sahtelerle balığı çek.";
-                    }
+                    tacticText = `${timeEmoji} ${timeName} - `;
+                }
+                
+                if (windSpeed > 45) {
+                    tacticText += "⚠️ FIRTINA! Kıyıya yaklaşma.";
+                } else if (timeOfDay === 'DAWN') {
+                    tacticText += "Şafak avı başladı! Levrek ve Lüfer aktif, topwater sahteler dene.";
+                } else if (timeOfDay === 'DUSK') {
+                    tacticText += "Alacakaranlık! Balıklar beslenme modunda, saldırgan sahteler kullan.";
+                } else if (timeOfDay === 'NIGHT') {
+                    tacticText += "Gece avı. Kalamar, İstavrit, Mırmır aktif. Işıklı iskeleleri tercih et.";
+                } else if (timeOfDay === 'MORNING') {
+                    tacticText += "Sabah aktivitesi. Lüfer sürüleri ve Çipura için ideal zaman.";
+                } else {
+                    tacticText += "Öğleden sonra sakin. Sabrınızı test edin, dip yemlerini deneyin.";
                 }
             }
 
-            // ✅ DİNAMİK CONFİDENCE (v39 CORE)
             let dataCompleteness = 1.0;
             if (wave > 3.5 || windSpeed > 45) dataCompleteness = 0.7;
             
@@ -618,6 +777,12 @@ app.get('/api/forecast', async (req, res) => {
 
             forecast.push({
                 date: targetDate.toISOString(),
+                hour: clickHour, // ✅ YENİ
+                timeOfDay: timeOfDay, // ✅ YENİ
+                timeEmoji: getTimeEmoji(timeOfDay), // ✅ YENİ
+                timeName: getTimeName(timeOfDay), // ✅ YENİ
+                majorWindow: majorWindow, // ✅ YENİ
+                minorWindow: minorWindow, // ✅ YENİ
                 temp: Math.round(tempWater * 10) / 10,
                 wave: wave, 
                 wind: Math.round(windSpeed),
@@ -643,9 +808,10 @@ app.get('/api/forecast', async (req, res) => {
         }
 
         const responseData = { 
-            version: "v42.0 MASTER", 
+            version: "v43.0 CHRONO MASTER", 
             region: regionName,
             isLand: isLand,
+            clickHour: clickHour, // ✅ YENİ
             forecast: forecast 
         };
         
@@ -660,15 +826,13 @@ app.get('/api/forecast', async (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`\n╔════════════════════════════════════════════════════╗`);
-    console.log(`║  ⚓ MERALOJİ ENGINE v42.0 - MASTER RELEASE        ║`);
+    console.log(`║  ⚓ MERALOJİ ENGINE v43.0 - CHRONO MASTER         ║`);
     console.log(`║  Port: ${PORT}                                       ║`);
-    console.log(`║  ✅ v39 Core (Pressure Trend, Temp Shock, etc.)   ║`);
-    console.log(`║  ✅ v41 Features (Weather Summary, Land, Places)  ║`);
-    console.log(`║  ✅ 12 Trigger Logic                              ║`);
-    console.log(`║  ✅ Current Scoring                               ║`);
-    console.log(`║  ✅ Dynamic Confidence                            ║`);
-    console.log(`║  ✅ Solunar Additive (Fixed)                      ║`);
-    console.log(`║  ✅ Ahtapot Eklendi                               ║`);
-    console.log(`║  🎯 PRODUCTION READY                              ║`);
+    console.log(`║  ✅ Hour-Specific Calculations                    ║`);
+    console.log(`║  ✅ Day/Night/Twilight Intelligence               ║`);
+    console.log(`║  ✅ Major/Minor Solunar Windows                   ║`);
+    console.log(`║  ✅ Species Time Behavior Patterns                ║`);
+    console.log(`║  ✅ Hourly Activity Analysis                      ║`);
+    console.log(`║  🎯 TIME-AWARE PRODUCTION READY                   ║`);
     console.log(`╚════════════════════════════════════════════════════╝\n`);
 });
