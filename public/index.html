@@ -30,10 +30,8 @@
         .radar-pin::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--blue); animation: pulse 2s infinite; pointer-events: none; opacity: 0.5; }
         @keyframes pulse { 0% { width: 0; height: 0; opacity: 0.8; } 100% { width: 100px; height: 100px; opacity: 0; } }
 
-        /* YEMCİ İKONU */
         .bait-icon { font-size: 24px; text-align: center; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
 
-        /* UI ELEMENTS */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--dark); background-image: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity 0.8s ease-in-out; padding: 20px; text-align: center; }
         .splash-title-top { font-size: 2.8em; font-weight: 900; color: white; letter-spacing: 4px; margin-bottom: 20px; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .splash-logo { width: 240px; height: 240px; filter: drop-shadow(0 0 40px rgba(56, 189, 248, 0.5)); margin-bottom: 20px; animation: float 3s ease-in-out infinite;}
@@ -98,9 +96,14 @@
         .tech-title { font-weight: 700; color: white; font-size: 1.1em; margin-bottom: 5px; display: block; }
         
         .loading-active { display: flex !important; }
-        .calc-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(5px); z-index: 2500; display: none; align-items: center; justify-content: center; flex-direction: column; font-family: 'Share Tech Mono', monospace; pointer-events: auto; }
-        .radar-spinner { width: 80px; height: 80px; border-radius: 50%; border: 3px solid rgba(56, 189, 248, 0.1); border-top-color: var(--blue); animation: radar 1s linear infinite; margin-bottom: 30px; box-shadow: 0 0 40px rgba(56, 189, 248, 0.2); }
+        /* NEW ANIMATED OVERLAY */
+        .calc-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 23, 0.98); z-index: 2500; display: none; align-items: center; justify-content: center; flex-direction: column; font-family: 'Share Tech Mono', monospace; pointer-events: auto; padding: 20px; text-align: left; }
+        .radar-spinner { width: 60px; height: 60px; border-radius: 50%; border: 2px solid rgba(56, 189, 248, 0.1); border-top-color: var(--blue); animation: radar 1s linear infinite; margin-bottom: 20px; }
+        #log-container { width: 100%; max-width: 350px; font-size: 0.9em; color: #cbd5e1; line-height: 1.6; }
+        .log-line { margin-bottom: 5px; opacity: 0; animation: fadeIn 0.1s forwards; }
+        .log-val { color: var(--yellow); font-weight: bold; margin-left: 10px; }
         @keyframes radar { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { to { opacity: 1; } }
 
         /* METRIC MODAL STYLES (NEW) */
         .metric-info-row { margin-bottom: 15px; text-align: left; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; }
@@ -142,14 +145,14 @@
                 <button class="secondary-btn" onclick="openTechModal()">🧠 Algoritma Detayı</button>
             </div>
         </div>
-        <div style="text-align:center; color:#666; font-size:0.8em; margin-top:20px;">Geliştirici: Uğur Kögüs<br>v2.0 Master</div>
+        <div style="text-align:center; color:#666; font-size:0.8em; margin-top:20px;">Geliştirici: Uğur Kögüs<br>v2.1 Data Stream</div>
     </div>
     
     <div id="map"></div>
     
     <div class="calc-overlay" id="loading">
         <div class="radar-spinner"></div>
-        <div style="color:var(--blue); font-family:'Share Tech Mono';">ANALİZ YAPILIYOR...</div>
+        <div id="log-container"></div>
     </div>
     
     <div id="hud-panel">
@@ -315,6 +318,48 @@
             return `<div class="metric-card" onclick="openMetricInfo('${key}')"><div class="m-val" style="color:${valColor}">${displayVal}</div>${labelHtml}<div class="m-lbl">${METRIC_DATA[key].title}</div></div>`;
         }
 
+        // --- YENİ ANIMASYON MANTIĞI ---
+        function runMatrixAnimation(data, today) {
+            const logContainer = document.getElementById('log-container');
+            logContainer.innerHTML = ''; // Temizle
+            
+            // Animasyonda gösterilecek veriler (Sıralı)
+            const steps = [
+                { text: `📡 UYDU BAĞLANTISI: ${data.region}`, delay: 0 },
+                { text: `⏱️ ZAMAN DAMGASI: ${new Date().toLocaleTimeString()}`, delay: 200 },
+                { text: `🌡️ HAVA ISISI: <span class="log-val">${today.airTemp}°C</span>`, delay: 600 },
+                { text: `💨 RÜZGAR HIZI: <span class="log-val">${today.wind} km/s</span>`, delay: 1000 },
+                { text: `📉 BASINÇ: <span class="log-val">${today.pressure} hPa</span>`, delay: 1400 },
+                { text: `🌊 DENİZ VERİSİ SORGULANIYOR...`, delay: 1800 }
+            ];
+
+            if (data.isLand) {
+                steps.push({ text: `⚠️ HATA: KARA PARÇASI TESPİT EDİLDİ!`, delay: 2400 });
+            } else {
+                steps.push({ text: `🌊 SU ISISI: <span class="log-val">${today.temp}°C</span>`, delay: 2400 });
+                steps.push({ text: `🎣 ANALİZ TAMAMLANDI.`, delay: 2800 });
+            }
+
+            // Adım adım yazdır
+            let maxDelay = 0;
+            steps.forEach(step => {
+                setTimeout(() => {
+                    const div = document.createElement('div');
+                    div.className = 'log-line';
+                    div.innerHTML = `> ${step.text}`;
+                    logContainer.appendChild(div);
+                    logContainer.scrollTop = logContainer.scrollHeight;
+                }, step.delay);
+                maxDelay = step.delay;
+            });
+
+            // Animasyon bitince paneli aç
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                showResults(data, today);
+            }, maxDelay + 800);
+        }
+
         map.on('click', async (e) => {
             const lat = e.latlng.lat.toFixed(4); const lon = e.latlng.lng.toFixed(4); lastLatLon = { lat, lon };
             if(markerLayer) map.removeLayer(markerLayer);
@@ -324,13 +369,13 @@
             
             document.getElementById('hud-panel').style.display = 'none';
             document.getElementById('loading').style.display = 'flex';
+            document.getElementById('log-container').innerHTML = ''; // Reset
             
             try {
                 const res = await fetch(`/api/forecast?lat=${lat}&lon=${lon}`); const data = await res.json();
-                document.getElementById('loading').style.display = 'none';
-                if(data.isLand) { alert("Burası kara parçası!"); return; }
                 weeklyDataCache = data.forecast; 
-                showResults(data, data.forecast[0]);
+                // Animasyonu başlat
+                runMatrixAnimation(data, data.forecast[0]);
             } catch(err) { 
                 document.getElementById('loading').style.display = 'none';
                 alert("Bağlantı hatası."); 
@@ -373,11 +418,26 @@
             document.querySelector('.panel-content').scrollTop = 0; 
             
             document.getElementById('region-title').innerText = data.region;
-            document.getElementById('score-val').innerHTML = '<span style="font-size:0.4em; vertical-align:super; opacity:0.8;">%</span>' + today.score.toFixed(1);
-            document.getElementById('score-val').style.color = getColor(today.score);
-            document.getElementById('conf-val').innerText = "GÜVEN: %" + today.confidence;
-            document.getElementById('weather-val').innerText = today.weatherSummary || "";
-            document.getElementById('tactic-text').innerText = today.tactic;
+            
+            if (data.isLand) {
+                // KARA MODU GÖRÜNÜMÜ
+                document.getElementById('score-val').innerHTML = '<span style="font-size:0.4em; opacity:0.5;">KARA</span>';
+                document.getElementById('score-val').style.color = 'var(--red)';
+                document.getElementById('conf-val').innerText = "VERİ YOK";
+                document.getElementById('weather-val').innerText = today.weatherSummary || "ATMOSFERİK VERİ";
+                document.getElementById('tactic-text').innerText = "Burası kara parçası veya çok sığ bir alan. Deniz tahminleri (Dalga, Akıntı) hesaplanamıyor. Ancak aşağıdaki butondan yakındaki yemcileri bulabilirsin.";
+                
+                // Balık listesini gizle
+                document.getElementById('fish-list').innerHTML = '<div style="text-align:center; padding:20px; color:#666;">Balık verisi yok.</div>';
+            } else {
+                // NORMAL DENİZ MODU
+                document.getElementById('score-val').innerHTML = '<span style="font-size:0.4em; vertical-align:super; opacity:0.8;">%</span>' + today.score.toFixed(1);
+                document.getElementById('score-val').style.color = getColor(today.score);
+                document.getElementById('conf-val').innerText = "GÜVEN: %" + today.confidence;
+                document.getElementById('weather-val').innerText = today.weatherSummary || "";
+                document.getElementById('tactic-text').innerText = today.tactic;
+                renderFishList(today.fishList, 'fish-list');
+            }
 
             const grid = document.getElementById('main-grid');
             grid.innerHTML = 
@@ -391,8 +451,6 @@
                 createMetricCard('tide', today.tide, 'm') +
                 createMetricCard('current', today.current, '') +
                 createMetricCard('cloud', today.cloud, '%');
-
-            renderFishList(today.fishList, 'fish-list');
         }
 
         function renderFishList(list, containerId) {
