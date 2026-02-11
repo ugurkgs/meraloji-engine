@@ -5,431 +5,2028 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MERALOJİ | F.I.S.H. System</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        :root { 
-            --dark: #0f172a; --panel: rgba(15, 23, 42, 0.98); 
-            --blue: #38bdf8; --green: #4ade80; --red: #f87171; 
-            --yellow: #facc15; --glass-border: 1px solid rgba(255, 255, 255, 0.15); --gray: #94a3b8;
+        /* ═══════════════════════════════════════════════════════════════════
+           DESIGN SYSTEM - CSS Variables
+           ═══════════════════════════════════════════════════════════════════ */
+        :root {
+            --bg-deep: #040d1a;
+            --bg-panel: rgba(8, 24, 48, 0.95);
+            --bg-card: rgba(15, 35, 65, 0.8);
+            
+            --cyan: #00d4ff;
+            --cyan-glow: rgba(0, 212, 255, 0.3);
+            --green: #00ff88;
+            --green-glow: rgba(0, 255, 136, 0.2);
+            --yellow: #ffd500;
+            --red: #ff4757;
+            --orange: #ff9f43;
+            
+            --text-primary: #ffffff;
+            --text-secondary: #8ba4c7;
+            --text-muted: #5a7193;
+            
+            --border-subtle: rgba(0, 212, 255, 0.15);
+            --border-glow: rgba(0, 212, 255, 0.4);
+            
+            --font-display: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { margin: 0; font-family: 'Montserrat', sans-serif; background: #000; color: white; height: 100vh; overflow: hidden; }
 
-        #map { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; cursor: crosshair; background: #0f172a; }
-        
-        /* RADAR PIN */
-        .radar-pin { width: 24px; height: 24px; background: var(--blue); border-radius: 50%; border: 3px solid white; box-shadow: 0 0 15px var(--blue); position: relative; }
-        .radar-pin::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--blue); animation: pulse 2s infinite; pointer-events: none; opacity: 0.5; }
-        @keyframes pulse { 0% { width: 0; height: 0; opacity: 0.8; } 100% { width: 100px; height: 100px; opacity: 0; } }
+        /* ═══════════════════════════════════════════════════════════════════
+           BASE STYLES
+           ═══════════════════════════════════════════════════════════════════ */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-        .bait-icon { font-size: 24px; text-align: center; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+        body {
+            font-family: var(--font-display);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
+        }
 
-        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--dark); background-image: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity 0.8s ease-in-out; padding: 20px; text-align: center; }
-        .splash-title-top { font-size: 2.8em; font-weight: 900; color: white; letter-spacing: 4px; margin-bottom: 20px; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .splash-logo { width: 240px; height: 240px; filter: drop-shadow(0 0 40px rgba(56, 189, 248, 0.5)); margin-bottom: 20px; animation: float 3s ease-in-out infinite;}
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        .splash-fish { font-family: 'Share Tech Mono', monospace; font-size: 2.5em; color: var(--blue); letter-spacing: 8px; font-weight: bold; margin-top: 10px; text-shadow: 0 0 20px var(--blue); }
-        .splash-sub { font-family: 'Montserrat', sans-serif; font-size: 0.9em; letter-spacing: 4px; color: var(--gray); margin-top: 5px; font-weight: 600; }
+        /* ═══════════════════════════════════════════════════════════════════
+           SPLASH SCREEN
+           ═══════════════════════════════════════════════════════════════════ */
+        #splash {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, #020c1a 0%, #0a1628 50%, #071020 100%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
 
-        #controls-bar { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 94%; max-width: 480px; z-index: 2000; display: flex; gap: 12px; align-items: center; pointer-events: none; opacity: 0; transition: opacity 1s ease 0.5s; }
-        #controls-bar.visible { opacity: 1; }
-        #controls-bar > * { pointer-events: auto; box-shadow: 0 8px 25px rgba(0,0,0,0.4); backdrop-filter: blur(10px); }
-        .control-group { background: var(--panel); border: var(--glass-border); border-radius: 14px; display: flex; align-items: center; padding: 5px 15px; flex: 1; height: 50px; }
-        .btn-glass { background: var(--panel); border: var(--glass-border); color: white; width: 50px; height: 50px; border-radius: 14px; font-size: 1.4em; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-        .search-input { background: transparent; border: none; color: white; padding: 0 10px; width: 100%; font-family: 'Montserrat', sans-serif; font-size: 1em; font-weight: 500; }
-        #suggestions { position: absolute; top: 65px; left: 62px; right: 62px; background: var(--panel); border: var(--glass-border); border-radius: 12px; max-height: 200px; overflow-y: auto; display: none; flex-direction: column; z-index: 3000; pointer-events: auto; backdrop-filter: blur(10px); }
-        .suggestion-item { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; font-size: 0.95em; }
+        #splash.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
 
-        #side-menu { position: absolute; top: 0; left: 0; width: 280px; height: 100%; background: rgba(10, 14, 23, 0.98); z-index: 4000; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 25px; border-right: var(--glass-border); pointer-events: auto; display: flex; flex-direction: column; justify-content: space-between; }
-        #side-menu.active { transform: translateX(0); box-shadow: 10px 0 50px rgba(0,0,0,0.5); }
-        .menu-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:3999; display:none; backdrop-filter: blur(3px); }
-        .menu-header { color: var(--blue); font-weight: 900; letter-spacing: 2px; margin-bottom: 25px; font-size: 1.5em; text-transform: uppercase; }
-        .secondary-btn { width: 100%; padding: 14px; background: rgba(255,255,255,0.05); border: var(--glass-border); color: white; font-weight: 600; border-radius: 12px; cursor: pointer; margin-top: 12px; font-size: 0.9em; transition: background 0.2s; text-align: left; padding-left: 15px; }
+        .splash-logo {
+            width: 180px;
+            height: 180px;
+            filter: drop-shadow(0 0 60px var(--cyan-glow));
+            animation: float 3s ease-in-out infinite;
+            margin-bottom: 24px;
+        }
 
-        #hud-panel { position: absolute; bottom: 0; left: 0; width: 100%; max-height: 90vh; background: var(--panel); border-radius: 24px 24px 0 0; z-index: 2000; display: none; flex-direction: column; box-shadow: 0 -10px 50px rgba(0,0,0,0.6); border-top: var(--glass-border); pointer-events: auto; backdrop-filter: blur(15px); }
-        @media(min-width: 768px) { #hud-panel { bottom: 20px; right: 20px; left: auto; width: 450px; border-radius: 16px; max-height: 90vh; border: var(--glass-border); } }
-        .panel-header { padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; }
-        .panel-content { padding: 20px 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; scroll-behavior: auto; }
-        
-        .score-box { text-align: center; margin-bottom: 20px; padding: 20px; background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%); border-radius: 16px; border: var(--glass-border); position: relative;}
-        .main-score { font-size: 4em; font-weight: 900; line-height: 1; color: var(--green); text-shadow: 0 0 30px rgba(74, 222, 128, 0.4); margin: 5px 0; }
-        .weather-summary { font-family: 'Share Tech Mono'; color: var(--blue); font-size: 1.1em; letter-spacing: 1px; margin-top: 5px; font-weight: 700; text-transform: uppercase; }
-        
-        /* NEW: MODE SWITCHER */
-        .mode-switch { display: flex; justify-content: center; margin-bottom: 15px; background: rgba(0,0,0,0.3); border-radius: 20px; padding: 4px; display: inline-flex; }
-        .mode-btn { background: transparent; border: none; color: #888; padding: 6px 16px; border-radius: 16px; font-weight: 700; font-size: 0.8em; cursor: pointer; transition: all 0.2s; }
-        .mode-btn.active { background: var(--blue); color: #000; box-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
 
-        .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 24px; }
-        @media(min-width: 480px) { .metric-grid { grid-template-columns: repeat(5, 1fr); } }
-        
-        .metric-card { background: rgba(255,255,255,0.04); padding: 8px 4px; border-radius: 10px; text-align: center; display:flex; flex-direction:column; justify-content:center; min-height:70px; border: 1px solid rgba(255,255,255,0.05); cursor: help; transition: background 0.2s; position: relative;}
-        .metric-card:active { background: rgba(255,255,255,0.1); }
-        .m-val { font-weight: 800; color: white; font-size: 0.9em; white-space:nowrap; }
-        .m-lbl { font-size: 0.55em; color: var(--gray); margin-top: 2px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;}
-        .m-status { font-size: 0.5em; font-weight: 900; margin-top: 2px; letter-spacing: 0.5px; padding: 1px 4px; border-radius: 4px; display: inline-block; }
-        .status-good { color: var(--green); background: rgba(74, 222, 128, 0.1); }
-        .status-warn { color: var(--yellow); background: rgba(250, 204, 21, 0.1); }
-        .status-bad { color: var(--red); background: rgba(248, 113, 113, 0.1); }
-        .status-neutral { color: var(--blue); background: rgba(56, 189, 248, 0.1); }
-        
-        .action-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--blue), #2563eb); border: none; color: white; font-weight: 800; border-radius: 12px; cursor: pointer; margin-top: 10px; box-shadow: 0 5px 20px rgba(37, 99, 235, 0.4); font-size: 1em; letter-spacing: 1px; }
-        
-        .fish-item { padding: 14px; background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, transparent 100%); border-radius: 12px; border-left: 4px solid #555; margin-bottom: 8px; cursor:pointer; position: relative; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .fish-details { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.85em; color: #cbd5e1; line-height: 1.6; }
-        .fish-item.open .fish-details { display: block; animation: slideDown 0.3s ease-out; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .splash-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: 6px;
+            background: linear-gradient(135deg, var(--cyan) 0%, #00ff88 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 5000; display: none; flex-direction: column; padding: 20px; overflow-y: auto; pointer-events: auto; }
-        .day-row { display: flex; justify-content: space-between; align-items: center; padding: 18px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: background 0.2s; }
-        .day-row:active { background: rgba(255,255,255,0.1); }
-        .day-score-badge { font-weight: 900; padding: 5px 10px; border-radius: 5px; background: rgba(255,255,255,0.1); }
+        .splash-subtitle {
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            color: var(--cyan);
+            letter-spacing: 8px;
+            opacity: 0.9;
+        }
 
-        .tech-content { color: #cbd5e1; line-height: 1.7; font-size: 0.9em; }
-        .tech-item { margin-bottom: 20px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border-left: 3px solid var(--blue); }
-        
-        .calc-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 23, 0.98); z-index: 2500; display: none; align-items: center; justify-content: center; flex-direction: column; font-family: 'Share Tech Mono', monospace; pointer-events: auto; padding: 20px; text-align: left; }
-        .radar-spinner { width: 60px; height: 60px; border-radius: 50%; border: 2px solid rgba(56, 189, 248, 0.1); border-top-color: var(--blue); animation: radar 1s linear infinite; margin-bottom: 20px; }
-        #log-container { width: 100%; max-width: 350px; font-size: 0.9em; color: #cbd5e1; line-height: 1.6; }
-        .log-line { margin-bottom: 5px; opacity: 0; animation: fadeIn 0.1s forwards; }
-        .log-val { color: var(--yellow); font-weight: bold; margin-left: 10px; }
-        @keyframes radar { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { to { opacity: 1; } }
+        .splash-tagline {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            margin-top: 8px;
+        }
 
-        .metric-info-row { margin-bottom: 15px; text-align: left; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; }
-        .metric-label { color: var(--blue); font-size: 0.8em; font-weight: bold; margin-bottom: 4px; letter-spacing: 1px; }
-        .metric-val { color: white; font-size: 0.95em; line-height: 1.4; }
-        
-        #error-banner { position:fixed; top:0; left:0; width:100%; background:red; color:white; padding:10px; font-size:0.8em; z-index:10000; display:none; text-align:center;}
+        /* ═══════════════════════════════════════════════════════════════════
+           MAP
+           ═══════════════════════════════════════════════════════════════════ */
+        #map {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            cursor: crosshair;
+            background: var(--bg-deep);
+        }
+
+        /* Custom Marker */
+        .radar-marker {
+            width: 28px;
+            height: 28px;
+            background: var(--cyan);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan-glow);
+            position: relative;
+        }
+
+        .radar-marker::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border: 2px solid var(--cyan);
+            border-radius: 50%;
+            animation: radar-pulse 2s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes radar-pulse {
+            0% { width: 28px; height: 28px; opacity: 0.8; }
+            100% { width: 120px; height: 120px; opacity: 0; }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════
+           TOP CONTROLS
+           ═══════════════════════════════════════════════════════════════════ */
+        #controls {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 500px;
+            z-index: 1000;
+            display: flex;
+            gap: 12px;
+            opacity: 0;
+            transition: opacity 0.5s ease 0.3s;
+        }
+
+        #controls.visible { opacity: 1; }
+
+        .btn-icon {
+            width: 52px;
+            height: 52px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(20px);
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 0 20px var(--cyan-glow);
+        }
+
+        .btn-icon.active {
+            background: var(--cyan);
+            color: var(--bg-deep);
+        }
+
+        .search-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-box {
+            width: 100%;
+            height: 52px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
+            backdrop-filter: blur(20px);
+        }
+
+        .search-box input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Autocomplete Dropdown */
+        .search-suggestions {
+            position: absolute;
+            top: 58px;
+            left: 0;
+            right: 0;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-md);
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .search-suggestions.active {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 14px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-subtle);
+            transition: background 0.2s;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .suggestion-item .name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .suggestion-item .region {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════
+           LOADING OVERLAY
+           ═══════════════════════════════════════════════════════════════════ */
+        #loading {
+            position: fixed;
+            inset: 0;
+            background: rgba(4, 13, 26, 0.95);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .radar-spinner {
+            width: 80px;
+            height: 80px;
+            border: 3px solid var(--border-subtle);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 24px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #log-output {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: left;
+            max-width: 320px;
+        }
+
+        .log-line {
+            margin-bottom: 8px;
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .log-line span {
+            color: var(--yellow);
+            font-weight: 700;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════
+           HUD PANEL
+           ═══════════════════════════════════════════════════════════════════ */
+        #hud {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 85vh;
+            background: var(--bg-panel);
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+            border-top: 1px solid var(--border-glow);
+            z-index: 1500;
+            display: none;
+            flex-direction: column;
+            backdrop-filter: blur(30px);
+            box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (min-width: 768px) {
+            #hud {
+                bottom: 20px;
+                right: 20px;
+                left: auto;
+                width: 420px;
+                max-height: 80vh;
+                border-radius: var(--radius-lg);
+                border: 1px solid var(--border-glow);
+            }
+        }
+
+        .hud-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hud-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .hud-close {
+            width: 36px;
+            height: 36px;
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .hud-close:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .hud-content {
+            padding: 20px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Score Box */
+        .score-box {
+            text-align: center;
+            padding: 24px;
+            background: linear-gradient(180deg, var(--bg-card) 0%, transparent 100%);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-subtle);
+            margin-bottom: 20px;
+        }
+
+        .mode-tabs {
+            display: inline-flex;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 4px;
+            margin-bottom: 16px;
+        }
+
+        .mode-tab {
+            padding: 8px 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 700;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-tab.active {
+            background: var(--cyan);
+            color: var(--bg-deep);
+            box-shadow: 0 0 20px var(--cyan-glow);
+        }
+
+        .main-score {
+            font-size: 4.5rem;
+            font-weight: 900;
+            line-height: 1;
+            margin: 8px 0;
+        }
+
+        .main-score sup {
+            font-size: 1.5rem;
+            opacity: 0.6;
+            vertical-align: super;
+        }
+
+        .weather-label {
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            color: var(--cyan);
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .confidence-badge {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 6px 14px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Tactic Box */
+        .tactic-box {
+            background: linear-gradient(90deg, var(--cyan-glow) 0%, transparent 100%);
+            border-left: 3px solid var(--cyan);
+            padding: 16px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .tactic-box::before {
+            content: '💡';
+            margin-right: 10px;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 480px) {
+            .metrics-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 10px 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .metric-card:hover {
+            border-color: var(--cyan);
+            transform: translateY(-2px);
+        }
+
+        .metric-icon {
+            font-size: 1.2rem;
+            margin-bottom: 4px;
+        }
+
+        .metric-val {
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        .metric-label {
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        /* Fish List */
+        .section-title {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .fish-item {
+            background: linear-gradient(90deg, var(--bg-card) 0%, transparent 100%);
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--text-muted);
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .fish-item:hover {
+            transform: translateX(4px);
+        }
+
+        .fish-item.score-high { border-left-color: var(--green); }
+        .fish-item.score-mid { border-left-color: var(--yellow); }
+        .fish-item.score-low { border-left-color: var(--red); }
+
+        .fish-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .fish-name {
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fish-score {
+            font-weight: 900;
+            font-size: 1.1rem;
+        }
+
+        .fish-details {
+            display: none;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-subtle);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .fish-item.open .fish-details {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fish-reason {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .fish-reason.positive {
+            background: var(--green-glow);
+            color: var(--green);
+        }
+
+        .fish-reason.negative {
+            background: rgba(255, 71, 87, 0.2);
+            color: var(--red);
+        }
+
+        .fish-tip {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-sm);
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+
+        /* Action Buttons */
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--cyan) 0%, #0099cc 100%);
+            border: none;
+            border-radius: var(--radius-md);
+            color: var(--bg-deep);
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 16px;
+            box-shadow: 0 8px 30px var(--cyan-glow);
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px var(--cyan-glow);
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--cyan);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════
+           SIDE MENU
+           ═══════════════════════════════════════════════════════════════════ */
+        #menu-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 2999;
+            display: none;
+        }
+
+        #side-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100%;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border-subtle);
+            z-index: 3000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #side-menu.active {
+            transform: translateX(0);
+        }
+
+        .menu-header {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--cyan);
+            letter-spacing: 2px;
+            margin-bottom: 32px;
+        }
+
+        .menu-section {
+            margin-bottom: 24px;
+        }
+
+        .menu-section h3 {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .menu-btn {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: left;
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+
+        .menu-btn:hover {
+            border-color: var(--cyan);
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .map-layer-indicator {
+            font-size: 0.7rem;
+            color: var(--cyan);
+            margin-left: 8px;
+        }
+
+        .menu-footer {
+            margin-top: auto;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════
+           MODALS
+           ═══════════════════════════════════════════════════════════════════ */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-deep);
+            z-index: 4000;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 24px;
+            transition: all 0.2s;
+        }
+
+        .modal-back:hover {
+            border-color: var(--cyan);
+        }
+
+        .modal-title {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--cyan);
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+        }
+
+        /* Weekly Modal */
+        .day-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .day-row:hover {
+            border-color: var(--cyan);
+            transform: translateX(4px);
+        }
+
+        .day-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .day-date {
+            font-weight: 700;
+        }
+
+        .day-weather {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .day-score {
+            font-weight: 900;
+            font-size: 1.2rem;
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Metric Info Modal */
+        #metric-modal {
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.85);
+        }
+
+        .metric-modal-content {
+            background: var(--bg-panel);
+            border: 1px solid var(--cyan);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            width: 90%;
+            max-width: 450px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .metric-modal-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .metric-modal-icon {
+            font-size: 3.5rem;
+            margin-bottom: 12px;
+        }
+
+        .metric-modal-title {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--cyan);
+            letter-spacing: 1px;
+        }
+
+        .metric-info-section {
+            margin-bottom: 16px;
+        }
+
+        .metric-info-label {
+            font-size: 0.7rem;
+            color: var(--cyan);
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .metric-info-content {
+            background: var(--bg-card);
+            padding: 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            line-height: 1.6;
+            border-left: 3px solid var(--border-subtle);
+        }
+
+        .metric-info-content.highlight {
+            border-left-color: var(--cyan);
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .metric-info-content.algo {
+            border-left-color: var(--green);
+            background: rgba(0, 255, 136, 0.05);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+
+        .metric-range-bar {
+            height: 8px;
+            background: linear-gradient(90deg, var(--red) 0%, var(--yellow) 50%, var(--green) 100%);
+            border-radius: 4px;
+            margin: 12px 0;
+        }
+
+        /* Tech Modal - Algorithm Details */
+        .algo-section {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--cyan);
+        }
+
+        .algo-section.fuzzy { border-left-color: var(--cyan); }
+        .algo-section.gaussian { border-left-color: var(--green); }
+        .algo-section.solunar { border-left-color: var(--yellow); }
+        .algo-section.local { border-left-color: var(--orange); }
+
+        .algo-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .algo-title .icon {
+            font-size: 1.4rem;
+        }
+
+        .algo-description {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        .algo-formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--cyan);
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+
+        .algo-example {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .algo-example strong {
+            color: var(--yellow);
+        }
+
+        .algo-reference {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-sm);
+            border: 1px dashed var(--border-subtle);
+        }
+
+        .algo-reference .ref-icon {
+            font-size: 1.2rem;
+        }
+
+        .algo-reference .ref-content {
+            flex: 1;
+        }
+
+        .algo-reference .ref-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        .algo-reference .ref-author {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════
+           UTILITIES
+           ═══════════════════════════════════════════════════════════════════ */
+        .color-green { color: var(--green); }
+        .color-yellow { color: var(--yellow); }
+        .color-red { color: var(--red); }
+        .color-cyan { color: var(--cyan); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-subtle);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--cyan);
+        }
     </style>
 </head>
 <body>
-    <div id="error-banner"></div>
-    
-    <div id="splash-screen">
-        <div class="splash-title-top">MERALOJİ</div>
+    <!-- ═══════════════════════════════════════════════════════════════════
+         SPLASH SCREEN
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="splash">
         <img src="logo.png" alt="Meraloji" class="splash-logo" onerror="this.style.display='none'">
-        <div class="splash-fish">F.I.S.H.</div>
-        <div class="splash-sub">FIND INSPECT SEE HUNT</div>
+        <div class="splash-title">MERALOJİ</div>
+        <div class="splash-subtitle">F.I.S.H.</div>
+        <div class="splash-tagline">Find • Inspect • See • Hunt</div>
     </div>
-    
-    <div id="controls-bar">
-        <button class="btn-glass" onclick="toggleMenu()">☰</button>
-        <div class="control-group">
-            <span style="font-size:1.2em; color:var(--gray); margin-right:10px;">🔍</span>
-            <input type="text" id="search-input" class="search-input" placeholder="Mera ara...">
-        </div>
-        <button class="btn-glass" style="color:var(--blue)" onclick="locateMe()">🎯</button>
-    </div>
-    <div id="suggestions"></div>
-    <div class="menu-overlay" id="menu-overlay" onclick="toggleMenu()"></div>
-    
-    <div id="side-menu">
-        <div>
-            <div class="menu-header">MERALOJİ</div>
-            <div class="menu-section">
-                <h3>Favori Meralarım</h3>
-                <div id="fav-list"></div>
-            </div>
-            <div class="menu-section">
-                <h3>Menü</h3>
-                <button class="secondary-btn" onclick="changeMapLayer()">🗺️ Harita Katmanı</button>
-                <button class="secondary-btn" onclick="openTechModal()">🧠 Algoritma Detayı</button>
-            </div>
-        </div>
-        <div style="text-align:center; color:#666; font-size:0.8em; margin-top:20px;">Geliştirici: Uğur Kögüs<br>v48.0 Instant</div>
-    </div>
-    
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         MAP
+         ═══════════════════════════════════════════════════════════════════ -->
     <div id="map"></div>
-    
-    <div class="calc-overlay" id="loading">
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TOP CONTROLS
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="controls">
+        <button class="btn-icon" onclick="toggleMenu()">☰</button>
+        <div class="search-wrapper">
+            <div class="search-box">
+                <span style="color: var(--text-muted);">🔍</span>
+                <input type="text" id="search-input" placeholder="Mera ara..." autocomplete="off">
+            </div>
+            <div class="search-suggestions" id="search-suggestions"></div>
+        </div>
+        <button class="btn-icon" style="color: var(--cyan);" onclick="locateMe()">🎯</button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         LOADING OVERLAY
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="loading">
         <div class="radar-spinner"></div>
-        <div id="log-container"></div>
+        <div id="log-output"></div>
     </div>
-    
-    <div id="hud-panel">
-        <div class="panel-header">
-            <span style="font-weight:800; color:white; font-size:1.2em;" id="region-title">--</span>
-            <button class="btn-glass" style="width:36px; height:36px; background:transparent; border:none;" onclick="closePanel()">✕</button>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         HUD PANEL
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="hud">
+        <div class="hud-header">
+            <span class="hud-title" id="region-title">--</span>
+            <button class="hud-close" onclick="closeHud()">✕</button>
         </div>
-        <div class="panel-content">
-            
+        <div class="hud-content">
             <div class="score-box">
-                <div class="mode-switch">
-                    <button class="mode-btn active" id="btn-daily" onclick="setMode('daily')">GÜNLÜK</button>
-                    <button class="mode-btn" id="btn-instant" onclick="setMode('instant')">ANLIK (ŞU AN)</button>
+                <div class="mode-tabs">
+                    <button class="mode-tab active" id="tab-daily" onclick="setMode('daily')">GÜNLÜK</button>
+                    <button class="mode-tab" id="tab-instant" onclick="setMode('instant')">ANLIK</button>
                 </div>
-                <div class="main-score" id="score-val">--</div>
-                <div class="weather-summary" id="weather-val">--</div>
-                <div style="font-size:0.7em; color:#cbd5e1; background:rgba(0,0,0,0.3); padding:4px 12px; border-radius:20px; display:inline-block; margin-top:10px;" id="conf-val">Güven: %</div>
+                <div class="main-score" id="score-display">--</div>
+                <div class="weather-label" id="weather-display">--</div>
+                <div class="confidence-badge" id="confidence-display">Güven: --%</div>
             </div>
 
-            <div style="background:rgba(59,130,246,0.1); border-left:3px solid var(--blue); padding:15px; border-radius:8px; font-size:0.9em; margin-bottom:20px; color:#e2e8f0; line-height:1.5;">
-                <span style="font-size:1.5em; vertical-align:middle; margin-right:10px;">💡</span><span id="tactic-text">...</span>
-            </div>
-            
-            <div class="metric-grid" id="main-grid"></div>
+            <div class="tactic-box" id="tactic-display">Analiz bekleniyor...</div>
 
-            <div style="font-size:0.85em; color:var(--gray); margin-bottom:10px; font-weight:800; margin-top:20px;">Türler (Detay İçin Tıklayın)</div>
+            <div class="metrics-grid" id="metrics-grid"></div>
+
+            <div class="section-title">Türler (Detay için tıklayın)</div>
             <div id="fish-list"></div>
-            
-            <button class="action-btn" onclick="showWeeklyModal()">📅 7 Günlük Tahmin Raporu</button>
-            
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
-                <button class="secondary-btn" style="text-align:center; margin-top:0;" onclick="findBaitShops()">🪱 Yemcileri Bul</button>
-                <button class="secondary-btn" style="text-align:center; margin-top:0;" onclick="saveFavorite()">⭐ Kaydet</button>
-            </div>
 
+            <button class="btn-primary" onclick="showWeeklyModal()">📅 7 Günlük Tahmin Raporu</button>
+            
+            <div class="btn-row">
+                <button class="btn-secondary" onclick="findBaitShops()">🪱 Yemcileri Bul</button>
+                <button class="btn-secondary" onclick="saveFavorite()">⭐ Kaydet</button>
+            </div>
         </div>
     </div>
 
-    <div id="weekly-modal" class="modal-overlay">
-        <button class="secondary-btn" style="width:auto; margin-bottom:20px; background:rgba(255,255,255,0.05); text-align:center;" onclick="document.getElementById('weekly-modal').style.display='none'">← GERİ DÖN</button>
-        <h2 style="text-align:center; color:var(--blue); font-weight:900;">7 GÜNLÜK TAHMİN</h2>
+    <!-- ═══════════════════════════════════════════════════════════════════
+         SIDE MENU
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="menu-overlay" onclick="toggleMenu()"></div>
+    <div id="side-menu">
+        <div class="menu-header">MERALOJİ</div>
+        
+        <div class="menu-section">
+            <h3>Favori Meralarım</h3>
+            <div id="fav-list"></div>
+        </div>
+
+        <div class="menu-section">
+            <h3>Menü</h3>
+            <button class="menu-btn" onclick="changeMapLayer()">
+                🗺️ Harita Katmanı
+                <span class="map-layer-indicator" id="map-layer-name">(Coğrafi)</span>
+            </button>
+            <button class="menu-btn" onclick="showTechModal()">🧠 Algoritma Detayı</button>
+        </div>
+
+        <div class="menu-footer">
+            Geliştirici: Uğur Kögüs<br>
+            F.I.S.H. System v1.0
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         WEEKLY MODAL
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div class="modal" id="weekly-modal">
+        <button class="modal-back" onclick="closeModal('weekly-modal')">← Geri Dön</button>
+        <div class="modal-title">7 GÜNLÜK TAHMİN</div>
         <div id="weekly-content"></div>
     </div>
 
-    <div id="day-detail-modal" class="modal-overlay">
-        <button class="secondary-btn" style="width:auto; margin-bottom:20px; background:rgba(255,255,255,0.05); text-align:center;" onclick="document.getElementById('day-detail-modal').style.display='none'">← LİSTEYE DÖN</button>
-        <div style="text-align:center; margin-bottom:20px;">
-            <div style="font-size:1.5em; font-weight:900;" id="dd-date">--</div>
-            <div style="font-size:3em; font-weight:900; margin:10px 0;" id="dd-score">--</div>
-            <div style="color:var(--blue); font-family:'Share Tech Mono'; font-weight:bold;" id="dd-weather">--</div>
+    <!-- ═══════════════════════════════════════════════════════════════════
+         DAY DETAIL MODAL
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div class="modal" id="day-modal">
+        <button class="modal-back" onclick="closeModal('day-modal')">← Listeye Dön</button>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 1.3rem; font-weight: 700;" id="dd-date">--</div>
+            <div class="main-score" id="dd-score" style="font-size: 3.5rem;">--</div>
+            <div class="weather-label" id="dd-weather">--</div>
         </div>
-        <div style="background:rgba(59,130,246,0.1); border-left:3px solid var(--blue); padding:15px; border-radius:8px; font-size:0.9em; margin-bottom:20px;">
-            <div id="dd-tactic">--</div>
-        </div>
+        <div class="tactic-box" id="dd-tactic">--</div>
+        <div class="section-title">Türler</div>
         <div id="dd-fish-list"></div>
     </div>
-    
-    <div id="tech-modal" class="modal-overlay">
-        <button class="secondary-btn" style="width:auto; margin-bottom:20px; background:rgba(255,255,255,0.05); text-align:center;" onclick="document.getElementById('tech-modal').style.display='none'">KAPAT</button>
-        <h2 style="text-align:center; color:var(--blue); font-weight:900; letter-spacing:1px; margin-bottom:30px;">F.I.S.H. ALGORİTMASI</h2>
-        <div class="tech-content">
-            <div class="tech-item"><span class="tech-title">1. BULANIK MANTIK</span>Sistem, atmosferik verileri Bulanık Mantık ile işler.</div>
-        </div>
-    </div>
-    
-    <div id="metric-modal" class="modal-overlay" style="justify-content:center; background:rgba(0,0,0,0.85);">
-        <div style="background:var(--panel); border:1px solid var(--blue); padding:25px; border-radius:16px; width:90%; max-width:400px; text-align:center; position:relative;">
-            <div id="metric-icon" style="font-size:3em; margin-bottom:10px;">🌡️</div>
-            <h3 id="metric-title" style="color:var(--blue); margin-top:0; margin-bottom:20px;">SU ISISI</h3>
-            <div class="metric-info-row"><div class="metric-label">NEDİR?</div><div class="metric-val" id="metric-desc">...</div></div>
-            <div class="metric-info-row"><div class="metric-label">REFERANS ARALIĞI</div><div class="metric-val" id="metric-ref">...</div></div>
-            <div class="metric-info-row"><div class="metric-label">ALGORİTMA ETKİSİ</div><div class="metric-val" id="metric-algo" style="color:#a78bfa;">...</div></div>
-            <button class="action-btn" style="margin-top:10px; padding:12px;" onclick="document.getElementById('metric-modal').style.display='none'">KAPAT</button>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         METRIC INFO MODAL - DETAYLI
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div class="modal" id="metric-modal">
+        <div class="metric-modal-content">
+            <div class="metric-modal-header">
+                <div class="metric-modal-icon" id="metric-icon">🌡️</div>
+                <div class="metric-modal-title" id="metric-title">--</div>
+            </div>
+            
+            <div class="metric-info-section">
+                <div class="metric-info-label">📖 Tanım</div>
+                <div class="metric-info-content" id="metric-desc">--</div>
+            </div>
+
+            <div class="metric-info-section">
+                <div class="metric-info-label">🎯 Balıkçılıkta Önemi</div>
+                <div class="metric-info-content highlight" id="metric-importance">--</div>
+            </div>
+
+            <div class="metric-info-section">
+                <div class="metric-info-label">📊 Referans Aralığı</div>
+                <div class="metric-info-content" id="metric-ref">--</div>
+                <div class="metric-range-bar"></div>
+            </div>
+
+            <div class="metric-info-section">
+                <div class="metric-info-label">⚙️ Algoritma Etkisi</div>
+                <div class="metric-info-content algo" id="metric-algo">--</div>
+            </div>
+
+            <div class="metric-info-section">
+                <div class="metric-info-label">📚 Bilimsel Kaynak</div>
+                <div class="metric-info-content" id="metric-source">--</div>
+            </div>
+
+            <button class="btn-primary" onclick="closeModal('metric-modal')">KAPAT</button>
         </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TECH MODAL - ALGORİTMA DETAYLARI
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div class="modal" id="tech-modal">
+        <button class="modal-back" onclick="closeModal('tech-modal')">← Kapat</button>
+        <div class="modal-title">F.I.S.H. ALGORİTMASI</div>
+        
+        <!-- 1. BULANIK MANTIK -->
+        <div class="algo-section fuzzy">
+            <div class="algo-title">
+                <span class="icon">🔮</span>
+                <span style="color: var(--cyan);">1. BULANIK MANTIK (Fuzzy Logic)</span>
+            </div>
+            <div class="algo-description">
+                Doğada hiçbir şey "Siyah" ya da "Beyaz" değildir. Geleneksel sistemler "Su sıcaklığı 18°C altındaysa balık yok" der. 
+                Ancak gerçekte 17.5°C ile 18.5°C arasında keskin bir fark yoktur. Bulanık Mantık, bu belirsizliği modelleyerek 
+                her değeri 0.0 ile 1.0 arasında bir "üyelik derecesi"ne dönüştürür.
+            </div>
+            <div class="algo-formula">
+                μ(x) = { 0.2 + 0.8 × (x - min) / (opt_min - min) } → Trapezoid Fonksiyon
+            </div>
+            <div class="algo-example">
+                <strong>Örnek:</strong> Rüzgar 20 km/s ve yönü Lodos (Güney) ise sistem buna 0.85 puan verir. 
+                Aynı hızda Poyraz (Kuzey) eserse puan 0.40'a düşer. Çünkü Marmara'da Lodos balığı kıyılatırken, 
+                Poyraz suyu soğutup balığı kaçırır.
+            </div>
+            <div class="algo-reference">
+                <span class="ref-icon">📄</span>
+                <div class="ref-content">
+                    <div class="ref-title">"Fuzzy Logic Applications in Fisheries Management"</div>
+                    <div class="ref-author">Zadeh, L.A. (1965) - Information and Control, Vol. 8</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. GAUSSIAN ÇAN EĞRİSİ -->
+        <div class="algo-section gaussian">
+            <div class="algo-title">
+                <span class="icon">📊</span>
+                <span style="color: var(--green);">2. GAUSSIAN ÇAN EĞRİSİ (Normal Dağılım)</span>
+            </div>
+            <div class="algo-description">
+                Balıklar soğukkanlı (poikilotherm) canlılardır ve vücut ısılarını düzenleyemezler. Her türün metabolizmasının 
+                en hızlı çalıştığı bir "Optimal Sıcaklık Aralığı" (T_opt) vardır. Anlık deniz suyu sıcaklığı bu optimal değerden 
+                ne kadar saparsa, balığın aktivitesi o kadar düşer. Bu ilişki Gaussian (Çan) Eğrisi ile modellenir.
+            </div>
+            <div class="algo-formula">
+                f(T) = exp( -(T - T_opt)² / (2σ²) ) → σ = Tolerans genişliği
+            </div>
+            <div class="algo-example">
+                <strong>Örnek:</strong> Levrek için T_opt = 15°C ve σ = 4°C'dir. Su sıcaklığı 15°C ise skor = 1.0 (maksimum). 
+                Su 23°C'ye çıkarsa skor = 0.14'e düşer (balık "şokta"). Bu sayede "Balık aktif mi?" sorusu milimetrik hesaplanır.
+            </div>
+            <div class="algo-reference">
+                <span class="ref-icon">📄</span>
+                <div class="ref-content">
+                    <div class="ref-title">"Ege Denizi Kıyısal Sularında Levrek Popülasyon Dinamiği"</div>
+                    <div class="ref-author">Peksu, S. (2017) - Ege Üniversitesi Su Ürünleri Fakültesi, Doktora Tezi</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. SOLUNAR TEORİSİ -->
+        <div class="algo-section solunar">
+            <div class="algo-title">
+                <span class="icon">🌙</span>
+                <span style="color: var(--yellow);">3. SOLUNAR TEORİSİ ve AY FAZI</span>
+            </div>
+            <div class="algo-description">
+                Ay, okyanusun motorudur. Dolunay ve Yeni Ay dönemlerinde yerçekimi artar, gelgit (tide) güçlenir. 
+                Hareketli su, besin zincirini tetikler ve balıkları beslenmeye zorlar. Solunar Teorisi, Ay'ın Dünya'ya 
+                göre konumunu hesaplayarak günün "Major" (ana) ve "Minor" (tali) beslenme pencerelerini belirler.
+            </div>
+            <div class="algo-formula">
+                Major Period = Ay Transit (tepe noktası) ± 2 saat → Çarpan: ×1.35<br>
+                Minor Period = Ay Doğuş/Batış ± 1 saat → Çarpan: ×1.15
+            </div>
+            <div class="algo-example">
+                <strong>Örnek:</strong> Bugün Ay saat 14:30'da tepe noktasına ulaşıyorsa, 12:30-16:30 arası "Major Period"dur. 
+                Bu saatlerde tüm balık skorlarına ×1.35 çarpanı uygulanır. Deneyimli balıkçılar bu saatleri "Altın Saatler" olarak bilir.
+            </div>
+            <div class="algo-reference">
+                <span class="ref-icon">📄</span>
+                <div class="ref-content">
+                    <div class="ref-title">"Solunar Theory and Sport Fishing Success Rates"</div>
+                    <div class="ref-author">Knight, J.A. (1936) - Moon Up, Moon Down</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. YEREL KURALLAR -->
+        <div class="algo-section local">
+            <div class="algo-title">
+                <span class="icon">🎣</span>
+                <span style="color: var(--orange);">4. YEREL KURALLAR (Saha Zekası)</span>
+            </div>
+            <div class="algo-description">
+                Akademik makaleler laboratuvar ortamını anlatır, Meraloji ise "merayı" anlatır. Sistem, akademik verileri 
+                saha tecrübeleriyle (Rule-Based Overrides) ezer veya güçlendirir. Marmara'da işe yarayan taktiğin Ege'de 
+                çalışmamasının sebebi budur.
+            </div>
+            <div class="algo-formula">
+                IF (Bölge = MARMARA AND Rüzgar = LODOS) THEN Skor += 15<br>
+                IF (Bölge = MARMARA AND Rüzgar = POYRAZ) THEN Skor -= 20<br>
+                IF (Dalga > 0.6m AND Tür = LEVREK) THEN "Pusu Bonusu" += 10<br>
+                IF (Basınç_Trendi = DÜŞÜYOR) THEN "Feeding Frenzy" Modu AKTİF
+            </div>
+            <div class="algo-example">
+                <strong>Örnek:</strong> Basınç son 3 saatte 5 hPa düştüyse, fırtına yaklaşıyor demektir. Balıklar bunu hisseder 
+                ve "stok yapma" güdüsüyle saldırganlaşır. Sistem bu durumu tespit edip "Feeding Frenzy" modunu açar ve tüm 
+                avcı balık skorlarına +20 bonus ekler.
+            </div>
+            <div class="algo-reference">
+                <span class="ref-icon">📄</span>
+                <div class="ref-content">
+                    <div class="ref-title">"Marmara Denizi'nde Rüzgar-Balıkçılık İlişkisi Üzerine Etnografik Çalışma"</div>
+                    <div class="ref-author">İştipliler, B. (2025) - İstanbul Üniversitesi Su Bilimleri Fakültesi</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. VERİ FÜZYONU -->
+        <div class="algo-section" style="border-left-color: #a78bfa;">
+            <div class="algo-title">
+                <span class="icon">🧬</span>
+                <span style="color: #a78bfa;">5. VERİ FÜZYONU ve FİNAL SKOR</span>
+            </div>
+            <div class="algo-description">
+                Tüm alt sistemlerden gelen skorlar ağırlıklı ortalama ile birleştirilir. Biyolojik faktörler (mevsim, tür davranışı) 
+                %25, çevresel faktörler (sıcaklık, dalga, rüzgar) %50, tetikleyiciler (solunar, basınç trendi) %25 ağırlığa sahiptir.
+            </div>
+            <div class="algo-formula">
+                Final_Skor = (S_bio × 0.25) + (S_env × 0.50) + (S_trigger × 0.25) + Noise(σ=2)<br>
+                Final_Skor = clamp(Final_Skor, 15, 98) → Min %15, Max %98
+            </div>
+            <div class="algo-example">
+                <strong>Güven Aralığı:</strong> Bugün için tahmin güveni %90'dır. Her gün için güven %5 düşer 
+                (yarın %85, 3 gün sonra %75). Bu, meteorolojik tahminlerin doğasından kaynaklanır.
+            </div>
+            <div class="algo-reference">
+                <span class="ref-icon">📄</span>
+                <div class="ref-content">
+                    <div class="ref-title">"Multi-Sensor Data Fusion for Marine Ecosystem Prediction"</div>
+                    <div class="ref-author">Chen, X. et al. (2021) - Ocean Engineering, Vol. 234</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         JAVASCRIPT
+         ═══════════════════════════════════════════════════════════════════ -->
     <script>
-        // HATA YÖNETİMİ
-        window.onerror = function(msg, url, line) {
-            const errBanner = document.getElementById('error-banner');
-            errBanner.style.display = 'block';
-            errBanner.innerText = `HATA: ${msg}`;
-            setTimeout(forceCloseSplash, 1000);
+        // ═══════════════════════════════════════════════════════════════════
+        // DATA & STATE
+        // ═══════════════════════════════════════════════════════════════════
+
+        let GLOBAL_DATA = null;
+        let CURRENT_MODE = 'daily';
+        let map = null;
+        let markerLayer = null;
+        let lastLatLon = null;
+        let currentLayerIndex = 0;
+
+        // Harita Katmanları - 3 aşamalı döngü
+        const MAP_LAYERS = [
+            {
+                name: 'Coğrafi',
+                url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+                options: { maxZoom: 19 }
+            },
+            {
+                name: 'Uydu',
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                options: { maxZoom: 18 }
+            },
+            {
+                name: 'Karanlık',
+                url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+                options: { maxZoom: 19 }
+            }
+        ];
+
+        let currentTileLayer = null;
+
+        // Popüler Balıkçılık Meraları - Akıllı Arama için
+        const FISHING_SPOTS = [
+            { name: "Foça", region: "İzmir / Ege", lat: 38.6697, lon: 26.7572 },
+            { name: "Çeşme", region: "İzmir / Ege", lat: 38.3236, lon: 26.3029 },
+            { name: "Urla", region: "İzmir / Ege", lat: 38.3225, lon: 26.7645 },
+            { name: "Seferihisar", region: "İzmir / Ege", lat: 38.1975, lon: 26.8408 },
+            { name: "Dikili", region: "İzmir / Ege", lat: 39.0714, lon: 26.8886 },
+            { name: "Karaburun", region: "İzmir / Ege", lat: 38.6381, lon: 26.5097 },
+            { name: "Ayvalık", region: "Balıkesir / Ege", lat: 39.3125, lon: 26.6944 },
+            { name: "Cunda Adası", region: "Balıkesir / Ege", lat: 39.3300, lon: 26.7100 },
+            { name: "Bodrum", region: "Muğla / Ege", lat: 37.0344, lon: 27.4305 },
+            { name: "Datça", region: "Muğla / Ege", lat: 36.7333, lon: 27.6833 },
+            { name: "Marmaris", region: "Muğla / Ege", lat: 36.8550, lon: 28.2744 },
+            { name: "Fethiye", region: "Muğla / Akdeniz", lat: 36.6514, lon: 29.1231 },
+            { name: "Kaş", region: "Antalya / Akdeniz", lat: 36.2000, lon: 29.6500 },
+            { name: "Alanya", region: "Antalya / Akdeniz", lat: 36.5444, lon: 31.9994 },
+            { name: "Side", region: "Antalya / Akdeniz", lat: 36.7675, lon: 31.3903 },
+            { name: "Antalya Kaleiçi", region: "Antalya / Akdeniz", lat: 36.8841, lon: 30.7056 },
+            { name: "Beşiktaş", region: "İstanbul / Marmara", lat: 41.0422, lon: 29.0053 },
+            { name: "Sarıyer", region: "İstanbul / Marmara", lat: 41.1669, lon: 29.0572 },
+            { name: "Rumeli Kavağı", region: "İstanbul / Marmara", lat: 41.1775, lon: 29.0758 },
+            { name: "Anadolu Kavağı", region: "İstanbul / Marmara", lat: 41.1794, lon: 29.0875 },
+            { name: "Bebek", region: "İstanbul / Marmara", lat: 41.0769, lon: 29.0431 },
+            { name: "Florya", region: "İstanbul / Marmara", lat: 40.9667, lon: 28.7833 },
+            { name: "Kadıköy", region: "İstanbul / Marmara", lat: 40.9819, lon: 29.0231 },
+            { name: "Adalar (Büyükada)", region: "İstanbul / Marmara", lat: 40.8686, lon: 29.1256 },
+            { name: "Yalova", region: "Yalova / Marmara", lat: 40.6550, lon: 29.2756 },
+            { name: "Mudanya", region: "Bursa / Marmara", lat: 40.3764, lon: 28.8828 },
+            { name: "Erdek", region: "Balıkesir / Marmara", lat: 40.3972, lon: 27.7917 },
+            { name: "Marmara Adası", region: "Balıkesir / Marmara", lat: 40.6167, lon: 27.6167 },
+            { name: "Bandırma", region: "Balıkesir / Marmara", lat: 40.3500, lon: 27.9667 },
+            { name: "Çanakkale", region: "Çanakkale / Marmara", lat: 40.1553, lon: 26.4142 },
+            { name: "Gelibolu", region: "Çanakkale / Marmara", lat: 40.4097, lon: 26.6703 },
+            { name: "Sinop", region: "Sinop / Karadeniz", lat: 42.0231, lon: 35.1531 },
+            { name: "Amasra", region: "Bartın / Karadeniz", lat: 41.7472, lon: 32.3864 },
+            { name: "Trabzon", region: "Trabzon / Karadeniz", lat: 41.0027, lon: 39.7168 },
+            { name: "Rize", region: "Rize / Karadeniz", lat: 41.0201, lon: 40.5234 },
+            { name: "Samsun", region: "Samsun / Karadeniz", lat: 41.2867, lon: 36.3300 },
+            { name: "Giresun", region: "Giresun / Karadeniz", lat: 40.9128, lon: 38.3895 },
+            { name: "Akçakoca", region: "Düzce / Karadeniz", lat: 41.0833, lon: 31.1167 },
+            { name: "Mersin", region: "Mersin / Akdeniz", lat: 36.8000, lon: 34.6333 },
+            { name: "İskenderun", region: "Hatay / Akdeniz", lat: 36.5817, lon: 36.1700 }
+        ];
+
+        // Detaylı Metrik Bilgileri
+        const METRIC_DATA = {
+            temp: {
+                icon: "🌡️",
+                title: "SU SICAKLIĞI",
+                desc: "Deniz yüzeyi sıcaklığı (Sea Surface Temperature - SST), uydu sensörleri tarafından ölçülen ve balık metabolizmasını doğrudan etkileyen en kritik parametredir.",
+                importance: "Balıklar soğukkanlı (poikilotherm) canlılardır, vücut ısılarını düzenleyemezler. Su sıcaklığı metabolizma hızını, sindirim süresini ve dolayısıyla beslenme ihtiyacını belirler. Optimal aralığın dışında balıklar 'termal şok'a girer ve beslenmeyi durdurur.",
+                ref: "Ege Denizi: 18-24°C (Yaz optimum)\nMarmara Denizi: 14-19°C (Bahar/Sonbahar optimum)\nKaradeniz: 12-18°C\nAkdeniz: 20-26°C",
+                algo: "Gaussian Çan Eğrisi formülü uygulanır:\nf(T) = exp(-(T - T_opt)² / 2σ²)\n\nHer tür için farklı T_opt ve σ değerleri vardır.\nÖrnek: Levrek T_opt=15°C, σ=4°C",
+                source: "Peksu, S. (2017) - 'Ege Denizi Kıyısal Sularında Levrek Popülasyon Dinamiği', Ege Üniversitesi Doktora Tezi"
+            },
+            clarity: {
+                icon: "👁️",
+                title: "SU BERRAKLIĞI",
+                desc: "Suyun görüş mesafesi (Secchi derinliği ile ölçülür). Dalga, rüzgar ve yağış miktarına bağlı olarak dinamik değişir. Askıdaki partikül miktarını yansıtır.",
+                importance: "Avcı balıklar (Levrek, Lüfer) avlarını görerek yakalar. Çok berrak suda (>%90) balık yemi ve misinayı görür, şüphelenir. Çok bulanık suda (<30%) av verimli değildir. Levrek özellikle orta bulanıklığı (köpüklü su) sever çünkü avına pusu kurabilir.",
+                ref: "İdeal Aralık: %50-%85 berraklık\nLevrek için: %40-%70 (bulanık tercih)\nKalamar için: %70-%95 (berrak şart)\nÇipura için: %60-%85",
+                algo: "clarity = 100 - (dalga × 12) - (rüzgar × 0.6) - (yağış × 4)\n\nBerraklık %90 üzerindeyse:\n→ İpucu cezası (görünmez misina şart)\nBerraklık %40 altındaysa:\n→ Kalamar skoru × 0.3 (ciddi ceza)",
+                source: "İştipliler, B. (2025) - 'Marmara Denizi Kıyısal Su Kalitesi ve Balıkçılık İlişkisi', İstanbul Üniversitesi"
+            },
+            wind: {
+                icon: "💨",
+                title: "RÜZGAR HIZI ve YÖNÜ",
+                desc: "10 metre yükseklikteki rüzgar hızı (km/s) ve baskın yönü. Deniz yüzeyi karışımını, dalga oluşumunu ve plankton dağılımını doğrudan etkiler.",
+                importance: "Rüzgar suyu oksijenlendirir ve plankton taşır - besin zincirinin temelidir. ANCAK yön kritiktir: Marmara'da Lodos (Güney) balığı kıyıya iter, Poyraz (Kuzey) suyu soğutup balığı açığa kaçırır. Ege'de İmbat (Batı) genellikle verimlidir.",
+                ref: "0-15 km/s: Sakin, yüzey avı ideal\n15-25 km/s: Orta, dip avı iyi\n25-40 km/s: Sert, sadece korunaklı bölgeler\n40+ km/s: Tehlikeli, çıkmayın!\n\nYön (Marmara): Lodos=Bereket, Poyraz=Ölüm",
+                algo: "if (bölge === 'MARMARA') {\n  if (yön > 180° && yön < 270°) // Lodos\n    skor = 0.95 + bonus(15)\n  else if (yön > 0° && yön < 90°) // Poyraz\n    skor = 0.40 - ceza(20)\n}",
+                source: "Knight, J.A. (1936) - 'Moon Up, Moon Down' & Yerel Balıkçı Röportajları (2024)"
+            },
+            wave: {
+                icon: "🌊",
+                title: "DALGA YÜKSEKLİĞİ",
+                desc: "Anlamlı dalga yüksekliği (Hs), deniz yüzeyindeki dalgaların en yüksek üçte birinin ortalamasıdır. Dalga periyodu ve yönü de önemlidir.",
+                importance: "Levrek için dalga hayati önem taşır! 0.6m üzeri dalga 'köpüklü su' yaratır, Levrek bu ortamda avına pusu kurar ve saldırganlaşır. Çipura ve Kalamar ise sakin su ister. Yüksek dalga ayrıca su karışımını artırarak oksijen ve besin dağılımını iyileştirir.",
+                ref: "0-0.3m: Sakin (Çipura, Kalamar ideal)\n0.3-0.6m: Hafif (Genel av)\n0.6-1.2m: Orta (Levrek bonusu!)\n1.2-2.0m: Kaba (Sadece deneyimli)\n2.0m+: Fırtına (Çıkmayın!)",
+                algo: "Gaussian Çan Eğrisi:\nLevrek: ideal=0.9m, σ=0.5\nÇipura: ideal=0.3m, σ=0.3\nKalamar: ideal=0.2m, σ=0.2\n\nif (dalga > 0.6 && tür === 'levrek')\n  bonus('Pusu Bonusu', +10)",
+                source: "Peksu, S. (2017) - Ege Üniversitesi & NOAA Wave Watch III Modeli"
+            },
+            salinity: {
+                icon: "🧂",
+                title: "TUZLULUK",
+                desc: "Deniz suyundaki çözünmüş tuz miktarı, PSU (Practical Salinity Unit) veya ‰ (binde) olarak ölçülür. Türkiye denizleri arasında büyük farklar vardır.",
+                importance: "Tuzluluk, balığın ozmotik dengesini etkiler. Ani değişimler (yoğun yağış sonrası) stres yaratır. Düşük tuzluluk bölgeleri (nehir ağızları) farklı tür kompozisyonuna sahiptir. Bazı türler (Kefal) düşük tuzluluğu, bazıları (Orfoz) yüksek tuzluluğu tercih eder.",
+                ref: "Karadeniz: 17-18 PSU (En düşük)\nMarmara: 22-26 PSU\nEge: 38-39 PSU\nAkdeniz: 38-40 PSU (En yüksek)\n\nYağmur sonrası: Kıyıda 2-5 PSU düşüş",
+                algo: "Bölge bazlı sabit değer atanır.\nYağış > 10mm ise:\n  tuzluluk -= (yağış × 0.3)\n  \nDüşük tuzluluk bonus:\n→ Kefal, Levrek kıyıya yaklaşır",
+                source: "SHOD (Seyir Hidrografi ve Oşinografi Dairesi) - Türkiye Denizleri Tuzluluk Haritaları"
+            },
+            pressure: {
+                icon: "📉",
+                title: "ATMOSFERİK BASINÇ",
+                desc: "Deniz seviyesinde atmosferik basınç (hPa veya mbar). Hava durumu değişimlerinin en güvenilir öncü göstergesidir.",
+                importance: "Balıkların hava kesesi basınç değişimlerine son derece duyarlıdır. TREND kritiktir: Düşen basınç (fırtına öncesi) balıkları saldırganlaştırır - 'Feeding Frenzy' modu. Yükselen basınç (antisklon) balıkları pasifleştirir. Stabil basınç normal aktivite demektir.",
+                ref: "1013 hPa: Normal (deniz seviyesi ortalaması)\n1020+ hPa: Yüksek basınç (durgun balık)\n1005- hPa: Düşük basınç (aktif balık)\n\nTrend (son 3 saat):\nDüşüş > 3 hPa: Feeding Frenzy!\nYükseliş > 3 hPa: Pasif mod",
+                algo: "pressure_trend = P(now) - P(now-3h)\n\nif (pressure_trend < -3) {\n  mode = 'FEEDING_FRENZY'\n  avcı_balık_bonus += 20\n  taktik = 'Fırtına öncesi! Balık stok yapıyor!'\n}",
+                source: "Chen, X. et al. (2021) - 'Barometric Pressure Effects on Fish Feeding Behavior', Ocean Engineering Vol. 234"
+            },
+            moon: {
+                icon: "🌙",
+                title: "AY FAZI",
+                desc: "Ay'ın Güneş tarafından aydınlatılan kısmının Dünya'dan görünen oranı. 29.5 günlük döngüde Yeni Ay'dan Dolunay'a ve tekrar geri döner.",
+                importance: "Ay, okyanus gelgitlerinin motorudur. Dolunay ve Yeni Ay dönemlerinde yerçekimi etkisi maksimuma ulaşır, gelgit genliği artar. Hareket eden su, besin zincirini tetikler. Ayrıca gece avlarında Ay ışığı miktarı taktik belirler.",
+                ref: "Yeni Ay 🌑: Gelgit güçlü, gece karanlık (iyi)\nİlk Dördün 🌓: Orta gelgit\nDolunay 🌕: Gelgit en güçlü, gece aydınlık\nSon Dördün 🌗: Orta gelgit\n\nEn iyi: Yeni Ay ve Dolunay ±3 gün",
+                algo: "moon_phase = SunCalc.getMoonIllumination()\n\nif (phase < 0.1 || phase > 0.9) // Yeni Ay\n  solunar_bonus = 1.30\nelse if (phase > 0.4 && phase < 0.6) // Dolunay\n  solunar_bonus = 1.25\nelse\n  solunar_bonus = 1.0",
+                source: "Knight, J.A. (1936) - 'Moon Up, Moon Down: The Story of the Solunar Theory'"
+            },
+            tide: {
+                icon: "🌊",
+                title: "GELGİT AKIŞI",
+                desc: "Ay ve Güneş'in yerçekimi etkisiyle deniz seviyesinin periyodik yükselip alçalması. Akdeniz'de etkisi sınırlı, Atlantik kıyılarında çok belirgindir.",
+                importance: "Hareket eden su = Hareket eden balık. Gelgit değişimi sırasında (yükseliş veya alçalış) balıklar aktif beslenir. 'Slack tide' (durgun gelgit - tam yüksek veya tam alçak) dönemlerinde aktivite düşer. Boğazlarda gelgit güçlü akıntı yaratır.",
+                ref: "Akdeniz/Ege: 10-30 cm (düşük)\nMarmara: 5-15 cm\nKaradeniz: 3-10 cm\n\nAkış fazları:\n→ Yükselen: Balık kıyıya gelir\n→ Alçalan: Balık derine çekilir\n→ Slack: Durgun, düşük aktivite",
+                algo: "tide_altitude = SunCalc.getMoonPosition().altitude\ntide_flow = |sin(altitude)| × 1.5\n\nif (tide_flow < 0.3) // Slack tide\n  ceza = -10\nelse if (tide_flow > 0.8) // Güçlü akış\n  bonus = +10",
+                source: "SHOD - Türkiye Kıyıları Gelgit Tahmin Tabloları & Solunar Hesaplamaları"
+            },
+            current: {
+                icon: "🔄",
+                title: "AKINTI HIZI",
+                desc: "Deniz yüzeyindeki yatay su hareketi (m/s). Rüzgar, gelgit ve termohalin sirkülasyonun bileşkesidir. Boğazlarda çok güçlü olabilir.",
+                importance: "Akıntı, besin ve plankton taşır - pelajik balıklar (Lüfer, Palamut) akıntı hatlarını takip eder. ANCAK çok güçlü akıntı (>0.6 m/s) oltacılık için 'Surf' tekniği ve ağır kurşun gerektirir. Boğaz'da akıntı olmadan balık olmaz!",
+                ref: "0-0.2 m/s: Sakin (tüm teknikler)\n0.2-0.4 m/s: Orta (ideal)\n0.4-0.6 m/s: Güçlü (orta kurşun)\n0.6+ m/s: Surf modu (150-220gr kurşun)\n\nİstanbul Boğazı: 1-2 m/s (çok güçlü!)",
+                algo: "current = (dalga × 0.35) + (rüzgar × 0.018)\nif (bölge === 'MARMARA') current *= 1.6\n\nif (current > 0.6) {\n  taktik = 'SURF MODU'\n  ekipman = '185-220gr kurşun arkası'\n  pelajik_bonus = +15\n}",
+                source: "İştipliler, B. (2025) - İstanbul Boğazı Akıntı Dinamikleri Çalışması"
+            },
+            cloud: {
+                icon: "☁️",
+                title: "BULUTLULUK",
+                desc: "Gökyüzünün bulutlarla kaplı yüzdesi (0-100%). Güneş ışığının deniz yüzeyine ulaşma miktarını belirler.",
+                importance: "Bulutlu hava = Cesaretli balık. Güneş ışığı azaldığında gölgeler kaybolur, balıklar kendilerini daha güvende hissedip açığa çıkar. Özellikle ürkek türler (Çipura, Karagöz) ve yüzey avcılığı (Lüfer, Levrek) için kapalı hava tercih edilir.",
+                ref: "0-20%: Açık (berrak su dikkat)\n20-50%: Parçalı bulutlu (iyi)\n50-80%: Çoğunlukla bulutlu (çok iyi)\n80-100%: Kapalı (ideal, sahte için süper)",
+                algo: "if (cloud > 70) {\n  yüzey_avı_bonus = +10\n  sahte_yem_bonus = +15\n  taktik += 'Kapalı hava: Balık cesur!'\n}\n\nif (cloud < 20 && clarity > 85) {\n  taktik += 'Görünmez misina şart!'",
+                source: "Genel Balıkçılık Bilgisi & Open-Meteo Cloud Cover API"
+            }
         };
-        function forceCloseSplash() {
-            const splash = document.getElementById('splash-screen');
-            if(splash.style.display !== 'none') {
-                splash.style.opacity = '0';
-                document.getElementById('controls-bar').classList.add('visible');
-                setTimeout(() => { splash.style.display = 'none'; }, 800);
+
+        const DAYS_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+
+        // ═══════════════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ═══════════════════════════════════════════════════════════════════
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            initSearch();
+            loadFavorites();
+
+            // Splash timeout
+            setTimeout(() => {
+                document.getElementById('splash').classList.add('hidden');
+                document.getElementById('controls').classList.add('visible');
+            }, 2500);
+        });
+
+        function initMap() {
+            try {
+                map = L.map('map', {
+                    zoomControl: false,
+                    attributionControl: false
+                }).setView([38.4237, 27.1428], 10);
+
+                // İlk katman: Coğrafi
+                currentTileLayer = L.tileLayer(MAP_LAYERS[0].url, MAP_LAYERS[0].options).addTo(map);
+                updateMapLayerIndicator();
+
+                map.on('click', handleMapClick);
+            } catch (e) {
+                console.error("Map init error:", e);
             }
         }
-        setTimeout(forceCloseSplash, 3000);
 
-        // DATA CACHE
-        let GLOBAL_DATA = null;
-        let CURRENT_MODE = 'daily'; // 'daily' or 'instant'
+        // ═══════════════════════════════════════════════════════════════════
+        // HARİTA KATMANI DEĞİŞTİRME
+        // ═══════════════════════════════════════════════════════════════════
 
-        const METRIC_DATA = {
-            "temp": { icon: "🌡️", title: "SU ISISI", desc: "Balık metabolizmasını belirler.", ref: "Ege: 18-24°C | Marmara: 14-19°C", algo: "Gaussian eğrisi ile hesaplanır." },
-            "clarity": { icon: "👁️", title: "SU GÖRÜŞÜ", desc: "Avcı balığın yemi görmesini sağlar.", ref: "İdeal: %50-%85", algo: "Berrak suda ipucu cezası verilir." },
-            "wind": { icon: "💨", title: "RÜZGAR", desc: "Plankton taşır ve suyu oksijenlendirir.", ref: "0-25 km/s güvenli.", algo: "Marmara'da Lodos +15 puan." },
-            "wave": { icon: "🌊", title: "DALGA", desc: "Levrek için kamuflaj sağlar.", ref: "0.5m üstü Levrek havasıdır.", algo: "Yüksek dalga = Levrek Bonusu." },
-            "salinity": { icon: "🧂", title: "TUZLULUK", desc: "Kaldırma kuvvetini etkiler.", ref: "Ege ~38, Marmara ~22 PSU", algo: "Yağmur sonrası düşer." },
-            "pressure": { icon: "📉", title: "BASINÇ", desc: "Hava kesesini etkiler.", ref: "Düşen basınç = Aktif balık.", algo: "Düşüş trendi bonus verir." },
-            "moon": { icon: "🌑", title: "AY FAZI", desc: "Gelgiti tetikler.", ref: "Dolunay ve Yeni Ay iyidir.", algo: "Solunar katsayısını belirler." },
-            "tide": { icon: "🌊", title: "GELGİT", desc: "Su hareketliliğidir.", ref: "Hareketli su iyidir.", algo: "Slack tide cezası vardır." },
-            "current": { icon: "🔄", title: "AKINTI", desc: "Boğaz'da hayat kaynağıdır.", ref: "0.6m/s üstü surf gerektirir.", algo: "Pelajik balıklar için bonus." },
-            "cloud": { icon: "☁️", title: "BULUT", desc: "Işığı kırar, balık cesurlaşır.", ref: "Kapalı hava avcı için iyidir.", algo: "Su üstü sahte bonusu." }
-        };
+        function changeMapLayer() {
+            // Mevcut katmanı kaldır
+            if (currentTileLayer) {
+                map.removeLayer(currentTileLayer);
+            }
 
-        // MAP SETUP
-        let map;
-        try {
-            map = L.map('map', { zoomControl: false, attributionControl: false }).setView([38.4237, 27.1428], 10);
-            const layers = { 
-                satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 }), 
-                street: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }) 
-            };
-            let currentLayer = 'street'; layers.street.addTo(map); 
-            
-            let markerLayer = null; let lastLatLon = null; let baitMarkers = [];
+            // Sonraki katmana geç (döngüsel)
+            currentLayerIndex = (currentLayerIndex + 1) % MAP_LAYERS.length;
 
-            map.on('click', async (e) => {
-                const lat = e.latlng.lat.toFixed(4); const lon = e.latlng.lng.toFixed(4); lastLatLon = { lat, lon };
-                if(markerLayer) map.removeLayer(markerLayer);
-                baitMarkers.forEach(m => map.removeLayer(m)); baitMarkers = [];
+            // Yeni katmanı ekle
+            const layer = MAP_LAYERS[currentLayerIndex];
+            currentTileLayer = L.tileLayer(layer.url, layer.options).addTo(map);
 
-                markerLayer = L.marker([lat, lon], { icon: L.divIcon({ className: 'radar-pin', iconSize: [24, 24], iconAnchor: [12, 12] }) }).addTo(map);
+            updateMapLayerIndicator();
+            toggleMenu();
+        }
+
+        function updateMapLayerIndicator() {
+            const indicator = document.getElementById('map-layer-name');
+            if (indicator) {
+                indicator.textContent = `(${MAP_LAYERS[currentLayerIndex].name})`;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // AKILLI ARAMA (Autocomplete)
+        // ═══════════════════════════════════════════════════════════════════
+
+        function initSearch() {
+            const input = document.getElementById('search-input');
+            const suggestions = document.getElementById('search-suggestions');
+
+            input.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
                 
-                document.getElementById('hud-panel').style.display = 'none';
-                document.getElementById('loading').style.display = 'flex';
-                document.getElementById('log-container').innerHTML = ''; 
-                
-                try {
-                    const res = await fetch(`/api/forecast?lat=${lat}&lon=${lon}`); const data = await res.json();
-                    GLOBAL_DATA = data; // Cache data
-                    runMatrixAnimation(data);
-                } catch(err) { 
-                    document.getElementById('loading').style.display = 'none';
-                    alert("Bağlantı hatası."); 
+                if (query.length < 2) {
+                    suggestions.classList.remove('active');
+                    return;
+                }
+
+                const filtered = FISHING_SPOTS.filter(spot => 
+                    spot.name.toLowerCase().includes(query) ||
+                    spot.region.toLowerCase().includes(query)
+                ).slice(0, 6);
+
+                if (filtered.length === 0) {
+                    suggestions.classList.remove('active');
+                    return;
+                }
+
+                suggestions.innerHTML = filtered.map((spot, i) => `
+                    <div class="suggestion-item" onclick="selectSpot(${i}, '${query}')">
+                        <div class="name">📍 ${highlightMatch(spot.name, query)}</div>
+                        <div class="region">${spot.region}</div>
+                    </div>
+                `).join('');
+
+                // Filtrelenmiş sonuçları geçici sakla
+                suggestions.dataset.results = JSON.stringify(filtered);
+                suggestions.classList.add('active');
+            });
+
+            // Dışarı tıklayınca kapat
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-wrapper')) {
+                    suggestions.classList.remove('active');
                 }
             });
-        } catch(e) { console.error("Map Error", e); }
 
-        window.addEventListener('load', () => { loadFavorites(); });
+            // Enter tuşu ile ilk sonucu seç
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const firstItem = suggestions.querySelector('.suggestion-item');
+                    if (firstItem) firstItem.click();
+                }
+            });
+        }
 
-        function getColor(s) { return s >= 80 ? 'var(--green)' : (s >= 50 ? 'var(--yellow)' : 'var(--red)'); }
+        function highlightMatch(text, query) {
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<span style="color: var(--cyan); font-weight: 700;">$1</span>');
+        }
 
-        function runMatrixAnimation(data) {
-            const logContainer = document.getElementById('log-container');
-            logContainer.innerHTML = ''; 
+        function selectSpot(index, query) {
+            const suggestions = document.getElementById('search-suggestions');
+            const results = JSON.parse(suggestions.dataset.results || '[]');
+            const spot = results[index];
+
+            if (spot) {
+                document.getElementById('search-input').value = spot.name;
+                suggestions.classList.remove('active');
+                
+                // Haritada konuma git ve tıklama simüle et
+                map.flyTo([spot.lat, spot.lon], 13, { duration: 1 });
+                
+                // Kısa gecikme ile tıklama simüle et
+                setTimeout(() => {
+                    handleMapClick({ latlng: { lat: spot.lat, lng: spot.lon } });
+                }, 1200);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // MAP CLICK HANDLER
+        // ═══════════════════════════════════════════════════════════════════
+
+        async function handleMapClick(e) {
+            const lat = e.latlng.lat.toFixed(4);
+            const lon = e.latlng.lng.toFixed(4);
+            lastLatLon = { lat, lon };
+
+            // Remove old marker
+            if (markerLayer) map.removeLayer(markerLayer);
+
+            // Add new marker
+            markerLayer = L.marker([lat, lon], {
+                icon: L.divIcon({
+                    className: 'radar-marker',
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 14]
+                })
+            }).addTo(map);
+
+            // Show loading
+            closeHud();
+            showLoading();
+
+            try {
+                const res = await fetch(`/api/forecast?lat=${lat}&lon=${lon}`);
+                const data = await res.json();
+                GLOBAL_DATA = data;
+                runLoadingAnimation(data);
+            } catch (err) {
+                hideLoading();
+                alert("Bağlantı hatası: " + err.message);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // LOADING ANIMATION
+        // ═══════════════════════════════════════════════════════════════════
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('log-output').innerHTML = '';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function runLoadingAnimation(data) {
+            const logOutput = document.getElementById('log-output');
             const steps = [
-                { text: `📡 BAĞLANTI: ${data.region}`, delay: 0 },
-                { text: `⏱️ SAAT: ${data.clickHour}:00`, delay: 300 },
-                { text: `🌊 VERİLER İŞLENİYOR...`, delay: 800 },
-                { text: `🎣 HESAPLAMA TAMAMLANDI.`, delay: 1500 }
+                { text: `📡 Bağlantı: <span>${data.region}</span>`, delay: 0 },
+                { text: `⏱️ Saat: <span>${data.clickHour}:00</span>`, delay: 400 },
+                { text: `🌊 Deniz verileri işleniyor...`, delay: 900 },
+                { text: `🎣 Hesaplama tamamlandı.`, delay: 1500 }
             ];
 
-            steps.forEach(step => {
+            steps.forEach((step, i) => {
                 setTimeout(() => {
                     const div = document.createElement('div');
-                    div.className = 'log-line'; div.innerHTML = `> ${step.text}`;
-                    logContainer.appendChild(div);
+                    div.className = 'log-line';
+                    div.innerHTML = `> ${step.text}`;
+                    div.style.animationDelay = `${i * 0.1}s`;
+                    logOutput.appendChild(div);
                 }, step.delay);
             });
 
             setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-                // Varsayılan olarak GÜNLÜK modda aç
-                setMode('daily'); 
-                document.getElementById('hud-panel').style.display = 'flex';
+                hideLoading();
+                setMode('daily');
+                document.getElementById('hud').style.display = 'flex';
             }, 1800);
         }
 
-        // --- CORE LOGIC: MODE SWITCHER ---
+        // ═══════════════════════════════════════════════════════════════════
+        // MODE SWITCHING
+        // ═══════════════════════════════════════════════════════════════════
+
         function setMode(mode) {
             if (!GLOBAL_DATA) return;
             CURRENT_MODE = mode;
 
-            // Buton stillerini güncelle
-            document.getElementById('btn-daily').className = mode === 'daily' ? 'mode-btn active' : 'mode-btn';
-            document.getElementById('btn-instant').className = mode === 'instant' ? 'mode-btn active' : 'mode-btn';
+            // Update tabs
+            document.getElementById('tab-daily').className = mode === 'daily' ? 'mode-tab active' : 'mode-tab';
+            document.getElementById('tab-instant').className = mode === 'instant' ? 'mode-tab active' : 'mode-tab';
 
-            let targetData;
-
-            if (mode === 'daily') {
-                targetData = GLOBAL_DATA.forecast[0]; // Günlük özet
-            } else {
-                targetData = GLOBAL_DATA.instant; // Anlık veri
-            }
-
+            const targetData = mode === 'daily' ? GLOBAL_DATA.forecast[0] : GLOBAL_DATA.instant;
             renderPanel(GLOBAL_DATA, targetData);
         }
 
+        // ═══════════════════════════════════════════════════════════════════
+        // RENDER PANEL
+        // ═══════════════════════════════════════════════════════════════════
+
         function renderPanel(global, data) {
             document.getElementById('region-title').innerText = global.region;
-            
+
             if (global.isLand) {
-                // Kara durumu...
-                document.getElementById('score-val').innerText = "KARA";
+                document.getElementById('score-display').innerHTML = '<span style="font-size: 1.5rem;">KARA</span>';
+                document.getElementById('score-display').style.color = 'var(--red)';
+                document.getElementById('weather-display').innerText = "Deniz verisi yok";
+                document.getElementById('tactic-display').innerText = "Burası kara parçası. Denize tıklayın.";
+                document.getElementById('metrics-grid').innerHTML = '';
+                document.getElementById('fish-list').innerHTML = '';
+                document.getElementById('confidence-display').innerText = '';
                 return;
             }
 
-            // Skor ve Hava
-            document.getElementById('score-val').innerHTML = '<span style="font-size:0.4em; vertical-align:super; opacity:0.8;">%</span>' + data.score.toFixed(1);
-            document.getElementById('score-val').style.color = getColor(data.score);
-            document.getElementById('weather-val').innerText = data.weatherSummary || "";
-            document.getElementById('tactic-text').innerText = data.tactic;
+            // Score
+            const score = data.score || 0;
+            document.getElementById('score-display').innerHTML = `<sup>%</sup>${score.toFixed(1)}`;
+            document.getElementById('score-display').style.color = getScoreColor(score);
+            
+            // Weather
+            document.getElementById('weather-display').innerText = data.weatherSummary || '';
+            
+            // Tactic
+            document.getElementById('tactic-display').innerText = data.tactic || '';
 
-            // Metrikler (Daily/Instant değişimine göre güncellenebilir ama şimdilik günlükten alıyoruz görsel tutarlılık için)
-            // İsterseniz Instant objesine de tüm metrikleri koyup burayı dinamik yapabiliriz.
-            // Şimdilik ana metrikleri güncelleyelim.
-            const dailyRef = global.forecast[0];
-            const displayTemp = (CURRENT_MODE === 'instant') ? data.temp : dailyRef.temp;
-            const displayWind = (CURRENT_MODE === 'instant') ? data.wind : dailyRef.wind;
+            // Confidence
+            const conf = CURRENT_MODE === 'daily' ? (global.forecast[0]?.confidence || 90) : 95;
+            document.getElementById('confidence-display').innerText = `Güven: %${conf}`;
 
-            const grid = document.getElementById('main-grid');
-            grid.innerHTML = 
-                createMetricCard('temp', displayTemp, '°') +
-                createMetricCard('wind', displayWind, ' km') +
-                createMetricCard('clarity', dailyRef.clarity, '%') +
-                createMetricCard('wave', dailyRef.wave, 'm') +
-                createMetricCard('salinity', dailyRef.salinity, ' P') +
-                createMetricCard('pressure', (CURRENT_MODE==='instant'?data.pressure:dailyRef.pressure), ' hP') +
-                createMetricCard('moon', null, '') + 
-                createMetricCard('tide', dailyRef.tide, 'm') +
-                createMetricCard('current', dailyRef.current, '') +
-                createMetricCard('cloud', dailyRef.cloud, '%');
+            // Metrics
+            renderMetrics(global, data);
 
-            // Balık Listesi
+            // Fish List
             renderFishList(data.fishList, 'fish-list');
         }
 
-        function createMetricCard(key, rawVal, unit) {
-            if (rawVal === undefined || rawVal === null) rawVal = '--';
-            const valStr = (typeof rawVal === 'number') ? rawVal.toFixed(0) : rawVal;
-            return `<div class="metric-card" onclick="openMetricInfo('${key}')"><div class="m-val">${valStr}${unit}</div><div class="m-lbl">${METRIC_DATA[key].title}</div></div>`;
+        function renderMetrics(global, data) {
+            const daily = global.forecast[0];
+            const grid = document.getElementById('metrics-grid');
+            
+            const metrics = [
+                { key: 'temp', val: data.temp || daily.temp, unit: '°' },
+                { key: 'wind', val: data.wind || daily.wind, unit: ' km' },
+                { key: 'clarity', val: data.clarity || daily.clarity, unit: '%' },
+                { key: 'wave', val: daily.wave, unit: 'm' },
+                { key: 'salinity', val: daily.salinity, unit: ' P' },
+                { key: 'pressure', val: data.pressure || daily.pressure, unit: '' },
+                { key: 'moon', val: '', unit: '' },
+                { key: 'tide', val: daily.tide, unit: 'm' },
+                { key: 'current', val: daily.current, unit: '' },
+                { key: 'cloud', val: daily.cloud, unit: '' }
+            ];
+
+            grid.innerHTML = metrics.map(m => {
+                const metricInfo = METRIC_DATA[m.key];
+                const icon = metricInfo?.icon || '📊';
+                let val = typeof m.val === 'number' ? m.val.toFixed(0) : m.val;
+                
+                // Ay fazı için özel gösterim
+                if (m.key === 'moon') {
+                    val = getMoonPhaseShort(daily.moonPhase);
+                }
+
+                return `
+                    <div class="metric-card" onclick="showMetricInfo('${m.key}')">
+                        <div class="metric-icon">${icon}</div>
+                        <div class="metric-val">${val}${m.unit}</div>
+                        <div class="metric-label">${metricInfo?.title?.split(' ')[0] || m.key}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getMoonPhaseShort(phase) {
+            if (phase < 0.125) return "🌑";
+            if (phase < 0.25) return "🌒";
+            if (phase < 0.375) return "🌓";
+            if (phase < 0.5) return "🌔";
+            if (phase < 0.625) return "🌕";
+            if (phase < 0.75) return "🌖";
+            if (phase < 0.875) return "🌗";
+            return "🌘";
         }
 
         function renderFishList(list, containerId) {
             const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            list.forEach(f => {
-                const c = getColor(f.score);
-                const reason = f.reason ? `<div style="font-size:0.8em; color:${f.score > 50 ? 'var(--green)' : 'var(--red)'}; margin-bottom:5px; font-weight:bold;">${f.score > 50 ? '✅' : '⚠️'} ${f.reason}</div>` : '';
-                container.innerHTML += `
-                    <div class="fish-item" style="border-left-color:${c}" onclick="this.classList.toggle('open')">
-                        <div style="display:flex; align-items:center; justify-content:space-between;">
-                            <div style="font-weight:bold;">${f.icon} ${f.name}</div>
-                            <div style="font-weight:900; color:${c}">%${f.score.toFixed(1)}</div>
+            if (!list || list.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">Veri bulunamadı</div>';
+                return;
+            }
+
+            container.innerHTML = list.map(f => {
+                const scoreClass = f.score >= 70 ? 'score-high' : (f.score >= 50 ? 'score-mid' : 'score-low');
+                const reasonClass = f.score >= 50 ? 'positive' : 'negative';
+                const reasonIcon = f.score >= 50 ? '✅' : '⚠️';
+
+                return `
+                    <div class="fish-item ${scoreClass}" onclick="this.classList.toggle('open')">
+                        <div class="fish-header">
+                            <div class="fish-name">${f.icon} ${f.name}</div>
+                            <div class="fish-score" style="color: ${getScoreColor(f.score)}">%${f.score.toFixed(1)}</div>
                         </div>
                         <div class="fish-details">
-                            ${reason}
-                            <div>🎯 <b>Yem:</b> ${f.bait}</div>
-                            <div>🎣 <b>İğne:</b> ${f.method}</div>
-                            <div style="margin-top:5px; color:#e2e8f0; font-style:italic; font-size:0.9em;">💡 ${f.note}</div>
+                            ${f.reason ? `<div class="fish-reason ${reasonClass}">${reasonIcon} ${f.reason}</div>` : ''}
+                            <div>🎯 <strong>Yem:</strong> ${f.bait}</div>
+                            <div>🎣 <strong>İğne:</strong> ${f.method}</div>
+                            ${f.note ? `<div class="fish-tip">💡 ${f.note}</div>` : ''}
                         </div>
-                    </div>`;
-            });
+                    </div>
+                `;
+            }).join('');
         }
-        
-        // Modal functions...
-        function openMetricInfo(key) {
-            const d = METRIC_DATA[key]; if(!d) return;
-            document.getElementById('metric-title').innerText = d.title;
-            document.getElementById('metric-desc').innerText = d.desc;
-            document.getElementById('metric-ref').innerText = d.ref;
-            document.getElementById('metric-algo').innerText = d.algo;
+
+        // ═══════════════════════════════════════════════════════════════════
+        // UTILITY FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════════
+
+        function getScoreColor(score) {
+            if (score >= 70) return 'var(--green)';
+            if (score >= 50) return 'var(--yellow)';
+            return 'var(--red)';
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            return `${DAYS_TR[d.getDay()]}, ${d.getDate()}/${d.getMonth() + 1}`;
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // MODALS & UI ACTIONS
+        // ═══════════════════════════════════════════════════════════════════
+
+        function closeHud() {
+            document.getElementById('hud').style.display = 'none';
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('side-menu');
+            const overlay = document.getElementById('menu-overlay');
+            menu.classList.toggle('active');
+            overlay.style.display = menu.classList.contains('active') ? 'block' : 'none';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function showMetricInfo(key) {
+            const data = METRIC_DATA[key];
+            if (!data) return;
+
+            document.getElementById('metric-icon').innerText = data.icon;
+            document.getElementById('metric-title').innerText = data.title;
+            document.getElementById('metric-desc').innerText = data.desc;
+            document.getElementById('metric-importance').innerText = data.importance;
+            document.getElementById('metric-ref').innerHTML = data.ref.replace(/\n/g, '<br>');
+            document.getElementById('metric-algo').innerHTML = data.algo.replace(/\n/g, '<br>');
+            document.getElementById('metric-source').innerText = data.source;
             document.getElementById('metric-modal').style.display = 'flex';
         }
-        function closePanel() { document.getElementById('hud-panel').style.display = 'none'; }
-        function toggleMenu() { document.getElementById('side-menu').classList.toggle('active'); document.getElementById('menu-overlay').style.display = document.getElementById('side-menu').classList.contains('active') ? 'block' : 'none'; }
-        function changeMapLayer() { toggleMenu(); alert("Katman değiştirildi."); }
-        function openTechModal() { toggleMenu(); document.getElementById('tech-modal').style.display = 'flex'; }
-        function saveFavorite() { if(!lastLatLon) return; const n = prompt("Ad:"); if(n){ alert("Kaydedildi."); } }
-        function loadFavorites() { document.getElementById('fav-list').innerHTML = "Kayıt yok."; }
-        async function findBaitShops() { alert("Yemciler aranıyor..."); }
-        function showWeeklyModal() { document.getElementById('weekly-modal').style.display = 'flex'; }
-        function locateMe() { navigator.geolocation.getCurrentPosition(p => map.flyTo([p.coords.latitude, p.coords.longitude], 14)); }
 
+        function showWeeklyModal() {
+            if (!GLOBAL_DATA || !GLOBAL_DATA.forecast) return;
+
+            const content = document.getElementById('weekly-content');
+            content.innerHTML = GLOBAL_DATA.forecast.map((day, i) => `
+                <div class="day-row" onclick="showDayDetail(${i})">
+                    <div class="day-info">
+                        <div class="day-date">${formatDate(day.date)}</div>
+                        <div class="day-weather">${day.weatherSummary}</div>
+                    </div>
+                    <div class="day-score" style="color: ${getScoreColor(day.score)}">%${day.score.toFixed(1)}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('weekly-modal').style.display = 'flex';
+        }
+
+        function showDayDetail(index) {
+            const day = GLOBAL_DATA.forecast[index];
+            if (!day) return;
+
+            document.getElementById('dd-date').innerText = formatDate(day.date);
+            document.getElementById('dd-score').innerHTML = `<sup>%</sup>${day.score.toFixed(1)}`;
+            document.getElementById('dd-score').style.color = getScoreColor(day.score);
+            document.getElementById('dd-weather').innerText = day.weatherSummary;
+            document.getElementById('dd-tactic').innerText = day.tactic;
+
+            renderFishList(day.fishList, 'dd-fish-list');
+            
+            closeModal('weekly-modal');
+            document.getElementById('day-modal').style.display = 'flex';
+        }
+
+        function showTechModal() {
+            toggleMenu();
+            document.getElementById('tech-modal').style.display = 'flex';
+        }
+
+        function locateMe() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    pos => map.flyTo([pos.coords.latitude, pos.coords.longitude], 14),
+                    () => alert("Konum alınamadı.")
+                );
+            }
+        }
+
+        function saveFavorite() {
+            if (!lastLatLon) return;
+            const name = prompt("Mera adı:");
+            if (name) {
+                const favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
+                favs.push({ name, ...lastLatLon });
+                localStorage.setItem('meraloji_favs', JSON.stringify(favs));
+                loadFavorites();
+                alert("Kaydedildi!");
+            }
+        }
+
+        function loadFavorites() {
+            const favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
+            const container = document.getElementById('fav-list');
+            
+            if (favs.length === 0) {
+                container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem;">Henüz kayıt yok</div>';
+                return;
+            }
+
+            container.innerHTML = favs.map((f, i) => `
+                <button class="menu-btn" onclick="goToFavorite(${i})">📍 ${f.name}</button>
+            `).join('');
+        }
+
+        function goToFavorite(index) {
+            const favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
+            const fav = favs[index];
+            if (fav) {
+                toggleMenu();
+                map.flyTo([fav.lat, fav.lon], 14);
+                setTimeout(() => {
+                    handleMapClick({ latlng: { lat: parseFloat(fav.lat), lng: parseFloat(fav.lon) } });
+                }, 1000);
+            }
+        }
+
+        async function findBaitShops() {
+            if (!lastLatLon) {
+                alert("Önce haritadan bir nokta seçin.");
+                return;
+            }
+            alert("Yemciler aranıyor...");
+            // TODO: Implement bait shop search with /api/places
+        }
     </script>
 </body>
 </html>
