@@ -1116,10 +1116,7 @@
 
             <button class="btn-primary" onclick="showWeeklyModal()">📅 7 Günlük Tahmin Raporu</button>
             
-            <div class="btn-row">
-                <button class="btn-secondary" onclick="findBaitShops()">🪱 Yemcileri Bul</button>
-                <button class="btn-secondary" onclick="saveFavorite()">⭐ Kaydet</button>
-            </div>
+            <button class="btn-secondary" style="width: 100%; margin-top: 12px;" onclick="saveFavorite()">⭐ Favorilere Kaydet</button>
         </div>
     </div>
 
@@ -1777,12 +1774,12 @@
             document.getElementById('region-title').innerText = global.region;
 
             if (global.isLand) {
-                document.getElementById('score-display').innerHTML = '<span style="font-size: 1.5rem;">KARA</span>';
+                document.getElementById('score-display').innerHTML = '<span style="font-size: 1.2rem;">🏔️ KARA</span>';
                 document.getElementById('score-display').style.color = 'var(--red)';
-                document.getElementById('weather-display').innerText = "Deniz verisi yok";
-                document.getElementById('tactic-display').innerText = "Burası kara parçası. Denize tıklayın.";
-                document.getElementById('metrics-grid').innerHTML = '';
-                document.getElementById('fish-list').innerHTML = '';
+                document.getElementById('weather-display').innerText = "";
+                document.getElementById('tactic-display').innerText = "Burası kara parçası. Lütfen denizde bir nokta seçin.";
+                document.getElementById('metrics-grid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--text-muted);">Deniz verisi bulunamadı</div>';
+                document.getElementById('fish-list').innerHTML = '<div style="text-align: center; padding: 30px; color: var(--text-muted);">🌊 Denizde bir nokta seçtiğinizde<br>balık analizi burada görünecek</div>';
                 document.getElementById('confidence-display').innerText = '';
                 return;
             }
@@ -2017,15 +2014,6 @@
                     handleMapClick({ latlng: { lat: parseFloat(fav.lat), lng: parseFloat(fav.lon) } });
                 }, 1000);
             }
-        }
-
-        async function findBaitShops() {
-            if (!lastLatLon) {
-                alert("Önce haritadan bir nokta seçin.");
-                return;
-            }
-            alert("Yemciler aranıyor...");
-            // TODO: Implement bait shop search with /api/places
         }
     </script>
 </body>
