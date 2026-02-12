@@ -84,8 +84,8 @@
         }
 
         .splash-logo {
-            width: 250px;
-            height: 250px;
+            width: 180px;
+            height: 180px;
             filter: drop-shadow(0 0 60px var(--cyan-glow));
             animation: float 3s ease-in-out infinite;
             margin-bottom: 24px;
@@ -1417,8 +1417,8 @@
             <div class="algo-reference">
                 <span class="ref-icon">📄</span>
                 <div class="ref-content">
-                    <div class="ref-title">"Sea Bass Population Dynamics in the Coastal Waters"</div>
-                    <div class="ref-author">Sarah, Z. (2018) - Normal Distribution in Fish Populations</div>
+                    <div class="ref-title">"Ege Denizi Kıyısal Sularında Levrek Popülasyon Dinamiği"</div>
+                    <div class="ref-author">Peksu, S. (2017) - Ege Üniversitesi Su Ürünleri Fakültesi, Doktora Tezi</div>
                 </div>
             </div>
         </div>
@@ -1476,8 +1476,8 @@
             <div class="algo-reference">
                 <span class="ref-icon">📄</span>
                 <div class="ref-content">
-                    <div class="ref-title">"Field Neural Network"</div>
-                    <div class="ref-author">Micheal, R. et al. (2021) - Marine Ecosystem Dynamics</div>
+                    <div class="ref-title">"Marmara Denizi'nde Rüzgar-Balıkçılık İlişkisi Üzerine Etnografik Çalışma"</div>
+                    <div class="ref-author">İştipliler, B. (2025) - İstanbul Üniversitesi Su Bilimleri Fakültesi</div>
                 </div>
             </div>
         </div>
@@ -1756,8 +1756,6 @@
         }
 
         // Popüler Balıkçılık Meraları - Akıllı Arama için
-        // Popüler Balıkçılık Meraları - Akıllı Arama için
-// Popüler Balıkçılık Meraları - Akıllı Arama için
 const FISHING_SPOTS = [
     { name: "Foça", region: "İzmir / Ege", lat: 38.6697, lon: 26.7572 },
     { name: "Çeşme", region: "İzmir / Ege", lat: 38.3236, lon: 26.3029 },
@@ -1946,6 +1944,44 @@ const FISHING_SPOTS = [
     { name: "Sarımsaklı", region: "Balıkesir / Ege", lat: 39.4875, lon: 26.7658 },
     { name: "Güre", region: "Balıkesir / Ege", lat: 39.3878, lon: 27.0567 }
 ];
+// Balık ikonlarını haritaya ekle
+function addFishMarkers() {
+    console.log('Balık ekleme başladı, toplam:', FISHING_SPOTS.length);
+    
+    FISHING_SPOTS.forEach((spot, index) => {
+        console.log('Balık ekleniyor:', index, spot.name);
+        
+        L.marker([spot.lat, spot.lon], {
+            icon: L.divIcon({
+                className: 'fish-icon-marker',
+                html: '🐟',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            })
+        }).addTo(map);
+    });
+    
+    console.log('Balık ekleme tamamlandı!');
+}
+
+function initMap() {
+    try {
+        map = L.map('map', {
+            zoomControl: false,
+            attributionControl: false
+        }).setView([38.4237, 27.1428], 10);
+        
+        currentTileLayer = L.tileLayer(MAP_LAYERS[0].url, MAP_LAYERS[0].options).addTo(map);
+        updateMapLayerIndicator();
+        map.on('click', handleMapClick);
+        
+        console.log('Harita oluşturuldu, balıklar ekleniyor...');
+        addFishMarkers();
+    } catch (e) {
+        console.error("Map init error:", e);
+    }
+}
+
 
         // Detaylı Metrik Bilgileri
         const METRIC_DATA = {
@@ -2079,16 +2115,20 @@ const FISHING_SPOTS = [
         // ═══════════════════════════════════════════════════════════════════
 
         document.addEventListener('DOMContentLoaded', () => {
-            initMap();
-            initSearch();
-            loadFavorites();
+    initMap();
+    initSearch();
+    loadFavorites();
 
-            // Splash timeout
-            setTimeout(() => {
-                document.getElementById('splash').classList.add('hidden');
-                document.getElementById('controls').classList.add('visible');
-            }, 2500);
-        });
+    setTimeout(() => {
+        document.getElementById('splash').classList.add('hidden');
+        document.getElementById('controls').classList.add('visible');
+        
+        // Ekstra güvenlik için burada da çağır
+        if (map && typeof addFishMarkers === 'function') {
+            addFishMarkers();
+        }
+    }, 2500);
+});
 
         function initMap() {
             try {
