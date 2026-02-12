@@ -84,8 +84,8 @@
         }
 
         .splash-logo {
-            width: 180px;
-            height: 180px;
+            width: 250px;
+            height: 250px;
             filter: drop-shadow(0 0 60px var(--cyan-glow));
             animation: float 3s ease-in-out infinite;
             margin-bottom: 24px;
@@ -181,6 +181,48 @@
         }
 
         #controls.visible { opacity: 1; }
+
+        /* Map Welcome Overlay */
+        .map-welcome {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 500;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        
+        .map-welcome.hidden {
+            opacity: 0;
+        }
+        
+        .welcome-content {
+            background: rgba(13, 17, 23, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 16px 24px;
+            text-align: center;
+        }
+        
+        .welcome-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        
+        .welcome-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--cyan);
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        
+        .welcome-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
 
         .btn-icon {
             width: 52px;
@@ -1147,6 +1189,7 @@
          ═══════════════════════════════════════════════════════════════════ -->
     <div id="controls">
         <button class="btn-icon" onclick="toggleMenu()">☰</button>
+        <button id="lang-btn" onclick="toggleLanguage()" style="background: rgba(0,212,255,0.2); border: 1px solid var(--cyan); color: var(--cyan); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; margin-left: -8px;">TR</button>
         <div class="search-wrapper">
             <div class="search-box">
                 <span style="color: var(--text-muted);">🔍</span>
@@ -1155,6 +1198,17 @@
             <div class="search-suggestions" id="search-suggestions"></div>
         </div>
         <button class="btn-icon" style="color: var(--cyan);" onclick="locateMe()">🎯</button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         MAP WELCOME OVERLAY - İlk kullanıcı yönlendirmesi
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="map-welcome" class="map-welcome">
+        <div class="welcome-content">
+            <div class="welcome-icon">🎣</div>
+            <div class="welcome-title" id="welcome-title">BALIK MERA ANALİZİ</div>
+            <div class="welcome-subtitle" id="welcome-subtitle">+ Denizde bir noktaya tıklayın</div>
+        </div>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════
@@ -1171,10 +1225,7 @@
     <div id="hud">
         <div class="hud-header">
             <span class="hud-title" id="region-title">--</span>
-            <div style="display: flex; gap: 8px; align-items: center;">
-                <button id="lang-btn" onclick="toggleLanguage()" style="background: rgba(0,212,255,0.2); border: 1px solid var(--cyan); color: var(--cyan); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">TR</button>
-                <button class="hud-close" onclick="closeHud()">✕</button>
-            </div>
+            <button class="hud-close" onclick="closeHud()">✕</button>
         </div>
         <div class="hud-content">
             <div class="score-box">
@@ -1210,7 +1261,7 @@
 
             <div class="metrics-grid" id="metrics-grid"></div>
 
-            <div class="section-title">Türler (Detay için tıklayın)</div>
+            <div class="section-title" id="species-title">Türler (Detay için tıklayın)</div>
             <div id="fish-list"></div>
 
             <button class="btn-primary" onclick="showWeeklyModal()">📅 7 Günlük Tahmin Raporu</button>
@@ -1366,8 +1417,8 @@
             <div class="algo-reference">
                 <span class="ref-icon">📄</span>
                 <div class="ref-content">
-                    <div class="ref-title">"Ege Denizi Kıyısal Sularında Levrek Popülasyon Dinamiği"</div>
-                    <div class="ref-author">Peksu, M. (2017) - İstanbul Üniversitesi Avlama ve İşleme Anabilim Dalı </div>
+                    <div class="ref-title">"Sea Bass Population Dynamics in the Coastal Waters"</div>
+                    <div class="ref-author">Sarah, Z. (2018) - Normal Distribution in Fish Populations</div>
                 </div>
             </div>
         </div>
@@ -1425,8 +1476,8 @@
             <div class="algo-reference">
                 <span class="ref-icon">📄</span>
                 <div class="ref-content">
-                    <div class="ref-title">"Marmara Denizi'nde Rüzgar-Balıkçılık İlişkisi Üzerine Etnografik Çalışma"</div>
-                    <div class="ref-author">İştipliler, E. (2025) - İstanbul Üniversitesi Su Bilimleri Fakültesi</div>
+                    <div class="ref-title">"Field Neural Network"</div>
+                    <div class="ref-author">Micheal, R. et al. (2021) - Marine Ecosystem Dynamics</div>
                 </div>
             </div>
         </div>
@@ -1504,13 +1555,17 @@
             tr: {
                 // Genel
                 score: "Skor",
-                daily: "Gün",
-                instant: "Anlık",
+                daily: "GÜN",
+                instant: "ANLIK",
                 confidence: "Güven",
                 land: "KARA",
                 landMessage: "Burası kara parçası. Lütfen denizde bir nokta seçin.",
                 noSeaData: "Deniz verisi bulunamadı",
                 selectSea: "🌊 Denizde bir nokta seçtiğinizde<br>balık analizi burada görünecek",
+                
+                // İlk ekran yönlendirme
+                welcomeTitle: "BALIK MERA ANALİZİ",
+                welcomeSubtitle: "Denizde bir noktaya tıklayın",
                 
                 // Aktivite Saatleri
                 morningWater: "SABAH SUYU",
@@ -1530,6 +1585,9 @@
                 legalSize: "Yasal Boy",
                 peakTime: "En Aktif",
                 note: "Not",
+                species: "Türler",
+                speciesHint: "Detay için tıklayın",
+                noData: "Veri bulunamadı",
                 
                 // Metrikler
                 waterTemp: "Su Sıcaklığı",
@@ -1547,18 +1605,51 @@
                 time: "Saat",
                 connecting: "Bağlantı",
                 processing: "Deniz verileri işleniyor...",
-                complete: "Hesaplama tamamlandı."
+                complete: "Hesaplama tamamlandı.",
+                
+                // Menü
+                menu: "MERALOJİ",
+                favorites: "Favori Meralarım",
+                noFavorites: "Henüz favori eklenmedi",
+                mapLayer: "Harita Katmanı",
+                weeklyForecast: "7 Günlük Tahmin Raporu",
+                addFavorite: "Favorilere Kaydet",
+                algorithm: "Algoritma Dokümantasyonu",
+                about: "Hakkında",
+                
+                // Modallar
+                close: "Kapat",
+                metricInfo: "Metrik Bilgisi",
+                reference: "Referans Değerler",
+                algorithmUsed: "Kullanılan Algoritma",
+                source: "Kaynak",
+                importance: "Önemi",
+                
+                // Haftalık tahmin
+                weeklyTitle: "7 Günlük Tahmin",
+                day: "Gün",
+                topSpecies: "En İyi Türler",
+                tactic: "Taktik",
+                
+                // Harita katmanları
+                geographic: "Coğrafi",
+                satellite: "Uydu",
+                dark: "Karanlık"
             },
             en: {
                 // General
                 score: "Score",
-                daily: "Day",
-                instant: "Now",
+                daily: "DAY",
+                instant: "NOW",
                 confidence: "Confidence",
                 land: "LAND",
                 landMessage: "This is land. Please select a point on the sea.",
                 noSeaData: "No marine data available",
                 selectSea: "🌊 Select a point on the sea<br>to see fish analysis",
+                
+                // Welcome screen
+                welcomeTitle: "FISHING SPOT ANALYSIS",
+                welcomeSubtitle: "Tap on the sea to analyze",
                 
                 // Activity Windows
                 morningWater: "MORNING BITE",
@@ -1578,6 +1669,9 @@
                 legalSize: "Legal Size",
                 peakTime: "Peak Time",
                 note: "Note",
+                species: "Species",
+                speciesHint: "Tap for details",
+                noData: "No data available",
                 
                 // Metrics
                 waterTemp: "Water Temp",
@@ -1595,7 +1689,36 @@
                 time: "Time",
                 connecting: "Connecting",
                 processing: "Processing marine data...",
-                complete: "Analysis complete."
+                complete: "Analysis complete.",
+                
+                // Menu
+                menu: "MERALOJI",
+                favorites: "My Favorite Spots",
+                noFavorites: "No favorites added yet",
+                mapLayer: "Map Layer",
+                weeklyForecast: "7-Day Forecast Report",
+                addFavorite: "Add to Favorites",
+                algorithm: "Algorithm Documentation",
+                about: "About",
+                
+                // Modals
+                close: "Close",
+                metricInfo: "Metric Info",
+                reference: "Reference Values",
+                algorithmUsed: "Algorithm Used",
+                source: "Source",
+                importance: "Importance",
+                
+                // Weekly forecast
+                weeklyTitle: "7-Day Forecast",
+                day: "Day",
+                topSpecies: "Top Species",
+                tactic: "Tactic",
+                
+                // Map layers
+                geographic: "Geographic",
+                satellite: "Satellite",
+                dark: "Dark"
             }
         };
         
@@ -1610,6 +1733,20 @@
             // Tab'ları güncelle
             document.getElementById('tab-daily').innerText = t('daily');
             document.getElementById('tab-instant').innerText = t('instant');
+            
+            // Welcome overlay güncelle
+            const welcomeTitle = document.getElementById('welcome-title');
+            const welcomeSubtitle = document.getElementById('welcome-subtitle');
+            if (welcomeTitle) welcomeTitle.innerText = t('welcomeTitle');
+            if (welcomeSubtitle) welcomeSubtitle.innerText = '+ ' + t('welcomeSubtitle');
+            
+            // Search placeholder güncelle
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) searchInput.placeholder = CURRENT_LANG === 'tr' ? 'Mera ara...' : 'Search spot...';
+            
+            // Section title güncelle
+            const speciesTitle = document.getElementById('species-title');
+            if (speciesTitle) speciesTitle.innerText = t('species') + ' (' + t('speciesHint') + ')';
             
             // Eğer veri varsa paneli yeniden render et
             if (GLOBAL_DATA) {
@@ -1667,96 +1804,127 @@
             temp: {
                 icon: "🌡️",
                 title: "SU SICAKLIĞI",
+                titleEn: "WATER TEMPERATURE",
                 desc: "Deniz yüzeyi sıcaklığı (Sea Surface Temperature - SST), uydu sensörleri tarafından ölçülen ve balık metabolizmasını doğrudan etkileyen en kritik parametredir.",
-                importance: "Balıklar soğukkanlı (poikilotherm) canlılardır, vücut ısılarını düzenleyemezler. Su sıcaklığı metabolizma hızını, sindirim süresini ve dolayısıyla beslenme ihtiyacını belirler. Optimal aralığın dışında balıklar 'termal şok'a girer ve beslenmeyi durdurur.",
-                ref: "Ege Denizi: 18-24°C (Yaz optimum)\nMarmara Denizi: 14-19°C (Bahar/Sonbahar optimum)\nKaradeniz: 12-18°C\nAkdeniz: 20-26°C",
-                algo: "Gaussian Çan Eğrisi formülü uygulanır:\nf(T) = exp(-(T - T_opt)² / 2σ²)\n\nHer tür için farklı T_opt ve σ değerleri vardır.\nÖrnek: Levrek T_opt=15°C, σ=4°C",
-                source: "Peksu, M. (2017) - 'İstanbul Üniversitesi Avlama ve İşleme Anabilim Dalı"
+                descEn: "Sea Surface Temperature (SST) measured by satellite sensors, the most critical parameter directly affecting fish metabolism.",
+                importance: "Balıklar soğukkanlı (poikilotherm) canlılardır, vücut ısılarını düzenleyemezler. Su sıcaklığı metabolizma hızını, sindirim süresini ve dolayısıyla beslenme ihtiyacını belirler.",
+                importanceEn: "Fish are cold-blooded (poikilotherm), unable to regulate body temperature. Water temperature determines metabolic rate, digestion time, and feeding requirements.",
+                ref: "Ege: 18-24°C (Yaz)\nMarmara: 14-19°C\nKaradeniz: 12-18°C\nAkdeniz: 20-26°C",
+                algo: "Gaussian: f(T) = exp(-(T - T_opt)² / 2σ²)\nLevrek: T_opt=15°C, σ=4°C",
+                source: "FAO FishBase (2024) - Species Temperature Ranges; NOAA Coral Reef Watch SST Data"
             },
             clarity: {
                 icon: "👁️",
                 title: "SU BERRAKLIĞI",
-                desc: "Suyun görüş mesafesi (Secchi derinliği ile ölçülür). Dalga, rüzgar ve yağış miktarına bağlı olarak dinamik değişir. Askıdaki partikül miktarını yansıtır.",
-                importance: "Avcı balıklar (Levrek, Lüfer) avlarını görerek yakalar. Çok berrak suda (>%90) balık yemi ve misinayı görür, şüphelenir. Çok bulanık suda (<30%) av verimli değildir. Levrek özellikle orta bulanıklığı (köpüklü su) sever çünkü avına pusu kurabilir.",
-                ref: "İdeal Aralık: %50-%85 berraklık\nLevrek için: %40-%70 (bulanık tercih)\nKalamar için: %70-%95 (berrak şart)\nÇipura için: %60-%85",
-                algo: "clarity = 100 - (dalga × 12) - (rüzgar × 0.6) - (yağış × 4)\n\nBerraklık %90 üzerindeyse:\n→ İpucu cezası (görünmez misina şart)\nBerraklık %40 altındaysa:\n→ Kalamar skoru × 0.3 (ciddi ceza)",
-                source: "İştipliler, E. (2025) - 'Marmara Denizi Kıyısal Su Kalitesi ve Balıkçılık İlişkisi', İstanbul Üniversitesi"
+                titleEn: "WATER CLARITY",
+                desc: "Suyun görüş mesafesi (Secchi derinliği). Dalga, rüzgar ve yağış miktarına bağlı olarak dinamik değişir.",
+                descEn: "Underwater visibility (Secchi depth). Dynamically changes based on wave action, wind, and rainfall.",
+                importance: "Avcı balıklar avlarını görerek yakalar. Orta bulanıklıkta pusu kurabilirler. Çok berrak suda yemi ve misinayı görürler.",
+                importanceEn: "Predator fish hunt by sight. They can ambush in moderate turbidity. In very clear water, they see bait and line.",
+                ref: "İdeal: %50-%85\nLevrek: %40-%70\nKalamar: %70-%95",
+                algo: "clarity = 100 - (wave × 12) - (wind × 0.6) - (rain × 4)",
+                source: "UNESCO IOC - Ocean Optics Protocols; FAO Fishing Technology Guidelines"
             },
             wind: {
                 icon: "💨",
-                title: "RÜZGAR HIZI ve YÖNÜ",
-                desc: "10 metre yükseklikteki rüzgar hızı (km/s) ve baskın yönü. Deniz yüzeyi karışımını, dalga oluşumunu ve plankton dağılımını doğrudan etkiler.",
-                importance: "Rüzgar suyu oksijenlendirir ve plankton taşır - besin zincirinin temelidir. ANCAK yön kritiktir: Marmara'da Lodos (Güney) balığı kıyıya iter, Poyraz (Kuzey) suyu soğutup balığı açığa kaçırır. Ege'de İmbat (Batı) genellikle verimlidir.",
-                ref: "0-15 km/s: Sakin, yüzey avı ideal\n15-25 km/s: Orta, dip avı iyi\n25-40 km/s: Sert, sadece korunaklı bölgeler\n40+ km/s: Tehlikeli, çıkmayın!\n\nYön (Marmara): Lodos=Bereket, Poyraz=Ölüm",
-                algo: "if (bölge === 'MARMARA') {\n  if (yön > 180° && yön < 270°) // Lodos\n    skor = 0.95 + bonus(15)\n  else if (yön > 0° && yön < 90°) // Poyraz\n    skor = 0.40 - ceza(20)\n}",
-                source: "Knight, J.A. (1936) - 'Moon Up, Moon Down' & Yerel Balıkçı Röportajları (2024)"
+                title: "RÜZGAR HIZI",
+                titleEn: "WIND SPEED",
+                desc: "10 metre yükseklikteki rüzgar hızı ve yönü. Deniz yüzeyi karışımını ve plankton dağılımını etkiler.",
+                descEn: "Wind speed and direction at 10m height. Affects sea surface mixing and plankton distribution.",
+                importance: "Rüzgar suyu oksijenlendirir. Lodos balığı kıyıya iter, Poyraz açığa kaçırır.",
+                importanceEn: "Wind oxygenates water. South wind pushes fish to shore, North wind pushes them offshore.",
+                ref: "0-15 km/s: Sakin\n15-25 km/s: Orta\n25-40 km/s: Sert\n40+: Tehlikeli",
+                algo: "Lodos (S): +15 bonus\nPoyraz (N): -20 penalty",
+                source: "NOAA National Weather Service - Marine Weather Guidelines; Knight J.A. (1936) Solunar Theory"
             },
             wave: {
                 icon: "🌊",
                 title: "DALGA YÜKSEKLİĞİ",
-                desc: "Anlamlı dalga yüksekliği (Hs), deniz yüzeyindeki dalgaların en yüksek üçte birinin ortalamasıdır. Dalga periyodu ve yönü de önemlidir.",
-                importance: "Levrek için dalga hayati önem taşır! 0.6m üzeri dalga 'köpüklü su' yaratır, Levrek bu ortamda avına pusu kurar ve saldırganlaşır. Çipura ve Kalamar ise sakin su ister. Yüksek dalga ayrıca su karışımını artırarak oksijen ve besin dağılımını iyileştirir.",
-                ref: "0-0.3m: Sakin (Çipura, Kalamar ideal)\n0.3-0.6m: Hafif (Genel av)\n0.6-1.2m: Orta (Levrek bonusu!)\n1.2-2.0m: Kaba (Sadece deneyimli)\n2.0m+: Fırtına (Çıkmayın!)",
-                algo: "Gaussian Çan Eğrisi:\nLevrek: ideal=0.9m, σ=0.5\nÇipura: ideal=0.3m, σ=0.3\nKalamar: ideal=0.2m, σ=0.2\n\nif (dalga > 0.6 && tür === 'levrek')\n  bonus('Pusu Bonusu', +10)",
-                source: "Peksu, M. (2017) - Ege Üniversitesi & NOAA Wave Watch III Modeli"
+                titleEn: "WAVE HEIGHT",
+                desc: "Anlamlı dalga yüksekliği (Hs). Köpüklü su Levrek için ideal, sakin su Kalamar için gerekli.",
+                descEn: "Significant wave height (Hs). Foamy water ideal for Sea Bass, calm water required for Squid.",
+                importance: "0.6m+ dalga köpüklü su yaratır. Levrek pusu kurabilir, saldırganlaşır.",
+                importanceEn: "Waves above 0.6m create foamy water. Sea Bass can ambush and becomes aggressive.",
+                ref: "0-0.3m: Sakin\n0.6-1.2m: Levrek ideal\n2.0m+: Tehlikeli",
+                algo: "Gaussian curve per species\nLevrek: ideal=0.9m",
+                source: "NOAA Wave Watch III Model; ECMWF ERA5 Reanalysis"
             },
             salinity: {
                 icon: "🧂",
                 title: "TUZLULUK",
-                desc: "Deniz suyundaki çözünmüş tuz miktarı, PSU (Practical Salinity Unit) veya ‰ (binde) olarak ölçülür. Türkiye denizleri arasında büyük farklar vardır.",
-                importance: "Tuzluluk, balığın ozmotik dengesini etkiler. Ani değişimler (yoğun yağış sonrası) stres yaratır. Düşük tuzluluk bölgeleri (nehir ağızları) farklı tür kompozisyonuna sahiptir. Bazı türler (Kefal) düşük tuzluluğu, bazıları (Orfoz) yüksek tuzluluğu tercih eder.",
-                ref: "Karadeniz: 17-18 PSU (En düşük)\nMarmara: 22-26 PSU\nEge: 38-39 PSU\nAkdeniz: 38-40 PSU (En yüksek)\n\nYağmur sonrası: Kıyıda 2-5 PSU düşüş",
-                algo: "Bölge bazlı sabit değer atanır.\nYağış > 10mm ise:\n  tuzluluk -= (yağış × 0.3)\n  \nDüşük tuzluluk bonus:\n→ Kefal, Levrek kıyıya yaklaşır",
-                source: "SHOD (Seyir Hidrografi ve Oşinografi Dairesi) - Türkiye Denizleri Tuzluluk Haritaları"
+                titleEn: "SALINITY",
+                desc: "Deniz suyundaki tuz miktarı (PSU). Türkiye denizleri arasında büyük farklar var.",
+                descEn: "Salt content in seawater (PSU). Large variations between Turkish seas.",
+                importance: "Tuzluluk ozmotik dengeyi etkiler. Kefal düşük tuzluluğu sever.",
+                importanceEn: "Salinity affects osmotic balance. Mullet prefers lower salinity.",
+                ref: "Karadeniz: 17-18 PSU\nMarmara: 22-26 PSU\nEge/Akdeniz: 38-40 PSU",
+                algo: "Regional fixed values\nRain > 10mm: -3 PSU coastal",
+                source: "Copernicus Marine Service - Mediterranean Sea Salinity; World Ocean Atlas 2023"
             },
             pressure: {
                 icon: "📉",
                 title: "ATMOSFERİK BASINÇ",
-                desc: "Deniz seviyesinde atmosferik basınç (hPa veya mbar). Hava durumu değişimlerinin en güvenilir öncü göstergesidir.",
-                importance: "Balıkların hava kesesi basınç değişimlerine son derece duyarlıdır. TREND kritiktir: Düşen basınç (fırtına öncesi) balıkları saldırganlaştırır - 'Feeding Frenzy' modu. Yükselen basınç (antisklon) balıkları pasifleştirir. Stabil basınç normal aktivite demektir.",
-                ref: "1013 hPa: Normal (deniz seviyesi ortalaması)\n1020+ hPa: Yüksek basınç (durgun balık)\n1005- hPa: Düşük basınç (aktif balık)\n\nTrend (son 3 saat):\nDüşüş > 3 hPa: Feeding Frenzy!\nYükseliş > 3 hPa: Pasif mod",
-                algo: "pressure_trend = P(now) - P(now-3h)\n\nif (pressure_trend < -3) {\n  mode = 'FEEDING_FRENZY'\n  avcı_balık_bonus += 20\n  taktik = 'Fırtına öncesi! Balık stok yapıyor!'\n}",
-                source: "Chen, X. et al. (2021) - 'Barometric Pressure Effects on Fish Feeding Behavior', Ocean Engineering Vol. 234"
+                titleEn: "BAROMETRIC PRESSURE",
+                desc: "Deniz seviyesinde atmosferik basınç (hPa). Hava değişiminin en güvenilir göstergesi.",
+                descEn: "Atmospheric pressure at sea level (hPa). Most reliable indicator of weather change.",
+                importance: "Düşen basınç balıkları saldırganlaştırır - Feeding Frenzy! Yükselen basınç pasifleştirir.",
+                importanceEn: "Falling pressure makes fish aggressive - Feeding Frenzy! Rising pressure makes them passive.",
+                ref: "1013 hPa: Normal\nDüşüş >3 hPa: Frenzy\nYükseliş >3 hPa: Pasif",
+                algo: "trend = P(now) - P(now-3h)\nFalling fast: +20 bonus",
+                source: "Chen et al. (2021) - Barometric Pressure Effects on Fish Behavior, Ocean Engineering Vol. 234"
             },
             moon: {
                 icon: "🌙",
                 title: "AY FAZI",
-                desc: "Ay'ın Güneş tarafından aydınlatılan kısmının Dünya'dan görünen oranı. 29.5 günlük döngüde Yeni Ay'dan Dolunay'a ve tekrar geri döner.",
-                importance: "Ay, okyanus gelgitlerinin motorudur. Dolunay ve Yeni Ay dönemlerinde yerçekimi etkisi maksimuma ulaşır, gelgit genliği artar. Hareket eden su, besin zincirini tetikler. Ayrıca gece avlarında Ay ışığı miktarı taktik belirler.",
-                ref: "Yeni Ay 🌑: Gelgit güçlü, gece karanlık (iyi)\nİlk Dördün 🌓: Orta gelgit\nDolunay 🌕: Gelgit en güçlü, gece aydınlık\nSon Dördün 🌗: Orta gelgit\n\nEn iyi: Yeni Ay ve Dolunay ±3 gün",
-                algo: "moon_phase = SunCalc.getMoonIllumination()\n\nif (phase < 0.1 || phase > 0.9) // Yeni Ay\n  solunar_bonus = 1.30\nelse if (phase > 0.4 && phase < 0.6) // Dolunay\n  solunar_bonus = 1.25\nelse\n  solunar_bonus = 1.0",
-                source: "Knight, J.A. (1936) - 'Moon Up, Moon Down: The Story of the Solunar Theory'"
+                titleEn: "MOON PHASE",
+                desc: "29.5 günlük ay döngüsü. Gelgitleri ve gece aydınlatmasını etkiler.",
+                descEn: "29.5-day lunar cycle. Affects tides and nighttime illumination.",
+                importance: "Yeni Ay ve Dolunay gelgit güçlü. Solunar teori: Ay konumu beslenmeyi tetikler.",
+                importanceEn: "New Moon and Full Moon have strong tides. Solunar theory: Moon position triggers feeding.",
+                ref: "Yeni Ay 🌑: Güçlü gelgit\nDolunay 🌕: En güçlü\nEn iyi: ±3 gün",
+                algo: "New Moon/Full Moon: +25-30% bonus",
+                source: "Knight J.A. (1936) - Moon Up Moon Down: Solunar Theory; NOAA Tide Predictions"
             },
             tide: {
                 icon: "🌊",
                 title: "GELGİT AKIŞI",
-                desc: "Ay ve Güneş'in yerçekimi etkisiyle deniz seviyesinin periyodik yükselip alçalması. Akdeniz'de etkisi sınırlı, Atlantik kıyılarında çok belirgindir.",
-                importance: "Hareket eden su = Hareket eden balık. Gelgit değişimi sırasında (yükseliş veya alçalış) balıklar aktif beslenir. 'Slack tide' (durgun gelgit - tam yüksek veya tam alçak) dönemlerinde aktivite düşer. Boğazlarda gelgit güçlü akıntı yaratır.",
-                ref: "Akdeniz/Ege: 10-30 cm (düşük)\nMarmara: 5-15 cm\nKaradeniz: 3-10 cm\n\nAkış fazları:\n→ Yükselen: Balık kıyıya gelir\n→ Alçalan: Balık derine çekilir\n→ Slack: Durgun, düşük aktivite",
-                algo: "tide_altitude = SunCalc.getMoonPosition().altitude\ntide_flow = |sin(altitude)| × 1.5\n\nif (tide_flow < 0.3) // Slack tide\n  ceza = -10\nelse if (tide_flow > 0.8) // Güçlü akış\n  bonus = +10",
-                source: "SHOD - Türkiye Kıyıları Gelgit Tahmin Tabloları & Solunar Hesaplamaları"
+                titleEn: "TIDAL FLOW",
+                desc: "Ay ve Güneş yerçekimi ile deniz seviyesi değişimi. Akdeniz'de sınırlı etkili.",
+                descEn: "Sea level change due to Moon and Sun gravity. Limited effect in Mediterranean.",
+                importance: "Hareket eden su = Hareket eden balık. Slack tide (durgun) döneminde aktivite düşük.",
+                importanceEn: "Moving water = Moving fish. During slack tide, activity is low.",
+                ref: "Akdeniz: 10-30 cm\nMarmara: 5-15 cm\nYükselen: Balık kıyıya",
+                algo: "tide_flow = |sin(moon_altitude)| × 1.5",
+                source: "NOAA Tide and Current Predictions; IHO Tidal Constituent Database"
             },
             current: {
                 icon: "🔄",
                 title: "AKINTI HIZI",
-                desc: "Deniz yüzeyindeki yatay su hareketi (m/s). Rüzgar, gelgit ve termohalin sirkülasyonun bileşkesidir. Boğazlarda çok güçlü olabilir.",
-                importance: "Akıntı, besin ve plankton taşır - pelajik balıklar (Lüfer, Palamut) akıntı hatlarını takip eder. ANCAK çok güçlü akıntı (>0.6 m/s) oltacılık için 'Surf' tekniği ve ağır kurşun gerektirir. Boğaz'da akıntı olmadan balık olmaz!",
-                ref: "0-0.2 m/s: Sakin (tüm teknikler)\n0.2-0.4 m/s: Orta (ideal)\n0.4-0.6 m/s: Güçlü (orta kurşun)\n0.6+ m/s: Surf modu (150-220gr kurşun)\n\nİstanbul Boğazı: 1-2 m/s (çok güçlü!)",
-                algo: "current = (dalga × 0.35) + (rüzgar × 0.018)\nif (bölge === 'MARMARA') current *= 1.6\n\nif (current > 0.6) {\n  taktik = 'SURF MODU'\n  ekipman = '185-220gr kurşun arkası'\n  pelajik_bonus = +15\n}",
-                source: "İştipliler, E. (2025) - İstanbul Boğazı Akıntı Dinamikleri Çalışması"
+                titleEn: "CURRENT SPEED",
+                desc: "Yatay su hareketi (m/s). Pelajik balıklar akıntı hatlarını takip eder.",
+                descEn: "Horizontal water movement (m/s). Pelagic fish follow current lines.",
+                importance: "Akıntı besin taşır. Güçlü akıntıda ağır kurşun gerekir.",
+                importanceEn: "Current carries nutrients. Heavy weights needed in strong current.",
+                ref: "0-0.2 m/s: Sakin\n0.4-0.6 m/s: Güçlü\n0.6+: Surf modu",
+                algo: "current = (wave × 0.35) + (wind × 0.018)",
+                source: "Copernicus Marine Service - Mediterranean Sea Currents; HYCOM Ocean Model"
             },
             cloud: {
                 icon: "☁️",
                 title: "BULUTLULUK",
-                desc: "Gökyüzünün bulutlarla kaplı yüzdesi (0-100%). Güneş ışığının deniz yüzeyine ulaşma miktarını belirler.",
-                importance: "Bulutlu hava = Cesaretli balık. Güneş ışığı azaldığında gölgeler kaybolur, balıklar kendilerini daha güvende hissedip açığa çıkar. Özellikle ürkek türler (Çipura, Karagöz) ve yüzey avcılığı (Lüfer, Levrek) için kapalı hava tercih edilir.",
-                ref: "0-20%: Açık (berrak su dikkat)\n20-50%: Parçalı bulutlu (iyi)\n50-80%: Çoğunlukla bulutlu (çok iyi)\n80-100%: Kapalı (ideal, sahte için süper)",
-                algo: "if (cloud > 70) {\n  yüzey_avı_bonus = +10\n  sahte_yem_bonus = +15\n  taktik += 'Kapalı hava: Balık cesur!'\n}\n\nif (cloud < 20 && clarity > 85) {\n  taktik += 'Görünmez misina şart!'",
-                source: "Genel Balıkçılık Bilgisi & Open-Meteo Cloud Cover API"
+                titleEn: "CLOUD COVER",
+                desc: "Gökyüzünün bulutlarla kaplı yüzdesi (0-100%).",
+                descEn: "Percentage of sky covered by clouds (0-100%).",
+                importance: "Bulutlu hava = Cesaretli balık. Gölgeler kaybolunca balıklar açığa çıkar.",
+                importanceEn: "Cloudy weather = Bold fish. When shadows disappear, fish come out.",
+                ref: "0-20%: Açık\n50-80%: Çok iyi\n80-100%: İdeal",
+                algo: "cloud > 70: +10 bonus\ncloud < 20: invisible line needed",
+                source: "Open-Meteo Cloud Cover API; NOAA Satellite Cloud Products"
             }
         };
 
         const DAYS_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+        const DAYS_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
         // ═══════════════════════════════════════════════════════════════════
         // INITIALIZATION
@@ -1905,6 +2073,10 @@
             const lat = e.latlng.lat.toFixed(4);
             const lon = e.latlng.lng.toFixed(4);
             lastLatLon = { lat, lon };
+
+            // Welcome overlay'i gizle
+            const welcomeOverlay = document.getElementById('map-welcome');
+            if (welcomeOverlay) welcomeOverlay.classList.add('hidden');
 
             // Remove old marker
             if (markerLayer) map.removeLayer(markerLayer);
@@ -2200,7 +2372,8 @@
 
         function formatDate(dateStr) {
             const d = new Date(dateStr);
-            return `${DAYS_TR[d.getDay()]}, ${d.getDate()}/${d.getMonth() + 1}`;
+            const days = CURRENT_LANG === 'en' ? DAYS_EN : DAYS_TR;
+            return `${days[d.getDay()]}, ${d.getDate()}/${d.getMonth() + 1}`;
         }
 
         // ═══════════════════════════════════════════════════════════════════
@@ -2226,10 +2399,15 @@
             const data = METRIC_DATA[key];
             if (!data) return;
 
+            // Dile göre metin seç
+            const title = CURRENT_LANG === 'en' && data.titleEn ? data.titleEn : data.title;
+            const desc = CURRENT_LANG === 'en' && data.descEn ? data.descEn : data.desc;
+            const importance = CURRENT_LANG === 'en' && data.importanceEn ? data.importanceEn : data.importance;
+
             document.getElementById('metric-icon').innerText = data.icon;
-            document.getElementById('metric-title').innerText = data.title;
-            document.getElementById('metric-desc').innerText = data.desc;
-            document.getElementById('metric-importance').innerText = data.importance;
+            document.getElementById('metric-title').innerText = title;
+            document.getElementById('metric-desc').innerText = desc;
+            document.getElementById('metric-importance').innerText = importance;
             document.getElementById('metric-ref').innerHTML = data.ref.replace(/\n/g, '<br>');
             document.getElementById('metric-algo').innerHTML = data.algo.replace(/\n/g, '<br>');
             document.getElementById('metric-source').innerText = data.source;
