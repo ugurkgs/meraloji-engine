@@ -477,6 +477,83 @@
         }
 
         /* Tactic Box */
+        /* Activity Windows Card */
+        .activity-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        
+        .activity-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .activity-row:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-row:hover {
+            background: rgba(0, 212, 255, 0.1);
+        }
+        
+        .activity-icon {
+            font-size: 1.2rem;
+            margin-right: 12px;
+        }
+        
+        .activity-label {
+            flex: 1;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+        
+        .activity-time {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--cyan);
+            font-weight: 500;
+        }
+        
+        /* Activity Tooltip */
+        .activity-tooltip {
+            position: fixed;
+            background: var(--bg-panel);
+            border: 1px solid var(--cyan);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            max-width: 280px;
+            z-index: 9999;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            animation: tooltipFade 0.2s ease;
+        }
+        
+        .activity-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid var(--cyan);
+        }
+        
+        @keyframes tooltipFade {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .tactic-box {
             background: linear-gradient(90deg, var(--cyan-glow) 0%, transparent 100%);
             border-left: 3px solid var(--cyan);
@@ -1094,17 +1171,39 @@
     <div id="hud">
         <div class="hud-header">
             <span class="hud-title" id="region-title">--</span>
-            <button class="hud-close" onclick="closeHud()">✕</button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button id="lang-btn" onclick="toggleLanguage()" style="background: rgba(0,212,255,0.2); border: 1px solid var(--cyan); color: var(--cyan); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">TR</button>
+                <button class="hud-close" onclick="closeHud()">✕</button>
+            </div>
         </div>
         <div class="hud-content">
             <div class="score-box">
                 <div class="mode-tabs">
-                    <button class="mode-tab active" id="tab-daily" onclick="setMode('daily')">GÜNLÜK</button>
+                    <button class="mode-tab active" id="tab-daily" onclick="setMode('daily')">GÜN</button>
                     <button class="mode-tab" id="tab-instant" onclick="setMode('instant')">ANLIK</button>
                 </div>
                 <div class="main-score" id="score-display">--</div>
                 <div class="weather-label" id="weather-display">--</div>
                 <div class="confidence-badge" id="confidence-display">Güven: --%</div>
+            </div>
+
+            <!-- Aktivite Saatleri Kartı -->
+            <div id="activity-windows" class="activity-card" style="display: none;">
+                <div class="activity-row" onclick="showActivityTip('morning')">
+                    <span class="activity-icon">🌅</span>
+                    <span class="activity-label" id="activity-morning-label">SABAH SUYU</span>
+                    <span class="activity-time" id="activity-morning-time">--:-- - --:--</span>
+                </div>
+                <div class="activity-row" onclick="showActivityTip('evening')">
+                    <span class="activity-icon">🌆</span>
+                    <span class="activity-label" id="activity-evening-label">AKŞAM SUYU</span>
+                    <span class="activity-time" id="activity-evening-time">--:-- - --:--</span>
+                </div>
+                <div class="activity-row" onclick="showActivityTip('night')">
+                    <span class="activity-icon">🌙</span>
+                    <span class="activity-label" id="activity-night-label">GECE AVI</span>
+                    <span class="activity-time" id="activity-night-time">22:00 - 03:00</span>
+                </div>
             </div>
 
             <div class="tactic-box" id="tactic-display">Analiz bekleniyor...</div>
@@ -1395,6 +1494,129 @@
         ];
 
         let currentTileLayer = null;
+
+        // ═══════════════════════════════════════════════════════════════════
+        // DİL SİSTEMİ - TR/EN Toggle
+        // ═══════════════════════════════════════════════════════════════════
+        let CURRENT_LANG = 'tr';
+        
+        const TRANSLATIONS = {
+            tr: {
+                // Genel
+                score: "Skor",
+                daily: "Gün",
+                instant: "Anlık",
+                confidence: "Güven",
+                land: "KARA",
+                landMessage: "Burası kara parçası. Lütfen denizde bir nokta seçin.",
+                noSeaData: "Deniz verisi bulunamadı",
+                selectSea: "🌊 Denizde bir nokta seçtiğinizde<br>balık analizi burada görünecek",
+                
+                // Aktivite Saatleri
+                morningWater: "SABAH SUYU",
+                eveningWater: "AKŞAM SUYU",
+                nightHunt: "GECE AVI",
+                noon: "ÖĞLEN",
+                morningWaterTip: "Şafak ±2 saat. Avcı balıklar besleniyor.",
+                eveningWaterTip: "Gün batımı ±2 saat. Günün en verimli saatleri.",
+                nightHuntTip: "22:00 - 03:00. Eşkina, Mırmır, İskorpit aktif.",
+                noonTip: "11:00 - 16:00. Aktivite düşük.",
+                
+                // Balık Kartı
+                bait: "Yem",
+                lure: "Sahte",
+                rig: "Takım",
+                hook: "İğne",
+                legalSize: "Yasal Boy",
+                peakTime: "En Aktif",
+                note: "Not",
+                
+                // Metrikler
+                waterTemp: "Su Sıcaklığı",
+                wave: "Dalga",
+                wind: "Rüzgar",
+                clarity: "Berraklık",
+                pressure: "Basınç",
+                salinity: "Tuzluluk",
+                moon: "Ay Fazı",
+                tide: "Gel-Git",
+                current: "Akıntı",
+                cloud: "Bulut",
+                
+                // Zaman
+                time: "Saat",
+                connecting: "Bağlantı",
+                processing: "Deniz verileri işleniyor...",
+                complete: "Hesaplama tamamlandı."
+            },
+            en: {
+                // General
+                score: "Score",
+                daily: "Day",
+                instant: "Now",
+                confidence: "Confidence",
+                land: "LAND",
+                landMessage: "This is land. Please select a point on the sea.",
+                noSeaData: "No marine data available",
+                selectSea: "🌊 Select a point on the sea<br>to see fish analysis",
+                
+                // Activity Windows
+                morningWater: "MORNING BITE",
+                eveningWater: "EVENING BITE",
+                nightHunt: "NIGHT HUNT",
+                noon: "MIDDAY",
+                morningWaterTip: "Dawn ±2 hours. Predator fish are feeding.",
+                eveningWaterTip: "Sunset ±2 hours. Most productive hours.",
+                nightHuntTip: "22:00 - 03:00. Brown Meagre, Striped Bream active.",
+                noonTip: "11:00 - 16:00. Low activity.",
+                
+                // Fish Card
+                bait: "Bait",
+                lure: "Lure",
+                rig: "Rig",
+                hook: "Hook",
+                legalSize: "Legal Size",
+                peakTime: "Peak Time",
+                note: "Note",
+                
+                // Metrics
+                waterTemp: "Water Temp",
+                wave: "Wave",
+                wind: "Wind",
+                clarity: "Clarity",
+                pressure: "Pressure",
+                salinity: "Salinity",
+                moon: "Moon Phase",
+                tide: "Tide",
+                current: "Current",
+                cloud: "Cloud",
+                
+                // Time
+                time: "Time",
+                connecting: "Connecting",
+                processing: "Processing marine data...",
+                complete: "Analysis complete."
+            }
+        };
+        
+        function t(key) {
+            return TRANSLATIONS[CURRENT_LANG][key] || key;
+        }
+        
+        function toggleLanguage() {
+            CURRENT_LANG = CURRENT_LANG === 'tr' ? 'en' : 'tr';
+            document.getElementById('lang-btn').innerText = CURRENT_LANG.toUpperCase();
+            
+            // Tab'ları güncelle
+            document.getElementById('tab-daily').innerText = t('daily');
+            document.getElementById('tab-instant').innerText = t('instant');
+            
+            // Eğer veri varsa paneli yeniden render et
+            if (GLOBAL_DATA) {
+                const targetData = CURRENT_MODE === 'daily' ? GLOBAL_DATA.forecast[0] : GLOBAL_DATA.instant;
+                renderPanel(GLOBAL_DATA, targetData);
+            }
+        }
 
         // Popüler Balıkçılık Meraları - Akıllı Arama için
         const FISHING_SPOTS = [
@@ -1726,11 +1948,17 @@
 
         function runLoadingAnimation(data) {
             const logOutput = document.getElementById('log-output');
+            
+            // Tıklama saatini frontend'de hesapla (gerçek kullanıcı saati)
+            const now = new Date();
+            const userHour = now.getHours();
+            const userMinute = now.getMinutes().toString().padStart(2, '0');
+            
             const steps = [
-                { text: `📡 Bağlantı: <span>${data.region}</span>`, delay: 0 },
-                { text: `⏱️ Saat: <span>${data.clickHour}:00</span>`, delay: 400 },
-                { text: `🌊 Deniz verileri işleniyor...`, delay: 900 },
-                { text: `🎣 Hesaplama tamamlandı.`, delay: 1500 }
+                { text: `📡 ${t('connecting')}: <span>${data.region}</span>`, delay: 0 },
+                { text: `⏱️ ${t('time')}: <span>${userHour}:${userMinute}</span>`, delay: 400 },
+                { text: `🌊 ${t('processing')}`, delay: 900 },
+                { text: `🎣 ${t('complete')}`, delay: 1500 }
             ];
 
             steps.forEach((step, i) => {
@@ -1774,13 +2002,14 @@
             document.getElementById('region-title').innerText = global.region;
 
             if (global.isLand) {
-                document.getElementById('score-display').innerHTML = '<span style="font-size: 1.2rem;">🏔️ KARA</span>';
+                document.getElementById('score-display').innerHTML = `<span style="font-size: 1.2rem;">🏔️ ${t('land')}</span>`;
                 document.getElementById('score-display').style.color = 'var(--red)';
                 document.getElementById('weather-display').innerText = "";
-                document.getElementById('tactic-display').innerText = "Burası kara parçası. Lütfen denizde bir nokta seçin.";
-                document.getElementById('metrics-grid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--text-muted);">Deniz verisi bulunamadı</div>';
-                document.getElementById('fish-list').innerHTML = '<div style="text-align: center; padding: 30px; color: var(--text-muted);">🌊 Denizde bir nokta seçtiğinizde<br>balık analizi burada görünecek</div>';
+                document.getElementById('tactic-display').innerText = t('landMessage');
+                document.getElementById('metrics-grid').innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--text-muted);">${t('noSeaData')}</div>`;
+                document.getElementById('fish-list').innerHTML = `<div style="text-align: center; padding: 30px; color: var(--text-muted);">${t('selectSea')}</div>`;
                 document.getElementById('confidence-display').innerText = '';
+                document.getElementById('activity-windows').style.display = 'none';
                 return;
             }
 
@@ -1797,13 +2026,70 @@
 
             // Confidence
             const conf = CURRENT_MODE === 'daily' ? (global.forecast[0]?.confidence || 90) : 95;
-            document.getElementById('confidence-display').innerText = `Güven: %${conf}`;
+            document.getElementById('confidence-display').innerText = `${t('confidence')}: %${conf}`;
+
+            // Aktivite Saatleri (sadece günlük modda göster)
+            const activityCard = document.getElementById('activity-windows');
+            if (CURRENT_MODE === 'daily' && global.forecast[0]?.activityWindows) {
+                const aw = global.forecast[0].activityWindows;
+                activityCard.style.display = 'block';
+                
+                // Etiketleri güncelle
+                document.getElementById('activity-morning-label').innerText = t('morningWater');
+                document.getElementById('activity-evening-label').innerText = t('eveningWater');
+                document.getElementById('activity-night-label').innerText = t('nightHunt');
+                
+                // Saatleri güncelle
+                document.getElementById('activity-morning-time').innerText = `${aw.morning.start} - ${aw.morning.end}`;
+                document.getElementById('activity-evening-time').innerText = `${aw.evening.start} - ${aw.evening.end}`;
+                document.getElementById('activity-night-time').innerText = `${aw.night.start} - ${aw.night.end}`;
+            } else {
+                activityCard.style.display = 'none';
+            }
 
             // Metrics
             renderMetrics(global, data);
 
             // Fish List
             renderFishList(data.fishList, 'fish-list');
+        }
+
+        // Aktivite Tooltip gösterimi
+        function showActivityTip(type) {
+            // Önceki tooltip'i kaldır
+            const existing = document.querySelector('.activity-tooltip');
+            if (existing) existing.remove();
+            
+            const tips = {
+                morning: t('morningWaterTip'),
+                evening: t('eveningWaterTip'),
+                night: t('nightHuntTip')
+            };
+            
+            const tooltip = document.createElement('div');
+            tooltip.className = 'activity-tooltip';
+            tooltip.innerText = tips[type];
+            
+            // Pozisyonlama
+            const row = event.currentTarget;
+            const rect = row.getBoundingClientRect();
+            tooltip.style.left = `${rect.left + rect.width / 2 - 140}px`;
+            tooltip.style.top = `${rect.top - 60}px`;
+            
+            document.body.appendChild(tooltip);
+            
+            // 3 saniye sonra kaldır
+            setTimeout(() => tooltip.remove(), 3000);
+            
+            // Dışarı tıklayınca kaldır
+            setTimeout(() => {
+                document.addEventListener('click', function handler(e) {
+                    if (!tooltip.contains(e.target)) {
+                        tooltip.remove();
+                        document.removeEventListener('click', handler);
+                    }
+                });
+            }, 100);
         }
 
         function renderMetrics(global, data) {
@@ -1865,17 +2151,36 @@
                 const scoreClass = f.score >= 70 ? 'score-high' : (f.score >= 50 ? 'score-mid' : 'score-low');
                 const reasonClass = f.score >= 50 ? 'positive' : 'negative';
                 const reasonIcon = f.score >= 50 ? '✅' : '⚠️';
+                
+                // Dile göre isim seç
+                const displayName = CURRENT_LANG === 'en' ? (f.nameEn || f.name) : f.name;
+                const scientificLine = CURRENT_LANG === 'en' && f.scientificName 
+                    ? `<div style="font-size: 0.7rem; color: var(--text-muted); font-style: italic; margin-top: 2px;">${f.scientificName}</div>` 
+                    : '';
+                
+                // Aktif saat gösterimi
+                const peakTimeLabel = t('peakTime');
+                const peakTimeLine = f.peakHoursDesc 
+                    ? `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-subtle);">🕐 <strong>${peakTimeLabel}:</strong> ${f.peakHoursDesc}</div>` 
+                    : '';
 
                 return `
                     <div class="fish-item ${scoreClass}" onclick="this.classList.toggle('open')">
                         <div class="fish-header">
-                            <div class="fish-name">${f.icon} ${f.name}</div>
+                            <div class="fish-name">
+                                ${f.icon} ${displayName}
+                                ${scientificLine}
+                            </div>
                             <div class="fish-score" style="color: ${getScoreColor(f.score)}">%${f.score.toFixed(1)}</div>
                         </div>
                         <div class="fish-details">
                             ${f.reason ? `<div class="fish-reason ${reasonClass}">${reasonIcon} ${f.reason}</div>` : ''}
-                            <div>🎯 <strong>Yem:</strong> ${f.bait}</div>
-                            <div>🎣 <strong>İğne:</strong> ${f.method}</div>
+                            <div>🎯 <strong>${t('bait')}:</strong> ${f.bait}</div>
+                            <div>🎣 <strong>${t('hook')}:</strong> ${f.method}</div>
+                            ${f.lure ? `<div>🎪 <strong>${t('lure')}:</strong> ${f.lure}</div>` : ''}
+                            ${f.rig ? `<div>⚙️ <strong>${t('rig')}:</strong> ${f.rig}</div>` : ''}
+                            ${f.legalSize ? `<div>📏 <strong>${t('legalSize')}:</strong> ${f.legalSize}</div>` : ''}
+                            ${peakTimeLine}
                             ${f.note ? `<div class="fish-tip">💡 ${f.note}</div>` : ''}
                         </div>
                     </div>
