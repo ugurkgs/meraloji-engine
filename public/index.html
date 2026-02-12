@@ -1944,43 +1944,7 @@ const FISHING_SPOTS = [
     { name: "Sarımsaklı", region: "Balıkesir / Ege", lat: 39.4875, lon: 26.7658 },
     { name: "Güre", region: "Balıkesir / Ege", lat: 39.3878, lon: 27.0567 }
 ];
-// Balık ikonlarını haritaya ekle
-function addFishMarkers() {
-    console.log('Balık ekleme başladı, toplam:', FISHING_SPOTS.length);
-    
-    FISHING_SPOTS.forEach((spot, index) => {
-        console.log('Balık ekleniyor:', index, spot.name);
-        
-        L.marker([spot.lat, spot.lon], {
-            icon: L.divIcon({
-                className: 'fish-icon-marker',
-                html: '🐟',
-                iconSize: [30, 30],
-                iconAnchor: [15, 15]
-            })
-        }).addTo(map);
-    });
-    
-    console.log('Balık ekleme tamamlandı!');
-}
 
-function initMap() {
-    try {
-        map = L.map('map', {
-            zoomControl: false,
-            attributionControl: false
-        }).setView([38.4237, 27.1428], 10);
-        
-        currentTileLayer = L.tileLayer(MAP_LAYERS[0].url, MAP_LAYERS[0].options).addTo(map);
-        updateMapLayerIndicator();
-        map.on('click', handleMapClick);
-        
-        console.log('Harita oluşturuldu, balıklar ekleniyor...');
-        addFishMarkers();
-    } catch (e) {
-        console.error("Map init error:", e);
-    }
-}
 
 
         // Detaylı Metrik Bilgileri
