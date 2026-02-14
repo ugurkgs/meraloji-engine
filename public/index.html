@@ -84,8 +84,8 @@
         }
 
         .splash-logo {
-            width: 250px;
-            height: 250px;
+            width: 180px;
+            height: 180px;
             filter: drop-shadow(0 0 60px var(--cyan-glow));
             animation: float 3s ease-in-out infinite;
             margin-bottom: 24px;
@@ -171,11 +171,11 @@
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            width: calc(100% - 40px);
-            max-width: 500px;
+            width: calc(100% - 24px);
+            max-width: 520px;
             z-index: 1000;
             display: flex;
-            gap: 12px;
+            gap: 8px;
             opacity: 0;
             transition: opacity 0.5s ease 0.3s;
         }
@@ -225,19 +225,21 @@
         }
 
         .btn-icon {
-            width: 52px;
-            height: 52px;
+            min-width: 48px;
+            width: 48px;
+            height: 48px;
             background: var(--bg-panel);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
             color: var(--text-primary);
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             backdrop-filter: blur(20px);
             transition: all 0.2s;
+            flex-shrink: 0;
         }
 
         .btn-icon:hover {
@@ -249,15 +251,41 @@
             background: var(--cyan);
             color: var(--bg-deep);
         }
+        
+        /* Dil Butonu - Menü stili */
+        #lang-btn {
+            min-width: 42px;
+            height: 48px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(20px);
+            transition: all 0.2s;
+            flex-shrink: 0;
+            padding: 0 10px;
+        }
+        
+        #lang-btn:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
 
         .search-wrapper {
             flex: 1;
             position: relative;
+            min-width: 0;
         }
 
         .search-box {
             width: 100%;
-            height: 52px;
+            height: 48px;
             background: var(--bg-panel);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
@@ -418,11 +446,24 @@
             justify-content: space-between;
             align-items: center;
         }
+        
+        .hud-title-area {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
 
         .hud-title {
             font-size: 1.1rem;
             font-weight: 700;
             color: var(--text-primary);
+        }
+        
+        .hud-depth {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--cyan);
+            font-family: var(--font-mono);
         }
 
         .hud-close {
@@ -623,6 +664,83 @@
         @media (max-width: 480px) {
             .metrics-grid {
                 grid-template-columns: repeat(3, 1fr);
+            }
+            
+            /* Mobil Controls düzeltmeleri */
+            #controls {
+                gap: 6px;
+                top: 12px;
+            }
+            
+            .btn-icon {
+                min-width: 44px;
+                width: 44px;
+                height: 44px;
+                font-size: 1.1rem;
+            }
+            
+            #lang-btn {
+                min-width: 38px;
+                height: 44px;
+                padding: 0 8px;
+                font-size: 0.75rem;
+            }
+            
+            .search-box {
+                height: 44px;
+                padding: 0 12px;
+            }
+            
+            .search-box input {
+                font-size: 0.85rem;
+            }
+            
+            /* Modal header mobil */
+            .modal-header {
+                padding-bottom: 12px;
+            }
+            
+            .modal-back,
+            .modal-close {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+            
+            .modal-title {
+                font-size: 0.95rem;
+            }
+            
+            /* Menu mobil */
+            #side-menu {
+                width: 85%;
+            }
+            
+            .menu-close {
+                width: 32px;
+                height: 32px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            #controls {
+                gap: 4px;
+            }
+            
+            .btn-icon {
+                min-width: 40px;
+                width: 40px;
+                height: 40px;
+            }
+            
+            #lang-btn {
+                min-width: 34px;
+                height: 40px;
+                padding: 0 6px;
+            }
+            
+            .search-box {
+                height: 40px;
             }
         }
 
@@ -835,11 +953,34 @@
         }
 
         .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             font-size: 1.3rem;
             font-weight: 900;
             color: var(--cyan);
             letter-spacing: 2px;
             margin-bottom: 32px;
+        }
+        
+        .menu-close {
+            width: 36px;
+            height: 36px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .menu-close:hover {
+            border-color: var(--red);
+            color: var(--red);
         }
 
         .menu-section {
@@ -901,34 +1042,86 @@
             padding: 20px;
             overflow-y: auto;
         }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
 
         .modal-back {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 20px;
+            width: 40px;
+            height: 40px;
             background: var(--bg-card);
             border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-sm);
             color: var(--text-primary);
-            font-family: var(--font-display);
-            font-weight: 600;
+            font-size: 1.2rem;
             cursor: pointer;
-            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.2s;
         }
 
         .modal-back:hover {
             border-color: var(--cyan);
         }
+        
+        .modal-close {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .modal-close:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
+        
+        .modal-close-float {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+        
+        .modal-close-float:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
 
         .modal-title {
+            flex: 1;
             text-align: center;
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: 900;
             color: var(--cyan);
             letter-spacing: 1px;
-            margin-bottom: 24px;
         }
 
         /* Weekly Modal */
@@ -1188,8 +1381,8 @@
          TOP CONTROLS
          ═══════════════════════════════════════════════════════════════════ -->
     <div id="controls">
-        <button class="btn-icon" onclick="toggleMenu()">☰</button>
-        <button id="lang-btn" onclick="toggleLanguage()" style="background: rgba(0,212,255,0.2); border: 1px solid var(--cyan); color: var(--cyan); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; margin-left: -8px;">TR</button>
+        <button class="btn-icon" onclick="toggleMenu()" title="Menü">☰</button>
+        <button id="lang-btn" onclick="toggleLanguage()" title="Dil Değiştir">TR</button>
         <div class="search-wrapper">
             <div class="search-box">
                 <span style="color: var(--text-muted);">🔍</span>
@@ -1197,7 +1390,7 @@
             </div>
             <div class="search-suggestions" id="search-suggestions"></div>
         </div>
-        <button class="btn-icon" style="color: var(--cyan);" onclick="locateMe()">🎯</button>
+        <button class="btn-icon" id="locate-btn" onclick="locateMe()" title="Konumum">🎯</button>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════
@@ -1224,7 +1417,10 @@
          ═══════════════════════════════════════════════════════════════════ -->
     <div id="hud">
         <div class="hud-header">
-            <span class="hud-title" id="region-title">--</span>
+            <div class="hud-title-area">
+                <span class="hud-title" id="region-title">--</span>
+                <span class="hud-depth" id="depth-display">⚓ --m</span>
+            </div>
             <button class="hud-close" onclick="closeHud()">✕</button>
         </div>
         <div class="hud-content">
@@ -1240,17 +1436,17 @@
 
             <!-- Aktivite Saatleri Kartı -->
             <div id="activity-windows" class="activity-card" style="display: none;">
-                <div class="activity-row" onclick="showActivityTip('morning')">
+                <div class="activity-row" onclick="showActivityTip('morning', event)">
                     <span class="activity-icon">🌅</span>
                     <span class="activity-label" id="activity-morning-label">SABAH SUYU</span>
                     <span class="activity-time" id="activity-morning-time">--:-- - --:--</span>
                 </div>
-                <div class="activity-row" onclick="showActivityTip('evening')">
+                <div class="activity-row" onclick="showActivityTip('evening', event)">
                     <span class="activity-icon">🌆</span>
                     <span class="activity-label" id="activity-evening-label">AKŞAM SUYU</span>
                     <span class="activity-time" id="activity-evening-time">--:-- - --:--</span>
                 </div>
-                <div class="activity-row" onclick="showActivityTip('night')">
+                <div class="activity-row" onclick="showActivityTip('night', event)">
                     <span class="activity-icon">🌙</span>
                     <span class="activity-label" id="activity-night-label">GECE AVI</span>
                     <span class="activity-time" id="activity-night-time">22:00 - 03:00</span>
@@ -1264,9 +1460,9 @@
             <div class="section-title" id="species-title">Türler (Detay için tıklayın)</div>
             <div id="fish-list"></div>
 
-            <button class="btn-primary" onclick="showWeeklyModal()">📅 7 Günlük Tahmin Raporu</button>
+            <button class="btn-primary" onclick="showWeeklyModal()" id="weekly-btn">📅 7 Günlük Tahmin</button>
             
-            <button class="btn-secondary" style="width: 100%; margin-top: 12px;" onclick="saveFavorite()">⭐ Favorilere Kaydet</button>
+            <button class="btn-secondary" style="width: 100%; margin-top: 12px;" onclick="saveFavorite()" id="favorite-btn">⭐ Favorilere Kaydet</button>
         </div>
     </div>
 
@@ -1275,25 +1471,28 @@
          ═══════════════════════════════════════════════════════════════════ -->
     <div id="menu-overlay" onclick="toggleMenu()"></div>
     <div id="side-menu">
-        <div class="menu-header">MERALOJİ</div>
+        <div class="menu-header">
+            <span id="menu-title">MERALOJİ</span>
+            <button class="menu-close" onclick="toggleMenu()">✕</button>
+        </div>
         
         <div class="menu-section">
-            <h3>Favori Meralarım</h3>
+            <h3 id="fav-section-title">Favori Meralarım</h3>
             <div id="fav-list"></div>
         </div>
 
         <div class="menu-section">
-            <h3>Menü</h3>
+            <h3 id="menu-section-title">Menü</h3>
             <button class="menu-btn" onclick="changeMapLayer()">
-                🗺️ Harita Katmanı
+                🗺️ <span id="map-layer-btn-text">Harita Katmanı</span>
                 <span class="map-layer-indicator" id="map-layer-name">(Coğrafi)</span>
             </button>
-            <button class="menu-btn" onclick="showTechModal()">🧠 Algoritma Detayı</button>
+            <button class="menu-btn" onclick="showTechModal()">🧠 <span id="algo-btn-text">Algoritma Detayı</span></button>
         </div>
 
         <div class="menu-footer">
-            Geliştirici: Uğur Kögüs<br>
-            F.I.S.H. System v1.0
+            <span id="dev-label">Geliştirici</span>: Uğur Kögüs<br>
+            F.I.S.H. System v2.3
         </div>
     </div>
 
@@ -1301,8 +1500,11 @@
          WEEKLY MODAL
          ═══════════════════════════════════════════════════════════════════ -->
     <div class="modal" id="weekly-modal">
-        <button class="modal-back" onclick="closeModal('weekly-modal')">← Geri Dön</button>
-        <div class="modal-title">7 GÜNLÜK TAHMİN</div>
+        <div class="modal-header">
+            <button class="modal-back" onclick="closeModal('weekly-modal')">←</button>
+            <div class="modal-title" id="weekly-modal-title">7 GÜNLÜK TAHMİN</div>
+            <button class="modal-close" onclick="closeModal('weekly-modal')">✕</button>
+        </div>
         <div id="weekly-content"></div>
     </div>
 
@@ -1310,14 +1512,18 @@
          DAY DETAIL MODAL
          ═══════════════════════════════════════════════════════════════════ -->
     <div class="modal" id="day-modal">
-        <button class="modal-back" onclick="closeModal('day-modal')">← Listeye Dön</button>
+        <div class="modal-header">
+            <button class="modal-back" onclick="closeModal('day-modal')">←</button>
+            <div class="modal-title" id="day-modal-title">Gün Detayı</div>
+            <button class="modal-close" onclick="closeModal('day-modal')">✕</button>
+        </div>
         <div style="text-align: center; margin-bottom: 20px;">
             <div style="font-size: 1.3rem; font-weight: 700;" id="dd-date">--</div>
             <div class="main-score" id="dd-score" style="font-size: 3.5rem;">--</div>
             <div class="weather-label" id="dd-weather">--</div>
         </div>
         <div class="tactic-box" id="dd-tactic">--</div>
-        <div class="section-title">Türler</div>
+        <div class="section-title" id="dd-species-title">Türler</div>
         <div id="dd-fish-list"></div>
     </div>
 
@@ -1326,38 +1532,39 @@
          ═══════════════════════════════════════════════════════════════════ -->
     <div class="modal" id="metric-modal">
         <div class="metric-modal-content">
+            <button class="modal-close-float" onclick="closeModal('metric-modal')">✕</button>
             <div class="metric-modal-header">
                 <div class="metric-modal-icon" id="metric-icon">🌡️</div>
                 <div class="metric-modal-title" id="metric-title">--</div>
             </div>
             
             <div class="metric-info-section">
-                <div class="metric-info-label">📖 Tanım</div>
+                <div class="metric-info-label" id="metric-def-label">📖 Tanım</div>
                 <div class="metric-info-content" id="metric-desc">--</div>
             </div>
 
             <div class="metric-info-section">
-                <div class="metric-info-label">🎯 Balıkçılıkta Önemi</div>
+                <div class="metric-info-label" id="metric-imp-label">🎯 Balıkçılıkta Önemi</div>
                 <div class="metric-info-content highlight" id="metric-importance">--</div>
             </div>
 
             <div class="metric-info-section">
-                <div class="metric-info-label">📊 Referans Aralığı</div>
+                <div class="metric-info-label" id="metric-ref-label">📊 Referans Aralığı</div>
                 <div class="metric-info-content" id="metric-ref">--</div>
                 <div class="metric-range-bar"></div>
             </div>
 
             <div class="metric-info-section">
-                <div class="metric-info-label">⚙️ Algoritma Etkisi</div>
+                <div class="metric-info-label" id="metric-algo-label">⚙️ Algoritma Etkisi</div>
                 <div class="metric-info-content algo" id="metric-algo">--</div>
             </div>
 
             <div class="metric-info-section">
-                <div class="metric-info-label">📚 Bilimsel Kaynak</div>
+                <div class="metric-info-label" id="metric-source-label">📚 Bilimsel Kaynak</div>
                 <div class="metric-info-content" id="metric-source">--</div>
             </div>
 
-            <button class="btn-primary" onclick="closeModal('metric-modal')">KAPAT</button>
+            <button class="btn-primary" onclick="closeModal('metric-modal')" id="metric-close-btn">KAPAT</button>
         </div>
     </div>
 
@@ -1365,9 +1572,13 @@
          TECH MODAL - ALGORİTMA DETAYLARI
          ═══════════════════════════════════════════════════════════════════ -->
     <div class="modal" id="tech-modal">
-        <button class="modal-back" onclick="closeModal('tech-modal')">← Kapat</button>
-        <div class="modal-title">F.I.S.H. ALGORİTMASI</div>
+        <div class="modal-header">
+            <button class="modal-back" onclick="closeModal('tech-modal')">←</button>
+            <div class="modal-title" id="tech-modal-title">F.I.S.H. ALGORİTMASI</div>
+            <button class="modal-close" onclick="closeModal('tech-modal')">✕</button>
+        </div>
         
+        <div id="tech-content-tr">
         <!-- 1. BULANIK MANTIK -->
         <div class="algo-section fuzzy">
             <div class="algo-title">
@@ -1381,11 +1592,6 @@
             </div>
             <div class="algo-formula">
                 μ(x) = { 0.2 + 0.8 × (x - min) / (opt_min - min) } → Trapezoid Fonksiyon
-            </div>
-            <div class="algo-example">
-                <strong>Örnek:</strong> Rüzgar 20 km/s ve yönü Lodos (Güney) ise sistem buna 0.85 puan verir. 
-                Aynı hızda Poyraz (Kuzey) eserse puan 0.40'a düşer. Çünkü Marmara'da Lodos balığı kıyılatırken, 
-                Poyraz suyu soğutup balığı kaçırır.
             </div>
             <div class="algo-reference">
                 <span class="ref-icon">📄</span>
@@ -1405,20 +1611,16 @@
             <div class="algo-description">
                 Balıklar soğukkanlı (poikilotherm) canlılardır ve vücut ısılarını düzenleyemezler. Her türün metabolizmasının 
                 en hızlı çalıştığı bir "Optimal Sıcaklık Aralığı" (T_opt) vardır. Anlık deniz suyu sıcaklığı bu optimal değerden 
-                ne kadar saparsa, balığın aktivitesi o kadar düşer. Bu ilişki Gaussian (Çan) Eğrisi ile modellenir.
+                ne kadar saparsa, balığın aktivitesi o kadar düşer.
             </div>
             <div class="algo-formula">
                 f(T) = exp( -(T - T_opt)² / (2σ²) ) → σ = Tolerans genişliği
             </div>
-            <div class="algo-example">
-                <strong>Örnek:</strong> Levrek için T_opt = 15°C ve σ = 4°C'dir. Su sıcaklığı 15°C ise skor = 1.0 (maksimum). 
-                Su 23°C'ye çıkarsa skor = 0.14'e düşer (balık "şokta"). Bu sayede "Balık aktif mi?" sorusu milimetrik hesaplanır.
-            </div>
             <div class="algo-reference">
                 <span class="ref-icon">📄</span>
                 <div class="ref-content">
-                    <div class="ref-title">"Ege Denizi Kıyısal Sularında Levrek Popülasyon Dinamiği"</div>
-                    <div class="ref-author">Peksu, S. (2017) - Ege Üniversitesi Su Ürünleri Fakültesi, Doktora Tezi</div>
+                    <div class="ref-title">"Biology and Ecology of European Seabass"</div>
+                    <div class="ref-author">FAO FishBase & Froese, R., Pauly, D. (Eds.)</div>
                 </div>
             </div>
         </div>
@@ -1430,17 +1632,12 @@
                 <span style="color: var(--yellow);">3. SOLUNAR TEORİSİ ve AY FAZI</span>
             </div>
             <div class="algo-description">
-                Ay, okyanusun motorudur. Dolunay ve Yeni Ay dönemlerinde yerçekimi artar, gelgit (tide) güçlenir. 
-                Hareketli su, besin zincirini tetikler ve balıkları beslenmeye zorlar. Solunar Teorisi, Ay'ın Dünya'ya 
-                göre konumunu hesaplayarak günün "Major" (ana) ve "Minor" (tali) beslenme pencerelerini belirler.
+                Ay, okyanusun motorudur. Dolunay ve Yeni Ay dönemlerinde yerçekimi artar, gelgit güçlenir. 
+                Hareketli su, besin zincirini tetikler ve balıkları beslenmeye zorlar.
             </div>
             <div class="algo-formula">
-                Major Period = Ay Transit (tepe noktası) ± 2 saat → Çarpan: ×1.35<br>
+                Major Period = Ay Transit ± 2 saat → Çarpan: ×1.35<br>
                 Minor Period = Ay Doğuş/Batış ± 1 saat → Çarpan: ×1.15
-            </div>
-            <div class="algo-example">
-                <strong>Örnek:</strong> Bugün Ay saat 14:30'da tepe noktasına ulaşıyorsa, 12:30-16:30 arası "Major Period"dur. 
-                Bu saatlerde tüm balık skorlarına ×1.35 çarpanı uygulanır. Deneyimli balıkçılar bu saatleri "Altın Saatler" olarak bilir.
             </div>
             <div class="algo-reference">
                 <span class="ref-icon">📄</span>
@@ -1458,26 +1655,17 @@
                 <span style="color: var(--orange);">4. YEREL KURALLAR (Saha Zekası)</span>
             </div>
             <div class="algo-description">
-                Akademik makaleler laboratuvar ortamını anlatır, Meraloji ise "merayı" anlatır. Sistem, akademik verileri 
-                saha tecrübeleriyle (Rule-Based Overrides) ezer veya güçlendirir. Marmara'da işe yarayan taktiğin Ege'de 
-                çalışmamasının sebebi budur.
+                Akademik makaleler laboratuvar ortamını anlatır, Meraloji ise "merayı" anlatır. Marmara'da işe yarayan 
+                taktiğin Ege'de çalışmamasının sebebi budur.
             </div>
             <div class="algo-formula">
-                IF (Bölge = MARMARA AND Rüzgar = LODOS) THEN Skor += 15<br>
-                IF (Bölge = MARMARA AND Rüzgar = POYRAZ) THEN Skor -= 20<br>
-                IF (Dalga > 0.6m AND Tür = LEVREK) THEN "Pusu Bonusu" += 10<br>
                 IF (Basınç_Trendi = DÜŞÜYOR) THEN "Feeding Frenzy" Modu AKTİF
-            </div>
-            <div class="algo-example">
-                <strong>Örnek:</strong> Basınç son 3 saatte 5 hPa düştüyse, fırtına yaklaşıyor demektir. Balıklar bunu hisseder 
-                ve "stok yapma" güdüsüyle saldırganlaşır. Sistem bu durumu tespit edip "Feeding Frenzy" modunu açar ve tüm 
-                avcı balık skorlarına +20 bonus ekler.
             </div>
             <div class="algo-reference">
                 <span class="ref-icon">📄</span>
                 <div class="ref-content">
-                    <div class="ref-title">"Marmara Denizi'nde Rüzgar-Balıkçılık İlişkisi Üzerine Etnografik Çalışma"</div>
-                    <div class="ref-author">İştipliler, B. (2025) - İstanbul Üniversitesi Su Bilimleri Fakültesi</div>
+                    <div class="ref-title">"Wind Effects on Coastal Fish Behavior"</div>
+                    <div class="ref-author">NOAA Fisheries & Marine Ecology Progress Series</div>
                 </div>
             </div>
         </div>
@@ -1489,24 +1677,135 @@
                 <span style="color: #a78bfa;">5. VERİ FÜZYONU ve FİNAL SKOR</span>
             </div>
             <div class="algo-description">
-                Tüm alt sistemlerden gelen skorlar ağırlıklı ortalama ile birleştirilir. Biyolojik faktörler (mevsim, tür davranışı) 
-                %25, çevresel faktörler (sıcaklık, dalga, rüzgar) %50, tetikleyiciler (solunar, basınç trendi) %25 ağırlığa sahiptir.
+                Tüm alt sistemlerden gelen skorlar ağırlıklı ortalama ile birleştirilir. Biyolojik faktörler %25, 
+                çevresel faktörler %50, tetikleyiciler %25 ağırlığa sahiptir.
             </div>
             <div class="algo-formula">
-                Final_Skor = (S_bio × 0.25) + (S_env × 0.50) + (S_trigger × 0.25) + Noise(σ=2)<br>
-                Final_Skor = clamp(Final_Skor, 15, 98) → Min %15, Max %98
-            </div>
-            <div class="algo-example">
-                <strong>Güven Aralığı:</strong> Bugün için tahmin güveni %90'dır. Her gün için güven %5 düşer 
-                (yarın %85, 3 gün sonra %75). Bu, meteorolojik tahminlerin doğasından kaynaklanır.
+                Final_Skor = (S_bio × 0.25) + (S_env × 0.50) + (S_trigger × 0.25)
             </div>
             <div class="algo-reference">
                 <span class="ref-icon">📄</span>
                 <div class="ref-content">
-                    <div class="ref-title">"Multi-Sensor Data Fusion for Marine Ecosystem Prediction"</div>
-                    <div class="ref-author">Chen, X. et al. (2021) - Ocean Engineering, Vol. 234</div>
+                    <div class="ref-title">"Multi-Sensor Data Fusion for Marine Prediction"</div>
+                    <div class="ref-author">Chen, X. et al. (2021) - Ocean Engineering</div>
                 </div>
             </div>
+        </div>
+        </div>
+        
+        <div id="tech-content-en" style="display: none;">
+        <!-- 1. FUZZY LOGIC -->
+        <div class="algo-section fuzzy">
+            <div class="algo-title">
+                <span class="icon">🔮</span>
+                <span style="color: var(--cyan);">1. FUZZY LOGIC</span>
+            </div>
+            <div class="algo-description">
+                Nature is never "Black" or "White". Traditional systems say "No fish if water is below 18°C". 
+                But in reality, there's no sharp difference between 17.5°C and 18.5°C. Fuzzy Logic models this 
+                uncertainty by converting each value into a "membership degree" between 0.0 and 1.0.
+            </div>
+            <div class="algo-formula">
+                μ(x) = { 0.2 + 0.8 × (x - min) / (opt_min - min) } → Trapezoid Function
+            </div>
+            <div class="algo-reference">
+                <span class="ref-icon">📄</span>
+                <div class="ref-content">
+                    <div class="ref-title">"Fuzzy Logic Applications in Fisheries Management"</div>
+                    <div class="ref-author">Zadeh, L.A. (1965) - Information and Control, Vol. 8</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. GAUSSIAN BELL CURVE -->
+        <div class="algo-section gaussian">
+            <div class="algo-title">
+                <span class="icon">📊</span>
+                <span style="color: var(--green);">2. GAUSSIAN BELL CURVE (Normal Distribution)</span>
+            </div>
+            <div class="algo-description">
+                Fish are cold-blooded (poikilotherm) and cannot regulate their body temperature. Each species has 
+                an "Optimal Temperature Range" (T_opt) where metabolism works fastest. The further the water temperature 
+                deviates from optimal, the lower the fish activity.
+            </div>
+            <div class="algo-formula">
+                f(T) = exp( -(T - T_opt)² / (2σ²) ) → σ = Tolerance width
+            </div>
+            <div class="algo-reference">
+                <span class="ref-icon">📄</span>
+                <div class="ref-content">
+                    <div class="ref-title">"Biology and Ecology of European Seabass"</div>
+                    <div class="ref-author">FAO FishBase & Froese, R., Pauly, D. (Eds.)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. SOLUNAR THEORY -->
+        <div class="algo-section solunar">
+            <div class="algo-title">
+                <span class="icon">🌙</span>
+                <span style="color: var(--yellow);">3. SOLUNAR THEORY & MOON PHASE</span>
+            </div>
+            <div class="algo-description">
+                The moon is the ocean's engine. During Full Moon and New Moon, gravitational pull increases and tides 
+                strengthen. Moving water triggers the food chain and forces fish to feed.
+            </div>
+            <div class="algo-formula">
+                Major Period = Moon Transit ± 2 hours → Multiplier: ×1.35<br>
+                Minor Period = Moonrise/set ± 1 hour → Multiplier: ×1.15
+            </div>
+            <div class="algo-reference">
+                <span class="ref-icon">📄</span>
+                <div class="ref-content">
+                    <div class="ref-title">"Solunar Theory and Sport Fishing Success Rates"</div>
+                    <div class="ref-author">Knight, J.A. (1936) - Moon Up, Moon Down</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. LOCAL RULES -->
+        <div class="algo-section local">
+            <div class="algo-title">
+                <span class="icon">🎣</span>
+                <span style="color: var(--orange);">4. LOCAL RULES (Field Intelligence)</span>
+            </div>
+            <div class="algo-description">
+                Academic papers describe lab conditions, Meraloji describes the "spot". A tactic that works in the 
+                Marmara Sea may not work in the Aegean. This is why regional rules matter.
+            </div>
+            <div class="algo-formula">
+                IF (Pressure_Trend = FALLING) THEN "Feeding Frenzy" Mode ACTIVE
+            </div>
+            <div class="algo-reference">
+                <span class="ref-icon">📄</span>
+                <div class="ref-content">
+                    <div class="ref-title">"Wind Effects on Coastal Fish Behavior"</div>
+                    <div class="ref-author">NOAA Fisheries & Marine Ecology Progress Series</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. DATA FUSION -->
+        <div class="algo-section" style="border-left-color: #a78bfa;">
+            <div class="algo-title">
+                <span class="icon">🧬</span>
+                <span style="color: #a78bfa;">5. DATA FUSION & FINAL SCORE</span>
+            </div>
+            <div class="algo-description">
+                Scores from all subsystems are combined using weighted average. Biological factors 25%, 
+                environmental factors 50%, triggers 25%.
+            </div>
+            <div class="algo-formula">
+                Final_Score = (S_bio × 0.25) + (S_env × 0.50) + (S_trigger × 0.25)
+            </div>
+            <div class="algo-reference">
+                <span class="ref-icon">📄</span>
+                <div class="ref-content">
+                    <div class="ref-title">"Multi-Sensor Data Fusion for Marine Prediction"</div>
+                    <div class="ref-author">Chen, X. et al. (2021) - Ocean Engineering</div>
+                </div>
+            </div>
+        </div>
         </div>
     </div>
 
@@ -1562,6 +1861,8 @@
                 landMessage: "Burası kara parçası. Lütfen denizde bir nokta seçin.",
                 noSeaData: "Deniz verisi bulunamadı",
                 selectSea: "🌊 Denizde bir nokta seçtiğinizde<br>balık analizi burada görünecek",
+                region: "Bölge",
+                depth: "Derinlik",
                 
                 // İlk ekran yönlendirme
                 welcomeTitle: "BALIK MERA ANALİZİ",
@@ -1576,6 +1877,7 @@
                 eveningWaterTip: "Gün batımı ±2 saat. Günün en verimli saatleri.",
                 nightHuntTip: "22:00 - 03:00. Eşkina, Mırmır, İskorpit aktif.",
                 noonTip: "11:00 - 16:00. Aktivite düşük.",
+                activityPeriods: "Aktivite Saatleri",
                 
                 // Balık Kartı
                 bait: "Yem",
@@ -1588,11 +1890,14 @@
                 species: "Türler",
                 speciesHint: "Detay için tıklayın",
                 noData: "Veri bulunamadı",
+                fishDetails: "Balık Detayları",
+                triggers: "Tetikleyiciler",
                 
                 // Metrikler
                 waterTemp: "Su Sıcaklığı",
                 wave: "Dalga",
                 wind: "Rüzgar",
+                windDir: "Rüzgar Yönü",
                 clarity: "Berraklık",
                 pressure: "Basınç",
                 salinity: "Tuzluluk",
@@ -1600,41 +1905,127 @@
                 tide: "Gel-Git",
                 current: "Akıntı",
                 cloud: "Bulut",
+                seabedLayer: "Deniz Tabanı",
+                
+                // Rüzgar Yönleri
+                windNorth: "Poyraz",
+                windNorthEast: "Kuzey Doğu",
+                windEast: "Doğu",
+                windSouthEast: "Keşişleme",
+                windSouth: "Lodos",
+                windSouthWest: "Güney Batı",
+                windWest: "Batı",
+                windNorthWest: "Karayel",
+                windCalm: "Sakin",
                 
                 // Zaman
                 time: "Saat",
                 connecting: "Bağlantı",
                 processing: "Deniz verileri işleniyor...",
                 complete: "Hesaplama tamamlandı.",
+                today: "Bugün",
+                tomorrow: "Yarın",
                 
                 // Menü
                 menu: "MERALOJİ",
                 favorites: "Favori Meralarım",
                 noFavorites: "Henüz favori eklenmedi",
                 mapLayer: "Harita Katmanı",
-                weeklyForecast: "7 Günlük Tahmin Raporu",
+                weeklyForecast: "7 Günlük Tahmin",
                 addFavorite: "Favorilere Kaydet",
-                algorithm: "Algoritma Dokümantasyonu",
+                removeFavorite: "Favorilerden Çıkar",
+                algorithm: "Algoritma",
                 about: "Hakkında",
+                settings: "Ayarlar",
                 
                 // Modallar
                 close: "Kapat",
                 metricInfo: "Metrik Bilgisi",
                 reference: "Referans Değerler",
-                algorithmUsed: "Kullanılan Algoritma",
+                algorithmUsed: "Algoritma",
                 source: "Kaynak",
                 importance: "Önemi",
+                description: "Açıklama",
                 
                 // Haftalık tahmin
                 weeklyTitle: "7 Günlük Tahmin",
                 day: "Gün",
                 topSpecies: "En İyi Türler",
                 tactic: "Taktik",
+                weather: "Hava",
+                conditions: "Koşullar",
                 
                 // Harita katmanları
                 geographic: "Coğrafi",
                 satellite: "Uydu",
-                dark: "Karanlık"
+                dark: "Karanlık",
+                
+                // Durum mesajları
+                loading: "Yükleniyor...",
+                error: "Hata oluştu",
+                retry: "Tekrar Dene",
+                success: "Başarılı",
+                warning: "Uyarı",
+                danger: "Tehlike",
+                storm: "Fırtına",
+                feedingFrenzy: "Beslenme Çılgınlığı",
+                
+                // Birimler
+                meters: "m",
+                celsius: "°C",
+                kmh: "km/s",
+                hpa: "hPa",
+                psu: "PSU",
+                percent: "%",
+                
+                // Hava Durumu
+                STORM_RISK: "⚠️ FIRTINA RİSKİ",
+                VERY_WINDY: "💨 ÇOK SERT RÜZGAR",
+                WINDY: "💨 RÜZGARLI",
+                HEAVY_RAIN: "🌧️ YOĞUN YAĞIŞ",
+                RAINY: "🌦️ YAĞMURLU",
+                FOGGY: "🌫️ SİSLİ / PUSLU",
+                OVERCAST: "☁️ KAPALI",
+                PARTLY_CLOUDY: "⛅ PARÇALI BULUTLU",
+                SLIGHTLY_CLOUDY: "🌤️ AZ BULUTLU",
+                CLEAR_SUNNY: "☀️ AÇIK / GÜNEŞLİ",
+                
+                // Taktik Metinleri
+                TACTIC_LAND: "Burası kara parçası.",
+                TACTIC_HIGH_WAVE: "⚠️ TEHLİKE! Dalga çok yüksek.",
+                TACTIC_STORM: "⚠️ FIRTINA ALARMI!",
+                TACTIC_FEEDING_FRENZY: "⚡ FEEDING FRENZY! Basınç hızla düşüyor!",
+                TACTIC_PRESSURE_DROP: "📉 Basınç düşüyor. Avcı balıklar aktif.",
+                TACTIC_WAVY_MURKY: "Dalgalı ve bulanık. Levrek/Karagöz için ideal.",
+                TACTIC_NIGHT: "🌙 GECE: Eşkina, Mırmır, İskorpit aktif.",
+                TACTIC_DAWN: "🌅 ŞAFAK: Levrek/Lüfer için en iyi zaman.",
+                TACTIC_DUSK: "🌆 AKŞAM: Avcı balıklar besleniyor.",
+                TACTIC_GOLDEN_HOURS: "✨ Altın saatler! Levrek/Lüfer aktif.",
+                TACTIC_DAY: "☀️ GÜNDÜZ: Çipura, Kefal hedefleyin.",
+                TACTIC_STANDARD: "Standart koşullar.",
+                
+                // Yasal Boy
+                legalSizeNone: "Yok",
+                
+                // Algoritma Modal
+                algorithmTitle: "F.I.S.H. ALGORITHM",
+                algorithmSubtitle: "Bulanık Mantık + Çok Katmanlı Puanlama",
+                algorithmDesc: "F.I.S.H. (Fishing Intelligence Scoring Heuristics) sistemi, deniz koşulları, balık biyolojisi ve astronomi verilerini birleştiren çok katmanlı bir puanlama motoru kullanır.",
+                algorithmComponents: "Temel Bileşenler",
+                gaussianScoring: "Gaussian (Çan Eğrisi) Puanlama",
+                gaussianDesc: "Her balık türü için optimal sıcaklık, dalga, berraklık aralıkları tanımlanır. Mevcut değer bu aralığa ne kadar yakınsa skor o kadar yüksek olur.",
+                solunarTheory: "Solunar Teori",
+                solunarDesc: "Güneş ve ay pozisyonlarına göre major/minor beslenme pencereleri hesaplanır. Ay doğuş/batış ve zenit/nadir saatleri kritik öneme sahiptir.",
+                pressureEffect: "Basınç Etkisi",
+                pressureDesc: "Atmosfer basıncının ani düşüşü (3+ hPa/6 saat) balık aktivitesini tetikler. 'Feeding Frenzy' durumu oluşur.",
+                regionalFactors: "Bölgesel Faktörler",
+                regionalDesc: "Her deniz bölgesi (Ege, Marmara, Karadeniz, Akdeniz) için farklı rüzgar, akıntı ve tuzluluk dinamikleri hesaplanır.",
+                dataSources: "Veri Kaynakları",
+                source1: "Open-Meteo Marine & Weather API",
+                source2: "EMODnet Bathymetry (Derinlik)",
+                source3: "SunCalc (Astronomi Hesaplamaları)",
+                source4: "FAO FishBase (Tür Verileri)",
+                confidenceNote: "Güven skoru uzak günlerde azalır (günde -%6)."
             },
             en: {
                 // General
@@ -1646,6 +2037,8 @@
                 landMessage: "This is land. Please select a point on the sea.",
                 noSeaData: "No marine data available",
                 selectSea: "🌊 Select a point on the sea<br>to see fish analysis",
+                region: "Region",
+                depth: "Depth",
                 
                 // Welcome screen
                 welcomeTitle: "FISHING SPOT ANALYSIS",
@@ -1660,6 +2053,7 @@
                 eveningWaterTip: "Sunset ±2 hours. Most productive hours.",
                 nightHuntTip: "22:00 - 03:00. Brown Meagre, Striped Bream active.",
                 noonTip: "11:00 - 16:00. Low activity.",
+                activityPeriods: "Activity Periods",
                 
                 // Fish Card
                 bait: "Bait",
@@ -1672,11 +2066,14 @@
                 species: "Species",
                 speciesHint: "Tap for details",
                 noData: "No data available",
+                fishDetails: "Fish Details",
+                triggers: "Triggers",
                 
                 // Metrics
                 waterTemp: "Water Temp",
                 wave: "Wave",
                 wind: "Wind",
+                windDir: "Wind Dir",
                 clarity: "Clarity",
                 pressure: "Pressure",
                 salinity: "Salinity",
@@ -1684,46 +2081,156 @@
                 tide: "Tide",
                 current: "Current",
                 cloud: "Cloud",
+                seabedLayer: "Seabed",
+                
+                // Wind Directions
+                windNorth: "North",
+                windNorthEast: "NE",
+                windEast: "East",
+                windSouthEast: "SE",
+                windSouth: "South",
+                windSouthWest: "SW",
+                windWest: "West",
+                windNorthWest: "NW",
+                windCalm: "Calm",
                 
                 // Time
                 time: "Time",
                 connecting: "Connecting",
                 processing: "Processing marine data...",
                 complete: "Analysis complete.",
+                today: "Today",
+                tomorrow: "Tomorrow",
                 
                 // Menu
                 menu: "MERALOJI",
-                favorites: "My Favorite Spots",
-                noFavorites: "No favorites added yet",
+                favorites: "My Favorites",
+                noFavorites: "No favorites yet",
                 mapLayer: "Map Layer",
-                weeklyForecast: "7-Day Forecast Report",
+                weeklyForecast: "7-Day Forecast",
                 addFavorite: "Add to Favorites",
-                algorithm: "Algorithm Documentation",
+                removeFavorite: "Remove from Favorites",
+                algorithm: "Algorithm",
                 about: "About",
+                settings: "Settings",
                 
                 // Modals
                 close: "Close",
                 metricInfo: "Metric Info",
                 reference: "Reference Values",
-                algorithmUsed: "Algorithm Used",
+                algorithmUsed: "Algorithm",
                 source: "Source",
                 importance: "Importance",
+                description: "Description",
                 
                 // Weekly forecast
                 weeklyTitle: "7-Day Forecast",
                 day: "Day",
                 topSpecies: "Top Species",
                 tactic: "Tactic",
+                weather: "Weather",
+                conditions: "Conditions",
                 
                 // Map layers
                 geographic: "Geographic",
                 satellite: "Satellite",
-                dark: "Dark"
+                dark: "Dark",
+                
+                // Status messages
+                loading: "Loading...",
+                error: "Error occurred",
+                retry: "Retry",
+                success: "Success",
+                warning: "Warning",
+                danger: "Danger",
+                storm: "Storm",
+                feedingFrenzy: "Feeding Frenzy",
+                
+                // Units
+                meters: "m",
+                celsius: "°C",
+                kmh: "km/h",
+                hpa: "hPa",
+                psu: "PSU",
+                percent: "%",
+                
+                // Weather Conditions
+                STORM_RISK: "⚠️ STORM RISK",
+                VERY_WINDY: "💨 VERY WINDY",
+                WINDY: "💨 WINDY",
+                HEAVY_RAIN: "🌧️ HEAVY RAIN",
+                RAINY: "🌦️ RAINY",
+                FOGGY: "🌫️ FOGGY / MISTY",
+                OVERCAST: "☁️ OVERCAST",
+                PARTLY_CLOUDY: "⛅ PARTLY CLOUDY",
+                SLIGHTLY_CLOUDY: "🌤️ SLIGHTLY CLOUDY",
+                CLEAR_SUNNY: "☀️ CLEAR / SUNNY",
+                
+                // Tactic Messages
+                TACTIC_LAND: "This is land area.",
+                TACTIC_HIGH_WAVE: "⚠️ DANGER! Waves too high.",
+                TACTIC_STORM: "⚠️ STORM ALERT!",
+                TACTIC_FEEDING_FRENZY: "⚡ FEEDING FRENZY! Pressure dropping fast!",
+                TACTIC_PRESSURE_DROP: "📉 Pressure dropping. Predators active.",
+                TACTIC_WAVY_MURKY: "Wavy and murky. Ideal for Sea Bass/Seabream.",
+                TACTIC_NIGHT: "🌙 NIGHT: Brown Meagre, Striped Bream active.",
+                TACTIC_DAWN: "🌅 DAWN: Best time for Sea Bass/Bluefish.",
+                TACTIC_DUSK: "🌆 DUSK: Predator fish are feeding.",
+                TACTIC_GOLDEN_HOURS: "✨ Golden hours! Sea Bass/Bluefish active.",
+                TACTIC_DAY: "☀️ DAYTIME: Target Gilthead, Mullet.",
+                TACTIC_STANDARD: "Standard conditions.",
+                
+                // Legal Size
+                legalSizeNone: "None",
+                
+                // Algorithm Modal
+                algorithmTitle: "F.I.S.H. ALGORITHM",
+                algorithmSubtitle: "Fuzzy Logic + Multi-Layer Scoring",
+                algorithmDesc: "F.I.S.H. (Fishing Intelligence Scoring Heuristics) uses a multi-layer scoring engine combining marine conditions, fish biology, and astronomical data.",
+                algorithmComponents: "Core Components",
+                gaussianScoring: "Gaussian (Bell Curve) Scoring",
+                gaussianDesc: "Optimal temperature, wave, and clarity ranges are defined for each species. The closer to optimal, the higher the score.",
+                solunarTheory: "Solunar Theory",
+                solunarDesc: "Major/minor feeding windows are calculated based on sun and moon positions. Moonrise/set and zenith/nadir times are critical.",
+                pressureEffect: "Pressure Effect",
+                pressureDesc: "Rapid pressure drops (3+ hPa/6 hours) trigger fish activity. Creates 'Feeding Frenzy' conditions.",
+                regionalFactors: "Regional Factors",
+                regionalDesc: "Different wind, current, and salinity dynamics are calculated for each sea region (Aegean, Marmara, Black Sea, Mediterranean).",
+                dataSources: "Data Sources",
+                source1: "Open-Meteo Marine & Weather API",
+                source2: "EMODnet Bathymetry (Depth)",
+                source3: "SunCalc (Astronomy Calculations)",
+                source4: "FAO FishBase (Species Data)",
+                confidenceNote: "Confidence decreases for distant days (-6% per day)."
             }
         };
         
         function t(key) {
             return TRANSLATIONS[CURRENT_LANG][key] || key;
+        }
+        
+        // Rüzgar yönünü derece'den isme çevirme
+        function getWindDirectionName(degrees) {
+            if (degrees === undefined || degrees === null) return t('windCalm');
+            
+            const directions = [
+                { min: 337.5, max: 360, key: 'windNorth' },
+                { min: 0, max: 22.5, key: 'windNorth' },
+                { min: 22.5, max: 67.5, key: 'windNorthEast' },
+                { min: 67.5, max: 112.5, key: 'windEast' },
+                { min: 112.5, max: 157.5, key: 'windSouthEast' },
+                { min: 157.5, max: 202.5, key: 'windSouth' },
+                { min: 202.5, max: 247.5, key: 'windSouthWest' },
+                { min: 247.5, max: 292.5, key: 'windWest' },
+                { min: 292.5, max: 337.5, key: 'windNorthWest' }
+            ];
+            
+            for (const dir of directions) {
+                if (degrees >= dir.min && degrees < dir.max) {
+                    return t(dir.key);
+                }
+            }
+            return t('windCalm');
         }
         
         function toggleLanguage() {
@@ -1748,204 +2255,124 @@
             const speciesTitle = document.getElementById('species-title');
             if (speciesTitle) speciesTitle.innerText = t('species') + ' (' + t('speciesHint') + ')';
             
+            // HUD butonları güncelle
+            const weeklyBtn = document.getElementById('weekly-btn');
+            if (weeklyBtn) weeklyBtn.innerHTML = '📅 ' + t('weeklyForecast');
+            
+            const favoriteBtn = document.getElementById('favorite-btn');
+            if (favoriteBtn) favoriteBtn.innerHTML = '⭐ ' + t('addFavorite');
+            
+            // Menü elementleri güncelle
+            const menuTitle = document.getElementById('menu-title');
+            if (menuTitle) menuTitle.innerText = t('menu');
+            
+            const favSectionTitle = document.getElementById('fav-section-title');
+            if (favSectionTitle) favSectionTitle.innerText = t('favorites');
+            
+            const mapLayerBtnText = document.getElementById('map-layer-btn-text');
+            if (mapLayerBtnText) mapLayerBtnText.innerText = t('mapLayer');
+            
+            const algoBtnText = document.getElementById('algo-btn-text');
+            if (algoBtnText) algoBtnText.innerText = t('algorithm');
+            
+            // Modal başlıkları güncelle
+            const weeklyModalTitle = document.getElementById('weekly-modal-title');
+            if (weeklyModalTitle) weeklyModalTitle.innerText = t('weeklyTitle');
+            
+            const dayModalTitle = document.getElementById('day-modal-title');
+            if (dayModalTitle) dayModalTitle.innerText = CURRENT_LANG === 'tr' ? 'Gün Detayı' : 'Day Details';
+            
+            const ddSpeciesTitle = document.getElementById('dd-species-title');
+            if (ddSpeciesTitle) ddSpeciesTitle.innerText = t('species');
+            
+            const techModalTitle = document.getElementById('tech-modal-title');
+            if (techModalTitle) techModalTitle.innerText = CURRENT_LANG === 'tr' ? 'F.I.S.H. ALGORİTMASI' : 'F.I.S.H. ALGORITHM';
+            
+            // Metric modal etiketleri güncelle
+            const metricDefLabel = document.getElementById('metric-def-label');
+            if (metricDefLabel) metricDefLabel.innerHTML = '📖 ' + (CURRENT_LANG === 'tr' ? 'Tanım' : 'Definition');
+            
+            const metricImpLabel = document.getElementById('metric-imp-label');
+            if (metricImpLabel) metricImpLabel.innerHTML = '🎯 ' + (CURRENT_LANG === 'tr' ? 'Balıkçılıkta Önemi' : 'Importance in Fishing');
+            
+            const metricRefLabel = document.getElementById('metric-ref-label');
+            if (metricRefLabel) metricRefLabel.innerHTML = '📊 ' + (CURRENT_LANG === 'tr' ? 'Referans Aralığı' : 'Reference Range');
+            
+            const metricAlgoLabel = document.getElementById('metric-algo-label');
+            if (metricAlgoLabel) metricAlgoLabel.innerHTML = '⚙️ ' + (CURRENT_LANG === 'tr' ? 'Algoritma Etkisi' : 'Algorithm Effect');
+            
+            const metricSourceLabel = document.getElementById('metric-source-label');
+            if (metricSourceLabel) metricSourceLabel.innerHTML = '📚 ' + (CURRENT_LANG === 'tr' ? 'Bilimsel Kaynak' : 'Scientific Source');
+            
+            const metricCloseBtn = document.getElementById('metric-close-btn');
+            if (metricCloseBtn) metricCloseBtn.innerText = t('close').toUpperCase();
+            
             // Eğer veri varsa paneli yeniden render et
             if (GLOBAL_DATA) {
                 const targetData = CURRENT_MODE === 'daily' ? GLOBAL_DATA.forecast[0] : GLOBAL_DATA.instant;
                 renderPanel(GLOBAL_DATA, targetData);
             }
         }
+        
+        // Modal açıldığında scroll to top
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                modal.scrollTop = 0; // Scroll to top
+            }
+        }
+        
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
 
         // Popüler Balıkçılık Meraları - Akıllı Arama için
-const FISHING_SPOTS = [
-    { name: "Foça", region: "İzmir / Ege", lat: 38.6697, lon: 26.7572 },
-    { name: "Çeşme", region: "İzmir / Ege", lat: 38.3236, lon: 26.3029 },
-    { name: "Urla", region: "İzmir / Ege", lat: 38.3225, lon: 26.7645 },
-    { name: "Seferihisar", region: "İzmir / Ege", lat: 38.1975, lon: 26.8408 },
-    { name: "Dikili", region: "İzmir / Ege", lat: 39.0714, lon: 26.8886 },
-    { name: "Karaburun", region: "İzmir / Ege", lat: 38.6381, lon: 26.5097 },
-    { name: "Ayvalık", region: "Balıkesir / Ege", lat: 39.3125, lon: 26.6944 },
-    { name: "Cunda Adası", region: "Balıkesir / Ege", lat: 39.3300, lon: 26.7100 },
-    { name: "Bodrum", region: "Muğla / Ege", lat: 37.0344, lon: 27.4305 },
-    { name: "Datça", region: "Muğla / Ege", lat: 36.7333, lon: 27.6833 },
-    { name: "Marmaris", region: "Muğla / Ege", lat: 36.8550, lon: 28.2744 },
-    { name: "Fethiye", region: "Muğla / Akdeniz", lat: 36.6514, lon: 29.1231 },
-    { name: "Kaş", region: "Antalya / Akdeniz", lat: 36.2000, lon: 29.6500 },
-    { name: "Alanya", region: "Antalya / Akdeniz", lat: 36.5444, lon: 31.9994 },
-    { name: "Side", region: "Antalya / Akdeniz", lat: 36.7675, lon: 31.3903 },
-    { name: "Antalya Kaleiçi", region: "Antalya / Akdeniz", lat: 36.8841, lon: 30.7056 },
-    { name: "Beşiktaş", region: "İstanbul / Marmara", lat: 41.0422, lon: 29.0053 },
-    { name: "Sarıyer", region: "İstanbul / Marmara", lat: 41.1669, lon: 29.0572 },
-    { name: "Rumeli Kavağı", region: "İstanbul / Marmara", lat: 41.1775, lon: 29.0758 },
-    { name: "Anadolu Kavağı", region: "İstanbul / Marmara", lat: 41.1794, lon: 29.0875 },
-    { name: "Bebek", region: "İstanbul / Marmara", lat: 41.0769, lon: 29.0431 },
-    { name: "Florya", region: "İstanbul / Marmara", lat: 40.9667, lon: 28.7833 },
-    { name: "Kadıköy", region: "İstanbul / Marmara", lat: 40.9819, lon: 29.0231 },
-    { name: "Adalar (Büyükada)", region: "İstanbul / Marmara", lat: 40.8686, lon: 29.1256 },
-    { name: "Yalova", region: "Yalova / Marmara", lat: 40.6550, lon: 29.2756 },
-    { name: "Mudanya", region: "Bursa / Marmara", lat: 40.3764, lon: 28.8828 },
-    { name: "Erdek", region: "Balıkesir / Marmara", lat: 40.3972, lon: 27.7917 },
-    { name: "Marmara Adası", region: "Balıkesir / Marmara", lat: 40.6167, lon: 27.6167 },
-    { name: "Bandırma", region: "Balıkesir / Marmara", lat: 40.3500, lon: 27.9667 },
-    { name: "Çanakkale", region: "Çanakkale / Marmara", lat: 40.1553, lon: 26.4142 },
-    { name: "Gelibolu", region: "Çanakkale / Marmara", lat: 40.4097, lon: 26.6703 },
-    { name: "Sinop", region: "Sinop / Karadeniz", lat: 42.0231, lon: 35.1531 },
-    { name: "Amasra", region: "Bartın / Karadeniz", lat: 41.7472, lon: 32.3864 },
-    { name: "Trabzon", region: "Trabzon / Karadeniz", lat: 41.0027, lon: 39.7168 },
-    { name: "Rize", region: "Rize / Karadeniz", lat: 41.0201, lon: 40.5234 },
-    { name: "Samsun", region: "Samsun / Karadeniz", lat: 41.2867, lon: 36.3300 },
-    { name: "Giresun", region: "Giresun / Karadeniz", lat: 40.9128, lon: 38.3895 },
-    { name: "Akçakoca", region: "Düzce / Karadeniz", lat: 41.0833, lon: 31.1167 },
-    { name: "Mersin", region: "Mersin / Akdeniz", lat: 36.8000, lon: 34.6333 },
-    { name: "İskenderun", region: "Hatay / Akdeniz", lat: 36.5817, lon: 36.1700 },
-    // Eklenen Yeni Meralar
-    { name: "Galata Köprüsü", region: "İstanbul / Marmara", lat: 41.0203, lon: 28.9733 },
-    { name: "Kuleli", region: "İstanbul / Marmara", lat: 41.0569, lon: 29.0528 },
-    { name: "Tuzla", region: "İstanbul / Marmara", lat: 40.8175, lon: 29.3039 },
-    { name: "Şile", region: "İstanbul / Karadeniz", lat: 41.1764, lon: 29.6133 },
-    { name: "Kuşadası", region: "Aydın / Ege", lat: 37.8579, lon: 27.2610 },
-    { name: "Didim", region: "Aydın / Ege", lat: 37.3697, lon: 27.2647 },
-    { name: "Gökova", region: "Muğla / Ege", lat: 37.0547, lon: 28.3267 },
-    { name: "Kemer", region: "Antalya / Akdeniz", lat: 36.6025, lon: 30.5606 },
-    { name: "Finike", region: "Antalya / Akdeniz", lat: 36.2958, lon: 30.1417 },
-    { name: "Samandağ", region: "Hatay / Akdeniz", lat: 36.0828, lon: 35.9772 },
-    { name: "Tekirdağ", region: "Tekirdağ / Marmara", lat: 40.9833, lon: 27.5167 },
-    { name: "Şarköy", region: "Tekirdağ / Marmara", lat: 40.6186, lon: 27.1128 },
-    { name: "İğneada", region: "Kırklareli / Karadeniz", lat: 41.8767, lon: 27.9856 },
-    { name: "Kıyıköy", region: "Kırklareli / Karadeniz", lat: 41.6375, lon: 28.0931 },
-    { name: "Zonguldak", region: "Zonguldak / Karadeniz", lat: 41.4564, lon: 31.7987 },
-    { name: "Ordu", region: "Ordu / Karadeniz", lat: 40.9839, lon: 37.8764 },
-    { name: "Hopa", region: "Artvin / Karadeniz", lat: 41.4019, lon: 41.4336 },
-    { name: "Gökçeada", region: "Çanakkale / Ege", lat: 40.1872, lon: 25.9083 },
-    { name: "Bozcaada", region: "Çanakkale / Ege", lat: 39.8333, lon: 26.0667 },
-    // Yeni Eklenenler
-    { name: "Eminönü", region: "İstanbul / Marmara", lat: 41.0178, lon: 28.9703 },
-    { name: "Üsküdar", region: "İstanbul / Marmara", lat: 41.0225, lon: 29.0100 },
-    { name: "Ortaköy", region: "İstanbul / Marmara", lat: 41.0547, lon: 29.0269 },
-    { name: "Arnavutköy", region: "İstanbul / Marmara", lat: 41.0672, lon: 29.0431 },
-    { name: "Beylerbeyi", region: "İstanbul / Marmara", lat: 41.0417, lon: 29.0386 },
-    { name: "Kanlıca", region: "İstanbul / Marmara", lat: 41.0786, lon: 29.0611 },
-    { name: "Çubuklu", region: "İstanbul / Marmara", lat: 41.0894, lon: 29.0714 },
-    { name: "Paşabahçe", region: "İstanbul / Marmara", lat: 41.0978, lon: 29.0803 },
-    { name: "Beykoz", region: "İstanbul / Marmara", lat: 41.1267, lon: 29.0983 },
-    { name: "Silivri", region: "İstanbul / Marmara", lat: 41.0767, lon: 28.2467 },
-    { name: "Çatalca", region: "İstanbul / Marmara", lat: 41.1419, lon: 28.4619 },
-    { name: "Büyükçekmece", region: "İstanbul / Marmara", lat: 41.0189, lon: 28.5808 },
-    { name: "Küçükçekmece", region: "İstanbul / Marmara", lat: 41.0086, lon: 28.7750 },
-    { name: "Yeşilköy", region: "İstanbul / Marmara", lat: 40.9706, lon: 28.8114 },
-    { name: "Bakırköy Sahil", region: "İstanbul / Marmara", lat: 40.9789, lon: 28.8739 },
-    { name: "Zeytinburnu", region: "İstanbul / Marmara", lat: 40.9908, lon: 28.9078 },
-    { name: "Kumkapı", region: "İstanbul / Marmara", lat: 41.0047, lon: 28.9544 },
-    { name: "Yenikapı", region: "İstanbul / Marmara", lat: 41.0075, lon: 28.9492 },
-    { name: "Caddebostan", region: "İstanbul / Marmara", lat: 40.9689, lon: 29.0500 },
-    { name: "Bostancı", region: "İstanbul / Marmara", lat: 40.9558, lon: 29.0872 },
-    { name: "Maltepe Sahil", region: "İstanbul / Marmara", lat: 40.9292, lon: 29.1381 },
-    { name: "Kartal Sahil", region: "İstanbul / Marmara", lat: 40.9014, lon: 29.1756 },
-    { name: "Pendik", region: "İstanbul / Marmara", lat: 40.8761, lon: 29.2308 },
-    { name: "Gemlik", region: "Bursa / Marmara", lat: 40.4303, lon: 29.1558 },
-    { name: "Gönen", region: "Balıkesir / Marmara", lat: 40.1031, lon: 27.6478 },
-    { name: "Güzelçamlı", region: "Aydın / Ege", lat: 37.7028, lon: 27.2486 },
-    { name: "Akbük", region: "Muğla / Ege", lat: 37.3772, lon: 27.5631 },
-    { name: "Turgutreis", region: "Muğla / Ege", lat: 37.0042, lon: 27.2486 },
-    { name: "Gümbet", region: "Muğla / Ege", lat: 37.0314, lon: 27.3933 },
-    { name: "Bitez", region: "Muğla / Ege", lat: 37.0228, lon: 27.4131 },
-    { name: "Gümüşlük", region: "Muğla / Ege", lat: 37.0450, lon: 27.2261 },
-    { name: "Yalıkavak", region: "Muğla / Ege", lat: 37.1342, lon: 27.2639 },
-    { name: "Torba", region: "Muğla / Ege", lat: 37.0744, lon: 27.4800 },
-    { name: "Güllük", region: "Muğla / Ege", lat: 37.2539, lon: 27.5994 },
-    { name: "Milas", region: "Muğla / Ege", lat: 37.3167, lon: 27.7833 },
-    { name: "Ören", region: "Muğla / Ege", lat: 37.4247, lon: 27.7764 },
-    { name: "Akyaka", region: "Muğla / Ege", lat: 37.0525, lon: 28.3306 },
-    { name: "İçmeler", region: "Muğla / Ege", lat: 36.7600, lon: 28.2236 },
-    { name: "Turunç", region: "Muğla / Ege", lat: 36.7817, lon: 28.2194 },
-    { name: "Selimiye", region: "Muğla / Ege", lat: 36.7128, lon: 28.0328 },
-    { name: "Bozburun", region: "Muğla / Ege", lat: 36.6953, lon: 27.9586 },
-    { name: "Dalyan", region: "Muğla / Ege", lat: 36.8364, lon: 28.6431 },
-    { name: "Ekincik", region: "Muğla / Ege", lat: 36.8742, lon: 28.6714 },
-    { name: "Göcek", region: "Muğla / Ege", lat: 36.7519, lon: 28.9353 },
-    { name: "Ölüdeniz", region: "Muğla / Akdeniz", lat: 36.5475, lon: 29.1164 },
-    { name: "Çalış", region: "Muğla / Akdeniz", lat: 36.6228, lon: 29.0919 },
-    { name: "Kalkan", region: "Antalya / Akdeniz", lat: 36.2647, lon: 29.4069 },
-    { name: "Patara", region: "Antalya / Akdeniz", lat: 36.2700, lon: 29.3175 },
-    { name: "Demre", region: "Antalya / Akdeniz", lat: 36.2447, lon: 29.9861 },
-    { name: "Olympos", region: "Antalya / Akdeniz", lat: 36.4011, lon: 30.4736 },
-    { name: "Çıralı", region: "Antalya / Akdeniz", lat: 36.4028, lon: 30.4756 },
-    { name: "Tekirova", region: "Antalya / Akdeniz", lat: 36.5117, lon: 30.5264 },
-    { name: "Beldibi", region: "Antalya / Akdeniz", lat: 36.6428, lon: 30.5769 },
-    { name: "Göynük", region: "Antalya / Akdeniz", lat: 36.6886, lon: 30.5431 },
-    { name: "Lara", region: "Antalya / Akdeniz", lat: 36.8400, lon: 30.7550 },
-    { name: "Kundu", region: "Antalya / Akdeniz", lat: 36.8319, lon: 30.8175 },
-    { name: "Belek", region: "Antalya / Akdeniz", lat: 36.8631, lon: 31.0542 },
-    { name: "Kadriye", region: "Antalya / Akdeniz", lat: 36.8886, lon: 31.1386 },
-    { name: "Serik", region: "Antalya / Akdeniz", lat: 36.9189, lon: 31.1008 },
-    { name: "Manavgat", region: "Antalya / Akdeniz", lat: 36.7878, lon: 31.4433 },
-    { name: "Kumköy", region: "Antalya / Akdeniz", lat: 36.7489, lon: 31.4108 },
-    { name: "Sorgun", region: "Antalya / Akdeniz", lat: 36.7317, lon: 31.4606 },
-    { name: "Titreyengöl", region: "Antalya / Akdeniz", lat: 36.7658, lon: 31.4756 },
-    { name: "Kızılağaç", region: "Antalya / Akdeniz", lat: 36.7133, lon: 31.5219 },
-    { name: "İncekum", region: "Antalya / Akdeniz", lat: 36.5550, lon: 32.0772 },
-    { name: "Avsallar", region: "Antalya / Akdeniz", lat: 36.6100, lon: 31.7989 },
-    { name: "Mahmutlar", region: "Antalya / Akdeniz", lat: 36.4992, lon: 32.0739 },
-    { name: "Gazipaşa", region: "Antalya / Akdeniz", lat: 36.2681, lon: 32.3089 },
-    { name: "Anamur", region: "Mersin / Akdeniz", lat: 36.0792, lon: 32.8372 },
-    { name: "Bozyazı", region: "Mersin / Akdeniz", lat: 36.1033, lon: 32.9722 },
-    { name: "Silifke", region: "Mersin / Akdeniz", lat: 36.3778, lon: 33.9333 },
-    { name: "Taşucu", region: "Mersin / Akdeniz", lat: 36.3189, lon: 33.8811 },
-    { name: "Kızkalesi", region: "Mersin / Akdeniz", lat: 36.4517, lon: 34.1475 },
-    { name: "Erdemli", region: "Mersin / Akdeniz", lat: 36.6053, lon: 34.3056 },
-    { name: "Viranşehir", region: "Mersin / Akdeniz", lat: 36.7522, lon: 34.4911 },
-    { name: "Yumurtalık", region: "Adana / Akdeniz", lat: 36.7714, lon: 35.7914 },
-    { name: "Karataş", region: "Adana / Akdeniz", lat: 36.5650, lon: 35.3839 },
-    { name: "Arsuz", region: "Hatay / Akdeniz", lat: 36.4167, lon: 35.8917 },
-    { name: "Çevlik", region: "Hatay / Akdeniz", lat: 36.1119, lon: 35.9419 },
-    { name: "Bartın", region: "Bartın / Karadeniz", lat: 41.6344, lon: 32.3375 },
-    { name: "İnkumu", region: "Bartın / Karadeniz", lat: 41.7067, lon: 32.4489 },
-    { name: "Kurucaşile", region: "Bartın / Karadeniz", lat: 41.8350, lon: 32.7214 },
-    { name: "Cide", region: "Kastamonu / Karadeniz", lat: 41.8886, lon: 33.0231 },
-    { name: "İnebolu", region: "Kastamonu / Karadeniz", lat: 41.9756, lon: 33.7656 },
-    { name: "Abana", region: "Kastamonu / Karadeniz", lat: 41.9786, lon: 34.0175 },
-    { name: "Ayancık", region: "Sinop / Karadeniz", lat: 41.9467, lon: 34.5878 },
-    { name: "Gerze", region: "Sinop / Karadeniz", lat: 41.8044, lon: 35.1944 },
-    { name: "Bafra", region: "Samsun / Karadeniz", lat: 41.5692, lon: 35.9081 },
-    { name: "Çarşamba", region: "Samsun / Karadeniz", lat: 41.1967, lon: 36.7242 },
-    { name: "Terme", region: "Samsun / Karadeniz", lat: 41.2092, lon: 36.9758 },
-    { name: "Ünye", region: "Ordu / Karadeniz", lat: 41.1272, lon: 37.2828 },
-    { name: "Fatsa", region: "Ordu / Karadeniz", lat: 41.0289, lon: 37.5017 },
-    { name: "Perşembe", region: "Ordu / Karadeniz", lat: 41.0644, lon: 37.7700 },
-    { name: "Tirebolu", region: "Giresun / Karadeniz", lat: 41.0031, lon: 38.8142 },
-    { name: "Görele", region: "Giresun / Karadeniz", lat: 41.0342, lon: 39.0019 },
-    { name: "Espiye", region: "Giresun / Karadeniz", lat: 40.9486, lon: 38.7111 },
-    { name: "Akçaabat", region: "Trabzon / Karadeniz", lat: 41.0178, lon: 39.5739 },
-    { name: "Yomra", region: "Trabzon / Karadeniz", lat: 40.9547, lon: 40.0556 },
-    { name: "Arsin", region: "Trabzon / Karadeniz", lat: 40.9522, lon: 40.2969 },
-    { name: "Sürmene", region: "Trabzon / Karadeniz", lat: 40.9097, lon: 40.1150 },
-    { name: "Of", region: "Trabzon / Karadeniz", lat: 40.9453, lon: 40.2675 },
-    { name: "Çayeli", region: "Rize / Karadeniz", lat: 41.0911, lon: 40.7194 },
-    { name: "Ardeşen", region: "Rize / Karadeniz", lat: 41.1881, lon: 40.9842 },
-    { name: "Pazar", region: "Rize / Karadeniz", lat: 41.1764, lon: 40.8886 },
-    { name: "Fındıklı", region: "Rize / Karadeniz", lat: 41.2739, lon: 41.1472 },
-    { name: "Arhavi", region: "Artvin / Karadeniz", lat: 41.3556, lon: 41.3222 },
-    { name: "Kemalpaşa", region: "Tekirdağ / Marmara", lat: 40.9450, lon: 27.4500 },
-    { name: "Marmaraereğlisi", region: "Tekirdağ / Marmara", lat: 40.9697, lon: 27.9558 },
-    { name: "Mürefte", region: "Tekirdağ / Marmara", lat: 40.8764, lon: 27.3233 },
-    { name: "Eceabat", region: "Çanakkale / Marmara", lat: 40.1839, lon: 26.3628 },
-    { name: "Kilitbahir", region: "Çanakkale / Marmara", lat: 40.1492, lon: 26.3750 },
-    { name: "Lapseki", region: "Çanakkale / Marmara", lat: 40.3483, lon: 26.6839 },
-    { name: "Biga", region: "Çanakkale / Marmara", lat: 40.2289, lon: 27.2453 },
-    { name: "Karabiga", region: "Çanakkale / Marmara", lat: 40.3922, lon: 27.2967 },
-    { name: "Ezine", region: "Çanakkale / Ege", lat: 39.7875, lon: 26.3417 },
-    { name: "Assos", region: "Çanakkale / Ege", lat: 39.4919, lon: 26.3392 },
-    { name: "Küçükkuyu", region: "Çanakkale / Ege", lat: 39.5069, lon: 26.6756 },
-    { name: "Altınoluk", region: "Balıkesir / Ege", lat: 39.5875, lon: 26.7533 },
-    { name: "Akçay", region: "Balıkesir / Ege", lat: 39.5667, lon: 26.9500 },
-    { name: "Burhaniye", region: "Balıkesir / Ege", lat: 39.5008, lon: 26.9747 },
-    { name: "Gömeç", region: "Balıkesir / Ege", lat: 39.3828, lon: 26.8403 },
-    { name: "Ören (Burhaniye)", region: "Balıkesir / Ege", lat: 39.5836, lon: 27.0333 },
-    { name: "Alibey Adası", region: "Balıkesir / Ege", lat: 39.3525, lon: 26.6700 },
-    { name: "Sarımsaklı", region: "Balıkesir / Ege", lat: 39.4875, lon: 26.7658 },
-    { name: "Güre", region: "Balıkesir / Ege", lat: 39.3878, lon: 27.0567 }
-];
-
-
+        const FISHING_SPOTS = [
+            { name: "Foça", region: "İzmir / Ege", lat: 38.6697, lon: 26.7572 },
+            { name: "Çeşme", region: "İzmir / Ege", lat: 38.3236, lon: 26.3029 },
+            { name: "Urla", region: "İzmir / Ege", lat: 38.3225, lon: 26.7645 },
+            { name: "Seferihisar", region: "İzmir / Ege", lat: 38.1975, lon: 26.8408 },
+            { name: "Dikili", region: "İzmir / Ege", lat: 39.0714, lon: 26.8886 },
+            { name: "Karaburun", region: "İzmir / Ege", lat: 38.6381, lon: 26.5097 },
+            { name: "Ayvalık", region: "Balıkesir / Ege", lat: 39.3125, lon: 26.6944 },
+            { name: "Cunda Adası", region: "Balıkesir / Ege", lat: 39.3300, lon: 26.7100 },
+            { name: "Bodrum", region: "Muğla / Ege", lat: 37.0344, lon: 27.4305 },
+            { name: "Datça", region: "Muğla / Ege", lat: 36.7333, lon: 27.6833 },
+            { name: "Marmaris", region: "Muğla / Ege", lat: 36.8550, lon: 28.2744 },
+            { name: "Fethiye", region: "Muğla / Akdeniz", lat: 36.6514, lon: 29.1231 },
+            { name: "Kaş", region: "Antalya / Akdeniz", lat: 36.2000, lon: 29.6500 },
+            { name: "Alanya", region: "Antalya / Akdeniz", lat: 36.5444, lon: 31.9994 },
+            { name: "Side", region: "Antalya / Akdeniz", lat: 36.7675, lon: 31.3903 },
+            { name: "Antalya Kaleiçi", region: "Antalya / Akdeniz", lat: 36.8841, lon: 30.7056 },
+            { name: "Beşiktaş", region: "İstanbul / Marmara", lat: 41.0422, lon: 29.0053 },
+            { name: "Sarıyer", region: "İstanbul / Marmara", lat: 41.1669, lon: 29.0572 },
+            { name: "Rumeli Kavağı", region: "İstanbul / Marmara", lat: 41.1775, lon: 29.0758 },
+            { name: "Anadolu Kavağı", region: "İstanbul / Marmara", lat: 41.1794, lon: 29.0875 },
+            { name: "Bebek", region: "İstanbul / Marmara", lat: 41.0769, lon: 29.0431 },
+            { name: "Florya", region: "İstanbul / Marmara", lat: 40.9667, lon: 28.7833 },
+            { name: "Kadıköy", region: "İstanbul / Marmara", lat: 40.9819, lon: 29.0231 },
+            { name: "Adalar (Büyükada)", region: "İstanbul / Marmara", lat: 40.8686, lon: 29.1256 },
+            { name: "Yalova", region: "Yalova / Marmara", lat: 40.6550, lon: 29.2756 },
+            { name: "Mudanya", region: "Bursa / Marmara", lat: 40.3764, lon: 28.8828 },
+            { name: "Erdek", region: "Balıkesir / Marmara", lat: 40.3972, lon: 27.7917 },
+            { name: "Marmara Adası", region: "Balıkesir / Marmara", lat: 40.6167, lon: 27.6167 },
+            { name: "Bandırma", region: "Balıkesir / Marmara", lat: 40.3500, lon: 27.9667 },
+            { name: "Çanakkale", region: "Çanakkale / Marmara", lat: 40.1553, lon: 26.4142 },
+            { name: "Gelibolu", region: "Çanakkale / Marmara", lat: 40.4097, lon: 26.6703 },
+            { name: "Sinop", region: "Sinop / Karadeniz", lat: 42.0231, lon: 35.1531 },
+            { name: "Amasra", region: "Bartın / Karadeniz", lat: 41.7472, lon: 32.3864 },
+            { name: "Trabzon", region: "Trabzon / Karadeniz", lat: 41.0027, lon: 39.7168 },
+            { name: "Rize", region: "Rize / Karadeniz", lat: 41.0201, lon: 40.5234 },
+            { name: "Samsun", region: "Samsun / Karadeniz", lat: 41.2867, lon: 36.3300 },
+            { name: "Giresun", region: "Giresun / Karadeniz", lat: 40.9128, lon: 38.3895 },
+            { name: "Akçakoca", region: "Düzce / Karadeniz", lat: 41.0833, lon: 31.1167 },
+            { name: "Mersin", region: "Mersin / Akdeniz", lat: 36.8000, lon: 34.6333 },
+            { name: "İskenderun", region: "Hatay / Akdeniz", lat: 36.5817, lon: 36.1700 }
+        ];
 
         // Detaylı Metrik Bilgileri
         const METRIC_DATA = {
@@ -2079,20 +2506,16 @@ const FISHING_SPOTS = [
         // ═══════════════════════════════════════════════════════════════════
 
         document.addEventListener('DOMContentLoaded', () => {
-    initMap();
-    initSearch();
-    loadFavorites();
+            initMap();
+            initSearch();
+            loadFavorites();
 
-    setTimeout(() => {
-        document.getElementById('splash').classList.add('hidden');
-        document.getElementById('controls').classList.add('visible');
-        
-        // Ekstra güvenlik için burada da çağır
-        if (map && typeof addFishMarkers === 'function') {
-            addFishMarkers();
-        }
-    }, 2500);
-});
+            // Splash timeout
+            setTimeout(() => {
+                document.getElementById('splash').classList.add('hidden');
+                document.getElementById('controls').classList.add('visible');
+            }, 2500);
+        });
 
         function initMap() {
             try {
@@ -2278,12 +2701,18 @@ const FISHING_SPOTS = [
             const userHour = now.getHours();
             const userMinute = now.getMinutes().toString().padStart(2, '0');
             
+            // Derinlik bilgisi
+            const depthText = data.depth && data.depth.avg !== null 
+                ? `⚓ ${CURRENT_LANG === 'tr' ? 'Derinlik' : 'Depth'}: <span>${Math.round(data.depth.avg)}m</span>` 
+                : null;
+            
             const steps = [
                 { text: `📡 ${t('connecting')}: <span>${data.region}</span>`, delay: 0 },
                 { text: `⏱️ ${t('time')}: <span>${userHour}:${userMinute}</span>`, delay: 400 },
-                { text: `🌊 ${t('processing')}`, delay: 900 },
-                { text: `🎣 ${t('complete')}`, delay: 1500 }
-            ];
+                depthText ? { text: depthText, delay: 700 } : null,
+                { text: `🌊 ${t('processing')}`, delay: depthText ? 1100 : 900 },
+                { text: `🎣 ${t('complete')}`, delay: depthText ? 1700 : 1500 }
+            ].filter(Boolean);
 
             steps.forEach((step, i) => {
                 setTimeout(() => {
@@ -2298,7 +2727,11 @@ const FISHING_SPOTS = [
             setTimeout(() => {
                 hideLoading();
                 setMode('daily');
-                document.getElementById('hud').style.display = 'flex';
+                const hud = document.getElementById('hud');
+                hud.style.display = 'flex';
+                // Scroll to top when HUD opens
+                const hudContent = hud.querySelector('.hud-content');
+                if (hudContent) hudContent.scrollTop = 0;
             }, 1800);
         }
 
@@ -2324,6 +2757,17 @@ const FISHING_SPOTS = [
 
         function renderPanel(global, data) {
             document.getElementById('region-title').innerText = global.region;
+            
+            // Derinlik bilgisini göster
+            const depthDisplay = document.getElementById('depth-display');
+            if (global.depth && global.depth.avg !== null) {
+                const depthVal = Math.round(global.depth.avg);
+                const depthLabel = CURRENT_LANG === 'tr' ? 'Derinlik' : 'Depth';
+                depthDisplay.innerHTML = `⚓ ${depthLabel}: <strong>${depthVal}m</strong>`;
+                depthDisplay.style.display = 'block';
+            } else {
+                depthDisplay.style.display = 'none';
+            }
 
             if (global.isLand) {
                 document.getElementById('score-display').innerHTML = `<span style="font-size: 1.2rem;">🏔️ ${t('land')}</span>`;
@@ -2334,6 +2778,7 @@ const FISHING_SPOTS = [
                 document.getElementById('fish-list').innerHTML = `<div style="text-align: center; padding: 30px; color: var(--text-muted);">${t('selectSea')}</div>`;
                 document.getElementById('confidence-display').innerText = '';
                 document.getElementById('activity-windows').style.display = 'none';
+                depthDisplay.style.display = 'none';
                 return;
             }
 
@@ -2342,11 +2787,13 @@ const FISHING_SPOTS = [
             document.getElementById('score-display').innerHTML = `<sup>%</sup>${score.toFixed(1)}`;
             document.getElementById('score-display').style.color = getScoreColor(score);
             
-            // Weather
-            document.getElementById('weather-display').innerText = data.weatherSummary || '';
+            // Weather - çevir
+            const weatherKey = data.weatherSummary || '';
+            document.getElementById('weather-display').innerText = t(weatherKey) || weatherKey;
             
-            // Tactic
-            document.getElementById('tactic-display').innerText = data.tactic || '';
+            // Tactic - çevir
+            const tacticKey = data.tacticKey || '';
+            document.getElementById('tactic-display').innerText = t(tacticKey) || tacticKey;
 
             // Confidence
             const conf = CURRENT_MODE === 'daily' ? (global.forecast[0]?.confidence || 90) : 95;
@@ -2379,7 +2826,7 @@ const FISHING_SPOTS = [
         }
 
         // Aktivite Tooltip gösterimi
-        function showActivityTip(type) {
+        function showActivityTip(type, event) {
             // Önceki tooltip'i kaldır
             const existing = document.querySelector('.activity-tooltip');
             if (existing) existing.remove();
@@ -2397,7 +2844,7 @@ const FISHING_SPOTS = [
             // Pozisyonlama
             const row = event.currentTarget;
             const rect = row.getBoundingClientRect();
-            tooltip.style.left = `${rect.left + rect.width / 2 - 140}px`;
+            tooltip.style.left = `${Math.max(10, rect.left + rect.width / 2 - 140)}px`;
             tooltip.style.top = `${rect.top - 60}px`;
             
             document.body.appendChild(tooltip);
@@ -2420,9 +2867,13 @@ const FISHING_SPOTS = [
             const daily = global.forecast[0];
             const grid = document.getElementById('metrics-grid');
             
+            // Rüzgar yönü hesapla
+            const windDirDeg = data.windDirection || daily.windDirection || 0;
+            const windDirName = getWindDirectionName(windDirDeg);
+            
             const metrics = [
                 { key: 'temp', val: data.temp || daily.temp, unit: '°' },
-                { key: 'wind', val: data.wind || daily.wind, unit: ' km' },
+                { key: 'wind', val: data.wind || daily.wind, unit: ' km', extra: windDirName },
                 { key: 'clarity', val: data.clarity || daily.clarity, unit: '%' },
                 { key: 'wave', val: daily.wave, unit: 'm' },
                 { key: 'salinity', val: daily.salinity, unit: ' P' },
@@ -2442,12 +2893,19 @@ const FISHING_SPOTS = [
                 if (m.key === 'moon') {
                     val = getMoonPhaseShort(daily.moonPhase);
                 }
+                
+                // Rüzgar için yön ekle
+                const extraLine = m.extra ? `<div style="font-size: 0.6rem; color: var(--cyan); margin-top: 2px;">${m.extra}</div>` : '';
+                
+                // Metrik başlığı dile göre
+                const title = CURRENT_LANG === 'en' ? (metricInfo?.titleEn || metricInfo?.title || m.key) : (metricInfo?.title || m.key);
 
                 return `
                     <div class="metric-card" onclick="showMetricInfo('${m.key}')">
                         <div class="metric-icon">${icon}</div>
                         <div class="metric-val">${val}${m.unit}</div>
-                        <div class="metric-label">${metricInfo?.title?.split(' ')[0] || m.key}</div>
+                        ${extraLine}
+                        <div class="metric-label">${title.split(' ')[0]}</div>
                     </div>
                 `;
             }).join('');
@@ -2464,10 +2922,45 @@ const FISHING_SPOTS = [
             return "🌘";
         }
 
+        // Basit yem/takım çeviri sözlüğü
+        const BAIT_TRANSLATIONS = {
+            // Yemler
+            "Karides": "Shrimp", "Kurt": "Worm", "Midye": "Mussel", "Kalamar": "Squid",
+            "Balık": "Fish", "Yengeç": "Crab", "Ekmek": "Bread", "Hamur": "Dough",
+            "Boru Kurdu": "Ragworm", "Mamun": "Sandworm", "Teke": "Prawn",
+            "İstavrit": "Horse Mackerel", "Sardalya": "Sardine", "Çaça": "Sprat",
+            "Hamsi": "Anchovy", "İpek": "Silk Worm", "Yosun": "Seaweed",
+            "Uskumru": "Mackerel", "Zargana": "Garfish", "Ahtapot": "Octopus",
+            
+            // Sahteler
+            "Silikon": "Soft Plastic", "Kaşık": "Spoon", "Çapari": "Sabiki Rig",
+            "Sahte Balık": "Lure", "Jig": "Jig", "Popper": "Popper",
+            "Zoka": "Squid Jig", "LRF Silikon": "LRF Soft Plastic",
+            
+            // Takımlar
+            "Dip Takımı": "Bottom Rig", "Spin": "Spinning", "Surf": "Surf Casting",
+            "Şamandıralı": "Float Rig", "Trolling": "Trolling", "Eging": "Eging",
+            "Jigging": "Jigging", "LRF": "LRF", "Uzun Olta": "Long Line",
+            "Gezer Kurşunlu": "Running Sinker", "Hafif": "Light",
+            
+            // Diğer
+            "Yok": "None", "Gündüz": "Daytime", "Gece": "Night",
+            "Sabah": "Morning", "Akşam": "Evening"
+        };
+        
+        function translateBaitInfo(text) {
+            if (CURRENT_LANG === 'tr' || !text) return text;
+            let result = text;
+            for (const [tr, en] of Object.entries(BAIT_TRANSLATIONS)) {
+                result = result.replace(new RegExp(tr, 'g'), en);
+            }
+            return result;
+        }
+
         function renderFishList(list, containerId) {
             const container = document.getElementById(containerId);
             if (!list || list.length === 0) {
-                container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">Veri bulunamadı</div>';
+                container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">${t('noData')}</div>`;
                 return;
             }
 
@@ -2482,10 +2975,16 @@ const FISHING_SPOTS = [
                     ? `<div style="font-size: 0.7rem; color: var(--text-muted); font-style: italic; margin-top: 2px;">${f.scientificName}</div>` 
                     : '';
                 
+                // Yem/takım bilgilerini çevir
+                const baitText = translateBaitInfo(f.bait);
+                const lureText = translateBaitInfo(f.lure);
+                const rigText = translateBaitInfo(f.rig);
+                const legalText = f.legalSize === 'Yok' ? t('legalSizeNone') : f.legalSize;
+                
                 // Aktif saat gösterimi
                 const peakTimeLabel = t('peakTime');
                 const peakTimeLine = f.peakHoursDesc 
-                    ? `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-subtle);">🕐 <strong>${peakTimeLabel}:</strong> ${f.peakHoursDesc}</div>` 
+                    ? `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-subtle);">🕐 <strong>${peakTimeLabel}:</strong> ${translateBaitInfo(f.peakHoursDesc)}</div>` 
                     : '';
 
                 return `
@@ -2499,11 +2998,11 @@ const FISHING_SPOTS = [
                         </div>
                         <div class="fish-details">
                             ${f.reason ? `<div class="fish-reason ${reasonClass}">${reasonIcon} ${f.reason}</div>` : ''}
-                            <div>🎯 <strong>${t('bait')}:</strong> ${f.bait}</div>
+                            <div>🎯 <strong>${t('bait')}:</strong> ${baitText}</div>
                             <div>🎣 <strong>${t('hook')}:</strong> ${f.method}</div>
-                            ${f.lure ? `<div>🎪 <strong>${t('lure')}:</strong> ${f.lure}</div>` : ''}
-                            ${f.rig ? `<div>⚙️ <strong>${t('rig')}:</strong> ${f.rig}</div>` : ''}
-                            ${f.legalSize ? `<div>📏 <strong>${t('legalSize')}:</strong> ${f.legalSize}</div>` : ''}
+                            ${lureText ? `<div>🎪 <strong>${t('lure')}:</strong> ${lureText}</div>` : ''}
+                            ${rigText ? `<div>⚙️ <strong>${t('rig')}:</strong> ${rigText}</div>` : ''}
+                            ${legalText ? `<div>📏 <strong>${t('legalSize')}:</strong> ${legalText}</div>` : ''}
                             ${peakTimeLine}
                             ${f.note ? `<div class="fish-tip">💡 ${f.note}</div>` : ''}
                         </div>
@@ -2543,10 +3042,6 @@ const FISHING_SPOTS = [
             overlay.style.display = menu.classList.contains('active') ? 'block' : 'none';
         }
 
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
-
         function showMetricInfo(key) {
             const data = METRIC_DATA[key];
             if (!data) return;
@@ -2563,7 +3058,10 @@ const FISHING_SPOTS = [
             document.getElementById('metric-ref').innerHTML = data.ref.replace(/\n/g, '<br>');
             document.getElementById('metric-algo').innerHTML = data.algo.replace(/\n/g, '<br>');
             document.getElementById('metric-source').innerText = data.source;
-            document.getElementById('metric-modal').style.display = 'flex';
+            
+            const modal = document.getElementById('metric-modal');
+            modal.style.display = 'flex';
+            modal.scrollTop = 0;
         }
 
         function showWeeklyModal() {
@@ -2574,13 +3072,15 @@ const FISHING_SPOTS = [
                 <div class="day-row" onclick="showDayDetail(${i})">
                     <div class="day-info">
                         <div class="day-date">${formatDate(day.date)}</div>
-                        <div class="day-weather">${day.weatherSummary}</div>
+                        <div class="day-weather">${t(day.weatherSummary) || day.weatherSummary}</div>
                     </div>
                     <div class="day-score" style="color: ${getScoreColor(day.score)}">%${day.score.toFixed(1)}</div>
                 </div>
             `).join('');
 
-            document.getElementById('weekly-modal').style.display = 'flex';
+            const modal = document.getElementById('weekly-modal');
+            modal.style.display = 'flex';
+            modal.scrollTop = 0;
         }
 
         function showDayDetail(index) {
@@ -2590,32 +3090,41 @@ const FISHING_SPOTS = [
             document.getElementById('dd-date').innerText = formatDate(day.date);
             document.getElementById('dd-score').innerHTML = `<sup>%</sup>${day.score.toFixed(1)}`;
             document.getElementById('dd-score').style.color = getScoreColor(day.score);
-            document.getElementById('dd-weather').innerText = day.weatherSummary;
-            document.getElementById('dd-tactic').innerText = day.tactic;
+            document.getElementById('dd-weather').innerText = t(day.weatherSummary) || day.weatherSummary;
+            document.getElementById('dd-tactic').innerText = t(day.tacticKey) || day.tacticKey;
 
             renderFishList(day.fishList, 'dd-fish-list');
             
             closeModal('weekly-modal');
-            document.getElementById('day-modal').style.display = 'flex';
+            const modal = document.getElementById('day-modal');
+            modal.style.display = 'flex';
+            modal.scrollTop = 0;
         }
 
         function showTechModal() {
             toggleMenu();
-            document.getElementById('tech-modal').style.display = 'flex';
+            // Dile göre içerik göster
+            document.getElementById('tech-content-tr').style.display = CURRENT_LANG === 'tr' ? 'block' : 'none';
+            document.getElementById('tech-content-en').style.display = CURRENT_LANG === 'en' ? 'block' : 'none';
+            
+            const modal = document.getElementById('tech-modal');
+            modal.style.display = 'flex';
+            modal.scrollTop = 0;
         }
 
         function locateMe() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     pos => map.flyTo([pos.coords.latitude, pos.coords.longitude], 14),
-                    () => alert("Konum alınamadı.")
+                    () => alert(CURRENT_LANG === 'tr' ? "Konum alınamadı." : "Location unavailable.")
                 );
             }
         }
 
         function saveFavorite() {
             if (!lastLatLon) return;
-            const name = prompt("Mera adı:");
+            const promptText = CURRENT_LANG === 'tr' ? "Mera adı:" : "Spot name:";
+            const name = prompt(promptText);
             if (name) {
                 const favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
                 favs.push({ name, ...lastLatLon });
@@ -2635,8 +3144,18 @@ const FISHING_SPOTS = [
             }
 
             container.innerHTML = favs.map((f, i) => `
-                <button class="menu-btn" onclick="goToFavorite(${i})">📍 ${f.name}</button>
+                <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                    <button class="menu-btn" style="flex: 1;" onclick="goToFavorite(${i})">📍 ${f.name}</button>
+                    <button onclick="deleteFavorite(${i})" style="background: var(--red); color: white; border: none; border-radius: 4px; width: 28px; height: 28px; font-size: 12px; cursor: pointer; flex-shrink: 0;">✕</button>
+                </div>
             `).join('');
+        }
+
+        function deleteFavorite(index) {
+            const favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
+            favs.splice(index, 1);
+            localStorage.setItem('meraloji_favs', JSON.stringify(favs));
+            loadFavorites();
         }
 
         function goToFavorite(index) {
