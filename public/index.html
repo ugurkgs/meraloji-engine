@@ -84,8 +84,8 @@
         }
 
         .splash-logo {
-            width: 250px;
-            height: 250px;
+            width: 180px;
+            height: 180px;
             filter: drop-shadow(0 0 60px var(--cyan-glow));
             animation: float 3s ease-in-out infinite;
             margin-bottom: 24px;
@@ -1488,11 +1488,68 @@
                 <span class="map-layer-indicator" id="map-layer-name">(Coğrafi)</span>
             </button>
             <button class="menu-btn" onclick="showTechModal()">🧠 <span id="algo-btn-text">Algoritma Detayı</span></button>
+            <button class="menu-btn" onclick="showHelpModal()">❓ <span id="help-btn-text">Yardım</span></button>
         </div>
 
         <div class="menu-footer">
             <span id="dev-label">Geliştirici</span>: Uğur Kögüs<br>
-            F.I.S.H. System v2.3
+            <a href="mailto:ugurkogus@gmail.com" style="color: var(--cyan); font-size: 0.8rem;">📧 ugurkogus@gmail.com</a><br>
+            <span style="font-size: 0.75rem; opacity: 0.7;">F.I.S.H. System v2.7</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         HELP MODAL
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div class="modal" id="help-modal">
+        <div class="modal-header">
+            <button class="modal-back" onclick="closeModal('help-modal')">←</button>
+            <div class="modal-title" id="help-modal-title">Nasıl Kullanılır?</div>
+            <button class="modal-close" onclick="closeModal('help-modal')">✕</button>
+        </div>
+        <div style="padding: 20px;">
+            <p id="help-intro" style="color: var(--text-muted); margin-bottom: 15px;">Meraloji, deniz koşullarını analiz ederek balık avı olasılıklarını hesaplar.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--cyan);">
+                    <strong id="help-map-label">🗺️ Harita</strong>
+                    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted);" id="help-map-desc">Denizde bir noktaya tıklayın</p>
+                </div>
+                
+                <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--green);">
+                    <strong id="help-score-label">📊 Skor</strong>
+                    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted);" id="help-score-desc">Balık aktivite olasılığı (%)</p>
+                </div>
+                
+                <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--yellow);">
+                    <strong>GÜN / ANLIK</strong>
+                    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted);" id="help-mode-desc">GÜN: 24 saatlik ortalama | ANLIK: Şu anki koşullar</p>
+                </div>
+                
+                <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--orange);">
+                    <strong id="help-fish-label">🐟 Balık Listesi</strong>
+                    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted);" id="help-fish-desc">Detay için balığa tıklayın. Yıldızlar hangi faktörün skoru etkilediğini gösterir.</p>
+                </div>
+                
+               <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid #a78bfa;">
+    <strong id="help-wind-label">💨 Rüzgar Yönleri ve Etkileri</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        <span style="color: var(--green);">Yıldız (K)</span> - Soğuk hava taşır, sıcaklığı düşürür<br>
+        <span style="color: var(--green);">Poyraz (KD)</span> - Sert ve soğuktur, kar yağışını artırır<br>
+        <span style="color: var(--green);">Gündoğusu (D)</span> - Kuru ve soğuktur, yağışı keser<br>
+        <span style="color: var(--red);">Keşişleme (GD)</span> - Sıcak ve kurudur, sıcaklığı yükseltir<br>
+        <span style="color: var(--red);">Kıble (G)</span> - Güneyden sıcak ve nemli hava taşır<br>
+        <span style="color: var(--red);">Lodos (GB)</span> - Sıcak ve şiddetlidir, yağış habercisidir<br>
+        <span style="color: var(--yellow);">Günbatısı (B)</span> - Nemli hava taşır, yağış bırakabilir<br>
+        <span style="color: var(--yellow);">Karayel (KB)</span> - Soğuk cephe getirir, sıcaklığı hızla düşürür
+    </p>
+</div>
+                
+                <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--red);">
+                    <strong>🏭 Gün ve Anlık Skor</strong>
+                    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted);" id="help-commercial-desc">Günlük skor; gün içi ağırlıklı ortalamayı alarak hesaplanan skordur. Anlık skor; son 3 saatin verisiyle oluşan skordur.</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -2003,9 +2060,45 @@
                 TACTIC_GOLDEN_HOURS: "✨ Altın saatler! Levrek/Lüfer aktif.",
                 TACTIC_DAY: "☀️ GÜNDÜZ: Çipura, Kefal hedefleyin.",
                 TACTIC_STANDARD: "Standart koşullar.",
+                TACTIC_DYNAMIC: "🎯 Hedef: ", // + topFishNames
                 
                 // Yasal Boy
                 legalSizeNone: "Yok",
+                
+                // Rüzgar Yönü Açıklamaları
+                windExplainNorth: "Kuzey (Poyraz) - Denizi yatırır",
+                windExplainSouth: "Güney (Lodos) - Denizi kaldırır",
+                windExplainEast: "Doğu (Gün doğusu)",
+                windExplainWest: "Batı (Gün batısı)",
+                windExplainNW: "Kuzeybatı (Karayel)",
+                windExplainSE: "Güneydoğu (Keşişleme)",
+                
+                // Yıldız Sistemi
+                starSeason: "Mevsim",
+                starTemp: "Sıcaklık",
+                starWave: "Dalga",
+                starClarity: "Berraklık",
+                starWind: "Rüzgar",
+                starActivity: "Aktivite",
+                starTrigger: "Tetikleyici",
+                starPenalty: "Ceza",
+                
+                // Yardım Modal
+                helpTitle: "Nasıl Kullanılır?",
+                helpIntro: "Meraloji, deniz koşullarını analiz ederek balık avı olasılıklarını hesaplar.",
+                helpMap: "🗺️ Harita: Denizde bir noktaya tıklayın",
+                helpScore: "📊 Skor: Balık aktivite olasılığı (%)",
+                helpDaily: "GÜN: 24 saatlik ortalama tahmin",
+                helpInstant: "ANLIK: Şu anki koşullar",
+                helpFish: "🐟 Balık Listesi: Detay için tıklayın",
+                helpStars: "⭐ Yıldızlar: Hangi faktör skoru etkiledi",
+                helpWeekly: "📅 7 Gün: Haftalık tahmin",
+                helpFavorite: "⭐ Favori: Konumu kaydedin",
+                helpCommercial: "🏭 Ticari balıklar hobi oltası ile tutulmaz",
+                
+                // Geliştirici
+                developer: "Geliştirici",
+                contact: "İletişim",
                 
                 // Algoritma Modal
                 algorithmTitle: "F.I.S.H. ALGORITHM",
@@ -2179,9 +2272,45 @@
                 TACTIC_GOLDEN_HOURS: "✨ Golden hours! Sea Bass/Bluefish active.",
                 TACTIC_DAY: "☀️ DAYTIME: Target Gilthead, Mullet.",
                 TACTIC_STANDARD: "Standard conditions.",
+                TACTIC_DYNAMIC: "🎯 Target: ", // + topFishNames
                 
                 // Legal Size
                 legalSizeNone: "None",
+                
+                // Wind Direction Explanations
+                windExplainNorth: "North (Poyraz) - Calms the sea",
+                windExplainSouth: "South (Lodos) - Stirs the sea",
+                windExplainEast: "East (Sunrise)",
+                windExplainWest: "West (Sunset)",
+                windExplainNW: "Northwest (Karayel)",
+                windExplainSE: "Southeast (Keşişleme)",
+                
+                // Star System
+                starSeason: "Season",
+                starTemp: "Temperature",
+                starWave: "Wave",
+                starClarity: "Clarity",
+                starWind: "Wind",
+                starActivity: "Activity",
+                starTrigger: "Trigger",
+                starPenalty: "Penalty",
+                
+                // Help Modal
+                helpTitle: "How to Use?",
+                helpIntro: "Meraloji analyzes sea conditions to calculate fishing probabilities.",
+                helpMap: "🗺️ Map: Tap on any point in the sea",
+                helpScore: "📊 Score: Fish activity probability (%)",
+                helpDaily: "DAY: 24-hour average forecast",
+                helpInstant: "NOW: Current conditions",
+                helpFish: "🐟 Fish List: Tap for details",
+                helpStars: "⭐ Stars: Which factors affected the score",
+                helpWeekly: "📅 7 Days: Weekly forecast",
+                helpFavorite: "⭐ Favorite: Save locations",
+                helpCommercial: "🏭 Commercial fish cannot be caught with hobby tackle",
+                
+                // Developer
+                developer: "Developer",
+                contact: "Contact",
                 
                 // Algorithm Modal
                 algorithmTitle: "F.I.S.H. ALGORITHM",
@@ -2274,6 +2403,12 @@
             
             const algoBtnText = document.getElementById('algo-btn-text');
             if (algoBtnText) algoBtnText.innerText = t('algorithm');
+            
+            const helpBtnText = document.getElementById('help-btn-text');
+            if (helpBtnText) helpBtnText.innerText = CURRENT_LANG === 'tr' ? 'Yardım' : 'Help';
+            
+            const devLabel = document.getElementById('dev-label');
+            if (devLabel) devLabel.innerText = t('developer');
             
             // Modal başlıkları güncelle
             const weeklyModalTitle = document.getElementById('weekly-modal-title');
@@ -2701,9 +2836,9 @@
             const userHour = now.getHours();
             const userMinute = now.getMinutes().toString().padStart(2, '0');
             
-            // Derinlik bilgisi
+            // Derinlik bilgisi (min 1m)
             const depthText = data.depth && data.depth.avg !== null 
-                ? `⚓ ${CURRENT_LANG === 'tr' ? 'Derinlik' : 'Depth'}: <span>${Math.round(data.depth.avg)}m</span>` 
+                ? `⚓ ${CURRENT_LANG === 'tr' ? 'Derinlik' : 'Depth'}: <span>${Math.max(1, Math.round(data.depth.avg))}m</span>` 
                 : null;
             
             const steps = [
@@ -2758,10 +2893,10 @@
         function renderPanel(global, data) {
             document.getElementById('region-title').innerText = global.region;
             
-            // Derinlik bilgisini göster
+            // Derinlik bilgisini göster (min 1m)
             const depthDisplay = document.getElementById('depth-display');
             if (global.depth && global.depth.avg !== null) {
-                const depthVal = Math.round(global.depth.avg);
+                const depthVal = Math.max(1, Math.round(global.depth.avg)); // Min 1m
                 const depthLabel = CURRENT_LANG === 'tr' ? 'Derinlik' : 'Depth';
                 depthDisplay.innerHTML = `⚓ ${depthLabel}: <strong>${depthVal}m</strong>`;
                 depthDisplay.style.display = 'block';
@@ -2791,9 +2926,13 @@
             const weatherKey = data.weatherSummary || '';
             document.getElementById('weather-display').innerText = t(weatherKey) || weatherKey;
             
-            // Tactic - çevir
+            // Tactic - dinamik gösterim
             const tacticKey = data.tacticKey || '';
-            document.getElementById('tactic-display').innerText = t(tacticKey) || tacticKey;
+            let tacticText = t(tacticKey) || tacticKey;
+            if (tacticKey === 'TACTIC_DYNAMIC' && data.topFishNames) {
+                tacticText = t('TACTIC_DYNAMIC') + data.topFishNames;
+            }
+            document.getElementById('tactic-display').innerText = tacticText;
 
             // Confidence
             const conf = CURRENT_MODE === 'daily' ? (global.forecast[0]?.confidence || 90) : 95;
@@ -2986,6 +3125,30 @@
                 const peakTimeLine = f.peakHoursDesc 
                     ? `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-subtle);">🕐 <strong>${peakTimeLabel}:</strong> ${translateBaitInfo(f.peakHoursDesc)}</div>` 
                     : '';
+                
+                // Yıldız sistemi (scoreDetails varsa)
+                let starsHtml = '';
+                if (f.scoreDetails) {
+                    const sd = f.scoreDetails;
+                    const starLine = (label, stars) => {
+                        const filled = '★'.repeat(Math.max(0, Math.min(5, stars)));
+                        const empty = '☆'.repeat(5 - Math.max(0, Math.min(5, stars)));
+                        const color = stars >= 4 ? 'var(--green)' : (stars >= 2 ? 'var(--yellow)' : 'var(--red)');
+                        return `<div style="display:flex;justify-content:space-between;font-size:0.75rem;"><span>${label}</span><span style="color:${color}">${filled}${empty}</span></div>`;
+                    };
+                    starsHtml = `
+                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border-subtle); background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                            <div style="font-size: 0.7rem; color: var(--cyan); margin-bottom: 4px;">📊 ${CURRENT_LANG === 'tr' ? 'SKOR ANALİZİ' : 'SCORE ANALYSIS'}</div>
+                            ${sd.season ? starLine(t('starSeason'), sd.season.stars) : ''}
+                            ${sd.temp ? starLine(t('starTemp') + ` (${sd.temp.value}°C)`, sd.temp.stars) : ''}
+                            ${sd.wave ? starLine(t('starWave') + ` (${sd.wave.value}m)`, sd.wave.stars) : ''}
+                            ${sd.clarity ? starLine(t('starClarity') + ` (${sd.clarity.value}%)`, sd.clarity.stars) : ''}
+                            ${sd.wind ? starLine(t('starWind') + ` (${sd.wind.value}km/s)`, sd.wind.stars) : ''}
+                            ${sd.activity ? starLine(t('starActivity'), sd.activity.stars) : ''}
+                            ${sd.penalties && sd.penalties.length > 0 ? `<div style="color: var(--red); font-size: 0.7rem; margin-top: 4px;">⚠️ ${sd.penalties.join(', ')}</div>` : ''}
+                        </div>
+                    `;
+                }
 
                 return `
                     <div class="fish-item ${scoreClass}" onclick="this.classList.toggle('open')">
@@ -3005,6 +3168,7 @@
                             ${legalText ? `<div>📏 <strong>${t('legalSize')}:</strong> ${legalText}</div>` : ''}
                             ${peakTimeLine}
                             ${f.note ? `<div class="fish-tip">💡 ${f.note}</div>` : ''}
+                            ${starsHtml}
                         </div>
                     </div>
                 `;
@@ -3108,6 +3272,17 @@
             document.getElementById('tech-content-en').style.display = CURRENT_LANG === 'en' ? 'block' : 'none';
             
             const modal = document.getElementById('tech-modal');
+            modal.style.display = 'flex';
+            modal.scrollTop = 0;
+        }
+
+        function showHelpModal() {
+            toggleMenu();
+            // Dile göre başlık ve içerikleri güncelle
+            document.getElementById('help-modal-title').innerText = t('helpTitle');
+            document.getElementById('help-intro').innerText = t('helpIntro');
+            
+            const modal = document.getElementById('help-modal');
             modal.style.display = 'flex';
             modal.scrollTop = 0;
         }
