@@ -84,8 +84,8 @@
         }
 
         .splash-logo {
-            width: 180px;
-            height: 180px;
+            width: 250px;
+            height: 250px;
             filter: drop-shadow(0 0 60px var(--cyan-glow));
             animation: float 3s ease-in-out infinite;
             margin-bottom: 24px;
@@ -1510,27 +1510,219 @@
         <div style="padding: 20px;">
             <p id="help-intro" style="color: var(--text-muted); margin-bottom: 15px;">Meraloji, deniz koşullarını analiz ederek balık avı olasılıklarını hesaplar.</p>
             
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--cyan);">
-                    <strong id="help-map-label">🗺️ Harita</strong>
-                    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted);" id="help-map-desc">Denizde bir noktaya tıklayın</p>
-                </div>
+          
                 
-                <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--green);">
-                    <strong id="help-score-label">📊 Skor</strong>
-                    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted);" id="help-score-desc">Balık aktivite olasılığı (%)</p>
-                </div>
-                
-                <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--yellow);">
-                    <strong>GÜN / ANLIK</strong>
-                    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted);" id="help-mode-desc">GÜN: 24 saatlik ortalama | ANLIK: Şu anki koşullar</p>
-                </div>
-                
-                <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--orange);">
-                    <strong id="help-fish-label">🐟 Balık Listesi</strong>
-                    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted);" id="help-fish-desc">Detay için balığa tıklayın. Yıldızlar hangi faktörün skoru etkilediğini gösterir.</p>
-                </div>
-                
+<!-- 🗺️ HARİTA -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--cyan);">
+    <strong id="help-map-label">🗺️ Harita Kullanımı</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        Haritada istediğiniz noktaya tıklayarak o bölgenin balık avı tahminini alın. Denize tıklamadığınız sürece analiz yapılmaz. Kara parçalarına tıklanırsa "Burası kara parçası" uyarısı verilir.
+    </p>
+</div>
+
+<!-- 📊 SKOR SİSTEMİ -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--green);">
+    <strong id="help-score-label">📊 Skor Sistemi</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        <span style="color: var(--green);">70-100</span> - Mükemmel koşullar, balık aktivitesi çok yüksek<br>
+        <span style="color: var(--yellow);">50-70</span> - İyi koşullar, balık tutma şansı yüksek<br>
+        <span style="color: var(--orange);">30-50</span> - Orta koşullar, sabırlı olun<br>
+        <span style="color: var(--red);">0-30</span> - Zayıf koşullar, alternatif nokta deneyin
+    </p>
+</div>
+
+<!-- GÜN / ANLIK MOD -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--yellow);">
+    <strong id="help-mode-label">⏰ Gün / Anlık Mod</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        <span style="color: var(--cyan);">GÜN</span> - Tüm günün 24 saatlik ağırlıklı ortalaması. Balıkların en aktif olduğu saatler daha fazla ağırlık taşır.<br>
+        <span style="color: var(--green);">ANLIK</span> - Şu anki saat için 3 saatlik yuvarlanmış ortalama (gürültü filtreleme). Anlık koşulları yansıtır.
+    </p>
+</div>
+
+<!-- 🐟 BALIK LİSTESİ -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--orange);">
+    <strong id="help-fish-label">🐟 Balık Listesi</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        Tıkladığınız noktada o an yakalanma olasılığı en yüksek 10 balık türü gösterilir. En yüksek skorlu balık listenin en üstündedir. Her balığa tıklayarak:<br>
+        <span style="color: var(--cyan);">🎯 Yem</span> - Önerilen doğal/canlı yemler<br>
+        <span style="color: var(--green);">🎣 İğne</span> - İğne numarası ve tipi<br>
+        <span style="color: var(--yellow);">🎪 Suni Yem</span> - Yapay yem önerileri<br>
+        <span style="color: var(--orange);">⚙️ Takım</span> - Olta takımı önerisi<br>
+        <span style="color: var(--red);">📏 Yasal Boy</span> - Minimum yakalama boyu
+    </p>
+</div>
+
+<!-- 📅 7 GÜNLÜK TAHMİN -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid #a78bfa;">
+    <strong id="help-forecast-label">📅 7 Günlük Tahmin</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        Seçili noktanın 7 günlük detaylı balık avı tahmini. Her gün için:<br>
+        • En yüksek balık skorunu<br>
+        • Genel hava durumunu<br>
+        • Rüzgar ve dalga durumunu gösterir<br>
+        <span style="color: var(--cyan);">Bir güne tıklayarak</span> o günün saatlik detaylarını, balık listesini ve önerilen taktiği görüntüleyebilirsiniz.
+    </p>
+</div>
+
+<!-- 🌊 DERİNLİK BİLGİSİ -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--cyan);">
+    <strong id="help-depth-label">🌊 Derinlik Bilgisi</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        <span style="color: var(--green);">EMODnet Bathymetry</span> veritabanından gerçek zamanlı derinlik verisi:<br>
+        <span style="color: var(--cyan);">Negatif değer (-)</span> - Deniz altı derinliği (metre)<br>
+        <span style="color: var(--red);">Pozitif değer (+)</span> - Kara yüksekliği (metre)<br>
+        Örnek: -25m = 25 metre derinlikte deniz, +150m = 150 metre yükseklikte kara
+    </p>
+</div>
+
+<!-- 🌤️ HAVA DURUMU -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--yellow);">
+    <strong id="help-weather-label">🌤️ Hava Durumu ve Basınç</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        <span style="color: var(--cyan);">💨 Rüzgar</span> - Hız (knot) ve yön (derece)<br>
+        <span style="color: var(--orange);">🌡️ Sıcaklık</span> - Hava sıcaklığı (°C)<br>
+        <span style="color: var(--green);">🌊 Su Sıcaklığı</span> - Deniz yüzeyi sıcaklığı (°C)<br>
+        <span style="color: var(--red);">📉 Basınç Trendi</span> - Hızla düşerse = <strong>Feeding Frenzy!</strong> (Balıklar çılgınca beslenir)<br>
+        <span style="color: var(--yellow);">☁️ Bulutluluk</span> - Yüzde cinsinden<br>
+        <span style="color: var(--cyan);">🌧️ Yağış</span> - mm cinsinden
+    </p>
+</div>
+
+<!-- 🎯 TAKTİK ÖNERİLERİ -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--orange);">
+    <strong id="help-tactic-label">🎯 Taktik Önerileri</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        Sistemin o an için önerdiği balıkçılık taktiği. Örnekler:<br>
+        <span style="color: var(--green);">⚡ FEEDING FRENZY</span> - Basınç hızla düşüyor, balıklar aşırı aktif<br>
+        <span style="color: var(--cyan);">🌅 ŞAFAK</span> - Altın saatler, levrek/lüfer için en iyi zaman<br>
+        <span style="color: var(--yellow);">🌊 Dalgalı-Bulanık</span> - Levrek/karagöz için ideal koşullar<br>
+        <span style="color: var(--red);">⚠️ TEHLİKE</span> - Dalga çok yüksek, denize çıkmayın
+    </p>
+</div>
+
+<!-- 💨 RÜZGAR YÖNLERİ ve ETKİLERİ -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid #a78bfa;">
+    <strong id="help-wind-label">💨 Rüzgar Yönleri ve Etkileri</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        <span style="color: var(--green);">Yıldız (K - 0°)</span> - Soğuk hava taşır, sıcaklığı düşürür<br>
+        <span style="color: var(--green);">Poyraz (KD - 45°)</span> - Sert ve soğuktur, berraklık getirir<br>
+        <span style="color: var(--yellow);">Gündoğusu (D - 90°)</span> - Kuru ve soğuktur, yağışı keser<br>
+        <span style="color: var(--orange);">Keşişleme (GD - 135°)</span> - Sıcak ve kurudur, sıcaklığı yükseltir<br>
+        <span style="color: var(--red);">Kıble (G - 180°)</span> - Güneyden sıcak ve nemli hava taşır<br>
+        <span style="color: var(--red);">Lodos (GB - 225°)</span> - Sıcak ve şiddetlidir, bulanıklık getirir<br>
+        <span style="color: var(--cyan);">Günbatısı (B - 270°)</span> - Nemli hava taşır, yağış bırakabilir<br>
+        <span style="color: var(--cyan);">Karayel (KB - 315°)</span> - Soğuk cephe getirir, sıcaklığı hızla düşürür
+    </p>
+</div>
+
+<!-- 📍 FAVORİ MERALAR -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--green);">
+    <strong id="help-favorites-label">📍 Favori Meralar</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        Sık gittiğiniz avlanma noktalarını kaydedin:<br>
+        1. Haritada favori noktanıza tıklayın<br>
+        2. HUD'da <span style="color: var(--cyan);">📍 Kaydet</span> butonuna basın<br>
+        3. Mera adını girin (örn: "Fenerbahçe Kayalıkları")<br>
+        4. Menüden <span style="color: var(--green);">Favoriler</span> bölümünden tek tıkla geri dönün
+    </p>
+</div>
+
+<!-- 🗺️ HARİTA KATMANLARI -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--cyan);">
+    <strong id="help-layers-label">🗺️ Harita Katmanları</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        Menüden <span style="color: var(--cyan);">🗺️ Harita Katmanı</span> butonuna her tıklamada sırayla geçiş yapar:<br>
+        <span style="color: var(--green);">1. Coğrafi</span> - Detaylı harita, şehir ve yol gösterir<br>
+        <span style="color: var(--cyan);">2. Uydu</span> - Gerçek görünüm, kayalıkları görmek için ideal<br>
+        <span style="color: var(--yellow);">3. Karanlık</span> - Gece modu, gözleri yormaz
+    </p>
+</div>
+
+<!-- 🧠 ALGORİTMA DETAYI -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid #a78bfa;">
+    <strong id="help-algorithm-label">🧠 Algoritma Detayı</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        F.I.S.H. sisteminin kullandığı bilimsel algoritmalar:<br>
+        <span style="color: var(--cyan);">🔮 Fuzzy Logic</span> - Belirsizlik modellemesi<br>
+        <span style="color: var(--green);">📊 Gaussian Çan Eğrisi</span> - Optimal sıcaklık analizi<br>
+        <span style="color: var(--yellow);">🌙 Solunar Teori</span> - Ay etkisi ve gelgit<br>
+        <span style="color: var(--orange);">🎣 Yerel Kurallar</span> - Bölgesel saha zekası<br>
+        <span style="color: #a78bfa;">🧬 Veri Füzyonu</span> - Tüm verilerin birleştirilmesi<br>
+        Akademik kaynaklarla desteklenmiş detaylı açıklamalar için butona tıklayın.
+    </p>
+</div>
+
+<!-- 🌙 AY FAZLARI -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--yellow);">
+    <strong id="help-moon-label">🌙 Ay Fazları ve Etkisi</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        <span style="color: var(--green);">🌑 Yeni Ay</span> - En güçlü gelgit, balık aktivitesi yüksek (+15%)<br>
+        <span style="color: var(--green);">🌕 Dolunay</span> - Güçlü gelgit, gece avı için ideal (+12%)<br>
+        <span style="color: var(--cyan);">🌓 İlk Dördün</span> - Orta seviye aktivite (+5%)<br>
+        <span style="color: var(--yellow);">🌗 Son Dördün</span> - Orta seviye aktivite (+5%)<br>
+        <strong>Solunar Pencereler:</strong><br>
+        <span style="color: var(--orange);">Major Pencere</span> - Ay transit zamanı ±2 saat (×1.35)<br>
+        <span style="color: var(--cyan);">Minor Pencere</span> - Ay doğuşu/batışı ±1 saat (×1.15)
+    </p>
+</div>
+
+<!-- ⏰ AKTİVİTE SAATLERİ -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--orange);">
+    <strong id="help-activity-label">⏰ Aktivite Saatleri</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        Her balık türünün kendi aktivite saatleri vardır:<br>
+        <span style="color: var(--green);">🌅 DAWN_DUSK (Alacakaranlık)</span> - Levrek, Lüfer, Karagöz<br>
+        <span style="color: var(--cyan);">☀️ DAY (Gündüz)</span> - Çipura, Barbun, Tekir, Fangri<br>
+        <span style="color: var(--yellow);">🌙 NIGHT (Gece)</span> - Eşkina, Mırmır, Minekop, İskorpit<br>
+        <span style="color: #a78bfa;">🕐 ALL (Tüm Gün)</span> - İstavrit, Sardalya<br>
+        <strong>Günlük skorda</strong> her balığın aktif saatlerine daha fazla ağırlık verilir.
+    </p>
+</div>
+
+<!-- 🌊 SU BERRAKLIĞı -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--cyan);">
+    <strong id="help-clarity-label">🌊 Su Berraklığı</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        Su berraklığı balık türüne göre farklı etki eder:<br>
+        <span style="color: var(--green);">CLEAR (Berrak)</span> - Lüfer, Kalamar, Zargana sever<br>
+        <span style="color: var(--yellow);">MODERATE (Orta)</span> - Çipura, Fangri, Mercan için ideal<br>
+        <span style="color: var(--orange);">TURBID (Bulanık)</span> - Levrek, Karagöz, Mırmır için mükemmel<br>
+        <strong>Berraklığı etkileyen faktörler:</strong><br>
+        • Dalga yüksekliği (-15 puan/metre)<br>
+        • Rüzgar hızı (-0.8 puan/knot)<br>
+        • Yağış miktarı (-5 puan/mm)
+    </p>
+</div>
+
+<!-- 🌡️ SU SICAKLIĞI -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--red);">
+    <strong id="help-temp-label">🌡️ Su Sıcaklığı</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        Balıklar soğukkanlıdır (poikilotherm), vücut sıcaklıklarını düzenleyemezler. Her türün optimal sıcaklık aralığı vardır:<br>
+        <span style="color: var(--red);">Sıcak Su (24-28°C)</span> - Lambuga, Yazılı Orkinos, Sarıkuyruk<br>
+        <span style="color: var(--orange);">Ilık Su (18-24°C)</span> - Levrek, Lüfer, Çipura, Karagöz<br>
+        <span style="color: var(--cyan);">Soğuk Su (10-18°C)</span> - Kalkan, Mezgit, Uskumru<br>
+        <strong>Bölgesel kış sıcaklıkları:</strong> Karadeniz 7°C, Marmara 9°C, Ege 14°C, Akdeniz 16°C
+    </p>
+</div>
+
+<!-- ⚖️ YASAL KURALLAR -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--red);">
+    <strong id="help-legal-label">⚖️ Yasal Boy Sınırları</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        Su Ürünleri Yasası gereği minimum yakalama boyları:<br>
+        <span style="color: var(--red);">45 cm</span> - Kalkan, Orfoz, Lahoz, Sarıkuyruk<br>
+        <span style="color: var(--orange);">25 cm</span> - Levrek, Sinarit, Trança<br>
+        <span style="color: var(--yellow);">20 cm</span> - Çipura, Kefal, Mırmır (etik)<br>
+        <span style="color: var(--cyan);">18 cm</span> - Lüfer, Karagöz, Mercan, Uskumru<br>
+        <span style="color: var(--green);">15 cm</span> - Fangri<br>
+        <span style="color: #a78bfa;">13 cm</span> - Barbun, Tekir<br>
+        <strong>⚠️ Yasak dönemler:</strong> Kalkan (15 Nisan - 15 Haziran)
+    </p>
+</div>
+
+
                <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid #a78bfa;">
     <strong id="help-wind-label">💨 Rüzgar Yönleri ve Etkileri</strong>
     <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
@@ -1545,13 +1737,7 @@
     </p>
 </div>
                 
-                <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--red);">
-                    <strong>🏭 Gün ve Anlık Skor</strong>
-                    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted);" id="help-commercial-desc">Günlük skor; gün içi ağırlıklı ortalamayı alarak hesaplanan skordur. Anlık skor; son 3 saatin verisiyle oluşan skordur.</p>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- ═══════════════════════════════════════════════════════════════════
          WEEKLY MODAL
