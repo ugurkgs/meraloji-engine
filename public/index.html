@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XMLZ2C40D9"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-XMLZ2C40D9');
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XMLZ2C40D9"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XMLZ2C40D9');
+    </script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -1568,7 +1567,7 @@
 
         <div class="menu-footer">
             <span id="dev-label">Geliştirici</span>: Uğur Kögüs<br>
-            <a href="mailto:ugurkogus@gmail.com" style="color: var(--cyan); font-size: 0.8rem;">📧 ugurkogus@gmail.com</a><br>
+            <a href="/cdn-cgi/l/email-protection#8affedfff8e1e5edfff9caede7ebe3e6a4e9e5e7" style="color: var(--cyan); font-size: 0.8rem;">📧 <span class="__cf_email__" data-cfemail="76031103041d1911030536111b171f1a5815191b">[email&#160;protected]</span></a><br>
             <span style="font-size: 0.75rem; opacity: 0.7;">F.I.S.H. System v2.7</span>
         </div>
     </div>
@@ -1690,6 +1689,9 @@
         <span style="color: var(--cyan);">Karayel (KB - 315°)</span> - Soğuk cephe getirir, sıcaklığı hızla düşürür
     </p>
 </div>
+
+        </div>
+    </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════
          WEEKLY MODAL
@@ -2007,7 +2009,7 @@
     <!-- ═══════════════════════════════════════════════════════════════════
          JAVASCRIPT
          ═══════════════════════════════════════════════════════════════════ -->
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         // ═══════════════════════════════════════════════════════════════════
         // DATA & STATE
         // ═══════════════════════════════════════════════════════════════════
@@ -3525,10 +3527,11 @@
                 toggleMenu();
                 map.flyTo([fav.lat, fav.lon], 14);
                 setTimeout(() => {
-                    handleMapClick({ latlng: { lat: parseFloat(fav.lat), lng: parseFloat(fav.lon) } });
-                }, 1000);
+                    handleMapClick({ latlng: { lat: fav.lat, lng: fav.lon } });
+                }, 500);
             }
         }
+
     </script>
 </body>
 </html>
