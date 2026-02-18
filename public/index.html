@@ -10,11 +10,14 @@
   gtag('js', new Date());
 
   gtag('config', 'G-XMLZ2C40D9');
-</script>
-    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MERALOJİ | F.I.S.H. System</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -95,8 +98,8 @@
         }
 
         .splash-logo {
-            width: 250px;
-            height: 250px;
+            width: 180px;
+            height: 180px;
             filter: drop-shadow(0 0 60px var(--cyan-glow));
             animation: float 3s ease-in-out infinite;
             margin-bottom: 24px;
@@ -830,6 +833,58 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .fish-photo-btn {
+            cursor: pointer;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            margin-left: 4px;
+        }
+        
+        .fish-photo-btn:hover {
+            opacity: 1;
+        }
+
+        /* Fotoğraf Modal */
+        .photo-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .photo-modal img {
+            max-width: 90%;
+            max-height: 70%;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        
+        .photo-modal-title {
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .photo-modal-close {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: var(--red);
+            color: white;
+            border: none;
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
         }
 
         .fish-score {
@@ -1471,10 +1526,19 @@
             <div class="section-title" id="species-title">Türler (Detay için tıklayın)</div>
             <div id="fish-list"></div>
 
-            <button class="btn-primary" onclick="showWeeklyModal()" id="weekly-btn">📅 7 Günlük Tahmin</button>
+            <button class="btn-primary" onclick="showWeeklyModal(event)" id="weekly-btn">📅 7 Günlük Tahmin</button>
             
             <button class="btn-secondary" style="width: 100%; margin-top: 12px;" onclick="saveFavorite()" id="favorite-btn">⭐ Favorilere Kaydet</button>
         </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         FISH PHOTO MODAL
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div class="photo-modal" id="fish-photo-modal" onclick="closeFishPhoto()">
+        <button class="photo-modal-close" onclick="closeFishPhoto()">✕</button>
+        <div class="photo-modal-title" id="fish-photo-title"></div>
+        <img id="fish-photo-img" src="" alt="Balık Fotoğrafı">
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════
@@ -1626,129 +1690,6 @@
         <span style="color: var(--cyan);">Karayel (KB - 315°)</span> - Soğuk cephe getirir, sıcaklığı hızla düşürür
     </p>
 </div>
-
-<!-- 📍 FAVORİ MERALAR -->
-<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--green);">
-    <strong id="help-favorites-label">📍 Favori Meralar</strong>
-    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
-        Sık gittiğiniz avlanma noktalarını kaydedin:<br>
-        1. Haritada favori noktanıza tıklayın<br>
-        2. HUD'da <span style="color: var(--cyan);">📍 Kaydet</span> butonuna basın<br>
-        3. Mera adını girin (örn: "Fenerbahçe Kayalıkları")<br>
-        4. Menüden <span style="color: var(--green);">Favoriler</span> bölümünden tek tıkla geri dönün
-    </p>
-</div>
-
-<!-- 🗺️ HARİTA KATMANLARI -->
-<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--cyan);">
-    <strong id="help-layers-label">🗺️ Harita Katmanları</strong>
-    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
-        Menüden <span style="color: var(--cyan);">🗺️ Harita Katmanı</span> butonuna her tıklamada sırayla geçiş yapar:<br>
-        <span style="color: var(--green);">1. Coğrafi</span> - Detaylı harita, şehir ve yol gösterir<br>
-        <span style="color: var(--cyan);">2. Uydu</span> - Gerçek görünüm, kayalıkları görmek için ideal<br>
-        <span style="color: var(--yellow);">3. Karanlık</span> - Gece modu, gözleri yormaz
-    </p>
-</div>
-
-<!-- 🧠 ALGORİTMA DETAYI -->
-<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid #a78bfa;">
-    <strong id="help-algorithm-label">🧠 Algoritma Detayı</strong>
-    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
-        F.I.S.H. sisteminin kullandığı bilimsel algoritmalar:<br>
-        <span style="color: var(--cyan);">🔮 Fuzzy Logic</span> - Belirsizlik modellemesi<br>
-        <span style="color: var(--green);">📊 Gaussian Çan Eğrisi</span> - Optimal sıcaklık analizi<br>
-        <span style="color: var(--yellow);">🌙 Solunar Teori</span> - Ay etkisi ve gelgit<br>
-        <span style="color: var(--orange);">🎣 Yerel Kurallar</span> - Bölgesel saha zekası<br>
-        <span style="color: #a78bfa;">🧬 Veri Füzyonu</span> - Tüm verilerin birleştirilmesi<br>
-        Akademik kaynaklarla desteklenmiş detaylı açıklamalar için butona tıklayın.
-    </p>
-</div>
-
-<!-- 🌙 AY FAZLARI -->
-<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--yellow);">
-    <strong id="help-moon-label">🌙 Ay Fazları ve Etkisi</strong>
-    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
-        <span style="color: var(--green);">🌑 Yeni Ay</span> - En güçlü gelgit, balık aktivitesi yüksek (+15%)<br>
-        <span style="color: var(--green);">🌕 Dolunay</span> - Güçlü gelgit, gece avı için ideal (+12%)<br>
-        <span style="color: var(--cyan);">🌓 İlk Dördün</span> - Orta seviye aktivite (+5%)<br>
-        <span style="color: var(--yellow);">🌗 Son Dördün</span> - Orta seviye aktivite (+5%)<br>
-        <strong>Solunar Pencereler:</strong><br>
-        <span style="color: var(--orange);">Major Pencere</span> - Ay transit zamanı ±2 saat (×1.35)<br>
-        <span style="color: var(--cyan);">Minor Pencere</span> - Ay doğuşu/batışı ±1 saat (×1.15)
-    </p>
-</div>
-
-<!-- ⏰ AKTİVİTE SAATLERİ -->
-<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--orange);">
-    <strong id="help-activity-label">⏰ Aktivite Saatleri</strong>
-    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
-        Her balık türünün kendi aktivite saatleri vardır:<br>
-        <span style="color: var(--green);">🌅 DAWN_DUSK (Alacakaranlık)</span> - Levrek, Lüfer, Karagöz<br>
-        <span style="color: var(--cyan);">☀️ DAY (Gündüz)</span> - Çipura, Barbun, Tekir, Fangri<br>
-        <span style="color: var(--yellow);">🌙 NIGHT (Gece)</span> - Eşkina, Mırmır, Minekop, İskorpit<br>
-        <span style="color: #a78bfa;">🕐 ALL (Tüm Gün)</span> - İstavrit, Sardalya<br>
-        <strong>Günlük skorda</strong> her balığın aktif saatlerine daha fazla ağırlık verilir.
-    </p>
-</div>
-
-<!-- 🌊 SU BERRAKLIĞı -->
-<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--cyan);">
-    <strong id="help-clarity-label">🌊 Su Berraklığı</strong>
-    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
-        Su berraklığı balık türüne göre farklı etki eder:<br>
-        <span style="color: var(--green);">CLEAR (Berrak)</span> - Lüfer, Kalamar, Zargana sever<br>
-        <span style="color: var(--yellow);">MODERATE (Orta)</span> - Çipura, Fangri, Mercan için ideal<br>
-        <span style="color: var(--orange);">TURBID (Bulanık)</span> - Levrek, Karagöz, Mırmır için mükemmel<br>
-        <strong>Berraklığı etkileyen faktörler:</strong><br>
-        • Dalga yüksekliği (-15 puan/metre)<br>
-        • Rüzgar hızı (-0.8 puan/knot)<br>
-        • Yağış miktarı (-5 puan/mm)
-    </p>
-</div>
-
-<!-- 🌡️ SU SICAKLIĞI -->
-<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--red);">
-    <strong id="help-temp-label">🌡️ Su Sıcaklığı</strong>
-    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
-        Balıklar soğukkanlıdır (poikilotherm), vücut sıcaklıklarını düzenleyemezler. Her türün optimal sıcaklık aralığı vardır:<br>
-        <span style="color: var(--red);">Sıcak Su (24-28°C)</span> - Lambuga, Yazılı Orkinos, Sarıkuyruk<br>
-        <span style="color: var(--orange);">Ilık Su (18-24°C)</span> - Levrek, Lüfer, Çipura, Karagöz<br>
-        <span style="color: var(--cyan);">Soğuk Su (10-18°C)</span> - Kalkan, Mezgit, Uskumru<br>
-        <strong>Bölgesel kış sıcaklıkları:</strong> Karadeniz 7°C, Marmara 9°C, Ege 14°C, Akdeniz 16°C
-    </p>
-</div>
-
-<!-- ⚖️ YASAL KURALLAR -->
-<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--red);">
-    <strong id="help-legal-label">⚖️ Yasal Boy Sınırları</strong>
-    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
-        Su Ürünleri Yasası gereği minimum yakalama boyları:<br>
-        <span style="color: var(--red);">45 cm</span> - Kalkan, Orfoz, Lahoz, Sarıkuyruk<br>
-        <span style="color: var(--orange);">25 cm</span> - Levrek, Sinarit, Trança<br>
-        <span style="color: var(--yellow);">20 cm</span> - Çipura, Kefal, Mırmır (etik)<br>
-        <span style="color: var(--cyan);">18 cm</span> - Lüfer, Karagöz, Mercan, Uskumru<br>
-        <span style="color: var(--green);">15 cm</span> - Fangri<br>
-        <span style="color: #a78bfa;">13 cm</span> - Barbun, Tekir<br>
-        <strong>⚠️ Yasak dönemler:</strong> Kalkan (15 Nisan - 15 Haziran)
-    </p>
-</div>
-
-
-               <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid #a78bfa;">
-    <strong id="help-wind-label">💨 Rüzgar Yönleri ve Etkileri</strong>
-    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
-        <span style="color: var(--green);">Yıldız (K)</span> - Soğuk hava taşır, sıcaklığı düşürür<br>
-        <span style="color: var(--green);">Poyraz (KD)</span> - Sert ve soğuktur, kar yağışını artırır<br>
-        <span style="color: var(--green);">Gündoğusu (D)</span> - Kuru ve soğuktur, yağışı keser<br>
-        <span style="color: var(--red);">Keşişleme (GD)</span> - Sıcak ve kurudur, sıcaklığı yükseltir<br>
-        <span style="color: var(--red);">Kıble (G)</span> - Güneyden sıcak ve nemli hava taşır<br>
-        <span style="color: var(--red);">Lodos (GB)</span> - Sıcak ve şiddetlidir, yağış habercisidir<br>
-        <span style="color: var(--yellow);">Günbatısı (B)</span> - Nemli hava taşır, yağış bırakabilir<br>
-        <span style="color: var(--yellow);">Karayel (KB)</span> - Soğuk cephe getirir, sıcaklığı hızla düşürür
-    </p>
-</div>
-                
-
 
     <!-- ═══════════════════════════════════════════════════════════════════
          WEEKLY MODAL
@@ -2257,6 +2198,10 @@
                 TACTIC_GOLDEN_HOURS: "✨ Altın saatler! Levrek/Lüfer aktif.",
                 TACTIC_DAY: "☀️ GÜNDÜZ: Çipura, Kefal hedefleyin.",
                 TACTIC_STANDARD: "Standart koşullar.",
+                TACTIC_HOT_SPOT: "🔥 SICAK MERA! ",
+                TACTIC_MODERATE: "📊 Orta Aktivite: ",
+                TACTIC_LOW_ACTIVITY: "⚠️ Düşük aktivite. Mera değiştirmeyi deneyin.",
+                TACTIC_STRONG_WIND: "💨 Çok rüzgarlı! Dikkatli olun.",
                 TACTIC_DYNAMIC: "🎯 Hedef: ", // + topFishNames
                 
                 // Yasal Boy
@@ -2469,6 +2414,10 @@
                 TACTIC_GOLDEN_HOURS: "✨ Golden hours! Sea Bass/Bluefish active.",
                 TACTIC_DAY: "☀️ DAYTIME: Target Gilthead, Mullet.",
                 TACTIC_STANDARD: "Standard conditions.",
+                TACTIC_HOT_SPOT: "🔥 HOT SPOT! ",
+                TACTIC_MODERATE: "📊 Moderate Activity: ",
+                TACTIC_LOW_ACTIVITY: "⚠️ Low activity. Try changing spots.",
+                TACTIC_STRONG_WIND: "💨 Very windy! Be careful.",
                 TACTIC_DYNAMIC: "🎯 Target: ", // + topFishNames
                 
                 // Legal Size
@@ -3123,12 +3072,28 @@
             const weatherKey = data.weatherSummary || '';
             document.getElementById('weather-display').innerText = t(weatherKey) || weatherKey;
             
-            // Tactic - dinamik gösterim
+            // GELİŞMİŞ TAKTİK GÖSTERİMİ
             const tacticKey = data.tacticKey || '';
+            const tacticData = data.tacticData;
             let tacticText = t(tacticKey) || tacticKey;
-            if (tacticKey === 'TACTIC_DYNAMIC' && data.topFishNames) {
-                tacticText = t('TACTIC_DYNAMIC') + data.topFishNames;
+            
+            if (tacticKey === 'TACTIC_HOT_SPOT' && tacticData?.fish) {
+                // 85+ skor - detaylı taktik
+                const fishInfo = tacticData.fish.map(f => {
+                    const baitHint = f.bait ? f.bait.split(',')[0] : '';
+                    return `${f.name} (%${f.score.toFixed(0)})`;
+                }).join(', ');
+                tacticText = t('TACTIC_HOT_SPOT') + fishInfo;
+                
+                // İlk balık için yem önerisi
+                if (tacticData.fish[0]?.bait) {
+                    const firstBait = translateBaitInfo(tacticData.fish[0].bait.split(',')[0]);
+                    tacticText += ` | Yem: ${firstBait}`;
+                }
+            } else if (tacticKey === 'TACTIC_MODERATE' && tacticData?.fish) {
+                tacticText = t('TACTIC_MODERATE') + tacticData.fish.join(', ');
             }
+            
             document.getElementById('tactic-display').innerText = tacticText;
 
             // Confidence
@@ -3237,7 +3202,7 @@
                 const title = CURRENT_LANG === 'en' ? (metricInfo?.titleEn || metricInfo?.title || m.key) : (metricInfo?.title || m.key);
 
                 return `
-                    <div class="metric-card" onclick="showMetricInfo('${m.key}')">
+                    <div class="metric-card" onclick="showMetricInfo('${m.key}', event)">
                         <div class="metric-icon">${icon}</div>
                         <div class="metric-val">${val}${m.unit}</div>
                         ${extraLine}
@@ -3347,11 +3312,14 @@
                     `;
                 }
 
+                // Fotoğraf butonu
+                const photoBtn = f.photoId ? `<span class="fish-photo-btn" onclick="showFishPhoto(${f.photoId}, '${displayName}', event)">👁️</span>` : '';
+
                 return `
                     <div class="fish-item ${scoreClass}" onclick="this.classList.toggle('open')">
                         <div class="fish-header">
                             <div class="fish-name">
-                                ${f.icon} ${displayName}
+                                ${f.icon} ${displayName} ${photoBtn}
                                 ${scientificLine}
                             </div>
                             <div class="fish-score" style="color: ${getScoreColor(f.score)}">%${f.score.toFixed(1)}</div>
@@ -3403,7 +3371,8 @@
             overlay.style.display = menu.classList.contains('active') ? 'block' : 'none';
         }
 
-        function showMetricInfo(key) {
+        function showMetricInfo(key, event) {
+            if (event) event.stopPropagation();
             const data = METRIC_DATA[key];
             if (!data) return;
 
@@ -3425,12 +3394,13 @@
             modal.scrollTop = 0;
         }
 
-        function showWeeklyModal() {
+        function showWeeklyModal(event) {
+            if (event) event.stopPropagation();
             if (!GLOBAL_DATA || !GLOBAL_DATA.forecast) return;
 
             const content = document.getElementById('weekly-content');
             content.innerHTML = GLOBAL_DATA.forecast.map((day, i) => `
-                <div class="day-row" onclick="showDayDetail(${i})">
+                <div class="day-row" onclick="showDayDetail(${i}, event)">
                     <div class="day-info">
                         <div class="day-date">${formatDate(day.date)}</div>
                         <div class="day-weather">${t(day.weatherSummary) || day.weatherSummary}</div>
@@ -3444,7 +3414,8 @@
             modal.scrollTop = 0;
         }
 
-        function showDayDetail(index) {
+        function showDayDetail(index, event) {
+            if (event) event.stopPropagation();
             const day = GLOBAL_DATA.forecast[index];
             if (!day) return;
 
@@ -3452,7 +3423,13 @@
             document.getElementById('dd-score').innerHTML = `<sup>%</sup>${day.score.toFixed(1)}`;
             document.getElementById('dd-score').style.color = getScoreColor(day.score);
             document.getElementById('dd-weather').innerText = t(day.weatherSummary) || day.weatherSummary;
-            document.getElementById('dd-tactic').innerText = t(day.tacticKey) || day.tacticKey;
+            
+            // Dinamik taktik gösterimi
+            let tacticText = t(day.tacticKey) || day.tacticKey;
+            if (day.tacticKey === 'TACTIC_DYNAMIC' && day.topFishNames) {
+                tacticText = t('TACTIC_DYNAMIC') + day.topFishNames;
+            }
+            document.getElementById('dd-tactic').innerText = tacticText;
 
             renderFishList(day.fishList, 'dd-fish-list');
             
@@ -3482,6 +3459,17 @@
             const modal = document.getElementById('help-modal');
             modal.style.display = 'flex';
             modal.scrollTop = 0;
+        }
+
+        function showFishPhoto(photoId, fishName, event) {
+            if (event) event.stopPropagation();
+            document.getElementById('fish-photo-title').innerText = fishName;
+            document.getElementById('fish-photo-img').src = `/fish/${photoId}.jpg`;
+            document.getElementById('fish-photo-modal').style.display = 'flex';
+        }
+        
+        function closeFishPhoto() {
+            document.getElementById('fish-photo-modal').style.display = 'none';
         }
 
         function locateMe() {
