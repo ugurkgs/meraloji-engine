@@ -451,6 +451,7 @@ function calculate3HourWindowScore(fish, key, baseParams, weather, marine, cente
 const SPECIES_DB = {
     "levrek": {
         name: "Levrek", nameEn: "European Sea Bass", icon: "🐟", scientificName: "Dicentrarchus labrax",
+        photoId: 1,
         category: "KIYI_AVCI",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak ve gün batımı ±2 saat",
         tempRange: { min: 12, opt: 18, max: 25 },
@@ -468,6 +469,7 @@ const SPECIES_DB = {
     },
     "lufer": {
         name: "Lüfer", nameEn: "Bluefish", icon: "🦈", scientificName: "Pomatomus saltatrix",
+        photoId: 2,
         category: "PELAJIK",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah suyu ve akşam suyu",
         tempRange: { min: 12, opt: 18, max: 25 },
@@ -485,6 +487,7 @@ const SPECIES_DB = {
     },
     "eskina": {
         name: "Eşkina", nameEn: "Brown Meagre", icon: "🐟", scientificName: "Sciaena umbra",
+        photoId: 3,
         category: "KIYI_AVCI",
         peakHours: "NIGHT", peakHoursDesc: "22:00 - 03:00 arası en aktif",
         tempRange: { min: 12, opt: 18, max: 25 },
@@ -502,6 +505,7 @@ const SPECIES_DB = {
     },
     "minekop": {
         name: "Minekop", nameEn: "Meagre", icon: "🐟", scientificName: "Argyrosomus regius",
+        photoId: 4,
         category: "KIYI_AVCI",
         peakHours: "NIGHT", peakHoursDesc: "Gece ve alacakaranlık",
         tempRange: { min: 12, opt: 18, max: 25 },
@@ -519,6 +523,7 @@ const SPECIES_DB = {
     },
     "cipura": {
         name: "Çipura", nameEn: "Gilt-head Bream", icon: "🐠", scientificName: "Sparus aurata",
+        photoId: 11,
         category: "KIYI",
         peakHours: "DAY", peakHoursDesc: "Sabah 08:00-11:00, İkindi 15:00-17:00",
         tempRange: { min: 14, opt: 20, max: 28 },
@@ -536,6 +541,7 @@ const SPECIES_DB = {
     },
     "karagoz": {
         name: "Karagöz", nameEn: "Common Two-banded Bream", icon: "🐟", scientificName: "Diplodus vulgaris",
+        photoId: 12,
         category: "KIYI",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah ve akşam suyu",
         tempRange: { min: 12, opt: 20, max: 25 },
@@ -553,6 +559,7 @@ const SPECIES_DB = {
     },
     "mirmir": {
         name: "Mırmır", nameEn: "Striped Seabream", icon: "🦓", scientificName: "Lithognathus mormyrus",
+        photoId: 13,
         category: "KIYI",
         peakHours: "NIGHT", peakHoursDesc: "Gece kıyıya yaklaşır, 21:00-02:00",
         tempRange: { min: 12, opt: 20, max: 25 },
@@ -570,6 +577,7 @@ const SPECIES_DB = {
     },
     "kalamar": {
         name: "Kalamar", nameEn: "European Squid", icon: "🦑", scientificName: "Loligo vulgaris",
+        photoId: 46,
         category: "KAFADANBACAKLI",
         peakHours: "NIGHT", peakHoursDesc: "Gece, özellikle ay ışığında",
         tempRange: { min: 14, opt: 19, max: 24 },
@@ -587,6 +595,7 @@ const SPECIES_DB = {
     },
     "ahtapot": {
         name: "Ahtapot", nameEn: "Common Octopus", icon: "🐙", scientificName: "Octopus vulgaris",
+        photoId: 47,
         category: "KAFADANBACAKLI",
         peakHours: "DAY", peakHoursDesc: "Gündüz aktif, sabah saatleri",
         tempRange: { min: 14, opt: 19, max: 24 },
@@ -604,6 +613,7 @@ const SPECIES_DB = {
     },
     "istavrit": {
         name: "İstavrit", nameEn: "Horse Mackerel", icon: "🐟", scientificName: "Trachurus mediterraneus",
+        photoId: 23,
         category: "PELAJIK",
         peakHours: "ALL", peakHoursDesc: "Tüm gün aktif, sabah/akşam yoğun",
         tempRange: { min: 10, opt: 18, max: 24 },
@@ -621,6 +631,7 @@ const SPECIES_DB = {
     },
     "torik": {
         name: "Torik", nameEn: "Atlantic Bonito", icon: "🐟", scientificName: "Sarda sarda",
+        photoId: 26,
         category: "PELAJIK",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Erken sabah ve akşamüstü",
         tempRange: { min: 15, opt: 20, max: 27 },
@@ -638,6 +649,7 @@ const SPECIES_DB = {
     },
     "palamut": {
         name: "Palamut", nameEn: "Bonito", icon: "🐟", scientificName: "Sarda sarda (Küçük)",
+        photoId: 25,
         category: "PELAJIK",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah suyu ve akşam suyu",
         tempRange: { min: 15, opt: 20, max: 27 },
@@ -655,6 +667,7 @@ const SPECIES_DB = {
     },
     "barbun": {
         name: "Barbun", nameEn: "Red Mullet", icon: "🐟", scientificName: "Mullus barbatus",
+        photoId: 33,
         category: "DIP_DERIN",
         peakHours: "DAY", peakHoursDesc: "Gündüz, tekne ile derin suda",
         tempRange: { min: 6, opt: 11, max: 17 },
@@ -672,6 +685,7 @@ const SPECIES_DB = {
     },
     "mezgit": {
         name: "Mezgit", nameEn: "Whiting", icon: "🐟", scientificName: "Merlangius merlangus",
+        photoId: 41,
         category: "DIP_DERIN",
         peakHours: "DAY", peakHoursDesc: "Gündüz, tekne ile derin suda",
         tempRange: { min: 6, opt: 11, max: 17 },
@@ -689,6 +703,7 @@ const SPECIES_DB = {
     },
     "kalkan": {
         name: "Kalkan", nameEn: "Turbot", icon: "🐟", scientificName: "Scophthalmus maximus",
+        photoId: 39,
         category: "DIP_DERIN",
         peakHours: "DAY", peakHoursDesc: "Gündüz, tekne ile derin suda",
         tempRange: { min: 6, opt: 11, max: 17 },
@@ -706,6 +721,7 @@ const SPECIES_DB = {
     },
     "iskorpit": {
         name: "İskorpit", nameEn: "Scorpionfish", icon: "🐟", scientificName: "Scorpaena porcus",
+        photoId: 40,
         category: "DIP_KIYI",
         peakHours: "NIGHT", peakHoursDesc: "Gece aktif, 21:00 sonrası",
         tempRange: { min: 10, opt: 18, max: 24 },
@@ -723,6 +739,7 @@ const SPECIES_DB = {
     },
     "kefal": {
         name: "Kefal", nameEn: "Flathead Grey Mullet", icon: "🐟", scientificName: "Mugil cephalus",
+        photoId: 44,
         category: "LAGUN",
         peakHours: "DAY", peakHoursDesc: "Sabah erken ve ikindi saatleri",
         tempRange: { min: 10, opt: 18, max: 28 },
@@ -740,6 +757,7 @@ const SPECIES_DB = {
     },
     "zargana": {
         name: "Zargana", nameEn: "Garfish", icon: "🐟", scientificName: "Belone belone",
+        photoId: 20,
         category: "KIYI",
         peakHours: "DAY", peakHoursDesc: "Güneşli günlerde yüzeyde",
         tempRange: { min: 12, opt: 18, max: 25 },
@@ -760,6 +778,7 @@ const SPECIES_DB = {
     // ═══════════════════════════════════════════════════════════════════════════
     "orfoz": {
         name: "Orfoz", nameEn: "Dusky Grouper", icon: "🐟", scientificName: "Epinephelus marginatus",
+        photoId: 5,
         category: "KIYI_AVCI",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah erken ve akşamüstü, kayalık dipte",
         tempRange: { min: 14, opt: 20, max: 26 },
@@ -777,6 +796,7 @@ const SPECIES_DB = {
     },
     "akya": {
         name: "Akya", nameEn: "Greater Amberjack", icon: "🐟", scientificName: "Seriola dumerili",
+        photoId: 6,
         category: "PELAJIK",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah suyu ve akşam suyu, açık sularda",
         tempRange: { min: 16, opt: 22, max: 28 },
@@ -794,6 +814,7 @@ const SPECIES_DB = {
     },
     "sinarit": {
         name: "Sinarit", nameEn: "Common Dentex", icon: "🐟", scientificName: "Dentex dentex",
+        photoId: 7,
         category: "KIYI_AVCI",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık saatleri, kayalık dipte",
         tempRange: { min: 14, opt: 20, max: 26 },
@@ -811,6 +832,7 @@ const SPECIES_DB = {
     },
     "fangri": {
         name: "Fangri", nameEn: "Common Pandora", icon: "🐟", scientificName: "Pagellus erythrinus",
+        photoId: 14,
         category: "KIYI",
         peakHours: "DAY", peakHoursDesc: "Gündüz saatleri, kumlu-kayalık karışık dipte",
         tempRange: { min: 12, opt: 18, max: 24 },
@@ -828,6 +850,7 @@ const SPECIES_DB = {
     },
     "mercan": {
         name: "Mercan", nameEn: "Red Porgy", icon: "🐟", scientificName: "Pagrus pagrus",
+        photoId: 35,
         category: "DIP_KIYI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, kayalık ve kumlu karışık dipte",
         tempRange: { min: 14, opt: 20, max: 26 },
@@ -845,6 +868,7 @@ const SPECIES_DB = {
     },
     "antenli_mercan": {
         name: "Antenli Mercan", nameEn: "Blackspot Seabream", icon: "🐟", scientificName: "Pagellus bogaraveo",
+        photoId: 36,
         category: "DIP_DERIN",
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin kayalık dipte",
         tempRange: { min: 10, opt: 16, max: 22 },
@@ -862,6 +886,7 @@ const SPECIES_DB = {
     },
     "melanur": {
         name: "Melanur", nameEn: "Saddled Seabream", icon: "🐟", scientificName: "Oblada melanura",
+        photoId: 15,
         category: "KIYI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, sığ kayalık alanlarda",
         tempRange: { min: 14, opt: 20, max: 26 },
@@ -879,6 +904,7 @@ const SPECIES_DB = {
     },
     "kupes": {
         name: "Kupes", nameEn: "Bogue", icon: "🐟", scientificName: "Boops boops",
+        photoId: 16,
         category: "KIYI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, sürü halinde yüzey yakını",
         tempRange: { min: 12, opt: 18, max: 24 },
@@ -896,6 +922,7 @@ const SPECIES_DB = {
     },
     "lahoz": {
         name: "Lahoz", nameEn: "White Grouper", icon: "🐟", scientificName: "Epinephelus aeneus",
+        photoId: 8,
         category: "KIYI_AVCI",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık, kayalık dip",
         tempRange: { min: 16, opt: 22, max: 28 },
@@ -913,6 +940,7 @@ const SPECIES_DB = {
     },
     "sivriburun": {
         name: "Sivriburun", nameEn: "Sharpsnout Seabream", icon: "🐟", scientificName: "Diplodus puntazzo",
+        photoId: 17,
         category: "KIYI",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah ve akşam, kayalık kıyı",
         tempRange: { min: 14, opt: 20, max: 26 },
@@ -930,6 +958,7 @@ const SPECIES_DB = {
     },
     "izmarit": {
         name: "İzmarit", nameEn: "Picarel", icon: "🐟", scientificName: "Spicara smaris",
+        photoId: 18,
         category: "KIYI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, kumlu-çamurlu dip",
         tempRange: { min: 12, opt: 18, max: 24 },
@@ -947,6 +976,7 @@ const SPECIES_DB = {
     },
     "tekir": {
         name: "Tekir", nameEn: "Striped Red Mullet", icon: "🐟", scientificName: "Mullus surmuletus",
+        photoId: 37,
         category: "DIP_KIYI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, kumlu ve çakıllı dip",
         tempRange: { min: 10, opt: 16, max: 22 },
@@ -964,6 +994,7 @@ const SPECIES_DB = {
     },
     "sargoz": {
         name: "Sargoz", nameEn: "White Seabream", icon: "🐟", scientificName: "Diplodus sargus",
+        photoId: 19,
         category: "KIYI",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah ve akşam suyu, kayalık kıyı",
         tempRange: { min: 14, opt: 20, max: 26 },
@@ -981,6 +1012,7 @@ const SPECIES_DB = {
     },
     "hani": {
         name: "Hani/Hanos", nameEn: "Comber", icon: "🐟", scientificName: "Serranus cabrilla",
+        photoId: 38,
         category: "DIP_KIYI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, kayalık dip",
         tempRange: { min: 12, opt: 18, max: 24 },
@@ -1000,6 +1032,7 @@ const SPECIES_DB = {
     },
     "sarikulak": {
         name: "Sarıkulak Kefal", nameEn: "Golden Grey Mullet", icon: "🐟", scientificName: "Chelon auratus",
+        photoId: 45,
         category: "LAGUN",
         peakHours: "DAY", peakHoursDesc: "Sabah erken, lagün ve kıyı",
         tempRange: { min: 10, opt: 18, max: 26 },
@@ -1020,6 +1053,7 @@ const SPECIES_DB = {
     // ═══════════════════════════════════════════════════════════════════════════
     "tranca": {
         name: "Trança", nameEn: "Pink Dentex", icon: "🐟", scientificName: "Dentex gibbosus",
+        photoId: 49,
         category: "DERİN",
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin su",
         tempRange: { min: 16, opt: 21, max: 26 },
@@ -1037,6 +1071,7 @@ const SPECIES_DB = {
     },
     "subye": {
         name: "Sübye", nameEn: "Common Cuttlefish", icon: "🦑", scientificName: "Sepia officinalis",
+        photoId: 48,
         category: "KALAMAR",
         peakHours: "NIGHT", peakHoursDesc: "Gece, kıyı yakını",
         tempRange: { min: 14, opt: 18, max: 24 },
@@ -1054,6 +1089,7 @@ const SPECIES_DB = {
     },
     "sarikuyruk": {
         name: "Sarıkuyruk", nameEn: "Greater Amberjack", icon: "🐟", scientificName: "Seriola dumerili",
+        photoId: 50,
         category: "AVCI",
         peakHours: "DAY", peakHoursDesc: "Sabah/Akşam, açık su",
         tempRange: { min: 18, opt: 24, max: 28 },
@@ -1071,6 +1107,7 @@ const SPECIES_DB = {
     },
     "granyoz": {
         name: "Granyoz (Sarıağız)", nameEn: "Meagre", icon: "🐟", scientificName: "Argyrosomus regius",
+        photoId: 10,
         category: "AVCI",
         peakHours: "NIGHT", peakHoursDesc: "Gece ve alacakaranlık",
         tempRange: { min: 16, opt: 21, max: 26 },
@@ -1088,6 +1125,7 @@ const SPECIES_DB = {
     },
     "yazili_orkinos": {
         name: "Yazılı Orkinos", nameEn: "Little Tunny", icon: "🐟", scientificName: "Euthynnus alletteratus",
+        photoId: 29,
         category: "AVCI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, sürü halinde",
         tempRange: { min: 18, opt: 24, max: 28 },
@@ -1122,6 +1160,7 @@ const SPECIES_DB = {
     },
     "uskumru": {
         name: "Uskumru", nameEn: "Atlantic Mackerel", icon: "🐟", scientificName: "Scomber scombrus",
+        photoId: 27,
         category: "SÜRÜ",
         peakHours: "DAY", peakHoursDesc: "Sabah/Akşam",
         tempRange: { min: 10, opt: 15, max: 20 },
@@ -1139,6 +1178,7 @@ const SPECIES_DB = {
     },
     "kolyoz": {
         name: "Kolyoz", nameEn: "Chub Mackerel", icon: "🐟", scientificName: "Scomber japonicus",
+        photoId: 28,
         category: "SÜRÜ",
         peakHours: "DAY", peakHoursDesc: "Gündüz",
         tempRange: { min: 15, opt: 22, max: 27 },
@@ -1156,6 +1196,7 @@ const SPECIES_DB = {
     },
     "isparoz": {
         name: "İsparoz", nameEn: "Annular Seabream", icon: "🐟", scientificName: "Diplodus annularis",
+        photoId: 21,
         category: "KAYALIK",
         peakHours: "DAY", peakHoursDesc: "Gündüz, sığ",
         tempRange: { min: 14, opt: 20, max: 26 },
@@ -1173,6 +1214,7 @@ const SPECIES_DB = {
     },
     "sarpa": {
         name: "Sarpa (Salpa)", nameEn: "Salema", icon: "🐟", scientificName: "Sarpa salpa",
+        photoId: 22,
         category: "KAYALIK",
         peakHours: "DAY", peakHoursDesc: "Gündüz, sığ",
         tempRange: { min: 16, opt: 22, max: 28 },
@@ -1190,6 +1232,7 @@ const SPECIES_DB = {
     },
     "muren": {
         name: "Müren", nameEn: "Mediterranean Moray", icon: "🐍", scientificName: "Muraena helena",
+        photoId: 54,
         category: "KAYALIK",
         peakHours: "NIGHT", peakHoursDesc: "Gece, kayalık",
         tempRange: { min: 18, opt: 23, max: 28 },
@@ -1207,6 +1250,7 @@ const SPECIES_DB = {
     },
     "migri": {
         name: "Mığrı (Deniz Yılanı)", nameEn: "European Conger", icon: "🐍", scientificName: "Conger conger",
+        photoId: 53,
         category: "DERİN",
         peakHours: "NIGHT", peakHoursDesc: "Gece, kayalık dip",
         tempRange: { min: 12, opt: 17, max: 24 },
@@ -1224,6 +1268,7 @@ const SPECIES_DB = {
     },
     "zurna": {
         name: "Zurna", nameEn: "European Barracuda", icon: "🐟", scientificName: "Sphyraena sphyraena",
+        photoId: 52,
         category: "AVCI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, yüzey",
         tempRange: { min: 18, opt: 24, max: 28 },
@@ -1241,6 +1286,7 @@ const SPECIES_DB = {
     },
     "barakuda": {
         name: "Baraküda", nameEn: "Yellowmouth Barracuda", icon: "🐟", scientificName: "Sphyraena viridensis",
+        photoId: 51,
         category: "AVCI",
         peakHours: "CREPUSCULAR", peakHoursDesc: "Alacakaranlık ve gece",
         tempRange: { min: 18, opt: 24, max: 29 },
@@ -1258,6 +1304,7 @@ const SPECIES_DB = {
     },
     "kirlangic": {
         name: "Kırlangıç", nameEn: "Tub Gurnard", icon: "🐟", scientificName: "Chelidonichthys lucerna",
+        photoId: 59,
         category: "DİP",
         peakHours: "DAY", peakHoursDesc: "Gündüz, kumlu dip",
         tempRange: { min: 12, opt: 17, max: 22 },
@@ -1292,6 +1339,7 @@ const SPECIES_DB = {
     },
     "pisi": {
         name: "Pisi Balığı", nameEn: "European Flounder", icon: "🐟", scientificName: "Platichthys flesus",
+        photoId: 43,
         category: "DİP",
         peakHours: "DAY", peakHoursDesc: "Gündüz, kumlu dip",
         tempRange: { min: 8, opt: 14, max: 20 },
@@ -1309,6 +1357,7 @@ const SPECIES_DB = {
     },
     "gelincik": {
         name: "Gelincik", nameEn: "Shore Rockling", icon: "🐟", scientificName: "Gaidropsarus mediterraneus",
+        photoId: 55,
         category: "KAYALIK",
         peakHours: "NIGHT", peakHoursDesc: "Gece, kayalık",
         tempRange: { min: 10, opt: 16, max: 24 },
@@ -1326,6 +1375,7 @@ const SPECIES_DB = {
     },
     "vatoz": {
         name: "Vatoz", nameEn: "Common Stingray", icon: "🦈", scientificName: "Dasyatis pastinaca",
+        photoId: 58,
         category: "DİP",
         peakHours: "NIGHT", peakHoursDesc: "Gece, kumlu dip",
         tempRange: { min: 12, opt: 18, max: 26 },
@@ -1343,6 +1393,7 @@ const SPECIES_DB = {
     },
     "cutre": {
         name: "Çütre (Tetik)", nameEn: "Grey Triggerfish", icon: "🐟", scientificName: "Balistes capriscus",
+        photoId: 72,
         category: "KAYALIK",
         peakHours: "DAY", peakHoursDesc: "Gündüz, kayalık",
         tempRange: { min: 18, opt: 24, max: 28 },
@@ -1394,6 +1445,7 @@ const SPECIES_DB = {
     },
     "hamsi": {
         name: "Hamsi", nameEn: "European Anchovy", icon: "🐟", scientificName: "Engraulis encrasicolus",
+        photoId: 32,
         category: "SÜRÜ",
         peakHours: "DAY", peakHoursDesc: "Gündüz, sürü halinde",
         tempRange: { min: 8, opt: 12, max: 18 },
@@ -1411,6 +1463,7 @@ const SPECIES_DB = {
     },
     "aslan_baligi": {
         name: "Aslan Balığı", nameEn: "Devil Firefish", icon: "🦁", scientificName: "Pterois miles",
+        photoId: 71,
         category: "İSTİLACI",
         peakHours: "CREPUSCULAR", peakHoursDesc: "Alacakaranlık",
         tempRange: { min: 18, opt: 25, max: 30 },
@@ -1428,6 +1481,7 @@ const SPECIES_DB = {
     },
     "balon_baligi": {
         name: "Balon Balığı", nameEn: "Silver-cheeked Toadfish", icon: "🐡", scientificName: "Lagocephalus sceleratus",
+        photoId: 70,
         category: "İSTİLACI",
         peakHours: "DAY", peakHoursDesc: "Gündüz",
         tempRange: { min: 18, opt: 26, max: 32 },
@@ -1448,6 +1502,7 @@ const SPECIES_DB = {
     // ═══════════════════════════════════════════════════════════════════
     "isparoz": {
         name: "İsparoz", nameEn: "Annular Seabream", icon: "🐟", scientificName: "Diplodus annularis",
+        photoId: 21,
         category: "DIP_KIYI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, sığ kayalık",
         tempRange: { min: 12, opt: 18, max: 26 },
@@ -1465,6 +1520,7 @@ const SPECIES_DB = {
     },
     "yazili_orkinos": {
         name: "Yazılı Orkinos", nameEn: "Little Tunny", icon: "🐟", scientificName: "Euthynnus alletteratus",
+        photoId: 29,
         category: "PELAJIK",
         peakHours: "DAY", peakHoursDesc: "Sabah-Öğlen, açık deniz",
         tempRange: { min: 18, opt: 24, max: 30 },
@@ -1482,6 +1538,7 @@ const SPECIES_DB = {
     },
     "palamut": {
         name: "Palamut", nameEn: "Atlantic Bonito", icon: "🐟", scientificName: "Sarda sarda",
+        photoId: 25,
         category: "PELAJIK",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah-Akşam",
         tempRange: { min: 12, opt: 18, max: 24 },
@@ -1499,6 +1556,7 @@ const SPECIES_DB = {
     },
     "torik": {
         name: "Torik", nameEn: "Atlantic Bonito (Large)", icon: "🐟", scientificName: "Sarda sarda",
+        photoId: 26,
         category: "PELAJIK",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah-Akşam, derin",
         tempRange: { min: 10, opt: 16, max: 22 },
@@ -1516,6 +1574,7 @@ const SPECIES_DB = {
     },
     "cinekop": {
         name: "Çinekop", nameEn: "Baby Bluefish", icon: "🐟", scientificName: "Pomatomus saltatrix (juv.)",
+        photoId: 31,
         category: "PELAJIK",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah-Akşam",
         tempRange: { min: 14, opt: 20, max: 26 },
@@ -1536,6 +1595,7 @@ const SPECIES_DB = {
     // ═══════════════════════════════════════════════════════════════════
     "hamsi": {
         name: "Hamsi", nameEn: "European Anchovy", icon: "🐟", scientificName: "Engraulis encrasicolus",
+        photoId: 32,
         category: "TİCARİ",
         peakHours: "DAY", peakHoursDesc: "Gündüz, yüzey",
         tempRange: { min: 8, opt: 14, max: 20 },
@@ -1553,6 +1613,7 @@ const SPECIES_DB = {
     },
     "sardalya": {
         name: "Sardalya", nameEn: "European Sardine", icon: "🐟", scientificName: "Sardina pilchardus",
+        photoId: 24,
         category: "TİCARİ",
         peakHours: "DAY", peakHoursDesc: "Gündüz, yüzey",
         tempRange: { min: 10, opt: 16, max: 22 },
@@ -1570,6 +1631,7 @@ const SPECIES_DB = {
     },
     "istavrit": {
         name: "İstavrit", nameEn: "Horse Mackerel", icon: "🐟", scientificName: "Trachurus trachurus",
+        photoId: 23,
         category: "TİCARİ",
         peakHours: "DAY", peakHoursDesc: "Gündüz, orta su",
         tempRange: { min: 10, opt: 16, max: 22 },
@@ -1587,6 +1649,7 @@ const SPECIES_DB = {
     },
     "uskumru": {
         name: "Uskumru", nameEn: "Atlantic Mackerel", icon: "🐟", scientificName: "Scomber scombrus",
+        photoId: 27,
         category: "TİCARİ",
         peakHours: "DAY", peakHoursDesc: "Sabah, yüzey-orta su",
         tempRange: { min: 8, opt: 14, max: 20 },
@@ -1604,6 +1667,7 @@ const SPECIES_DB = {
     },
     "kolyoz": {
         name: "Kolyoz", nameEn: "Chub Mackerel", icon: "🐟", scientificName: "Scomber japonicus",
+        photoId: 28,
         category: "TİCARİ",
         peakHours: "DAY", peakHoursDesc: "Sabah, yüzey",
         tempRange: { min: 12, opt: 18, max: 24 },
@@ -1621,6 +1685,7 @@ const SPECIES_DB = {
     },
     "mezgit": {
         name: "Mezgit", nameEn: "Whiting", icon: "🐟", scientificName: "Merlangius merlangus",
+        photoId: 41,
         category: "DIP_DERIN",
         peakHours: "DAY", peakHoursDesc: "Gündüz, kumlu dip",
         tempRange: { min: 6, opt: 12, max: 18 },
@@ -1638,6 +1703,7 @@ const SPECIES_DB = {
     },
     "kalkan": {
         name: "Kalkan", nameEn: "Turbot", icon: "🐟", scientificName: "Scophthalmus maximus",
+        photoId: 39,
         category: "DIP_DERIN",
         peakHours: "NIGHT", peakHoursDesc: "Gece, kumlu dip",
         tempRange: { min: 6, opt: 12, max: 18 },
@@ -1655,6 +1721,7 @@ const SPECIES_DB = {
     },
     "barbunya": {
         name: "Barbunya", nameEn: "Red Mullet", icon: "🐟", scientificName: "Mullus barbatus",
+        photoId: 34,
         category: "DIP_KIYI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, kumlu/çamurlu dip",
         tempRange: { min: 12, opt: 18, max: 24 },
@@ -1672,6 +1739,7 @@ const SPECIES_DB = {
     },
     "tekir": {
         name: "Tekir", nameEn: "Striped Red Mullet", icon: "🐟", scientificName: "Mullus surmuletus",
+        photoId: 37,
         category: "DIP_KIYI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, kayalık/kumlu",
         tempRange: { min: 12, opt: 18, max: 24 },
@@ -1689,6 +1757,7 @@ const SPECIES_DB = {
     },
     "pisi": {
         name: "Pisi Balığı", nameEn: "European Flounder", icon: "🐟", scientificName: "Platichthys flesus",
+        photoId: 43,
         category: "DIP_KIYI",
         peakHours: "NIGHT", peakHoursDesc: "Gece, kumlu sığ",
         tempRange: { min: 8, opt: 14, max: 20 },
@@ -1706,6 +1775,7 @@ const SPECIES_DB = {
     },
     "fangri": {
         name: "Fangri", nameEn: "Common Pandora", icon: "🐟", scientificName: "Pagellus erythrinus",
+        photoId: 14,
         category: "DIP_DERIN",
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin kayalık",
         tempRange: { min: 14, opt: 20, max: 26 },
@@ -1723,6 +1793,7 @@ const SPECIES_DB = {
     },
     "izmarit": {
         name: "İzmarit", nameEn: "Picarel", icon: "🐟", scientificName: "Spicara smaris",
+        photoId: 18,
         category: "DIP_KIYI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, sürü halinde",
         tempRange: { min: 12, opt: 18, max: 24 },
@@ -1740,6 +1811,7 @@ const SPECIES_DB = {
     },
     "lahoz": {
         name: "Lahoz (Lagos)", nameEn: "Dusky Grouper", icon: "🐟", scientificName: "Epinephelus marginatus",
+        photoId: 8,
         category: "DIP_DERIN",
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin kayalık",
         tempRange: { min: 14, opt: 20, max: 26 },
@@ -1754,6 +1826,40 @@ const SPECIES_DB = {
         advice: { bait: "Canlı balık, Ahtapot", lure: "Büyük Silikon", rig: "Dip", hook: "4/0 - 6/0" },
         legalSize: "45 cm",
         note: "⚠️ KORUMA ALTINDA. Yakaladığınızda serbest bırakın!"
+    },
+    "mersin": {
+        name: "Mersin Balığı", nameEn: "Sturgeon", icon: "🐟", scientificName: "Acipenser spp.",
+        category: "DIP_DERIN",
+        peakHours: "DAY", peakHoursDesc: "Gündüz, derin su",
+        tempRange: { min: 10, opt: 16, max: 22 },
+        seasons: { winter: 0.60, spring: 0.75, summer: 0.50, autumn: 0.65 },
+        activity: "DAY",
+        pressureSensitivity: 0.5,
+        wavePref: 0.3,
+        clarityPref: "MODERATE",
+        currentPref: 0.4,
+        regions: ["KARADENİZ", "MARMARA"],
+        depth: { min: 20, opt: 80, max: 200 },
+        advice: { bait: "Kurt, Midye, Balık parçası", lure: "Yok", rig: "Dip, Uzun Olta", hook: "2 - 6" },
+        legalSize: "Yok",
+        note: "⚠️ NADİR TÜR. Karadeniz'e özgü. Yakaladığınızda serbest bırakın."
+    },
+    "mandagoz": {
+        name: "Mandagöz", nameEn: "Bogue", icon: "🐟", scientificName: "Boops boops",
+        category: "DIP_KIYI",
+        peakHours: "DAY", peakHoursDesc: "Gündüz, sürü halinde",
+        tempRange: { min: 12, opt: 18, max: 24 },
+        seasons: { winter: 0.55, spring: 0.70, summer: 0.80, autumn: 0.70 },
+        activity: "DAY",
+        pressureSensitivity: 0.4,
+        wavePref: 0.3,
+        clarityPref: "MODERATE",
+        currentPref: 0.3,
+        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        depth: { min: 3, opt: 20, max: 80 },
+        advice: { bait: "Ekmek, Kurt, Hamur", lure: "Yok", rig: "Çapari, Dip", hook: "10 - 14" },
+        legalSize: "Yok",
+        note: "Kupes'e benzer. Sürü halinde avlanır. Yem balığı olarak kullanılır."
     }
 };
 
@@ -2052,7 +2158,7 @@ app.get('/api/forecast', async (req, res) => {
                         
                         fishList.push({
                             key, name: fish.name, nameEn: fish.nameEn || fish.name,
-                            scientificName: fish.scientificName,
+                            scientificName: fish.scientificName, photoId: fish.photoId,
                             icon: fish.icon, category: fish.category,
                             peakHours: fish.peakHours, peakHoursDesc: fish.peakHoursDesc,
                             score: dailyScore, // Ağırlıklı günlük skor
@@ -2067,26 +2173,53 @@ app.get('/api/forecast', async (req, res) => {
                 fishList.sort((a, b) => b.score - a.score);
             }
 
-            // DİNAMİK TAKTİK MESAJI - Top 3 balığı göster
+            // GELİŞMİŞ TAKTİK SİSTEMİ
             let tacticKey = "";
-            let topFishNames = "";
-            if (fishList.length > 0) {
-                // Ticari olmayan en iyi 3 balık
-                const hobbyFish = fishList.filter(f => f.category !== "TİCARİ").slice(0, 3);
-                if (hobbyFish.length > 0) {
-                    topFishNames = hobbyFish.map(f => f.name).join(", ");
-                }
-            }
+            let tacticData = null;
             
-            if (isLand) tacticKey = "TACTIC_LAND";
-            else if (wave > 2.0) tacticKey = "TACTIC_HIGH_WAVE";
-            else if (weatherSummary.includes("STORM")) tacticKey = "TACTIC_STORM";
-            else if (pressureTrend.trend === 'FALLING_FAST' && i === 0) tacticKey = "TACTIC_FEEDING_FRENZY";
-            else if (pressureTrend.trend === 'FALLING' && i === 0) tacticKey = "TACTIC_PRESSURE_DROP";
-            else if (topFishNames) tacticKey = "TACTIC_DYNAMIC"; // Dinamik mod
-            else tacticKey = "TACTIC_STANDARD";
-
+            // 85+ skor alan balıkları bul
+            const highScoreFish = fishList.filter(f => f.score >= 85 && f.category !== "TİCARİ");
+            const mediumScoreFish = fishList.filter(f => f.score >= 60 && f.score < 85 && f.category !== "TİCARİ");
             const topScore = fishList.length > 0 ? fishList[0].score : 0;
+            
+            if (isLand) {
+                tacticKey = "TACTIC_LAND";
+            } else if (wave > 2.0) {
+                tacticKey = "TACTIC_HIGH_WAVE";
+                tacticData = { warning: true };
+            } else if (weatherSummary.includes("STORM")) {
+                tacticKey = "TACTIC_STORM";
+                tacticData = { warning: true };
+            } else if (windSpeed > 35) {
+                tacticKey = "TACTIC_STRONG_WIND";
+                tacticData = { warning: true, wind: windSpeed };
+            } else if (pressureTrend.trend === 'FALLING_FAST') {
+                tacticKey = "TACTIC_FEEDING_FRENZY";
+                tacticData = { bonus: true };
+            } else if (highScoreFish.length > 0) {
+                // 85+ skor var - aktif taktik öner
+                tacticKey = "TACTIC_HOT_SPOT";
+                tacticData = {
+                    fish: highScoreFish.slice(0, 2).map(f => ({
+                        name: f.name,
+                        score: f.score,
+                        bait: f.bait,
+                        lure: f.lure
+                    }))
+                };
+            } else if (mediumScoreFish.length > 0) {
+                // 60-85 arası - orta aktivite
+                tacticKey = "TACTIC_MODERATE";
+                tacticData = {
+                    fish: mediumScoreFish.slice(0, 3).map(f => f.name)
+                };
+            } else if (topScore < 40) {
+                // Düşük skor - mera değiştir önerisi
+                tacticKey = "TACTIC_LOW_ACTIVITY";
+                tacticData = { suggest: "change_spot" };
+            } else {
+                tacticKey = "TACTIC_STANDARD";
+            }
 
             forecast.push({
                 date: targetDate.toISOString(),
@@ -2097,7 +2230,7 @@ app.get('/api/forecast', async (req, res) => {
                 pressure: Math.round(pressure), pressureTrend: i === 0 ? pressureTrend.trend : null,
                 cloud: cloud + "%", rain: rain + "mm", salinity, tide: tideFlow.toFixed(1),
                 current: currentEst.toFixed(2), score: parseFloat(topScore.toFixed(1)),
-                confidence: 92 - (i * 6), tacticKey, topFishNames, weatherSummary,
+                confidence: 92 - (i * 6), tacticKey, tacticData, weatherSummary,
                 fishList: fishList.slice(0, 10), moonPhase: moon.phase,
                 moonPhaseName: getMoonPhaseName(moon.phase), airTemp: tempAir, timeMode,
                 activityWindows: activityWindows
@@ -2152,7 +2285,7 @@ app.get('/api/forecast', async (req, res) => {
                 if (smoothedScore > 15) {
                     instantFishList.push({
                         key, name: fish.name, nameEn: fish.nameEn || fish.name,
-                        scientificName: fish.scientificName,
+                        scientificName: fish.scientificName, photoId: fish.photoId,
                         icon: fish.icon, category: fish.category,
                         peakHours: fish.peakHours, peakHoursDesc: fish.peakHoursDesc,
                         score: smoothedScore, // 3 saatlik ortalama skor
@@ -2165,28 +2298,49 @@ app.get('/api/forecast', async (req, res) => {
             }
             instantFishList.sort((a, b) => b.score - a.score);
 
-            // DİNAMİK TAKTİK MESAJI - Top 3 balığı göster
+            // GELİŞMİŞ TAKTİK SİSTEMİ - ANLIK
             let instantTacticKey = "";
-            let instantTopFishNames = "";
-            if (instantFishList.length > 0) {
-                const hobbyFish = instantFishList.filter(f => f.category !== "TİCARİ").slice(0, 3);
-                if (hobbyFish.length > 0) {
-                    instantTopFishNames = hobbyFish.map(f => f.name).join(", ");
-                }
-            }
+            let instantTacticData = null;
             
-            if (i_wave > 2.0) instantTacticKey = "TACTIC_HIGH_WAVE";
-            else if (pressureTrend.trend === 'FALLING_FAST') instantTacticKey = "TACTIC_FEEDING_FRENZY";
-            else if (instantTopFishNames) instantTacticKey = "TACTIC_DYNAMIC";
-            else if (i_timeMode === "NIGHT") instantTacticKey = "TACTIC_NIGHT";
-            else if (i_timeMode === "DAWN") instantTacticKey = "TACTIC_DAWN";
-            else if (i_timeMode === "DUSK") instantTacticKey = "TACTIC_DUSK";
-            else instantTacticKey = "TACTIC_DAY";
+            const i_highScoreFish = instantFishList.filter(f => f.score >= 85 && f.category !== "TİCARİ");
+            const i_mediumScoreFish = instantFishList.filter(f => f.score >= 60 && f.score < 85 && f.category !== "TİCARİ");
+            const i_topScore = instantFishList.length > 0 ? instantFishList[0].score : 0;
+            
+            if (i_wave > 2.0) {
+                instantTacticKey = "TACTIC_HIGH_WAVE";
+                instantTacticData = { warning: true };
+            } else if (i_wind > 35) {
+                instantTacticKey = "TACTIC_STRONG_WIND";
+                instantTacticData = { warning: true };
+            } else if (pressureTrend.trend === 'FALLING_FAST') {
+                instantTacticKey = "TACTIC_FEEDING_FRENZY";
+                instantTacticData = { bonus: true };
+            } else if (i_highScoreFish.length > 0) {
+                instantTacticKey = "TACTIC_HOT_SPOT";
+                instantTacticData = {
+                    fish: i_highScoreFish.slice(0, 2).map(f => ({
+                        name: f.name,
+                        score: f.score,
+                        bait: f.bait,
+                        lure: f.lure
+                    }))
+                };
+            } else if (i_mediumScoreFish.length > 0) {
+                instantTacticKey = "TACTIC_MODERATE";
+                instantTacticData = {
+                    fish: i_mediumScoreFish.slice(0, 3).map(f => f.name)
+                };
+            } else if (i_topScore < 40) {
+                instantTacticKey = "TACTIC_LOW_ACTIVITY";
+                instantTacticData = { suggest: "change_spot" };
+            } else {
+                instantTacticKey = "TACTIC_STANDARD";
+            }
 
             instantData = {
-                score: instantFishList.length > 0 ? parseFloat(instantFishList[0].score.toFixed(1)) : 0,
+                score: i_topScore,
                 weatherSummary: getWeatherCondition(i_rain, i_wind, i_cloud, i_clarity),
-                tacticKey: instantTacticKey, topFishNames: instantTopFishNames,
+                tacticKey: instantTacticKey, tacticData: instantTacticData,
                 fishList: instantFishList.slice(0, 10),
                 temp: i_tempWater, wind: i_wind, 
                 windDirection: i_windDir,
@@ -2197,7 +2351,7 @@ app.get('/api/forecast', async (req, res) => {
         }
 
         const responseData = {
-            version: "F.I.S.H. v2.7", region: regionName, isLand, clickHour,
+            version: "F.I.S.H. v2.8", region: regionName, isLand, clickHour,
             depth: depthData,  // EMODnet Bathymetry derinlik verisi
             forecast, instant: instantData
         };
@@ -2214,9 +2368,9 @@ app.get('/api/forecast', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════════╗
-║         ⚓ MERALOJİ F.I.S.H. v2.7 AKTİF ⚓                ║
-║    ✅ ${Object.keys(SPECIES_DB).length} Balık | Yıldız Sistemi | Dinamik Taktik      ║
-║    📊 Yardım Modal | Ticari Balıklar | İsparoz           ║
+║         ⚓ MERALOJİ F.I.S.H. v2.8 AKTİF ⚓                ║
+║    ✅ ${Object.keys(SPECIES_DB).length} Balık | Fotoğraf | Gelişmiş Taktik          ║
+║    📸 Balık Fotoğrafları | 85+ Skor Taktikleri           ║
 ║    Port: ${PORT}                                            ║
 ╚═══════════════════════════════════════════════════════════╝
     `);
