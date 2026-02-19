@@ -478,6 +478,13 @@
             color: var(--cyan);
             font-family: var(--font-mono);
         }
+        
+        .hud-coords {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            letter-spacing: 0.3px;
+        }
 
         .hud-close {
             width: 36px;
@@ -801,6 +808,130 @@
             letter-spacing: 1px;
             margin-bottom: 12px;
             text-transform: uppercase;
+        }
+
+        /* BALIK ARAMA */
+        .fish-search-box {
+            margin-bottom: 14px;
+            position: relative;
+        }
+        .fish-search-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 0 12px;
+            transition: border-color 0.2s;
+        }
+        .fish-search-input-wrapper:focus-within {
+            border-color: var(--cyan);
+        }
+        .fish-search-icon {
+            font-size: 0.9rem;
+            margin-right: 8px;
+            opacity: 0.6;
+        }
+        .fish-search-input-wrapper input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            padding: 10px 0;
+            outline: none;
+            font-family: var(--font-main);
+        }
+        .fish-search-input-wrapper input::placeholder {
+            color: var(--text-muted);
+        }
+        .fish-search-clear {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px;
+        }
+        .fish-search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-primary, #0a0e1a);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            border: 1px solid var(--border-subtle);
+            border-top: none;
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        .fish-search-option {
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-subtle);
+            transition: background 0.15s;
+        }
+        .fish-search-option:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+        .fish-search-option .fish-cat {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            margin-left: 8px;
+        }
+        .fish-search-result {
+            margin-top: 10px;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+            padding: 16px;
+        }
+        .fish-search-result .fsr-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .fish-search-result .fsr-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .fish-search-result .fsr-score {
+            font-size: 1.2rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+        }
+        .fish-search-result .fsr-reason-item {
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.78rem;
+            margin-bottom: 6px;
+        }
+        .fish-search-result .fsr-reason-item.critical {
+            background: rgba(255,65,54,0.15);
+            color: var(--red);
+            border-left: 3px solid var(--red);
+        }
+        .fish-search-result .fsr-reason-item.high {
+            background: rgba(255,133,27,0.15);
+            color: #ff851b;
+            border-left: 3px solid #ff851b;
+        }
+        .fish-search-result .fsr-reason-item.medium {
+            background: rgba(255,220,0,0.1);
+            color: var(--yellow);
+            border-left: 3px solid var(--yellow);
+        }
+        .fish-search-result .fsr-reason-item.low, .fish-search-result .fsr-reason-item.info {
+            background: rgba(0,200,200,0.08);
+            color: var(--cyan);
+            border-left: 3px solid var(--cyan);
         }
 
         .fish-item {
@@ -1484,6 +1615,7 @@
         <div class="hud-header">
             <div class="hud-title-area">
                 <span class="hud-title" id="region-title">--</span>
+                <span class="hud-coords" id="coords-display"></span>
                 <span class="hud-depth" id="depth-display">⚓ --m</span>
             </div>
             <button class="hud-close" onclick="closeHud()">✕</button>
@@ -1523,6 +1655,18 @@
             <div class="metrics-grid" id="metrics-grid"></div>
 
             <div class="section-title" id="species-title">Türler (Detay için tıklayın)</div>
+            
+            <!-- BALIK ARAMA -->
+            <div class="fish-search-box" id="fish-search-box">
+                <div class="fish-search-input-wrapper">
+                    <span class="fish-search-icon">🔍</span>
+                    <input type="text" id="fish-search-input" placeholder="Balık Ara..." autocomplete="off" oninput="onFishSearchInput(this.value)" onfocus="onFishSearchFocus()">
+                    <button class="fish-search-clear" id="fish-search-clear" onclick="clearFishSearch()" style="display:none;">✕</button>
+                </div>
+                <div class="fish-search-dropdown" id="fish-search-dropdown" style="display:none;"></div>
+                <div class="fish-search-result" id="fish-search-result" style="display:none;"></div>
+            </div>
+            
             <div id="fish-list"></div>
 
             <button class="btn-primary" onclick="showWeeklyModal(event)" id="weekly-btn">📅 7 Günlük Tahmin</button>
@@ -3041,6 +3185,18 @@
         function renderPanel(global, data) {
             document.getElementById('region-title').innerText = global.region;
             
+            // Koordinat gösterimi
+            const coordsDisplay = document.getElementById('coords-display');
+            if (global.lat !== undefined && global.lon !== undefined) {
+                coordsDisplay.innerText = `📍 ${parseFloat(global.lat).toFixed(4)}, ${parseFloat(global.lon).toFixed(4)}`;
+                coordsDisplay.style.display = 'block';
+            } else if (lastLatLon) {
+                coordsDisplay.innerText = `📍 ${parseFloat(lastLatLon.lat).toFixed(4)}, ${parseFloat(lastLatLon.lon).toFixed(4)}`;
+                coordsDisplay.style.display = 'block';
+            } else {
+                coordsDisplay.style.display = 'none';
+            }
+            
             // Derinlik bilgisini göster (min 1m)
             const depthDisplay = document.getElementById('depth-display');
             if (global.depth && global.depth.avg !== null) {
@@ -3305,10 +3461,13 @@
                             <div style="font-size: 0.7rem; color: var(--cyan); margin-bottom: 4px;">📊 ${CURRENT_LANG === 'tr' ? 'SKOR ANALİZİ' : 'SCORE ANALYSIS'}</div>
                             ${sd.season ? starLine(t('starSeason'), sd.season.stars) : ''}
                             ${sd.temp ? starLine(t('starTemp') + ` (${sd.temp.value}°C)`, sd.temp.stars) : ''}
+                            ${sd.depth ? starLine((CURRENT_LANG === 'tr' ? 'Derinlik' : 'Depth') + ` (${Math.round(sd.depth.value)}m / opt:${sd.depth.fishOpt}m)`, sd.depth.stars) : ''}
                             ${sd.wave ? starLine(t('starWave') + ` (${sd.wave.value}m)`, sd.wave.stars) : ''}
                             ${sd.clarity ? starLine(t('starClarity') + ` (${sd.clarity.value}%)`, sd.clarity.stars) : ''}
                             ${sd.wind ? starLine(t('starWind') + ` (${sd.wind.value}km/s)`, sd.wind.stars) : ''}
                             ${sd.activity ? starLine(t('starActivity'), sd.activity.stars) : ''}
+                            ${sd.midday ? `<div style="color: var(--yellow); font-size: 0.7rem; margin-top: 4px;">☀️ Öğlen bastırması: ×${sd.midday.penalty.toFixed(2)}</div>` : ''}
+                            ${sd.volatility ? `<div style="color: var(--cyan); font-size: 0.7rem; margin-top: 4px;">🐟 Sürü faktörü: ×${sd.volatility.multiplier}</div>` : ''}
                             ${sd.penalties && sd.penalties.length > 0 ? `<div style="color: var(--red); font-size: 0.7rem; margin-top: 4px;">⚠️ ${sd.penalties.join(', ')}</div>` : ''}
                         </div>
                     `;
@@ -3341,6 +3500,183 @@
                 `;
             }).join('');
         }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // BALIK ARAMA SİSTEMİ
+        // ═══════════════════════════════════════════════════════════════════
+
+        let SPECIES_LIST_CACHE = null;
+
+        async function loadSpeciesList() {
+            if (SPECIES_LIST_CACHE) return SPECIES_LIST_CACHE;
+            try {
+                const res = await fetch('/api/species-list');
+                SPECIES_LIST_CACHE = await res.json();
+                return SPECIES_LIST_CACHE;
+            } catch (e) {
+                console.error('Species list error:', e);
+                return [];
+            }
+        }
+
+        async function onFishSearchFocus() {
+            await loadSpeciesList();
+        }
+
+        async function onFishSearchInput(val) {
+            const dropdown = document.getElementById('fish-search-dropdown');
+            const clearBtn = document.getElementById('fish-search-clear');
+            
+            if (!val || val.length < 1) {
+                dropdown.style.display = 'none';
+                clearBtn.style.display = 'none';
+                return;
+            }
+            clearBtn.style.display = 'block';
+            
+            const list = await loadSpeciesList();
+            const q = val.toLowerCase().replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ğ/g, 'g');
+            
+            const matches = list.filter(s => {
+                const name = s.name.toLowerCase().replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ğ/g, 'g');
+                const nameEn = (s.nameEn || '').toLowerCase();
+                return name.includes(q) || nameEn.includes(q);
+            }).slice(0, 8);
+
+            if (matches.length === 0) {
+                dropdown.innerHTML = '<div class="fish-search-option" style="color:var(--text-muted);">Sonuç bulunamadı</div>';
+            } else {
+                const catNames = {
+                    'KIYI_AVCI': 'Kıyı Avcı', 'KIYI': 'Kıyı', 'PELAJIK': 'Pelajik',
+                    'DIP_KIYI': 'Dip/Kıyı', 'DIP_DERIN': 'Dip/Derin', 'DİP': 'Dip',
+                    'KAYALIK': 'Kayalık', 'SÜRÜ': 'Sürü', 'AVCI': 'Avcı',
+                    'TİCARİ': 'Ticari', 'DERİN': 'Derin', 'İSTİLACI': 'İstilacı',
+                    'LAGUN': 'Lagün', 'KAFADANBACAKLI': 'Kafadanbacaklı', 'KALAMAR': 'Kalamar'
+                };
+                dropdown.innerHTML = matches.map(s => 
+                    `<div class="fish-search-option" onclick="selectFishSearch('${s.key}')">
+                        ${s.icon} ${s.name} <span class="fish-cat">${catNames[s.category] || s.category}</span>
+                    </div>`
+                ).join('');
+            }
+            dropdown.style.display = 'block';
+        }
+
+        function clearFishSearch() {
+            document.getElementById('fish-search-input').value = '';
+            document.getElementById('fish-search-dropdown').style.display = 'none';
+            document.getElementById('fish-search-result').style.display = 'none';
+            document.getElementById('fish-search-clear').style.display = 'none';
+        }
+
+        async function selectFishSearch(fishKey) {
+            const dropdown = document.getElementById('fish-search-dropdown');
+            const resultDiv = document.getElementById('fish-search-result');
+            dropdown.style.display = 'none';
+
+            if (!lastLatLon) {
+                resultDiv.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:16px;">Önce haritada bir nokta seçin.</div>';
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            // İsmi input'a yaz
+            const list = await loadSpeciesList();
+            const found = list.find(s => s.key === fishKey);
+            if (found) {
+                document.getElementById('fish-search-input').value = found.name;
+            }
+
+            resultDiv.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">⏳ Analiz ediliyor...</div>';
+            resultDiv.style.display = 'block';
+
+            try {
+                const res = await fetch(`/api/fish-search?lat=${lastLatLon.lat}&lon=${lastLatLon.lon}&fishKey=${fishKey}`);
+                const data = await res.json();
+
+                if (data.error === 'land') {
+                    resultDiv.innerHTML = '<div style="color:var(--red); text-align:center; padding:16px;">🏔️ Burası kara parçası</div>';
+                    return;
+                }
+
+                const f = data.fish;
+                const score = data.score;
+                const scoreColor = score >= 70 ? 'var(--green)' : score >= 50 ? 'var(--yellow)' : 'var(--red)';
+                const sd = data.scoreDetails;
+
+                // Yıldız oluşturma helper
+                const starLine = (label, stars) => {
+                    const filled = '★'.repeat(Math.max(0, Math.min(5, stars)));
+                    const empty = '☆'.repeat(5 - Math.max(0, Math.min(5, stars)));
+                    const color = stars >= 4 ? 'var(--green)' : (stars >= 2 ? 'var(--yellow)' : 'var(--red)');
+                    return `<div style="display:flex;justify-content:space-between;font-size:0.75rem;"><span>${label}</span><span style="color:${color}">${filled}${empty}</span></div>`;
+                };
+
+                // Neden listesi
+                let reasonsHtml = '';
+                if (data.reasons && data.reasons.length > 0) {
+                    reasonsHtml = '<div style="margin-top:10px;">' + 
+                        '<div style="font-size:0.72rem;color:var(--yellow);margin-bottom:6px;">⚠️ ' + 
+                        (CURRENT_LANG === 'tr' ? 'NEDEN LİSTELENMEDİ / DÜŞÜK SKOR' : 'WHY NOT LISTED / LOW SCORE') + '</div>' +
+                        data.reasons.map(r => 
+                            `<div class="fsr-reason-item ${r.type.toLowerCase()}">${r.text}</div>`
+                        ).join('') + '</div>';
+                }
+
+                // Skor analizi
+                let starsHtml = '';
+                if (sd) {
+                    starsHtml = `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border-subtle);">
+                        <div style="font-size:0.72rem; color:var(--cyan); margin-bottom:6px;">📊 SKOR ANALİZİ</div>
+                        ${sd.season ? starLine('Mevsim', sd.season.stars) : ''}
+                        ${sd.temp ? starLine('Sıcaklık (' + sd.temp.value + '°C)', sd.temp.stars) : ''}
+                        ${sd.depth ? starLine('Derinlik (' + Math.round(sd.depth.value) + 'm / opt:' + sd.depth.fishOpt + 'm)', sd.depth.stars) : ''}
+                        ${sd.wave ? starLine('Dalga (' + sd.wave.value + 'm)', sd.wave.stars) : ''}
+                        ${sd.clarity ? starLine('Berraklık (' + sd.clarity.value + '%)', sd.clarity.stars) : ''}
+                        ${sd.wind ? starLine('Rüzgar (' + sd.wind.value + 'km/s)', sd.wind.stars) : ''}
+                        ${sd.activity ? starLine('Aktivite', sd.activity.stars) : ''}
+                        ${sd.region ? starLine('Bölge', sd.region.stars) : ''}
+                        ${sd.midday ? '<div style="color:var(--yellow);font-size:0.7rem;margin-top:4px;">☀️ Öğlen bastırması: ×' + sd.midday.penalty.toFixed(2) + '</div>' : ''}
+                        ${sd.volatility ? '<div style="color:var(--cyan);font-size:0.7rem;margin-top:4px;">🐟 Sürü faktörü: ×' + sd.volatility.multiplier + '</div>' : ''}
+                        ${sd.penalties && sd.penalties.length > 0 ? '<div style="color:var(--red);font-size:0.7rem;margin-top:4px;">⚠️ ' + sd.penalties.join(', ') + '</div>' : ''}
+                    </div>`;
+                }
+
+                // Koşullar özeti
+                const c = data.conditions;
+                const condHtml = `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border-subtle); font-size:0.72rem; color:var(--text-muted);">
+                    📍 ${c.region} | 🌡️ ${c.tempWater?.toFixed(1)}°C | 🌊 ${c.wave}m | 💨 ${c.windSpeed}km/s | ⚓ ${c.depthAvg ? Math.round(c.depthAvg) + 'm' : 'N/A'} | 🕐 ${c.timeMode} | 📅 ${c.season}
+                </div>`;
+
+                resultDiv.innerHTML = `
+                    <div class="fsr-header">
+                        <div class="fsr-name">${f.icon} ${f.name}</div>
+                        <div class="fsr-score" style="color:${scoreColor}">%${score.toFixed(1)}</div>
+                    </div>
+                    <div style="font-size:0.72rem; color:var(--text-muted); font-style:italic; margin-bottom:8px;">${f.scientificName || ''} — ${f.category}</div>
+                    <div style="font-size:0.78rem; color:var(--text-secondary);">
+                        🎯 <strong>Yem:</strong> ${f.advice?.bait || '-'}<br>
+                        📏 <strong>Yasal Boy:</strong> ${f.legalSize || '-'}<br>
+                        ⚓ <strong>Derinlik:</strong> ${f.depth.min}m - ${f.depth.max}m (opt: ${f.depth.opt}m)<br>
+                        🌍 <strong>Bölgeler:</strong> ${f.regions.join(', ')}
+                    </div>
+                    ${reasonsHtml}
+                    ${starsHtml}
+                    ${condHtml}
+                    ${f.note ? '<div style="margin-top:8px; font-size:0.75rem; color:var(--cyan);">💡 ' + f.note + '</div>' : ''}
+                `;
+            } catch (err) {
+                resultDiv.innerHTML = `<div style="color:var(--red); text-align:center; padding:16px;">Hata: ${err.message}</div>`;
+            }
+        }
+
+        // Tıklayınca dropdown kapansın
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.fish-search-box')) {
+                const dd = document.getElementById('fish-search-dropdown');
+                if (dd) dd.style.display = 'none';
+            }
+        });
 
         // ═══════════════════════════════════════════════════════════════════
         // UTILITY FUNCTIONS
