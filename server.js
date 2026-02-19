@@ -1322,6 +1322,7 @@ const SPECIES_DB = {
     },
     "dil_baligi": {
         name: "Dil Balığı", nameEn: "Common Sole", icon: "🐟", scientificName: "Solea solea",
+        photoId: 42,
         category: "DİP",
         peakHours: "NIGHT", peakHoursDesc: "Gece, kumlu dip",
         tempRange: { min: 12, opt: 18, max: 26 },
@@ -1411,6 +1412,7 @@ const SPECIES_DB = {
     },
     "kurbaga": {
         name: "Kurbağa Balığı (Trakonya)", nameEn: "Atlantic Stargazer", icon: "🐟", scientificName: "Uranoscopus scaber",
+        photoId: 79,
         category: "DİP",
         peakHours: "NIGHT", peakHoursDesc: "Gece, kumlu dip",
         tempRange: { min: 12, opt: 18, max: 26 },
@@ -1428,6 +1430,7 @@ const SPECIES_DB = {
     },
     "fener": {
         name: "Fener Balığı", nameEn: "Anglerfish", icon: "🐟", scientificName: "Lophius piscatorius",
+        photoId: 80,
         category: "DERİN",
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin dip",
         tempRange: { min: 10, opt: 14, max: 20 },
@@ -1829,6 +1832,7 @@ const SPECIES_DB = {
     },
     "mersin": {
         name: "Mersin Balığı", nameEn: "Sturgeon", icon: "🐟", scientificName: "Acipenser spp.",
+        photoId: 81,
         category: "DIP_DERIN",
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin su",
         tempRange: { min: 10, opt: 16, max: 22 },
@@ -1846,6 +1850,7 @@ const SPECIES_DB = {
     },
     "mandagoz": {
         name: "Mandagöz", nameEn: "Bogue", icon: "🐟", scientificName: "Boops boops",
+        photoId: 82,
         category: "DIP_KIYI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, sürü halinde",
         tempRange: { min: 12, opt: 18, max: 24 },
