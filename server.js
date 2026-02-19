@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// MERALOJİ F.I.S.H. SYSTEM - Backend Engine v2.2
+// MERALOJİ F.I.S.H. SYSTEM - Backend Engine v3.0
 // Find • Inspect • See • Hunt
 // Ağırlıklı Ortalama + Aktivite Saatleri + Çoklu Dil Desteği
 // ═══════════════════════════════════════════════════════════════════════════
@@ -62,7 +62,17 @@ function safeWaterTemp(val, region, month) {
 // Gaussian Çan Eğrisi
 function getGaussianScore(val, min, opt, max) {
     val = safeNum(val);
-    if (val < min || val > max) return 0.05;
+    
+    // Aralık dışı yumuşak geçiş (eskiden sert 0.05 idi)
+    if (val < min) {
+        const overshoot = (min - val) / Math.max(1, min * 0.3);
+        return Math.max(0.03, 0.25 * Math.exp(-overshoot * overshoot));
+    }
+    if (val > max) {
+        const overshoot = (val - max) / Math.max(1, max * 0.15);
+        return Math.max(0.03, 0.25 * Math.exp(-overshoot * overshoot));
+    }
+    
     if (val >= opt - 2 && val <= opt + 2) return 1.0;
     
     const distance = Math.abs(val - opt);
@@ -360,6 +370,8 @@ function getHourWeight(hour, activityWindows, fishActivity) {
 function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, activityWindows, hourlyStartIdx) {
     let totalScore = 0;
     let totalWeight = 0;
+    let bestHour = -1;
+    let bestHourScore = -1;
     
     // SunCalc'ı döngü dışında bir kez hesapla (performans)
     const sunTimes = SunCalc.getTimes(baseParams.targetDate, baseParams.lat, baseParams.lon);
@@ -393,6 +405,12 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
         // Skor hesapla
         const result = calculateFishScore(fish, key, hourParams);
         
+        // En iyi saati takip et
+        if (result.finalScore > bestHourScore) {
+            bestHourScore = result.finalScore;
+            bestHour = h;
+        }
+        
         // Ağırlık al
         const weight = getHourWeight(h, activityWindows, fish.activity);
         
@@ -400,7 +418,8 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
         totalWeight += weight;
     }
     
-    return totalWeight > 0 ? totalScore / totalWeight : 0;
+    const avgScore = totalWeight > 0 ? totalScore / totalWeight : 0;
+    return { score: avgScore, bestHour, bestHourScore };
 }
 
 // 3 saatlik pencere ortalaması (anlık için)
@@ -631,42 +650,6 @@ const SPECIES_DB = {
         legalSize: "13 cm",
         note: "Sürü halinde. Çapari ile kova doldurulur."
     },
-    "torik": {
-        name: "Torik", nameEn: "Atlantic Bonito", icon: "🐟", scientificName: "Sarda sarda",
-        photoId: 26,
-        category: "PELAJIK",
-        peakHours: "DAWN_DUSK", peakHoursDesc: "Erken sabah ve akşamüstü",
-        tempRange: { min: 15, opt: 20, max: 27 },
-        seasons: { winter: 0.20, spring: 0.40, summer: 0.75, autumn: 0.90 },
-        activity: "DAWN_DUSK",
-        pressureSensitivity: 0.8,
-        wavePref: 0.5,
-        clarityPref: "CLEAR",
-        currentPref: 0.9,
-        regions: ["MARMARA", "EGE", "KARADENİZ"],
-        depth: { min: 0, opt: 25, max: 500 },
-        advice: { bait: "Canlı İstavrit, Sardalya", lure: "Ağır Maket, Poşhter", rig: "Trolling, Bırakma", hook: "1 - 3/0 + Çelik Tel" },
-        legalSize: "Belirtilmemiş",
-        note: "Göç döneminde (Sonbahar) bereket. Hızlı yüzücü."
-    },
-    "palamut": {
-        name: "Palamut", nameEn: "Bonito", icon: "🐟", scientificName: "Sarda sarda (Küçük)",
-        photoId: 25,
-        category: "PELAJIK",
-        peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah suyu ve akşam suyu",
-        tempRange: { min: 15, opt: 20, max: 27 },
-        seasons: { winter: 0.15, spring: 0.30, summer: 0.60, autumn: 0.95 },
-        activity: "DAWN_DUSK",
-        pressureSensitivity: 0.8,
-        wavePref: 0.5,
-        clarityPref: "CLEAR",
-        currentPref: 0.9,
-        regions: ["MARMARA", "KARADENİZ", "EGE"],
-        depth: { min: 0, opt: 25, max: 500 },
-        advice: { bait: "Çiroz, İstavrit", lure: "Kaşık, Metal Jig", rig: "Hırsızlı, Trolling", hook: "1 - 2/0" },
-        legalSize: "25 cm",
-        note: "Sonbahar göçü meşhurdur. Marmara'da bolluk."
-    },
     "barbun": {
         name: "Barbun", nameEn: "Red Mullet", icon: "🐟", scientificName: "Mullus barbatus",
         photoId: 33,
@@ -684,42 +667,6 @@ const SPECIES_DB = {
         advice: { bait: "Karides, Midye, Kurt", lure: "Genelde Yok", rig: "Dip Takımı (3 İğneli)", hook: "4 - 8" },
         legalSize: "13 cm",
         note: "⚠️ Derin suda yaşar (30-400m). Kıyıdan zor tutulur."
-    },
-    "mezgit": {
-        name: "Mezgit", nameEn: "Whiting", icon: "🐟", scientificName: "Merlangius merlangus",
-        photoId: 41,
-        category: "DIP_DERIN",
-        peakHours: "DAY", peakHoursDesc: "Gündüz, tekne ile derin suda",
-        tempRange: { min: 6, opt: 11, max: 17 },
-        seasons: { winter: 0.85, spring: 0.50, summer: 0.15, autumn: 0.70 },
-        activity: "DAY",
-        pressureSensitivity: 0.4,
-        wavePref: 0.3,
-        clarityPref: "TURBID",
-        currentPref: 0.3,
-        regions: ["KARADENİZ", "MARMARA"],
-        depth: { min: 30, opt: 80, max: 400 },
-        advice: { bait: "Karides, Midye, Kurt", lure: "Genelde Yok", rig: "Dip Takımı", hook: "4 - 8" },
-        legalSize: "13 cm",
-        note: "⚠️ Soğuk, derin su balığı. Kış aylarında bollaşır."
-    },
-    "kalkan": {
-        name: "Kalkan", nameEn: "Turbot", icon: "🐟", scientificName: "Scophthalmus maximus",
-        photoId: 39,
-        category: "DIP_DERIN",
-        peakHours: "DAY", peakHoursDesc: "Gündüz, tekne ile derin suda",
-        tempRange: { min: 6, opt: 11, max: 17 },
-        seasons: { winter: 0.70, spring: 0.30, summer: 0.10, autumn: 0.60 },
-        activity: "DAY",
-        pressureSensitivity: 0.3,
-        wavePref: 0.4,
-        clarityPref: "TURBID",
-        currentPref: 0.2,
-        regions: ["KARADENİZ", "MARMARA"],
-        depth: { min: 30, opt: 80, max: 400 },
-        advice: { bait: "İstavrit Fleto, Hamsi", lure: "Yok", rig: "Ağır Dip Takımı", hook: "1/0 - 3/0" },
-        legalSize: "45 cm",
-        note: "⚠️ 15 Nisan - 15 Haziran YASAK. Derin suda (30-400m)."
     },
     "iskorpit": {
         name: "İskorpit", nameEn: "Scorpionfish", icon: "🐟", scientificName: "Scorpaena porcus",
@@ -832,24 +779,6 @@ const SPECIES_DB = {
         legalSize: "25 cm",
         note: "Lezzetli et! Kayalık dip sever. Sabırlı av gerektirir."
     },
-    "fangri": {
-        name: "Fangri", nameEn: "Common Pandora", icon: "🐟", scientificName: "Pagellus erythrinus",
-        photoId: 14,
-        category: "KIYI",
-        peakHours: "DAY", peakHoursDesc: "Gündüz saatleri, kumlu-kayalık karışık dipte",
-        tempRange: { min: 12, opt: 18, max: 24 },
-        seasons: { winter: 0.55, spring: 0.70, summer: 0.65, autumn: 0.80 },
-        activity: "DAY",
-        pressureSensitivity: 0.5,
-        wavePref: 0.4,
-        clarityPref: "MODERATE",
-        currentPref: 0.4,
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 10, opt: 50, max: 200 },
-        advice: { bait: "Karides, Midye, Kurt", lure: "Micro Jig", rig: "Dip Takımı (3 İğneli)", hook: "4 - 8" },
-        legalSize: "15 cm",
-        note: "Sürü halinde. Dip takımı ile verimli av."
-    },
     "mercan": {
         name: "Mercan", nameEn: "Red Porgy", icon: "🐟", scientificName: "Pagrus pagrus",
         photoId: 35,
@@ -922,24 +851,6 @@ const SPECIES_DB = {
         legalSize: "Yok",
         note: "Sürü halinde. Çapari ile bol av. Canlı yem olarak kullanılır."
     },
-    "lahoz": {
-        name: "Lahoz", nameEn: "White Grouper", icon: "🐟", scientificName: "Epinephelus aeneus",
-        photoId: 8,
-        category: "KIYI_AVCI",
-        peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık, kayalık dip",
-        tempRange: { min: 16, opt: 22, max: 28 },
-        seasons: { winter: 0.35, spring: 0.55, summer: 0.80, autumn: 0.65 },
-        activity: "DAWN_DUSK",
-        pressureSensitivity: 0.5,
-        wavePref: 0.4,
-        clarityPref: "MODERATE",
-        currentPref: 0.3,
-        regions: ["EGE", "AKDENİZ"],
-        depth: { min: 10, opt: 50, max: 200 },
-        advice: { bait: "Canlı Balık, Kalamar, Ahtapot", lure: "Büyük Silikon, Jig", rig: "Ağır Dip, Jigging", hook: "4/0 - 7/0" },
-        legalSize: "45 cm",
-        note: "Orfoza benzer ama daha açık renkli. Güçlü mücadele."
-    },
     "sivriburun": {
         name: "Sivriburun", nameEn: "Sharpsnout Seabream", icon: "🐟", scientificName: "Diplodus puntazzo",
         photoId: 17,
@@ -957,42 +868,6 @@ const SPECIES_DB = {
         advice: { bait: "Yengeç, Midye, Mamun", lure: "Silikon Karides", rig: "Şeytan Oltası, Dip Takımı", hook: "2 - 6" },
         legalSize: "18 cm",
         note: "Sivri burunlu karagöz. Köpüklü su sever."
-    },
-    "izmarit": {
-        name: "İzmarit", nameEn: "Picarel", icon: "🐟", scientificName: "Spicara smaris",
-        photoId: 18,
-        category: "KIYI",
-        peakHours: "DAY", peakHoursDesc: "Gündüz, kumlu-çamurlu dip",
-        tempRange: { min: 12, opt: 18, max: 24 },
-        seasons: { winter: 0.60, spring: 0.70, summer: 0.65, autumn: 0.70 },
-        activity: "DAY",
-        pressureSensitivity: 0.4,
-        wavePref: 0.3,
-        clarityPref: "MODERATE",
-        currentPref: 0.3,
-        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
-        depth: { min: 5, opt: 30, max: 130 },
-        advice: { bait: "Karides, Kurt, Hamur", lure: "Çapari", rig: "Çapari, Dip Takımı", hook: "10 - 14" },
-        legalSize: "Yok",
-        note: "Sürü halinde. Çapari ile verimli. Canlı yem olarak kullanılır."
-    },
-    "tekir": {
-        name: "Tekir", nameEn: "Striped Red Mullet", icon: "🐟", scientificName: "Mullus surmuletus",
-        photoId: 37,
-        category: "DIP_KIYI",
-        peakHours: "DAY", peakHoursDesc: "Gündüz, kumlu ve çakıllı dip",
-        tempRange: { min: 10, opt: 16, max: 22 },
-        seasons: { winter: 0.70, spring: 0.65, summer: 0.45, autumn: 0.75 },
-        activity: "DAY",
-        pressureSensitivity: 0.5,
-        wavePref: 0.4,
-        clarityPref: "MODERATE",
-        currentPref: 0.3,
-        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
-        depth: { min: 5, opt: 40, max: 100 },
-        advice: { bait: "Karides, Kurt, Kum Solucanı", lure: "Yok", rig: "Dip Takımı (3 İğneli)", hook: "6 - 10" },
-        legalSize: "13 cm",
-        note: "Barbuna benzer ama çizgili. Kumlu dip sever."
     },
     "sargoz": {
         name: "Sargoz", nameEn: "White Seabream", icon: "🐟", scientificName: "Diplodus sargus",
@@ -1117,7 +992,7 @@ const SPECIES_DB = {
         activity: "NIGHT",
         pressureSensitivity: 0.7,
         wavePref: 0.4,
-        clarityPref: "MEDIUM",
+        clarityPref: "MODERATE",
         currentPref: 0.5,
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 5, opt: 25, max: 60 },
@@ -1125,26 +1000,9 @@ const SPECIES_DB = {
         legalSize: "42 cm",
         note: "Gece avcısı dev. 50kg'a ulaşabilir. Ses çıkarır (davul balığı)."
     },
-    "yazili_orkinos": {
-        name: "Yazılı Orkinos", nameEn: "Little Tunny", icon: "🐟", scientificName: "Euthynnus alletteratus",
-        photoId: 29,
-        category: "AVCI",
-        peakHours: "DAY", peakHoursDesc: "Gündüz, sürü halinde",
-        tempRange: { min: 18, opt: 24, max: 28 },
-        seasons: { winter: 0.25, spring: 0.55, summer: 0.90, autumn: 0.75 },
-        activity: "DAY",
-        pressureSensitivity: 0.5,
-        wavePref: 0.5,
-        clarityPref: "CLEAR",
-        currentPref: 0.6,
-        regions: ["AKDENİZ", "EGE"],
-        depth: { min: 5, opt: 30, max: 70 },
-        advice: { bait: "Yapay tercih", lure: "Kaşık, Sahte Balık", rig: "Spin, Trolling", hook: "1/0 - 3/0" },
-        legalSize: "Yok",
-        note: "Hızlı ve güçlü. Kuş takibi yaparak bulunur. Yaz favorisi."
-    },
     "lambuga": {
         name: "Lambuga (Mahi Mahi)", nameEn: "Common Dolphinfish", icon: "🐟", scientificName: "Coryphaena hippurus",
+        photoId: 83,
         category: "AVCI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, yüzey",
         tempRange: { min: 21, opt: 26, max: 30 },
@@ -1196,24 +1054,6 @@ const SPECIES_DB = {
         legalSize: "18 cm",
         note: "Uskumruya benzer ama daha sıcak su sever. Yaz mevsimi balığı."
     },
-    "isparoz": {
-        name: "İsparoz", nameEn: "Annular Seabream", icon: "🐟", scientificName: "Diplodus annularis",
-        photoId: 21,
-        category: "KAYALIK",
-        peakHours: "DAY", peakHoursDesc: "Gündüz, sığ",
-        tempRange: { min: 14, opt: 20, max: 26 },
-        seasons: { winter: 0.50, spring: 0.75, summer: 0.80, autumn: 0.70 },
-        activity: "DAY",
-        pressureSensitivity: 0.4,
-        wavePref: 0.3,
-        clarityPref: "MEDIUM",
-        currentPref: 0.3,
-        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
-        depth: { min: 1, opt: 8, max: 20 },
-        advice: { bait: "Karides, Midye", lure: "Micro Jig", rig: "Dip, LRF", hook: "8 - 12" },
-        legalSize: "Yok",
-        note: "Küçük ama bol. LRF için ideal. Kayalık ve çimenlik sever."
-    },
     "sarpa": {
         name: "Sarpa (Salpa)", nameEn: "Salema", icon: "🐟", scientificName: "Sarpa salpa",
         photoId: 22,
@@ -1242,7 +1082,7 @@ const SPECIES_DB = {
         activity: "NIGHT",
         pressureSensitivity: 0.4,
         wavePref: 0.3,
-        clarityPref: "MEDIUM",
+        clarityPref: "MODERATE",
         currentPref: 0.3,
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 2, opt: 15, max: 40 },
@@ -1314,7 +1154,7 @@ const SPECIES_DB = {
         activity: "DAY",
         pressureSensitivity: 0.5,
         wavePref: 0.4,
-        clarityPref: "MEDIUM",
+        clarityPref: "MODERATE",
         currentPref: 0.4,
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 15, opt: 35, max: 80 },
@@ -1339,24 +1179,6 @@ const SPECIES_DB = {
         advice: { bait: "Boru Kurdu", lure: "Yok", rig: "Dip", hook: "6 - 10" },
         legalSize: "20 cm",
         note: "Gece aktif, gündüz kuma gömülür. Boru kurdu en iyi yem."
-    },
-    "pisi": {
-        name: "Pisi Balığı", nameEn: "European Flounder", icon: "🐟", scientificName: "Platichthys flesus",
-        photoId: 43,
-        category: "DİP",
-        peakHours: "DAY", peakHoursDesc: "Gündüz, kumlu dip",
-        tempRange: { min: 8, opt: 14, max: 20 },
-        seasons: { winter: 0.65, spring: 0.80, summer: 0.50, autumn: 0.70 },
-        activity: "DAY",
-        pressureSensitivity: 0.5,
-        wavePref: 0.3,
-        clarityPref: "TURBID",
-        currentPref: 0.3,
-        regions: ["MARMARA", "KARADENİZ"],
-        depth: { min: 2, opt: 10, max: 25 },
-        advice: { bait: "Boru Kurdu, Karides", lure: "Yok", rig: "Dip", hook: "6 - 10" },
-        legalSize: "20 cm",
-        note: "Serin su sever. Marmara ve Karadeniz'de bol. Lezzetli."
     },
     "gelincik": {
         name: "Gelincik", nameEn: "Shore Rockling", icon: "🐟", scientificName: "Gaidropsarus mediterraneus",
@@ -1458,7 +1280,7 @@ const SPECIES_DB = {
         activity: "DAY",
         pressureSensitivity: 0.4,
         wavePref: 0.4,
-        clarityPref: "MEDIUM",
+        clarityPref: "MODERATE",
         currentPref: 0.5,
         regions: ["KARADENİZ", "MARMARA"],
         depth: { min: 5, opt: 25, max: 60 },
@@ -1598,24 +1420,6 @@ const SPECIES_DB = {
     // ═══════════════════════════════════════════════════════════════════
     // TİCARİ BALIKLAR (Hobi oltası ile zor ama bölgede bulunur)
     // ═══════════════════════════════════════════════════════════════════
-    "hamsi": {
-        name: "Hamsi", nameEn: "European Anchovy", icon: "🐟", scientificName: "Engraulis encrasicolus",
-        photoId: 32,
-        category: "TİCARİ",
-        peakHours: "DAY", peakHoursDesc: "Gündüz, yüzey",
-        tempRange: { min: 8, opt: 14, max: 20 },
-        seasons: { winter: 0.90, spring: 0.50, summer: 0.30, autumn: 0.70 },
-        activity: "DAY",
-        pressureSensitivity: 0.3,
-        wavePref: 0.3,
-        clarityPref: "ANY",
-        currentPref: 0.4,
-        regions: ["KARADENİZ", "MARMARA"],
-        depth: { min: 0, opt: 30, max: 100 },
-        advice: { bait: "-", lure: "-", rig: "Ağ/Trol", hook: "-" },
-        legalSize: "9 cm",
-        note: "🏭 TİCARİ AVCILIK. Hobi oltası ile tutulmaz, sürü göstergesi olarak değerlendirin."
-    },
     "sardalya": {
         name: "Sardalya", nameEn: "European Sardine", icon: "🐟", scientificName: "Sardina pilchardus",
         photoId: 24,
@@ -1633,60 +1437,6 @@ const SPECIES_DB = {
         advice: { bait: "-", lure: "-", rig: "Ağ/Trol", hook: "-" },
         legalSize: "11 cm",
         note: "🏭 TİCARİ AVCILIK. Hobi oltası ile tutulmaz, yem balığı olarak kullanılır."
-    },
-    "istavrit": {
-        name: "İstavrit", nameEn: "Horse Mackerel", icon: "🐟", scientificName: "Trachurus trachurus",
-        photoId: 23,
-        category: "TİCARİ",
-        peakHours: "DAY", peakHoursDesc: "Gündüz, orta su",
-        tempRange: { min: 10, opt: 16, max: 22 },
-        seasons: { winter: 0.65, spring: 0.70, summer: 0.60, autumn: 0.80 },
-        activity: "DAY",
-        pressureSensitivity: 0.4,
-        wavePref: 0.4,
-        clarityPref: "MODERATE",
-        currentPref: 0.4,
-        regions: ["KARADENİZ", "MARMARA", "EGE"],
-        depth: { min: 5, opt: 50, max: 200 },
-        advice: { bait: "Kurt, Karides", lure: "Çapari", rig: "Çapari, Dip", hook: "8 - 12" },
-        legalSize: "13 cm",
-        note: "🏭 TİCARİ + HOBİ. Çapari ile tutulabilir. Canlı yem olarak değerli."
-    },
-    "uskumru": {
-        name: "Uskumru", nameEn: "Atlantic Mackerel", icon: "🐟", scientificName: "Scomber scombrus",
-        photoId: 27,
-        category: "TİCARİ",
-        peakHours: "DAY", peakHoursDesc: "Sabah, yüzey-orta su",
-        tempRange: { min: 8, opt: 14, max: 20 },
-        seasons: { winter: 0.80, spring: 0.65, summer: 0.40, autumn: 0.75 },
-        activity: "DAY",
-        pressureSensitivity: 0.4,
-        wavePref: 0.4,
-        clarityPref: "MODERATE",
-        currentPref: 0.5,
-        regions: ["KARADENİZ", "MARMARA"],
-        depth: { min: 5, opt: 40, max: 150 },
-        advice: { bait: "Çaça, Kurt", lure: "Çapari, Kaşık", rig: "Çapari", hook: "6 - 10" },
-        legalSize: "18 cm",
-        note: "🏭 TİCARİ + HOBİ. Kış aylarında Karadeniz'de bol. Çapari ile avlanır."
-    },
-    "kolyoz": {
-        name: "Kolyoz", nameEn: "Chub Mackerel", icon: "🐟", scientificName: "Scomber japonicus",
-        photoId: 28,
-        category: "TİCARİ",
-        peakHours: "DAY", peakHoursDesc: "Sabah, yüzey",
-        tempRange: { min: 12, opt: 18, max: 24 },
-        seasons: { winter: 0.55, spring: 0.70, summer: 0.80, autumn: 0.75 },
-        activity: "DAY",
-        pressureSensitivity: 0.4,
-        wavePref: 0.4,
-        clarityPref: "MODERATE",
-        currentPref: 0.5,
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 5, opt: 50, max: 200 },
-        advice: { bait: "Çaça, Kurt", lure: "Çapari", rig: "Çapari", hook: "6 - 10" },
-        legalSize: "18 cm",
-        note: "🏭 TİCARİ + HOBİ. Uskumruya benzer ama daha sıcak suları sever."
     },
     "mezgit": {
         name: "Mezgit", nameEn: "Whiting", icon: "🐟", scientificName: "Merlangius merlangus",
@@ -1817,8 +1567,8 @@ const SPECIES_DB = {
     "lahoz": {
         name: "Lahoz (Lagos)", nameEn: "Dusky Grouper", icon: "🐟", scientificName: "Epinephelus marginatus",
         photoId: 8,
-        category: "DIP_DERIN",
-        peakHours: "DAY", peakHoursDesc: "Gündüz, derin kayalık",
+        category: "DIP_KIYI",
+        peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık, kayalık dip",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.45, spring: 0.65, summer: 0.80, autumn: 0.65 },
         activity: "DAY",
@@ -2259,13 +2009,19 @@ app.get('/api/forecast', async (req, res) => {
                     if (!fish.regions.includes(regionName) && regionName !== 'AÇIK DENİZ') continue;
                     
                     // Ağırlıklı günlük skor hesapla (24 saatlik ortalama)
-                    const dailyScore = calculateWeightedDailyScore(
+                    const dailyResult = calculateWeightedDailyScore(
                         fish, key, baseParams, weather, marine, activityWindows, hourlyStartIdx
                     );
+                    const dailyScore = dailyResult.score;
                     
                     if (dailyScore > 15) {
-                        // En iyi saati bulmak için basit bir hesaplama
+                        // Detaylar için anlık hesaplama
                         const result = calculateFishScore(fish, key, baseParams);
+                        
+                        // En iyi saat bilgisi
+                        const bestHourStr = dailyResult.bestHour >= 0 
+                            ? `${String(dailyResult.bestHour).padStart(2,'0')}:00` 
+                            : null;
                         
                         fishList.push({
                             key, name: fish.name, nameEn: fish.nameEn || fish.name,
@@ -2273,6 +2029,8 @@ app.get('/api/forecast', async (req, res) => {
                             icon: fish.icon, category: fish.category,
                             peakHours: fish.peakHours, peakHoursDesc: fish.peakHoursDesc,
                             score: dailyScore, // Ağırlıklı günlük skor
+                            bestHour: bestHourStr, // En iyi saat
+                            bestHourScore: dailyResult.bestHourScore,
                             bait: fish.advice.bait, method: fish.advice.hook,
                             lure: fish.advice.lure, rig: fish.advice.rig, note: fish.note,
                             legalSize: fish.legalSize, reason: result.reason,
@@ -2464,7 +2222,7 @@ app.get('/api/forecast', async (req, res) => {
         }
 
         const responseData = {
-            version: "F.I.S.H. v2.9", region: regionName, isLand, clickHour,
+            version: "F.I.S.H. v3.0", region: regionName, isLand, clickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
             depth: depthData,  // EMODnet Bathymetry derinlik verisi
             forecast, instant: instantData
@@ -2674,7 +2432,7 @@ app.get('/api/fish-search', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════════╗
-║         ⚓ MERALOJİ F.I.S.H. v2.9 AKTİF ⚓                ║
+║         ⚓ MERALOJİ F.I.S.H. v3.0 AKTİF ⚓                ║
 ║    ✅ ${Object.keys(SPECIES_DB).length} Balık | Fotoğraf | Gelişmiş Taktik          ║
 ║    📸 Balık Fotoğrafları | 85+ Skor Taktikleri           ║
 ║    Port: ${PORT}                                            ║
