@@ -1721,6 +1721,8 @@ function calculateFishScore(fish, key, params) {
             s_trigger += 2; activeTriggers.push("Basınç Düşüyor");
         } else if (pressureTrend.trend === 'RISING_FAST') {
             s_trigger -= 2;
+        } else if (pressureTrend.trend === 'RISING') {
+            s_trigger -= 1; // Yavaş yükselen basınç da beslenmeyi yavaşlatır
         }
     }
     
@@ -1795,12 +1797,25 @@ function calculateFishScore(fish, key, params) {
             middayPenalty = 0.92;
         } else if (cat === 'KIYI' || cat === 'LAGUN') {
             middayPenalty = 0.70;
+        } else if (cat === 'KAFADANBACAKLI' || cat === 'KALAMAR') {
+            middayPenalty = 0.70; // Işığa hassas
+        } else if (cat === 'DERİN') {
+            middayPenalty = 0.90; // Derin türler öğlen ışığından az etkilenir
         } else {
             middayPenalty = 0.80;
         }
         rawScore *= middayPenalty;
         if (middayPenalty < 0.85) penalties.push("Öğlen bastırması");
         scoreDetails.midday = { penalty: middayPenalty, hour: currentHour };
+    }
+    
+    // Cam Deniz — rawScore üzerine direkt çarpan (clarityScore cezasına EK)
+    if (wave < 0.3 && clarity > 80) {
+        const camCeza = (fish.clarityPref === 'TURBID') ? 0.60 :
+                        (fish.clarityPref === 'MODERATE') ? 0.78 : 0.95;
+        rawScore *= camCeza;
+        if (camCeza < 0.85) penalties.push("Cam deniz");
+        scoreDetails.camDeniz = { penalty: camCeza };
     }
     
     // Dalga TEHLİKE
