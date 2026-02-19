@@ -859,7 +859,7 @@
             left: 0;
             right: 0;
             background: var(--bg-primary, #0a0e1a);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    	    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
             border: 1px solid var(--border-subtle);
             border-top: none;
             border-radius: 0 0 var(--radius-md) var(--radius-md);
@@ -3446,6 +3446,11 @@
                     ? `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-subtle);">🕐 <strong>${peakTimeLabel}:</strong> ${translateBaitInfo(f.peakHoursDesc)}</div>` 
                     : '';
                 
+                // En iyi saat (hesaplanmış gerçek veri)
+                const bestHourLine = f.bestHour 
+                    ? `<div style="color: var(--green); font-size: 0.78rem;">⭐ <strong>${CURRENT_LANG === 'tr' ? 'Bugün En İyi Saat' : 'Best Hour Today'}:</strong> ${f.bestHour} (%${f.bestHourScore ? f.bestHourScore.toFixed(0) : '?'})</div>`
+                    : '';
+                
                 // Yıldız sistemi (scoreDetails varsa)
                 let starsHtml = '';
                 if (f.scoreDetails) {
@@ -3493,6 +3498,7 @@
                             ${rigText ? `<div>⚙️ <strong>${t('rig')}:</strong> ${rigText}</div>` : ''}
                             ${legalText ? `<div>📏 <strong>${t('legalSize')}:</strong> ${legalText}</div>` : ''}
                             ${peakTimeLine}
+                            ${bestHourLine}
                             ${f.note ? `<div class="fish-tip">💡 ${f.note}</div>` : ''}
                             ${starsHtml}
                         </div>
