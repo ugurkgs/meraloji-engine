@@ -854,17 +854,17 @@ const SPECIES_DB = {
         category: "DIP_KIYI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, kayalık ve kumlu karışık dipte",
         tempRange: { min: 14, opt: 20, max: 26 },
-        seasons: { winter: 0.50, spring: 0.65, summer: 0.70, autumn: 0.75 },
+        seasons: { winter: 0.40, spring: 0.60, summer: 0.65, autumn: 0.85 },
         activity: "DAY",
         pressureSensitivity: 0.5,
-        wavePref: 0.4,
+        wavePref: 0.35,
         clarityPref: "MODERATE",
         currentPref: 0.4,
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 10, opt: 60, max: 250 },
-        advice: { bait: "Karides, Kalamar, Midye", lure: "Jig, Silikon", rig: "Dip Takımı", hook: "2 - 6" },
+        advice: { bait: "Karides, Kalamar, Midye, Sülünez", lure: "Jig, Silikon", rig: "Dip Takımı", hook: "2 - 6" },
         legalSize: "18 cm",
-        note: "Pembemsi rengi ile tanınır. Kayalık dip sever."
+        note: "Kayalık-kumluk karışık dipte gezer. Yem dibe oturmalı. Hafif akıntıda daha istekli vurur."
     },
     "antenli_mercan": {
         name: "Antenli Mercan", nameEn: "Blackspot Seabream", icon: "🐟", scientificName: "Pagellus bogaraveo",
