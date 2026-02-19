@@ -328,7 +328,7 @@ function getHourWeight(hour, activityWindows, fishActivity) {
         return 0.5;
     }
     
-    // Alacakaranlık balıkları için (Levrek, Lüfer, Karagöz)
+    // Alacakaranlık balıkları için (Levrek, Lüfer/Kofana, Karagöz)
     if (fishActivity === "DAWN_DUSK") {
         // Sabah suyu: x3
         if (hour >= m.startHour && hour <= m.endHour) return 3.0;
@@ -468,7 +468,7 @@ const SPECIES_DB = {
         note: "Köpüklü, bulanık suyu sever. Gürültüden kaçının."
     },
     "lufer": {
-        name: "Lüfer", nameEn: "Bluefish", icon: "🦈", scientificName: "Pomatomus saltatrix",
+        name: "Lüfer/Kofana", nameEn: "Bluefish", icon: "🦈", scientificName: "Pomatomus saltatrix",
         photoId: 2,
         category: "PELAJIK",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah suyu ve akşam suyu",
@@ -1282,7 +1282,7 @@ const SPECIES_DB = {
         depth: { min: 0, opt: 5, max: 20 },
         advice: { bait: "İpek", lure: "Küçük Sahte Balık", rig: "Spin, LRF", hook: "6 - 2" },
         legalSize: "Yok",
-        note: "Hızlı avcı. Yüzeyde sürü halinde. Lüfer yemi olarak kullanılır."
+        note: "Hızlı avcı. Yüzeyde sürü halinde. Lüfer/Kofana yemi olarak kullanılır."
     },
     "barakuda": {
         name: "Baraküda", nameEn: "Yellowmouth Barracuda", icon: "🐟", scientificName: "Sphyraena viridensis",
