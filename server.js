@@ -18,6 +18,26 @@ app.use(cors());
 const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath));
 
+// ============================================
+// BU SATIRLARI server.js'e EKLE
+// app.use(express.static(publicPath)); satırından SONRA
+// ============================================
+
+// .well-known dizinini serve et (Digital Asset Links - TWA için zorunlu)
+app.use('/.well-known', express.static(path.join(publicPath, '.well-known'), {
+    setHeaders: (res) => {
+        res.setHeader('Content-Type', 'application/json');
+    }
+}));
+
+// Service Worker'ın root scope'da çalışması için
+app.get('/sw.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.setHeader('Service-Worker-Allowed', '/');
+    res.sendFile(path.join(publicPath, 'sw.js'));
+});
+
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(publicPath, 'index.html'));
 });
