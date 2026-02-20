@@ -12,31 +12,43 @@ const rateLimit = require('express-rate-limit');
 const NodeCache = require('node-cache');
 const fetch = globalThis.fetch || require('node-fetch');
 
+// Firebase Admin SDK
+let admin, db;
+try {
+    admin = require('firebase-admin');
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+    } else {
+        const serviceAccount = require('./firebase-service-account.json');
+        admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+    }
+    db = admin.firestore();
+    console.log('✅ Firebase Admin SDK initialized');
+} catch (e) {
+    console.warn('⚠️ Firebase Admin SDK not available — auth disabled');
+    admin = null;
+    db = null;
+}
+
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath));
 
-// ============================================
-// BU SATIRLARI server.js'e EKLE
-// app.use(express.static(publicPath)); satırından SONRA
-// ============================================
-
-// .well-known dizinini serve et (Digital Asset Links - TWA için zorunlu)
+// .well-known (TWA Digital Asset Links)
 app.use('/.well-known', express.static(path.join(publicPath, '.well-known'), {
-    setHeaders: (res) => {
-        res.setHeader('Content-Type', 'application/json');
-    }
+    setHeaders: (res) => { res.setHeader('Content-Type', 'application/json'); }
 }));
 
-// Service Worker'ın root scope'da çalışması için
+// Service Worker scope
 app.get('/sw.js', (req, res) => {
     res.setHeader('Content-Type', 'application/javascript');
     res.setHeader('Service-Worker-Allowed', '/');
     res.sendFile(path.join(publicPath, 'sw.js'));
 });
-
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(publicPath, 'index.html'));
@@ -47,6 +59,37 @@ const cache = new NodeCache({ stdTTL: 3600, checkperiod: 600 });
 
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use('/api/', limiter);
+
+// Auth middleware
+async function verifyAuth(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ') || !admin) {
+        req.user = null;
+        req.isPremium = false;
+        return next();
+    }
+    try {
+        const token = authHeader.split('Bearer ')[1];
+        const decoded = await admin.auth().verifyIdToken(token);
+        req.user = decoded;
+        if (db) {
+            const subDoc = await db.collection('subscriptions').doc(decoded.uid).get();
+            if (subDoc.exists) {
+                const sub = subDoc.data();
+                req.isPremium = sub.status === 'active' && sub.expiresAt > Date.now();
+            } else {
+                req.isPremium = false;
+            }
+        } else {
+            req.isPremium = false;
+        }
+    } catch (e) {
+        req.user = null;
+        req.isPremium = false;
+    }
+    next();
+}
+app.use('/api/', verifyAuth);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MATH KERNEL - Hesaplama Fonksiyonları
@@ -2461,6 +2504,44 @@ app.get('/api/fish-search', async (req, res) => {
     } catch (error) {
         console.error("Fish Search Error:", error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// ABONELİK & AUTH ENDPOİNTLERİ
+// ═══════════════════════════════════════════════════════════════
+
+app.get('/api/subscription-status', async (req, res) => {
+    if (!req.user) {
+        return res.json({ isLoggedIn: false, isPremium: false });
+    }
+    res.json({
+        isLoggedIn: true,
+        isPremium: req.isPremium,
+        uid: req.user.uid,
+        email: req.user.email,
+        name: req.user.name || req.user.email
+    });
+});
+
+app.post('/api/verify-subscription', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
+    const { purchaseToken, subscriptionId } = req.body;
+    if (!purchaseToken) return res.status(400).json({ error: 'purchaseToken gerekli' });
+    try {
+        if (db) {
+            await db.collection('subscriptions').doc(req.user.uid).set({
+                status: 'active',
+                subscriptionId: subscriptionId || 'meraloji_pro_monthly',
+                purchaseToken,
+                startedAt: Date.now(),
+                expiresAt: Date.now() + (30 * 24 * 60 * 60 * 1000),
+                updatedAt: Date.now()
+            }, { merge: true });
+        }
+        res.json({ success: true, isPremium: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Doğrulama hatası' });
     }
 });
 
