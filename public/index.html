@@ -10,35 +10,30 @@
       gtag('config', 'G-XMLZ2C40D9');
     </script>
 
-<!-- ============================================ -->
-<!-- BU SATIRLARI index.html <head> İÇİNE EKLE   -->
-<!-- ============================================ -->
-
-<!-- PWA Manifest -->
-<link rel="manifest" href="/manifest.json">
-
-<!-- Theme Color (tarayıcı üst çubuğu rengi) -->
-<meta name="theme-color" content="#00c8c8">
-
-<!-- Apple Touch Icon (iOS için) -->
-<link rel="apple-touch-icon" href="/icons/icon-192.png">
-
-<!-- iOS PWA Meta Tags -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="MERALOJİ">
-
-<!-- Microsoft Tile -->
-<meta name="msapplication-TileImage" content="/icons/icon-144.png">
-<meta name="msapplication-TileColor" content="#0a0e1a">
-   
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MERALOJİ | F.I.S.H. System</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#00c8c8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MERALOJİ">
+    <meta name="msapplication-TileImage" content="/icons/icon-144.png">
+    <meta name="msapplication-TileColor" content="#0a0e1a">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    
+    <!-- AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-3917681233831830"
+         crossorigin="anonymous"></script>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -880,8 +875,7 @@
             top: 100%;
             left: 0;
             right: 0;
-            background: var(--bg-primary, #0a0e1a);
-    	    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            background: var(--bg-secondary);
             border: 1px solid var(--border-subtle);
             border-top: none;
             border-radius: 0 0 var(--radius-md) var(--radius-md);
@@ -1577,9 +1571,67 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--cyan);
         }
+        /* ═══ LOGIN & AUTH ═══ */
+        .login-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(180deg, #0a0e1a 0%, #0d1b2a 50%, #1b2838 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 10000; opacity: 1; transition: opacity 0.5s ease;
+        }
+        .login-overlay.hidden { opacity: 0; pointer-events: none; }
+        .login-logo { width: 180px; height: 180px; margin-bottom: 20px; border-radius: 24px; box-shadow: 0 8px 32px rgba(0,200,200,0.3); }
+        .login-title { font-size: 2rem; font-weight: 800; color: #00c8c8; margin-bottom: 4px; letter-spacing: 2px; }
+        .login-subtitle { font-size: 0.85rem; color: #8892a3; margin-bottom: 32px; letter-spacing: 4px; }
+        .google-sign-in-btn {
+            display: flex; align-items: center; gap: 12px; background: #fff; color: #333;
+            border: none; border-radius: 8px; padding: 12px 32px; font-size: 1rem; font-weight: 600;
+            cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: transform 0.15s ease;
+        }
+        .google-sign-in-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+        .google-sign-in-btn svg { width: 20px; height: 20px; }
+        .login-footer { position: absolute; bottom: 24px; color: #4a5568; font-size: 0.7rem; }
+        .user-badge {
+            display: none; align-items: center; gap: 6px; padding: 3px 10px;
+            background: rgba(0,200,200,0.1); border-radius: 20px; cursor: pointer; font-size: 0.72rem; color: var(--text-secondary);
+        }
+        .user-badge img { width: 22px; height: 22px; border-radius: 50%; }
+        .user-badge .pro-tag {
+            background: linear-gradient(135deg, #00c8c8, #00ffcc); color: #0a0e1a;
+            padding: 1px 6px; border-radius: 4px; font-size: 0.58rem; font-weight: 700;
+        }
+        .premium-gate {
+            background: linear-gradient(135deg, rgba(0,200,200,0.1), rgba(0,255,204,0.05));
+            border: 1px solid rgba(0,200,200,0.3); border-radius: 12px; padding: 16px; margin: 8px 0; text-align: center;
+        }
+        .premium-gate h3 { color: #00c8c8; font-size: 0.9rem; margin-bottom: 8px; }
+        .premium-gate p { color: #8892a3; font-size: 0.78rem; margin-bottom: 12px; }
+        .premium-gate .upgrade-btn {
+            background: linear-gradient(135deg, #00c8c8, #00ffcc); color: #0a0e1a;
+            border: none; padding: 10px 24px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer;
+        }
+        .premium-gate .price { color: #00ffcc; font-size: 1.1rem; font-weight: 700; }
+        .ad-banner-container {
+            width: 100%; min-height: 50px; display: flex; justify-content: center;
+            padding: 4px 0; background: rgba(0,0,0,0.3);
+        }
+
     </style>
 </head>
 <body>
+    <!-- ═══════════════════════════════════════════════════════════════════
+         LOGIN OVERLAY
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="login-overlay" class="login-overlay">
+        <img src="/logo.png" class="login-logo" alt="MERALOJİ">
+        <div class="login-title">MERALOJİ</div>
+        <div class="login-subtitle">F.I.S.H. SYSTEM</div>
+        <button id="google-signin-btn" class="google-sign-in-btn" onclick="signInWithGoogle()">
+            <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Google ile Giriş Yap
+        </button>
+        <div class="login-footer">© 2025 MERALOJİ — Uğur Kögüs</div>
+    </div>
+
     <!-- ═══════════════════════════════════════════════════════════════════
          SPLASH SCREEN
          ═══════════════════════════════════════════════════════════════════ -->
@@ -1638,6 +1690,11 @@
             <div class="hud-title-area">
                 <span class="hud-title" id="region-title">--</span>
                 <span class="hud-coords" id="coords-display"></span>
+                <div class="user-badge" id="user-badge" onclick="showUserMenu()">
+                    <img id="user-avatar" src="" alt="">
+                    <span id="user-name"></span>
+                    <span id="pro-tag" class="pro-tag" style="display:none">PRO</span>
+                </div>
                 <span class="hud-depth" id="depth-display">⚓ --m</span>
             </div>
             <button class="hud-close" onclick="closeHud()">✕</button>
@@ -3445,7 +3502,10 @@
                 return;
             }
 
-            container.innerHTML = list.map(f => {
+            // Premium gate: ücretsiz kullanıcıya 3 balık
+            const displayList = isPremium ? list : list.slice(0, 3);
+
+            container.innerHTML = displayList.map(f => {
                 const scoreClass = f.score >= 70 ? 'score-high' : (f.score >= 50 ? 'score-mid' : 'score-low');
                 const reasonClass = f.score >= 50 ? 'positive' : 'negative';
                 const reasonIcon = f.score >= 50 ? '✅' : '⚠️';
@@ -3527,6 +3587,17 @@
                     </div>
                 `;
             }).join('');
+
+            // Premium gate göster
+            if (!isPremium && list.length > 3) {
+                container.innerHTML += `
+                    <div class="premium-gate">
+                        <h3>🔒 MERALOJİ PRO</h3>
+                        <p>Tüm ${list.length} balık türünü gör, 7 günlük tahmin al, reklamsız kullan</p>
+                        <div class="price">₺9,99/ay</div>
+                        <button class="upgrade-btn" onclick="upgradeToPro()">PRO'ya Yükselt</button>
+                    </div>`;
+            }
         }
 
         // ═══════════════════════════════════════════════════════════════════
@@ -3897,21 +3968,121 @@
         }
 
     </script>
-
-    <!-- ============================================ -->
-<!-- BU SCRIPTI </body> ÖNCESİNE EKLE             -->
-<!-- ============================================ -->
-
 <script>
-// Service Worker Registration
+// ═══════════════════════════════════════════════
+// MERALOJİ AUTH & PREMIUM SYSTEM
+// ═══════════════════════════════════════════════
+
+const firebaseConfig = {
+    apiKey: "AIzaSyA-6K5xRwe1evEeILksKNG_PeHqAM8doQw",
+    authDomain: "meraloji.firebaseapp.com",
+    projectId: "meraloji",
+    storageBucket: "meraloji.firebasestorage.app",
+    messagingSenderId: "226661585844",
+    appId: "1:226661585844:web:5c379329cdd0399a2d98e1",
+    measurementId: "G-ZLNTMY1LL6"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+let currentUser = null;
+let isPremium = false;
+let authToken = null;
+
+function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch((error) => {
+        console.error('Login error:', error);
+        alert('Giriş yapılamadı: ' + error.message);
+    });
+}
+
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        currentUser = user;
+        authToken = await user.getIdToken();
+        document.getElementById('login-overlay').classList.add('hidden');
+        await checkSubscriptionStatus();
+        updateUserUI();
+        updateAdDisplay();
+    } else {
+        currentUser = null;
+        isPremium = false;
+        authToken = null;
+        document.getElementById('login-overlay').classList.remove('hidden');
+    }
+});
+
+async function checkSubscriptionStatus() {
+    if (!authToken) return;
+    try {
+        const res = await fetch('/api/subscription-status', {
+            headers: { 'Authorization': 'Bearer ' + authToken }
+        });
+        const data = await res.json();
+        isPremium = data.isPremium;
+    } catch (e) {
+        isPremium = false;
+    }
+}
+
+function updateUserUI() {
+    const badge = document.getElementById('user-badge');
+    if (badge && currentUser) {
+        document.getElementById('user-avatar').src = currentUser.photoURL || '';
+        document.getElementById('user-name').textContent = (currentUser.displayName || currentUser.email || '').split(' ')[0];
+        document.getElementById('pro-tag').style.display = isPremium ? 'inline' : 'none';
+        badge.style.display = 'flex';
+    }
+}
+
+function updateAdDisplay() {
+    const adBanner = document.getElementById('ad-banner');
+    if (adBanner) {
+        if (isPremium) {
+            adBanner.style.display = 'none';
+        } else {
+            adBanner.style.display = 'flex';
+            try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+        }
+    }
+}
+
+function signOut() {
+    auth.signOut();
+}
+
+function showUserMenu() {
+    if (confirm(isPremium ? 'Çıkış yapmak istiyor musunuz?' : 'Çıkış yapmak istiyor musunuz?\n\nPRO abone olmak için Google Play\'den MERALOJİ uygulamasını indirin.')) {
+        signOut();
+    }
+}
+
+function upgradeToPro() {
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        alert('Google Play üzerinden MERALOJİ PRO aboneliği satın alabilirsiniz.');
+    } else {
+        window.open('https://play.google.com/store/apps/details?id=com.meraloji.fish', '_blank');
+    }
+}
+
+// Tüm API çağrılarına auth token ekle
+const _origFetch = window.fetch;
+window.fetch = function(url, opts = {}) {
+    if (typeof url === 'string' && url.startsWith('/api/') && authToken) {
+        opts.headers = opts.headers || {};
+        opts.headers['Authorization'] = 'Bearer ' + authToken;
+    }
+    return _origFetch.call(this, url, opts);
+};
+
+// Service Worker
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('SW registered:', reg.scope))
-      .catch(err => console.log('SW registration failed:', err));
-  });
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
 }
 </script>
-
 </body>
 </html>
