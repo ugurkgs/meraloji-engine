@@ -3836,15 +3836,28 @@
             if (!GLOBAL_DATA || !GLOBAL_DATA.forecast) return;
 
             const content = document.getElementById('weekly-content');
-            content.innerHTML = GLOBAL_DATA.forecast.map((day, i) => `
+            content.innerHTML = GLOBAL_DATA.forecast.map((day, i) => {
+                // Premium gate: ücretsiz kullanıcıya sadece 1 gün
+                if (!isPremium && i > 0) {
+                    if (i === 1) {
+                        return `<div class="premium-gate">
+                            <h3>🔒 MERALOJİ PRO</h3>
+                            <p>7 günlük tahmine erişmek için PRO'ya yükseltin</p>
+                            <div class="price">₺9,99/ay</div>
+                            <button class="upgrade-btn" onclick="upgradeToPro()">PRO'ya Yükselt</button>
+                        </div>`;
+                    }
+                    return '';
+                }
+                return `
                 <div class="day-row" onclick="showDayDetail(${i}, event)">
                     <div class="day-info">
                         <div class="day-date">${formatDate(day.date)}</div>
                         <div class="day-weather">${t(day.weatherSummary) || day.weatherSummary}</div>
                     </div>
                     <div class="day-score" style="color: ${getScoreColor(day.score)}">%${day.score.toFixed(1)}</div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
 
             const modal = document.getElementById('weekly-modal');
             modal.style.display = 'flex';
@@ -3994,7 +4007,14 @@ function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).catch((error) => {
         console.error('Login error:', error);
-        alert('Giriş yapılamadı: ' + error.message);
+        const errMsg = error.code === 'auth/unauthorized-domain' 
+            ? 'Bu alan adı henüz yetkilendirilmedi. Lütfen daha sonra tekrar deneyin.'
+            : error.code === 'auth/popup-closed-by-user'
+            ? 'Giriş penceresi kapatıldı.'
+            : error.code === 'auth/network-request-failed'
+            ? 'İnternet bağlantınızı kontrol edin.'
+            : 'Giriş yapılamadı. Lütfen tekrar deneyin.';
+        alert(errMsg);
     });
 }
 
