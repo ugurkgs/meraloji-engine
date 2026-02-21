@@ -76,8 +76,11 @@ async function verifyAuth(req, res, next) {
         req.user = decoded;
         if (db) {
             const subDoc = await db.collection('subscriptions').doc(decoded.uid).get();
+            console.log('[AUTH-MW] subDoc.exists:', subDoc.exists, 'uid:', decoded.uid);
             if (subDoc.exists) {
                 const sub = subDoc.data();
+                console.log('[AUTH-MW] sub data:', JSON.stringify(sub));
+                console.log('[AUTH-MW] expiresAt:', sub.expiresAt, 'now:', Date.now(), 'check:', sub.expiresAt > Date.now());
                 req.isPremium = sub.status === 'active' && sub.expiresAt > Date.now();
             } else {
                 req.isPremium = false;
