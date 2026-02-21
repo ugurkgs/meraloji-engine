@@ -86,6 +86,7 @@ async function verifyAuth(req, res, next) {
             req.isPremium = false;
         }
     } catch (e) {
+        console.log('[AUTH-MW] Token verify failed:', e.message);
         req.user = null;
         req.isPremium = false;
     }
@@ -2514,6 +2515,7 @@ app.get('/api/fish-search', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 
 app.get('/api/subscription-status', async (req, res) => {
+    console.log('[SUB-CHECK] user:', req.user ? req.user.uid : 'null', 'isPremium:', req.isPremium, 'authHeader:', req.headers.authorization ? 'present' : 'missing');
     if (!req.user) {
         return res.json({ isLoggedIn: false, isPremium: false });
     }
