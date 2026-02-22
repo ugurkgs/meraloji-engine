@@ -611,6 +611,24 @@ const SPECIES_DB = {
         legalSize: "Yok (5kg/gün)",
         note: "Gece ve alacakaranlıkta aktif. Çalkantılı suyu sever."
     },
+    "ispendek": {
+    name: "İspendek", nameEn: "Picarel", icon: "🐟", scientificName: "Spicara smaris",
+    photoId: 9,
+    category: "PELAJIK",
+    peakHours: "DAY", peakHoursDesc: "Gündüz aktif, sabah 08:00-11:00",
+    tempRange: { min: 14, opt: 20, max: 26 },
+    seasons: { winter: 0.30, spring: 0.70, summer: 0.90, autumn: 0.60 },
+    activity: "DAY",
+    pressureSensitivity: 0.4,
+    wavePref: 0.3,
+    clarityPref: "CLEAR",
+    currentPref: 0.4,
+    regions: ["EGE", "AKDENİZ", "MARMARA"],
+    depth: { min: 5, opt: 30, max: 150 },
+    advice: { bait: "Ekmek İçi, Küçük Solucan, Midye", lure: "Micro Jig, Küçük Kaşık", rig: "Çoklu İğneli Takım, Şamandıralı", hook: "No:8-12 Olta İğnesi" },
+    legalSize: "11 cm",
+    note: "Sürü halinde gezinir. Küçük yem ve ince misina şart. Yaz aylarında sığ sularda bol bulunur."
+},
     "cipura": {
         name: "Çipura", nameEn: "Gilt-head Bream", icon: "🐠", scientificName: "Sparus aurata",
         photoId: 11,
