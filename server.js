@@ -2261,10 +2261,12 @@ app.get('/api/forecast', async (req, res) => {
         
         // Derinlik verisini işle
         let depthData = { avg: null, min: null, max: null };
+        let bathymetryRaw = null; // Ham değer (negatif=deniz, pozitif=kara)
         try {
             if (bathymetryRes && bathymetryRes.ok) {
                 const bathymetry = await bathymetryRes.json();
                 if (bathymetry && bathymetry.avg !== undefined) {
+                    bathymetryRaw = bathymetry.avg; // Ham değeri sakla
                     depthData = {
                         avg: Math.abs(bathymetry.avg),  // Pozitif metre değeri
                         min: Math.abs(bathymetry.min || bathymetry.avg),
@@ -2276,13 +2278,40 @@ app.get('/api/forecast', async (req, res) => {
             console.log('Bathymetry API error (non-critical):', bathyErr.message);
         }
 
+        // === GELİŞMİŞ KARA TESPİTİ ===
+        // 1. Marine API dalga verisi kontrolü (uzak iç bölgeler)
+        // 2. Batimetri kontrolü (kıyıya yakın kara noktaları)
         let isLand = false;
+        let landReason = '';
+        
         if (!marine.hourly || !marine.hourly.wave_height) {
             isLand = true;
+            landReason = 'Deniz verisi alınamadı';
         } else {
             const waveData = marine.hourly.wave_height.slice(0, 48);
             const validWaves = waveData.filter(v => v !== null && v !== undefined);
-            if (validWaves.length === 0 || validWaves.every(v => v === 0)) isLand = true;
+            if (validWaves.length === 0 || validWaves.every(v => v === 0)) {
+                isLand = true;
+                landReason = 'Dalga verisi yok — iç bölge';
+            }
+        }
+        
+        // Batimetri ile hassas kara tespiti
+        // bathymetryRaw: negatif = deniz tabanı (derinlik), pozitif = kara (yükseklik), 0 veya null = belirsiz
+        if (!isLand && bathymetryRaw !== null) {
+            if (bathymetryRaw >= 0) {
+                // Pozitif veya sıfır = deniz seviyesinde veya üstünde = KARA
+                isLand = true;
+                landReason = 'Batimetri verisi kara gösteriyor (yükseklik: ' + bathymetryRaw.toFixed(1) + 'm)';
+            } else if (bathymetryRaw > -1) {
+                // 0 ile -1m arası = çok sığ, muhtemelen kıyı şeridi
+                isLand = true;
+                landReason = 'Çok sığ alan (derinlik: ' + Math.abs(bathymetryRaw).toFixed(1) + 'm) — denize daha yakın bir nokta seçin';
+            }
+        }
+        
+        if (isLand) {
+            console.log(`[LAND] lat:${lat} lon:${lon} reason:${landReason} bathyRaw:${bathymetryRaw}`);
         }
 
         let pressureTrend = { trend: 'STABLE', change: 0 };
@@ -2572,7 +2601,7 @@ app.get('/api/forecast', async (req, res) => {
         }
 
         const responseData = {
-            version: "F.I.S.H. v3.0", region: regionName, isLand, clickHour,
+            version: "F.I.S.H. v3.0", region: regionName, isLand, landReason, clickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
             depth: depthData,  // EMODnet Bathymetry derinlik verisi
             forecast, instant: instantData
@@ -2638,20 +2667,39 @@ app.get('/api/fish-search', async (req, res) => {
         const marine = await marineRes.json();
 
         let depthAvg = null;
+        let bathymetryRaw = null;
         try {
             if (bathymetryRes && bathymetryRes.ok) {
                 const bathymetry = await bathymetryRes.json();
                 if (bathymetry && bathymetry.avg !== undefined) {
+                    bathymetryRaw = bathymetry.avg;
                     depthAvg = Math.abs(bathymetry.avg);
                 }
             }
         } catch (e) {}
 
-        const isLand = !marine.hourly || !marine.hourly.wave_height || 
-            marine.hourly.wave_height.slice(0, 48).filter(v => v !== null && v !== undefined).every(v => v === 0);
+        // Gelişmiş kara tespiti
+        let isLand = false;
+        let landReason = '';
+        
+        if (!marine.hourly || !marine.hourly.wave_height || 
+            marine.hourly.wave_height.slice(0, 48).filter(v => v !== null && v !== undefined).every(v => v === 0)) {
+            isLand = true;
+            landReason = 'Deniz verisi yok';
+        }
+        
+        if (!isLand && bathymetryRaw !== null) {
+            if (bathymetryRaw >= 0) {
+                isLand = true;
+                landReason = 'Kara noktası (yükseklik: ' + bathymetryRaw.toFixed(1) + 'm)';
+            } else if (bathymetryRaw > -1) {
+                isLand = true;
+                landReason = 'Çok sığ alan (' + Math.abs(bathymetryRaw).toFixed(1) + 'm) — denize daha yakın bir nokta seçin';
+            }
+        }
 
         if (isLand) {
-            return res.json({ error: 'land', message: 'Burası kara parçası' });
+            return res.json({ error: 'land', message: landReason || 'Burası kara parçası' });
         }
 
         const hourlyOffset = 24;
