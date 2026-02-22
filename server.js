@@ -2691,7 +2691,24 @@ app.get('/api/fish-search', async (req, res) => {
 
         const result = calculateFishScore(fish, fishKey, baseParams);
 
-        // Neden listelenmediğini analiz et
+        // === GÜNLÜK SKOR HESAPLA ===
+        let dailyScore = null;
+        let bestHour = null;
+        let bestHourScore = null;
+        try {
+            const activityWindows = calculateActivityWindows(now, parseFloat(latF), parseFloat(lonF));
+            const dailyResult = calculateWeightedDailyScore(
+                fish, fishKey, baseParams, weather, marine, activityWindows, hourlyOffset
+            );
+            dailyScore = dailyResult.score;
+            bestHour = dailyResult.bestHour >= 0 ? `${String(dailyResult.bestHour).padStart(2,'0')}:00` : null;
+            bestHourScore = dailyResult.bestHourScore;
+        } catch(e) { console.log('Daily score calc error:', e.message); }
+
+        // === LİSTEDE VAR MI KONTROL ===
+        const isInDailyList = dailyScore !== null && dailyScore > 15;
+
+        // Neden listelenmediğini analiz et (sadece listede yoksa göster)
         const reasons = [];
         const season = getSeason(now.getMonth());
         const seasonEff = fish.seasons[season] || 0;
@@ -2738,6 +2755,21 @@ app.get('/api/fish-search', async (req, res) => {
             reasons.push({ type: 'INFO', text: `Toplam skor (%${result.finalScore.toFixed(1)}) listeleme eşiğinin (%15) altında` });
         }
 
+        // Tuzluluk ve gelgit
+        const salinity = getSalinity(regionName);
+        const tide = SunCalc.getMoonPosition(now, parseFloat(latF), parseFloat(lonF));
+        const tideFlow = Math.abs(Math.sin(tide.altitude)) * 1.5;
+
+        // Rüzgar yön adı
+        const windDirName = (dir) => {
+            if (dir === null || dir === undefined) return '';
+            const dirs = ['K','KKD','KD','DKD','D','DGD','GD','GGD','G','GGB','GB','BGB','B','BKB','KB','KKB'];
+            return dirs[Math.round(dir / 22.5) % 16];
+        };
+
+        // Koruma altında mı
+        const isProtected = (fish.note && (fish.note.includes('KORUMA ALTINDA') || fish.note.includes('NADİR TÜR') || fish.note.includes('Serbest bırakın')));
+
         res.json({
             fish: {
                 key: fishKey,
@@ -2752,15 +2784,24 @@ app.get('/api/fish-search', async (req, res) => {
                 seasons: fish.seasons,
                 activity: fish.activity,
                 clarityPref: fish.clarityPref,
+                pressureSensitivity: fish.pressureSensitivity,
+                currentPref: fish.currentPref,
+                wavePref: fish.wavePref,
                 advice: fish.advice,
-                legalSize: fish.legalSize,
-                note: fish.note
+                legalSize: isProtected ? null : fish.legalSize,
+                isProtected: isProtected,
+                note: fish.note,
+                tempRange: fish.tempRange
             },
             score: result.finalScore,
+            dailyScore: dailyScore,
+            bestHour: bestHour,
+            bestHourScore: bestHourScore,
+            isInDailyList: isInDailyList,
             scoreDetails: result.scoreDetails,
             triggers: result.activeTriggers,
             reason: result.reason,
-            reasons: reasons,
+            reasons: isInDailyList ? [] : reasons,
             conditions: {
                 region: regionName,
                 depthAvg: depthAvg,
@@ -2768,8 +2809,18 @@ app.get('/api/fish-search', async (req, res) => {
                 wave: wave,
                 clarity: clarity,
                 windSpeed: windSpeed,
+                windDir: windDir,
+                windDirName: windDirName(windDir),
+                pressure: pressure,
+                pressureTrend: pressureTrend,
+                currentSpeed: currentEst,
+                salinity: salinity,
+                tideFlow: parseFloat(tideFlow.toFixed(2)),
                 timeMode: timeMode,
-                season: season
+                season: season,
+                moonPhase: moon.phase,
+                solunar: solunar,
+                rain: rain
             }
         });
 
