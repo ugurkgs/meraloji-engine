@@ -831,6 +831,7 @@
         .fish-search-box {
             margin-bottom: 14px;
             position: relative;
+            z-index: 100;
         }
         .fish-search-input-wrapper {
             display: flex;
@@ -879,9 +880,10 @@
             border: 1px solid var(--border-subtle);
             border-top: none;
             border-radius: 0 0 var(--radius-md) var(--radius-md);
-            max-height: 200px;
+            max-height: 250px;
             overflow-y: auto;
-            z-index: 100;
+            z-index: 9999;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
         }
         .fish-search-option {
             padding: 10px 14px;
@@ -906,6 +908,8 @@
             border-radius: var(--radius-md);
             border: 1px solid var(--border-subtle);
             padding: 16px;
+            position: relative;
+            z-index: 50;
         }
         .fish-search-result .fsr-header {
             display: flex;
