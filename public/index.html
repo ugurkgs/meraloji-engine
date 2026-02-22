@@ -3162,6 +3162,16 @@
             const lon = e.latlng.lng.toFixed(4);
             lastLatLon = { lat, lon };
 
+            // Balık arama sıfırla
+            const fsInput = document.getElementById('fish-search-input');
+            const fsResult = document.getElementById('fish-search-result');
+            const fsDropdown = document.getElementById('fish-search-dropdown');
+            const fsClear = document.getElementById('fish-search-clear');
+            if (fsInput) fsInput.value = '';
+            if (fsResult) fsResult.style.display = 'none';
+            if (fsDropdown) fsDropdown.style.display = 'none';
+            if (fsClear) fsClear.style.display = 'none';
+
             // Welcome overlay'i gizle
             const welcomeOverlay = document.getElementById('map-welcome');
             if (welcomeOverlay) welcomeOverlay.classList.add('hidden');
