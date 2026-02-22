@@ -3729,66 +3729,222 @@
                 }
 
                 const f = data.fish;
-                const score = data.score;
-                const scoreColor = score >= 70 ? 'var(--green)' : score >= 50 ? 'var(--yellow)' : 'var(--red)';
+                const instantScore = data.score;
+                const dailyScore = data.dailyScore;
+                const bestHour = data.bestHour;
+                const bestHourScore = data.bestHourScore;
+                const isInList = data.isInDailyList;
                 const sd = data.scoreDetails;
+                const c = data.conditions;
 
-                // Yıldız oluşturma helper
-                const starLine = (label, stars) => {
-                    const filled = '★'.repeat(Math.max(0, Math.min(5, stars)));
-                    const empty = '☆'.repeat(5 - Math.max(0, Math.min(5, stars)));
-                    const color = stars >= 4 ? 'var(--green)' : (stars >= 2 ? 'var(--yellow)' : 'var(--red)');
-                    return `<div style="display:flex;justify-content:space-between;font-size:0.75rem;"><span>${label}</span><span style="color:${color}">${filled}${empty}</span></div>`;
-                };
+                const scoreColor = (s) => s >= 70 ? 'var(--green)' : s >= 50 ? 'var(--yellow)' : 'var(--red)';
 
-                // Neden listesi
+                // === FOTOĞRAF BUTONU ===
+                const photoBtn = f.photoId ? `<span onclick="showFishPhoto('${f.name}', ${f.photoId})" style="cursor:pointer; font-size:1.1rem; margin-left:8px; opacity:0.7;" title="Fotoğraf">👁️</span>` : '';
+
+                // === ÇİFT SKOR GÖSTERGE ===
+                const dailyScoreHtml = dailyScore !== null 
+                    ? `<div style="display:flex; gap:16px; align-items:center; margin-bottom:10px; padding:10px; background:rgba(0,200,200,0.05); border-radius:8px;">
+                        <div style="text-align:center;">
+                            <div style="font-size:0.65rem; color:var(--text-muted);">GÜNLÜK</div>
+                            <div style="font-size:1.3rem; font-weight:700; font-family:var(--font-mono); color:${scoreColor(dailyScore)};">%${dailyScore.toFixed(1)}</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-size:0.65rem; color:var(--text-muted);">ANLIK</div>
+                            <div style="font-size:1.3rem; font-weight:700; font-family:var(--font-mono); color:${scoreColor(instantScore)};">%${instantScore.toFixed(1)}</div>
+                        </div>
+                        ${bestHour ? `<div style="text-align:center; margin-left:auto;">
+                            <div style="font-size:0.65rem; color:var(--text-muted);">EN İYİ SAAT</div>
+                            <div style="font-size:1rem; font-weight:600; color:var(--cyan);">${bestHour} <span style="font-size:0.75rem; color:${scoreColor(bestHourScore)};">(%${bestHourScore?.toFixed(0) || '?'})</span></div>
+                        </div>` : ''}
+                    </div>`
+                    : `<div style="margin-bottom:8px;"><span style="font-size:1.3rem; font-weight:700; font-family:var(--font-mono); color:${scoreColor(instantScore)};">%${instantScore.toFixed(1)}</span> <span style="font-size:0.7rem; color:var(--text-muted);">anlık</span></div>`;
+
+                // === LİSTEDE VAR MI ===
+                const listStatusHtml = isInList 
+                    ? `<div style="font-size:0.75rem; color:var(--green); margin-bottom:8px;">✅ Bu tür bugün listelenmiş (günlük skor: %${dailyScore?.toFixed(1)})</div>`
+                    : '';
+
+                // === NEDEN LİSTELENMEDİ (sadece listede yoksa) ===
                 let reasonsHtml = '';
-                if (data.reasons && data.reasons.length > 0) {
+                if (!isInList && data.reasons && data.reasons.length > 0) {
                     reasonsHtml = '<div style="margin-top:10px;">' + 
-                        '<div style="font-size:0.72rem;color:var(--yellow);margin-bottom:6px;">⚠️ ' + 
-                        (CURRENT_LANG === 'tr' ? 'NEDEN LİSTELENMEDİ / DÜŞÜK SKOR' : 'WHY NOT LISTED / LOW SCORE') + '</div>' +
+                        '<div style="font-size:0.72rem;color:var(--yellow);margin-bottom:6px;">⚠️ NEDEN LİSTELENMEDİ</div>' +
                         data.reasons.map(r => 
                             `<div class="fsr-reason-item ${r.type.toLowerCase()}">${r.text}</div>`
                         ).join('') + '</div>';
                 }
 
-                // Skor analizi
+                // === GELİŞMİŞ SKOR ANALİZİ ===
+                const starLine = (label, stars, pts, maxPts, note) => {
+                    const filled = '★'.repeat(Math.max(0, Math.min(5, stars)));
+                    const empty = '☆'.repeat(5 - Math.max(0, Math.min(5, stars)));
+                    const color = stars >= 4 ? 'var(--green)' : (stars >= 2 ? 'var(--yellow)' : 'var(--red)');
+                    const ptsStr = pts !== undefined && maxPts !== undefined ? `<span style="opacity:0.6; font-size:0.65rem;"> ${pts.toFixed?.(1) ?? pts}/${maxPts}</span>` : '';
+                    let noteHtml = '';
+                    if (note && stars <= 1) {
+                        noteHtml = `<div style="font-size:0.65rem; color:var(--red); margin:2px 0 4px 0; padding-left:4px;">↳ ${note}</div>`;
+                    }
+                    return `<div style="display:flex;justify-content:space-between;font-size:0.75rem;align-items:center;"><span>${label}${ptsStr}</span><span style="color:${color}">${filled}${empty}</span></div>${noteHtml}`;
+                };
+
+                // Rüzgar yön notu
+                const windNote = () => {
+                    const dir = c.windDirName;
+                    const spd = c.windSpeed;
+                    if (spd > 40) return 'Fırtına seviyesinde rüzgar — tüm türler için tehlikeli';
+                    if (spd > 25) return `Şiddetli ${dir} rüzgarı — kıyı balıkçılığı riskli`;
+                    if (dir && (dir.includes('G') || dir === 'GB' || dir === 'GD')) return `Lodos (${dir}) — dip balıkları pasifleşir, yüzey balıkları aktifleşebilir`;
+                    if (dir && (dir.includes('K') || dir === 'KB' || dir === 'KD')) return `Poyraz (${dir}) — su soğur, bazı türler derine çekilir`;
+                    return '';
+                };
+
+                // Basınç notu
+                const pressNote = () => {
+                    const trend = c.pressureTrend?.trend;
+                    if (trend === 'FALLING_FAST') return 'Hızlı basınç düşüşü — beslenme çılgınlığı tetiklenir!';
+                    if (trend === 'FALLING') return 'Basınç düşüyor — balıklar aktif beslenmeye geçer';
+                    if (trend === 'RISING_FAST') return 'Hızlı basınç artışı — balıklar pasifleşir, ağız kapatır';
+                    if (trend === 'RISING') return 'Basınç yükseliyor — beslenme yavaşlar';
+                    return '';
+                };
+
+                // Akıntı notu
+                const currentNote = () => {
+                    const spd = c.currentSpeed;
+                    if (spd > 1.0) return 'Güçlü akıntı — pelajik türler aktif, dip avı zorlaşır';
+                    if (spd > 0.5) return f.currentPref > 0.6 ? 'Orta akıntı — bu tür akıntıyı sever' : 'Orta akıntı — bu tür sakin suyu tercih eder';
+                    if (spd < 0.1) return 'Durgun su — akıntı seven türler pasifleşir';
+                    return '';
+                };
+
+                // Gelgit notu
+                const tideNote = () => {
+                    const tf = c.tideFlow;
+                    if (tf > 1.2) return 'Güçlü gelgit akışı — kıyı türleri beslenmeye geçer';
+                    if (tf < 0.3) return 'Zayıf gelgit — gelgite bağlı türler hareketsizleşir';
+                    return '';
+                };
+
+                // Berraklık notu
+                const clarityNote = () => {
+                    const cl = c.clarity;
+                    const pref = f.clarityPref;
+                    if (pref === 'TURBID' && cl > 75) return 'Çok berrak su — bu tür bulanık/köpüklü su tercih eder';
+                    if (pref === 'CLEAR' && cl < 40) return 'Bulanık su — bu tür berrak su sever';
+                    if (cl < 25) return 'Çok bulanık su — görüş mesafesi düşük';
+                    return '';
+                };
+
+                // Mevsim notu
+                const seasonNote = () => {
+                    const sEff = f.seasons[c.season] || 0;
+                    if (sEff < 0.3) return `${c.season === 'winter' ? 'Kış' : c.season === 'summer' ? 'Yaz' : c.season === 'spring' ? 'İlkbahar' : 'Sonbahar'} bu tür için çok kötü sezon`;
+                    if (sEff < 0.5) return 'Bu mevsimde düşük aktivite gösterir';
+                    return '';
+                };
+
+                // Sıcaklık notu
+                const tempNote = () => {
+                    const t = c.tempWater;
+                    if (t < f.tempRange.min) return `Su sıcaklığı (${t.toFixed(1)}°C) minimum toleransın (${f.tempRange.min}°C) altında`;
+                    if (t > f.tempRange.max) return `Su sıcaklığı (${t.toFixed(1)}°C) maximum toleransın (${f.tempRange.max}°C) üstünde`;
+                    return '';
+                };
+
+                // Basınç yıldız hesabı
+                const pressStars = () => {
+                    const trend = c.pressureTrend?.trend;
+                    const sens = f.pressureSensitivity || 0.5;
+                    if (trend === 'FALLING_FAST' && sens > 0.6) return 5;
+                    if (trend === 'FALLING' && sens > 0.5) return 4;
+                    if (trend === 'STABLE') return 3;
+                    if (trend === 'RISING') return 2;
+                    if (trend === 'RISING_FAST') return 1;
+                    return 3;
+                };
+
+                // Akıntı yıldız hesabı
+                const currentStars = () => {
+                    const spd = c.currentSpeed || 0;
+                    const pref = f.currentPref || 0.5;
+                    if (pref > 0.6) {
+                        if (spd > 0.5) return 5;
+                        if (spd > 0.3) return 4;
+                        if (spd > 0.1) return 3;
+                        return 1;
+                    } else {
+                        if (spd < 0.2) return 5;
+                        if (spd < 0.4) return 4;
+                        if (spd < 0.6) return 3;
+                        return 1;
+                    }
+                };
+
+                // Gelgit yıldız hesabı
+                const tideStars = () => {
+                    const tf = c.tideFlow || 0;
+                    if (tf > 0.8 && tf < 1.3) return 5;
+                    if (tf > 0.5) return 4;
+                    if (tf > 0.3) return 3;
+                    return 2;
+                };
+
+                // Basınç trendi Türkçe
+                const pressTrendTR = () => {
+                    const t = c.pressureTrend?.trend;
+                    if (t === 'FALLING_FAST') return '⚡ Hızlı Düşüş';
+                    if (t === 'FALLING') return '↘ Düşüyor';
+                    if (t === 'RISING_FAST') return '⬆ Hızlı Artış';
+                    if (t === 'RISING') return '↗ Yükseliyor';
+                    return '→ Stabil';
+                };
+
                 let starsHtml = '';
                 if (sd) {
                     starsHtml = `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border-subtle);">
                         <div style="font-size:0.72rem; color:var(--cyan); margin-bottom:6px;">📊 SKOR ANALİZİ</div>
-                        ${sd.season ? starLine('Mevsim', sd.season.stars) : ''}
-                        ${sd.temp ? starLine('Sıcaklık (' + sd.temp.value + '°C)', sd.temp.stars) : ''}
-                        ${sd.depth ? starLine('Derinlik (' + Math.round(sd.depth.value) + 'm / opt:' + sd.depth.fishOpt + 'm)', sd.depth.stars) : ''}
-                        ${sd.wave ? starLine('Dalga (' + sd.wave.value + 'm)', sd.wave.stars) : ''}
-                        ${sd.clarity ? starLine('Berraklık (' + sd.clarity.value + '%)', sd.clarity.stars) : ''}
-                        ${sd.wind ? starLine('Rüzgar (' + sd.wind.value + 'km/s)', sd.wind.stars) : ''}
-                        ${sd.activity ? starLine('Aktivite', sd.activity.stars) : ''}
-                        ${sd.region ? starLine('Bölge', sd.region.stars) : ''}
+                        ${sd.season ? starLine('Mevsim (' + c.season + ')', sd.season.stars, sd.season.score, sd.season.max, seasonNote()) : ''}
+                        ${sd.temp ? starLine('Sıcaklık (' + sd.temp.value + '°C / opt:' + f.tempRange.opt + '°C)', sd.temp.stars, sd.temp.score, sd.temp.max, tempNote()) : ''}
+                        ${sd.depth ? starLine('Derinlik (' + Math.round(sd.depth.value) + 'm / opt:' + sd.depth.fishOpt + 'm)', sd.depth.stars, sd.depth.score, sd.depth.max, '') : ''}
+                        ${sd.wave ? starLine('Dalga (' + sd.wave.value + 'm)', sd.wave.stars, sd.wave.score, sd.wave.max, '') : ''}
+                        ${sd.clarity ? starLine('Berraklık (' + sd.clarity.value + '%)', sd.clarity.stars, sd.clarity.score, sd.clarity.max, clarityNote()) : ''}
+                        ${sd.wind ? starLine('Rüzgar (' + sd.wind.value + 'km/s ' + (c.windDirName || '') + ')', sd.wind.stars, sd.wind.score, sd.wind.max, windNote()) : ''}
+                        ${sd.activity ? starLine('Aktivite (' + sd.activity.timeMode + ')', sd.activity.stars, sd.activity.score, sd.activity.max, '') : ''}
+                        ${sd.region ? starLine('Bölge', sd.region.stars, sd.region.score, sd.region.max, '') : ''}
+                        ${starLine('Basınç (' + c.pressure + ' hPa ' + pressTrendTR() + ')', pressStars(), sd.trigger?.score || 0, sd.trigger?.max || 10, pressNote())}
+                        ${starLine('Akıntı (' + (c.currentSpeed || 0).toFixed(1) + ' kn)', currentStars(), '', '', currentNote())}
+                        ${starLine('Gelgit (' + (c.tideFlow || 0).toFixed(1) + ')', tideStars(), '', '', tideNote())}
+                        ${c.salinity ? `<div style="font-size:0.68rem; color:var(--text-muted); margin-top:4px;">🧂 Tuzluluk: ‰${c.salinity} (${c.region})</div>` : ''}
                         ${sd.midday ? '<div style="color:var(--yellow);font-size:0.7rem;margin-top:4px;">☀️ Öğlen bastırması: ×' + sd.midday.penalty.toFixed(2) + '</div>' : ''}
                         ${sd.volatility ? '<div style="color:var(--cyan);font-size:0.7rem;margin-top:4px;">🐟 Sürü faktörü: ×' + sd.volatility.multiplier + '</div>' : ''}
+                        ${sd.camDeniz ? '<div style="color:var(--yellow);font-size:0.7rem;margin-top:4px;">🪟 Cam deniz cezası: ×' + sd.camDeniz.penalty.toFixed(2) + '</div>' : ''}
                         ${sd.penalties && sd.penalties.length > 0 ? '<div style="color:var(--red);font-size:0.7rem;margin-top:4px;">⚠️ ' + sd.penalties.join(', ') + '</div>' : ''}
                     </div>`;
                 }
 
                 // Koşullar özeti
-                const c = data.conditions;
                 const condHtml = `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border-subtle); font-size:0.72rem; color:var(--text-muted);">
-                    📍 ${c.region} | 🌡️ ${c.tempWater?.toFixed(1)}°C | 🌊 ${c.wave}m | 💨 ${c.windSpeed}km/s | ⚓ ${c.depthAvg ? Math.round(c.depthAvg) + 'm' : 'N/A'} | 🕐 ${c.timeMode} | 📅 ${c.season}
+                    📍 ${c.region} | 🌡️ ${c.tempWater?.toFixed(1)}°C | 🌊 ${c.wave}m | 💨 ${c.windSpeed}km/s ${c.windDirName || ''} | ⚓ ${c.depthAvg ? Math.round(c.depthAvg) + 'm' : 'N/A'} | 🕐 ${c.timeMode} | 📅 ${c.season}
+                </div>`;
+
+                // Bilgi satırı
+                const infoHtml = `<div style="font-size:0.78rem; color:var(--text-secondary);">
+                    🎯 <strong>Yem:</strong> ${f.advice?.bait || '-'}<br>
+                    ${f.legalSize ? '📏 <strong>Yasal Boy:</strong> ' + f.legalSize + '<br>' : ''}
+                    ${f.isProtected ? '<span style="color:var(--red);">⚠️ <strong>KORUMA ALTINDA</strong> — Yakaladığınızda serbest bırakın!</span><br>' : ''}
+                    ⚓ <strong>Derinlik:</strong> ${f.depth.min}m - ${f.depth.max}m (opt: ${f.depth.opt}m)<br>
+                    🌍 <strong>Bölgeler:</strong> ${f.regions.join(', ')}
                 </div>`;
 
                 resultDiv.innerHTML = `
                     <div class="fsr-header">
-                        <div class="fsr-name">${f.icon} ${f.name}</div>
-                        <div class="fsr-score" style="color:${scoreColor}">%${score.toFixed(1)}</div>
+                        <div class="fsr-name">${f.icon} ${f.name}${photoBtn}</div>
                     </div>
                     <div style="font-size:0.72rem; color:var(--text-muted); font-style:italic; margin-bottom:8px;">${f.scientificName || ''} — ${f.category}</div>
-                    <div style="font-size:0.78rem; color:var(--text-secondary);">
-                        🎯 <strong>Yem:</strong> ${f.advice?.bait || '-'}<br>
-                        📏 <strong>Yasal Boy:</strong> ${f.legalSize || '-'}<br>
-                        ⚓ <strong>Derinlik:</strong> ${f.depth.min}m - ${f.depth.max}m (opt: ${f.depth.opt}m)<br>
-                        🌍 <strong>Bölgeler:</strong> ${f.regions.join(', ')}
-                    </div>
+                    ${dailyScoreHtml}
+                    ${listStatusHtml}
+                    ${infoHtml}
                     ${reasonsHtml}
                     ${starsHtml}
                     ${condHtml}
