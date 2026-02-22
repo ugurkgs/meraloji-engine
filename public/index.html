@@ -831,7 +831,7 @@
         .fish-search-box {
             margin-bottom: 14px;
             position: relative;
-            z-index: 100;
+            z-index: 1000;
         }
         .fish-search-input-wrapper {
             display: flex;
@@ -877,13 +877,14 @@
             left: 0;
             right: 0;
             background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
+            border: 1px solid var(--cyan);
             border-top: none;
             border-radius: 0 0 var(--radius-md) var(--radius-md);
             max-height: 250px;
             overflow-y: auto;
             z-index: 9999;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            pointer-events: auto;
         }
         .fish-search-option {
             padding: 10px 14px;
@@ -962,6 +963,8 @@
             margin-bottom: 10px;
             cursor: pointer;
             transition: all 0.2s;
+            position: relative;
+            z-index: 1;
         }
 
         .fish-item:hover {
@@ -3629,10 +3632,12 @@
         async function onFishSearchInput(val) {
             const dropdown = document.getElementById('fish-search-dropdown');
             const clearBtn = document.getElementById('fish-search-clear');
+            const fishList = document.getElementById('fish-list');
             
             if (!val || val.length < 1) {
                 dropdown.style.display = 'none';
                 clearBtn.style.display = 'none';
+                if (fishList) { fishList.style.opacity = '1'; fishList.style.pointerEvents = 'auto'; }
                 return;
             }
             clearBtn.style.display = 'block';
@@ -3663,6 +3668,7 @@
                 ).join('');
             }
             dropdown.style.display = 'block';
+            if (fishList) { fishList.style.opacity = '0.3'; fishList.style.pointerEvents = 'none'; }
         }
 
         function clearFishSearch() {
@@ -3670,12 +3676,16 @@
             document.getElementById('fish-search-dropdown').style.display = 'none';
             document.getElementById('fish-search-result').style.display = 'none';
             document.getElementById('fish-search-clear').style.display = 'none';
+            const fishList = document.getElementById('fish-list');
+            if (fishList) { fishList.style.opacity = '1'; fishList.style.pointerEvents = 'auto'; }
         }
 
         async function selectFishSearch(fishKey) {
             const dropdown = document.getElementById('fish-search-dropdown');
             const resultDiv = document.getElementById('fish-search-result');
             dropdown.style.display = 'none';
+            const fishList = document.getElementById('fish-list');
+            if (fishList) { fishList.style.opacity = '1'; fishList.style.pointerEvents = 'auto'; }
 
             if (!lastLatLon) {
                 resultDiv.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:16px;">Önce haritada bir nokta seçin.</div>';
@@ -3778,6 +3788,8 @@
             if (!e.target.closest('.fish-search-box')) {
                 const dd = document.getElementById('fish-search-dropdown');
                 if (dd) dd.style.display = 'none';
+                const fishList = document.getElementById('fish-list');
+                if (fishList) { fishList.style.opacity = '1'; fishList.style.pointerEvents = 'auto'; }
             }
         });
 
