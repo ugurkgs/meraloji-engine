@@ -3633,6 +3633,10 @@
             const dropdown = document.getElementById('fish-search-dropdown');
             const clearBtn = document.getElementById('fish-search-clear');
             const fishList = document.getElementById('fish-list');
+            const resultDiv = document.getElementById('fish-search-result');
+            
+            // Her yeni aramada önceki sonucu gizle
+            if (resultDiv) resultDiv.style.display = 'none';
             
             if (!val || val.length < 1) {
                 dropdown.style.display = 'none';
@@ -3643,10 +3647,22 @@
             clearBtn.style.display = 'block';
             
             const list = await loadSpeciesList();
-            const q = val.toLowerCase().replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ğ/g, 'g');
+            
+            // Türkçe normalizasyon (İ→i, ı→i, Ö→o, Ü→u, Ş→s, Ç→c, Ğ→g)
+            const trNorm = (str) => str
+                .replace(/İ/g, 'i').replace(/I/g, 'i')
+                .replace(/ı/g, 'i')
+                .replace(/Ö/g, 'o').replace(/ö/g, 'o')
+                .replace(/Ü/g, 'u').replace(/ü/g, 'u')
+                .replace(/Ş/g, 's').replace(/ş/g, 's')
+                .replace(/Ç/g, 'c').replace(/ç/g, 'c')
+                .replace(/Ğ/g, 'g').replace(/ğ/g, 'g')
+                .toLowerCase();
+            
+            const q = trNorm(val);
             
             const matches = list.filter(s => {
-                const name = s.name.toLowerCase().replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ğ/g, 'g');
+                const name = trNorm(s.name);
                 const nameEn = (s.nameEn || '').toLowerCase();
                 return name.includes(q) || nameEn.includes(q);
             }).slice(0, 8);
