@@ -2297,17 +2297,14 @@ app.get('/api/forecast', async (req, res) => {
         }
         
         // Batimetri ile hassas kara tespiti
-        // bathymetryRaw: negatif = deniz tabanı (derinlik), pozitif = kara (yükseklik), 0 veya null = belirsiz
+        // bathymetryRaw: negatif = deniz tabanı (derinlik), pozitif = kara (yükseklik), null = belirsiz
         if (!isLand && bathymetryRaw !== null) {
-            if (bathymetryRaw >= 0) {
-                // Pozitif veya sıfır = deniz seviyesinde veya üstünde = KARA
+            if (bathymetryRaw > 0) {
+                // Pozitif = deniz seviyesinin üstünde = KESİN KARA
                 isLand = true;
-                landReason = 'Batimetri verisi kara gösteriyor (yükseklik: ' + bathymetryRaw.toFixed(1) + 'm)';
-            } else if (bathymetryRaw > -1) {
-                // 0 ile -1m arası = çok sığ, muhtemelen kıyı şeridi
-                isLand = true;
-                landReason = 'Çok sığ alan (derinlik: ' + Math.abs(bathymetryRaw).toFixed(1) + 'm) — denize daha yakın bir nokta seçin';
+                landReason = 'Burası kara parçası (yükseklik: +' + bathymetryRaw.toFixed(1) + 'm)';
             }
+            // bathymetryRaw <= 0 = deniz (sığ bile olsa analiz yap)
         }
         
         if (isLand) {
@@ -2689,12 +2686,9 @@ app.get('/api/fish-search', async (req, res) => {
         }
         
         if (!isLand && bathymetryRaw !== null) {
-            if (bathymetryRaw >= 0) {
+            if (bathymetryRaw > 0) {
                 isLand = true;
-                landReason = 'Kara noktası (yükseklik: ' + bathymetryRaw.toFixed(1) + 'm)';
-            } else if (bathymetryRaw > -1) {
-                isLand = true;
-                landReason = 'Çok sığ alan (' + Math.abs(bathymetryRaw).toFixed(1) + 'm) — denize daha yakın bir nokta seçin';
+                landReason = 'Burası kara parçası (yükseklik: +' + bathymetryRaw.toFixed(1) + 'm)';
             }
         }
 
