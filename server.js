@@ -63,35 +63,68 @@ const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use('/api/', limiter);
 
 // Auth middleware
+const TRIAL_DAYS = 7;
+const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
+
 async function verifyAuth(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ') || !admin) {
         req.user = null;
         req.isPremium = false;
+        req.trialInfo = null;
         return next();
     }
     try {
         const token = authHeader.split('Bearer ')[1];
         const decoded = await admin.auth().verifyIdToken(token);
         req.user = decoded;
+        req.isPremium = false;
+        req.trialInfo = null;
+
         if (db) {
+            // 1. Önce abonelik kontrol
             const subDoc = await db.collection('subscriptions').doc(decoded.uid).get();
-            console.log('[AUTH-MW] subDoc.exists:', subDoc.exists, 'uid:', decoded.uid);
             if (subDoc.exists) {
                 const sub = subDoc.data();
-                console.log('[AUTH-MW] sub data:', JSON.stringify(sub));
-                console.log('[AUTH-MW] expiresAt:', sub.expiresAt, 'now:', Date.now(), 'check:', sub.expiresAt > Date.now());
-                req.isPremium = sub.status === 'active' && sub.expiresAt > Date.now();
-            } else {
-                req.isPremium = false;
+                if (sub.status === 'active' && sub.expiresAt > Date.now()) {
+                    req.isPremium = true;
+                    return next();
+                }
             }
-        } else {
-            req.isPremium = false;
+
+            // 2. Abonelik yoksa trial kontrol
+            const trialDoc = await db.collection('trials').doc(decoded.uid).get();
+            if (trialDoc.exists) {
+                const trial = trialDoc.data();
+                const elapsed = Date.now() - trial.startedAt;
+                const remaining = TRIAL_MS - elapsed;
+                const daysLeft = Math.ceil(remaining / (24 * 60 * 60 * 1000));
+
+                if (remaining > 0) {
+                    req.isPremium = true;
+                    req.trialInfo = { active: true, daysLeft, startedAt: trial.startedAt, expiresAt: trial.startedAt + TRIAL_MS };
+                } else {
+                    req.trialInfo = { active: false, daysLeft: 0, expired: true };
+                }
+            } else {
+                // İlk giriş — trial başlat
+                const now = Date.now();
+                await db.collection('trials').doc(decoded.uid).set({
+                    startedAt: now,
+                    uid: decoded.uid,
+                    email: decoded.email || '',
+                    createdAt: now
+                });
+                req.isPremium = true;
+                req.trialInfo = { active: true, daysLeft: TRIAL_DAYS, startedAt: now, expiresAt: now + TRIAL_MS, isNew: true };
+                console.log('[TRIAL] New trial started for:', decoded.uid);
+            }
         }
     } catch (e) {
         console.log('[AUTH-MW] Token verify failed:', e.message);
         req.user = null;
         req.isPremium = false;
+        req.trialInfo = null;
     }
     next();
 }
@@ -2877,13 +2910,13 @@ app.get('/api/fish-search', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 
 app.get('/api/subscription-status', async (req, res) => {
-    console.log('[SUB-CHECK] user:', req.user ? req.user.uid : 'null', 'isPremium:', req.isPremium, 'authHeader:', req.headers.authorization ? 'present' : 'missing');
     if (!req.user) {
         return res.json({ isLoggedIn: false, isPremium: false });
     }
     res.json({
         isLoggedIn: true,
         isPremium: req.isPremium,
+        trial: req.trialInfo || null,
         uid: req.user.uid,
         email: req.user.email,
         name: req.user.name || req.user.email
