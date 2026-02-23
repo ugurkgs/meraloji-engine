@@ -3663,9 +3663,12 @@
 
             // Premium gate göster
             if (!isPremium && list.length > 3) {
+                const trialMsg = (trialInfo && trialInfo.expired) 
+                    ? '<p style="color:var(--yellow); margin-bottom:8px;">⏰ Deneme süreniz doldu!</p>' : '';
                 container.innerHTML += `
                     <div class="premium-gate">
                         <h3>🔒 MERALOJİ PRO</h3>
+                        ${trialMsg}
                         <p>Tüm ${list.length} balık türünü gör, 7 günlük tahmin al, reklamsız kullan</p>
                         <div class="price">₺9,99/ay</div>
                         <button class="upgrade-btn" onclick="upgradeToPro()">PRO'ya Yükselt</button>
@@ -4094,8 +4097,10 @@
                 // Premium gate: ücretsiz kullanıcıya sadece 1 gün
                 if (!isPremium && i > 0) {
                     if (i === 1) {
+                        const trialMsg2 = (trialInfo && trialInfo.expired) ? '<p style="color:var(--yellow);">⏰ Deneme süreniz doldu!</p>' : '';
                         return `<div class="premium-gate">
                             <h3>🔒 MERALOJİ PRO</h3>
+                            ${trialMsg2}
                             <p>7 günlük tahmine erişmek için PRO'ya yükseltin</p>
                             <div class="price">₺9,99/ay</div>
                             <button class="upgrade-btn" onclick="upgradeToPro()">PRO'ya Yükselt</button>
@@ -4256,6 +4261,7 @@ const auth = firebase.auth();
 let currentUser = null;
 let isPremium = false;
 let authToken = null;
+let trialInfo = null;
 
 function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -4296,8 +4302,10 @@ async function checkSubscriptionStatus() {
         });
         const data = await res.json();
         isPremium = data.isPremium;
+        trialInfo = data.trial || null;
     } catch (e) {
         isPremium = false;
+        trialInfo = null;
     }
 }
 
@@ -4306,7 +4314,19 @@ function updateUserUI() {
     if (badge && currentUser) {
         document.getElementById('user-avatar').src = currentUser.photoURL || '';
         document.getElementById('user-name').textContent = (currentUser.displayName || currentUser.email || '').split(' ')[0];
-        document.getElementById('pro-tag').style.display = isPremium ? 'inline' : 'none';
+        
+        const proTag = document.getElementById('pro-tag');
+        if (trialInfo && trialInfo.active) {
+            proTag.textContent = `DENEME (${trialInfo.daysLeft}g)`;
+            proTag.style.display = 'inline';
+            proTag.style.background = 'linear-gradient(90deg, #ff851b, #ff6b35)';
+        } else if (isPremium) {
+            proTag.textContent = 'PRO';
+            proTag.style.display = 'inline';
+            proTag.style.background = 'linear-gradient(90deg, #00c8c8, #00ffcc)';
+        } else {
+            proTag.style.display = 'none';
+        }
         badge.style.display = 'flex';
     }
 }
