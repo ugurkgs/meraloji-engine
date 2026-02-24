@@ -1,29 +1,18 @@
 {
-  "name": "meraloji-fish-system",
-  "version": "1.0.0",
-  "description": "MERALOJİ F.I.S.H. System - Find • Inspect • See • Hunt",
+  "name": "meraloji-fish",
+  "version": "3.0.0",
+  "description": "MERALOJİ F.I.S.H. System",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node server.js"
   },
-  "keywords": [
-    "fishing",
-    "weather",
-    "marine",
-    "forecast",
-    "balıkçılık"
-  ],
-  "author": "Uğur Kögüs",
-  "license": "MIT",
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "express-rate-limit": "^7.1.5",
-    "node-cache": "^5.1.2",
-    "node-fetch": "^2.7.0",
-    "suncalc": "^1.9.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
     "firebase-admin": "^12.0.0",
-    "googleapis": "^134.0.0"
+    "googleapis": "^134.0.0",
+    "node-cache": "^5.1.2",
+    "suncalc": "^1.9.0"
   }
 }
