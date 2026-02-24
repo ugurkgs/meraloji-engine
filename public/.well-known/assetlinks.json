@@ -4,7 +4,8 @@
     "namespace": "android_app",
     "package_name": "com.meraloji.fish",
     "sha256_cert_fingerprints": [
-      "0D:48:87:F8:6B:B2:08:F6:68:47:F9:56:EA:0E:90:F7:7F:19:33:DE:69:3F:EB:02:07:37:1C:82:64:4C:A7:6F"
+      "0D:48:87:F8:6B:B2:08:F6:68:47:F9:56:EA:0E:90:F7:7F:19:33:DE:69:3F:EB:02:07:37:1C:82:64:4C:A7:6F",
+      "1D:08:A0:89:71:17:9F:F7:FE:B8:8E:4D:DA:6F:28:01:89:DB:DA:97:83:16:1A:3D:C7:45:44:49:D5:71:3E:60"
     ]
   }
 }]
