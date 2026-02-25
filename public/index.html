@@ -4355,15 +4355,13 @@ function showUserMenu() {
 
 async function upgradeToPro() {
     if (window.matchMedia('(display-mode: standalone)').matches) {
-        // Firebase'den o anki kullanıcının UID'sini alıyoruz
         const user = firebase.auth().currentUser;
         if (user) {
-            window.location.href = 'meraloji://satin-al?uid=' + user.uid;
+            window.location.href = `intent://satin-al?uid=${user.uid}#Intent;scheme=meraloji;package=com.meraloji.fish;end`;
         } else {
             alert("Lütfen önce giriş yapın.");
         }
     } else {
-        // Tarayıcıda — Play Store'a yönlendir
         window.open('https://play.google.com/store/apps/details?id=com.meraloji.fish', '_blank');
     }
 }
