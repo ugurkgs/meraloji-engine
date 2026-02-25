@@ -2944,6 +2944,33 @@ app.post('/api/verify-subscription', async (req, res) => {
     }
 });
 
+// BURAYA YENİ EKLİYORUZ - Android'den gelen ödemeyi karşılayan kısım
+app.post('/api/verify-purchase', async (req, res) => {
+    const { uid, purchaseToken } = req.body;
+    
+    if (!uid || !purchaseToken) {
+        return res.status(400).json({ error: 'Eksik parametre' });
+    }
+
+    try {
+        if (db) {
+            // Sistemin mevcut mantığına uygun olarak subscriptions koleksiyonuna yazıyoruz
+            await db.collection('subscriptions').doc(uid).set({
+                status: 'active',
+                subscriptionId: 'meraloji_pro_monthly',
+                purchaseToken: purchaseToken,
+                startedAt: Date.now(),
+                expiresAt: Date.now() + (30 * 24 * 60 * 60 * 1000), // 30 gün
+                updatedAt: Date.now()
+            }, { merge: true });
+        }
+        res.status(200).send({ success: true });
+    } catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+});
+// YENİ EKLEME BİTT
+
 app.listen(PORT, () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════════╗
