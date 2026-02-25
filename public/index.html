@@ -16,7 +16,7 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">"
     
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
@@ -4353,10 +4353,12 @@ function showUserMenu() {
     }
 }
 
-function upgradeToPro() {
+async function upgradeToPro() {
     if (window.matchMedia('(display-mode: standalone)').matches) {
-        alert('Google Play üzerinden MERALOJİ PRO aboneliği satın alabilirsiniz.');
+        // TWA içinde — Native Android'e deep link gönder
+        window.location.href = 'meraloji://satin-al';
     } else {
+        // Tarayıcıda — Play Store'a yönlendir
         window.open('https://play.google.com/store/apps/details?id=com.meraloji.fish', '_blank');
     }
 }
