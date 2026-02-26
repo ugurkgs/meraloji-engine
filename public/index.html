@@ -1622,6 +1622,282 @@
             padding: 4px 0; background: rgba(0,0,0,0.3);
         }
 
+        /* ═══════════════════════════════════════════════════════════════════
+           🔍 BÖLGE TARAMA (SCAN) STİLLERİ
+           ═══════════════════════════════════════════════════════════════════ */
+        .scan-btn {
+            width: 48px;
+            height: 48px;
+            background: #000000;
+	    border: 1px solid #ff4757;
+            border-radius: var(--radius-md);
+            color: var(--green);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(20px);
+            transition: all 0.2s;
+            flex-shrink: 0;
+            position: relative;
+box-shadow: 0 0 10px rgba(255,71,87,0.3);        }
+        .scan-btn:hover {
+            border-color: #ffd500;
+background: #111111;
+            box-shadow: 0 0 24px rgba(0,255,136,0.35), inset 0 0 16px rgba(0,255,136,0.1);
+        }
+        .scan-btn.active { background: var(--green); color: var(--bg-deep); border-color: var(--green); }
+        .scan-radar-icon { overflow: visible; }
+        .scan-sweep-line {
+            transform-origin: 12px 12px;
+            animation: radarSweep 2.4s linear infinite;
+stroke: var(--green);
+            opacity: 0.9;
+        }
+        .scan-sweep-dot {
+            transform-origin: 12px 12px;
+            animation: radarSweep 2.4s linear infinite;
+        }
+        @keyframes radarSweep {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        .scan-badge {
+            position: absolute;
+            top: -4px; right: -4px;
+            background: var(--yellow);
+            color: var(--bg-deep);
+            font-size: 0.55rem;
+            font-weight: 800;
+            padding: 1px 4px;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+        }
+
+        /* Scan Modal */
+        #scan-modal {
+            position: fixed; inset: 0; background: rgba(4,13,26,1);
+            z-index: 3000; display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            backdrop-filter: blur(12px); padding: 20px;
+        }
+        .scan-modal-box {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-xl);
+            width: 100%; max-width: 420px;
+            padding: 28px 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        }
+        .scan-modal-title {
+            font-size: 1.15rem; font-weight: 800;
+            color: var(--green); letter-spacing: 1px;
+            margin-bottom: 6px; text-align: center;
+        }
+        .scan-modal-subtitle {
+            font-size: 0.78rem; color: var(--text-muted);
+            text-align: center; margin-bottom: 20px;
+        }
+        .scan-option-row {
+            display: flex; gap: 8px; margin-bottom: 14px;
+        }
+        .scan-option-btn {
+            flex: 1; padding: 10px 6px;
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md); color: var(--text-secondary);
+            font-family: var(--font-display); font-size: 0.8rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; text-align: center;
+        }
+        .scan-option-btn.selected {
+            border-color: var(--green); color: var(--green);
+            background: rgba(0,255,136,0.1);
+            box-shadow: 0 0 12px var(--green-glow);
+        }
+        .scan-fish-select {
+            width: 100%; padding: 10px 14px; margin-bottom: 14px;
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md); color: var(--text-primary);
+            font-family: var(--font-display); font-size: 0.85rem;
+            outline: none; cursor: pointer;
+        }
+        .scan-fish-select:focus { border-color: var(--green); }
+        .scan-warning-box {
+            background: rgba(255,213,0,0.08); border: 1px solid rgba(255,213,0,0.3);
+            border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 16px;
+            font-size: 0.78rem; color: var(--yellow); line-height: 1.5;
+        }
+        .scan-remaining {
+            font-size: 0.75rem; color: var(--text-muted);
+            text-align: center; margin-bottom: 16px;
+        }
+        .scan-remaining span { color: var(--cyan); font-weight: 700; }
+        .scan-start-btn {
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, var(--green), #00c878);
+            border: none; border-radius: var(--radius-md);
+            color: var(--bg-deep); font-family: var(--font-display);
+            font-size: 1rem; font-weight: 800; cursor: pointer;
+            transition: all 0.2s; letter-spacing: 1px;
+        }
+        .scan-start-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--green-glow); }
+        .scan-start-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .scan-cancel-btn {
+            width: 100%; padding: 10px; margin-top: 8px;
+            background: transparent; border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md); color: var(--text-muted);
+            font-family: var(--font-display); font-size: 0.85rem; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .scan-cancel-btn:hover { border-color: var(--red); color: var(--red); }
+
+        /* Scan Progress Overlay */
+        #scan-progress {
+            position: fixed; inset: 0; background: rgba(4,13,26,0.96);
+            z-index: 3500; display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            backdrop-filter: blur(16px); padding: 24px;
+        }
+        .scan-radar {
+            width: 100px; height: 100px; position: relative; margin-bottom: 24px;
+        }
+        .scan-radar-ring {
+            position: absolute; inset: 0;
+            border: 2px solid var(--green);
+            border-radius: 50%; opacity: 0.3;
+        }
+        .scan-radar-sweep {
+            position: absolute; inset: 0;
+            border: 2px solid transparent;
+            border-top-color: var(--green);
+            border-radius: 50%;
+            animation: spin 1.2s linear infinite;
+            box-shadow: 0 0 20px var(--green-glow);
+        }
+        .scan-radar-dot {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px; height: 10px;
+            background: var(--green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--green);
+        }
+        .scan-progress-title {
+            font-size: 1rem; font-weight: 700;
+            color: var(--green); letter-spacing: 2px;
+            margin-bottom: 8px; text-align: center;
+        }
+        .scan-progress-sub {
+            font-size: 0.78rem; color: var(--text-muted);
+            text-align: center; margin-bottom: 20px;
+        }
+        .scan-progress-bar-wrap {
+            width: 100%; max-width: 320px;
+            background: var(--bg-card); border-radius: 10px;
+            height: 8px; overflow: hidden; margin-bottom: 10px;
+        }
+        .scan-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green), #00ffcc);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 0%;
+            box-shadow: 0 0 10px var(--green-glow);
+        }
+        .scan-progress-pct {
+            font-family: var(--font-mono); font-size: 1.1rem;
+            color: var(--green); font-weight: 700;
+            margin-bottom: 6px; text-align: center;
+        }
+        .scan-progress-log {
+            font-family: var(--font-mono); font-size: 0.72rem;
+            color: var(--text-muted); text-align: center; min-height: 36px;
+            max-width: 320px; line-height: 1.5;
+        }
+        .scan-live-pins {
+            position: fixed; bottom: 20px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,255,136,0.1);
+            border: 1px solid var(--green);
+            border-radius: var(--radius-md);
+            padding: 6px 14px;
+            font-size: 0.75rem; color: var(--green);
+            font-family: var(--font-mono);
+            z-index: 3600;
+            display: none;
+        }
+
+        /* Scan Result Pin Markers */
+        .scan-pin-marker {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 800;
+            font-family: var(--font-mono);
+            color: #000; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.8);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+        }
+        .scan-pin-top {
+            width: 36px; height: 36px;
+            background: var(--green);
+            box-shadow: 0 0 16px var(--green-glow), 0 2px 8px rgba(0,0,0,0.5);
+            border: 3px solid #fff;
+            font-size: 0.72rem;
+        }
+
+        /* Tutorial Overlay */
+        #scan-tutorial {
+            position: fixed; inset: 0;
+            background: rgba(4,13,26,0.95);
+            z-index: 4000; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            backdrop-filter: blur(16px); padding: 24px;
+        }
+        .tutorial-box {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-xl);
+            width: 100%; max-width: 400px;
+            padding: 28px 24px;
+        }
+        .tutorial-title {
+            font-size: 1.1rem; font-weight: 800;
+            color: var(--green); text-align: center;
+            letter-spacing: 1px; margin-bottom: 20px;
+        }
+        .tutorial-step {
+            display: flex; gap: 12px; align-items: flex-start;
+            margin-bottom: 14px; padding: 10px 12px;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+        }
+        .tutorial-step-num {
+            width: 26px; height: 26px; min-width: 26px;
+            background: var(--green); color: #000;
+            border-radius: 50%; font-weight: 800;
+            font-size: 0.8rem; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .tutorial-step-text {
+            font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;
+        }
+        .tutorial-step-text strong { color: var(--cyan); }
+        .tutorial-ok-btn {
+            width: 100%; margin-top: 20px; padding: 14px;
+            background: linear-gradient(135deg, var(--green), #00c878);
+            border: none; border-radius: var(--radius-md);
+            color: #000; font-family: var(--font-display);
+            font-size: 1rem; font-weight: 800;
+            cursor: pointer; letter-spacing: 1px;
+        }
+        .tutorial-skip {
+            text-align: center; margin-top: 10px;
+            font-size: 0.75rem; color: var(--text-muted);
+            cursor: pointer; text-decoration: underline;
+        }
+
     </style>
 </head>
 <body>
@@ -1668,6 +1944,96 @@
             <div class="search-suggestions" id="search-suggestions"></div>
         </div>
         <button class="btn-icon" id="locate-btn" onclick="locateMe()" title="Konumum">🎯</button>
+        <button class="scan-btn" id="scan-btn" onclick="openScanFlow()" title="Bölge Tarama (PRO)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="scan-radar-icon">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 2" opacity="0.5"/>
+                <circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2" opacity="0.75"/>
+                <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                <line x1="12" y1="12" x2="12" y2="2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" class="scan-sweep-line"/>
+                <circle cx="12" cy="4" r="1.2" fill="currentColor" opacity="0.9" class="scan-sweep-dot"/>
+            </svg>
+            <span class="scan-badge" id="scan-badge">5</span>
+        </button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         🔍 TARAMA TUTORIAL OVERLAY (ilk kullanımda gösterilir)
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="scan-tutorial">
+        <div class="tutorial-box">
+            <div class="tutorial-title">🔍 BÖLGE TARAMA</div>
+            <div class="tutorial-step">
+                <div class="tutorial-step-num">1</div>
+                <div class="tutorial-step-text">Haritada bir noktaya tıklayın <strong>veya</strong> GPS konumunuzu kullanın — bu nokta tarama merkezi olur.</div>
+            </div>
+            <div class="tutorial-step">
+                <div class="tutorial-step-num">2</div>
+                <div class="tutorial-step-text"><strong>Yarıçap seçin:</strong> 3 km dar çevre, 5 km orta, 10 km geniş tarama yapar.</div>
+            </div>
+            <div class="tutorial-step">
+                <div class="tutorial-step-num">3</div>
+                <div class="tutorial-step-text"><strong>(İsteğe bağlı)</strong> Belirli bir balık türü seçin — o türün çıkabileceği en iyi noktalar önce gösterilir.</div>
+            </div>
+            <div class="tutorial-step">
+                <div class="tutorial-step-num">4</div>
+                <div class="tutorial-step-text"><strong>Tara</strong> butonuna basın. İşlem ~2 dakika sürer, pin'ler haritada birer birer belirir.</div>
+            </div>
+            <div class="tutorial-step">
+                <div class="tutorial-step-num">5</div>
+                <div class="tutorial-step-text">En yüksek skorlu <strong>5 nokta</strong> yeşil pin ile işaretlenir. Bir noktaya tıklayıp tam analiz alabilirsiniz.</div>
+            </div>
+            <button class="tutorial-ok-btn" onclick="closeScanTutorial()">ANLADIM, BAŞLA →</button>
+            <div class="tutorial-skip" onclick="closeScanTutorial()">Bu mesajı bir daha gösterme</div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         🔍 TARAMA AYAR MODALI
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="scan-modal">
+        <div class="scan-modal-box">
+            <div class="scan-modal-title">🔍 BÖLGE TARAMA</div>
+            <div class="scan-modal-subtitle" id="scan-modal-center-text">Merkez: Seçili nokta / GPS konumunuz</div>
+
+            <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:8px;">Tarama Yarıçapı:</div>
+            <div class="scan-option-row" id="scan-radius-row">
+                <button class="scan-option-btn" onclick="selectRadius(3)">3 km<br><span style="font-size:0.65rem; color:var(--text-muted);">Dar</span></button>
+                <button class="scan-option-btn selected" onclick="selectRadius(5)">5 km<br><span style="font-size:0.65rem; color:var(--text-muted);">Orta</span></button>
+                <button class="scan-option-btn" onclick="selectRadius(10)">10 km<br><span style="font-size:0.65rem; color:var(--text-muted);">Geniş</span></button>
+            </div>
+
+            <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:8px;">Balık Türü (opsiyonel):</div>
+            <select class="scan-fish-select" id="scan-fish-select">
+                <option value="">— Tüm türler (en yüksek skor) —</option>
+            </select>
+
+            <div class="scan-warning-box">
+                ⏱️ Bu tarama <strong>~2 dakika</strong> sürebilir. Sonuçlar ekrana gerçek zamanlı yansır. Tarama sonuçları 3 saat boyunca saklanır; aynı bölgeyi tekrar tararken önbellekten anında döner.
+            </div>
+
+            <div class="scan-remaining">Bugünkü kalan tarama hakkınız: <span id="scan-remaining-count">5</span> / 5</div>
+
+            <button class="scan-start-btn" onclick="startScan()" id="scan-start-btn">🔍 TARAMAYI BAŞLAT</button>
+            <button class="scan-cancel-btn" onclick="closeScanModal()">İptal</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         🔍 TARAMA İLERLEME EKRANI
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="scan-progress">
+        <div class="scan-radar">
+            <div class="scan-radar-ring"></div>
+            <div class="scan-radar-sweep"></div>
+            <div class="scan-radar-dot"></div>
+        </div>
+        <div class="scan-progress-title">BÖLGE TARANIYOR</div>
+        <div class="scan-progress-sub">Lütfen uygulamayı açık tutun...</div>
+        <div class="scan-progress-bar-wrap">
+            <div class="scan-progress-bar" id="scan-progress-bar"></div>
+        </div>
+        <div class="scan-progress-pct" id="scan-progress-pct">%0</div>
+        <div class="scan-progress-log" id="scan-progress-log">Noktalar hesaplanıyor...</div>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════
@@ -1758,6 +2124,83 @@
             <button class="btn-primary" onclick="showWeeklyModal(event)" id="weekly-btn">📅 7 Günlük Tahmin</button>
             
             <button class="btn-secondary" style="width: 100%; margin-top: 12px;" onclick="saveFavorite()" id="favorite-btn">⭐ Favorilere Kaydet</button>
+
+            <!-- BÖLGE TARAMA BUTONU - HUD içinde -->
+            <button id="hud-scan-btn" onclick="openScanFlow()" style="
+                width: 100%; margin-top: 12px; padding: 12px;
+                background: rgba(0,255,136,0.08);
+                border: 1px solid rgba(0,255,136,0.3);
+                border-radius: var(--radius-md);
+                color: var(--green); font-family: var(--font-display);
+                font-size: 0.85rem; font-weight: 700; cursor: pointer;
+                display: flex; align-items: center; justify-content: center; gap: 8px;
+                transition: all 0.2s;
+            " onmouseover="this.style.background='rgba(0,255,136,0.15)'" onmouseout="this.style.background='rgba(0,255,136,0.08)'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 2"/></svg> Bölgeyi Tara <span id="hud-scan-badge" style="background:rgba(0,255,136,0.2);padding:2px 8px;border-radius:10px;font-size:0.75rem;">5 hak</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         🔍 TARAMA GRUP PANELİ (harita üzerinde)
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="scan-group-panel" style="
+        display:none; position:fixed; bottom:20px; left:12px;
+        z-index:1200; flex-wrap:wrap; gap:6px; max-width:260px;
+        backdrop-filter:blur(10px);
+    "></div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         🗑 TARAMA TEMİZLE ONAY MODALI
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="scan-clear-confirm" style="
+        display:none; position:fixed; inset:0;
+        background:rgba(4,13,26,0.92); z-index:4500;
+        align-items:center; justify-content:center; padding:24px;
+        backdrop-filter:blur(12px);
+    ">
+        <div style="
+            background:var(--bg-panel); border:1px solid var(--border-glow);
+            border-radius:var(--radius-xl); width:100%; max-width:360px; padding:28px 24px;
+            box-shadow:0 20px 60px rgba(0,0,0,0.6);
+        ">
+            <div style="font-size:1.1rem;font-weight:800;color:var(--red);text-align:center;margin-bottom:12px;">🗑 Tarama Pinlerini Temizle</div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);text-align:center;line-height:1.6;margin-bottom:8px;">
+                Haritadaki tüm tarama sonuçları kaldırılacak.
+            </div>
+            <div style="background:rgba(255,213,0,0.08);border:1px solid rgba(255,213,0,0.3);border-radius:var(--radius-md);padding:12px;margin-bottom:20px;font-size:0.78rem;color:var(--yellow);text-align:center;">
+                ⚠️ Temizlemek tarama haklarınızı <strong>geri getirmez</strong>.<br>Haklar gece yarısı otomatik yenilenir.
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button onclick="document.getElementById('scan-clear-confirm').style.display='none'" style="
+                    flex:1;padding:12px;background:transparent;
+                    border:1px solid var(--border-subtle);border-radius:var(--radius-md);
+                    color:var(--text-muted);font-family:var(--font-display);cursor:pointer;
+                ">İptal</button>
+                <button onclick="document.getElementById('scan-clear-confirm').style.display='none';clearAllScanGroups(false);" style="
+                    flex:1;padding:12px;background:rgba(255,71,87,0.15);
+                    border:1px solid var(--red);border-radius:var(--radius-md);
+                    color:var(--red);font-family:var(--font-display);font-weight:700;cursor:pointer;
+                ">Temizle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         🔍 TARAMA SONUÇ MODALI
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div class="modal" id="scan-result-modal" style="z-index:3200;">
+        <div class="modal-header">
+            <button class="modal-back" onclick="closeModal('scan-result-modal')">←</button>
+            <div class="modal-title">🔍 Tarama Sonuçları</div>
+            <button class="modal-close" onclick="closeModal('scan-result-modal')">✕</button>
+        </div>
+        <div style="padding: 16px 20px;">
+            <div id="scan-result-meta" style="font-size:0.75rem; color:var(--text-muted); margin-bottom:14px; text-align:center;"></div>
+            <div id="scan-result-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+            <div style="margin-top:16px; padding:10px 12px; background:rgba(0,255,136,0.05); border:1px solid rgba(0,255,136,0.15); border-radius:var(--radius-md); font-size:0.75rem; color:var(--text-muted);">
+                💡 Bir noktaya tıklayarak tam balık analizi alabilirsiniz.
+            </div>
         </div>
     </div>
 
@@ -1821,6 +2264,19 @@
     <strong id="help-map-label">🗺️ Harita Kullanımı</strong>
     <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
         Haritada istediğiniz noktaya tıklayarak o bölgenin balık avı tahminini alın. Denize tıklamadığınız sürece analiz yapılmaz. Kara parçalarına tıklanırsa "Burası kara parçası" uyarısı verilir.
+    </p>
+</div>
+
+<!-- 🔍 BÖLGE TARAMA - YENİ -->
+<div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--green); margin-top: 10px;">
+    <strong style="color: var(--green);">🔍 Bölge Tarama (PRO)</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px; color: var(--text-muted); line-height: 1.6;">
+        Sağ üstteki <span style="color:var(--green);">🔍</span> butonuna basarak çevrenizi tarayın:<br>
+        <span style="color: var(--cyan);">1.</span> Haritada bir noktaya tıklayın veya GPS konumunuzu kullanın<br>
+        <span style="color: var(--cyan);">2.</span> Yarıçap seçin: 3 km / 5 km / 10 km<br>
+        <span style="color: var(--cyan);">3.</span> İsteğe bağlı balık türü seçin<br>
+        <span style="color: var(--cyan);">4.</span> Tara — ~2 dakika içinde pin'ler haritaya belirir<br>
+        <span style="color: var(--yellow);">⚡ Günlük 5 tarama hakkınız vardır.</span> Aynı bölge 3 saat içinde anında döner.
     </p>
 </div>
 
@@ -3035,7 +3491,7 @@
                 map = L.map('map', {
                     zoomControl: false,
                     attributionControl: false
-                }).setView([38.4237, 27.1428], 10);
+                }).setView([38.5, 35.0], 6);
 
                 // İlk katman: Coğrafi
                 currentTileLayer = L.tileLayer(MAP_LAYERS[0].url, MAP_LAYERS[0].options).addTo(map);
@@ -3225,9 +3681,12 @@
             const userMinute = now.getMinutes().toString().padStart(2, '0');
             
             // Derinlik bilgisi (min 1m)
-            const depthText = data.depth && data.depth.avg !== null 
-                ? `⚓ ${CURRENT_LANG === 'tr' ? 'Derinlik' : 'Depth'}: <span>${Math.max(1, Math.round(data.depth.avg))}m</span>` 
-                : null;
+            const depthText = (() => {
+                if (!data.depth || data.depth.avg === null) return null;
+                const ds = fmtDepth(data.depth.avg);
+                const lbl = CURRENT_LANG === 'tr' ? 'Derinlik' : 'Depth';
+                return `⚓ ${lbl}: <span>${ds}</span>`;
+            })();
             
             const steps = [
                 { text: `📡 ${t('connecting')}: <span>${data.region}</span>`, delay: 0 },
@@ -3296,19 +3755,25 @@
             // Derinlik bilgisini göster (min 1m)
             const depthDisplay = document.getElementById('depth-display');
             if (global.depth && global.depth.avg !== null) {
-                const depthVal = Math.max(1, Math.round(global.depth.avg)); // Min 1m
                 const depthLabel = CURRENT_LANG === 'tr' ? 'Derinlik' : 'Depth';
-                depthDisplay.innerHTML = `⚓ ${depthLabel}: <strong>${depthVal}m</strong>`;
+                const isShallow = global.landReason === 'SHALLOW';
+                const shallowNote = isShallow ? ' <span style="color:var(--yellow);font-size:0.7rem;">⚠️ Sığ</span>' : '';
+                depthDisplay.innerHTML = `⚓ ${depthLabel}: <strong>${fmtDepth(global.depth.avg)}</strong>${shallowNote}`;
                 depthDisplay.style.display = 'block';
             } else {
                 depthDisplay.style.display = 'none';
             }
 
             if (global.isLand) {
-                document.getElementById('score-display').innerHTML = `<span style="font-size: 1.2rem;">🏔️ ${t('land')}</span>`;
-                document.getElementById('score-display').style.color = 'var(--red)';
+                const isCertainLand = global.landReason === 'CERTAIN_LAND';
+                const landIcon = isCertainLand ? '🏔️' : '🌊';
+                const landTitle = isCertainLand ? t('land') : 'Kara veya Sığ Bölge';
+                document.getElementById('score-display').innerHTML = `<span style="font-size: 1.2rem;">${landIcon} ${landTitle}</span>`;
+                document.getElementById('score-display').style.color = isCertainLand ? 'var(--red)' : 'var(--yellow)';
                 document.getElementById('weather-display').innerText = "";
-                const landMsg = global.landReason || t('landMessage');
+                const landMsg = isCertainLand
+                    ? t('landMessage')
+                    : 'Batimetri verisi çok düşük. Bu nokta kara sınırında veya çok sığ olabilir.';
                 document.getElementById('tactic-display').innerText = landMsg;
                 document.getElementById('metrics-grid').innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--text-muted);">${t('noSeaData')}</div>`;
                 document.getElementById('fish-list').innerHTML = `<div style="text-align: center; padding: 30px; color: var(--text-muted);">${t('selectSea')}</div>`;
@@ -3615,7 +4080,7 @@
                             <div style="font-size: 0.7rem; color: var(--cyan); margin-bottom: 4px;">📊 ${CURRENT_LANG === 'tr' ? 'SKOR ANALİZİ' : 'SCORE ANALYSIS'}</div>
                             ${sd.season ? starLine(t('starSeason'), sd.season.stars, sd.season.score, sd.season.max, seasonNote) : ''}
                             ${sd.temp ? starLine(t('starTemp') + ` (${sd.temp.value}°C)`, sd.temp.stars, sd.temp.score, sd.temp.max, tempNote) : ''}
-                            ${sd.depth ? starLine((CURRENT_LANG === 'tr' ? 'Derinlik' : 'Depth') + ` (${Math.round(sd.depth.value)}m / opt:${sd.depth.fishOpt}m)`, sd.depth.stars, sd.depth.score, sd.depth.max, '') : ''}
+                            ${sd.depth ? starLine((CURRENT_LANG === 'tr' ? 'Derinlik' : 'Depth') + ' (' + fmtDepth(sd.depth.value) + ' / opt:' + fmtDepth(sd.depth.fishOpt) + ')', sd.depth.stars, sd.depth.score, sd.depth.max, '') : ''}
                             ${sd.wave ? starLine(t('starWave') + ` (${sd.wave.value}m)`, sd.wave.stars, sd.wave.score, sd.wave.max, '') : ''}
                             ${sd.clarity ? starLine(t('starClarity') + ` (${sd.clarity.value}%)`, sd.clarity.stars, sd.clarity.score, sd.clarity.max, clarNote) : ''}
                             ${sd.wind ? starLine(t('starWind') + ` (${sd.wind.value}km/s ${wdName})`, sd.wind.stars, sd.wind.score, sd.wind.max, windNote) : ''}
@@ -3975,7 +4440,7 @@
                         <div style="font-size:0.72rem; color:var(--cyan); margin-bottom:6px;">📊 SKOR ANALİZİ</div>
                         ${sd.season ? starLine('Mevsim (' + c.season + ')', sd.season.stars, sd.season.score, sd.season.max, seasonNote()) : ''}
                         ${sd.temp ? starLine('Sıcaklık (' + sd.temp.value + '°C / opt:' + f.tempRange.opt + '°C)', sd.temp.stars, sd.temp.score, sd.temp.max, tempNote()) : ''}
-                        ${sd.depth ? starLine('Derinlik (' + Math.round(sd.depth.value) + 'm / opt:' + sd.depth.fishOpt + 'm)', sd.depth.stars, sd.depth.score, sd.depth.max, '') : ''}
+                        ${sd.depth ? starLine('Derinlik (' + fmtDepth(sd.depth.value) + ' / opt:' + fmtDepth(sd.depth.fishOpt) + ')', sd.depth.stars, sd.depth.score, sd.depth.max, '') : ''}
                         ${sd.wave ? starLine('Dalga (' + sd.wave.value + 'm)', sd.wave.stars, sd.wave.score, sd.wave.max, '') : ''}
                         ${sd.clarity ? starLine('Berraklık (' + sd.clarity.value + '%)', sd.clarity.stars, sd.clarity.score, sd.clarity.max, clarityNote()) : ''}
                         ${sd.wind ? starLine('Rüzgar (' + sd.wind.value + 'km/s ' + (c.windDirName || '') + ')', sd.wind.stars, sd.wind.score, sd.wind.max, windNote()) : ''}
@@ -3994,7 +4459,7 @@
 
                 // Koşullar özeti
                 const condHtml = `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border-subtle); font-size:0.72rem; color:var(--text-muted);">
-                    📍 ${c.region} | 🌡️ ${c.tempWater?.toFixed(1)}°C | 🌊 ${c.wave}m | 💨 ${c.windSpeed}km/s ${c.windDirName || ''} | ⚓ ${c.depthAvg ? Math.round(c.depthAvg) + 'm' : 'N/A'} | 🕐 ${c.timeMode} | 📅 ${c.season}
+                    📍 ${c.region} | 🌡️ ${c.tempWater?.toFixed(1)}°C | 🌊 ${c.wave}m | 💨 ${c.windSpeed}km/s ${c.windDirName || ''} | ⚓ ${c.depthAvg ? fmtDepth(c.depthAvg) : 'N/A'} | 🕐 ${c.timeMode} | 📅 ${c.season}
                 </div>`;
 
                 // Bilgi satırı
@@ -4037,6 +4502,16 @@
         // ═══════════════════════════════════════════════════════════════════
         // UTILITY FUNCTIONS
         // ═══════════════════════════════════════════════════════════════════
+
+        // Derinlik formatlayıcı - her yerde tutarlı
+        function fmtDepth(m) {
+            if (m === null || m === undefined) return '—';
+            const v = Math.abs(parseFloat(m));
+            if (v === 0) return '0 m';
+            if (v < 0.1) return v.toFixed(2) + ' m';
+            if (v < 10) return v.toFixed(1) + ' m';
+            return Math.round(v) + ' m';
+        }
 
         function getScoreColor(score) {
             if (score >= 70) return 'var(--green)';
@@ -4190,6 +4665,398 @@
             }
         }
 
+        // ═══════════════════════════════════════════════════════════════════
+        // 🔍 BÖLGE TARAMA SİSTEMİ
+        // ═══════════════════════════════════════════════════════════════════
+
+        let scanRadius = 5;
+        let scanGroups = []; // [{id, label, layers:[], results:[]}]
+        let scanGroupCounter = 0;
+        let scanEventSource = null;
+
+        // Balık listesini scan dropdown'a yükle
+        async function populateScanFishSelect() {
+            const select = document.getElementById('scan-fish-select');
+            if (select.options.length > 1) return; // zaten yüklü
+            try {
+                const list = await loadSpeciesList();
+                list.forEach(f => {
+                    const opt = document.createElement('option');
+                    opt.value = f.key;
+                    opt.textContent = `${f.icon || '🐟'} ${f.name}`;
+                    select.appendChild(opt);
+                });
+            } catch(e) {}
+        }
+
+        async function loadScanUsage() {
+            try {
+                const res = await fetch('/api/scan-usage');
+                const data = await res.json();
+                const rem = data.remainingScans ?? 5;
+                document.getElementById('scan-badge').textContent = rem;
+                document.getElementById('scan-remaining-count').textContent = rem;
+                return rem;
+            } catch(e) { return 5; }
+        }
+
+        function selectRadius(km) {
+            scanRadius = km;
+            document.querySelectorAll('#scan-radius-row .scan-option-btn').forEach(btn => {
+                btn.classList.toggle('selected', btn.textContent.startsWith(km + ' km') || btn.textContent.startsWith(String(km)));
+            });
+        }
+
+        async function openScanFlow() {
+            if (!isPremium) {
+                alert('🔒 Bu özellik MERALOJİ PRO gerektirir.\n\nPRO\'ya yükseltmek için Google Play\'i ziyaret edin.');
+                return;
+            }
+
+            // İlk kullanımda tutorial göster
+            const hasSeenTutorial = localStorage.getItem('meraloji_scan_tutorial_seen');
+            if (!hasSeenTutorial) {
+                document.getElementById('scan-tutorial').style.display = 'flex';
+                return;
+            }
+
+            openScanModal();
+        }
+
+        function closeScanTutorial() {
+            localStorage.setItem('meraloji_scan_tutorial_seen', '1');
+            document.getElementById('scan-tutorial').style.display = 'none';
+            openScanModal();
+        }
+
+        async function openScanModal() {
+            await populateScanFishSelect();
+            await loadScanUsage();
+
+            // Merkez metni güncelle
+            const centerEl = document.getElementById('scan-modal-center-text');
+            if (lastLatLon) {
+                centerEl.textContent = `Merkez: ${parseFloat(lastLatLon.lat).toFixed(4)}, ${parseFloat(lastLatLon.lon).toFixed(4)}`;
+            } else {
+                centerEl.textContent = 'Merkez: Önce haritada bir noktaya tıklayın veya GPS kullanın';
+            }
+
+            document.getElementById('scan-modal').style.display = 'flex';
+        }
+
+        function closeScanModal() {
+            document.getElementById('scan-modal').style.display = 'none';
+        }
+
+        async function startScan() {
+            const rem = await loadScanUsage();
+            if (rem <= 0) {
+                alert('⛔ Günlük 5 tarama hakkınızı kullandınız.\nYarın tekrar deneyin.');
+                closeScanModal();
+                return;
+            }
+
+            // Merkez noktayı belirle
+            let centerLat, centerLon;
+            if (lastLatLon) {
+                centerLat = lastLatLon.lat;
+                centerLon = lastLatLon.lon;
+            } else {
+                // GPS'ten al
+                try {
+                    const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej));
+                    centerLat = pos.coords.latitude.toFixed(4);
+                    centerLon = pos.coords.longitude.toFixed(4);
+                } catch(e) {
+                    alert('Konum bulunamadı. Haritada bir noktaya tıklayın.');
+                    return;
+                }
+            }
+
+            const fishKey = document.getElementById('scan-fish-select').value || null;
+            closeScanModal();
+
+            // Önceki scan pinlerini temizle
+            clearScanPins();
+
+            // Progress ekranını göster
+            document.getElementById('scan-progress').style.display = 'flex';
+            document.getElementById('scan-progress-bar').style.width = '0%';
+            document.getElementById('scan-progress-pct').textContent = '%0';
+            document.getElementById('scan-progress-log').textContent = 'Tarama başlatılıyor...';
+
+            // SSE bağlantısı kur
+            let url = `/api/scan?lat=${centerLat}&lon=${centerLon}&radius=${scanRadius}`;
+            if (fishKey) url += `&fishKey=${fishKey}`;
+
+            // SSE fetch ile (auth token için)
+            const response = await fetch(url, {
+                headers: authToken ? { 'Authorization': 'Bearer ' + authToken } : {}
+            });
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            try {
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ')) continue;
+                        try {
+                            const evt = JSON.parse(line.slice(6));
+                            handleScanEvent(evt, centerLat, centerLon);
+                        } catch(e) {}
+                    }
+                }
+            } catch(e) {
+                document.getElementById('scan-progress').style.display = 'none';
+                alert('Tarama hatası: ' + e.message);
+            }
+        }
+
+        // Aktif tarama grubu
+        let activeGroupId = null;
+
+        function handleScanEvent(evt, centerLat, centerLon) {
+            if (evt.type === 'error') {
+                document.getElementById('scan-progress').style.display = 'none';
+                if (evt.message && evt.message.includes('daily_limit')) {
+                    showScanError('⛔ Günlük tarama limitiniz doldu. Yarın tekrar deneyin.');
+                } else {
+                    showScanError('Tarama hatası: ' + (evt.message || 'Bilinmeyen hata'));
+                }
+                return;
+            }
+
+            if (evt.type === 'start') {
+                // Yeni grup oluştur
+                scanGroupCounter++;
+                const groupColors = ['#00ff88','#00d4ff','#ffd500','#ff9f43','#a29bfe'];
+                const color = groupColors[(scanGroupCounter - 1) % groupColors.length];
+                const fishTag = evt.fishKey ? ` · ${evt.fishKey}` : '';
+                const newGroup = {
+                    id: scanGroupCounter,
+                    label: `Tarama ${scanGroupCounter}${fishTag}`,
+                    color,
+                    layers: [],
+                    results: [],
+                    centerLat, centerLon
+                };
+                scanGroups.push(newGroup);
+                activeGroupId = scanGroupCounter;
+                document.getElementById('scan-progress-log').textContent = `${evt.total} nokta taranacak (${evt.radiusKm} km)...`;
+            }
+
+            if (evt.type === 'progress') {
+                document.getElementById('scan-progress-bar').style.width = evt.pct + '%';
+                document.getElementById('scan-progress-pct').textContent = `%${evt.pct}`;
+                if (evt.lastPoint && evt.lastPoint.score !== null) {
+                    const fishHint = evt.lastPoint.fishName ? ` · ${evt.lastPoint.fishName}` : '';
+                    document.getElementById('scan-progress-log').textContent =
+                        `${evt.done}/${evt.total} nokta tarandı — %${evt.lastPoint.score?.toFixed(1) ?? '—'}${fishHint}`;
+                    if (evt.lastPoint.score > 35) {
+                        addScanPinToGroup(activeGroupId, evt.lastPoint.lat, evt.lastPoint.lon, evt.lastPoint.score, evt.lastPoint.fishName, false);
+                    }
+                }
+            }
+
+            if (evt.type === 'complete') {
+                document.getElementById('scan-progress').style.display = 'none';
+
+                if (!evt.top5 || evt.top5.length === 0) {
+                    showScanError('Bu bölgede yeterli deniz noktası bulunamadı.');
+                    // Boş grubu kaldır
+                    removeScanGroup(activeGroupId);
+                    return;
+                }
+
+                // Aktif gruba top5 pin'lerini ekle (geçici progress pin'lerini temizle)
+                const grp = scanGroups.find(g => g.id === activeGroupId);
+                if (grp) {
+                    grp.layers.forEach(l => map.removeLayer(l));
+                    grp.layers = [];
+                    grp.results = evt.top5;
+                    evt.top5.forEach((pt) => {
+                        addScanPinToGroup(activeGroupId, pt.lat, pt.lon, pt.score, pt.fishName, true);
+                    });
+                }
+
+                updateScanGroupPanel();
+
+                // Badge güncelle
+                const rem = evt.remainingScans ?? 0;
+                document.getElementById('scan-badge').textContent = rem;
+                document.getElementById('scan-remaining-count').textContent = rem;
+                const hudBadge = document.getElementById('hud-scan-badge');
+                if (hudBadge) hudBadge.textContent = rem + ' hak';
+
+                // Haritayı top5'e sığdır
+                const bounds = L.latLngBounds(evt.top5.map(p => [p.lat, p.lon]));
+                map.fitBounds(bounds.pad(0.3));
+
+                // Sonuç modalını göster
+                showScanResultModal(evt);
+            }
+        }
+
+        function showScanError(msg) {
+            // Basit toast benzeri, alert yerine
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#ff4757;color:#fff;padding:12px 20px;border-radius:12px;z-index:9999;font-size:0.85rem;max-width:320px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        function showScanResultModal(evt) {
+            const fromCache = evt.fromCache;
+            const cacheNote = fromCache ? `Önbellekten · ${evt.cacheAge} dk önce hesaplandı` : `Az önce tarandı · ${evt.radiusKm} km yarıçap`;
+            const fishLabel = evt.fishKey ? ` · ${evt.fishKey}` : '';
+
+            document.getElementById('scan-result-meta').innerHTML =
+                `<span style="color:var(--cyan);">${cacheNote}${fishLabel}</span>`;
+
+            const listEl = document.getElementById('scan-result-list');
+            listEl.innerHTML = evt.top5.map((pt, i) => {
+                const color = pt.score >= 55 ? 'var(--green)' : pt.score >= 35 ? 'var(--yellow)' : 'var(--red)';
+                const fishLabel = pt.fishName || '—';
+                return `
+                <div onclick="scanPinClick(${pt.lat}, ${pt.lon})" style="
+                    display:flex; align-items:center; gap:14px;
+                    background:var(--bg-card); border:1px solid var(--border-subtle);
+                    border-radius:var(--radius-md); padding:14px 16px;
+                    cursor:pointer; transition:all 0.2s;
+                " onmouseover="this.style.borderColor='${color}'" onmouseout="this.style.borderColor='var(--border-subtle)'">
+                    <div style="
+                        width:50px; height:50px; min-width:50px;
+                        background:${color}22; border:2px solid ${color};
+                        border-radius:50%; display:flex; flex-direction:column;
+                        align-items:center; justify-content:center;
+                    ">
+                        <div style="font-family:var(--font-mono);font-size:0.9rem;font-weight:800;color:${color};line-height:1;">${pt.score.toFixed(1)}</div>
+                        <div style="font-size:0.5rem;color:${color};opacity:0.7;">%</div>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">${fishLabel}</div>
+                        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">📍 ${pt.lat.toFixed(4)}, ${pt.lon.toFixed(4)}</div>
+                    </div>
+                    <div style="color:var(--text-muted);font-size:1rem;">›</div>
+                </div>`;
+            }).join('');
+
+            openModal('scan-result-modal');
+        }
+
+        function scanPinClick(lat, lon) {
+            closeModal('scan-result-modal');
+            handleMapClick({ latlng: { lat, lng: lon } });
+        }
+
+        function addScanPinToGroup(groupId, lat, lon, score, fishName, isTop) {
+            const grp = scanGroups.find(g => g.id === groupId);
+            const groupColor = grp ? grp.color : '#00ff88';
+            const scoreColor = score >= 55 ? '#00ff88' : score >= 35 ? '#ffd500' : '#ff6b6b';
+            const pinColor = isTop ? groupColor : scoreColor;
+            const size = isTop ? 52 : 32;
+            const label = fishName
+                ? `<div style="font-weight:800;font-size:0.65rem;line-height:1.2;">${score.toFixed(1)}%</div><div style="font-size:0.55rem;line-height:1.1;opacity:0.9;">${fishName.length > 8 ? fishName.slice(0,7)+'.' : fishName}</div>`
+                : `<div style="font-weight:800;font-size:0.72rem;">${score.toFixed(1)}%</div>`;
+
+            const icon = L.divIcon({
+                className: '',
+                html: `<div style="
+                    width:${size}px;height:${size}px;
+                    background:${pinColor};
+                    border-radius:50%;
+                    border:${isTop ? '3px' : '2px'} solid rgba(255,255,255,0.85);
+                    display:flex;flex-direction:column;
+                    align-items:center;justify-content:center;
+                    color:#000;cursor:pointer;
+                    box-shadow:0 0 ${isTop ? '16px' : '6px'} ${pinColor}88, 0 2px 8px rgba(0,0,0,0.5);
+                    text-align:center;
+                ">${label}</div>`,
+                iconSize: [size, size],
+                iconAnchor: [size/2, size/2]
+            });
+
+            const marker = L.marker([lat, lon], { icon }).addTo(map);
+            marker.on('click', () => {
+                handleMapClick({ latlng: { lat, lng: lon } });
+            });
+            if (grp) grp.layers.push(marker);
+        }
+
+        function clearAllScanGroups(silent) {
+            scanGroups.forEach(g => g.layers.forEach(l => map.removeLayer(l)));
+            scanGroups = [];
+            scanGroupCounter = 0;
+            updateScanGroupPanel();
+            if (!silent) {
+                const toast = document.createElement('div');
+                toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--bg-panel);border:1px solid var(--border-glow);color:var(--text-primary);padding:12px 20px;border-radius:12px;z-index:9999;font-size:0.82rem;max-width:320px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+                toast.innerHTML = '🧹 Tarama pinleri temizlendi.<br><span style="color:var(--yellow);font-size:0.75rem;">⚠️ Temizlemek hak iade etmez. Haklar 1 gün sonra yenilenir.</span>';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 4000);
+            }
+        }
+
+        function removeScanGroup(id) {
+            const idx = scanGroups.findIndex(g => g.id === id);
+            if (idx === -1) return;
+            scanGroups[idx].layers.forEach(l => map.removeLayer(l));
+            scanGroups.splice(idx, 1);
+            updateScanGroupPanel();
+            // Uyarı toast
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--bg-panel);border:1px solid var(--border-glow);color:var(--text-primary);padding:12px 20px;border-radius:12px;z-index:9999;font-size:0.82rem;max-width:320px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+            toast.innerHTML = '🧹 Tarama kaldırıldı.<br><span style="color:var(--yellow);font-size:0.75rem;">⚠️ Silmek hak iade etmez. Haklar gece yarısı yenilenir.</span>';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // Eski clearScanPins - sadece tamamlandığında geçici pin temizliği için kullanılıyor
+        function clearScanPins() {
+            // artık grup bazlı yönetiliyor, bu fonksiyon boş
+        }
+
+        function updateScanGroupPanel() {
+            const panel = document.getElementById('scan-group-panel');
+            if (!panel) return;
+            if (scanGroups.length === 0) {
+                panel.style.display = 'none';
+                return;
+            }
+            panel.style.display = 'flex';
+            panel.innerHTML = scanGroups.map(g => `
+                <div style="display:flex;align-items:center;gap:6px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:8px;padding:5px 10px;font-size:0.72rem;cursor:pointer;"
+                     onclick="focusScanGroup(${g.id})">
+                    <span style="color:${g.color};">●</span>
+                    <span style="color:var(--text-secondary);">${g.label}</span>
+                    <span onclick="event.stopPropagation();removeScanGroup(${g.id})" style="color:var(--text-muted);margin-left:4px;font-size:0.8rem;cursor:pointer;">✕</span>
+                </div>
+            `).join('');
+            // Temizle butonu
+            panel.innerHTML += `<div onclick="showClearConfirm()" style="display:flex;align-items:center;gap:4px;background:rgba(255,71,87,0.1);border:1px solid rgba(255,71,87,0.3);border-radius:8px;padding:5px 10px;font-size:0.72rem;cursor:pointer;color:var(--red);">🗑 Temizle</div>`;
+        }
+
+        function focusScanGroup(id) {
+            const g = scanGroups.find(g => g.id === id);
+            if (!g || !g.results.length) return;
+            const bounds = L.latLngBounds(g.results.map(p => [p.lat, p.lon]));
+            map.fitBounds(bounds.pad(0.3));
+        }
+
+        function showClearConfirm() {
+            const modal = document.getElementById('scan-clear-confirm');
+            if (modal) modal.style.display = 'flex';
+        }
+
         function saveFavorite() {
             if (!lastLatLon) return;
             const promptText = CURRENT_LANG === 'tr' ? "Mera adı:" : "Spot name:";
@@ -4286,6 +5153,8 @@ auth.onAuthStateChanged(async (user) => {
         await checkSubscriptionStatus();
         updateUserUI();
         updateAdDisplay();
+        // Scan badge güncelle
+        if (isPremium) { try { await loadScanUsage(); } catch(e) {} }
     } else {
         currentUser = null;
         isPremium = false;
