@@ -2331,13 +2331,20 @@ app.get('/api/forecast', async (req, res) => {
         
         // Batimetri ile hassas kara tespiti
         // bathymetryRaw: negatif = deniz tabanı (derinlik), pozitif = kara (yükseklik), null = belirsiz
+        // Çok sığ eşiği: 0.5m ve altı = kara veya sığ uyarısı
+        const SHALLOW_THRESHOLD = 0.5;
+
         if (!isLand && bathymetryRaw !== null) {
             if (bathymetryRaw > 0) {
                 // Pozitif = deniz seviyesinin üstünde = KESİN KARA
                 isLand = true;
-                landReason = 'Burası kara parçası (yükseklik: +' + bathymetryRaw.toFixed(1) + 'm)';
+                landReason = 'CERTAIN_LAND'; // frontend'e sinyal
+            } else if (Math.abs(bathymetryRaw) <= SHALLOW_THRESHOLD) {
+                // Çok sığ ama veri var — sığ uyarısı ver ama analizi engelleme
+                // isLand = false kalır, sadece landReason set edilir
+                landReason = 'SHALLOW'; // frontend'e sinyal
             }
-            // bathymetryRaw <= 0 = deniz (sığ bile olsa analiz yap)
+            // bathymetryRaw <= -0.5 = normal deniz
         }
         
         if (isLand) {
@@ -2941,6 +2948,305 @@ app.post('/api/verify-subscription', async (req, res) => {
         res.json({ success: true, isPremium: true });
     } catch (error) {
         res.status(500).json({ error: 'Doğrulama hatası' });
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// 🔍 BÖLGE TARAMA ENDPOİNTİ (PRO - Günlük 5 Hak)
+// ═══════════════════════════════════════════════════════════════
+
+// Grid nokta üretici: merkez etrafında km yarıçaplı noktalar
+function generateGridPoints(centerLat, centerLon, radiusKm) {
+    const points = [];
+    const latStep = radiusKm / 111;             // 1 derece lat ≈ 111 km
+    const lonStep = radiusKm / (111 * Math.cos(centerLat * Math.PI / 180));
+    const steps = radiusKm <= 3 ? 2 : radiusKm <= 5 ? 3 : 4; // grid yoğunluğu
+
+    for (let i = -steps; i <= steps; i++) {
+        for (let j = -steps; j <= steps; j++) {
+            const dist = Math.sqrt(i * i + j * j) * (radiusKm / steps);
+            if (dist > radiusKm) continue;
+            const lat = parseFloat((centerLat + i * latStep / steps).toFixed(4));
+            const lon = parseFloat((centerLon + j * lonStep / steps).toFixed(4));
+            points.push({ lat, lon });
+        }
+    }
+    return points;
+}
+
+// Tek nokta için skor hesapla (mevcut forecast mantığından)
+// Merkez nokta için paylaşılan hava/deniz verisi - scan boyunca tek sefer çekilir
+async function fetchCenterWeather(lat, lon) {
+    const latF = parseFloat(lat).toFixed(4);
+    const lonF = parseFloat(lon).toFixed(4);
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain&past_days=1&timezone=auto`;
+    const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=1&timezone=auto`;
+    const [wRes, mRes] = await Promise.all([fetch(weatherUrl), fetch(marineUrl)]);
+    return { weather: await wRes.json(), marine: await mRes.json() };
+}
+
+// Sadece bathymetry çek - her nokta için (kara tespiti + derinlik)
+async function fetchBathymetry(lat, lon) {
+    const latF = parseFloat(lat).toFixed(4);
+    const lonF = parseFloat(lon).toFixed(4);
+    try {
+        const res = await fetch(`https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`);
+        if (!res.ok) return null;
+        const b = await res.json();
+        return b && b.avg !== undefined ? b.avg : null;
+    } catch(e) { return null; }
+}
+
+// Paylaşılan hava verisiyle tek nokta skoru hesapla (API çağrısı yok)
+function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey) {
+    const latF = parseFloat(lat).toFixed(4);
+    const lonF = parseFloat(lon).toFixed(4);
+    const now = new Date();
+    const clickHour = now.getHours();
+    const regionName = getRegion(latF, lonF);
+
+    try {
+        // Kara tespiti: bathymetri pozitifse kesin kara
+        if (bathyRaw !== null && bathyRaw > 0) return null;
+        // Marine veri hiç yoksa kara/iç bölge (sadece null/undefined kontrolü, 0 dalga geçerli)
+        if (!marine.hourly?.wave_height || marine.hourly.wave_height.length === 0) return null;
+
+        const hourlyOffset = 24;
+        const hourlyIdx = hourlyOffset + clickHour;
+        const rawWaterTemp = marine.hourly?.sea_surface_temperature?.[hourlyIdx];
+        const tempWater = safeWaterTemp(rawWaterTemp, regionName, now.getMonth());
+        const wave = safeNum(marine.hourly?.wave_height?.[hourlyIdx]);
+        const windSpeed = safeNum(weather.hourly?.wind_speed_10m?.[hourlyIdx]);
+        const windDir = safeNum(weather.daily?.wind_direction_10m_dominant?.[1]);
+        const pressure = safeNum(weather.hourly?.surface_pressure?.[hourlyIdx], 1013);
+        const rain = safeNum(weather.hourly?.rain?.[hourlyIdx]);
+        const clarity = calculateClarity(wave, windSpeed, rain);
+        const currentEst = estimateCurrent(wave, windSpeed, regionName);
+        const depthAvg = bathyRaw !== null ? Math.abs(bathyRaw) : null;
+        const sunTimes = SunCalc.getTimes(now, latF, lonF);
+        const timeMode = getTimeOfDay(clickHour, sunTimes);
+        const solunar = getSolunarWindow(now, latF, lonF);
+        const moon = SunCalc.getMoonIllumination(now);
+
+        const params = {
+            tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
+            timeMode, solunar, region: regionName, targetDate: now, isInstant: false,
+            currentSpeed: currentEst, pressureTrend: null, moonPhase: moon.phase,
+            lat: parseFloat(latF), lon: parseFloat(lonF), depthAvg, hour: clickHour
+        };
+
+        // Günlük ağırlıklı skor için activityWindows ve hourlyStartIdx
+        const activityWindows = calculateActivityWindows(now, parseFloat(latF), parseFloat(lonF));
+        const hourlyStartIdx = 24; // today = past_days=1 offset
+
+        if (!fishKey) {
+            let topScore = 0;
+            let topFishName = '';
+            for (const [key, fish] of Object.entries(SPECIES_DB)) {
+                if (!fish.regions.includes(regionName) && regionName !== 'AÇIK DENİZ') continue;
+                try {
+                    const dailyResult = calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx);
+                    const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
+                    if (score > topScore) {
+                        topScore = score;
+                        topFishName = fish.name;
+                    }
+                } catch (e) {}
+            }
+            return { score: topScore, fishName: topFishName };
+        } else {
+            const fish = SPECIES_DB[fishKey];
+            if (!fish) return null;
+            if (!fish.regions.includes(regionName) && regionName !== 'AÇIK DENİZ') return null;
+            try {
+                const dailyResult = calculateWeightedDailyScore(fish, fishKey, params, weather, marine, activityWindows, hourlyStartIdx);
+                return { score: (dailyResult && dailyResult.score) ? dailyResult.score : 0, fishName: fish.name };
+            } catch(e) {
+                const r = calculateFishScore(fish, fishKey, params);
+                return { score: r.finalScore, fishName: fish.name };
+            }
+        }
+    } catch(e) {
+        console.log('[SCAN-SCORE] Error:', e.message);
+        return null;
+    }
+}
+
+app.get('/api/scan', async (req, res) => {
+    if (!req.isPremium) {
+        return res.status(403).json({ error: 'pro_required', message: 'Bu özellik MERALOJİ PRO gerektirir.' });
+    }
+    if (!req.user) {
+        return res.status(401).json({ error: 'auth_required' });
+    }
+
+    const { lat, lon, radius, fishKey } = req.query;
+    if (!lat || !lon) return res.status(400).json({ error: 'lat ve lon gerekli' });
+
+    const centerLat = parseFloat(lat);
+    const centerLon = parseFloat(lon);
+    const radiusKm = Math.min(20, Math.max(3, parseFloat(radius) || 5));
+    const uid = req.user.uid;
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+    try {
+        // ── Günlük limit kontrolü ──
+        const usageRef = db ? db.collection('scanUsage').doc(`${uid}_${today}`) : null;
+        if (usageRef) {
+            const usageDoc = await usageRef.get();
+            const usageCount = usageDoc.exists ? (usageDoc.data().count || 0) : 0;
+            if (usageCount >= 5) {
+                return res.status(429).json({
+                    error: 'daily_limit',
+                    message: 'Günlük 5 tarama hakkınızı kullandınız. Yarın tekrar deneyin.',
+                    remainingScans: 0
+                });
+            }
+        }
+
+        // ── 3 saatlik cache kontrolü ──
+        const fishTag = fishKey || 'all';
+        const cacheKey = `scan_${centerLat.toFixed(2)}_${centerLon.toFixed(2)}_${radiusKm}_${fishTag}`;
+        
+        if (db) {
+            const cacheRef = db.collection('scanCache').doc(cacheKey);
+            const cached = await cacheRef.get();
+            if (cached.exists) {
+                const d = cached.data();
+                const ageMs = Date.now() - d.createdAt;
+                if (ageMs < 3 * 60 * 60 * 1000) { // 3 saat
+                    // Cache hit → kullanım sayacını artır
+                    if (usageRef) {
+                        await usageRef.set({ count: (await usageRef.get()).exists ? (await usageRef.get()).data().count + 1 : 1, uid, date: today }, { merge: true });
+                    }
+                    const usageDoc2 = usageRef ? await usageRef.get() : null;
+                    const newCount = usageDoc2 && usageDoc2.exists ? usageDoc2.data().count : 1;
+                    return res.json({ ...d.result, fromCache: true, cacheAge: Math.round(ageMs / 60000), remainingScans: 5 - newCount });
+                }
+            }
+        }
+
+        // ── Kullanım sayacını artır (işlem başlamadan önce) ──
+        if (usageRef) {
+            const currentDoc = await usageRef.get();
+            const currentCount = currentDoc.exists ? (currentDoc.data().count || 0) : 0;
+            await usageRef.set({ count: currentCount + 1, uid, date: today }, { merge: true });
+        }
+
+        // ── SSE ile streaming yanıt ──
+        res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no'
+        });
+
+        const sendEvent = (data) => {
+            res.write(`data: ${JSON.stringify(data)}\n\n`);
+        };
+
+        const gridPoints = generateGridPoints(centerLat, centerLon, radiusKm);
+        const total = gridPoints.length;
+        const results = [];
+        // Gecikme: bathymetry API'si için nokta başına ~2 sn yeterli
+        const DELAY_MS = Math.ceil((total * 2000) / total);
+
+        sendEvent({ type: 'start', total, radiusKm, fishKey: fishKey || null });
+        if (res.flush) res.flush();
+
+        // Merkez noktanın hava/deniz verisini bir kere çek
+        let centerWeather, centerMarine;
+        try {
+            sendEvent({ type: 'progress', pct: 0, done: 0, total, lastPoint: null, status: 'Hava verisi alınıyor...' });
+            if (res.flush) res.flush();
+            const wd = await fetchCenterWeather(centerLat, centerLon);
+            centerWeather = wd.weather;
+            centerMarine = wd.marine;
+        } catch(e) {
+            sendEvent({ type: 'error', message: 'Hava verisi alınamadı: ' + e.message });
+            res.end();
+            return;
+        }
+
+        for (let i = 0; i < gridPoints.length; i++) {
+            const pt = gridPoints[i];
+
+            // Bathymetry: her nokta için ayrı çek (kara tespiti)
+            let bathyRaw = null;
+            try {
+                bathyRaw = await fetchBathymetry(pt.lat, pt.lon);
+            } catch(e) {}
+
+            await new Promise(r => setTimeout(r, DELAY_MS));
+
+            let result = null;
+            try {
+                result = calcPointScoreFromWeather(pt.lat, pt.lon, centerWeather, centerMarine, bathyRaw, fishKey || null);
+            } catch(e) {
+                console.log('[SCAN] Point error:', pt.lat, pt.lon, e.message);
+            }
+
+            const score = result ? result.score : null;
+            const fishName = result ? result.fishName : null;
+
+            if (score !== null && score > 5) {
+                results.push({ lat: pt.lat, lon: pt.lon, score: parseFloat(score.toFixed(1)), fishName });
+            }
+
+            const pct = Math.round(((i + 1) / total) * 100);
+            sendEvent({ type: 'progress', pct, done: i + 1, total, lastPoint: { lat: pt.lat, lon: pt.lon, score, fishName } });
+            if (res.flush) res.flush();
+        }
+
+        // En yüksek 5 nokta
+        const top5 = results.sort((a, b) => b.score - a.score).slice(0, 5);
+
+        // Kalan hak hesapla
+        let remainingScans = 4;
+        if (db && usageRef) {
+            const finalDoc = await usageRef.get();
+            remainingScans = Math.max(0, 5 - (finalDoc.exists ? finalDoc.data().count : 1));
+        }
+
+        const scanResult = {
+            top5,
+            all: results,
+            center: { lat: centerLat, lon: centerLon },
+            radiusKm,
+            fishKey: fishKey || null,
+            scannedAt: Date.now(),
+            remainingScans
+        };
+
+        // 3 saatlik cache'e kaydet
+        if (db) {
+            await db.collection('scanCache').doc(cacheKey).set({
+                result: scanResult,
+                createdAt: Date.now()
+            });
+        }
+
+        sendEvent({ type: 'complete', ...scanResult });
+        res.end();
+
+    } catch (error) {
+        console.error('[SCAN] Error:', error.message);
+        try { res.write(`data: ${JSON.stringify({ type: 'error', message: error.message })}\n\n`); res.end(); } catch (e) {}
+    }
+});
+
+// Kalan tarama hakkını sorgula
+app.get('/api/scan-usage', async (req, res) => {
+    if (!req.user) return res.json({ remainingScans: 0 });
+    const uid = req.user.uid;
+    const today = new Date().toISOString().split('T')[0];
+    try {
+        if (!db) return res.json({ remainingScans: 5 });
+        const usageDoc = await db.collection('scanUsage').doc(`${uid}_${today}`).get();
+        const count = usageDoc.exists ? (usageDoc.data().count || 0) : 0;
+        res.json({ remainingScans: Math.max(0, 5 - count), usedToday: count });
+    } catch (e) {
+        res.json({ remainingScans: 5, usedToday: 0 });
     }
 });
 
