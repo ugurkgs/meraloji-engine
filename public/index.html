@@ -1628,8 +1628,8 @@
         .scan-btn {
             width: 48px;
             height: 48px;
-            background: #000000;
-	    border: 1px solid #ff4757;
+            background: rgba(0, 255, 136, 0.08);
+            border: 1px solid rgba(0, 255, 136, 0.4);
             border-radius: var(--radius-md);
             color: var(--green);
             font-size: 1.2rem;
@@ -1641,10 +1641,11 @@
             transition: all 0.2s;
             flex-shrink: 0;
             position: relative;
-box-shadow: 0 0 10px rgba(255,71,87,0.3);        }
+            box-shadow: 0 0 12px rgba(0,255,136,0.15), inset 0 0 12px rgba(0,255,136,0.05);
+        }
         .scan-btn:hover {
-            border-color: #ffd500;
-background: #111111;
+            border-color: var(--green);
+            background: rgba(0,255,136,0.15);
             box-shadow: 0 0 24px rgba(0,255,136,0.35), inset 0 0 16px rgba(0,255,136,0.1);
         }
         .scan-btn.active { background: var(--green); color: var(--bg-deep); border-color: var(--green); }
@@ -1652,7 +1653,7 @@ background: #111111;
         .scan-sweep-line {
             transform-origin: 12px 12px;
             animation: radarSweep 2.4s linear infinite;
-stroke: var(--green);
+            stroke: var(--green);
             opacity: 0.9;
         }
         .scan-sweep-dot {
@@ -1677,7 +1678,7 @@ stroke: var(--green);
 
         /* Scan Modal */
         #scan-modal {
-            position: fixed; inset: 0; background: rgba(4,13,26,1);
+            position: fixed; inset: 0; background: rgba(4,13,26,0.92);
             z-index: 3000; display: none; flex-direction: column;
             align-items: center; justify-content: center;
             backdrop-filter: blur(12px); padding: 20px;
@@ -2034,6 +2035,16 @@ stroke: var(--green);
         </div>
         <div class="scan-progress-pct" id="scan-progress-pct">%0</div>
         <div class="scan-progress-log" id="scan-progress-log">Noktalar hesaplanıyor...</div>
+        <button onclick="stopScan()" style="
+            margin-top: 20px; padding: 10px 28px;
+            background: transparent; border: 1px solid var(--red);
+            border-radius: var(--radius-md); color: var(--red);
+            font-family: var(--font-display); font-size: 0.82rem;
+            font-weight: 700; cursor: pointer; letter-spacing: 0.05em;
+            transition: all 0.2s;
+        " onmouseover="this.style.background='rgba(255,71,87,0.12)'" onmouseout="this.style.background='transparent'">
+            ■ TARAMAYI DURDUR
+        </button>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════
@@ -3478,6 +3489,8 @@ stroke: var(--green);
             initMap();
             initSearch();
             loadFavorites();
+            // Önceki tarama verilerini yükle (sayfa yenileme sonrası)
+            setTimeout(() => loadScanGroupsFromStorage(), 500);
 
             // Splash timeout
             setTimeout(() => {
@@ -4503,6 +4516,44 @@ stroke: var(--green);
         // UTILITY FUNCTIONS
         // ═══════════════════════════════════════════════════════════════════
 
+        // ── Tarama verilerini localStorage'a kaydet/yükle ──
+        function saveScanGroupsToStorage() {
+            try {
+                // layers haritaya özgü, sadece results ve meta kaydet
+                const toSave = scanGroups.map(g => ({
+                    id: g.id,
+                    label: g.label,
+                    color: g.color,
+                    results: g.results,
+                    centerLat: g.centerLat,
+                    centerLon: g.centerLon
+                }));
+                localStorage.setItem('meraloji_scan_groups', JSON.stringify(toSave));
+                localStorage.setItem('meraloji_scan_counter', String(scanGroupCounter));
+            } catch(e) {}
+        }
+
+        function loadScanGroupsFromStorage() {
+            try {
+                const raw = localStorage.getItem('meraloji_scan_groups');
+                const counter = parseInt(localStorage.getItem('meraloji_scan_counter') || '0');
+                if (!raw) return;
+                const saved = JSON.parse(raw);
+                if (!Array.isArray(saved) || saved.length === 0) return;
+                scanGroupCounter = counter;
+                saved.forEach(g => {
+                    if (!g.results || g.results.length === 0) return;
+                    const group = { id: g.id, label: g.label, color: g.color, results: g.results, layers: [], centerLat: g.centerLat, centerLon: g.centerLon };
+                    scanGroups.push(group);
+                    // Pin'leri haritaya yeniden ekle
+                    g.results.forEach(pt => {
+                        addScanPinToGroup(g.id, pt.lat, pt.lon, pt.score, pt.fishName, true);
+                    });
+                });
+                if (scanGroups.length > 0) updateScanGroupPanel();
+            } catch(e) {}
+        }
+
         // Derinlik formatlayıcı - her yerde tutarlı
         function fmtDepth(m) {
             if (m === null || m === undefined) return '—';
@@ -4673,6 +4724,7 @@ stroke: var(--green);
         let scanGroups = []; // [{id, label, layers:[], results:[]}]
         let scanGroupCounter = 0;
         let scanEventSource = null;
+        let scanAbortController = null;
 
         // Balık listesini scan dropdown'a yükle
         async function populateScanFishSelect() {
@@ -4789,10 +4841,21 @@ stroke: var(--green);
             let url = `/api/scan?lat=${centerLat}&lon=${centerLon}&radius=${scanRadius}`;
             if (fishKey) url += `&fishKey=${fishKey}`;
 
-            // SSE fetch ile (auth token için)
-            const response = await fetch(url, {
-                headers: authToken ? { 'Authorization': 'Bearer ' + authToken } : {}
-            });
+            // Abort controller — durdur butonuna bağlanır
+            scanAbortController = new AbortController();
+
+            let response;
+            try {
+                response = await fetch(url, {
+                    headers: authToken ? { 'Authorization': 'Bearer ' + authToken } : {},
+                    signal: scanAbortController.signal
+                });
+            } catch(e) {
+                document.getElementById('scan-progress').style.display = 'none';
+                if (e.name !== 'AbortError') showScanError('Bağlantı hatası: ' + e.message);
+                return;
+            }
+
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let buffer = '';
@@ -4816,8 +4879,24 @@ stroke: var(--green);
                 }
             } catch(e) {
                 document.getElementById('scan-progress').style.display = 'none';
-                alert('Tarama hatası: ' + e.message);
+                if (e.name !== 'AbortError') showScanError('Tarama hatası: ' + e.message);
+            } finally {
+                scanAbortController = null;
             }
+        }
+
+        function stopScan() {
+            if (scanAbortController) {
+                scanAbortController.abort();
+                scanAbortController = null;
+            }
+            document.getElementById('scan-progress').style.display = 'none';
+            // Yarım kalan grubu kaldır
+            if (activeGroupId !== null) {
+                removeScanGroup(activeGroupId);
+                activeGroupId = null;
+            }
+            showScanError('Tarama durduruldu.');
         }
 
         // Aktif tarama grubu
@@ -4888,6 +4967,7 @@ stroke: var(--green);
                 }
 
                 updateScanGroupPanel();
+                saveScanGroupsToStorage(); // localStorage'a kaydet
 
                 // Badge güncelle
                 const rem = evt.remainingScans ?? 0;
@@ -4997,6 +5077,7 @@ stroke: var(--green);
             scanGroups = [];
             scanGroupCounter = 0;
             updateScanGroupPanel();
+            saveScanGroupsToStorage();
             if (!silent) {
                 const toast = document.createElement('div');
                 toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--bg-panel);border:1px solid var(--border-glow);color:var(--text-primary);padding:12px 20px;border-radius:12px;z-index:9999;font-size:0.82rem;max-width:320px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
@@ -5012,6 +5093,7 @@ stroke: var(--green);
             scanGroups[idx].layers.forEach(l => map.removeLayer(l));
             scanGroups.splice(idx, 1);
             updateScanGroupPanel();
+            saveScanGroupsToStorage();
             // Uyarı toast
             const toast = document.createElement('div');
             toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--bg-panel);border:1px solid var(--border-glow);color:var(--text-primary);padding:12px 20px;border-radius:12px;z-index:9999;font-size:0.82rem;max-width:320px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
