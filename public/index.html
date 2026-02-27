@@ -1626,39 +1626,57 @@
            🔍 BÖLGE TARAMA (SCAN) STİLLERİ
            ═══════════════════════════════════════════════════════════════════ */
         .scan-btn {
-            width: 48px;
-            height: 48px;
-            background: rgba(0, 255, 136, 0.08);
-            border: 1px solid rgba(0, 255, 136, 0.4);
+            width: 52px;
+            height: 52px;
+            background: #000000;
+            border: 2px solid #ff4757;
             border-radius: var(--radius-md);
-            color: var(--green);
+            color: #00ff88;
             font-size: 1.2rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(20px);
             transition: all 0.2s;
             flex-shrink: 0;
             position: relative;
-            box-shadow: 0 0 12px rgba(0,255,136,0.15), inset 0 0 12px rgba(0,255,136,0.05);
+            overflow: hidden;
+            box-shadow: 0 0 14px rgba(255,71,87,0.4), inset 0 0 10px rgba(0,255,136,0.06);
         }
         .scan-btn:hover {
-            border-color: var(--green);
-            background: rgba(0,255,136,0.15);
-            box-shadow: 0 0 24px rgba(0,255,136,0.35), inset 0 0 16px rgba(0,255,136,0.1);
+            box-shadow: 0 0 22px rgba(255,71,87,0.65), inset 0 0 16px rgba(0,255,136,0.12);
+            border-color: #ff6b78;
         }
-        .scan-btn.active { background: var(--green); color: var(--bg-deep); border-color: var(--green); }
-        .scan-radar-icon { overflow: visible; }
+        .scan-btn.active { background: #000; }
+
+        /* Dikey tarama çubuğu — sağdan sola gidip gelir */
+        .scan-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 6px;
+            background: linear-gradient(to right, transparent, rgba(0,255,136,0.7), transparent);
+            animation: scanBeam 1.8s ease-in-out infinite;
+            filter: blur(1px);
+        }
+        @keyframes scanBeam {
+            0%   { left: -6px; }
+            50%  { left: calc(100% + 6px); }
+            100% { left: -6px; }
+        }
+
+        /* Radar iğnesi */
+        .scan-radar-icon { overflow: visible; position: relative; z-index: 1; }
         .scan-sweep-line {
             transform-origin: 12px 12px;
             animation: radarSweep 2.4s linear infinite;
-            stroke: var(--green);
-            opacity: 0.9;
+            stroke: #00ff88;
+            opacity: 1;
         }
         .scan-sweep-dot {
             transform-origin: 12px 12px;
             animation: radarSweep 2.4s linear infinite;
+            fill: #00ff88;
         }
         @keyframes radarSweep {
             from { transform: rotate(0deg); }
@@ -1666,14 +1684,15 @@
         }
         .scan-badge {
             position: absolute;
-            top: -4px; right: -4px;
+            top: -5px; right: -5px;
             background: var(--yellow);
-            color: var(--bg-deep);
+            color: #000;
             font-size: 0.55rem;
             font-weight: 800;
-            padding: 1px 4px;
+            padding: 2px 5px;
             border-radius: 6px;
             font-family: var(--font-mono);
+            z-index: 2;
         }
 
         /* Scan Modal */
@@ -1946,12 +1965,12 @@
         </div>
         <button class="btn-icon" id="locate-btn" onclick="locateMe()" title="Konumum">🎯</button>
         <button class="scan-btn" id="scan-btn" onclick="openScanFlow()" title="Bölge Tarama (PRO)">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="scan-radar-icon">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 2" opacity="0.5"/>
-                <circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2" opacity="0.75"/>
-                <circle cx="12" cy="12" r="2" fill="currentColor"/>
-                <line x1="12" y1="12" x2="12" y2="2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" class="scan-sweep-line"/>
-                <circle cx="12" cy="4" r="1.2" fill="currentColor" opacity="0.9" class="scan-sweep-dot"/>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="scan-radar-icon">
+                <circle cx="12" cy="12" r="10" stroke="#00ff88" stroke-width="1.2" stroke-dasharray="4 2" opacity="0.4"/>
+                <circle cx="12" cy="12" r="6" stroke="#00ff88" stroke-width="1.2" stroke-dasharray="3 2" opacity="0.65"/>
+                <circle cx="12" cy="12" r="2.2" fill="#00ff88"/>
+                <line x1="12" y1="12" x2="12" y2="2" stroke="#00ff88" stroke-width="2" stroke-linecap="round" class="scan-sweep-line"/>
+                <circle cx="12" cy="3" r="1.5" class="scan-sweep-dot"/>
             </svg>
             <span class="scan-badge" id="scan-badge">5</span>
         </button>
