@@ -2599,8 +2599,8 @@ app.get('/api/forecast', async (req, res) => {
             let tacticData = null;
             
             // 85+ skor alan balıkları bul
-            const highScoreFish = fishList.filter(f => f.score >= 85 && f.category !== "TİCARİ");
-            const mediumScoreFish = fishList.filter(f => f.score >= 60 && f.score < 85 && f.category !== "TİCARİ");
+            const highScoreFish = fishList.filter(f => f.score >= 75 && f.category !== "TİCARİ");
+            const mediumScoreFish = fishList.filter(f => f.score >= 55 && f.score < 75 && f.category !== "TİCARİ");
             const topScore = fishList.length > 0 ? fishList[0].score : 0;
             
             if (isLand) {
@@ -2733,8 +2733,8 @@ app.get('/api/forecast', async (req, res) => {
             let instantTacticKey = "";
             let instantTacticData = null;
             
-            const i_highScoreFish = instantFishList.filter(f => f.score >= 85 && f.category !== "TİCARİ");
-            const i_mediumScoreFish = instantFishList.filter(f => f.score >= 60 && f.score < 85 && f.category !== "TİCARİ");
+            const i_highScoreFish = instantFishList.filter(f => f.score >= 75 && f.category !== "TİCARİ");
+            const i_mediumScoreFish = instantFishList.filter(f => f.score >= 55 && f.score < 75 && f.category !== "TİCARİ");
             const i_topScore = instantFishList.length > 0 ? instantFishList[0].score : 0;
             
             if (i_wave > 2.0) {
