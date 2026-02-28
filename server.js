@@ -2075,18 +2075,19 @@ function calculateFishScore(fish, key, params) {
     // Koruma altındaki türler için skor her zaman 0
     if (fish.protected === true) {
         return {
-            score: 0,
+            finalScore: 0,          // calculateWeightedDailyScore / 3HourWindow için
+            score: 0,               // direkt erişim için
             name: fish.name, nameEn: fish.nameEn, icon: fish.icon,
             scientificName: fish.scientificName, photoId: fish.photoId,
             category: fish.category, regions: fish.regions,
-            peakHoursDesc: fish.peakHoursDesc,
+            peakHours: fish.peakHours, peakHoursDesc: fish.peakHoursDesc,
             legalSize: fish.legalSize,
             note: fish.note,
             bait: "-", lure: "-", rig: "-", hook: "-",
             method: "-",
             penalties: ["🚫 AVLANMASI YASAKTIR — Koruma Altında Tür"],
             activeTriggers: [], scoreDetails: {},
-            reason: "🚫 Bu tür Türkiye'de avlanması kesinlikle yasak olan koruma altındaki bir türdür."
+            reason: "🚫 Türkiye'de avlanması kesinlikle yasak — Koruma altında tür (6/2 Tebliğ)."
         };
     }
     const {
@@ -2905,6 +2906,8 @@ app.get('/api/fish-search', async (req, res) => {
             pressureTrend = calculatePressureTrend(hourlyPressure.slice(startIdx, currentPressureIdx + 1));
         }
 
+        const salinity = getSalinity(regionName);  // baseParams'tan önce tanımlanmalı
+
         const baseParams = {
             tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
             timeMode, solunar, region: regionName, targetDate: now, isInstant: true,
@@ -2981,8 +2984,7 @@ app.get('/api/fish-search', async (req, res) => {
             reasons.push({ type: 'INFO', text: `Toplam skor (%${result.finalScore.toFixed(1)}) listeleme eşiğinin (%15) altında` });
         }
 
-        // Tuzluluk ve gelgit
-        const salinity = getSalinity(regionName);
+        // Gelgit
         const tide = SunCalc.getMoonPosition(now, parseFloat(latF), parseFloat(lonF));
         const tideFlow = Math.abs(Math.sin(tide.altitude)) * 1.5;
 
