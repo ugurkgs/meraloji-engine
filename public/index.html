@@ -4082,18 +4082,23 @@
                     const wdNames = ['K','KKD','KD','DKD','D','DGD','GD','GGD','G','GGB','GB','BGB','B','BKB','KB','KKB'];
                     const wdName = wdNames[Math.round(windDirDeg / 22.5) % 16] || '';
 
-                    // Basınç yıldız
-                    const pressStars = pressTrend === 'FALLING_FAST' ? 5 : pressTrend === 'FALLING' ? 4 : pressTrend === 'STABLE' ? 3 : pressTrend === 'RISING' ? 2 : 1;
+                    // Basınç yıldız — sd.pressure varsa oradan al
+                    const pressStars = sd.pressure ? sd.pressure.stars : (pressTrend === 'FALLING_FAST' ? 5 : pressTrend === 'FALLING' ? 4 : pressTrend === 'STABLE' ? 3 : pressTrend === 'RISING' ? 2 : 1);
                     const pressTrendTR = pressTrend === 'FALLING_FAST' ? '⚡ Hızlı Düşüş' : pressTrend === 'FALLING' ? '↘ Düşüyor' : pressTrend === 'RISING_FAST' ? '⬆ Hızlı Artış' : pressTrend === 'RISING' ? '↗ Yükseliyor' : '→ Stabil';
                     const pressNote = pressTrend === 'RISING_FAST' ? 'Hızlı basınç artışı — balıklar pasifleşir' : pressTrend === 'RISING' ? 'Basınç yükseliyor — beslenme yavaşlar' : '';
+                    const pressPts = pressStars; // 5 üzerinden
+                    const pressMax = 5;
 
-                    // Akıntı yıldız
-                    const fishCurPref = 0.5; // Varsayılan
-                    const curStars = currentSpd > 0.5 ? 4 : currentSpd > 0.3 ? 3 : currentSpd > 0.1 ? 3 : 2;
-                    const curNote = currentSpd < 0.1 ? 'Durgun su — akıntı seven türler pasifleşir' : '';
+                    // Akıntı — sd.current varsa server'dan al (türe özel pref ile hesaplanmış)
+                    const curStars = sd.current ? sd.current.stars : (currentSpd > 0.5 ? 4 : currentSpd > 0.3 ? 3 : currentSpd > 0.1 ? 3 : 2);
+                    const curPts = sd.current ? sd.current.score : '';
+                    const curMax = sd.current ? sd.current.max : '';
+                    const curNote = currentSpd < 0.1 ? 'Durgun su — akıntı seven türler pasifleşir' : (sd.current?.pref <= 0.3 && currentSpd > 0.8 ? 'Bu tür durgun su tercih eder' : '');
 
-                    // Gelgit yıldız
+                    // Gelgit yıldız + puan (5 üzerinden)
                     const tideStars = (tideVal > 0.8 && tideVal < 1.3) ? 5 : tideVal > 0.5 ? 4 : tideVal > 0.3 ? 3 : 2;
+                    const tidePts = parseFloat((tideStars).toFixed(1));
+                    const tideMax = 5;
                     const tideNote = tideVal < 0.3 ? 'Zayıf gelgit — gelgite bağlı türler hareketsizleşir' : '';
 
                     // Rüzgar notu (düşük yıldızda)
@@ -4125,9 +4130,9 @@
                             ${sd.wind ? starLine(t('starWind') + ` (${sd.wind.value}km/s ${wdName})`, sd.wind.stars, sd.wind.score, sd.wind.max, windNote) : ''}
                             ${sd.activity ? starLine(t('starActivity'), sd.activity.stars, sd.activity.score, sd.activity.max, '') : ''}
                             ${sd.region ? starLine(CURRENT_LANG === 'tr' ? 'Bölge' : 'Region', sd.region.stars, sd.region.score, sd.region.max, '') : ''}
-                            ${starLine('Basınç (' + pressure + ' hPa ' + pressTrendTR + ')', pressStars, '', '', pressNote)}
-                            ${starLine('Akıntı (' + currentSpd.toFixed(1) + ' kn)', curStars, '', '', curNote)}
-                            ${starLine('Gelgit (' + tideVal.toFixed(1) + ')', tideStars, '', '', tideNote)}
+                            ${starLine('Basınç (' + pressure + ' hPa / ' + pressTrendTR + ')', pressStars, pressPts, pressMax, pressNote)}
+                            ${starLine('Akıntı (' + currentSpd.toFixed(1) + ' kn / opt:' + (sd.current?.pref !== undefined ? (sd.current.pref * 1.5).toFixed(1) : '0.5') + ' kn)', curStars, curPts, curMax, curNote)}
+                            ${starLine('Gelgit (' + tideVal.toFixed(1) + ' / opt:0.8-1.3)', tideStars, tidePts, tideMax, tideNote)}
                             ${salinityVal ? `<div style="font-size:0.68rem; color:var(--text-muted); margin-top:4px;">🧂 Tuzluluk: ‰${salinityVal}</div>` : ''}
                             ${sd.midday ? `<div style="color: var(--yellow); font-size: 0.7rem; margin-top: 4px;">☀️ Öğlen bastırması: ×${sd.midday.penalty.toFixed(2)}</div>` : ''}
                             ${sd.volatility ? `<div style="color: var(--cyan); font-size: 0.7rem; margin-top: 4px;">🐟 Sürü faktörü: ×${sd.volatility.multiplier}</div>` : ''}
@@ -4492,8 +4497,8 @@
                         ${sd.activity ? starLine('Aktivite (' + sd.activity.timeMode + ')', sd.activity.stars, sd.activity.score, sd.activity.max, '') : ''}
                         ${sd.region ? starLine('Bölge', sd.region.stars, sd.region.score, sd.region.max, '') : ''}
                         ${starLine('Basınç (' + c.pressure + ' hPa ' + pressTrendTR() + ')', pressStars(), '', '', pressNote())}
-                        ${starLine('Akıntı (' + (c.currentSpeed || 0).toFixed(1) + ' kn)', currentStars(), '', '', currentNote())}
-                        ${starLine('Gelgit (' + (c.tideFlow || 0).toFixed(1) + ')', tideStars(), '', '', tideNote())}
+                        ${starLine('Akıntı (' + (c.currentSpeed || 0).toFixed(1) + ' kn / opt:' + (sd.current?.pref !== undefined ? (sd.current.pref * 1.5).toFixed(1) : '0.5') + ' kn)', currentStars(), sd.current ? sd.current.score : '', sd.current ? sd.current.max : '', currentNote())}
+                        ${starLine('Gelgit (' + (c.tideFlow || 0).toFixed(1) + ' / opt:0.8-1.3)', tideStars(), tideStars(), 5, tideNote())}
                         ${c.salinity ? `<div style="font-size:0.68rem; color:var(--text-muted); margin-top:4px;">🧂 Tuzluluk: ‰${c.salinity} (${c.region})</div>` : ''}
                         ${sd.midday ? '<div style="color:var(--yellow);font-size:0.7rem;margin-top:4px;">☀️ Öğlen bastırması: ×' + sd.midday.penalty.toFixed(2) + '</div>' : ''}
                         ${sd.volatility ? '<div style="color:var(--cyan);font-size:0.7rem;margin-top:4px;">🐟 Sürü faktörü: ×' + sd.volatility.multiplier + '</div>' : ''}
