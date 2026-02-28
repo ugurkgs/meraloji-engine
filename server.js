@@ -2075,10 +2075,18 @@ function calculateFishScore(fish, key, params) {
     // Koruma altındaki türler için skor her zaman 0
     if (fish.protected === true) {
         return {
-            score: 0, category: fish.category,
+            score: 0,
+            name: fish.name, nameEn: fish.nameEn, icon: fish.icon,
+            scientificName: fish.scientificName, photoId: fish.photoId,
+            category: fish.category, regions: fish.regions,
+            peakHoursDesc: fish.peakHoursDesc,
+            legalSize: fish.legalSize,
+            note: fish.note,
+            bait: "-", lure: "-", rig: "-", hook: "-",
+            method: "-",
             penalties: ["🚫 AVLANMASI YASAKTIR — Koruma Altında Tür"],
             activeTriggers: [], scoreDetails: {},
-            bait: "-", lure: "-", rig: "-", hook: "-"
+            reason: "🚫 Bu tür Türkiye'de avlanması kesinlikle yasak olan koruma altındaki bir türdür."
         };
     }
     const {
