@@ -2103,6 +2103,7 @@
                     <span id="pro-tag" class="pro-tag" style="display:none">PRO</span>
                 </div>
                 <span class="hud-depth" id="depth-display">⚓ --m</span>
+                <span class="hud-depth" id="shore-display" style="display:none">🏖️ --</span>
             </div>
             <button class="hud-close" onclick="closeHud()">✕</button>
         </div>
@@ -3725,14 +3726,28 @@
                 const lbl = CURRENT_LANG === 'tr' ? 'Derinlik' : 'Depth';
                 return `⚓ ${lbl}: <span>${ds}</span>`;
             })();
-            
+
+            // Karaya uzaklık bilgisi
+            const shoreText = (() => {
+                if (data.shoreDistance === undefined || data.shoreDistance === null) return null;
+                if (data.isLand) return null;
+                const dist = data.shoreDistance;
+                const lbl = CURRENT_LANG === 'tr' ? 'Kıyıya Uzaklık' : 'Shore Distance';
+                const val = dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`;
+                return `🏖️ ${lbl}: <span>${val}</span>`;
+            })();
+
+            let d = 0; // delay counter
             const steps = [
-                { text: `📡 ${t('connecting')}: <span>${data.region}</span>`, delay: 0 },
-                { text: `⏱️ ${t('time')}: <span>${userHour}:${userMinute}</span>`, delay: 400 },
-                depthText ? { text: depthText, delay: 700 } : null,
-                { text: `🌊 ${t('processing')}`, delay: depthText ? 1100 : 900 },
-                { text: `🎣 ${t('complete')}`, delay: depthText ? 1700 : 1500 }
+                { text: `📡 ${t('connecting')}: <span>${data.region}</span>`, delay: (d = 0, d) },
+                { text: `⏱️ ${t('time')}: <span>${userHour}:${userMinute}</span>`, delay: (d += 400, d) },
+                depthText ? { text: depthText, delay: (d += 300, d) } : null,
+                shoreText ? { text: shoreText, delay: (d += 300, d) } : null,
+                { text: `🌊 ${t('processing')}`, delay: (d += 400, d) },
+                { text: `🎣 ${t('complete')}`, delay: (d += 600, d) }
             ].filter(Boolean);
+
+            const totalAnimTime = d + 200;
 
             steps.forEach((step, i) => {
                 setTimeout(() => {
@@ -3752,7 +3767,7 @@
                 // Scroll to top when HUD opens
                 const hudContent = hud.querySelector('.hud-content');
                 if (hudContent) hudContent.scrollTop = 0;
-            }, 1800);
+            }, totalAnimTime);
         }
 
         // ═══════════════════════════════════════════════════════════════════
@@ -3802,6 +3817,18 @@
                 depthDisplay.style.display = 'none';
             }
 
+            // Karaya uzaklık bilgisini göster
+            const shoreDisplay = document.getElementById('shore-display');
+            if (global.shoreDistance !== undefined && global.shoreDistance !== null && !global.isLand) {
+                const shoreLbl = CURRENT_LANG === 'tr' ? 'Kıyıya' : 'Shore';
+                const dist = global.shoreDistance;
+                const val = dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`;
+                shoreDisplay.innerHTML = `🏖️ ${shoreLbl}: <strong>${val}</strong>`;
+                shoreDisplay.style.display = 'block';
+            } else {
+                shoreDisplay.style.display = 'none';
+            }
+
             if (global.isLand) {
                 const isCertainLand = global.landReason === 'CERTAIN_LAND';
                 const landIcon = isCertainLand ? '🏔️' : '🌊';
@@ -3818,6 +3845,7 @@
                 document.getElementById('confidence-display').innerText = '';
                 document.getElementById('activity-windows').style.display = 'none';
                 depthDisplay.style.display = 'none';
+                shoreDisplay.style.display = 'none';
                 return;
             }
 
@@ -4584,7 +4612,7 @@
                     scanGroups.push(group);
                     // Pin'leri haritaya yeniden ekle
                     g.results.forEach(pt => {
-                        addScanPinToGroup(g.id, pt.lat, pt.lon, pt.score, pt.fishName, true);
+                        addScanPinToGroup(g.id, pt.lat, pt.lon, pt.score, pt.fishName, true, pt.shoreKm);
                     });
                 });
                 if (scanGroups.length > 0) updateScanGroupPanel();
@@ -4977,7 +5005,7 @@
                     document.getElementById('scan-progress-log').textContent =
                         `${evt.done}/${evt.total} nokta tarandı — %${evt.lastPoint.score?.toFixed(1) ?? '—'}${fishHint}`;
                     if (evt.lastPoint.score > 35) {
-                        addScanPinToGroup(activeGroupId, evt.lastPoint.lat, evt.lastPoint.lon, evt.lastPoint.score, evt.lastPoint.fishName, false);
+                        addScanPinToGroup(activeGroupId, evt.lastPoint.lat, evt.lastPoint.lon, evt.lastPoint.score, evt.lastPoint.fishName, false, evt.lastPoint.shoreKm);
                     }
                 }
             }
@@ -4999,7 +5027,7 @@
                     grp.layers = [];
                     grp.results = evt.top5;
                     evt.top5.forEach((pt) => {
-                        addScanPinToGroup(activeGroupId, pt.lat, pt.lon, pt.score, pt.fishName, true);
+                        addScanPinToGroup(activeGroupId, pt.lat, pt.lon, pt.score, pt.fishName, true, pt.shoreKm);
                     });
                 }
 
@@ -5043,6 +5071,9 @@
             listEl.innerHTML = evt.top5.map((pt, i) => {
                 const color = pt.score >= 55 ? 'var(--green)' : pt.score >= 35 ? 'var(--yellow)' : 'var(--red)';
                 const fishLabel = pt.fishName || '—';
+                const shoreLabel = pt.shoreKm !== undefined && pt.shoreKm !== null 
+                    ? (pt.shoreKm < 1 ? `${Math.round(pt.shoreKm * 1000)} m` : `${pt.shoreKm.toFixed(1)} km`)
+                    : null;
                 return `
                 <div onclick="scanPinClick(${pt.lat}, ${pt.lon})" style="
                     display:flex; align-items:center; gap:14px;
@@ -5061,7 +5092,7 @@
                     </div>
                     <div style="flex:1;">
                         <div style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">${fishLabel}</div>
-                        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">📍 ${pt.lat.toFixed(4)}, ${pt.lon.toFixed(4)}</div>
+                        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">📍 ${pt.lat.toFixed(4)}, ${pt.lon.toFixed(4)}${shoreLabel ? ` · 🏖️ ${shoreLabel}` : ''}</div>
                     </div>
                     <div style="color:var(--text-muted);font-size:1rem;">›</div>
                 </div>`;
@@ -5075,15 +5106,18 @@
             handleMapClick({ latlng: { lat, lng: lon } });
         }
 
-        function addScanPinToGroup(groupId, lat, lon, score, fishName, isTop) {
+        function addScanPinToGroup(groupId, lat, lon, score, fishName, isTop, shoreKm) {
             const grp = scanGroups.find(g => g.id === groupId);
             const groupColor = grp ? grp.color : '#00ff88';
             const scoreColor = score >= 55 ? '#00ff88' : score >= 35 ? '#ffd500' : '#ff6b6b';
             const pinColor = isTop ? groupColor : scoreColor;
-            const size = isTop ? 52 : 32;
+            const size = isTop ? (shoreKm !== undefined ? 58 : 52) : 32;
+            const shoreStr = (isTop && shoreKm !== undefined && shoreKm !== null) 
+                ? `<div style="font-size:0.48rem;line-height:1;opacity:0.8;margin-top:1px;">🏖️${shoreKm < 1 ? Math.round(shoreKm*1000)+'m' : shoreKm.toFixed(1)+'km'}</div>` 
+                : '';
             const label = fishName
-                ? `<div style="font-weight:800;font-size:0.65rem;line-height:1.2;">${score.toFixed(1)}%</div><div style="font-size:0.55rem;line-height:1.1;opacity:0.9;">${fishName.length > 8 ? fishName.slice(0,7)+'.' : fishName}</div>`
-                : `<div style="font-weight:800;font-size:0.72rem;">${score.toFixed(1)}%</div>`;
+                ? `<div style="font-weight:800;font-size:0.65rem;line-height:1.2;">${score.toFixed(1)}%</div><div style="font-size:0.55rem;line-height:1.1;opacity:0.9;">${fishName.length > 8 ? fishName.slice(0,7)+'.' : fishName}</div>${shoreStr}`
+                : `<div style="font-weight:800;font-size:0.72rem;">${score.toFixed(1)}%</div>${shoreStr}`;
 
             const icon = L.divIcon({
                 className: '',
