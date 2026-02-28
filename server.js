@@ -343,6 +343,137 @@ function getRegion(lat, lon) {
     return 'TÜRKİYE';
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// KARAYA UZAKLIK HESAPLAMA — Simplified Turkey Coastline
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Türkiye kıyı şeridi — ~180 anahtar nokta (sadeleştirilmiş polyline)
+// Karadeniz, Marmara, Ege, Akdeniz kıyıları + önemli yarımadalar
+const TURKEY_COASTLINE = [
+    // ── KARADENİZ (Batı→Doğu) ──
+    [41.88,27.96],[41.98,28.01],[42.02,28.25],[41.98,28.60],[41.82,28.78],
+    [41.72,28.95],[41.58,29.06],[41.42,29.08],[41.28,29.12],[41.22,29.25],
+    [41.15,29.08],[41.10,29.00],[41.18,28.95],[41.25,28.70],[41.35,28.55],
+    // İstanbul Boğazı kuzey
+    [41.23,29.12],[41.18,29.06],[41.12,29.02],[41.07,29.01],[41.02,29.00],
+    // Karadeniz doğu devam
+    [41.28,29.35],[41.48,29.55],[41.58,29.85],[41.68,30.25],[41.72,30.60],
+    [41.78,30.95],[41.82,31.35],[41.85,31.80],[41.88,32.15],[41.92,32.55],
+    [42.00,32.95],[42.02,33.35],[41.98,33.70],[41.95,34.05],[41.88,34.45],
+    [41.82,34.80],[41.78,35.15],[41.72,35.50],[41.60,35.85],[41.50,36.15],
+    [41.42,36.50],[41.32,36.85],[41.25,37.15],[41.20,37.50],[41.18,37.85],
+    [41.15,38.20],[41.18,38.55],[41.22,38.95],[41.25,39.35],[41.22,39.72],
+    [41.18,40.10],[41.15,40.45],[41.18,40.80],[41.22,41.10],[41.28,41.40],
+    // Gürcistan sınırı
+    [41.50,41.52],[41.55,41.55],
+    // ── MARMARA DENİZİ ──
+    // Güney Marmara kıyısı
+    [40.72,29.50],[40.62,29.35],[40.55,29.15],[40.50,28.95],[40.48,28.75],
+    [40.42,28.55],[40.38,28.35],[40.35,28.15],[40.32,27.95],[40.35,27.75],
+    [40.38,27.55],[40.42,27.35],[40.45,27.15],[40.48,26.95],[40.52,26.75],
+    // Kuzey Marmara kıyısı
+    [40.92,28.85],[40.88,28.65],[40.85,28.45],[40.80,28.25],[40.78,28.05],
+    [40.75,27.85],[40.72,27.65],[40.68,27.45],[40.65,27.25],[40.62,27.05],
+    // Çanakkale Boğazı
+    [40.22,26.42],[40.15,26.40],[40.08,26.38],[40.02,26.35],
+    // ── EGE (Kuzey→Güney) ──
+    [39.95,26.18],[39.85,26.15],[39.72,26.20],[39.60,26.35],[39.48,26.50],
+    [39.35,26.55],[39.22,26.60],[39.10,26.72],[38.95,26.80],[38.82,26.72],
+    [38.72,26.58],[38.60,26.48],[38.48,26.42],[38.35,26.38],[38.22,26.35],
+    [38.10,26.38],[37.95,26.48],[37.82,26.55],[37.70,26.62],[37.58,26.72],
+    [37.48,26.85],[37.35,27.00],[37.22,27.15],[37.10,27.28],[37.02,27.42],
+    [36.92,27.58],[36.82,27.72],[36.72,27.90],[36.62,28.08],[36.58,28.25],
+    [36.62,28.45],[36.68,28.62],[36.72,28.78],
+    // Marmaris / Datça yarımadası
+    [36.75,28.05],[36.70,27.68],[36.72,27.42],[36.78,27.25],
+    // ── AKDENİZ (Batı→Doğu) ──
+    [36.62,28.95],[36.55,29.15],[36.48,29.35],[36.42,29.55],[36.35,29.75],
+    [36.25,29.95],[36.22,30.15],[36.28,30.35],[36.42,30.55],[36.55,30.72],
+    [36.62,30.88],[36.58,31.05],[36.52,31.25],[36.48,31.45],[36.42,31.65],
+    [36.38,31.85],[36.35,32.05],[36.32,32.25],[36.38,32.45],[36.42,32.65],
+    [36.48,32.85],[36.55,33.05],[36.58,33.25],[36.62,33.45],[36.68,33.65],
+    [36.72,33.85],[36.62,34.05],[36.52,34.25],[36.42,34.45],[36.38,34.65],
+    [36.35,34.85],[36.38,35.05],[36.45,35.25],[36.55,35.45],[36.62,35.65],
+    [36.58,35.85],[36.55,35.95],[36.48,36.05],[36.42,36.15],[36.35,36.25],
+    // İskenderun Körfezi
+    [36.52,36.15],[36.60,36.08],[36.68,36.02],[36.78,35.95],[36.85,35.88],
+    [36.90,35.95],[36.82,36.08],[36.72,36.22],[36.60,36.35],[36.50,36.45],
+    // Hatay sınırı
+    [36.22,36.08],[36.15,36.02],[36.08,35.95],[36.02,35.92],
+    // ── ADA KIYILARI (Gökçeada, Bozcaada) ──
+    [40.22,25.82],[40.18,25.88],[40.12,25.92],[40.08,25.85],
+    [39.85,26.02],[39.82,26.08],[39.78,26.05],[39.80,25.98]
+];
+
+// Haversine mesafe (km)
+function haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Nokta-segment arası en kısa mesafe (coastline segment'leri üzerinde interpolasyon)
+function pointToSegmentDistance(lat, lon, lat1, lon1, lat2, lon2) {
+    const dx = lat2 - lat1;
+    const dy = lon2 - lon1;
+    if (dx === 0 && dy === 0) return haversineKm(lat, lon, lat1, lon1);
+    
+    // t parametresi: noktanın segmentteki projeksiyonu (0-1 arası clamp)
+    const t = Math.max(0, Math.min(1, 
+        ((lat - lat1) * dx + (lon - lon1) * dy) / (dx * dx + dy * dy)
+    ));
+    const projLat = lat1 + t * dx;
+    const projLon = lon1 + t * dy;
+    return haversineKm(lat, lon, projLat, projLon);
+}
+
+/**
+ * Seçilen noktanın en yakın kıyıya uzaklığını hesaplar
+ * @returns {{ distanceKm: number, nearestPoint: [number, number] }}
+ */
+function calculateShoreDistance(lat, lon) {
+    lat = parseFloat(lat);
+    lon = parseFloat(lon);
+    
+    let minDist = Infinity;
+    let nearestPt = TURKEY_COASTLINE[0];
+    
+    // Segment bazlı hesaplama (polyline üzerinde en yakın nokta)
+    for (let i = 0; i < TURKEY_COASTLINE.length - 1; i++) {
+        const [lat1, lon1] = TURKEY_COASTLINE[i];
+        const [lat2, lon2] = TURKEY_COASTLINE[i + 1];
+        
+        // Çok uzak segmentleri hızlıca atla (ön filtre ~2 derece)
+        if (Math.abs(lat - lat1) > 2 && Math.abs(lat - lat2) > 2) continue;
+        if (Math.abs(lon - lon1) > 2 && Math.abs(lon - lon2) > 2) continue;
+        
+        const dist = pointToSegmentDistance(lat, lon, lat1, lon1, lat2, lon2);
+        if (dist < minDist) {
+            minDist = dist;
+            nearestPt = [lat1, lon1]; // yaklaşık en yakın kıyı noktası
+        }
+    }
+    
+    // Ayrıca her tek noktaya da bak (ada köşeleri vs.)
+    for (const [cLat, cLon] of TURKEY_COASTLINE) {
+        if (Math.abs(lat - cLat) > 2 && Math.abs(lon - cLon) > 2) continue;
+        const dist = haversineKm(lat, lon, cLat, cLon);
+        if (dist < minDist) {
+            minDist = dist;
+            nearestPt = [cLat, cLon];
+        }
+    }
+    
+    return {
+        distanceKm: Math.round(minDist * 100) / 100, // 2 ondalık
+        nearestPoint: nearestPt
+    };
+}
+
 // Tuzluluk
 function getSalinity(region) {
     const map = {
@@ -2806,10 +2937,14 @@ app.get('/api/forecast', async (req, res) => {
             };
         }
 
+        // Karaya uzaklık hesapla
+        const shoreInfo = calculateShoreDistance(lat, lon);
+
         const responseData = {
             version: "F.I.S.H. v3.0", region: regionName, isLand, landReason, clickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
             depth: depthData,  // EMODnet Bathymetry derinlik verisi
+            shoreDistance: shoreInfo.distanceKm, // Karaya uzaklık (km)
             forecast, instant: instantData
         };
 
@@ -3123,6 +3258,23 @@ app.post('/api/verify-subscription', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
+// 🏖️ KARAYA UZAKLIK ENDPOİNTİ (Lightweight)
+// ═══════════════════════════════════════════════════════════════
+
+app.get('/api/shore-distance', (req, res) => {
+    const { lat, lon } = req.query;
+    if (!lat || !lon) return res.status(400).json({ error: 'lat ve lon gerekli' });
+    const result = calculateShoreDistance(lat, lon);
+    const dist = result.distanceKm;
+    res.json({
+        distanceKm: dist,
+        distanceM: Math.round(dist * 1000),
+        formatted: dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`,
+        nearestCoast: result.nearestPoint
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
 // 🔍 BÖLGE TARAMA ENDPOİNTİ (PRO - Günlük 5 Hak)
 // ═══════════════════════════════════════════════════════════════
 
@@ -3373,11 +3525,13 @@ app.get('/api/scan', async (req, res) => {
             const fishName = result ? result.fishName : null;
 
             if (score !== null && score > 5) {
-                results.push({ lat: pt.lat, lon: pt.lon, score: parseFloat(score.toFixed(1)), fishName });
+                const ptShore = calculateShoreDistance(pt.lat, pt.lon);
+                results.push({ lat: pt.lat, lon: pt.lon, score: parseFloat(score.toFixed(1)), fishName, shoreKm: ptShore.distanceKm });
             }
 
             const pct = Math.round(((i + 1) / total) * 100);
-            sendEvent({ type: 'progress', pct, done: i + 1, total, lastPoint: { lat: pt.lat, lon: pt.lon, score, fishName } });
+            const ptShoreInfo = (score !== null && score > 5) ? calculateShoreDistance(pt.lat, pt.lon).distanceKm : null;
+            sendEvent({ type: 'progress', pct, done: i + 1, total, lastPoint: { lat: pt.lat, lon: pt.lon, score, fishName, shoreKm: ptShoreInfo } });
             if (res.flush) res.flush();
         }
 
@@ -3391,10 +3545,12 @@ app.get('/api/scan', async (req, res) => {
             remainingScans = Math.max(0, 5 - (finalDoc.exists ? finalDoc.data().count : 1));
         }
 
+        const centerShore = calculateShoreDistance(centerLat, centerLon);
         const scanResult = {
             top5,
             all: results,
             center: { lat: centerLat, lon: centerLon },
+            centerShoreKm: centerShore.distanceKm,
             radiusKm,
             fishKey: fishKey || null,
             scannedAt: Date.now(),
