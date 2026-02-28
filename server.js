@@ -2190,13 +2190,38 @@ function calculateFishScore(fish, key, params) {
         } else if (pressureTrend.trend === 'RISING') {
             s_trigger -= 1; // Yavaş yükselen basınç da beslenmeyi yavaşlatır
         }
+        // Basınç scoreDetails
+        const pressureStars = pressureTrend.trend === 'FALLING_FAST' ? 5
+            : pressureTrend.trend === 'FALLING' ? 4
+            : pressureTrend.trend === 'STABLE' ? 3
+            : pressureTrend.trend === 'RISING' ? 2 : 1;
+        scoreDetails.pressure = {
+            stars: pressureStars,
+            trend: pressureTrend.trend,
+            change: pressureTrend.change,
+            value: pressure
+        };
     }
     
-    // Akıntı (Pelajikler)
-    if (fish.category === "PELAJIK" && currentSpeed > 0.3) {
-        const currentBonus = Math.min(3, currentSpeed * fish.currentPref * 3);
-        s_trigger += currentBonus;
-        if (currentBonus > 1.5) activeTriggers.push("Güçlü Akıntı");
+    // Akıntı — tüm türler için currentPref ile değerlendir
+    {
+        // 0–1.5 kn arası ideal, fazlası ceza
+        const idealCurrent = fish.currentPref * 1.5;
+        const currentDiff = Math.abs(currentSpeed - idealCurrent);
+        const currentScore = Math.max(0, 1 - currentDiff / 1.5);
+        const currentPts = currentScore * 5;
+        if (fish.category === "PELAJIK" && currentSpeed > 0.3) {
+            const currentBonus = Math.min(3, currentSpeed * fish.currentPref * 3);
+            s_trigger += currentBonus;
+            if (currentBonus > 1.5) activeTriggers.push("Güçlü Akıntı");
+        }
+        scoreDetails.current = {
+            score: parseFloat(currentPts.toFixed(1)),
+            max: 5,
+            stars: Math.round(currentScore * 5),
+            value: currentSpeed,
+            pref: fish.currentPref
+        };
     }
     
     if (key === "levrek" && wave > 0.7 && clarity < 60) { s_trigger += 2; activeTriggers.push("Köpüklü Su"); }
