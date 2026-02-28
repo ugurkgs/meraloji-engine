@@ -282,31 +282,6 @@
             color: var(--bg-deep);
         }
         
-        /* Dil Butonu - Menü stili */
-        #lang-btn {
-            min-width: 42px;
-            height: 48px;
-            background: var(--bg-panel);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
-            font-size: 0.8rem;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(20px);
-            transition: all 0.2s;
-            flex-shrink: 0;
-            padding: 0 10px;
-        }
-        
-        #lang-btn:hover {
-            border-color: var(--cyan);
-            color: var(--cyan);
-        }
-
         .search-wrapper {
             flex: 1;
             position: relative;
@@ -716,13 +691,6 @@
                 font-size: 1.1rem;
             }
             
-            #lang-btn {
-                min-width: 38px;
-                height: 44px;
-                padding: 0 8px;
-                font-size: 0.75rem;
-            }
-            
             .search-box {
                 height: 44px;
                 padding: 0 12px;
@@ -768,12 +736,6 @@
                 min-width: 40px;
                 width: 40px;
                 height: 40px;
-            }
-            
-            #lang-btn {
-                min-width: 34px;
-                height: 40px;
-                padding: 0 6px;
             }
             
             .search-box {
@@ -1623,6 +1585,69 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════════
+           📏 MESAFE ÖLÇME STİLLERİ
+           ═══════════════════════════════════════════════════════════════════ */
+        .measure-btn {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-panel);
+            border: 1.5px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(20px);
+            transition: all 0.2s;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .measure-btn:hover {
+            border-color: #ff9f43;
+            box-shadow: 0 0 16px rgba(255,159,67,0.3);
+        }
+        .measure-btn.active {
+            background: #ff9f43;
+            color: #000;
+            border-color: #ff9f43;
+            box-shadow: 0 0 20px rgba(255,159,67,0.5);
+        }
+
+        #measure-toast {
+            display: none;
+            position: fixed;
+            top: 72px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.88);
+            border: 1px solid #ff9f43;
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 12px;
+            z-index: 9999;
+            font-size: 0.8rem;
+            text-align: center;
+            max-width: 340px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            font-family: var(--font-display);
+        }
+        #measure-toast .toast-step {
+            color: #ff9f43;
+            font-weight: 700;
+        }
+        #measure-toast .toast-close {
+            display: inline-block;
+            margin-left: 10px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        #measure-toast .toast-close:hover { color: #ff4757; }
+
+        /* ═══════════════════════════════════════════════════════════════════
            🔍 BÖLGE TARAMA (SCAN) STİLLERİ
            ═══════════════════════════════════════════════════════════════════ */
         .scan-btn {
@@ -1959,7 +1984,6 @@
          ═══════════════════════════════════════════════════════════════════ -->
     <div id="controls">
         <button class="btn-icon" onclick="toggleMenu()" title="Menü">☰</button>
-        <button id="lang-btn" onclick="toggleLanguage()" title="Dil Değiştir">TR</button>
         <div class="search-wrapper">
             <div class="search-box">
                 <span style="color: var(--text-muted);">🔍</span>
@@ -1967,7 +1991,7 @@
             </div>
             <div class="search-suggestions" id="search-suggestions"></div>
         </div>
-        <button class="btn-icon" id="locate-btn" onclick="locateMe()" title="Konumum">🎯</button>
+        <button class="measure-btn" id="measure-btn" onclick="toggleMeasureMode()" title="Mesafe Ölç">📏</button>
         <button class="scan-btn" id="scan-btn" onclick="openScanFlow()" title="Bölge Tarama (PRO)">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="scan-radar-icon">
                 <circle cx="12" cy="12" r="10" stroke="#00ff88" stroke-width="1.2" stroke-dasharray="4 2" opacity="0.4"/>
@@ -1978,6 +2002,12 @@
             </svg>
             <span class="scan-badge" id="scan-badge">5</span>
         </button>
+    </div>
+
+    <!-- 📏 MESAFE ÖLÇME TOAST -->
+    <div id="measure-toast">
+        <span id="measure-toast-text"><span class="toast-step">1️⃣</span> Haritada <strong>başlangıç noktasını</strong> seçin</span>
+        <span class="toast-close" onclick="cancelMeasure()">✕</span>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════
@@ -2103,7 +2133,6 @@
                     <span id="pro-tag" class="pro-tag" style="display:none">PRO</span>
                 </div>
                 <span class="hud-depth" id="depth-display">⚓ --m</span>
-                <span class="hud-depth" id="shore-display" style="display:none">🏖️ --</span>
             </div>
             <button class="hud-close" onclick="closeHud()">✕</button>
         </div>
@@ -2265,6 +2294,12 @@
 
         <div class="menu-section">
             <h3 id="menu-section-title">Menü</h3>
+            <button class="menu-btn" id="locate-btn" onclick="locateMe(); toggleMenu();">
+                🎯 <span id="locate-btn-text">Konumumu Bul</span>
+            </button>
+            <button class="menu-btn" onclick="toggleLanguage(); toggleMenu();">
+                🌐 <span id="lang-menu-text">English</span>
+            </button>
             <button class="menu-btn" onclick="changeMapLayer()">
                 🗺️ <span id="map-layer-btn-text">Harita Katmanı</span>
                 <span class="map-layer-indicator" id="map-layer-name">(Coğrafi)</span>
@@ -3235,7 +3270,16 @@
         
         function toggleLanguage() {
             CURRENT_LANG = CURRENT_LANG === 'tr' ? 'en' : 'tr';
-            document.getElementById('lang-btn').innerText = CURRENT_LANG.toUpperCase();
+            
+            // Menü içindeki dil ve konum buton metinlerini güncelle
+            const langMenuText = document.getElementById('lang-menu-text');
+            if (langMenuText) langMenuText.innerText = CURRENT_LANG === 'tr' ? 'English' : 'Türkçe';
+            
+            const locateBtnText = document.getElementById('locate-btn-text');
+            if (locateBtnText) locateBtnText.innerText = CURRENT_LANG === 'tr' ? 'Konumumu Bul' : 'My Location';
+            
+            const menuSectionTitle = document.getElementById('menu-section-title');
+            if (menuSectionTitle) menuSectionTitle.innerText = CURRENT_LANG === 'tr' ? 'Menü' : 'Menu';
             
             // Tab'ları güncelle
             document.getElementById('tab-daily').innerText = t('daily');
@@ -3653,9 +3697,16 @@
         // ═══════════════════════════════════════════════════════════════════
 
         async function handleMapClick(e) {
-            const lat = e.latlng.lat.toFixed(4);
-            const lon = e.latlng.lng.toFixed(4);
-            lastLatLon = { lat, lon };
+            const lat = parseFloat(e.latlng.lat.toFixed(4));
+            const lon = parseFloat(e.latlng.lng.toFixed(4));
+
+            // 📏 Mesafe ölçme modundaysa normal click'i engelle
+            if (measureMode && measureStep > 0) {
+                handleMeasureClick(lat, lon);
+                return;
+            }
+
+            lastLatLon = { lat: lat.toFixed(4), lon: lon.toFixed(4) };
 
             // Balık arama sıfırla
             const fsInput = document.getElementById('fish-search-input');
@@ -3691,6 +3742,7 @@
                 const res = await fetch(`/api/forecast?lat=${lat}&lon=${lon}`);
                 const data = await res.json();
                 GLOBAL_DATA = data;
+
                 runLoadingAnimation(data);
             } catch (err) {
                 hideLoading();
@@ -3701,6 +3753,156 @@
         // ═══════════════════════════════════════════════════════════════════
         // LOADING ANIMATION
         // ═══════════════════════════════════════════════════════════════════
+
+        // ═══════════════════════════════════════════════════════════════════
+        // 📏 MESAFE ÖLÇME MODU
+        // ═══════════════════════════════════════════════════════════════════
+
+        let measureMode = false;
+        let measureStep = 0; // 0=off, 1=waiting A, 2=waiting B
+        let measurePointA = null;
+        let measureLayers = []; // tüm ölçüm çizgileri + marker'ları
+
+        function toggleMeasureMode() {
+            if (measureMode) {
+                cancelMeasure();
+            } else {
+                startMeasure();
+            }
+        }
+
+        function startMeasure() {
+            measureMode = true;
+            measureStep = 1;
+            measurePointA = null;
+            document.getElementById('measure-btn').classList.add('active');
+            document.getElementById('measure-toast').style.display = 'block';
+            document.getElementById('measure-toast-text').innerHTML =
+                '<span class="toast-step">1️⃣</span> Haritada <strong>başlangıç noktasını</strong> seçin';
+
+            // HUD'u kapat ki harita tıklanabilir olsun
+            closeHud();
+        }
+
+        function cancelMeasure() {
+            measureMode = false;
+            measureStep = 0;
+            measurePointA = null;
+            document.getElementById('measure-btn').classList.remove('active');
+            document.getElementById('measure-toast').style.display = 'none';
+            // Yarım kalmış A noktası marker'ını temizle (eğer varsa ve henüz çizgi çekilmediyse)
+            // NOT: Tamamlanmış ölçümler haritada kalır, sadece mod kapatılır
+        }
+
+        function clearAllMeasurements() {
+            measureLayers.forEach(l => map.removeLayer(l));
+            measureLayers = [];
+            measureStep = 1;
+            measurePointA = null;
+            document.getElementById('measure-toast-text').innerHTML =
+                '<span class="toast-step">1️⃣</span> Haritada <strong>başlangıç noktasını</strong> seçin';
+        }
+
+        function handleMeasureClick(lat, lon) {
+            if (measureStep === 1) {
+                // A noktası seçildi
+                measurePointA = { lat, lon };
+
+                // A noktası marker'ı
+                const iconA = L.divIcon({
+                    className: '',
+                    html: `<div style="
+                        width:14px;height:14px;background:#ff9f43;border-radius:50%;
+                        border:2px solid #fff;box-shadow:0 0 8px rgba(255,159,67,0.6);
+                    "></div>`,
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7]
+                });
+                const mA = L.marker([lat, lon], { icon: iconA, interactive: false }).addTo(map);
+                measureLayers.push(mA);
+
+                // Adım 2'ye geç
+                measureStep = 2;
+                document.getElementById('measure-toast-text').innerHTML =
+                    '<span class="toast-step">2️⃣</span> Şimdi <strong>bitiş noktasını</strong> seçin';
+
+            } else if (measureStep === 2) {
+                // B noktası seçildi
+                const A = measurePointA;
+                const B = { lat, lon };
+
+                // Haversine mesafe hesapla (client-side)
+                const dist = haversineClient(A.lat, A.lon, B.lat, B.lon);
+                const label = dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(2)} km`;
+
+                // B noktası marker'ı
+                const iconB = L.divIcon({
+                    className: '',
+                    html: `<div style="
+                        width:14px;height:14px;background:#ff9f43;border-radius:50%;
+                        border:2px solid #fff;box-shadow:0 0 8px rgba(255,159,67,0.6);
+                    "></div>`,
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7]
+                });
+                const mB = L.marker([B.lat, B.lon], { icon: iconB, interactive: false }).addTo(map);
+                measureLayers.push(mB);
+
+                // Turuncu kesik çizgi
+                const line = L.polyline([[A.lat, A.lon], [B.lat, B.lon]], {
+                    color: '#ff9f43',
+                    weight: 2.5,
+                    opacity: 0.85,
+                    dashArray: '10, 6',
+                    interactive: false
+                }).addTo(map);
+                measureLayers.push(line);
+
+                // Ortada mesafe etiketi — siyah zemin, sarı yazı, okunabilir
+                const midLat = (A.lat + B.lat) / 2;
+                const midLon = (A.lon + B.lon) / 2;
+                const labelIcon = L.divIcon({
+                    className: '',
+                    html: `<div style="
+                        background: #111111;
+                        border: 2px solid #333333;
+                        color: #ffd500;
+                        font-family: 'JetBrains Mono', monospace;
+                        font-size: 0.9rem;
+                        font-weight: 800;
+                        padding: 7px 16px;
+                        border-radius: 12px;
+                        white-space: nowrap;
+                        pointer-events: none;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+                        letter-spacing: 0.5px;
+                    ">📏 ${label}</div>`,
+                    iconSize: [120, 36],
+                    iconAnchor: [60, 18]
+                });
+                const labelMark = L.marker([midLat, midLon], { icon: labelIcon, interactive: false }).addTo(map);
+                measureLayers.push(labelMark);
+
+                // Toast'u güncelle
+                document.getElementById('measure-toast-text').innerHTML =
+                    `📏 <strong>${label}</strong> — Tekrar ölçmek için tıklayın veya <span onclick="clearAllMeasurements()" style="color:#ff9f43;text-decoration:underline;cursor:pointer;margin-left:6px;">temizle</span>`;
+
+                // Yeni ölçüme hazır (A bekle)
+                measureStep = 1;
+                measurePointA = null;
+            }
+        }
+
+        // Client-side Haversine (server'a sormadan ölç)
+        function haversineClient(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) ** 2 +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon / 2) ** 2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
 
         function showLoading() {
             document.getElementById('loading').style.display = 'flex';
@@ -3727,22 +3929,11 @@
                 return `⚓ ${lbl}: <span>${ds}</span>`;
             })();
 
-            // Karaya uzaklık bilgisi
-            const shoreText = (() => {
-                if (data.shoreDistance === undefined || data.shoreDistance === null) return null;
-                if (data.isLand) return null;
-                const dist = data.shoreDistance;
-                const lbl = CURRENT_LANG === 'tr' ? 'Kıyıya Uzaklık' : 'Shore Distance';
-                const val = dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`;
-                return `🏖️ ${lbl}: <span>${val}</span>`;
-            })();
-
             let d = 0; // delay counter
             const steps = [
                 { text: `📡 ${t('connecting')}: <span>${data.region}</span>`, delay: (d = 0, d) },
                 { text: `⏱️ ${t('time')}: <span>${userHour}:${userMinute}</span>`, delay: (d += 400, d) },
                 depthText ? { text: depthText, delay: (d += 300, d) } : null,
-                shoreText ? { text: shoreText, delay: (d += 300, d) } : null,
                 { text: `🌊 ${t('processing')}`, delay: (d += 400, d) },
                 { text: `🎣 ${t('complete')}`, delay: (d += 600, d) }
             ].filter(Boolean);
@@ -3817,18 +4008,6 @@
                 depthDisplay.style.display = 'none';
             }
 
-            // Karaya uzaklık bilgisini göster
-            const shoreDisplay = document.getElementById('shore-display');
-            if (global.shoreDistance !== undefined && global.shoreDistance !== null && !global.isLand) {
-                const shoreLbl = CURRENT_LANG === 'tr' ? 'Kıyıya' : 'Shore';
-                const dist = global.shoreDistance;
-                const val = dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`;
-                shoreDisplay.innerHTML = `🏖️ ${shoreLbl}: <strong>${val}</strong>`;
-                shoreDisplay.style.display = 'block';
-            } else {
-                shoreDisplay.style.display = 'none';
-            }
-
             if (global.isLand) {
                 const isCertainLand = global.landReason === 'CERTAIN_LAND';
                 const landIcon = isCertainLand ? '🏔️' : '🌊';
@@ -3845,7 +4024,6 @@
                 document.getElementById('confidence-display').innerText = '';
                 document.getElementById('activity-windows').style.display = 'none';
                 depthDisplay.style.display = 'none';
-                shoreDisplay.style.display = 'none';
                 return;
             }
 
@@ -4612,7 +4790,7 @@
                     scanGroups.push(group);
                     // Pin'leri haritaya yeniden ekle
                     g.results.forEach(pt => {
-                        addScanPinToGroup(g.id, pt.lat, pt.lon, pt.score, pt.fishName, true, pt.shoreKm);
+                        addScanPinToGroup(g.id, pt.lat, pt.lon, pt.score, pt.fishName, true);
                     });
                 });
                 if (scanGroups.length > 0) updateScanGroupPanel();
@@ -5005,7 +5183,7 @@
                     document.getElementById('scan-progress-log').textContent =
                         `${evt.done}/${evt.total} nokta tarandı — %${evt.lastPoint.score?.toFixed(1) ?? '—'}${fishHint}`;
                     if (evt.lastPoint.score > 35) {
-                        addScanPinToGroup(activeGroupId, evt.lastPoint.lat, evt.lastPoint.lon, evt.lastPoint.score, evt.lastPoint.fishName, false, evt.lastPoint.shoreKm);
+                        addScanPinToGroup(activeGroupId, evt.lastPoint.lat, evt.lastPoint.lon, evt.lastPoint.score, evt.lastPoint.fishName, false);
                     }
                 }
             }
@@ -5027,7 +5205,7 @@
                     grp.layers = [];
                     grp.results = evt.top5;
                     evt.top5.forEach((pt) => {
-                        addScanPinToGroup(activeGroupId, pt.lat, pt.lon, pt.score, pt.fishName, true, pt.shoreKm);
+                        addScanPinToGroup(activeGroupId, pt.lat, pt.lon, pt.score, pt.fishName, true);
                     });
                 }
 
@@ -5071,9 +5249,6 @@
             listEl.innerHTML = evt.top5.map((pt, i) => {
                 const color = pt.score >= 55 ? 'var(--green)' : pt.score >= 35 ? 'var(--yellow)' : 'var(--red)';
                 const fishLabel = pt.fishName || '—';
-                const shoreLabel = pt.shoreKm !== undefined && pt.shoreKm !== null 
-                    ? (pt.shoreKm < 1 ? `${Math.round(pt.shoreKm * 1000)} m` : `${pt.shoreKm.toFixed(1)} km`)
-                    : null;
                 return `
                 <div onclick="scanPinClick(${pt.lat}, ${pt.lon})" style="
                     display:flex; align-items:center; gap:14px;
@@ -5092,7 +5267,7 @@
                     </div>
                     <div style="flex:1;">
                         <div style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">${fishLabel}</div>
-                        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">📍 ${pt.lat.toFixed(4)}, ${pt.lon.toFixed(4)}${shoreLabel ? ` · 🏖️ ${shoreLabel}` : ''}</div>
+                        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">📍 ${pt.lat.toFixed(4)}, ${pt.lon.toFixed(4)}</div>
                     </div>
                     <div style="color:var(--text-muted);font-size:1rem;">›</div>
                 </div>`;
@@ -5106,18 +5281,15 @@
             handleMapClick({ latlng: { lat, lng: lon } });
         }
 
-        function addScanPinToGroup(groupId, lat, lon, score, fishName, isTop, shoreKm) {
+        function addScanPinToGroup(groupId, lat, lon, score, fishName, isTop) {
             const grp = scanGroups.find(g => g.id === groupId);
             const groupColor = grp ? grp.color : '#00ff88';
             const scoreColor = score >= 55 ? '#00ff88' : score >= 35 ? '#ffd500' : '#ff6b6b';
             const pinColor = isTop ? groupColor : scoreColor;
-            const size = isTop ? (shoreKm !== undefined ? 58 : 52) : 32;
-            const shoreStr = (isTop && shoreKm !== undefined && shoreKm !== null) 
-                ? `<div style="font-size:0.48rem;line-height:1;opacity:0.8;margin-top:1px;">🏖️${shoreKm < 1 ? Math.round(shoreKm*1000)+'m' : shoreKm.toFixed(1)+'km'}</div>` 
-                : '';
+            const size = isTop ? 52 : 32;
             const label = fishName
-                ? `<div style="font-weight:800;font-size:0.65rem;line-height:1.2;">${score.toFixed(1)}%</div><div style="font-size:0.55rem;line-height:1.1;opacity:0.9;">${fishName.length > 8 ? fishName.slice(0,7)+'.' : fishName}</div>${shoreStr}`
-                : `<div style="font-weight:800;font-size:0.72rem;">${score.toFixed(1)}%</div>${shoreStr}`;
+                ? `<div style="font-weight:800;font-size:0.65rem;line-height:1.2;">${score.toFixed(1)}%</div><div style="font-size:0.55rem;line-height:1.1;opacity:0.9;">${fishName.length > 8 ? fishName.slice(0,7)+'.' : fishName}</div>`
+                : `<div style="font-weight:800;font-size:0.72rem;">${score.toFixed(1)}%</div>`;
 
             const icon = L.divIcon({
                 className: '',
