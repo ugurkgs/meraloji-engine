@@ -1454,7 +1454,7 @@ const SPECIES_DB = {
         note: "DİKKAT: Zehirli dikeni var! Tutarken çok dikkatli olun."
     },
     "cutre": {
-        name: "Çütre (Tetik)", nameEn: "Grey Triggerfish", icon: "🐟", scientificName: "Balistes capriscus",
+        name: "Çütre (Tetik/Domuz)", nameEn: "Grey Triggerfish", icon: "🐟", scientificName: "Balistes capriscus",
         photoId: 72,
         category: "KAYALIK",
         peakHours: "DAY", peakHoursDesc: "Gündüz, kayalık",
