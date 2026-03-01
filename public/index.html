@@ -2983,6 +2983,17 @@
                 starActivity: "Aktivite",
                 starTrigger: "Tetikleyici",
                 starPenalty: "Ceza",
+                starCloud: "Bulutluluk",
+                starUV: "UV İndeks",
+                starWavePeriod: "Dalga Periyodu",
+                starTempShock: "Sıcaklık Şoku",
+                metricWavePeriod: "Periyot",
+                metricUV: "UV",
+                metricSwell: "Swell",
+                tempShockCooling: "Soğuma şoku — yem avı tetiklendi",
+                tempShockWarming: "Ani ısınma — kısa süreli stres",
+                realCurrent: "Gerçek Veri",
+                estimatedCurrent: "Tahmin",
                 
                 // Yardım Modal
                 helpTitle: "Nasıl Kullanılır?",
@@ -3200,6 +3211,17 @@
                 starActivity: "Activity",
                 starTrigger: "Trigger",
                 starPenalty: "Penalty",
+                starCloud: "Cloud Cover",
+                starUV: "UV Index",
+                starWavePeriod: "Wave Period",
+                starTempShock: "Temp Shock",
+                metricWavePeriod: "Period",
+                metricUV: "UV",
+                metricSwell: "Swell",
+                tempShockCooling: "Cooling shock — feeding triggered",
+                tempShockWarming: "Sudden warming — short stress",
+                realCurrent: "Real Data",
+                estimatedCurrent: "Estimated",
                 
                 // Help Modal
                 helpTitle: "How to Use?",
@@ -3531,8 +3553,8 @@
                 importance: "Akıntı besin taşır. Güçlü akıntıda ağır kurşun gerekir.",
                 importanceEn: "Current carries nutrients. Heavy weights needed in strong current.",
                 ref: "0-0.2 m/s: Sakin\n0.4-0.6 m/s: Güçlü\n0.6+: Surf modu",
-                algo: "current = (wave × 0.35) + (wind × 0.018)",
-                source: "Copernicus Marine Service - Mediterranean Sea Currents; HYCOM Ocean Model"
+                algo: "Gerçek veri: Open-Meteo ocean_current_velocity\nTahmin: (wave × 0.35) + (wind × 0.018)",
+                source: "Open-Meteo Marine API - Ocean Current Data; Copernicus Marine Service; HYCOM Ocean Model"
             },
             cloud: {
                 icon: "☁️",
@@ -3545,6 +3567,42 @@
                 ref: "0-20%: Açık\n50-80%: Çok iyi\n80-100%: İdeal",
                 algo: "cloud > 70: +10 bonus\ncloud < 20: invisible line needed",
                 source: "Open-Meteo Cloud Cover API; NOAA Satellite Cloud Products"
+            },
+            wavePeriod: {
+                icon: "〰️",
+                title: "DALGA PERİYODU",
+                titleEn: "WAVE PERIOD",
+                desc: "Ardışık iki dalga tepesi arasındaki süre (saniye). Dalganın kaynağını ve karakterini belirler.",
+                descEn: "Time between two consecutive wave crests (seconds). Determines wave source and character.",
+                importance: "Uzun periyot (≥8s) = ölü dalga/swell — deniz altı sakin, balık aktif. Kısa periyot (≤4s) = rüzgar dalgası — yüzey kaotik, balık huzursuz.",
+                importanceEn: "Long period (≥8s) = swell — calm subsurface, fish active. Short period (≤4s) = wind waves — chaotic surface, fish stressed.",
+                ref: "≤4s: Rüzgar dalgası (kötü)\n4-7s: Karışık\n≥8s: Swell (iyi)",
+                algo: "≥8s: +2 trigger bonus\n≤4s + wave>0.5m: -1 penalty",
+                source: "NOAA Wave Watch III; Open-Meteo Marine API - Wave Period Data"
+            },
+            uv: {
+                icon: "☀️",
+                title: "UV İNDEKS",
+                titleEn: "UV INDEX",
+                desc: "Güneşin ultraviyole radyasyon şiddeti (0-11+). Sığ suda balık davranışını doğrudan etkiler.",
+                descEn: "Solar ultraviolet radiation intensity (0-11+). Directly affects fish behavior in shallow water.",
+                importance: "Yüksek UV'de balıklar derine iner veya gölge arar. Düşük UV'de sığ suda rahat avlanır.",
+                importanceEn: "High UV drives fish deeper or to shade. Low UV allows comfortable shallow feeding.",
+                ref: "0-2: Düşük (iyi)\n3-5: Orta\n6-7: Yüksek\n8+: Çok yüksek (kötü)",
+                algo: "UV≥8 gündüz: kıyı türleri -1.5\nUV≤3 gündüz: kıyı türleri +1",
+                source: "Open-Meteo UV Index API; WHO UV Index Guidelines"
+            },
+            swell: {
+                icon: "🏄",
+                title: "SWELL YÜKSEKLİĞİ",
+                titleEn: "SWELL HEIGHT",
+                desc: "Uzak fırtınalardan gelen uzun periyotlu dalga yüksekliği. Rüzgar dalgasından bağımsız.",
+                descEn: "Long-period wave height from distant storms. Independent of local wind waves.",
+                importance: "Swell varlığı deniz altında düzenli hareket yaratır. Balıklar swell'e adapte olur, rüzgar dalgasına olmaz.",
+                importanceEn: "Swell creates regular subsurface movement. Fish adapt to swell but not to wind waves.",
+                ref: "0-0.5m: Düşük\n0.5-1.5m: Orta\n1.5m+: Güçlü",
+                algo: "wavePeriod ile birlikte değerlendirilir",
+                source: "Open-Meteo Marine API; ECMWF WAM Model"
             }
         };
 
@@ -3741,8 +3799,17 @@
             try {
                 const res = await fetch(`/api/forecast?lat=${lat}&lon=${lon}`);
                 const data = await res.json();
+                
+                // API hatası kontrolü
+                if (data.error || !data.forecast) {
+                    hideLoading();
+                    const msg = data.message || data.error || 'Veri alınamadı';
+                    document.getElementById('log-output').innerHTML = `<div class="log-line" style="color:var(--yellow);">⚠️ ${msg} — tekrar deneyin</div>`;
+                    setTimeout(() => { hideLoading(); }, 2000);
+                    return;
+                }
+                
                 GLOBAL_DATA = data;
-
                 runLoadingAnimation(data);
             } catch (err) {
                 hideLoading();
@@ -4059,6 +4126,25 @@
             }
             
             document.getElementById('tactic-display').innerText = tacticText;
+            
+            // [YENİ] Sıcaklık Şoku Göstergesi
+            let shockEl = document.getElementById('temp-shock-display');
+            if (!shockEl) {
+                shockEl = document.createElement('div');
+                shockEl.id = 'temp-shock-display';
+                shockEl.style.cssText = 'font-size:0.8rem;font-weight:bold;padding:6px 12px;border-radius:8px;margin-top:6px;display:none;text-align:center;';
+                document.getElementById('tactic-display').parentNode.insertBefore(shockEl, document.getElementById('tactic-display').nextSibling);
+            }
+            const shockData = data.tempShock || global.forecast?.[0]?.tempShock;
+            if (shockData && shockData.shock) {
+                const isC = shockData.direction === 'COOLING';
+                shockEl.style.display = 'block';
+                shockEl.style.background = isC ? 'rgba(0,200,255,0.15)' : 'rgba(255,150,0,0.15)';
+                shockEl.style.color = isC ? 'var(--cyan)' : 'var(--yellow)';
+                shockEl.innerHTML = `⚡ ${t('starTempShock')}: ${shockData.change > 0 ? '+' : ''}${shockData.change}°C/24h — ${isC ? t('tempShockCooling') : t('tempShockWarming')}`;
+            } else {
+                shockEl.style.display = 'none';
+            }
 
             // Confidence
             const conf = CURRENT_MODE === 'daily' ? (global.forecast[0]?.confidence || 90) : 95;
@@ -4140,12 +4226,12 @@
                 { key: 'temp', val: data.temp || daily.temp, unit: '°' },
                 { key: 'wind', val: data.wind || daily.wind, unit: ' km', extra: windDirName },
                 { key: 'clarity', val: data.clarity || daily.clarity, unit: '%' },
-                { key: 'wave', val: daily.wave, unit: 'm' },
+                { key: 'wave', val: daily.wave, unit: 'm', extra: daily.wavePeriod ? `<span style="font-size:0.55rem;color:var(--text-muted);">${daily.wavePeriod}s</span>` : '' },
                 { key: 'salinity', val: daily.salinity, unit: ' P' },
                 { key: 'pressure', val: data.pressure || daily.pressure, unit: '' },
                 { key: 'moon', val: '', unit: '' },
                 { key: 'tide', val: daily.tide, unit: 'm' },
-                { key: 'current', val: daily.current, unit: '' },
+                { key: 'current', val: daily.current, unit: '', extra: daily.currentIsReal ? `<span style="color:var(--green);font-size:0.55rem;">● ${t('realCurrent')}</span>` : '' },
                 { key: 'cloud', val: daily.cloud, unit: '' }
             ];
 
@@ -4332,16 +4418,20 @@
                             ${sd.temp ? starLine(t('starTemp') + ` (${sd.temp.value}°C)`, sd.temp.stars, sd.temp.score, sd.temp.max, tempNote) : ''}
                             ${sd.depth ? starLine((CURRENT_LANG === 'tr' ? 'Derinlik' : 'Depth') + ' (' + fmtDepth(sd.depth.value) + ' / opt:' + fmtDepth(sd.depth.fishOpt) + ')', sd.depth.stars, sd.depth.score, sd.depth.max, '') : ''}
                             ${sd.wave ? starLine(t('starWave') + ` (${sd.wave.value}m)`, sd.wave.stars, sd.wave.score, sd.wave.max, '') : ''}
+                            ${sd.wavePeriod ? starLine(t('starWavePeriod') + ` (${sd.wavePeriod.value}s${sd.wavePeriod.swell ? ' / swell:' + sd.wavePeriod.swell.toFixed(1) + 'm' : ''})`, sd.wavePeriod.stars, '', '', sd.wavePeriod.value <= 4 ? (CURRENT_LANG === 'tr' ? 'Kısa periyot — rüzgar dalgası' : 'Short period — wind waves') : '') : ''}
                             ${sd.clarity ? starLine(t('starClarity') + ` (${sd.clarity.value}%)`, sd.clarity.stars, sd.clarity.score, sd.clarity.max, clarNote) : ''}
+                            ${sd.cloud ? starLine(t('starCloud') + ` (${sd.cloud.value}%)`, sd.cloud.stars, '', '', '') : ''}
+                            ${sd.uv ? starLine(t('starUV') + ` (${sd.uv.value})`, sd.uv.stars, '', '', sd.uv.value >= 8 ? (CURRENT_LANG === 'tr' ? 'Çok yüksek UV — balık derine kaçar' : 'Very high UV — fish go deep') : '') : ''}
                             ${sd.wind ? starLine(t('starWind') + ` (${sd.wind.value}km/s ${wdName})`, sd.wind.stars, sd.wind.score, sd.wind.max, windNote) : ''}
                             ${sd.activity ? starLine(t('starActivity'), sd.activity.stars, sd.activity.score, sd.activity.max, '') : ''}
                             ${sd.region ? starLine(CURRENT_LANG === 'tr' ? 'Bölge' : 'Region', sd.region.stars, sd.region.score, sd.region.max, '') : ''}
                             ${starLine('Basınç (' + pressure + ' hPa / ' + pressTrendTR + ')', pressStars, pressPts, pressMax, pressNote)}
-                            ${starLine('Akıntı (' + currentSpd.toFixed(1) + ' kn / opt:' + (sd.current?.pref !== undefined ? (sd.current.pref * 1.5).toFixed(1) : '0.5') + ' kn)', curStars, curPts, curMax, curNote)}
+                            ${starLine('Akıntı (' + currentSpd.toFixed(1) + ' kn' + (sd.current?.isReal ? ' ✓' : '') + ' / opt:' + (sd.current?.pref !== undefined ? (sd.current.pref * 1.5).toFixed(1) : '0.5') + ' kn)', curStars, curPts, curMax, curNote)}
                             ${starLine('Gelgit (' + tideVal.toFixed(1) + ' / opt:0.8-1.3)', tideStars, tidePts, tideMax, tideNote)}
                             ${salinityVal ? `<div style="font-size:0.68rem; color:var(--text-muted); margin-top:4px;">🧂 Tuzluluk: ‰${salinityVal}</div>` : ''}
+                            ${sd.tempShock ? `<div style="color: var(--cyan); font-size: 0.7rem; margin-top: 4px;">⚡ ${t('starTempShock')}: ${sd.tempShock.change > 0 ? '+' : ''}${sd.tempShock.change}°C/24h</div>` : ''}
                             ${sd.midday ? `<div style="color: var(--yellow); font-size: 0.7rem; margin-top: 4px;">☀️ Öğlen bastırması: ×${sd.midday.penalty.toFixed(2)}</div>` : ''}
-                            ${sd.volatility ? `<div style="color: var(--cyan); font-size: 0.7rem; margin-top: 4px;">🐟 Sürü faktörü: ×${sd.volatility.multiplier}</div>` : ''}
+                            ${sd.volatility ? `<div style="color: var(--cyan); font-size: 0.7rem; margin-top: 4px;">🐟 Sürü faktörü: ×${sd.volatility.multiplier}${sd.volatility.migratory ? (CURRENT_LANG === 'tr' ? ' (Yüksek Göçmen)' : ' (High Migratory)') : ''}</div>` : ''}
                             ${sd.camDeniz ? `<div style="color: var(--yellow); font-size: 0.7rem; margin-top: 4px;">🪟 Cam deniz cezası: ×${sd.camDeniz.penalty.toFixed(2)}</div>` : ''}
                             ${sd.penalties && sd.penalties.length > 0 ? `<div style="color: var(--red); font-size: 0.7rem; margin-top: 4px;">⚠️ ${sd.penalties.join(', ')}</div>` : ''}
                         </div>
