@@ -523,6 +523,7 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
     let totalWeight = 0;
     let bestHour = -1;
     let bestHourScore = -1;
+    const hourlyScores = new Array(24); // [YENİ] 24 saatlik skor dizisi
     
     // SunCalc'ı döngü dışında bir kez hesapla (performans)
     const sunTimes = SunCalc.getTimes(baseParams.targetDate, baseParams.lat, baseParams.lon);
@@ -566,6 +567,9 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
         // Skor hesapla
         const result = calculateFishScore(fish, key, hourParams);
         
+        // [YENİ] Saatlik skoru kaydet
+        hourlyScores[h] = Math.round(result.finalScore * 10) / 10;
+        
         // En iyi saati takip et
         if (result.finalScore > bestHourScore) {
             bestHourScore = result.finalScore;
@@ -580,7 +584,7 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
     }
     
     const avgScore = totalWeight > 0 ? totalScore / totalWeight : 0;
-    return { score: avgScore, bestHour, bestHourScore };
+    return { score: avgScore, bestHour, bestHourScore, hourlyScores };
 }
 
 // 3 saatlik pencere ortalaması (anlık için)
@@ -2788,6 +2792,7 @@ app.get('/api/forecast', async (req, res) => {
                             score: dailyScore, // Ağırlıklı günlük skor
                             bestHour: bestHourStr, // En iyi saat
                             bestHourScore: dailyResult.bestHourScore,
+                            hourlyScores: dailyResult.hourlyScores, // [YENİ] 24 saatlik skor
                             bait: fish.advice.bait, method: fish.advice.hook,
                             lure: fish.advice.lure, rig: fish.advice.rig, note: fish.note,
                             legalSize: fish.legalSize, reason: result.reason,
@@ -3171,6 +3176,7 @@ app.get('/api/fish-search', async (req, res) => {
         let dailyScore = null;
         let bestHour = null;
         let bestHourScore = null;
+        let hourlyScores = null;
         try {
             const activityWindows = calculateActivityWindows(now, parseFloat(latF), parseFloat(lonF));
             const dailyResult = calculateWeightedDailyScore(
@@ -3179,6 +3185,7 @@ app.get('/api/fish-search', async (req, res) => {
             dailyScore = dailyResult.score;
             bestHour = dailyResult.bestHour >= 0 ? `${String(dailyResult.bestHour).padStart(2,'0')}:00` : null;
             bestHourScore = dailyResult.bestHourScore;
+            hourlyScores = dailyResult.hourlyScores;
         } catch(e) { console.log('Daily score calc error:', e.message); }
 
         // === LİSTEDE VAR MI KONTROL ===
@@ -3272,6 +3279,7 @@ app.get('/api/fish-search', async (req, res) => {
             dailyScore: dailyScore,
             bestHour: bestHour,
             bestHourScore: bestHourScore,
+            hourlyScores: hourlyScores,
             isInDailyList: isInDailyList,
             scoreDetails: result.scoreDetails,
             triggers: result.activeTriggers,
