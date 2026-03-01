@@ -4347,6 +4347,44 @@
                     ? `<div style="color: var(--green); font-size: 0.78rem;">⭐ <strong>${CURRENT_LANG === 'tr' ? 'Bugün En İyi Saat' : 'Best Hour Today'}:</strong> ${f.bestHour} (%${f.bestHourScore ? f.bestHourScore.toFixed(0) : '?'})</div>`
                     : '';
                 
+                // [YENİ] 24 Saatlik Skor Grafiği
+                let hourlyChartHtml = '';
+                if (f.hourlyScores && f.hourlyScores.length === 24 && CURRENT_MODE === 'daily') {
+                    const scores = f.hourlyScores;
+                    const maxS = Math.max(...scores, 1);
+                    const nowH = new Date().getHours();
+                    const bestH = f.bestHour ? parseInt(f.bestHour) : -1;
+                    
+                    const bars = scores.map((s, h) => {
+                        const pct = Math.max(2, (s / maxS) * 100);
+                        const isBest = h === bestH;
+                        const isNow = h === nowH;
+                        const color = isBest ? 'var(--green)' : s >= 70 ? 'rgba(0,220,130,0.75)' : s >= 50 ? 'rgba(255,200,0,0.7)' : 'rgba(255,80,80,0.5)';
+                        const border = isNow ? 'border:1px solid var(--cyan);' : '';
+                        const title = `${String(h).padStart(2,'0')}:00 → %${s.toFixed(0)}`;
+                        return `<div title="${title}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;">
+                            <div style="width:100%;min-width:3px;height:${pct}%;background:${color};border-radius:2px 2px 0 0;${border}${isBest?'box-shadow:0 0 4px var(--green);':''}"></div>
+                        </div>`;
+                    }).join('');
+                    
+                    // Saat etiketleri (her 3 saatte bir)
+                    const labels = [0,3,6,9,12,15,18,21].map(h => 
+                        `<span style="position:absolute;left:${(h/24)*100}%;font-size:0.5rem;color:var(--text-muted);transform:translateX(-50%);">${String(h).padStart(2,'0')}</span>`
+                    ).join('');
+                    
+                    const chartTitle = CURRENT_LANG === 'tr' ? 'SAATLİK SKOR' : 'HOURLY SCORE';
+                    hourlyChartHtml = `
+                        <div style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px solid var(--border-subtle);">
+                            <div style="font-size:0.65rem;color:var(--cyan);margin-bottom:6px;">📈 ${chartTitle}</div>
+                            <div style="display:flex;gap:1px;height:40px;align-items:flex-end;">
+                                ${bars}
+                            </div>
+                            <div style="position:relative;height:12px;margin-top:2px;">
+                                ${labels}
+                            </div>
+                        </div>`;
+                }
+                
                 // Yıldız sistemi (scoreDetails varsa)
                 let starsHtml = '';
                 if (f.scoreDetails) {
@@ -4465,6 +4503,7 @@
                             ${legalText ? `<div>📏 <strong>${t('legalSize')}:</strong> ${legalText}</div>` : ''}
                             ${peakTimeLine}
                             ${bestHourLine}
+                            ${hourlyChartHtml}
                             ${f.note ? `<div class="fish-tip">💡 ${f.note}</div>` : ''}
                             ${starsHtml}
                         </div>
