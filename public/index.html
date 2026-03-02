@@ -79,10 +79,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     
-    <!-- AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-3917681233831830"
-         crossorigin="anonymous"></script>
-    
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     
@@ -2013,6 +2009,73 @@
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════
+         PAYWALL MODAL
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="paywall-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:100000; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:linear-gradient(135deg, #0d1520, #162030); border-radius:20px; max-width:380px; width:100%; padding:30px 24px; text-align:center; border:1px solid rgba(0,200,200,0.2); box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+            <!-- Close button -->
+            <div style="text-align:right; margin:-10px -4px 0 0;">
+                <button onclick="closePaywall()" style="background:none; border:none; color:#8892a3; font-size:24px; cursor:pointer;">✕</button>
+            </div>
+            
+            <!-- Icon & Title -->
+            <div style="font-size:48px; margin-bottom:10px;">🐟</div>
+            <div id="paywall-title" style="font-size:20px; font-weight:700; color:#fff; margin-bottom:6px;">Günlük Hakkınız Doldu</div>
+            <div id="paywall-subtitle" style="font-size:13px; color:#8892a3; margin-bottom:24px;">MERALOJİ PRO ile sınırsız tahmin yapın</div>
+            
+            <!-- Features -->
+            <div style="text-align:left; margin-bottom:24px;">
+                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; color:#c8d0dc; font-size:13px;">
+                    <span style="color:#00ffcc;">✓</span> Sınırsız harita tıklama
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; color:#c8d0dc; font-size:13px;">
+                    <span style="color:#00ffcc;">✓</span> 82 balık türü — tam liste
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; color:#c8d0dc; font-size:13px;">
+                    <span style="color:#00ffcc;">✓</span> Saatlik skor grafiği + En İyi Saat
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; color:#c8d0dc; font-size:13px;">
+                    <span style="color:#00ffcc;">✓</span> Sınırsız bölge tarama
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; color:#c8d0dc; font-size:13px;">
+                    <span style="color:#00ffcc;">✓</span> Detaylı skor analizi (15+ parametre)
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; color:#c8d0dc; font-size:13px;">
+                    <span style="color:#00ffcc;">✓</span> 7 günlük tahmin
+                </div>
+            </div>
+            
+            <!-- Pricing Cards -->
+            <div style="display:flex; gap:10px; margin-bottom:16px;">
+                <!-- Monthly -->
+                <div style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(0,200,200,0.15); border-radius:12px; padding:14px 10px; cursor:pointer;" onclick="upgradeToPro('monthly')">
+                    <div style="font-size:11px; color:#8892a3; margin-bottom:4px;">AYLIK</div>
+                    <div style="font-size:22px; font-weight:700; color:#00ffcc;">₺9,99</div>
+                    <div style="font-size:10px; color:#ff851b;">🎉 Lansmana Özel</div>
+                </div>
+                <!-- Yearly -->
+                <div style="flex:1; background:rgba(0,200,200,0.08); border:2px solid rgba(0,200,200,0.4); border-radius:12px; padding:14px 10px; position:relative; cursor:pointer;" onclick="upgradeToPro('yearly')">
+                    <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:linear-gradient(90deg,#00c8c8,#00ffcc); color:#000; font-size:9px; font-weight:700; padding:2px 10px; border-radius:10px;">EN AVANTAJLI</div>
+                    <div style="font-size:11px; color:#8892a3; margin-bottom:4px;">YILLIK</div>
+                    <div style="font-size:22px; font-weight:700; color:#00ffcc;">₺59,99</div>
+                    <div style="font-size:10px; color:#8892a3;">Aylık ₺5 — %50 tasarruf</div>
+                </div>
+            </div>
+            
+            <!-- Launch badge -->
+            <div style="font-size:11px; color:#ff851b; margin-bottom:16px;">⏰ Lansman fiyatı sınırlı sürelidir. Sonra ₺29,99/ay olacak.</div>
+            
+            <!-- CTA -->
+            <button onclick="upgradeToPro('yearly')" style="width:100%; padding:14px; border:none; border-radius:12px; background:linear-gradient(135deg, #00c8c8, #00ffcc); color:#000; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:0.5px;">
+                PRO'ya Yükselt
+            </button>
+            
+            <!-- Skip -->
+            <div onclick="closePaywall()" style="margin-top:12px; font-size:12px; color:#556; cursor:pointer;">Ücretsiz devam et (yarın hak yenilenir)</div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
          SPLASH SCREEN
          ═══════════════════════════════════════════════════════════════════ -->
     <div id="splash">
@@ -2040,7 +2103,7 @@
             <div class="search-suggestions" id="search-suggestions"></div>
         </div>
         <button class="measure-btn" id="measure-btn" onclick="toggleMeasureMode()" title="Mesafe Ölç">📏</button>
-        <button class="scan-btn" id="scan-btn" onclick="openScanFlow()" title="Bölge Tarama (PRO)">
+        <button class="scan-btn" id="scan-btn" onclick="openScanFlow()" title="Bölge Tarama">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="scan-radar-icon">
                 <circle cx="12" cy="12" r="10" stroke="#00ff88" stroke-width="1.2" stroke-dasharray="4 2" opacity="0.4"/>
                 <circle cx="12" cy="12" r="6" stroke="#00ff88" stroke-width="1.2" stroke-dasharray="3 2" opacity="0.65"/>
@@ -2048,7 +2111,7 @@
                 <line x1="12" y1="12" x2="12" y2="2" stroke="#00ff88" stroke-width="2" stroke-linecap="round" class="scan-sweep-line"/>
                 <circle cx="12" cy="3" r="1.5" class="scan-sweep-dot"/>
             </svg>
-            <span class="scan-badge" id="scan-badge">5</span>
+            <span class="scan-badge" id="scan-badge">1</span>
         </button>
     </div>
 
@@ -2113,7 +2176,7 @@
                 ⏱️ Bu tarama <strong>~2 dakika</strong> sürebilir. Sonuçlar ekrana gerçek zamanlı yansır. Tarama sonuçları 3 saat boyunca saklanır; aynı bölgeyi tekrar tararken önbellekten anında döner.
             </div>
 
-            <div class="scan-remaining">Bugünkü kalan tarama hakkınız: <span id="scan-remaining-count">5</span> / 5</div>
+            <div class="scan-remaining">Bugünkü kalan tarama hakkınız: <span id="scan-remaining-count">1</span></div>
 
             <button class="scan-start-btn" onclick="startScan()" id="scan-start-btn">🔍 TARAMAYI BAŞLAT</button>
             <button class="scan-cancel-btn" onclick="closeScanModal()">İptal</button>
@@ -2248,7 +2311,7 @@
                 display: flex; align-items: center; justify-content: center; gap: 8px;
                 transition: all 0.2s;
             " onmouseover="this.style.background='rgba(0,255,136,0.15)'" onmouseout="this.style.background='rgba(0,255,136,0.08)'">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 2"/></svg> Bölgeyi Tara <span id="hud-scan-badge" style="background:rgba(0,255,136,0.2);padding:2px 8px;border-radius:10px;font-size:0.75rem;">5 hak</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 2"/></svg> Bölgeyi Tara <span id="hud-scan-badge" style="background:rgba(0,255,136,0.2);padding:2px 8px;border-radius:10px;font-size:0.75rem;">1 hak</span>
             </button>
         </div>
     </div>
@@ -2394,7 +2457,7 @@
         <span style="color: var(--cyan);">2.</span> Yarıçap seçin: 3 km / 5 km / 10 km<br>
         <span style="color: var(--cyan);">3.</span> İsteğe bağlı balık türü seçin<br>
         <span style="color: var(--cyan);">4.</span> Tara — ~2 dakika içinde pin'ler haritaya belirir<br>
-        <span style="color: var(--yellow);">⚡ Günlük 5 tarama hakkınız vardır.</span> Aynı bölge 3 saat içinde anında döner.
+        <span style="color: var(--yellow);">⚡ Ücretsiz: Günlük 1 tarama. PRO: Sınırsız.</span> Aynı bölge 3 saat içinde anında döner.
     </p>
 </div>
 
@@ -3812,6 +3875,26 @@
                 return;
             }
 
+            // 🔒 Tıklama limiti kontrolü (PRO = sınırsız)
+            if (!isPremium) {
+                try {
+                    const clickRes = await fetch('/api/use-click', { 
+                        method: 'POST', 
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': authToken ? 'Bearer ' + authToken : ''
+                        } 
+                    });
+                    const clickData = await clickRes.json();
+                    if (!clickData.allowed) {
+                        showPaywall('click');
+                        return;
+                    }
+                    usageData.clicksRemaining = clickData.remaining;
+                    updateUserUI();
+                } catch(e) { /* hata durumunda izin ver */ }
+            }
+
             lastLatLon = { lat: lat.toFixed(4), lon: lon.toFixed(4) };
 
             // Balık arama sıfırla
@@ -4363,8 +4446,8 @@
                 return;
             }
 
-            // Premium gate: ücretsiz kullanıcıya 3 balık
-            const displayList = isPremium ? list : list.slice(0, 3);
+            // Premium gate: ücretsiz kullanıcıya 5 balık
+            const displayList = isPremium ? list : list.slice(0, 5);
 
             container.innerHTML = displayList.map(f => {
                 const isProtected = f.legalSize === 'YASAK' || f.category === 'KORUMA';
@@ -4398,6 +4481,13 @@
                 // [YENİ] 24 Saatlik Skor Grafiği
                 let hourlyChartHtml = '';
                 if (f.hourlyScores && f.hourlyScores.length === 24 && CURRENT_MODE === 'daily') {
+                    if (!isPremium) {
+                        hourlyChartHtml = `
+                            <div onclick="showPaywall('chart')" style="margin-top:8px;padding:12px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px dashed var(--border-subtle);text-align:center;cursor:pointer;">
+                                <div style="font-size:0.7rem;color:var(--cyan);">📈 SAATLİK SKOR GRAFİĞİ</div>
+                                <div style="font-size:0.65rem;color:#8892a3;margin-top:4px;">🔒 PRO ile açılır</div>
+                            </div>`;
+                    } else {
                     const scores = f.hourlyScores;
                     const maxS = Math.max(...scores, 1);
                     const nowH = new Date().getHours();
@@ -4431,11 +4521,19 @@
                                 ${labels}
                             </div>
                         </div>`;
-                }
+                    } // close else (isPremium)
+                } // close if (hourlyScores)
                 
                 // Yıldız sistemi (scoreDetails varsa)
                 let starsHtml = '';
                 if (f.scoreDetails) {
+                    if (!isPremium) {
+                        starsHtml = `
+                            <div onclick="showPaywall('analysis')" style="margin-top:8px;padding:12px;background:rgba(0,0,0,0.2);border-radius:6px;border:1px dashed var(--border-subtle);text-align:center;cursor:pointer;">
+                                <div style="font-size:0.7rem;color:var(--cyan);">📊 SKOR ANALİZİ (15+ parametre)</div>
+                                <div style="font-size:0.65rem;color:#8892a3;margin-top:4px;">🔒 PRO ile açılır</div>
+                            </div>`;
+                    } else {
                     const sd = f.scoreDetails;
                     const starLine = (label, stars, pts, maxPts, note) => {
                         const filled = '★'.repeat(Math.max(0, Math.min(5, stars)));
@@ -4522,7 +4620,8 @@
                             ${sd.penalties && sd.penalties.length > 0 ? `<div style="color: var(--red); font-size: 0.7rem; margin-top: 4px;">⚠️ ${sd.penalties.join(', ')}</div>` : ''}
                         </div>
                     `;
-                }
+                    } // close else (isPremium)
+                } // close if (scoreDetails)
 
                 // Fotoğraf butonu
                 const photoBtn = f.photoId ? `<span class="fish-photo-btn" onclick="showFishPhoto(${f.photoId}, '${displayName}', event)">👁️</span>` : '';
@@ -4560,16 +4659,15 @@
             }).join('');
 
             // Premium gate göster
-            if (!isPremium && list.length > 3) {
-                const trialMsg = (trialInfo && trialInfo.expired) 
-                    ? '<p style="color:var(--yellow); margin-bottom:8px;">⏰ Deneme süreniz doldu!</p>' : '';
+            if (!isPremium && list.length > 5) {
                 container.innerHTML += `
                     <div class="premium-gate">
-                        <h3>🔒 MERALOJİ PRO</h3>
-                        ${trialMsg}
-                        <p>Tüm ${list.length} balık türünü gör, 7 günlük tahmin al, reklamsız kullan</p>
-                        <div class="price">₺9,99/ay</div>
-                        <button class="upgrade-btn" onclick="upgradeToPro()">PRO'ya Yükselt</button>
+                        <h3>🔒 +${list.length - 5} balık daha var!</h3>
+                        <p>Tüm ${list.length} balık türünü gör, saatlik grafik, skor analizi</p>
+                        <div class="price" style="margin-bottom:4px;">🎉 Lansmana Özel: ₺9,99/ay</div>
+                        <div style="font-size:0.7rem;color:#8892a3;margin-bottom:6px;">Yıllık: ₺59,99 (₺5/ay)</div>
+                        <div style="font-size:0.65rem;color:#ff851b;margin-bottom:10px;">⏰ Lansman fiyatı sınırlı sürelidir</div>
+                        <button class="upgrade-btn" onclick="showPaywall('list')">PRO'ya Yükselt</button>
                     </div>`;
             }
         }
@@ -4869,6 +4967,13 @@
 
                 let starsHtml = '';
                 if (sd) {
+                    if (!isPremium) {
+                        starsHtml = `<div onclick="showPaywall('analysis')" style="margin-top:10px; padding:14px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px dashed var(--border-subtle); text-align:center; cursor:pointer;">
+                            <div style="font-size:0.75rem; color:var(--cyan);">📊 SKOR ANALİZİ (15+ parametre)</div>
+                            <div style="font-size:0.65rem; color:#8892a3; margin-top:6px;">🔒 Su sıcaklığı, dalga, rüzgar, basınç, akıntı, mevsim...</div>
+                            <div style="font-size:0.7rem; color:#ff851b; margin-top:6px;">PRO ile aç →</div>
+                        </div>`;
+                    } else {
                     starsHtml = `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border-subtle);">
                         <div style="font-size:0.72rem; color:var(--cyan); margin-bottom:6px;">📊 SKOR ANALİZİ</div>
                         ${sd.season ? starLine('Mevsim (' + c.season + ')', sd.season.stars, sd.season.score, sd.season.max, seasonNote()) : ''}
@@ -4888,7 +4993,8 @@
                         ${sd.camDeniz ? '<div style="color:var(--yellow);font-size:0.7rem;margin-top:4px;">🪟 Cam deniz cezası: ×' + sd.camDeniz.penalty.toFixed(2) + '</div>' : ''}
                         ${sd.penalties && sd.penalties.length > 0 ? '<div style="color:var(--red);font-size:0.7rem;margin-top:4px;">⚠️ ' + sd.penalties.join(', ') + '</div>' : ''}
                     </div>`;
-                }
+                    } // close else (isPremium)
+                } // close if (sd)
 
                 // Koşullar özeti
                 const condHtml = `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border-subtle); font-size:0.72rem; color:var(--text-muted);">
@@ -5043,13 +5149,13 @@
                 // Premium gate: ücretsiz kullanıcıya sadece 1 gün
                 if (!isPremium && i > 0) {
                     if (i === 1) {
-                        const trialMsg2 = (trialInfo && trialInfo.expired) ? '<p style="color:var(--yellow);">⏰ Deneme süreniz doldu!</p>' : '';
                         return `<div class="premium-gate">
-                            <h3>🔒 MERALOJİ PRO</h3>
-                            ${trialMsg2}
-                            <p>7 günlük tahmine erişmek için PRO'ya yükseltin</p>
-                            <div class="price">₺9,99/ay</div>
-                            <button class="upgrade-btn" onclick="upgradeToPro()">PRO'ya Yükselt</button>
+                            <h3>🔒 7 Günlük Tahmin</h3>
+                            <p>Önümüzdeki 7 günün tahminini görmek için PRO'ya yükseltin</p>
+                            <div class="price" style="margin-bottom:4px;">🎉 Lansmana Özel: ₺9,99/ay</div>
+                            <div style="font-size:0.7rem;color:#8892a3;margin-bottom:6px;">Yıllık: ₺59,99 (₺5/ay)</div>
+                            <div style="font-size:0.65rem;color:#ff851b;margin-bottom:10px;">⏰ Lansman fiyatı sınırlı sürelidir</div>
+                            <button class="upgrade-btn" onclick="showPaywall('forecast')">PRO'ya Yükselt</button>
                         </div>`;
                     }
                     return '';
@@ -5163,13 +5269,15 @@
 
         async function loadScanUsage() {
             try {
-                const res = await fetch('/api/scan-usage');
+                const res = await fetch('/api/scan-usage', {
+                    headers: authToken ? { 'Authorization': 'Bearer ' + authToken } : {}
+                });
                 const data = await res.json();
-                const rem = data.remainingScans ?? 5;
+                const rem = data.remainingScans ?? 1;
                 document.getElementById('scan-badge').textContent = rem;
                 document.getElementById('scan-remaining-count').textContent = rem;
                 return rem;
-            } catch(e) { return 5; }
+            } catch(e) { return 1; }
         }
 
         function selectRadius(km) {
@@ -5180,9 +5288,13 @@
         }
 
         async function openScanFlow() {
+            // Free kullanıcı da tarama yapabilir (günde 1 hak)
             if (!isPremium) {
-                alert('🔒 Bu özellik MERALOJİ PRO gerektirir.\n\nPRO\'ya yükseltmek için Google Play\'i ziyaret edin.');
-                return;
+                const rem = await loadScanUsage();
+                if (rem <= 0) {
+                    showPaywall('scan');
+                    return;
+                }
             }
 
             // İlk kullanımda tutorial göster
@@ -5223,7 +5335,7 @@
         async function startScan() {
             const rem = await loadScanUsage();
             if (rem <= 0) {
-                alert('⛔ Günlük 5 tarama hakkınızı kullandınız.\nYarın tekrar deneyin.');
+                showPaywall('scan');
                 closeScanModal();
                 return;
             }
@@ -5630,7 +5742,7 @@ const auth = firebase.auth();
 let currentUser = null;
 let isPremium = false;
 let authToken = null;
-let trialInfo = null;
+let usageData = { clicksRemaining: 5, scansRemaining: 1, clickLimit: 5, scanLimit: 1 };
 
 function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -5654,9 +5766,7 @@ auth.onAuthStateChanged(async (user) => {
         document.getElementById('login-overlay').classList.add('hidden');
         await checkSubscriptionStatus();
         updateUserUI();
-        updateAdDisplay();
-        // Scan badge güncelle
-        if (isPremium) { try { await loadScanUsage(); } catch(e) {} }
+        try { await loadScanUsage(); } catch(e) {}
     } else {
         currentUser = null;
         isPremium = false;
@@ -5673,10 +5783,11 @@ async function checkSubscriptionStatus() {
         });
         const data = await res.json();
         isPremium = data.isPremium;
-        trialInfo = data.trial || null;
+        if (data.usage) {
+            usageData = data.usage;
+        }
     } catch (e) {
         isPremium = false;
-        trialInfo = null;
     }
 }
 
@@ -5687,32 +5798,20 @@ function updateUserUI() {
         document.getElementById('user-name').textContent = (currentUser.displayName || currentUser.email || '').split(' ')[0];
         
         const proTag = document.getElementById('pro-tag');
-        if (trialInfo && trialInfo.active) {
-            proTag.textContent = `DENEME (${trialInfo.daysLeft}g)`;
-            proTag.style.display = 'inline';
-            proTag.style.background = 'linear-gradient(90deg, #ff851b, #ff6b35)';
-        } else if (isPremium) {
+        if (isPremium) {
             proTag.textContent = 'PRO';
             proTag.style.display = 'inline';
             proTag.style.background = 'linear-gradient(90deg, #00c8c8, #00ffcc)';
         } else {
-            proTag.style.display = 'none';
+            proTag.textContent = `${usageData.clicksRemaining}/${usageData.clickLimit}`;
+            proTag.style.display = 'inline';
+            proTag.style.background = 'linear-gradient(90deg, #ff851b, #ff6b35)';
         }
         badge.style.display = 'flex';
     }
 }
 
-function updateAdDisplay() {
-    const adBanner = document.getElementById('ad-banner');
-    if (adBanner) {
-        if (isPremium) {
-            adBanner.style.display = 'none';
-        } else {
-            adBanner.style.display = 'flex';
-            try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
-        }
-    }
-}
+// Reklamlar kaldırıldı — profesyonel uygulama reklam göstermez
 
 function signOut() {
     auth.signOut();
@@ -5724,15 +5823,60 @@ function showUserMenu() {
     }
 }
 
-async function upgradeToPro() {
+// ═══════════════════════════════════════════════════════════════
+// 💰 PAYWALL & UPGRADE
+// ═══════════════════════════════════════════════════════════════
+
+function showPaywall(reason) {
+    const modal = document.getElementById('paywall-modal');
+    const title = document.getElementById('paywall-title');
+    const subtitle = document.getElementById('paywall-subtitle');
+    
+    if (reason === 'click') {
+        title.textContent = 'Günlük 5 Tahmin Hakkınız Doldu';
+        subtitle.textContent = 'PRO ile sınırsız tahmin yapın, tüm balıkları görün';
+    } else if (reason === 'scan') {
+        title.textContent = 'Günlük Tarama Hakkınız Doldu';
+        subtitle.textContent = 'PRO ile sınırsız bölge taraması yapın';
+    } else if (reason === 'list') {
+        title.textContent = 'Daha Fazla Balık Görmek İçin';
+        subtitle.textContent = '82 balık türünün tamamını PRO ile keşfedin';
+    } else if (reason === 'forecast') {
+        title.textContent = '7 Günlük Tahmin';
+        subtitle.textContent = 'Önümüzdeki 7 günün tahminini PRO ile görün';
+    } else if (reason === 'chart') {
+        title.textContent = 'Saatlik Skor Grafiği';
+        subtitle.textContent = 'En iyi avlanma saatini PRO ile keşfedin';
+    } else if (reason === 'analysis') {
+        title.textContent = 'Detaylı Skor Analizi';
+        subtitle.textContent = '15+ parametre ile derinlemesine analiz';
+    } else {
+        title.textContent = 'MERALOJİ PRO';
+        subtitle.textContent = 'Akıllı balıkçılığın tüm gücünü açın';
+    }
+    
+    modal.style.display = 'flex';
+}
+
+function closePaywall() {
+    document.getElementById('paywall-modal').style.display = 'none';
+}
+
+async function upgradeToPro(plan) {
+    closePaywall();
+    
+    const subId = plan === 'yearly' ? 'meraloji_pro_yearly' : 'meraloji_pro_monthly';
+    
+    // PWA modundaysa Android intent ile ödeme sayfasına yönlendir
     if (window.matchMedia('(display-mode: standalone)').matches) {
         const user = firebase.auth().currentUser;
         if (user) {
-            window.location.href = `intent://satin-al?uid=${user.uid}#Intent;scheme=meraloji;package=com.meraloji.fish;end`;
+            window.location.href = `intent://satin-al?uid=${user.uid}&plan=${subId}#Intent;scheme=meraloji;package=com.meraloji.fish;end`;
         } else {
             alert("Lütfen önce giriş yapın.");
         }
     } else {
+        // Web'den geliyorsa Play Store'a yönlendir
         window.open('https://play.google.com/store/apps/details?id=com.meraloji.fish', '_blank');
     }
 }
