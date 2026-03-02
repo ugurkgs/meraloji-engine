@@ -3591,19 +3591,20 @@ app.get('/api/scan', async (req, res) => {
                 const d = cached.data();
                 const ageMs = Date.now() - d.createdAt;
                 if (ageMs < 3 * 60 * 60 * 1000) { // 3 saat
-                    // Cache hit → kullanım sayacını artır
-                    if (usageRef) {
-                        await usageRef.set({ count: (await usageRef.get()).exists ? (await usageRef.get()).data().count + 1 : 1, uid, date: today }, { merge: true });
+                    // Cache hit → sadece free kullanıcı için sayacı artır
+                    let newCount = 0;
+                    if (!req.isPremium && usageRef) {
+                        const curDoc = await usageRef.get();
+                        newCount = curDoc.exists ? (curDoc.data().count || 0) + 1 : 1;
+                        await usageRef.set({ count: newCount, uid, date: today }, { merge: true });
                     }
-                    const usageDoc2 = usageRef ? await usageRef.get() : null;
-                    const newCount = usageDoc2 && usageDoc2.exists ? usageDoc2.data().count : 1;
                     return res.json({ ...d.result, fromCache: true, cacheAge: Math.round(ageMs / 60000), remainingScans: req.isPremium ? 999 : Math.max(0, FREE_DAILY_SCANS - newCount) });
                 }
             }
         }
 
-        // ── Kullanım sayacını artır (işlem başlamadan önce) ──
-        if (usageRef) {
+        // ── Kullanım sayacını artır (sadece free kullanıcı) ──
+        if (!req.isPremium && usageRef) {
             const currentDoc = await usageRef.get();
             const currentCount = currentDoc.exists ? (currentDoc.data().count || 0) : 0;
             await usageRef.set({ count: currentCount + 1, uid, date: today }, { merge: true });
