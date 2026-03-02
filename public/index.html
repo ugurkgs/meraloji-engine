@@ -5274,8 +5274,19 @@
                 });
                 const data = await res.json();
                 const rem = data.remainingScans ?? 1;
-                document.getElementById('scan-badge').textContent = rem;
-                document.getElementById('scan-remaining-count').textContent = rem;
+                const badge = document.getElementById('scan-badge');
+                const remCount = document.getElementById('scan-remaining-count');
+                const hudBadge = document.getElementById('hud-scan-badge');
+                const remRow = document.querySelector('.scan-remaining');
+                if (isPremium || rem >= 999) {
+                    if (badge) badge.style.display = 'none';
+                    if (remCount) remCount.parentElement.style.display = 'none';
+                    if (hudBadge) hudBadge.textContent = 'PRO';
+                } else {
+                    if (badge) { badge.style.display = ''; badge.textContent = rem; }
+                    if (remCount) { remCount.parentElement.style.display = ''; remCount.textContent = rem; }
+                    if (hudBadge) hudBadge.textContent = rem + ' hak';
+                }
                 return rem;
             } catch(e) { return 1; }
         }
@@ -5503,10 +5514,17 @@
 
                 // Badge güncelle
                 const rem = evt.remainingScans ?? 0;
-                document.getElementById('scan-badge').textContent = rem;
-                document.getElementById('scan-remaining-count').textContent = rem;
+                const badge = document.getElementById('scan-badge');
+                const remCount = document.getElementById('scan-remaining-count');
                 const hudBadge = document.getElementById('hud-scan-badge');
-                if (hudBadge) hudBadge.textContent = rem + ' hak';
+                if (isPremium || rem >= 999) {
+                    if (badge) badge.style.display = 'none';
+                    if (hudBadge) hudBadge.textContent = 'PRO';
+                } else {
+                    if (badge) { badge.style.display = ''; badge.textContent = rem; }
+                    if (remCount) remCount.textContent = rem;
+                    if (hudBadge) hudBadge.textContent = rem + ' hak';
+                }
 
                 // Haritayı top5'e sığdır
                 const bounds = L.latLngBounds(evt.top5.map(p => [p.lat, p.lon]));
@@ -5613,7 +5631,9 @@
             if (!silent) {
                 const toast = document.createElement('div');
                 toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--bg-panel);border:1px solid var(--border-glow);color:var(--text-primary);padding:12px 20px;border-radius:12px;z-index:9999;font-size:0.82rem;max-width:320px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
-                toast.innerHTML = '🧹 Tarama pinleri temizlendi.<br><span style="color:var(--yellow);font-size:0.75rem;">⚠️ Temizlemek hak iade etmez. Haklar 1 gün sonra yenilenir.</span>';
+                toast.innerHTML = isPremium 
+                    ? '🧹 Tarama pinleri temizlendi.'
+                    : '🧹 Tarama pinleri temizlendi.<br><span style="color:var(--yellow);font-size:0.75rem;">⚠️ Temizlemek hak iade etmez. Haklar 1 gün sonra yenilenir.</span>';
                 document.body.appendChild(toast);
                 setTimeout(() => toast.remove(), 4000);
             }
@@ -5629,7 +5649,9 @@
             // Uyarı toast
             const toast = document.createElement('div');
             toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--bg-panel);border:1px solid var(--border-glow);color:var(--text-primary);padding:12px 20px;border-radius:12px;z-index:9999;font-size:0.82rem;max-width:320px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
-            toast.innerHTML = '🧹 Tarama kaldırıldı.<br><span style="color:var(--yellow);font-size:0.75rem;">⚠️ Silmek hak iade etmez. Haklar gece yarısı yenilenir.</span>';
+            toast.innerHTML = isPremium
+                ? '🧹 Tarama kaldırıldı.'
+                : '🧹 Tarama kaldırıldı.<br><span style="color:var(--yellow);font-size:0.75rem;">⚠️ Silmek hak iade etmez. Haklar gece yarısı yenilenir.</span>';
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 4000);
         }
