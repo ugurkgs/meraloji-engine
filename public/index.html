@@ -2048,7 +2048,7 @@
                 <line x1="12" y1="12" x2="12" y2="2" stroke="#00ff88" stroke-width="2" stroke-linecap="round" class="scan-sweep-line"/>
                 <circle cx="12" cy="3" r="1.5" class="scan-sweep-dot"/>
             </svg>
-            <span class="scan-badge" id="scan-badge">5</span>
+            <span class="scan-badge" id="scan-badge">1</span>
         </button>
     </div>
 
@@ -2234,6 +2234,7 @@
             <div id="fish-list"></div>
 
             <button class="btn-primary" onclick="showWeeklyModal(event)" id="weekly-btn">📅 7 Günlük Tahmin</button>
+            <div id="hud-click-badge" style="margin-top:8px;text-align:center;color:var(--yellow);font-size:0.78rem;">5/5 tıklama</div>
             
             <button class="btn-secondary" style="width: 100%; margin-top: 12px;" onclick="saveFavorite()" id="favorite-btn">⭐ Favorilere Kaydet</button>
 
@@ -2248,7 +2249,7 @@
                 display: flex; align-items: center; justify-content: center; gap: 8px;
                 transition: all 0.2s;
             " onmouseover="this.style.background='rgba(0,255,136,0.15)'" onmouseout="this.style.background='rgba(0,255,136,0.08)'">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 2"/></svg> Bölgeyi Tara <span id="hud-scan-badge" style="background:rgba(0,255,136,0.2);padding:2px 8px;border-radius:10px;font-size:0.75rem;">5 hak</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 2"/></svg> Bölgeyi Tara <span id="hud-scan-badge" style="background:rgba(0,255,136,0.2);padding:2px 8px;border-radius:10px;font-size:0.75rem;">1 hak</span>
             </button>
         </div>
     </div>
@@ -2394,7 +2395,7 @@
         <span style="color: var(--cyan);">2.</span> Yarıçap seçin: 3 km / 5 km / 10 km<br>
         <span style="color: var(--cyan);">3.</span> İsteğe bağlı balık türü seçin<br>
         <span style="color: var(--cyan);">4.</span> Tara — ~2 dakika içinde pin'ler haritaya belirir<br>
-        <span style="color: var(--yellow);">⚡ Günlük 5 tarama hakkınız vardır.</span> Aynı bölge 3 saat içinde anında döner.
+        <span style="color: var(--yellow);">⚡ Ücretsiz hesapta günlük 1 tarama hakkınız vardır.</span> PRO kullanıcılar sınırsız tarar. Aynı bölge 3 saat içinde anında döner.
     </p>
 </div>
 
@@ -3845,6 +3846,22 @@
             showLoading();
 
             try {
+                if (!isPremium) {
+                    const clickRes = await fetch('/api/consume-click', { method: 'POST' });
+                    const clickData = await clickRes.json();
+                    if (!clickRes.ok) {
+                        hideLoading();
+                        if (clickData && clickData.error === 'daily_click_limit') {
+                            document.getElementById('log-output').innerHTML = `<div class="log-line" style="color:var(--yellow);">🔒 Günlük 5 tıklama hakkınız doldu. PRO ile sınırsız analiz açılır.</div>`;
+                            alert('Günlük 5 tıklama hakkınız doldu. PRO ile sınırsız kullanabilirsiniz.');
+                            return;
+                        }
+                    } else {
+                        clickUsage = clickData;
+                        updateClickUsageUI();
+                    }
+                }
+
                 const res = await fetch(`/api/forecast?lat=${lat}&lon=${lon}`);
                 const data = await res.json();
                 
@@ -4363,8 +4380,8 @@
                 return;
             }
 
-            // Premium gate: ücretsiz kullanıcıya 3 balık
-            const displayList = isPremium ? list : list.slice(0, 3);
+            // Premium gate: ücretsiz kullanıcıya 5 balık
+            const displayList = isPremium ? list : list.slice(0, 5);
 
             container.innerHTML = displayList.map(f => {
                 const isProtected = f.legalSize === 'YASAK' || f.category === 'KORUMA';
@@ -4560,15 +4577,12 @@
             }).join('');
 
             // Premium gate göster
-            if (!isPremium && list.length > 3) {
-                const trialMsg = (trialInfo && trialInfo.expired) 
-                    ? '<p style="color:var(--yellow); margin-bottom:8px;">⏰ Deneme süreniz doldu!</p>' : '';
+            if (!isPremium && list.length > 5) {
                 container.innerHTML += `
                     <div class="premium-gate">
                         <h3>🔒 MERALOJİ PRO</h3>
-                        ${trialMsg}
-                        <p>Tüm ${list.length} balık türünü gör, 7 günlük tahmin al, reklamsız kullan</p>
-                        <div class="price">₺9,99/ay</div>
+                        <p>Tüm ${list.length} balık türünü gör, 7 günlük tahmin al, sınırsız tıklama ve tarama kullan.</p>
+                        <div class="price">Lansman: ₺9,99/ay • ₺59,99/yıl</div>
                         <button class="upgrade-btn" onclick="upgradeToPro()">PRO'ya Yükselt</button>
                     </div>`;
             }
@@ -5043,12 +5057,10 @@
                 // Premium gate: ücretsiz kullanıcıya sadece 1 gün
                 if (!isPremium && i > 0) {
                     if (i === 1) {
-                        const trialMsg2 = (trialInfo && trialInfo.expired) ? '<p style="color:var(--yellow);">⏰ Deneme süreniz doldu!</p>' : '';
                         return `<div class="premium-gate">
                             <h3>🔒 MERALOJİ PRO</h3>
-                            ${trialMsg2}
                             <p>7 günlük tahmine erişmek için PRO'ya yükseltin</p>
-                            <div class="price">₺9,99/ay</div>
+                            <div class="price">Lansman: ₺9,99/ay • ₺59,99/yıl</div>
                             <button class="upgrade-btn" onclick="upgradeToPro()">PRO'ya Yükselt</button>
                         </div>`;
                     }
@@ -5146,6 +5158,36 @@
         let scanEventSource = null;
         let scanAbortController = null;
 
+        function updateClickUsageUI() {
+            const badge = document.getElementById('hud-click-badge');
+            if (!badge) return;
+            if (isPremium || clickUsage.unlimited) {
+                badge.textContent = 'Sınırsız tıklama';
+            } else {
+                const rem = clickUsage.remainingClicks ?? 0;
+                badge.textContent = `${rem}/5 tıklama`;
+            }
+        }
+
+        async function loadClickUsage() {
+            if (isPremium) {
+                clickUsage = { remainingClicks: -1, dailyLimit: -1, unlimited: true };
+                updateClickUsageUI();
+                return clickUsage;
+            }
+            try {
+                const res = await fetch('/api/click-usage');
+                const data = await res.json();
+                clickUsage = data;
+                updateClickUsageUI();
+                return data;
+            } catch (e) {
+                clickUsage = { remainingClicks: 5, dailyLimit: 5, unlimited: false };
+                updateClickUsageUI();
+                return clickUsage;
+            }
+        }
+
         // Balık listesini scan dropdown'a yükle
         async function populateScanFishSelect() {
             const select = document.getElementById('scan-fish-select');
@@ -5165,11 +5207,14 @@
             try {
                 const res = await fetch('/api/scan-usage');
                 const data = await res.json();
-                const rem = data.remainingScans ?? 5;
-                document.getElementById('scan-badge').textContent = rem;
-                document.getElementById('scan-remaining-count').textContent = rem;
+                const rem = data.remainingScans ?? 1;
+                const unlimited = data.unlimited || rem < 0;
+                document.getElementById('scan-badge').textContent = unlimited ? '∞' : rem;
+                document.getElementById('scan-remaining-count').textContent = unlimited ? 'Sınırsız' : rem;
+                const hudBadge = document.getElementById('hud-scan-badge');
+                if (hudBadge) hudBadge.textContent = unlimited ? 'Sınırsız' : `${rem} hak`;
                 return rem;
-            } catch(e) { return 5; }
+            } catch(e) { return 1; }
         }
 
         function selectRadius(km) {
@@ -5180,11 +5225,6 @@
         }
 
         async function openScanFlow() {
-            if (!isPremium) {
-                alert('🔒 Bu özellik MERALOJİ PRO gerektirir.\n\nPRO\'ya yükseltmek için Google Play\'i ziyaret edin.');
-                return;
-            }
-
             // İlk kullanımda tutorial göster
             const hasSeenTutorial = localStorage.getItem('meraloji_scan_tutorial_seen');
             if (!hasSeenTutorial) {
@@ -5223,7 +5263,7 @@
         async function startScan() {
             const rem = await loadScanUsage();
             if (rem <= 0) {
-                alert('⛔ Günlük 5 tarama hakkınızı kullandınız.\nYarın tekrar deneyin.');
+                alert('⛔ Günlük 1 tarama hakkınızı kullandınız.\nYarın tekrar deneyin veya PRO\'ya geçin.');
                 closeScanModal();
                 return;
             }
@@ -5391,10 +5431,11 @@
 
                 // Badge güncelle
                 const rem = evt.remainingScans ?? 0;
-                document.getElementById('scan-badge').textContent = rem;
-                document.getElementById('scan-remaining-count').textContent = rem;
+                const unlimited = evt.unlimited || rem < 0;
+                document.getElementById('scan-badge').textContent = unlimited ? '∞' : rem;
+                document.getElementById('scan-remaining-count').textContent = unlimited ? 'Sınırsız' : rem;
                 const hudBadge = document.getElementById('hud-scan-badge');
-                if (hudBadge) hudBadge.textContent = rem + ' hak';
+                if (hudBadge) hudBadge.textContent = unlimited ? 'Sınırsız' : (rem + ' hak');
 
                 // Haritayı top5'e sığdır
                 const bounds = L.latLngBounds(evt.top5.map(p => [p.lat, p.lon]));
@@ -5630,7 +5671,7 @@ const auth = firebase.auth();
 let currentUser = null;
 let isPremium = false;
 let authToken = null;
-let trialInfo = null;
+let clickUsage = { remainingClicks: 0, dailyLimit: 5, unlimited: false };
 
 function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -5655,8 +5696,8 @@ auth.onAuthStateChanged(async (user) => {
         await checkSubscriptionStatus();
         updateUserUI();
         updateAdDisplay();
-        // Scan badge güncelle
-        if (isPremium) { try { await loadScanUsage(); } catch(e) {} }
+        try { await loadScanUsage(); } catch(e) {}
+        try { await loadClickUsage(); } catch(e) {}
     } else {
         currentUser = null;
         isPremium = false;
@@ -5673,10 +5714,8 @@ async function checkSubscriptionStatus() {
         });
         const data = await res.json();
         isPremium = data.isPremium;
-        trialInfo = data.trial || null;
     } catch (e) {
         isPremium = false;
-        trialInfo = null;
     }
 }
 
@@ -5687,11 +5726,7 @@ function updateUserUI() {
         document.getElementById('user-name').textContent = (currentUser.displayName || currentUser.email || '').split(' ')[0];
         
         const proTag = document.getElementById('pro-tag');
-        if (trialInfo && trialInfo.active) {
-            proTag.textContent = `DENEME (${trialInfo.daysLeft}g)`;
-            proTag.style.display = 'inline';
-            proTag.style.background = 'linear-gradient(90deg, #ff851b, #ff6b35)';
-        } else if (isPremium) {
+        if (isPremium) {
             proTag.textContent = 'PRO';
             proTag.style.display = 'inline';
             proTag.style.background = 'linear-gradient(90deg, #00c8c8, #00ffcc)';
@@ -5705,12 +5740,7 @@ function updateUserUI() {
 function updateAdDisplay() {
     const adBanner = document.getElementById('ad-banner');
     if (adBanner) {
-        if (isPremium) {
-            adBanner.style.display = 'none';
-        } else {
-            adBanner.style.display = 'flex';
-            try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
-        }
+        adBanner.style.display = 'none';
     }
 }
 
