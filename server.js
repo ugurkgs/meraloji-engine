@@ -1454,7 +1454,7 @@ const SPECIES_DB = {
         note: "DİKKAT: Zehirli dikeni var! Tutarken çok dikkatli olun."
     },
     "cutre": {
-        name: "Çütre (Tetik/Domuz)", nameEn: "Grey Triggerfish", icon: "🐟", scientificName: "Balistes capriscus",
+        name: "Çütre (Tetik)", nameEn: "Grey Triggerfish", icon: "🐟", scientificName: "Balistes capriscus",
         photoId: 72,
         category: "KAYALIK",
         peakHours: "DAY", peakHoursDesc: "Gündüz, kayalık",
@@ -2532,17 +2532,18 @@ function calculateFishScore(fish, key, params) {
         }
         const pseudoRand = (Math.abs(hash) % 1000) / 1000; // 0-1 arası deterministik
         
-        // Yüksek göçmen türler daha geniş band (0.65-1.35)
-        // Normal pelagik/sürü türler standart band (0.80-1.20)
+        // Yüksek göçmen türler: 0.75-1.20 (daraltıldı — eski: 0.65-1.35)
+        // Normal pelagik/sürü türler: 0.85-1.15 (daraltıldı — eski: 0.80-1.20)
+        // Sebep: Geniş band 75 puanlık balığı 95'e çıkarıyordu, kullanıcıyı yanıltıyordu
         const isHighMigratory = ['lufer', 'palamut', 'torik', 'sarikanat', 'kolyoz', 'istavrit', 'lapsari'].includes(key);
-        const volMin = isHighMigratory ? 0.65 : 0.80;
-        const volRange = isHighMigratory ? 0.70 : 0.40;
+        const volMin = isHighMigratory ? 0.75 : 0.85;
+        const volRange = isHighMigratory ? 0.45 : 0.30;
         const volatility = volMin + (pseudoRand * volRange);
         
         rawScore *= volatility;
         scoreDetails.volatility = { multiplier: volatility.toFixed(2), migratory: isHighMigratory };
-        if (volatility < 0.80) { penalties.push("Sürü yok"); }
-        else if (volatility > 1.15) { activeTriggers.push("Sürü aktif!"); }
+        if (volatility < 0.85) { penalties.push("Sürü yok"); }
+        else if (volatility > 1.10) { activeTriggers.push("Sürü aktif!"); }
     }
     
     scoreDetails.penalties = penalties;
