@@ -82,16 +82,16 @@ const cache = new NodeCache({ stdTTL: 3600, checkperiod: 600 });
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use('/api/', limiter);
 
-// Auth middleware
-const TRIAL_DAYS = 7;
-const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
+// Auth middleware & Freemium Limitleri
+const FREE_DAILY_CLICKS = 5;    // Ücretsiz kullanıcı günde 5 tıklama
+const FREE_DAILY_SCANS = 1;     // Ücretsiz kullanıcı günde 1 tarama
+const VALID_SUBSCRIPTIONS = ['meraloji_pro_monthly', 'meraloji_pro_yearly'];
 
 async function verifyAuth(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ') || !admin) {
         req.user = null;
         req.isPremium = false;
-        req.trialInfo = null;
         return next();
     }
     try {
@@ -99,52 +99,21 @@ async function verifyAuth(req, res, next) {
         const decoded = await admin.auth().verifyIdToken(token);
         req.user = decoded;
         req.isPremium = false;
-        req.trialInfo = null;
 
         if (db) {
-            // 1. Önce abonelik kontrol
+            // Abonelik kontrol
             const subDoc = await db.collection('subscriptions').doc(decoded.uid).get();
             if (subDoc.exists) {
                 const sub = subDoc.data();
                 if (sub.status === 'active' && sub.expiresAt > Date.now()) {
                     req.isPremium = true;
-                    return next();
                 }
-            }
-
-            // 2. Abonelik yoksa trial kontrol
-            const trialDoc = await db.collection('trials').doc(decoded.uid).get();
-            if (trialDoc.exists) {
-                const trial = trialDoc.data();
-                const elapsed = Date.now() - trial.startedAt;
-                const remaining = TRIAL_MS - elapsed;
-                const daysLeft = Math.ceil(remaining / (24 * 60 * 60 * 1000));
-
-                if (remaining > 0) {
-                    req.isPremium = true;
-                    req.trialInfo = { active: true, daysLeft, startedAt: trial.startedAt, expiresAt: trial.startedAt + TRIAL_MS };
-                } else {
-                    req.trialInfo = { active: false, daysLeft: 0, expired: true };
-                }
-            } else {
-                // İlk giriş — trial başlat
-                const now = Date.now();
-                await db.collection('trials').doc(decoded.uid).set({
-                    startedAt: now,
-                    uid: decoded.uid,
-                    email: decoded.email || '',
-                    createdAt: now
-                });
-                req.isPremium = true;
-                req.trialInfo = { active: true, daysLeft: TRIAL_DAYS, startedAt: now, expiresAt: now + TRIAL_MS, isNew: true };
-                console.log('[TRIAL] New trial started for:', decoded.uid);
             }
         }
     } catch (e) {
         console.log('[AUTH-MW] Token verify failed:', e.message);
         req.user = null;
         req.isPremium = false;
-        req.trialInfo = null;
     }
     next();
 }
@@ -3322,32 +3291,104 @@ app.get('/api/subscription-status', async (req, res) => {
     if (!req.user) {
         return res.json({ isLoggedIn: false, isPremium: false });
     }
+    
+    // Günlük kullanım bilgisini de döndür
+    const today = new Date().toISOString().split('T')[0];
+    let clicksUsed = 0, scansUsed = 0;
+    
+    if (db) {
+        try {
+            const clickDoc = await db.collection('clickUsage').doc(`${req.user.uid}_${today}`).get();
+            clicksUsed = clickDoc.exists ? (clickDoc.data().count || 0) : 0;
+            
+            const scanDoc = await db.collection('scanUsage').doc(`${req.user.uid}_${today}`).get();
+            scansUsed = scanDoc.exists ? (scanDoc.data().count || 0) : 0;
+        } catch(e) {}
+    }
+    
     res.json({
         isLoggedIn: true,
         isPremium: req.isPremium,
-        trial: req.trialInfo || null,
         uid: req.user.uid,
         email: req.user.email,
-        name: req.user.name || req.user.email
+        name: req.user.name || req.user.email,
+        usage: {
+            clicksUsed,
+            scansUsed,
+            clickLimit: req.isPremium ? -1 : FREE_DAILY_CLICKS,   // -1 = sınırsız
+            scanLimit: req.isPremium ? -1 : FREE_DAILY_SCANS,
+            clicksRemaining: req.isPremium ? -1 : Math.max(0, FREE_DAILY_CLICKS - clicksUsed),
+            scansRemaining: req.isPremium ? -1 : Math.max(0, FREE_DAILY_SCANS - scansUsed)
+        }
     });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// 📊 GÜNLÜK TIKLAMA SAYACI
+// ═══════════════════════════════════════════════════════════════
+app.post('/api/use-click', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
+    
+    // PRO kullanıcı = sınırsız
+    if (req.isPremium) {
+        return res.json({ allowed: true, remaining: -1 });
+    }
+    
+    const uid = req.user.uid;
+    const today = new Date().toISOString().split('T')[0];
+    const docId = `${uid}_${today}`;
+    
+    try {
+        if (!db) return res.json({ allowed: true, remaining: FREE_DAILY_CLICKS });
+        
+        const usageRef = db.collection('clickUsage').doc(docId);
+        const usageDoc = await usageRef.get();
+        const count = usageDoc.exists ? (usageDoc.data().count || 0) : 0;
+        
+        if (count >= FREE_DAILY_CLICKS) {
+            return res.json({ 
+                allowed: false, 
+                remaining: 0, 
+                limit: FREE_DAILY_CLICKS,
+                message: 'Günlük ücretsiz tahmin hakkınız doldu' 
+            });
+        }
+        
+        await usageRef.set({ count: count + 1, date: today, uid, updatedAt: Date.now() }, { merge: true });
+        
+        res.json({ 
+            allowed: true, 
+            remaining: FREE_DAILY_CLICKS - count - 1,
+            limit: FREE_DAILY_CLICKS
+        });
+    } catch(e) {
+        console.error('[CLICK-USAGE]', e.message);
+        res.json({ allowed: true, remaining: FREE_DAILY_CLICKS });
+    }
 });
 
 app.post('/api/verify-subscription', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
     const { purchaseToken, subscriptionId } = req.body;
     if (!purchaseToken) return res.status(400).json({ error: 'purchaseToken gerekli' });
+    
+    const subId = subscriptionId || 'meraloji_pro_monthly';
+    const isYearly = subId.includes('yearly');
+    const durationMs = isYearly ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
+    
     try {
         if (db) {
             await db.collection('subscriptions').doc(req.user.uid).set({
                 status: 'active',
-                subscriptionId: subscriptionId || 'meraloji_pro_monthly',
+                subscriptionId: subId,
                 purchaseToken,
+                isYearly,
                 startedAt: Date.now(),
-                expiresAt: Date.now() + (30 * 24 * 60 * 60 * 1000),
+                expiresAt: Date.now() + durationMs,
                 updatedAt: Date.now()
             }, { merge: true });
         }
-        res.json({ success: true, isPremium: true });
+        res.json({ success: true, isPremium: true, subscriptionId: subId });
     } catch (error) {
         res.status(500).json({ error: 'Doğrulama hatası' });
     }
@@ -3510,9 +3551,6 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
 }
 
 app.get('/api/scan', async (req, res) => {
-    if (!req.isPremium) {
-        return res.status(403).json({ error: 'pro_required', message: 'Bu özellik MERALOJİ PRO gerektirir.' });
-    }
     if (!req.user) {
         return res.status(401).json({ error: 'auth_required' });
     }
@@ -3525,17 +3563,18 @@ app.get('/api/scan', async (req, res) => {
     const radiusKm = Math.min(20, Math.max(3, parseFloat(radius) || 5));
     const uid = req.user.uid;
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const dailyLimit = req.isPremium ? 999 : FREE_DAILY_SCANS;
 
     try {
-        // ── Günlük limit kontrolü ──
+        // ── Günlük limit kontrolü (PRO = sınırsız) ──
         const usageRef = db ? db.collection('scanUsage').doc(`${uid}_${today}`) : null;
-        if (usageRef) {
+        if (!req.isPremium && usageRef) {
             const usageDoc = await usageRef.get();
             const usageCount = usageDoc.exists ? (usageDoc.data().count || 0) : 0;
-            if (usageCount >= 5) {
+            if (usageCount >= FREE_DAILY_SCANS) {
                 return res.status(429).json({
                     error: 'daily_limit',
-                    message: 'Günlük 5 tarama hakkınızı kullandınız. Yarın tekrar deneyin.',
+                    message: `Günlük ${FREE_DAILY_SCANS} tarama hakkınızı kullandınız. PRO ile sınırsız tarama yapın.`,
                     remainingScans: 0
                 });
             }
@@ -3558,7 +3597,7 @@ app.get('/api/scan', async (req, res) => {
                     }
                     const usageDoc2 = usageRef ? await usageRef.get() : null;
                     const newCount = usageDoc2 && usageDoc2.exists ? usageDoc2.data().count : 1;
-                    return res.json({ ...d.result, fromCache: true, cacheAge: Math.round(ageMs / 60000), remainingScans: 5 - newCount });
+                    return res.json({ ...d.result, fromCache: true, cacheAge: Math.round(ageMs / 60000), remainingScans: req.isPremium ? 999 : Math.max(0, FREE_DAILY_SCANS - newCount) });
                 }
             }
         }
@@ -3639,10 +3678,10 @@ app.get('/api/scan', async (req, res) => {
         const top5 = results.sort((a, b) => b.score - a.score).slice(0, 5);
 
         // Kalan hak hesapla
-        let remainingScans = 4;
+        let remainingScans = req.isPremium ? 999 : Math.max(0, FREE_DAILY_SCANS - 1);
         if (db && usageRef) {
             const finalDoc = await usageRef.get();
-            remainingScans = Math.max(0, 5 - (finalDoc.exists ? finalDoc.data().count : 1));
+            remainingScans = req.isPremium ? 999 : Math.max(0, FREE_DAILY_SCANS - (finalDoc.exists ? finalDoc.data().count : 1));
         }
 
         const scanResult = {
@@ -3675,35 +3714,45 @@ app.get('/api/scan', async (req, res) => {
 // Kalan tarama hakkını sorgula
 app.get('/api/scan-usage', async (req, res) => {
     if (!req.user) return res.json({ remainingScans: 0 });
+    
+    // PRO = sınırsız
+    if (req.isPremium) {
+        return res.json({ remainingScans: 999, usedToday: 0, isPremium: true });
+    }
+    
     const uid = req.user.uid;
     const today = new Date().toISOString().split('T')[0];
     try {
-        if (!db) return res.json({ remainingScans: 5 });
+        if (!db) return res.json({ remainingScans: FREE_DAILY_SCANS });
         const usageDoc = await db.collection('scanUsage').doc(`${uid}_${today}`).get();
         const count = usageDoc.exists ? (usageDoc.data().count || 0) : 0;
-        res.json({ remainingScans: Math.max(0, 5 - count), usedToday: count });
+        res.json({ remainingScans: Math.max(0, FREE_DAILY_SCANS - count), usedToday: count, limit: FREE_DAILY_SCANS });
     } catch (e) {
-        res.json({ remainingScans: 5, usedToday: 0 });
+        res.json({ remainingScans: FREE_DAILY_SCANS, usedToday: 0 });
     }
 });
 
 // BURAYA YENİ EKLİYORUZ - Android'den gelen ödemeyi karşılayan kısım
 app.post('/api/verify-purchase', async (req, res) => {
-    const { uid, purchaseToken } = req.body;
+    const { uid, purchaseToken, subscriptionId } = req.body;
     
     if (!uid || !purchaseToken) {
         return res.status(400).json({ error: 'Eksik parametre' });
     }
 
+    const subId = subscriptionId || 'meraloji_pro_monthly';
+    const isYearly = subId.includes('yearly');
+    const durationMs = isYearly ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
+
     try {
         if (db) {
-            // Sistemin mevcut mantığına uygun olarak subscriptions koleksiyonuna yazıyoruz
             await db.collection('subscriptions').doc(uid).set({
                 status: 'active',
-                subscriptionId: 'meraloji_pro_monthly',
+                subscriptionId: subId,
                 purchaseToken: purchaseToken,
+                isYearly,
                 startedAt: Date.now(),
-                expiresAt: Date.now() + (30 * 24 * 60 * 60 * 1000), // 30 gün
+                expiresAt: Date.now() + durationMs,
                 updatedAt: Date.now()
             }, { merge: true });
         }
