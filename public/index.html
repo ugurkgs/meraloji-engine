@@ -710,6 +710,13 @@
         }
 
         /* Metrics Grid */
+        /* CMEMS toggle butonu hover */
+        #cmems-toggle-btn:hover {
+            background: rgba(0,212,255,0.12) !important;
+            border-color: rgba(0,212,255,0.4) !important;
+            color: var(--cyan) !important;
+        }
+
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -2281,6 +2288,24 @@
 
             <div class="metrics-grid" id="metrics-grid"></div>
 
+            <!-- CMEMS GELİŞMİŞ VERİLER — varsayılan kapalı -->
+            <div id="cmems-section" style="margin-top: 0; overflow: hidden; transition: max-height 0.35s ease, opacity 0.35s ease; max-height: 0; opacity: 0;">
+                <div class="metrics-grid" id="cmems-grid" style="margin-top: 8px;"></div>
+            </div>
+            <button id="cmems-toggle-btn" onclick="toggleCMEMSSection()" style="
+                width: 100%; margin-top: 6px; padding: 8px 12px;
+                background: rgba(0,212,255,0.06);
+                border: 1px solid rgba(0,212,255,0.2);
+                border-radius: var(--radius-md);
+                color: var(--text-secondary); font-family: var(--font-display);
+                font-size: 0.78rem; font-weight: 600; cursor: pointer;
+                display: flex; align-items: center; justify-content: center; gap: 6px;
+                transition: background 0.2s;">
+                <span id="cmems-toggle-icon">▼</span>
+                <span id="cmems-toggle-label">Gelişmiş Veriler</span>
+                <span id="cmems-badge" style="font-size:0.65rem; color:var(--text-muted); display:none;"></span>
+            </button>
+
             <div class="section-title" id="species-title">Türler (Detay için tıklayın)</div>
             
             <!-- BALIK ARAMA -->
@@ -3717,6 +3742,252 @@
             }
         };
 
+        // ═══════════════════════════════════════════════════════════════════
+        // CMEMS GELİŞMİŞ VERİ KARTLARI
+        // ═══════════════════════════════════════════════════════════════════
+
+        const CMEMS_METRIC_DATA = {
+            cmems_current: {
+                icon: '🌊',
+                title: 'GERÇEK AKINITI',
+                titleEn: 'REAL CURRENT',
+                desc: 'Copernicus Marine Service (CMEMS) yüksek çözünürlüklü okyanus modelinden alınan gerçek deniz akıntısı. U (Doğu-Batı) ve V (Kuzey-Güney) bileşenlerinden hesaplanır.',
+                descEn: 'Real ocean current from Copernicus Marine Service high-resolution model. Calculated from U (East-West) and V (North-South) vector components.',
+                importance: 'Pelagik balıklar (lüfer, palamut, akya) akıntı hatlarını takip eder. Güçlü akıntı besin maddelerini yoğunlaştırır ve avlanma noktaları oluşturur.',
+                importanceEn: 'Pelagic fish (bluefish, bonito, amberjack) follow current lines. Strong currents concentrate nutrients and create hotspots.',
+                ref: '0-0.1 m/s: Sakin
+0.1-0.3 m/s: Orta
+0.3-0.6 m/s: Güçlü
+0.6+ m/s: Çok güçlü',
+                algo: 'speed = √(U² + V²)
+CMEMS MED/BLACK PHY dataset',
+                source: 'Copernicus Marine Service — MEDSEA_ANALYSISFORECAST_PHY_006_013'
+            },
+            cmems_sst: {
+                icon: '🌡️',
+                title: 'CMEMS SU SICAKLIĞI',
+                titleEn: 'CMEMS SEA TEMPERATURE',
+                desc: 'CMEMS okyanus modelinden alınan yüksek çözünürlüklü deniz yüzeyi sıcaklığı. Open-Meteo SST verisiyle karşılaştırılır, daha güvenilir olan kullanılır.',
+                descEn: 'High-resolution sea surface temperature from CMEMS ocean model. Compared with Open-Meteo SST, the more reliable one is used.',
+                importance: 'Daha yüksek çözünürlük (4-5 km vs 25 km) sayesinde kıyı termal yapıları ve soğuk su yükselmeleri (upwelling) daha doğru tespit edilir.',
+                importanceEn: 'Higher resolution (4-5 km vs 25 km) allows better detection of coastal thermal structures and cold water upwellings.',
+                ref: 'Ege: 15-26°C
+Akdeniz: 17-28°C
+Karadeniz: 8-25°C',
+                algo: 'CMEMS thetao değişkeni
+Fallback: Open-Meteo SST',
+                source: 'Copernicus Marine Service — MEDSEA_ANALYSISFORECAST_PHY_006_013'
+            },
+            cmems_salinity: {
+                icon: '🧂',
+                title: 'CMEMS TUZLULUK',
+                titleEn: 'CMEMS SALINITY',
+                desc: 'CMEMS modelinden gerçek zamanlı tuzluluk verisi. Bölgesel sabit değer yerine anlık ölçüm.',
+                descEn: 'Real-time salinity data from CMEMS model. Instant measurement instead of regional fixed value.',
+                importance: 'Tuzluluk balıkların ozmotik dengesini etkiler. Yağmur sonrası veya nehir ağızlarında ani tuzluluk düşüşü bazı türleri etkiler.',
+                importanceEn: 'Salinity affects fish osmotic balance. Sudden drops near river mouths or after rain affect certain species.',
+                ref: 'Karadeniz: 17-18 PSU
+Marmara: 22-26 PSU
+Ege/Akdeniz: 37-39 PSU',
+                algo: 'CMEMS so değişkeni
+Fallback: Bölgesel sabit',
+                source: 'Copernicus Marine Service — MEDSEA_ANALYSISFORECAST_PHY_006_013'
+            },
+            cmems_mld: {
+                icon: '📏',
+                title: 'TERMOKLİN DERİNLİĞİ',
+                titleEn: 'THERMOCLINE DEPTH',
+                desc: 'Mixed Layer Depth (MLD) — karışık su tabakasının derinliği. Yazın bu derinliğin altında ani sıcaklık düşüşü başlar (termoklin).',
+                descEn: 'Mixed Layer Depth (MLD) — depth of the mixed water layer. Below this depth in summer, temperature drops sharply (thermocline).',
+                importance: 'Balıklar termoklin sınırında yoğunlaşır. Avlanma derinliğin termoklinkle örtüşmesi başarıyı artırır.',
+                importanceEn: 'Fish concentrate at the thermocline boundary. Fishing depth matching the thermocline increases success.',
+                ref: 'Kış: 50-100m (zayıf)
+Yaz: 20-40m (güçlü)
+Sonbahar: 30-60m',
+                algo: 'CMEMS mlotst değişkeni
+Yaz termoklini: 20-40m ideal',
+                source: 'Copernicus Marine Service — MEDSEA_ANALYSISFORECAST_PHY_006_013'
+            },
+            cmems_chlorophyll: {
+                icon: '🌿',
+                title: 'KLOROFİL-A',
+                titleEn: 'CHLOROPHYLL-A',
+                desc: 'Deniz suyundaki fitoplankton yoğunluğu (mg/m³). Besin zincirinin temel göstergesi.',
+                descEn: 'Phytoplankton density in seawater (mg/m³). Fundamental indicator of the food chain.',
+                importance: 'Klorofil → Fitoplankton → Zooplankton → Küçük balık → Büyük balık. Yüksek klorofil bölgesi = aktif avlanma bölgesi.',
+                importanceEn: 'Chlorophyll → Phytoplankton → Zooplankton → Small fish → Big fish. High chlorophyll area = active fishing area.',
+                ref: '<0.1: Oligotrofik (yoksul)
+0.3-2.0: Ötrofik (zengin) ✅
+>5.0: Aşırı bloom ⚠️',
+                algo: 'CMEMS chl değişkeni
+0.3-2.0 mg/m³: maksimum bonus',
+                source: 'Copernicus Marine Service — MEDSEA_ANALYSISFORECAST_BIO'
+            },
+            cmems_turbidity: {
+                icon: '👁️',
+                title: 'GERÇEK BULANIKLIK',
+                titleEn: 'REAL TURBIDITY',
+                desc: 'Işık zayıflaması katsayısı Kd490 (m⁻¹). Sudaki partiküllerin ışığı ne kadar engellediğini gösterir.',
+                descEn: 'Light attenuation coefficient Kd490 (m⁻¹). Measures how much particles in water block light.',
+                importance: 'Gerçek su saydamlığı ölçümü. Dalga/rüzgar tahmininden çok daha doğru. Levrek gibi bulanık su seven türler için kritik.',
+                importanceEn: 'Real water transparency measurement. Much more accurate than wave/wind estimate. Critical for turbidity-loving species like sea bass.',
+                ref: '<0.1: Çok berrak
+0.1-0.3: Orta
+0.3-0.6: Bulanık ✅ (Levrek)
+>0.6: Çok bulanık',
+                algo: 'CMEMS kd490 değişkeni
+Clarity hesabını güçlendirir',
+                source: 'Copernicus Marine Service — MEDSEA_ANALYSISFORECAST_BIO'
+            }
+        };
+
+        // CMEMS bölümü aç/kapat — default kapalı, panel kapanınca da kapanır
+        let cmemsOpen = false;
+
+        function toggleCMEMSSection() {
+            cmemsOpen = !cmemsOpen;
+            const section = document.getElementById('cmems-section');
+            const icon    = document.getElementById('cmems-toggle-icon');
+            const label   = document.getElementById('cmems-toggle-label');
+            if (cmemsOpen) {
+                section.style.maxHeight = '600px';
+                section.style.opacity   = '1';
+                icon.textContent  = '▲';
+                label.textContent = CURRENT_LANG === 'en' ? 'Advanced Data' : 'Gelişmiş Veriler';
+            } else {
+                section.style.maxHeight = '0';
+                section.style.opacity   = '0';
+                icon.textContent  = '▼';
+                label.textContent = CURRENT_LANG === 'en' ? 'Advanced Data ▾' : 'Gelişmiş Veriler ▾';
+            }
+        }
+
+        function closeCMEMSSection() {
+            cmemsOpen = false;
+            const section = document.getElementById('cmems-section');
+            if (section) {
+                section.style.maxHeight = '0';
+                section.style.opacity   = '0';
+            }
+            const icon  = document.getElementById('cmems-toggle-icon');
+            const label = document.getElementById('cmems-toggle-label');
+            if (icon)  icon.textContent  = '▼';
+            if (label) label.textContent = CURRENT_LANG === 'en' ? 'Advanced Data ▾' : 'Gelişmiş Veriler ▾';
+        }
+
+        function renderCMEMSMetrics(forecastDay) {
+            const cmems = forecastDay?.cmems;
+            const grid  = document.getElementById('cmems-grid');
+            if (!grid) return;
+
+            const cards = [
+                {
+                    key: 'cmems_current',
+                    val: cmems?.currentSpeed !== null && cmems?.currentSpeed !== undefined
+                        ? cmems.currentSpeed.toFixed(2) + ' m/s'
+                        : '--',
+                    extra: (cmems?.currentU !== null && cmems?.currentV !== null)
+                        ? `<div style="font-size:0.55rem;color:var(--cyan);margin-top:2px;">U:${cmems.currentU?.toFixed(2)} V:${cmems.currentV?.toFixed(2)}</div>`
+                        : '',
+                    available: cmems?.dataQuality?.current
+                },
+                {
+                    key: 'cmems_sst',
+                    val: cmems?.sst !== null && cmems?.sst !== undefined
+                        ? cmems.sst.toFixed(1) + '°'
+                        : '--',
+                    available: cmems?.dataQuality?.sst
+                },
+                {
+                    key: 'cmems_salinity',
+                    val: cmems?.salinity !== null && cmems?.salinity !== undefined
+                        ? cmems.salinity.toFixed(1) + ' P'
+                        : '--',
+                    available: cmems?.dataQuality?.salinity
+                },
+                {
+                    key: 'cmems_mld',
+                    val: cmems?.mld !== null && cmems?.mld !== undefined
+                        ? cmems.mld.toFixed(0) + ' m'
+                        : '--',
+                    available: cmems?.dataQuality?.mld
+                },
+                {
+                    key: 'cmems_chlorophyll',
+                    val: cmems?.chlorophyll !== null && cmems?.chlorophyll !== undefined
+                        ? cmems.chlorophyll.toFixed(2) + ' mg'
+                        : '--',
+                    available: cmems?.dataQuality?.chlorophyll
+                },
+                {
+                    key: 'cmems_turbidity',
+                    val: cmems?.turbidity !== null && cmems?.turbidity !== undefined
+                        ? cmems.turbidity.toFixed(3) + ' m⁻¹'
+                        : '--',
+                    available: cmems?.dataQuality?.turbidity
+                }
+            ];
+
+            // Kaç veri geldi — badge güncelle
+            const availCount = cards.filter(c => c.available).length;
+            const badge = document.getElementById('cmems-badge');
+            if (badge) {
+                badge.style.display = '';
+                badge.textContent = availCount > 0
+                    ? `${availCount}/6 veri`
+                    : 'veri yok';
+                badge.style.color = availCount >= 4 ? 'var(--green)' : availCount >= 2 ? 'var(--yellow)' : 'var(--red)';
+            }
+
+            grid.innerHTML = cards.map(card => {
+                const info  = CMEMS_METRIC_DATA[card.key];
+                const icon  = info?.icon || '📊';
+                const title = CURRENT_LANG === 'en' ? (info?.titleEn || info?.title) : info?.title;
+                const shortTitle = title.split(' ')[0];
+                const unavailableStyle = card.available ? '' : 'opacity:0.4;';
+                const sourceTag = card.available
+                    ? `<div style="font-size:0.5rem;color:var(--green);margin-top:2px;">● CMEMS</div>`
+                    : `<div style="font-size:0.5rem;color:var(--text-muted);margin-top:2px;">— yok</div>`;
+
+                return `
+                    <div class="metric-card" onclick="showCMEMSMetricInfo('${card.key}', event)" style="${unavailableStyle}">
+                        <div class="metric-icon">${icon}</div>
+                        <div class="metric-val">${card.val}</div>
+                        ${card.extra || ''}
+                        ${sourceTag}
+                        <div class="metric-label">${shortTitle}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showCMEMSMetricInfo(key, event) {
+            if (event) event.stopPropagation();
+            const data = CMEMS_METRIC_DATA[key];
+            if (!data) return;
+            document.getElementById('metric-icon').textContent  = data.icon;
+            document.getElementById('metric-title').textContent = CURRENT_LANG === 'en' ? data.titleEn : data.title;
+            const body = document.getElementById('metric-modal-body') || document.querySelector('.metric-modal-content');
+            const modal = document.getElementById('metric-modal');
+
+            // Mevcut modal içeriğini doldur
+            const descEl = document.getElementById('metric-desc');
+            const impEl  = document.getElementById('metric-importance');
+            const refEl  = document.getElementById('metric-ref');
+            const algoEl = document.getElementById('metric-algo');
+            const srcEl  = document.getElementById('metric-source');
+            if (descEl) descEl.textContent = CURRENT_LANG === 'en' ? data.descEn : data.desc;
+            if (impEl)  impEl.textContent  = CURRENT_LANG === 'en' ? data.importanceEn : data.importance;
+            if (refEl)  refEl.textContent  = data.ref;
+            if (algoEl) algoEl.textContent = data.algo;
+            if (srcEl)  srcEl.textContent  = data.source;
+
+            if (modal) {
+                modal.style.display = 'flex';
+                modal.classList.add('active');
+            }
+        }
+
         const DAYS_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
         const DAYS_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -4302,6 +4573,10 @@
 
             // Metrics
             renderMetrics(global, data);
+
+            // CMEMS gelişmiş veriler — mevcut günün verisini render et, bölüm kapalı kalır
+            renderCMEMSMetrics(global.forecast[0]);
+            closeCMEMSSection(); // Panel her açıldığında kapalı başla
 
             // Fish List
             renderFishList(data.fishList, 'fish-list');
@@ -5108,6 +5383,7 @@
 
         function closeHud() {
             document.getElementById('hud').style.display = 'none';
+            closeCMEMSSection(); // Panel kapanınca CMEMS bölümü de kapat
         }
 
         function toggleMenu() {
