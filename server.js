@@ -43,25 +43,21 @@ async function safeFetchJSON(url, timeoutMs = 8000) {
 // Kayıt gerektirmez, API key yok, düz HTTP GET
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Klorofil: NOAA VIIRS, 3 günlük kompozit, ~750m, güncel veri
-const ERDDAP_CHL_URL  = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap/erdVHNchla3day.json';
-// SST: NASA JPL MUR, günlük, 1km, global
-const ERDDAP_SST_URL  = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap/jplMURSST41.json';
+// Klorofil: NOAA VIIRS günlük, 750m, global — değişken: chla
+const ERDDAP_CHL_URL = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap/erdVHNchla1day.json';
+// SST: NASA JPL MUR günlük, 1km, global — değişken: analysed_sst
+// MUR SST altitude boyutu içeriyor: [time][altitude][lat][lon]
+const ERDDAP_SST_URL = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap/jplMURSST41.json';
 
-// ERDDAP'tan tek nokta çek — her iki dataset için ortak helper
-async function fetchERDDAP(baseUrl, variable, lat, lon, dateStr, timeoutMs = 6000) {
+// ERDDAP'tan tek nokta çek — ortak helper
+async function fetchERDDAP(url, timeoutMs = 6000) {
     try {
-        const latF = parseFloat(lat).toFixed(3);
-        const lonF = parseFloat(lon).toFixed(3);
-        const url  = `${baseUrl}?${variable}[(${dateStr})][(${latF})][(${lonF})]`;
-
         const res = await Promise.race([
             fetch(url),
             new Promise((_, reject) => setTimeout(() => reject(new Error('ERDDAP_TIMEOUT')), timeoutMs))
         ]);
-
         if (!res.ok) {
-            console.log(`[ERDDAP] ${variable} HTTP ${res.status}`);
+            console.log(`[ERDDAP] HTTP ${res.status} — ${url.split('?')[0].split('/').pop()}`);
             return null;
         }
         const data = await res.json();
@@ -70,25 +66,33 @@ async function fetchERDDAP(baseUrl, variable, lat, lon, dateStr, timeoutMs = 600
         const val = parseFloat(rows[0][rows[0].length - 1]);
         return (isNaN(val) || val <= 0) ? null : val;
     } catch (e) {
-        console.log(`[ERDDAP] ${variable} failed: ${e.message}`);
+        console.log(`[ERDDAP] failed: ${e.message}`);
         return null;
     }
 }
 
-// Klorofil — NOAA VIIRS 3 günlük, 4 gün öncesi (işlenme süresi)
+// Klorofil — NOAA VIIRS günlük, 2 gün öncesi (işlenme süresi ~24-48h)
+// erdVHNchla1day: boyutlar [time][altitude][latitude][longitude]
 async function fetchChlorophyll(lat, lon) {
     const d = new Date();
-    d.setDate(d.getDate() - 4);
+    d.setDate(d.getDate() - 2);
     const dateStr = d.toISOString().split('T')[0] + 'T00:00:00Z';
-    return fetchERDDAP(ERDDAP_CHL_URL, 'chla', lat, lon, dateStr);
+    const latF = parseFloat(lat).toFixed(3);
+    const lonF = parseFloat(lon).toFixed(3);
+    const url = `${ERDDAP_CHL_URL}?chla[(${dateStr})][(0.0)][(${latF})][(${lonF})]`;
+    return fetchERDDAP(url);
 }
 
-// SST — NASA JPL MUR, dün (günlük güncellenir)
+// SST — NASA JPL MUR, dün
+// jplMURSST41: boyutlar [time][latitude][longitude] — altitude yok
 async function fetchMURSST(lat, lon) {
     const d = new Date();
     d.setDate(d.getDate() - 1);
     const dateStr = d.toISOString().split('T')[0] + 'T09:00:00Z';
-    return fetchERDDAP(ERDDAP_SST_URL, 'analysed_sst', lat, lon, dateStr);
+    const latF = parseFloat(lat).toFixed(3);
+    const lonF = parseFloat(lon).toFixed(3);
+    const url = `${ERDDAP_SST_URL}?analysed_sst[(${dateStr})][(${latF})][(${lonF})]`;
+    return fetchERDDAP(url);
 }
 
 // Tüm ocean veri kaynaklarını paralel çek — graceful degradation
