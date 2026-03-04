@@ -32,150 +32,6 @@ async function safeFetchJSON(url, timeoutMs = 8000) {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// OCEAN DATA — NASA/NOAA ERDDAP + Open-Meteo Entegrasyonu
-// Graceful degradation: veri gelmezse null döner, skor yine çalışır
-// Kayıt gerektirmez, API key yok, düz HTTP GET
-// ═══════════════════════════════════════════════════════════════════════════
-
-// ═══════════════════════════════════════════════════════════════════════════
-// NASA/NOAA ERDDAP — Ocean Data
-// Kayıt gerektirmez, API key yok, düz HTTP GET
-// ═══════════════════════════════════════════════════════════════════════════
-
-// Klorofil: NOAA S-NPP VIIRS, 4km, global NRT
-// Dataset: nesdisVHNSQchlaDaily — coastwatch.noaa.gov
-const ERDDAP_CHL_URL = 'https://coastwatch.noaa.gov/erddap/griddap/nesdisVHNSQchlaDaily.json';
-// SST: NOAA Geo-polar Blended, günlük, 5km, global, 2017-günümüz NRT
-// Dataset: noaacwBLENDEDsstDaily — boyutlar: [time][latitude][longitude]
-const ERDDAP_SST_URL = 'https://coastwatch.noaa.gov/erddap/griddap/noaacwBLENDEDsstDaily.json';
-
-// ERDDAP'tan tek nokta çek — ortak helper
-async function fetchERDDAP(url, timeoutMs = 6000) {
-    try {
-        const res = await Promise.race([
-            fetch(url),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('ERDDAP_TIMEOUT')), timeoutMs))
-        ]);
-        if (!res.ok) {
-            console.log(`[ERDDAP] HTTP ${res.status} — ${url.split('?')[0].split('/').pop()}`);
-            return null;
-        }
-        const data = await res.json();
-        const rows = data?.table?.rows;
-        if (!rows || rows.length === 0) return null;
-        const val = parseFloat(rows[0][rows[0].length - 1]);
-        return (isNaN(val) || val <= 0) ? null : val;
-    } catch (e) {
-        console.log(`[ERDDAP] failed: ${e.message}`);
-        return null;
-    }
-}
-
-// Ortak tarih yardımcısı
-function erddapDate(daysBack) {
-    const d = new Date();
-    d.setDate(d.getDate() - daysBack);
-    return d.toISOString().split('T')[0] + 'T12:00:00Z';
-}
-
-// Klorofil — NOAA VIIRS NRT günlük, 2 gün öncesi
-// Boyutlar: [time][altitude][latitude][longitude]
-async function fetchChlorophyll(lat, lon) {
-    const latF = parseFloat(lat).toFixed(3);
-    const lonF = parseFloat(lon).toFixed(3);
-    const url = `${ERDDAP_CHL_URL}?chlor_a[(${erddapDate(2)}):1:(${erddapDate(2)})][(0.0):1:(0.0)][(${latF}):1:(${latF})][(${lonF}):1:(${lonF})]`;
-    return fetchERDDAP(url);
-}
-
-// SST — NOAA Blended günlük, 2 gün öncesi (Kelvin → Celsius)
-async function fetchMURSST(lat, lon) {
-    const latF = parseFloat(lat).toFixed(3);
-    const lonF = parseFloat(lon).toFixed(3);
-    const url = `${ERDDAP_SST_URL}?analysed_sst[(${erddapDate(2)})][(${latF})][(${lonF})]`;
-    const kelvin = await fetchERDDAP(url);
-    if (kelvin === null) return null;
-    return kelvin > 150 ? parseFloat((kelvin - 273.15).toFixed(2)) : kelvin;
-}
-
-// Su saydamlığı Kd490 — NOAA VIIRS günlük, 2 gün öncesi
-// Düşük değer = berrak su, yüksek = bulanık
-// Boyutlar: [time][altitude][latitude][longitude]
-async function fetchKd490(lat, lon) {
-    const latF = parseFloat(lat).toFixed(3);
-    const lonF = parseFloat(lon).toFixed(3);
-    const url = `${ERDDAP_KD490_URL}?Kd_490[(${erddapDate(2)}):1:(${erddapDate(2)})][(0.0):1:(0.0)][(${latF}):1:(${latF})][(${lonF}):1:(${lonF})]`;
-    return fetchERDDAP(url);
-}
-
-// SSH ve WindStress: doğrulanmış public ERDDAP dataset yok — devre dışı
-
-// Tüm ocean veri kaynaklarını paralel çek — graceful degradation
-// Her biri bağımsız: biri failse diğerleri etkilenmez
-async function fetchAllCMEMS(lat, lon, region) {
-    const [chlorophyll, sst, kd490] = await Promise.all([
-        fetchChlorophyll(lat, lon).catch(() => null),
-        fetchMURSST(lat, lon).catch(() => null),
-        fetchKd490(lat, lon).catch(() => null),
-    ]);
-
-    const result = {
-        currentSpeed:  null,
-        currentU:      null,
-        currentV:      null,
-        sst,           // NOAA Blended SST (°C)
-        salinity:      null,
-        mld:           null,
-        chlorophyll,   // NOAA VIIRS klorofil (mg/m³)
-        turbidity:     kd490,  // Kd490 su saydamlığı (m⁻¹)
-        ssh:           null,
-        windStress:    null,
-        dataQuality: {
-            current:     false,
-            sst:         sst !== null,
-            salinity:    false,
-            mld:         false,
-            chlorophyll: chlorophyll !== null,
-            turbidity:   kd490 !== null,
-            ssh:         false,
-            windStress:  false,
-        }
-    };
-
-    const got = Object.values(result.dataQuality).filter(Boolean).length;
-    console.log(`[OCEAN] ${region} — SST:${sst !== null ? sst.toFixed(1)+'°C' : '-'} CHL:${chlorophyll !== null ? chlorophyll.toFixed(3) : '-'} KD490:${kd490 !== null ? kd490.toFixed(3) : '-'} (${got}/3)`);
-    return result;
-}
-
-// Klorofil skorunu hesapla (yem zinciri göstergesi)
-// Yüksek klorofil = fitoplankton = zooplankton = küçük balık = büyük balık aktif
-function calculateChlorophyllScore(chl) {
-    if (chl === null || chl === undefined) return null;
-    // Optimum aralık: 0.3 - 2.0 mg/m³
-    // < 0.1: oligotrofik (yoksul) — düşük aktivite
-    // 0.3-2.0: ötrofik (zengin) — yüksek aktivite
-    // > 5.0: aşırı (bloom) — oksijen tükenmesi, bazı türler kaçar
-    if (chl < 0.1)  return 0.3;
-    if (chl < 0.3)  return 0.6;
-    if (chl < 2.0)  return 1.0;
-    if (chl < 5.0)  return 0.8;
-    return 0.4; // Aşırı bloom
-}
-
-// Termoklin derinliği skoru
-// Yazın termoklin 20-40m'de olur, balıklar bu sınırda yoğunlaşır
-function calculateThermoclineScore(mld, depthAvg, season) {
-    if (mld === null || mld === undefined) return null;
-    if (season === 'winter' || season === 'spring') return 0.7; // Kışın termoklin zayıf
-    // Yaz/Sonbaharda: termoklin derinliği avlanılan derinlikle örtüşüyor mu?
-    if (!depthAvg) return 0.7;
-    const diff = Math.abs(depthAvg - mld);
-    if (diff < 5)  return 1.0;  // Termoklinde tam avlanıyorsun
-    if (diff < 15) return 0.85;
-    if (diff < 30) return 0.7;
-    return 0.5;
-}
-
 // Firebase Admin SDK
 let admin, db;
 try {
@@ -2736,17 +2592,6 @@ app.get('/api/forecast', async (req, res) => {
             fetchWithTimeout(bathymetryUrl).catch(() => null)
         ]);
         
-        // CMEMS — arka planda çek, forecast'i BEKLEME
-        // Fire-and-forget: CMEMS yavaşsa ana response etkilenmiyor
-        const cmemsPromise = fetchAllCMEMS(lat, lon, regionName).catch(() => null);
-        // 3 saniye içinde gelirse kullan, gelmezse null ile devam et
-        const cmems = await Promise.race([
-            cmemsPromise,
-            new Promise(resolve => setTimeout(() => resolve(null), 3000))
-        ]);
-        if (cmems) console.log('[CMEMS] Data received within 3s');
-        else console.log('[CMEMS] Timeout 3s — continuing without CMEMS data');
-        
         // Fallback: gelişmiş URL başarısızsa basit URL dene
         if (!weather || weather.error) {
             console.log('[FALLBACK] Weather enhanced failed, trying basic URL');
@@ -2868,17 +2713,8 @@ app.get('/api/forecast', async (req, res) => {
             // [YENİ] Marine hourly veriler
             const wavePeriod = isLand ? 0 : safeNum(marine.hourly?.wave_period?.[hourlyIdx]);
             const swellHeight = isLand ? 0 : safeNum(marine.hourly?.swell_wave_height?.[hourlyIdx]);
-            // CMEMS gerçek akıntısı varsa kullan, yoksa Open-Meteo'ya düş
-            const cmems_current     = (!isLand && cmems?.currentSpeed != null) ? cmems.currentSpeed : null;
-            const oceanCurrent      = isLand ? null : (cmems_current ?? marine.hourly?.ocean_current_velocity?.[hourlyIdx] ?? null);
-
-            // CMEMS ek parametreler — graceful: her biri bağımsız null olabilir
-            const cmems_sst         = (!isLand && cmems?.sst != null)         ? cmems.sst         : null;
-            const cmems_salinity    = (!isLand && cmems?.salinity != null)    ? cmems.salinity    : null;
-            const cmems_mld         = (!isLand && cmems?.mld != null)         ? cmems.mld         : null;
-            const cmems_chlorophyll = (!isLand && cmems?.chlorophyll != null) ? cmems.chlorophyll : null;
-            const cmems_turbidity   = (!isLand && cmems?.turbidity != null)   ? cmems.turbidity   : null;
-
+            const oceanCurrent = isLand ? null : (marine.hourly?.ocean_current_velocity?.[hourlyIdx] ?? null);
+            
             // [YENİ] Sıcaklık Şoku hesapla (dün vs bugün SST)
             const tempShock = isLand ? { shock: false, change: 0, direction: 'STABLE' } : calculateTempShock(marine, hourlyStartIdx);
 
@@ -2917,10 +2753,7 @@ app.get('/api/forecast', async (req, res) => {
                     wavePeriod,
                     swellHeight,
                     oceanCurrent,
-                    tempShock,
-                    // CMEMS parametreler (null olabilir — graceful degradation)
-                    cmems_sst, cmems_salinity, cmems_mld,
-                    cmems_chlorophyll, cmems_turbidity
+                    tempShock
                 };
 
                 for (const [key, fish] of Object.entries(SPECIES_DB)) {
@@ -3026,21 +2859,7 @@ app.get('/api/forecast', async (req, res) => {
                 confidence: 92 - (i * 6), tacticKey, tacticData, weatherSummary,
                 fishList: fishList.slice(0, 10), moonPhase: moon.phase,
                 moonPhaseName: getMoonPhaseName(moon.phase), airTemp: tempAir, timeMode,
-                activityWindows: activityWindows,
-                // CMEMS verileri — frontend kartlarda gösterim için
-                cmems: cmems ? {
-                    currentSpeed:  cmems.currentSpeed  != null ? parseFloat(cmems.currentSpeed.toFixed(3))  : null,
-                    currentU:      cmems.currentU      != null ? parseFloat(cmems.currentU.toFixed(3))      : null,
-                    currentV:      cmems.currentV      != null ? parseFloat(cmems.currentV.toFixed(3))      : null,
-                    sst:           cmems.sst            != null ? parseFloat(cmems.sst.toFixed(2))           : null,
-                    salinity:      cmems.salinity       != null ? parseFloat(cmems.salinity.toFixed(2))      : null,
-                    mld:           cmems.mld            != null ? parseFloat(cmems.mld.toFixed(1))           : null,
-                    chlorophyll:   cmems.chlorophyll    != null ? parseFloat(cmems.chlorophyll.toFixed(3))   : null,
-                    turbidity:     cmems.turbidity      != null ? parseFloat(cmems.turbidity.toFixed(4))     : null,
-                    ssh:           cmems.ssh            != null ? parseFloat(cmems.ssh.toFixed(3))           : null,
-                    windStress:    cmems.windStress     != null ? parseFloat(cmems.windStress.toFixed(2))    : null,
-                    dataQuality:   cmems.dataQuality
-                } : null
+                activityWindows: activityWindows
             });
         }
 
@@ -3186,10 +3005,9 @@ app.get('/api/forecast', async (req, res) => {
         }
 
         const responseData = {
-            version: 'F.I.S.H. v3.0', region: regionName, isLand, landReason, clickHour,
+            version: "F.I.S.H. v3.0", region: regionName, isLand, landReason, clickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
-            depth: depthData,
-            cmems: cmems ? { dataQuality: cmems.dataQuality } : null,
+            depth: depthData,  // EMODnet Bathymetry derinlik verisi
             forecast, instant: instantData
         };
 
@@ -3580,7 +3398,11 @@ app.post('/api/verify-subscription', async (req, res) => {
     
     try {
         if (db) {
-            await db.collection('subscriptions').doc(req.user.uid).set({
+            const userSubRef = db.collection('subscriptions').doc(req.user.uid);
+            const existing = await userSubRef.get();
+            const isNewPro = !existing.exists || existing.data().status !== 'active';
+
+            await userSubRef.set({
                 status: 'active',
                 subscriptionId: subId,
                 purchaseToken,
@@ -3589,6 +3411,12 @@ app.post('/api/verify-subscription', async (req, res) => {
                 expiresAt: Date.now() + durationMs,
                 updatedAt: Date.now()
             }, { merge: true });
+
+            // Yeni pro kullanıcıysa stats/pro_count sayacını artır
+            if (isNewPro) {
+                const statsRef = db.collection('stats').doc('pro_count');
+                await statsRef.set({ count: (await statsRef.get()).data()?.count + 1 || 1 }, { merge: true });
+            }
         }
         res.json({ success: true, isPremium: true, subscriptionId: subId });
     } catch (error) {
