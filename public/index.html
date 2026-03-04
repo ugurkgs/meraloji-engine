@@ -2051,7 +2051,7 @@
                 <div style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(0,200,200,0.15); border-radius:12px; padding:14px 10px; cursor:pointer;" onclick="upgradeToPro('monthly')">
                     <div style="font-size:11px; color:#8892a3; margin-bottom:4px;">AYLIK</div>
                     <div style="font-size:22px; font-weight:700; color:#00ffcc;">₺9,99</div>
-                    <div style="font-size:10px; color:#ff851b;">🎉 Lansmana Özel</div>
+                    <div style="font-size:10px; color:#ff851b;">🎯 İlk 1000'e Özel</div>
                 </div>
                 <!-- Yearly -->
                 <div style="flex:1; background:rgba(0,200,200,0.08); border:2px solid rgba(0,200,200,0.4); border-radius:12px; padding:14px 10px; position:relative; cursor:pointer;" onclick="upgradeToPro('yearly')">
@@ -2062,8 +2062,19 @@
                 </div>
             </div>
             
-            <!-- Launch badge -->
-            <div style="font-size:11px; color:#ff851b; margin-bottom:16px;">⏰ Lansman fiyatı sınırlı sürelidir. Sonra ₺29,99/ay olacak.</div>
+            <!-- 1000 kişi sayacı -->
+            <div style="background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.25);border-radius:10px;padding:10px 14px;margin-bottom:16px;">
+                <div style="font-size:11px;color:#ff851b;font-weight:700;margin-bottom:4px;">🎯 İLK 1000 KİŞİYE ÖZEL FİYAT</div>
+                <div style="font-size:11px;color:#c8d0dc;">Sonra <s>₺29,99/ay</s> olacak. Şimdi al, fiyat sonsuza kilitli kalır.</div>
+                <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
+                    <div style="font-size:12px;color:#c8d0dc;">Kalan:</div>
+                    <div style="font-size:18px;font-weight:700;color:#ff4444;" id="paywall-slots">...</div>
+                    <div style="font-size:11px;color:#8892a3;">/ 1000 kişi</div>
+                </div>
+                <div style="margin-top:6px;background:rgba(0,0,0,0.3);border-radius:4px;height:5px;overflow:hidden;">
+                    <div id="paywall-slots-bar" style="height:100%;background:linear-gradient(90deg,#ff4444,#ff851b);width:0%;transition:width 0.8s;"></div>
+                </div>
+            </div>
             
             <!-- CTA -->
             <button onclick="upgradeToPro('yearly')" style="width:100%; padding:14px; border:none; border-radius:12px; background:linear-gradient(135deg, #00c8c8, #00ffcc); color:#000; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:0.5px;">
@@ -4446,10 +4457,12 @@
                 return;
             }
 
-            // Premium gate: ücretsiz kullanıcıya 5 balık
+            // Premium gate: ücretsiz kullanıcıya 5 balık (3 gizli + 2 normal)
             const displayList = isPremium ? list : list.slice(0, 5);
 
-            container.innerHTML = displayList.map(f => {
+            container.innerHTML = displayList.map((f, idx) => {
+                // Ücretsiz kullanıcı: ilk 3 balık skor/detay gizli
+                const isLocked = !isPremium && idx < 3;
                 const isProtected = f.legalSize === 'YASAK' || f.category === 'KORUMA';
                 const scoreClass = isProtected ? 'score-low' : (f.score >= 70 ? 'score-high' : (f.score >= 50 ? 'score-mid' : 'score-low'));
                 const reasonClass = f.score >= 50 && !isProtected ? 'positive' : 'negative';
@@ -4631,6 +4644,27 @@
                         🚫 AVLANMASI KESİNLİKLE YASAKTIR — KORUMA ALTINDA TÜR (6/2 Tebliğ)
                     </div>` : '';
 
+                // Kilitli kart — skor ve detaylar gizli, sadece isim görünür
+                if (isLocked) {
+                    return `
+                        <div class="fish-item score-mid" onclick="showPaywall('locked_fish')" style="cursor:pointer;">
+                            <div class="fish-header">
+                                <div class="fish-name">
+                                    ${f.icon} ${displayName}
+                                    <span style="font-size:0.65rem;color:var(--text-muted);margin-left:4px;">${f.scientificName ? f.scientificName : ''}</span>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:6px;">
+                                    <div style="font-size:0.7rem;color:var(--cyan);">🔒 PRO</div>
+                                    <div class="fish-score" style="color:var(--text-muted);filter:blur(4px);">%${f.score.toFixed(0)}</div>
+                                </div>
+                            </div>
+                            <div style="font-size:0.72rem;color:var(--text-muted);padding:4px 0 2px;">
+                                🔒 Skor ve detaylar PRO üyelere özel — <span style="color:var(--cyan);">yükselt</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 return `
                     <div class="fish-item ${scoreClass}" style="${isProtected ? 'border:2px solid #cc0000;' : ''}" onclick="this.classList.toggle('open')">
                         ${protectedBanner}
@@ -4660,14 +4694,24 @@
 
             // Premium gate göster
             if (!isPremium && list.length > 5) {
+                const remaining = window._proSlotsRemaining ?? '...';
+                const remainingColor = typeof remaining === 'number' && remaining < 200 ? '#ff4444' : typeof remaining === 'number' && remaining < 500 ? '#ff851b' : '#00ffcc';
                 container.innerHTML += `
                     <div class="premium-gate">
                         <h3>🔒 +${list.length - 5} balık daha var!</h3>
-                        <p>Tüm ${list.length} balık türünü gör, saatlik grafik, skor analizi</p>
-                        <div class="price" style="margin-bottom:4px;">🎉 Lansmana Özel: ₺9,99/ay</div>
-                        <div style="font-size:0.7rem;color:#8892a3;margin-bottom:6px;">Yıllık: ₺59,99 (₺5/ay)</div>
-                        <div style="font-size:0.65rem;color:#ff851b;margin-bottom:10px;">⏰ Lansman fiyatı sınırlı sürelidir</div>
-                        <button class="upgrade-btn" onclick="showPaywall('list')">PRO'ya Yükselt</button>
+                        <p>İlk 3 sonucun skorunu, yem/olta detaylarını ve tüm ${list.length} türü gör</p>
+                        <div style="background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.3);border-radius:8px;padding:8px 12px;margin-bottom:10px;">
+                            <div style="font-size:0.7rem;color:#ff851b;margin-bottom:2px;">🎯 İLK 1000'E ÖZEL FİYAT</div>
+                            <div style="font-size:1.1rem;font-weight:700;color:#00ffcc;">₺9,99/ay</div>
+                            <div style="font-size:0.68rem;color:var(--text-muted);">Yıllık: ₺59,99 (₺5/ay)</div>
+                            <div style="margin-top:6px;font-size:0.72rem;">
+                                Kalan kontenjan: <span style="font-weight:700;color:${remainingColor};">${remaining}</span> kişi
+                            </div>
+                            <div style="margin-top:4px;background:rgba(0,0,0,0.3);border-radius:4px;height:4px;overflow:hidden;">
+                                <div style="height:100%;background:linear-gradient(90deg,#ff4444,#ff851b);width:${typeof remaining === 'number' ? Math.round((1000-remaining)/10) : 50}%;transition:width 0.5s;"></div>
+                            </div>
+                        </div>
+                        <button class="upgrade-btn" onclick="showPaywall('list')">PRO'ya Yükselt →</button>
                     </div>`;
             }
         }
@@ -5787,6 +5831,7 @@ auth.onAuthStateChanged(async (user) => {
         authToken = await user.getIdToken();
         document.getElementById('login-overlay').classList.add('hidden');
         await checkSubscriptionStatus();
+        loadProSlotsCount(); // fire-and-forget
         updateUserUI();
         try { await loadScanUsage(); } catch(e) {}
     } else {
@@ -5796,6 +5841,66 @@ auth.onAuthStateChanged(async (user) => {
         document.getElementById('login-overlay').classList.remove('hidden');
     }
 });
+
+// Firestore'dan toplam pro kullanıcı sayısını çek — 1000 kişi kontenjanı
+async function loadProSlotsCount() {
+    try {
+        if (!db) return;
+        const snap = await db.collection('stats').doc('pro_count').get();
+        const count = snap.exists ? (snap.data().count || 0) : 0;
+        const remaining = Math.max(0, 1000 - count);
+        window._proSlotsRemaining = remaining;
+
+        // Paywall modal sayacını güncelle
+        const el = document.getElementById('paywall-slots');
+        const bar = document.getElementById('paywall-slots-bar');
+        if (el) el.textContent = remaining;
+        if (bar) bar.style.width = Math.round((count / 1000) * 100) + '%';
+        if (el && remaining < 100) el.style.color = '#ff2222';
+        else if (el && remaining < 300) el.style.color = '#ff851b';
+        else if (el) el.style.color = '#ff4444';
+    } catch(e) {
+        window._proSlotsRemaining = '...';
+    }
+
+// Firestore'dan toplam pro kullanıcı sayısını çek — 1000 kişi kontenjanı
+async function loadProSlotsCount() {
+    try {
+        if (!db) return;
+        const snap = await db.collection('stats').doc('pro_count').get();
+        const count = snap.exists ? (snap.data().count || 0) : 0;
+        const remaining = Math.max(0, 1000 - count);
+        window._proSlotsRemaining = remaining;
+        const el = document.getElementById('paywall-slots');
+        const bar = document.getElementById('paywall-slots-bar');
+        if (el) el.textContent = remaining;
+        if (bar) bar.style.width = Math.round((count / 1000) * 100) + '%';
+        if (el) el.style.color = remaining < 100 ? '#ff2222' : remaining < 300 ? '#ff851b' : '#ff4444';
+    } catch(e) { window._proSlotsRemaining = '...'; }
+}
+
+
+}
+
+// Firestore'dan toplam pro kullanıcı sayısını çek — 1000 kişi kontenjanı
+async function loadProSlotsCount() {
+    try {
+        if (!db) return;
+        const snap = await db.collection('stats').doc('pro_count').get();
+        const count = snap.exists ? (snap.data().count || 0) : 0;
+        const remaining = Math.max(0, 1000 - count);
+        window._proSlotsRemaining = remaining;
+
+        // Paywall modal sayacını güncelle
+        const el = document.getElementById('paywall-slots');
+        const bar = document.getElementById('paywall-slots-bar');
+        if (el) el.textContent = remaining;
+        if (bar) bar.style.width = Math.round((count / 1000) * 100) + '%';
+        if (el) el.style.color = remaining < 100 ? '#ff2222' : remaining < 300 ? '#ff851b' : '#ff4444';
+    } catch(e) {
+        window._proSlotsRemaining = '...';
+    }
+}
 
 async function checkSubscriptionStatus() {
     if (!authToken) return;
@@ -5850,9 +5955,11 @@ function showUserMenu() {
 // ═══════════════════════════════════════════════════════════════
 
 function showPaywall(reason) {
+    loadProSlotsCount(); // Paywall açılırken sayacı tazele
     const modal = document.getElementById('paywall-modal');
     const title = document.getElementById('paywall-title');
     const subtitle = document.getElementById('paywall-subtitle');
+    loadProSlotsCount(); // Paywall açılırken sayacı tazele
     
     if (reason === 'click') {
         title.textContent = 'Günlük 5 Tahmin Hakkınız Doldu';
@@ -5904,7 +6011,6 @@ async function upgradeToPro(plan) {
 }
 
 // Tüm API çağrılarına auth token ekle — her çağrıda taze token al
-// Firebase token 1 saatte bir süresi doluyor, getIdToken() otomatik yeniler
 const _origFetch = window.fetch;
 window.fetch = async function(url, opts = {}) {
     if (typeof url === 'string' && url.startsWith('/api/') && currentUser) {
