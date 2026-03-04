@@ -3816,8 +3816,32 @@
                 importance: 'Gerçek su saydamlığı ölçümü. Dalga/rüzgar tahmininden çok daha doğru.',
                 importanceEn: 'Real water transparency measurement. Much more accurate than wave/wind estimate.',
                 ref: '<0.1: Çok berrak | 0.1-0.3: Orta | 0.3-0.6: Bulanık (Levrek) | >0.6: Çok bulanık',
-                algo: 'CMEMS kd490 — Clarity hesabını güçlendirir',
-                source: 'Copernicus Marine Service — MEDSEA_ANALYSISFORECAST_BIO'
+                algo: 'NOAA VIIRS Kd490 — Clarity hesabını güçlendirir',
+                source: 'NOAA CoastWatch — noaacwNPPVIIRSkd4901day'
+            },
+            cmems_ssh: {
+                icon: '📡',
+                title: 'DENİZ YÜKSEKLİĞİ',
+                titleEn: 'SEA SURFACE HEIGHT',
+                desc: 'Deniz yüzeyi yüksekliği anomalisi (m). Geostrofik akıntıların dolaylı göstergesi.',
+                descEn: 'Sea surface height anomaly (m). Indirect indicator of geostrophic currents.',
+                importance: 'Yüksek SSH bölgesi = su toplanması = saat yönünde döngü = besin fakir. Düşük SSH = soğuk su yükselişi = besin zengin = balık aktif.',
+                importanceEn: 'High SSH = water convergence = clockwise eddy = nutrient poor. Low SSH = upwelling = nutrient rich = fish active.',
+                ref: '>0.1m: Pozitif anomali (sıcak çevre) | -0.1 - 0.1: Normal | <-0.1m: Negatif (upwelling)',
+                algo: 'NESDIS SSH altimetre verisi — geostrofik akıntı tahmini',
+                source: 'NOAA CoastWatch — nesdisSSH1day'
+            },
+            cmems_windstress: {
+                icon: '🌬️',
+                title: 'RÜZGAR STRESİ',
+                titleEn: 'WIND STRESS',
+                desc: 'Okyanus yüzeyine etki eden rüzgar kuvveti (m/s). Upwelling ve su karışımının tetikleyicisi.',
+                descEn: 'Wind force acting on ocean surface (m/s). Trigger for upwelling and water mixing.',
+                importance: 'Güçlü rüzgar stresi derin soğuk suyu yüzeye taşır (upwelling). Bu besin bakımından zengin suyu getirir, balık aktivitesini artırır.',
+                importanceEn: 'Strong wind stress brings cold deep water to surface (upwelling). Brings nutrient-rich water, increases fish activity.',
+                ref: '<3 m/s: Zayıf | 3-7 m/s: Orta | >7 m/s: Güçlü upwelling potansiyeli',
+                algo: 'QuikSCAT/ASCAT aylık ortalama — upwelling indeksi',
+                source: 'NOAA CoastWatch — erdQAwindmday'
             }
         };
 
@@ -5252,7 +5276,9 @@
                 { key: 'cmems_salinity',   val: cmems && cmems.salinity != null   ? cmems.salinity.toFixed(1) + ' P'  : '--', available: cmems && cmems.dataQuality && cmems.dataQuality.salinity },
                 { key: 'cmems_mld',        val: cmems && cmems.mld != null        ? cmems.mld.toFixed(0) + ' m'       : '--', available: cmems && cmems.dataQuality && cmems.dataQuality.mld },
                 { key: 'cmems_chlorophyll',val: cmems && cmems.chlorophyll != null? cmems.chlorophyll.toFixed(2)+' mg': '--', available: cmems && cmems.dataQuality && cmems.dataQuality.chlorophyll },
-                { key: 'cmems_turbidity',  val: cmems && cmems.turbidity != null  ? cmems.turbidity.toFixed(3)+' m-1' : '--', available: cmems && cmems.dataQuality && cmems.dataQuality.turbidity }
+                { key: 'cmems_turbidity',  val: cmems && cmems.turbidity != null  ? cmems.turbidity.toFixed(3)+' m-1' : '--', available: cmems && cmems.dataQuality && cmems.dataQuality.turbidity },
+                { key: 'cmems_ssh',        val: cmems && cmems.ssh != null        ? (cmems.ssh >= 0 ? '+' : '') + cmems.ssh.toFixed(2)+' m' : '--', available: cmems && cmems.dataQuality && cmems.dataQuality.ssh },
+                { key: 'cmems_windstress', val: cmems && cmems.windStress != null ? cmems.windStress.toFixed(1)+' m/s' : '--', available: cmems && cmems.dataQuality && cmems.dataQuality.windStress }
             ];
 
             const availCount = cards.filter(c => c.available).length;
