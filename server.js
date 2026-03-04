@@ -41,11 +41,18 @@ const CMEMS_USER = process.env.CMEMS_USER || '';
 const CMEMS_PASS = process.env.CMEMS_PASS || '';
 const CMEMS_BASE = 'https://nrt.cmems-du.eu/thredds/dodsC';
 
-// CMEMS dataset ID'leri
+// CMEMS dataset ID'leri — her değişken ayrı dataset'te
 const CMEMS_DATASETS = {
-    MED_PHY:  'med-cmcc-cur-an-fc-h',   // Akdeniz + Ege: akıntı, SST, tuzluluk, MLD
-    MED_BIO:  'med-ogs-bio-an-fc-d',    // Akdeniz + Ege: klorofil, turbidite
-    BLACK_PHY:'blk-cmcc-cur-an-fc-h',   // Karadeniz: akıntı, SST, tuzluluk, MLD
+    MED_CUR: 'cmems_mod_med_phy-cur_anfc_4.2km_P1D-m',  // Akdeniz akıntı (uo, vo)
+    MED_TEM: 'cmems_mod_med_phy-tem_anfc_4.2km_P1D-m',  // Akdeniz sıcaklık (thetao)
+    MED_SAL: 'cmems_mod_med_phy-sal_anfc_4.2km_P1D-m',  // Akdeniz tuzluluk (so)
+    MED_MLD: 'cmems_mod_med_phy-mld_anfc_4.2km_P1D-m',  // Akdeniz MLD (mlotst)
+    MED_BIO: 'cmems_mod_med_bgc-optics_anfc_4.2km_P1D-m', // Akdeniz optik (kd490)
+    MED_CHL: 'cmems_mod_med_bgc-bio_anfc_4.2km_P1D-m',  // Akdeniz biyokimya (chl)
+    BLK_CUR: 'cmems_mod_blk_phy-cur_anfc_2.5km_P1D-m',  // Karadeniz akıntı
+    BLK_TEM: 'cmems_mod_blk_phy-tem_anfc_2.5km_P1D-m',  // Karadeniz sıcaklık
+    BLK_SAL: 'cmems_mod_blk_phy-sal_anfc_2.5km_P1D-m',  // Karadeniz tuzluluk
+    BLK_MLD: 'cmems_mod_blk_phy-mld_anfc_2.5km_P1D-m',  // Karadeniz MLD
 };
 
 // CMEMS OPeNDAP'tan tek değişken çek
@@ -89,9 +96,23 @@ async function fetchCMEMSVariable(dataset, variable, lat, lon, timeoutMs = 4000)
 }
 
 // Bölgeye göre doğru dataset seç
-function getCMEMSDataset(region) {
-    if (region === 'KARADENİZ') return { phy: CMEMS_DATASETS.BLACK_PHY, bio: null };
-    return { phy: CMEMS_DATASETS.MED_PHY, bio: CMEMS_DATASETS.MED_BIO };
+function getCMEMSDatasets(region) {
+    if (region === 'KARADENİZ') return {
+        cur: CMEMS_DATASETS.BLK_CUR,
+        tem: CMEMS_DATASETS.BLK_TEM,
+        sal: CMEMS_DATASETS.BLK_SAL,
+        mld: CMEMS_DATASETS.BLK_MLD,
+        chl: null,
+        bio: null
+    };
+    return {
+        cur: CMEMS_DATASETS.MED_CUR,
+        tem: CMEMS_DATASETS.MED_TEM,
+        sal: CMEMS_DATASETS.MED_SAL,
+        mld: CMEMS_DATASETS.MED_MLD,
+        chl: CMEMS_DATASETS.MED_CHL,
+        bio: CMEMS_DATASETS.MED_BIO
+    };
 }
 
 // Tüm CMEMS verilerini paralel çek — her biri bağımsız, biri failse diğerleri devam eder
@@ -101,7 +122,7 @@ async function fetchAllCMEMS(lat, lon, region) {
         return null;
     }
 
-    const ds = getCMEMSDataset(region);
+    const ds = getCMEMSDatasets(region);
 
     const [
         currentU,       // Doğu-Batı akıntı bileşeni (m/s)
@@ -112,12 +133,12 @@ async function fetchAllCMEMS(lat, lon, region) {
         chlorophyll,    // Klorofil-a (mg/m³) — sadece Akdeniz/Ege
         turbidity,      // Turbidite / Bulanıklık (m⁻¹) — sadece Akdeniz/Ege
     ] = await Promise.all([
-        fetchCMEMSVariable(ds.phy, 'uo',   lat, lon),
-        fetchCMEMSVariable(ds.phy, 'vo',   lat, lon),
-        fetchCMEMSVariable(ds.phy, 'thetao', lat, lon),
-        fetchCMEMSVariable(ds.phy, 'so',   lat, lon),
-        fetchCMEMSVariable(ds.phy, 'mlotst', lat, lon),
-        ds.bio ? fetchCMEMSVariable(ds.bio, 'chl', lat, lon) : Promise.resolve(null),
+        fetchCMEMSVariable(ds.cur, 'uo',     lat, lon),
+        fetchCMEMSVariable(ds.cur, 'vo',     lat, lon),
+        fetchCMEMSVariable(ds.tem, 'thetao', lat, lon),
+        fetchCMEMSVariable(ds.sal, 'so',     lat, lon),
+        fetchCMEMSVariable(ds.mld, 'mlotst', lat, lon),
+        ds.chl ? fetchCMEMSVariable(ds.chl, 'chl',   lat, lon) : Promise.resolve(null),
         ds.bio ? fetchCMEMSVariable(ds.bio, 'kd490', lat, lon) : Promise.resolve(null),
     ]);
 
