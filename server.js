@@ -33,141 +33,75 @@ async function safeFetchJSON(url, timeoutMs = 8000) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// CMEMS — Copernicus Marine Service Entegrasyonu
+// OCEAN DATA — NASA/NOAA ERDDAP + Open-Meteo Entegrasyonu
 // Graceful degradation: veri gelmezse null döner, skor yine çalışır
+// Kayıt gerektirmez, API key yok, düz HTTP GET
 // ═══════════════════════════════════════════════════════════════════════════
 
-const CMEMS_USER = process.env.CMEMS_USER || '';
-const CMEMS_PASS = process.env.CMEMS_PASS || '';
-const CMEMS_BASE = 'https://nrt.cmems-du.eu/thredds/dodsC';
+// NASA/NOAA ERDDAP — klorofil (MODIS Aqua, 4km, aylık kompozit)
+// Dataset: erdMH1chlamday — global kapsam, kayıt gerekmez
+const ERDDAP_CHL_BASE = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap/erdMH1chlamday.json';
 
-// CMEMS dataset ID'leri — her değişken ayrı dataset'te
-const CMEMS_DATASETS = {
-    MED_CUR: 'cmems_mod_med_phy-cur_anfc_4.2km_P1D-m',  // Akdeniz akıntı (uo, vo)
-    MED_TEM: 'cmems_mod_med_phy-tem_anfc_4.2km_P1D-m',  // Akdeniz sıcaklık (thetao)
-    MED_SAL: 'cmems_mod_med_phy-sal_anfc_4.2km_P1D-m',  // Akdeniz tuzluluk (so)
-    MED_MLD: 'cmems_mod_med_phy-mld_anfc_4.2km_P1D-m',  // Akdeniz MLD (mlotst)
-    MED_BIO: 'cmems_mod_med_bgc-optics_anfc_4.2km_P1D-m', // Akdeniz optik (kd490)
-    MED_CHL: 'cmems_mod_med_bgc-bio_anfc_4.2km_P1D-m',  // Akdeniz biyokimya (chl)
-    BLK_CUR: 'cmems_mod_blk_phy-cur_anfc_2.5km_P1D-m',  // Karadeniz akıntı
-    BLK_TEM: 'cmems_mod_blk_phy-tem_anfc_2.5km_P1D-m',  // Karadeniz sıcaklık
-    BLK_SAL: 'cmems_mod_blk_phy-sal_anfc_2.5km_P1D-m',  // Karadeniz tuzluluk
-    BLK_MLD: 'cmems_mod_blk_phy-mld_anfc_2.5km_P1D-m',  // Karadeniz MLD
-};
-
-// CMEMS OPeNDAP'tan tek değişken çek
-async function fetchCMEMSVariable(dataset, variable, lat, lon, timeoutMs = 4000) {
-    if (!CMEMS_USER || !CMEMS_PASS) return null;
+async function fetchChlorophyll(lat, lon, timeoutMs = 5000) {
     try {
-        const latF  = parseFloat(lat).toFixed(4);
-        const lonF  = parseFloat(lon).toFixed(4);
-        const now   = new Date();
-        const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+        const latF = parseFloat(lat).toFixed(2);
+        const lonF = parseFloat(lon).toFixed(2);
 
-        // OPeNDAP ASCII endpoint — lat/lon en yakın grid noktasına yuvarlanır
-        const url = `${CMEMS_BASE}/${dataset}.ascii?${variable}[(${dateStr}T00:00:00Z)][(0.0)][(${latF})][(${lonF})]`;
-        const auth = 'Basic ' + Buffer.from(`${CMEMS_USER}:${CMEMS_PASS}`).toString('base64');
+        // Geçen ayın tarihini al (aylık kompozit — güncel ay henüz hazır olmayabilir)
+        const now = new Date();
+        now.setMonth(now.getMonth() - 1);
+        now.setDate(1);
+        const dateStr = now.toISOString().split('T')[0] + 'T00:00:00Z';
+
+        // ERDDAP griddap sorgusu — en yakın nokta
+        const url = `${ERDDAP_CHL_BASE}?chlor_a[(${dateStr})][(${latF})][(${lonF})]`;
 
         const res = await Promise.race([
-            fetch(url, { headers: { Authorization: auth } }),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('CMEMS_TIMEOUT')), timeoutMs))
+            fetch(url),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('CHL_TIMEOUT')), timeoutMs))
         ]);
 
         if (!res.ok) return null;
-        const text = await res.text();
+        const data = await res.json();
 
-        // ASCII yanıttan sayısal değeri parse et
-        // Format: "varname, [N]\nval1, val2, ..."
-        const lines = text.split('\n').filter(l => l.trim());
-        for (const line of lines) {
-            if (line.includes(',')) {
-                const parts = line.split(',');
-                for (const p of parts) {
-                    const v = parseFloat(p.trim());
-                    if (!isNaN(v) && v !== 0 && Math.abs(v) < 1e10) return v;
-                }
-            }
-        }
-        return null;
+        // ERDDAP JSON formatı: data.table.rows[0][son_kolon]
+        const rows = data?.table?.rows;
+        if (!rows || rows.length === 0) return null;
+        const val = parseFloat(rows[0][rows[0].length - 1]);
+        if (isNaN(val) || val <= 0) return null;
+        return val; // mg/m³
     } catch (e) {
-        console.log(`[CMEMS] ${dataset}/${variable} failed: ${e.message}`);
+        console.log(`[CHL] fetch failed: ${e.message}`);
         return null;
     }
 }
 
-// Bölgeye göre doğru dataset seç
-function getCMEMSDatasets(region) {
-    if (region === 'KARADENİZ') return {
-        cur: CMEMS_DATASETS.BLK_CUR,
-        tem: CMEMS_DATASETS.BLK_TEM,
-        sal: CMEMS_DATASETS.BLK_SAL,
-        mld: CMEMS_DATASETS.BLK_MLD,
-        chl: null,
-        bio: null
-    };
-    return {
-        cur: CMEMS_DATASETS.MED_CUR,
-        tem: CMEMS_DATASETS.MED_TEM,
-        sal: CMEMS_DATASETS.MED_SAL,
-        mld: CMEMS_DATASETS.MED_MLD,
-        chl: CMEMS_DATASETS.MED_CHL,
-        bio: CMEMS_DATASETS.MED_BIO
-    };
-}
-
-// Tüm CMEMS verilerini paralel çek — her biri bağımsız, biri failse diğerleri devam eder
+// Tüm ocean veri kaynaklarını paralel çek
 async function fetchAllCMEMS(lat, lon, region) {
-    if (!CMEMS_USER || !CMEMS_PASS) {
-        console.log('[CMEMS] Credentials not set, skipping');
-        return null;
-    }
-
-    const ds = getCMEMSDatasets(region);
-
-    const [
-        currentU,       // Doğu-Batı akıntı bileşeni (m/s)
-        currentV,       // Kuzey-Güney akıntı bileşeni (m/s)
-        sst,            // Deniz yüzeyi sıcaklığı (°C)
-        salinity,       // Tuzluluk (PSU)
-        mld,            // Mixed Layer Depth / Termoklin (m)
-        chlorophyll,    // Klorofil-a (mg/m³) — sadece Akdeniz/Ege
-        turbidity,      // Turbidite / Bulanıklık (m⁻¹) — sadece Akdeniz/Ege
-    ] = await Promise.all([
-        fetchCMEMSVariable(ds.cur, 'uo',     lat, lon),
-        fetchCMEMSVariable(ds.cur, 'vo',     lat, lon),
-        fetchCMEMSVariable(ds.tem, 'thetao', lat, lon),
-        fetchCMEMSVariable(ds.sal, 'so',     lat, lon),
-        fetchCMEMSVariable(ds.mld, 'mlotst', lat, lon),
-        ds.chl ? fetchCMEMSVariable(ds.chl, 'chl',   lat, lon) : Promise.resolve(null),
-        ds.bio ? fetchCMEMSVariable(ds.bio, 'kd490', lat, lon) : Promise.resolve(null),
-    ]);
-
-    // Akıntı hızını U/V bileşenlerinden hesapla (Pisagor)
-    const currentSpeed = (currentU !== null && currentV !== null)
-        ? Math.sqrt(currentU * currentU + currentV * currentV)
-        : null;
+    // Klorofil — NASA ERDDAP (ücretsiz, kayıt yok)
+    const chlorophyll = await fetchChlorophyll(lat, lon).catch(() => null);
 
     const result = {
-        currentSpeed,   // m/s — null ise tahmin kullanılır
-        currentU,       // m/s
-        currentV,       // m/s
-        sst,            // °C — null ise Open-Meteo SST kullanılır
-        salinity,       // PSU — null ise bölgesel sabit kullanılır
-        mld,            // m — Mixed Layer Depth (termoklin göstergesi)
-        chlorophyll,    // mg/m³ — null ise skor etkisi yok
-        turbidity,      // m⁻¹ — null ise skor etkisi yok
-        dataQuality: {  // Frontend için hangi veriler geldi
-            current:     currentSpeed !== null,
-            sst:         sst !== null,
-            salinity:    salinity !== null,
-            mld:         mld !== null,
+        currentSpeed:  null,  // Open-Meteo'dan geliyor zaten
+        currentU:      null,
+        currentV:      null,
+        sst:           null,  // Open-Meteo SST kullanılıyor
+        salinity:      null,  // Bölgesel sabit kullanılıyor
+        mld:           null,  // Şimdilik yok
+        chlorophyll,          // NASA ERDDAP'tan
+        turbidity:     null,  // Şimdilik yok
+        dataQuality: {
+            current:     false,
+            sst:         false,
+            salinity:    false,
+            mld:         false,
             chlorophyll: chlorophyll !== null,
-            turbidity:   turbidity !== null,
+            turbidity:   false,
         }
     };
 
     const gotCount = Object.values(result.dataQuality).filter(Boolean).length;
-    console.log(`[CMEMS] ${region} — ${gotCount}/6 variables received`);
+    console.log(`[CHL] ${region} — chlorophyll: ${chlorophyll !== null ? chlorophyll.toFixed(3) + ' mg/m³' : 'null'}`);
     return result;
 }
 
