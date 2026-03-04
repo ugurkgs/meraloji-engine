@@ -4826,6 +4826,32 @@
                 document.getElementById('fish-search-input').value = found.name;
             }
 
+            // PRO kontrolü — ücretsiz kullanıcı search sonucu göremez
+            if (!isPremium) {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <div style="padding:20px; text-align:center; background:rgba(0,0,0,0.3); border-radius:10px; border:1px dashed var(--border-subtle);">
+                        <div style="font-size:2rem; margin-bottom:8px;">🔒</div>
+                        <div style="font-size:0.9rem; font-weight:700; color:var(--cyan); margin-bottom:6px;">PRO Özelliği</div>
+                        <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:14px;">Türe özel skor analizi, en iyi saat ve detaylar PRO üyelere özeldir</div>
+                        <button onclick="showPaywall('search')" style="padding:10px 24px; border:none; border-radius:8px; background:linear-gradient(135deg,#00c8c8,#00ffcc); color:#000; font-weight:700; cursor:pointer; font-size:0.85rem;">PRO'ya Yükselt →</button>
+                    </div>`;
+                return;
+            }
+
+            // PRO kontrolü — ücretsiz kullanıcı search sonucu göremez
+            if (!isPremium) {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <div style="padding:20px; text-align:center; background:rgba(0,0,0,0.3); border-radius:10px; border:1px dashed var(--border-subtle);">
+                        <div style="font-size:2rem; margin-bottom:8px;">🔒</div>
+                        <div style="font-size:0.9rem; font-weight:700; color:var(--cyan); margin-bottom:6px;">PRO Özelliği</div>
+                        <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:14px;">Türe özel skor analizi, en iyi saat ve detaylar PRO üyelere özeldir</div>
+                        <button onclick="showPaywall('search')" style="padding:10px 24px; border:none; border-radius:8px; background:linear-gradient(135deg,#00c8c8,#00ffcc); color:#000; font-weight:700; cursor:pointer; font-size:0.85rem;">PRO'ya Yükselt →</button>
+                    </div>`;
+                return;
+            }
+
             resultDiv.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">⏳ Analiz ediliyor...</div>';
             resultDiv.style.display = 'block';
 
