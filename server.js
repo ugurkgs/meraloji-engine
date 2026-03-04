@@ -32,6 +32,153 @@ async function safeFetchJSON(url, timeoutMs = 8000) {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// CMEMS — Copernicus Marine Service Entegrasyonu
+// Graceful degradation: veri gelmezse null döner, skor yine çalışır
+// ═══════════════════════════════════════════════════════════════════════════
+
+const CMEMS_USER = process.env.CMEMS_USER || '';
+const CMEMS_PASS = process.env.CMEMS_PASS || '';
+const CMEMS_BASE = 'https://nrt.cmems-du.eu/thredds/dodsC';
+
+// CMEMS dataset ID'leri
+const CMEMS_DATASETS = {
+    MED_PHY:  'med-cmcc-cur-an-fc-h',   // Akdeniz + Ege: akıntı, SST, tuzluluk, MLD
+    MED_BIO:  'med-ogs-bio-an-fc-d',    // Akdeniz + Ege: klorofil, turbidite
+    BLACK_PHY:'blk-cmcc-cur-an-fc-h',   // Karadeniz: akıntı, SST, tuzluluk, MLD
+};
+
+// CMEMS OPeNDAP'tan tek değişken çek
+async function fetchCMEMSVariable(dataset, variable, lat, lon, timeoutMs = 10000) {
+    if (!CMEMS_USER || !CMEMS_PASS) return null;
+    try {
+        const latF  = parseFloat(lat).toFixed(4);
+        const lonF  = parseFloat(lon).toFixed(4);
+        const now   = new Date();
+        const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+
+        // OPeNDAP ASCII endpoint — lat/lon en yakın grid noktasına yuvarlanır
+        const url = `${CMEMS_BASE}/${dataset}.ascii?${variable}[(${dateStr}T00:00:00Z)][(0.0)][(${latF})][(${lonF})]`;
+        const auth = 'Basic ' + Buffer.from(`${CMEMS_USER}:${CMEMS_PASS}`).toString('base64');
+
+        const res = await Promise.race([
+            fetch(url, { headers: { Authorization: auth } }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('CMEMS_TIMEOUT')), timeoutMs))
+        ]);
+
+        if (!res.ok) return null;
+        const text = await res.text();
+
+        // ASCII yanıttan sayısal değeri parse et
+        // Format: "varname, [N]\nval1, val2, ..."
+        const lines = text.split('\n').filter(l => l.trim());
+        for (const line of lines) {
+            if (line.includes(',')) {
+                const parts = line.split(',');
+                for (const p of parts) {
+                    const v = parseFloat(p.trim());
+                    if (!isNaN(v) && v !== 0 && Math.abs(v) < 1e10) return v;
+                }
+            }
+        }
+        return null;
+    } catch (e) {
+        console.log(`[CMEMS] ${dataset}/${variable} failed: ${e.message}`);
+        return null;
+    }
+}
+
+// Bölgeye göre doğru dataset seç
+function getCMEMSDataset(region) {
+    if (region === 'KARADENİZ') return { phy: CMEMS_DATASETS.BLACK_PHY, bio: null };
+    return { phy: CMEMS_DATASETS.MED_PHY, bio: CMEMS_DATASETS.MED_BIO };
+}
+
+// Tüm CMEMS verilerini paralel çek — her biri bağımsız, biri failse diğerleri devam eder
+async function fetchAllCMEMS(lat, lon, region) {
+    if (!CMEMS_USER || !CMEMS_PASS) {
+        console.log('[CMEMS] Credentials not set, skipping');
+        return null;
+    }
+
+    const ds = getCMEMSDataset(region);
+
+    const [
+        currentU,       // Doğu-Batı akıntı bileşeni (m/s)
+        currentV,       // Kuzey-Güney akıntı bileşeni (m/s)
+        sst,            // Deniz yüzeyi sıcaklığı (°C)
+        salinity,       // Tuzluluk (PSU)
+        mld,            // Mixed Layer Depth / Termoklin (m)
+        chlorophyll,    // Klorofil-a (mg/m³) — sadece Akdeniz/Ege
+        turbidity,      // Turbidite / Bulanıklık (m⁻¹) — sadece Akdeniz/Ege
+    ] = await Promise.all([
+        fetchCMEMSVariable(ds.phy, 'uo',   lat, lon),
+        fetchCMEMSVariable(ds.phy, 'vo',   lat, lon),
+        fetchCMEMSVariable(ds.phy, 'thetao', lat, lon),
+        fetchCMEMSVariable(ds.phy, 'so',   lat, lon),
+        fetchCMEMSVariable(ds.phy, 'mlotst', lat, lon),
+        ds.bio ? fetchCMEMSVariable(ds.bio, 'chl', lat, lon) : Promise.resolve(null),
+        ds.bio ? fetchCMEMSVariable(ds.bio, 'kd490', lat, lon) : Promise.resolve(null),
+    ]);
+
+    // Akıntı hızını U/V bileşenlerinden hesapla (Pisagor)
+    const currentSpeed = (currentU !== null && currentV !== null)
+        ? Math.sqrt(currentU * currentU + currentV * currentV)
+        : null;
+
+    const result = {
+        currentSpeed,   // m/s — null ise tahmin kullanılır
+        currentU,       // m/s
+        currentV,       // m/s
+        sst,            // °C — null ise Open-Meteo SST kullanılır
+        salinity,       // PSU — null ise bölgesel sabit kullanılır
+        mld,            // m — Mixed Layer Depth (termoklin göstergesi)
+        chlorophyll,    // mg/m³ — null ise skor etkisi yok
+        turbidity,      // m⁻¹ — null ise skor etkisi yok
+        dataQuality: {  // Frontend için hangi veriler geldi
+            current:     currentSpeed !== null,
+            sst:         sst !== null,
+            salinity:    salinity !== null,
+            mld:         mld !== null,
+            chlorophyll: chlorophyll !== null,
+            turbidity:   turbidity !== null,
+        }
+    };
+
+    const gotCount = Object.values(result.dataQuality).filter(Boolean).length;
+    console.log(`[CMEMS] ${region} — ${gotCount}/6 variables received`);
+    return result;
+}
+
+// Klorofil skorunu hesapla (yem zinciri göstergesi)
+// Yüksek klorofil = fitoplankton = zooplankton = küçük balık = büyük balık aktif
+function calculateChlorophyllScore(chl) {
+    if (chl === null || chl === undefined) return null;
+    // Optimum aralık: 0.3 - 2.0 mg/m³
+    // < 0.1: oligotrofik (yoksul) — düşük aktivite
+    // 0.3-2.0: ötrofik (zengin) — yüksek aktivite
+    // > 5.0: aşırı (bloom) — oksijen tükenmesi, bazı türler kaçar
+    if (chl < 0.1)  return 0.3;
+    if (chl < 0.3)  return 0.6;
+    if (chl < 2.0)  return 1.0;
+    if (chl < 5.0)  return 0.8;
+    return 0.4; // Aşırı bloom
+}
+
+// Termoklin derinliği skoru
+// Yazın termoklin 20-40m'de olur, balıklar bu sınırda yoğunlaşır
+function calculateThermoclineScore(mld, depthAvg, season) {
+    if (mld === null || mld === undefined) return null;
+    if (season === 'winter' || season === 'spring') return 0.7; // Kışın termoklin zayıf
+    // Yaz/Sonbaharda: termoklin derinliği avlanılan derinlikle örtüşüyor mu?
+    if (!depthAvg) return 0.7;
+    const diff = Math.abs(depthAvg - mld);
+    if (diff < 5)  return 1.0;  // Termoklinde tam avlanıyorsun
+    if (diff < 15) return 0.85;
+    if (diff < 30) return 0.7;
+    return 0.5;
+}
+
 // Firebase Admin SDK
 let admin, db;
 try {
@@ -2592,6 +2739,9 @@ app.get('/api/forecast', async (req, res) => {
             fetchWithTimeout(bathymetryUrl).catch(() => null)
         ]);
         
+        // CMEMS — paralel çek, null olabilir (graceful degradation)
+        const cmems = await fetchAllCMEMS(lat, lon, regionName).catch(() => null);
+        
         // Fallback: gelişmiş URL başarısızsa basit URL dene
         if (!weather || weather.error) {
             console.log('[FALLBACK] Weather enhanced failed, trying basic URL');
@@ -2713,8 +2863,17 @@ app.get('/api/forecast', async (req, res) => {
             // [YENİ] Marine hourly veriler
             const wavePeriod = isLand ? 0 : safeNum(marine.hourly?.wave_period?.[hourlyIdx]);
             const swellHeight = isLand ? 0 : safeNum(marine.hourly?.swell_wave_height?.[hourlyIdx]);
-            const oceanCurrent = isLand ? null : (marine.hourly?.ocean_current_velocity?.[hourlyIdx] ?? null);
-            
+            // CMEMS gerçek akıntısı varsa kullan, yoksa Open-Meteo'ya düş
+            const cmems_current     = (!isLand && cmems?.currentSpeed != null) ? cmems.currentSpeed : null;
+            const oceanCurrent      = isLand ? null : (cmems_current ?? marine.hourly?.ocean_current_velocity?.[hourlyIdx] ?? null);
+
+            // CMEMS ek parametreler — graceful: her biri bağımsız null olabilir
+            const cmems_sst         = (!isLand && cmems?.sst != null)         ? cmems.sst         : null;
+            const cmems_salinity    = (!isLand && cmems?.salinity != null)    ? cmems.salinity    : null;
+            const cmems_mld         = (!isLand && cmems?.mld != null)         ? cmems.mld         : null;
+            const cmems_chlorophyll = (!isLand && cmems?.chlorophyll != null) ? cmems.chlorophyll : null;
+            const cmems_turbidity   = (!isLand && cmems?.turbidity != null)   ? cmems.turbidity   : null;
+
             // [YENİ] Sıcaklık Şoku hesapla (dün vs bugün SST)
             const tempShock = isLand ? { shock: false, change: 0, direction: 'STABLE' } : calculateTempShock(marine, hourlyStartIdx);
 
@@ -2753,7 +2912,10 @@ app.get('/api/forecast', async (req, res) => {
                     wavePeriod,
                     swellHeight,
                     oceanCurrent,
-                    tempShock
+                    tempShock,
+                    // CMEMS parametreler (null olabilir — graceful degradation)
+                    cmems_sst, cmems_salinity, cmems_mld,
+                    cmems_chlorophyll, cmems_turbidity
                 };
 
                 for (const [key, fish] of Object.entries(SPECIES_DB)) {
@@ -2859,7 +3021,19 @@ app.get('/api/forecast', async (req, res) => {
                 confidence: 92 - (i * 6), tacticKey, tacticData, weatherSummary,
                 fishList: fishList.slice(0, 10), moonPhase: moon.phase,
                 moonPhaseName: getMoonPhaseName(moon.phase), airTemp: tempAir, timeMode,
-                activityWindows: activityWindows
+                activityWindows: activityWindows,
+                // CMEMS verileri — frontend kartlarda gösterim için
+                cmems: cmems ? {
+                    currentSpeed:  cmems.currentSpeed  !== null ? parseFloat(cmems.currentSpeed.toFixed(3))  : null,
+                    currentU:      cmems.currentU      !== null ? parseFloat(cmems.currentU.toFixed(3))      : null,
+                    currentV:      cmems.currentV      !== null ? parseFloat(cmems.currentV.toFixed(3))      : null,
+                    sst:           cmems.sst            !== null ? parseFloat(cmems.sst.toFixed(2))           : null,
+                    salinity:      cmems.salinity       !== null ? parseFloat(cmems.salinity.toFixed(2))      : null,
+                    mld:           cmems.mld            !== null ? parseFloat(cmems.mld.toFixed(1))           : null,
+                    chlorophyll:   cmems.chlorophyll    !== null ? parseFloat(cmems.chlorophyll.toFixed(3))   : null,
+                    turbidity:     cmems.turbidity      !== null ? parseFloat(cmems.turbidity.toFixed(4))     : null,
+                    dataQuality:   cmems.dataQuality
+                } : null
             });
         }
 
@@ -3005,9 +3179,10 @@ app.get('/api/forecast', async (req, res) => {
         }
 
         const responseData = {
-            version: "F.I.S.H. v3.0", region: regionName, isLand, landReason, clickHour,
+            version: 'F.I.S.H. v3.0', region: regionName, isLand, landReason, clickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
-            depth: depthData,  // EMODnet Bathymetry derinlik verisi
+            depth: depthData,
+            cmems: cmems ? { dataQuality: cmems.dataQuality } : null,
             forecast, instant: instantData
         };
 
