@@ -43,11 +43,12 @@ async function safeFetchJSON(url, timeoutMs = 8000) {
 // Kayıt gerektirmez, API key yok, düz HTTP GET
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Klorofil: NOAA VIIRS günlük, 750m, global — değişken: chla
-const ERDDAP_CHL_URL = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap/erdVHNchla1day.json';
-// SST: NASA JPL MUR günlük, 1km, global — değişken: analysed_sst
-// MUR SST altitude boyutu içeriyor: [time][altitude][lat][lon]
-const ERDDAP_SST_URL = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap/jplMURSST41.json';
+// Klorofil: NOAA VIIRS NRT günlük, 4km, global
+// Dataset: noaacwNPPVIIRSchlaDaily — boyutlar: [time][altitude][latitude][longitude]
+const ERDDAP_CHL_URL = 'https://coastwatch.noaa.gov/erddap/griddap/noaacwNPPVIIRSchlaDaily.json';
+// SST: NOAA Geo-polar Blended, günlük, 5km, global, 2017-günümüz NRT
+// Dataset: noaacwBLENDEDsstDaily — boyutlar: [time][latitude][longitude]
+const ERDDAP_SST_URL = 'https://coastwatch.noaa.gov/erddap/griddap/noaacwBLENDEDsstDaily.json';
 
 // ERDDAP'tan tek nokta çek — ortak helper
 async function fetchERDDAP(url, timeoutMs = 6000) {
@@ -71,24 +72,24 @@ async function fetchERDDAP(url, timeoutMs = 6000) {
     }
 }
 
-// Klorofil — NOAA VIIRS günlük, 2 gün öncesi (işlenme süresi ~24-48h)
-// erdVHNchla1day: boyutlar [time][altitude][latitude][longitude]
+// Klorofil — NOAA VIIRS NRT günlük, 2 gün öncesi
+// Boyutlar: [time][altitude][latitude][longitude]
 async function fetchChlorophyll(lat, lon) {
     const d = new Date();
     d.setDate(d.getDate() - 2);
-    const dateStr = d.toISOString().split('T')[0] + 'T00:00:00Z';
+    const dateStr = d.toISOString().split('T')[0] + 'T12:00:00Z';
     const latF = parseFloat(lat).toFixed(3);
     const lonF = parseFloat(lon).toFixed(3);
-    const url = `${ERDDAP_CHL_URL}?chla[(${dateStr})][(0.0)][(${latF})][(${lonF})]`;
+    const url = `${ERDDAP_CHL_URL}?chlor_a[(${dateStr})][(0.0)][(${latF})][(${lonF})]`;
     return fetchERDDAP(url);
 }
 
-// SST — NASA JPL MUR, dün
-// jplMURSST41: boyutlar [time][latitude][longitude] — altitude yok
+// SST — NOAA Geo-polar Blended, 2 gün öncesi
+// Boyutlar: [time][latitude][longitude]
 async function fetchMURSST(lat, lon) {
     const d = new Date();
-    d.setDate(d.getDate() - 1);
-    const dateStr = d.toISOString().split('T')[0] + 'T09:00:00Z';
+    d.setDate(d.getDate() - 2);
+    const dateStr = d.toISOString().split('T')[0] + 'T12:00:00Z';
     const latF = parseFloat(lat).toFixed(3);
     const lonF = parseFloat(lon).toFixed(3);
     const url = `${ERDDAP_SST_URL}?analysed_sst[(${dateStr})][(${latF})][(${lonF})]`;
