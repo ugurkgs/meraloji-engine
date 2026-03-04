@@ -808,7 +808,7 @@ const SPECIES_DB = {
 
     "kikla": {
         name: "Kikla-Ot Balığı", nameEn: "Ballan Wrasse", icon: "🐟", scientificName: "Labrus bergylta",
-        photoId: 82,
+        photoId: 74,
         category: "KAYALIK",
         peakHours: "DAY", peakHoursDesc: "Gündüz aktif, özellikle sabah erken ve akşamüstü",
         tempRange: { min: 12, opt: 17, max: 22 },
