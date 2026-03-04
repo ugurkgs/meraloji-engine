@@ -43,9 +43,9 @@ async function safeFetchJSON(url, timeoutMs = 8000) {
 // Kayıt gerektirmez, API key yok, düz HTTP GET
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Klorofil: NOAA VIIRS NRT günlük, 4km, global
-// Dataset: noaacwNPPVIIRSchlaDaily — boyutlar: [time][altitude][latitude][longitude]
-const ERDDAP_CHL_URL = 'https://coastwatch.noaa.gov/erddap/griddap/noaacwNPPVIIRSchlaDaily.json';
+// Klorofil: NOAA S-NPP VIIRS, 4km, global NRT
+// Dataset: nesdisVHNSQchlaDaily — coastwatch.noaa.gov
+const ERDDAP_CHL_URL = 'https://coastwatch.noaa.gov/erddap/griddap/nesdisVHNSQchlaDaily.json';
 // SST: NOAA Geo-polar Blended, günlük, 5km, global, 2017-günümüz NRT
 // Dataset: noaacwBLENDEDsstDaily — boyutlar: [time][latitude][longitude]
 const ERDDAP_SST_URL = 'https://coastwatch.noaa.gov/erddap/griddap/noaacwBLENDEDsstDaily.json';
@@ -85,7 +85,7 @@ async function fetchChlorophyll(lat, lon) {
 }
 
 // SST — NOAA Geo-polar Blended, 2 gün öncesi
-// Boyutlar: [time][latitude][longitude]
+// Boyutlar: [time][latitude][longitude] — Kelvin cinsinden gelir, Celsius'a çevir
 async function fetchMURSST(lat, lon) {
     const d = new Date();
     d.setDate(d.getDate() - 2);
@@ -93,7 +93,11 @@ async function fetchMURSST(lat, lon) {
     const latF = parseFloat(lat).toFixed(3);
     const lonF = parseFloat(lon).toFixed(3);
     const url = `${ERDDAP_SST_URL}?analysed_sst[(${dateStr})][(${latF})][(${lonF})]`;
-    return fetchERDDAP(url);
+    const kelvin = await fetchERDDAP(url);
+    if (kelvin === null) return null;
+    // Kelvin kontrolü: 200-350K arası geçerli deniz sıcaklığı
+    if (kelvin > 150) return parseFloat((kelvin - 273.15).toFixed(2));
+    return kelvin; // Zaten Celsius ise olduğu gibi döndür
 }
 
 // Tüm ocean veri kaynaklarını paralel çek — graceful degradation
