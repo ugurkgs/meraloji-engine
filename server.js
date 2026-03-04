@@ -3801,7 +3801,11 @@ app.post('/api/verify-purchase', async (req, res) => {
 
     try {
         if (db) {
-            await db.collection('subscriptions').doc(uid).set({
+            const userSubRef = db.collection('subscriptions').doc(uid);
+            const existing = await userSubRef.get();
+            const isNewPro = !existing.exists || existing.data().status !== 'active';
+
+            await userSubRef.set({
                 status: 'active',
                 subscriptionId: subId,
                 purchaseToken: purchaseToken,
@@ -3810,13 +3814,20 @@ app.post('/api/verify-purchase', async (req, res) => {
                 expiresAt: Date.now() + durationMs,
                 updatedAt: Date.now()
             }, { merge: true });
+
+            // Yeni pro kullanıcıysa sayacı artır
+            if (isNewPro) {
+                const statsRef = db.collection('stats').doc('pro_count');
+                const statsSnap = await statsRef.get();
+                const currentCount = statsSnap.exists ? (statsSnap.data().count || 0) : 0;
+                await statsRef.set({ count: currentCount + 1 }, { merge: true });
+            }
         }
         res.status(200).send({ success: true });
     } catch (error) {
         res.status(500).send({ error: error.message });
     }
 });
-// YENİ EKLEME BİTT
 
 app.listen(PORT, () => {
     console.log(`
