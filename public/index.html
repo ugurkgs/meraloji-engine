@@ -3737,6 +3737,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             initMap();
+            loadProSlotsCount(); // Sayfa yüklenince hemen çek
             initSearch();
             loadFavorites();
             // Önceki tarama verilerini yükle (sayfa yenileme sonrası)
@@ -5843,68 +5844,22 @@ auth.onAuthStateChanged(async (user) => {
 });
 
 // Firestore'dan toplam pro kullanıcı sayısını çek — 1000 kişi kontenjanı
+// Pro slot sayacı — /api/pro-slots endpoint'inden çeker
 async function loadProSlotsCount() {
     try {
-        if (!db) return;
-        const snap = await db.collection('stats').doc('pro_count').get();
-        const count = snap.exists ? (snap.data().count || 0) : 0;
-        const remaining = Math.max(0, 1000 - count);
-        window._proSlotsRemaining = remaining;
-
-        // Paywall modal sayacını güncelle
-        const el = document.getElementById('paywall-slots');
-        const bar = document.getElementById('paywall-slots-bar');
-        if (el) el.textContent = remaining;
-        if (bar) bar.style.width = Math.round((count / 1000) * 100) + '%';
-        if (el && remaining < 100) el.style.color = '#ff2222';
-        else if (el && remaining < 300) el.style.color = '#ff851b';
-        else if (el) el.style.color = '#ff4444';
-    } catch(e) {
-        window._proSlotsRemaining = '...';
-    }
-
-// Server'dan pro kullanıcı sayısını çek — 1000 kişi kontenjanı
-async function loadProSlotsCount() {
-    try {
-        const res = await _origFetch('/api/pro-slots');
+        const res = await fetch('/api/pro-slots');
         if (!res.ok) return;
         const data = await res.json();
         const remaining = data.remaining ?? '...';
         const count = data.count ?? 0;
         window._proSlotsRemaining = remaining;
-
         const el  = document.getElementById('paywall-slots');
         const bar = document.getElementById('paywall-slots-bar');
         if (el)  { el.textContent = remaining; el.style.color = remaining < 100 ? '#ff2222' : remaining < 300 ? '#ff851b' : '#ff4444'; }
         if (bar) bar.style.width = Math.round((count / 1000) * 100) + '%';
-
-        // Premium gate'deki sayacı da güncelle (açıksa)
-        document.querySelectorAll('[data-pro-slots]').forEach(el2 => { el2.textContent = remaining; });
     } catch(e) { window._proSlotsRemaining = '...'; }
 }
 
-
-}
-
-// Firestore'dan toplam pro kullanıcı sayısını çek — 1000 kişi kontenjanı
-async function loadProSlotsCount() {
-    try {
-        if (!db) return;
-        const snap = await db.collection('stats').doc('pro_count').get();
-        const count = snap.exists ? (snap.data().count || 0) : 0;
-        const remaining = Math.max(0, 1000 - count);
-        window._proSlotsRemaining = remaining;
-
-        // Paywall modal sayacını güncelle
-        const el = document.getElementById('paywall-slots');
-        const bar = document.getElementById('paywall-slots-bar');
-        if (el) el.textContent = remaining;
-        if (bar) bar.style.width = Math.round((count / 1000) * 100) + '%';
-        if (el) el.style.color = remaining < 100 ? '#ff2222' : remaining < 300 ? '#ff851b' : '#ff4444';
-    } catch(e) {
-        window._proSlotsRemaining = '...';
-    }
-}
 
 async function checkSubscriptionStatus() {
     if (!authToken) return;
