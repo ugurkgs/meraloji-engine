@@ -38,66 +38,78 @@ async function safeFetchJSON(url, timeoutMs = 8000) {
 // Kayıt gerektirmez, API key yok, düz HTTP GET
 // ═══════════════════════════════════════════════════════════════════════════
 
-// NASA/NOAA ERDDAP — klorofil (MODIS Aqua, 4km, aylık kompozit)
-// Dataset: erdMH1chlamday — global kapsam, kayıt gerekmez
-const ERDDAP_CHL_BASE = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap/erdMH1chlamday.json';
+// ═══════════════════════════════════════════════════════════════════════════
+// NASA/NOAA ERDDAP — Ocean Data
+// Kayıt gerektirmez, API key yok, düz HTTP GET
+// ═══════════════════════════════════════════════════════════════════════════
 
-async function fetchChlorophyll(lat, lon, timeoutMs = 6000) {
+// Klorofil: NOAA VIIRS, 3 günlük kompozit, ~750m, güncel veri
+const ERDDAP_CHL_URL  = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap/erdVHNchla3day.json';
+// SST: NASA JPL MUR, günlük, 1km, global
+const ERDDAP_SST_URL  = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap/jplMURSST41.json';
+
+// ERDDAP'tan tek nokta çek — her iki dataset için ortak helper
+async function fetchERDDAP(baseUrl, variable, lat, lon, dateStr, timeoutMs = 6000) {
     try {
         const latF = parseFloat(lat).toFixed(3);
         const lonF = parseFloat(lon).toFixed(3);
-
-        // 2 ay öncesini al — aylık kompozit işlenmesi gecikebilir
-        const now = new Date();
-        now.setMonth(now.getMonth() - 2);
-        now.setDate(15);
-        const dateStr = now.toISOString().split('T')[0] + 'T00:00:00Z';
-
-        // ERDDAP griddap — tek nokta sorgusu için (lat:1:lat)(lon:1:lon) formatı
-        const url = `${ERDDAP_CHL_BASE}?chlor_a[(${dateStr}):1:(${dateStr})][(${latF}):1:(${latF})][(${lonF}):1:(${lonF})]`;
-
-        console.log(`[CHL] URL: ${url}`);
+        const url  = `${baseUrl}?${variable}[(${dateStr})][(${latF})][(${lonF})]`;
 
         const res = await Promise.race([
             fetch(url),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('CHL_TIMEOUT')), timeoutMs))
+            new Promise((_, reject) => setTimeout(() => reject(new Error('ERDDAP_TIMEOUT')), timeoutMs))
         ]);
 
         if (!res.ok) {
-            console.log(`[CHL] HTTP ${res.status}`);
+            console.log(`[ERDDAP] ${variable} HTTP ${res.status}`);
             return null;
         }
         const data = await res.json();
-
-        // ERDDAP JSON: { table: { columnNames: [...], rows: [[time, lat, lon, val], ...] } }
         const rows = data?.table?.rows;
         if (!rows || rows.length === 0) return null;
         const val = parseFloat(rows[0][rows[0].length - 1]);
-        if (isNaN(val) || val <= 0) return null;
-        return val; // mg/m³
+        return (isNaN(val) || val <= 0) ? null : val;
     } catch (e) {
-        console.log(`[CHL] fetch failed: ${e.message}`);
+        console.log(`[ERDDAP] ${variable} failed: ${e.message}`);
         return null;
     }
 }
 
-// Tüm ocean veri kaynaklarını paralel çek
+// Klorofil — NOAA VIIRS 3 günlük, 4 gün öncesi (işlenme süresi)
+async function fetchChlorophyll(lat, lon) {
+    const d = new Date();
+    d.setDate(d.getDate() - 4);
+    const dateStr = d.toISOString().split('T')[0] + 'T00:00:00Z';
+    return fetchERDDAP(ERDDAP_CHL_URL, 'chla', lat, lon, dateStr);
+}
+
+// SST — NASA JPL MUR, dün (günlük güncellenir)
+async function fetchMURSST(lat, lon) {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const dateStr = d.toISOString().split('T')[0] + 'T09:00:00Z';
+    return fetchERDDAP(ERDDAP_SST_URL, 'analysed_sst', lat, lon, dateStr);
+}
+
+// Tüm ocean veri kaynaklarını paralel çek — graceful degradation
 async function fetchAllCMEMS(lat, lon, region) {
-    // Klorofil — NASA ERDDAP (ücretsiz, kayıt yok)
-    const chlorophyll = await fetchChlorophyll(lat, lon).catch(() => null);
+    const [chlorophyll, sst] = await Promise.all([
+        fetchChlorophyll(lat, lon).catch(() => null),
+        fetchMURSST(lat, lon).catch(() => null),
+    ]);
 
     const result = {
-        currentSpeed:  null,  // Open-Meteo'dan geliyor zaten
+        currentSpeed:  null,
         currentU:      null,
         currentV:      null,
-        sst:           null,  // Open-Meteo SST kullanılıyor
-        salinity:      null,  // Bölgesel sabit kullanılıyor
-        mld:           null,  // Şimdilik yok
-        chlorophyll,          // NASA ERDDAP'tan
-        turbidity:     null,  // Şimdilik yok
+        sst,                   // NASA JPL MUR SST (°C) — 1km çözünürlük
+        salinity:      null,
+        mld:           null,
+        chlorophyll,           // NOAA VIIRS klorofil (mg/m³)
+        turbidity:     null,
         dataQuality: {
             current:     false,
-            sst:         false,
+            sst:         sst !== null,
             salinity:    false,
             mld:         false,
             chlorophyll: chlorophyll !== null,
@@ -106,7 +118,7 @@ async function fetchAllCMEMS(lat, lon, region) {
     };
 
     const gotCount = Object.values(result.dataQuality).filter(Boolean).length;
-    console.log(`[CHL] ${region} — chlorophyll: ${chlorophyll !== null ? chlorophyll.toFixed(3) + ' mg/m³' : 'null'}`);
+    console.log(`[OCEAN] ${region} — SST: ${sst !== null ? sst.toFixed(2)+'°C' : 'null'} | CHL: ${chlorophyll !== null ? chlorophyll.toFixed(3)+' mg/m³' : 'null'}`);
     return result;
 }
 
