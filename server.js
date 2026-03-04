@@ -49,7 +49,7 @@ const CMEMS_DATASETS = {
 };
 
 // CMEMS OPeNDAP'tan tek değişken çek
-async function fetchCMEMSVariable(dataset, variable, lat, lon, timeoutMs = 10000) {
+async function fetchCMEMSVariable(dataset, variable, lat, lon, timeoutMs = 4000) {
     if (!CMEMS_USER || !CMEMS_PASS) return null;
     try {
         const latF  = parseFloat(lat).toFixed(4);
@@ -2739,8 +2739,16 @@ app.get('/api/forecast', async (req, res) => {
             fetchWithTimeout(bathymetryUrl).catch(() => null)
         ]);
         
-        // CMEMS — paralel çek, null olabilir (graceful degradation)
-        const cmems = await fetchAllCMEMS(lat, lon, regionName).catch(() => null);
+        // CMEMS — arka planda çek, forecast'i BEKLEME
+        // Fire-and-forget: CMEMS yavaşsa ana response etkilenmiyor
+        const cmemsPromise = fetchAllCMEMS(lat, lon, regionName).catch(() => null);
+        // 3 saniye içinde gelirse kullan, gelmezse null ile devam et
+        const cmems = await Promise.race([
+            cmemsPromise,
+            new Promise(resolve => setTimeout(() => resolve(null), 3000))
+        ]);
+        if (cmems) console.log('[CMEMS] Data received within 3s');
+        else console.log('[CMEMS] Timeout 3s — continuing without CMEMS data');
         
         // Fallback: gelişmiş URL başarısızsa basit URL dene
         if (!weather || weather.error) {
