@@ -72,62 +72,78 @@ async function fetchERDDAP(url, timeoutMs = 6000) {
     }
 }
 
+// Ortak tarih yardımcısı
+function erddapDate(daysBack) {
+    const d = new Date();
+    d.setDate(d.getDate() - daysBack);
+    return d.toISOString().split('T')[0] + 'T12:00:00Z';
+}
+
 // Klorofil — NOAA VIIRS NRT günlük, 2 gün öncesi
 // Boyutlar: [time][altitude][latitude][longitude]
 async function fetchChlorophyll(lat, lon) {
-    const d = new Date();
-    d.setDate(d.getDate() - 2);
-    const dateStr = d.toISOString().split('T')[0] + 'T12:00:00Z';
     const latF = parseFloat(lat).toFixed(3);
     const lonF = parseFloat(lon).toFixed(3);
-    const url = `${ERDDAP_CHL_URL}?chlor_a[(${dateStr})][(0.0)][(${latF})][(${lonF})]`;
+    const url = `${ERDDAP_CHL_URL}?chlor_a[(${erddapDate(2)}):1:(${erddapDate(2)})][(0.0):1:(0.0)][(${latF}):1:(${latF})][(${lonF}):1:(${lonF})]`;
     return fetchERDDAP(url);
 }
 
-// SST — NOAA Geo-polar Blended, 2 gün öncesi
-// Boyutlar: [time][latitude][longitude] — Kelvin cinsinden gelir, Celsius'a çevir
+// SST — NOAA Blended günlük, 2 gün öncesi (Kelvin → Celsius)
 async function fetchMURSST(lat, lon) {
-    const d = new Date();
-    d.setDate(d.getDate() - 2);
-    const dateStr = d.toISOString().split('T')[0] + 'T12:00:00Z';
     const latF = parseFloat(lat).toFixed(3);
     const lonF = parseFloat(lon).toFixed(3);
-    const url = `${ERDDAP_SST_URL}?analysed_sst[(${dateStr})][(${latF})][(${lonF})]`;
+    const url = `${ERDDAP_SST_URL}?analysed_sst[(${erddapDate(2)})][(${latF})][(${lonF})]`;
     const kelvin = await fetchERDDAP(url);
     if (kelvin === null) return null;
-    // Kelvin kontrolü: 200-350K arası geçerli deniz sıcaklığı
-    if (kelvin > 150) return parseFloat((kelvin - 273.15).toFixed(2));
-    return kelvin; // Zaten Celsius ise olduğu gibi döndür
+    return kelvin > 150 ? parseFloat((kelvin - 273.15).toFixed(2)) : kelvin;
 }
 
+// Su saydamlığı Kd490 — NOAA VIIRS günlük, 2 gün öncesi
+// Düşük değer = berrak su, yüksek = bulanık
+// Boyutlar: [time][altitude][latitude][longitude]
+async function fetchKd490(lat, lon) {
+    const latF = parseFloat(lat).toFixed(3);
+    const lonF = parseFloat(lon).toFixed(3);
+    const url = `${ERDDAP_KD490_URL}?Kd_490[(${erddapDate(2)}):1:(${erddapDate(2)})][(0.0):1:(0.0)][(${latF}):1:(${latF})][(${lonF}):1:(${lonF})]`;
+    return fetchERDDAP(url);
+}
+
+// SSH ve WindStress: doğrulanmış public ERDDAP dataset yok — devre dışı
+
 // Tüm ocean veri kaynaklarını paralel çek — graceful degradation
+// Her biri bağımsız: biri failse diğerleri etkilenmez
 async function fetchAllCMEMS(lat, lon, region) {
-    const [chlorophyll, sst] = await Promise.all([
+    const [chlorophyll, sst, kd490] = await Promise.all([
         fetchChlorophyll(lat, lon).catch(() => null),
         fetchMURSST(lat, lon).catch(() => null),
+        fetchKd490(lat, lon).catch(() => null),
     ]);
 
     const result = {
         currentSpeed:  null,
         currentU:      null,
         currentV:      null,
-        sst,                   // NASA JPL MUR SST (°C) — 1km çözünürlük
+        sst,           // NOAA Blended SST (°C)
         salinity:      null,
         mld:           null,
-        chlorophyll,           // NOAA VIIRS klorofil (mg/m³)
-        turbidity:     null,
+        chlorophyll,   // NOAA VIIRS klorofil (mg/m³)
+        turbidity:     kd490,  // Kd490 su saydamlığı (m⁻¹)
+        ssh:           null,
+        windStress:    null,
         dataQuality: {
             current:     false,
             sst:         sst !== null,
             salinity:    false,
             mld:         false,
             chlorophyll: chlorophyll !== null,
-            turbidity:   false,
+            turbidity:   kd490 !== null,
+            ssh:         false,
+            windStress:  false,
         }
     };
 
-    const gotCount = Object.values(result.dataQuality).filter(Boolean).length;
-    console.log(`[OCEAN] ${region} — SST: ${sst !== null ? sst.toFixed(2)+'°C' : 'null'} | CHL: ${chlorophyll !== null ? chlorophyll.toFixed(3)+' mg/m³' : 'null'}`);
+    const got = Object.values(result.dataQuality).filter(Boolean).length;
+    console.log(`[OCEAN] ${region} — SST:${sst !== null ? sst.toFixed(1)+'°C' : '-'} CHL:${chlorophyll !== null ? chlorophyll.toFixed(3) : '-'} KD490:${kd490 !== null ? kd490.toFixed(3) : '-'} (${got}/3)`);
     return result;
 }
 
@@ -3013,14 +3029,16 @@ app.get('/api/forecast', async (req, res) => {
                 activityWindows: activityWindows,
                 // CMEMS verileri — frontend kartlarda gösterim için
                 cmems: cmems ? {
-                    currentSpeed:  cmems.currentSpeed  !== null ? parseFloat(cmems.currentSpeed.toFixed(3))  : null,
-                    currentU:      cmems.currentU      !== null ? parseFloat(cmems.currentU.toFixed(3))      : null,
-                    currentV:      cmems.currentV      !== null ? parseFloat(cmems.currentV.toFixed(3))      : null,
-                    sst:           cmems.sst            !== null ? parseFloat(cmems.sst.toFixed(2))           : null,
-                    salinity:      cmems.salinity       !== null ? parseFloat(cmems.salinity.toFixed(2))      : null,
-                    mld:           cmems.mld            !== null ? parseFloat(cmems.mld.toFixed(1))           : null,
-                    chlorophyll:   cmems.chlorophyll    !== null ? parseFloat(cmems.chlorophyll.toFixed(3))   : null,
-                    turbidity:     cmems.turbidity      !== null ? parseFloat(cmems.turbidity.toFixed(4))     : null,
+                    currentSpeed:  cmems.currentSpeed  != null ? parseFloat(cmems.currentSpeed.toFixed(3))  : null,
+                    currentU:      cmems.currentU      != null ? parseFloat(cmems.currentU.toFixed(3))      : null,
+                    currentV:      cmems.currentV      != null ? parseFloat(cmems.currentV.toFixed(3))      : null,
+                    sst:           cmems.sst            != null ? parseFloat(cmems.sst.toFixed(2))           : null,
+                    salinity:      cmems.salinity       != null ? parseFloat(cmems.salinity.toFixed(2))      : null,
+                    mld:           cmems.mld            != null ? parseFloat(cmems.mld.toFixed(1))           : null,
+                    chlorophyll:   cmems.chlorophyll    != null ? parseFloat(cmems.chlorophyll.toFixed(3))   : null,
+                    turbidity:     cmems.turbidity      != null ? parseFloat(cmems.turbidity.toFixed(4))     : null,
+                    ssh:           cmems.ssh            != null ? parseFloat(cmems.ssh.toFixed(3))           : null,
+                    windStress:    cmems.windStress     != null ? parseFloat(cmems.windStress.toFixed(2))    : null,
                     dataQuality:   cmems.dataQuality
                 } : null
             });
