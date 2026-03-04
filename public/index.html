@@ -3821,7 +3821,7 @@
             }
         };
 
-                const DAYS_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+        const DAYS_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
         const DAYS_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
         // ═══════════════════════════════════════════════════════════════════
@@ -5214,9 +5214,96 @@
         // MODALS & UI ACTIONS
         // ═══════════════════════════════════════════════════════════════════
 
+        let cmemsOpen = false;
+
+        function closeCMEMSSection() {
+            cmemsOpen = false;
+            const section = document.getElementById('cmems-section');
+            if (section) { section.style.maxHeight = '0'; section.style.opacity = '0'; }
+            const icon  = document.getElementById('cmems-toggle-icon');
+            const label = document.getElementById('cmems-toggle-label');
+            if (icon)  icon.textContent  = '▼';
+            if (label) label.textContent = CURRENT_LANG === 'en' ? 'Advanced Data ▾' : 'Gelişmiş Veriler ▾';
+        }
+
+        function toggleCMEMSSection() {
+            cmemsOpen = !cmemsOpen;
+            const section = document.getElementById('cmems-section');
+            const icon    = document.getElementById('cmems-toggle-icon');
+            const label   = document.getElementById('cmems-toggle-label');
+            if (cmemsOpen) {
+                section.style.maxHeight = '600px';
+                section.style.opacity   = '1';
+                icon.textContent  = '▲';
+                label.textContent = CURRENT_LANG === 'en' ? 'Advanced Data' : 'Gelişmiş Veriler';
+            } else {
+                closeCMEMSSection();
+            }
+        }
+
+        function renderCMEMSMetrics(forecastDay) {
+            const cmems = forecastDay && forecastDay.cmems ? forecastDay.cmems : null;
+            const grid  = document.getElementById('cmems-grid');
+            if (!grid) return;
+
+            const cards = [
+                { key: 'cmems_current',    val: cmems && cmems.currentSpeed != null ? cmems.currentSpeed.toFixed(2) + ' m/s' : '--', available: cmems && cmems.dataQuality && cmems.dataQuality.current },
+                { key: 'cmems_sst',        val: cmems && cmems.sst != null        ? cmems.sst.toFixed(1) + '°'        : '--', available: cmems && cmems.dataQuality && cmems.dataQuality.sst },
+                { key: 'cmems_salinity',   val: cmems && cmems.salinity != null   ? cmems.salinity.toFixed(1) + ' P'  : '--', available: cmems && cmems.dataQuality && cmems.dataQuality.salinity },
+                { key: 'cmems_mld',        val: cmems && cmems.mld != null        ? cmems.mld.toFixed(0) + ' m'       : '--', available: cmems && cmems.dataQuality && cmems.dataQuality.mld },
+                { key: 'cmems_chlorophyll',val: cmems && cmems.chlorophyll != null? cmems.chlorophyll.toFixed(2)+' mg': '--', available: cmems && cmems.dataQuality && cmems.dataQuality.chlorophyll },
+                { key: 'cmems_turbidity',  val: cmems && cmems.turbidity != null  ? cmems.turbidity.toFixed(3)+' m-1' : '--', available: cmems && cmems.dataQuality && cmems.dataQuality.turbidity }
+            ];
+
+            const availCount = cards.filter(c => c.available).length;
+            const badge = document.getElementById('cmems-badge');
+            if (badge) {
+                badge.style.display = '';
+                badge.textContent = availCount > 0 ? availCount + '/6 veri' : 'veri yok';
+                badge.style.color = availCount >= 4 ? 'var(--green)' : availCount >= 2 ? 'var(--yellow)' : 'var(--text-muted)';
+            }
+
+            grid.innerHTML = cards.map(function(card) {
+                const info  = CMEMS_METRIC_DATA[card.key];
+                const icon  = info ? info.icon : '📊';
+                const title = info ? (CURRENT_LANG === 'en' ? (info.titleEn || info.title) : info.title) : card.key;
+                const shortTitle = title.split(' ')[0];
+                const unavailStyle = card.available ? '' : 'opacity:0.4;';
+                const sourceTag = card.available
+                    ? '<div style="font-size:0.5rem;color:var(--green);margin-top:2px;">● CMEMS</div>'
+                    : '<div style="font-size:0.5rem;color:var(--text-muted);margin-top:2px;">— yok</div>';
+                return '<div class="metric-card" onclick="showCMEMSMetricInfo(\'' + card.key + '\', event)" style="' + unavailStyle + '">'
+                    + '<div class="metric-icon">' + icon + '</div>'
+                    + '<div class="metric-val">' + card.val + '</div>'
+                    + sourceTag
+                    + '<div class="metric-label">' + shortTitle + '</div>'
+                    + '</div>';
+            }).join('');
+        }
+
+        function showCMEMSMetricInfo(key, event) {
+            if (event) event.stopPropagation();
+            const data = CMEMS_METRIC_DATA[key];
+            if (!data) return;
+            document.getElementById('metric-icon').textContent  = data.icon;
+            document.getElementById('metric-title').textContent = CURRENT_LANG === 'en' ? data.titleEn : data.title;
+            const descEl = document.getElementById('metric-desc');
+            const impEl  = document.getElementById('metric-importance');
+            const refEl  = document.getElementById('metric-ref');
+            const algoEl = document.getElementById('metric-algo');
+            const srcEl  = document.getElementById('metric-source');
+            if (descEl) descEl.textContent = CURRENT_LANG === 'en' ? data.descEn : data.desc;
+            if (impEl)  impEl.textContent  = CURRENT_LANG === 'en' ? data.importanceEn : data.importance;
+            if (refEl)  refEl.textContent  = data.ref;
+            if (algoEl) algoEl.textContent = data.algo;
+            if (srcEl)  srcEl.textContent  = data.source;
+            const modal = document.getElementById('metric-modal');
+            if (modal) { modal.style.display = 'flex'; modal.classList.add('active'); }
+        }
+
         function closeHud() {
             document.getElementById('hud').style.display = 'none';
-            closeCMEMSSection(); // Panel kapanınca CMEMS bölümü de kapat
+            closeCMEMSSection();
         }
 
         function toggleMenu() {
