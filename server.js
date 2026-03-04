@@ -42,29 +42,34 @@ async function safeFetchJSON(url, timeoutMs = 8000) {
 // Dataset: erdMH1chlamday — global kapsam, kayıt gerekmez
 const ERDDAP_CHL_BASE = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap/erdMH1chlamday.json';
 
-async function fetchChlorophyll(lat, lon, timeoutMs = 5000) {
+async function fetchChlorophyll(lat, lon, timeoutMs = 6000) {
     try {
-        const latF = parseFloat(lat).toFixed(2);
-        const lonF = parseFloat(lon).toFixed(2);
+        const latF = parseFloat(lat).toFixed(3);
+        const lonF = parseFloat(lon).toFixed(3);
 
-        // Geçen ayın tarihini al (aylık kompozit — güncel ay henüz hazır olmayabilir)
+        // 2 ay öncesini al — aylık kompozit işlenmesi gecikebilir
         const now = new Date();
-        now.setMonth(now.getMonth() - 1);
-        now.setDate(1);
+        now.setMonth(now.getMonth() - 2);
+        now.setDate(15);
         const dateStr = now.toISOString().split('T')[0] + 'T00:00:00Z';
 
-        // ERDDAP griddap sorgusu — en yakın nokta
-        const url = `${ERDDAP_CHL_BASE}?chlor_a[(${dateStr})][(${latF})][(${lonF})]`;
+        // ERDDAP griddap — tek nokta sorgusu için (lat:1:lat)(lon:1:lon) formatı
+        const url = `${ERDDAP_CHL_BASE}?chlor_a[(${dateStr}):1:(${dateStr})][(${latF}):1:(${latF})][(${lonF}):1:(${lonF})]`;
+
+        console.log(`[CHL] URL: ${url}`);
 
         const res = await Promise.race([
             fetch(url),
             new Promise((_, reject) => setTimeout(() => reject(new Error('CHL_TIMEOUT')), timeoutMs))
         ]);
 
-        if (!res.ok) return null;
+        if (!res.ok) {
+            console.log(`[CHL] HTTP ${res.status}`);
+            return null;
+        }
         const data = await res.json();
 
-        // ERDDAP JSON formatı: data.table.rows[0][son_kolon]
+        // ERDDAP JSON: { table: { columnNames: [...], rows: [[time, lat, lon, val], ...] } }
         const rows = data?.table?.rows;
         if (!rows || rows.length === 0) return null;
         const val = parseFloat(rows[0][rows[0].length - 1]);
