@@ -6099,12 +6099,24 @@ async function upgradeToPro(plan) {
     }
 }
 
-// Tüm API çağrılarına auth token ekle
+// Tüm API çağrılarına auth token ekle — her çağrıda taze token al
+// Firebase token 1 saatte bir süresi doluyor, getIdToken(true) zorla yeniler
 const _origFetch = window.fetch;
-window.fetch = function(url, opts = {}) {
-    if (typeof url === 'string' && url.startsWith('/api/') && authToken) {
-        opts.headers = opts.headers || {};
-        opts.headers['Authorization'] = 'Bearer ' + authToken;
+window.fetch = async function(url, opts = {}) {
+    if (typeof url === 'string' && url.startsWith('/api/') && currentUser) {
+        try {
+            // forceRefresh=false: cache'deyse kullan, dolmuşsa otomatik yenile
+            const freshToken = await currentUser.getIdToken(false);
+            opts.headers = opts.headers || {};
+            opts.headers['Authorization'] = 'Bearer ' + freshToken;
+            authToken = freshToken; // Global'i güncelle
+        } catch (e) {
+            // Token yenileme başarısız — yine de isteği gönder
+            if (authToken) {
+                opts.headers = opts.headers || {};
+                opts.headers['Authorization'] = 'Bearer ' + authToken;
+            }
+        }
     }
     return _origFetch.call(this, url, opts);
 };
