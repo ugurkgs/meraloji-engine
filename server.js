@@ -805,6 +805,27 @@ const SPECIES_DB = {
         legalSize: "1 kg",
         note: "Yemi sarıp yapışır. Ağırlık hissedince sert tasma."
     },
+
+    "kikla": {
+        name: "Kikla-Ot Balığı", nameEn: "Ballan Wrasse", icon: "🐟", scientificName: "Labrus bergylta",
+        photoId: 82,
+        category: "KAYALIK",
+        peakHours: "DAY", peakHoursDesc: "Gündüz aktif, özellikle sabah erken ve akşamüstü",
+        tempRange: { min: 12, opt: 17, max: 22 },
+        seasons: { winter: 0.30, spring: 0.65, summer: 0.80, autumn: 0.70 },
+        activity: "DAY",
+        pressureSensitivity: 0.4,
+        wavePref: 0.6,
+        clarityPref: "CLEAR",
+        currentPref: 0.5,
+        salinityPref: "HIGH",
+        regions: ["EGE", "AKDENİZ"],
+        depth: { min: 1, opt: 10, max: 50 },
+        advice: { bait: "Karides, Yengeç, Midye", lure: "LRF Silikon, Micro Jig", rig: "Dip Takımı, LRF", hook: "4 - 1 Güçlü" },
+        legalSize: "Yasal limit yok",
+        note: "Kayalık ve yosunluk bölgelerde yaşayan güçlü bir dip balığıdır. Kabukluları kırabilecek güçlü çenesi vardır."
+    },
+    
     "istavrit": {
         name: "İstavrit", nameEn: "Horse Mackerel", icon: "🐟", scientificName: "Trachurus mediterraneus",
         photoId: 23,
