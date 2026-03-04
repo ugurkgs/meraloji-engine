@@ -999,6 +999,26 @@ const SPECIES_DB = {
         legalSize: "Yok",
         note: "⚠️ Derin suda (50-700m). Tekne ile parakete avı."
     },
+
+    "lipsoz": {
+    name: "Lipsoz", nameEn: "Red Scorpionfish", icon: "🐟", scientificName: "Scorpaena scrofa",
+    photoId: 84,
+    category: "DIP_KIYI",
+    peakHours: "NIGHT", peakHoursDesc: "Gece aktif, pusu kurarak avlanır",
+    tempRange: { min: 11, opt: 15, max: 18 },
+    seasons: { winter: 0.65, spring: 0.70, summer: 0.55, autumn: 0.75 },
+    activity: "NIGHT",
+    pressureSensitivity: 0.5,
+    wavePref: 0.4,
+    clarityPref: "MODERATE",
+    currentPref: 0.4,
+    salinityPref: "HIGH",
+    regions: ["EGE", "AKDENİZ", "MARMARA"],
+    depth: { min: 20, opt: 60, max: 150 },
+    advice: { bait: "İstavrit Fleto, Karides, Kalamar", lure: "Kokulu Silikon (LRF)", rig: "Dip Takımı", hook: "2/0 - 4/0" },
+    legalSize: "15 cm",
+    note: "⚠️ DİKENLERİ ZEHİRLİ! Karadeniz'de bulunmaz. Kayalık ve taşlık diplerde pusu kurar. Yazın sığ kıyılara yaklaşır."
+},
     "melanur": {
         name: "Melanur", nameEn: "Saddled Seabream", icon: "🐟", scientificName: "Oblada melanura",
         photoId: 15,
