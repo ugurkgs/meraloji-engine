@@ -6095,6 +6095,40 @@ window.addEventListener('popstate', function(e) {
     }
 });
 
+// ═══════════════════════════════════════════════════════════════════
+// HUD SWIPE-TO-DISMISS — hızlı aşağı fırlatma ile kapat
+// ═══════════════════════════════════════════════════════════════════
+(function() {
+    let startY = 0, startTime = 0, startScrollTop = 0;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const hud = document.getElementById('hud');
+        if (!hud) return;
+
+        hud.addEventListener('touchstart', function(e) {
+            startY = e.touches[0].clientY;
+            startTime = Date.now();
+            const content = hud.querySelector('.hud-content');
+            startScrollTop = content ? content.scrollTop : 0;
+        }, { passive: true });
+
+        hud.addEventListener('touchend', function(e) {
+            const dy = e.changedTouches[0].clientY - startY;
+            const velocity = dy / (Date.now() - startTime);
+            if (dy > 60 && velocity > 0.5 && startScrollTop === 0) {
+                hud.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+                hud.style.transform = 'translateY(100%)';
+                hud.style.opacity = '0';
+                setTimeout(function() {
+                    closeHud();
+                    hud.style.transform = '';
+                    hud.style.opacity = '';
+                }, 240);
+            }
+        }, { passive: true });
+    });
+})();
+
 window.addEventListener('load', function() {
     history.pushState(null, document.title, window.location.href);
 });
