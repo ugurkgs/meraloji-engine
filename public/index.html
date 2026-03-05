@@ -2257,8 +2257,8 @@
          HUD PANEL
          ═══════════════════════════════════════════════════════════════════ -->
     <!-- HUD backdrop — geri tuşu için tam ekran overlay -->
-    <div id="hud-backdrop" onclick="closeHud()" style="display:none; position:fixed; inset:0; z-index:1499; background:rgba(0,0,0,0.01);"></div>
-    <div id="hud">
+    <div id="hud-wrapper" onclick="closeHud()" >
+    <div id="hud" onclick="event.stopPropagation()">
         <!-- Swipe-to-close drag handle -->
         <div id="hud-drag-handle" style="width:100%;padding:10px 0 4px;display:flex;justify-content:center;align-items:center;cursor:grab;touch-action:none;flex-shrink:0;">
             <div style="width:40px;height:4px;background:rgba(255,255,255,0.25);border-radius:2px;"></div>
@@ -2344,6 +2344,7 @@
             </button>
         </div>
     </div>
+    </div><!-- /hud-wrapper -->
 
     <!-- ═══════════════════════════════════════════════════════════════════
          🔍 TARAMA GRUP PANELİ (harita üzerinde)
@@ -4182,8 +4183,7 @@
                 hideLoading();
                 setMode('daily');
                 const hud = document.getElementById('hud');
-                hud.style.display = 'flex';
-            document.getElementById('hud-backdrop').style.display = 'block';
+                document.getElementById('hud-wrapper').style.display = 'flex';
             history.pushState({ page: 'hud' }, '', window.location.href);
                 // Scroll to top when HUD opens
                 const hudContent = hud.querySelector('.hud-content');
@@ -5198,9 +5198,7 @@
         // ═══════════════════════════════════════════════════════════════════
 
         function closeHud() {
-            document.getElementById('hud').style.display = 'none';
-            const backdrop = document.getElementById('hud-backdrop');
-            if (backdrop) backdrop.style.display = 'none';
+            document.getElementById('hud-wrapper').style.display = 'none';
         }
 
         function toggleMenu() {
@@ -6067,8 +6065,8 @@ function handleBackButton() {
 
     if (scanProgress && scanProgress.style.display !== 'none') { if (typeof closeScanModal === 'function') closeScanModal(); return true; }
 
-    const hud = document.getElementById('hud');
-    if (hud && hud.style.display !== 'none') { closeHud(); return true; }
+    const hudWrapper = document.getElementById('hud-wrapper');
+    if (hudWrapper && hudWrapper.style.display !== 'none') { closeHud(); return true; }
 
     const searchBox = document.getElementById('fish-search-box');
     if (searchBox && searchBox.style.display !== 'none') { searchBox.style.display = 'none'; return true; }
