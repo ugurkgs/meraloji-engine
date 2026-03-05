@@ -460,21 +460,26 @@
         /* ═══════════════════════════════════════════════════════════════════
            HUD PANEL
            ═══════════════════════════════════════════════════════════════════ */
-        #hud {
+        /* HUD wrapper — scan modal gibi inset:0 full screen overlay */
+        #hud-wrapper {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            inset: 0;
+            z-index: 1500;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-end;
+            background: rgba(4,13,26,0.7);
+            backdrop-filter: blur(4px);
+        }
+        #hud {
             max-height: 85vh;
             background: var(--bg-panel);
             border-radius: var(--radius-xl) var(--radius-xl) 0 0;
             border-top: 1px solid var(--border-glow);
-            z-index: 1500;
-            display: none;
+            display: flex;
             flex-direction: column;
-            backdrop-filter: blur(30px);
+            box-shadow: 0 -20px 60px rgba(0,0,0,0.5);
             transition: transform 0.3s ease, opacity 0.3s ease;
-            touch-action: pan-x;
         }
         #hud::before {
             content: '';
@@ -485,18 +490,18 @@
             border-radius: 2px;
             margin: 10px auto -6px;
             flex-shrink: 0;
-            box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.5);
         }
-
         @media (min-width: 768px) {
+            #hud-wrapper {
+                justify-content: flex-end;
+                align-items: flex-end;
+            }
             #hud {
-                bottom: 20px;
-                right: 20px;
-                left: auto;
                 width: 420px;
                 max-height: 80vh;
                 border-radius: var(--radius-lg);
                 border: 1px solid var(--border-glow);
+                margin: 0 20px 20px 0;
             }
         }
 
@@ -2257,8 +2262,8 @@
          HUD PANEL
          ═══════════════════════════════════════════════════════════════════ -->
     <!-- HUD backdrop — geri tuşu için tam ekran overlay -->
-    <div id="hud-wrapper" onclick="closeHud()" >
-    <div id="hud" onclick="event.stopPropagation()">
+    <div id="hud-wrapper" onclick="closeHud()">
+        <div id="hud" onclick="event.stopPropagation()">
         <!-- Swipe-to-close drag handle -->
         <div id="hud-drag-handle" style="width:100%;padding:10px 0 4px;display:flex;justify-content:center;align-items:center;cursor:grab;touch-action:none;flex-shrink:0;">
             <div style="width:40px;height:4px;background:rgba(255,255,255,0.25);border-radius:2px;"></div>
