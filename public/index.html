@@ -473,6 +473,18 @@
             display: none;
             flex-direction: column;
             backdrop-filter: blur(30px);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            touch-action: pan-x;
+        }
+        #hud::before {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            margin: 10px auto -6px;
+            flex-shrink: 0;
             box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.5);
         }
 
@@ -6044,6 +6056,68 @@ function handleBackButton() {
     if (photoModal && photoModal.style.display !== 'none') { photoModal.style.display = 'none'; return true; }
 
     const scanProgress = document.getElementById('scan-progress');
+// ═══════════════════════════════════════════════════════════════════
+// HUD SWIPE-TO-DISMISS
+// ═══════════════════════════════════════════════════════════════════
+(function() {
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    let isDragging = false;
+    let currentTranslate = 0;
+
+    function initSwipeToClose() {
+        const hud = document.getElementById('hud');
+        if (!hud || hud._swipeInit) return;
+        hud._swipeInit = true;
+
+        hud.addEventListener('touchstart', function(e) {
+            const header = hud.querySelector('.hud-header');
+            const content = hud.querySelector('.hud-content');
+            const isAtTop = !content || content.scrollTop === 0;
+            const isHeader = header && header.contains(e.target);
+            if (!isHeader && !isAtTop) return;
+            touchStartY = e.touches[0].clientY;
+            touchStartTime = Date.now();
+            isDragging = true;
+            currentTranslate = 0;
+            hud.style.transition = 'none';
+        }, { passive: true });
+
+        hud.addEventListener('touchmove', function(e) {
+            if (!isDragging) return;
+            const deltaY = e.touches[0].clientY - touchStartY;
+            if (deltaY < 0) { isDragging = false; hud.style.transform = ''; return; }
+            currentTranslate = deltaY;
+            hud.style.transform = 'translateY(' + deltaY + 'px)';
+            hud.style.opacity = Math.max(0.3, 1 - deltaY / 300);
+        }, { passive: true });
+
+        hud.addEventListener('touchend', function() {
+            if (!isDragging) return;
+            isDragging = false;
+            const velocity = currentTranslate / (Date.now() - touchStartTime);
+            hud.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+            if (currentTranslate > 120 || velocity > 0.5) {
+                hud.style.transform = 'translateY(100%)';
+                hud.style.opacity = '0';
+                setTimeout(() => { closeHud(); hud.style.transform = ''; hud.style.opacity = ''; }, 280);
+            } else {
+                hud.style.transform = '';
+                hud.style.opacity = '';
+            }
+        }, { passive: true });
+    }
+
+    // HUD her açıldığında init et
+    document.addEventListener('DOMContentLoaded', function() {
+        const hud = document.getElementById('hud');
+        if (!hud) return;
+        new MutationObserver(function() {
+            if (hud.style.display === 'flex') initSwipeToClose();
+        }).observe(hud, { attributes: true, attributeFilter: ['style'] });
+    });
+})();
+
     if (scanProgress && scanProgress.style.display !== 'none') { if (typeof closeScanModal === 'function') closeScanModal(); return true; }
 
     const hud = document.getElementById('hud');
