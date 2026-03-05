@@ -82,6 +82,64 @@ const cache = new NodeCache({ stdTTL: 3600, checkperiod: 600 });
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use('/api/', limiter);
 
+// ═══════════════════════════════════════════════════════════════════════════
+// KLOROFİL-A (PLANKTON) VERİSİ — NOAA CoastWatch ERDDAP
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function fetchChlorophyll(lat, lon) {
+    const latMin = (parseFloat(lat) - 0.1).toFixed(4);
+    const latMax = (parseFloat(lat) + 0.1).toFixed(4);
+    const lonMin = (parseFloat(lon) - 0.1).toFixed(4);
+    const lonMax = (parseFloat(lon) + 0.1).toFixed(4);
+
+    // Son 30 gün — bulutlu günlerde null dönebilir, en son geçerli değeri al
+    const now = new Date();
+    const end = now.toISOString().split('T')[0] + 'T00:00:00Z';
+    const startDate = new Date(now);
+    startDate.setDate(startDate.getDate() - 30);
+    const start = startDate.toISOString().split('T')[0] + 'T00:00:00Z';
+
+    const url = `https://coastwatch.noaa.gov/erddap/griddap/noaacwNPPVIIRSchlaDaily.json` +
+        `?chlor_a[(${start}):(last)][(0)][(${latMin}):(${latMax})][(${lonMin}):(${lonMax})]`;
+
+    try {
+        // NOAA bazen 302 redirect yapıyor — follow: 'follow' ile çöz
+        const res = await fetchWithTimeout(url, 12000);
+        if (!res.ok) return null;
+        const json = await res.json();
+
+        if (!json?.table?.rows) return null;
+
+        // Null olmayan pikselleri filtrele, en son geçerli günün verisini al
+        const rows = json.table.rows.filter(r => r[4] !== null && r[4] > 0);
+        if (rows.length === 0) return null;
+
+        // En son tarihe göre sırala
+        rows.sort((a, b) => new Date(b[0]) - new Date(a[0]));
+        const latestDate = rows[0][0].split('T')[0];
+        const latestRows = rows.filter(r => r[0].startsWith(latestDate));
+
+        const values = latestRows.map(r => r[4]);
+        const avg = values.reduce((a, b) => a + b, 0) / values.length;
+
+        // Aylık ortalama (tüm geçerli veriden)
+        const monthlyAvg = rows.slice(0, Math.min(rows.length, 200))
+            .map(r => r[4])
+            .reduce((a, b) => a + b, 0) / Math.min(rows.length, 200);
+
+        return {
+            chlorophyll: parseFloat(avg.toFixed(3)),
+            chlorophyll_monthly_avg: parseFloat(monthlyAvg.toFixed(3)),
+            date: latestDate,
+            valid_pixels: values.length,
+            daysAgo: Math.round((Date.now() - new Date(latestDate)) / 86400000)
+        };
+    } catch (e) {
+        console.log('[PLANKTON] NOAA fetch failed:', e.message);
+        return null;
+    }
+}
+
 // Auth middleware & Freemium Limitleri
 const FREE_DAILY_CLICKS = 5;    // Ücretsiz kullanıcı günde 5 tıklama
 const FREE_DAILY_SCANS = 1;     // Ücretsiz kullanıcı günde 1 tarama
@@ -627,6 +685,7 @@ const SPECIES_DB = {
         clarityPref: "TURBID",
         currentPref: 0.6,
         salinityPref: "MEDIUM",
+        planktonPref: "MEDIUM",
         regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 1, opt: 8, max: 40 },
         advice: { bait: "Canlı Teke, Mamun, Boru Kurdu", lure: "WTD, 10-14cm Maket, Silikon", rig: "Gezer Kurşunlu Dip, Spin", hook: "1/0 - 4/0 Geniş Pala" },
@@ -640,12 +699,19 @@ const SPECIES_DB = {
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah suyu ve akşam suyu",
         tempRange: { min: 12, opt: 18, max: 25 },
         seasons: { winter: 0.50, spring: 0.20, summer: 0.15, autumn: 0.95 },
+        monthlyActivity: [0.45, 0.4, 0.25, 0.2, 0.2, 0.15, 0.15, 0.2, 0.65, 0.95, 0.9, 0.55],
+        migrationBonus: {
+        "KARADENİZ": { months: [4,5,6],    bonus: 0.25 },
+        "MARMARA":   { months: [9,10,11],  bonus: 0.35 },
+        "EGE":       { months: [10,11],    bonus: 0.20 }
+    },
         activity: "DAWN_DUSK",
         pressureSensitivity: 0.9,
         wavePref: 0.6,
         clarityPref: "CLEAR",
         currentPref: 0.85,
         salinityPref: "MEDIUM",
+        planktonPref: "HIGH",
         regions: ["MARMARA", "EGE", "KARADENİZ"],
         depth: { min: 1, opt: 8, max: 40 },
         advice: { bait: "Yaprak Zargana, İstavrit Fleto", lure: "Kaşık, Ağır Rapala, Poşhter", rig: "Uzun Olta, Mantarlı Çinekop, Hırsızlı Zoka", hook: "1 - 4/0 Uzun Pala + Çelik Tel" },
@@ -723,6 +789,7 @@ const SPECIES_DB = {
         clarityPref: "MODERATE",
         currentPref: 0.3,
         salinityPref: "MEDIUM",
+        planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 0, opt: 10, max: 150 },
         advice: { bait: "Canlı Mamun, Yengeç, Midye", lure: "Micro Jig, Rubber", rig: "Hırsızlı Dip Takımı", hook: "Chinu No:2-4" },
@@ -742,6 +809,7 @@ const SPECIES_DB = {
         clarityPref: "TURBID",
         currentPref: 0.5,
         salinityPref: "MEDIUM",
+        planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 0, opt: 10, max: 160 },
         advice: { bait: "Mamun, Yengeç, Madya", lure: "Silikon Karides (Nadir)", rig: "Şeytan Oltası, Tek İğneli Dip", hook: "2 - 5 Sağlam Dövme" },
@@ -779,7 +847,8 @@ const SPECIES_DB = {
         wavePref: 0.2,
         clarityPref: "CLEAR",
         currentPref: 0.2,
-        salinityPref: "HIGH",  // Açık deniz türü — yüksek tuzluluğu tercih eder
+        salinityPref: "HIGH",  // Açık deniz türü — yüksek tuzluluğu tercih eder,
+        planktonPref: "LOW",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 2, opt: 20, max: 150 },
         advice: { bait: "Yok", lure: "Kalamar Zokası (Renkli/Fosforlu)", rig: "Zoka At-Çek (Whipping)", hook: "Özel Zoka İğnesi" },
@@ -798,7 +867,8 @@ const SPECIES_DB = {
         wavePref: 0.1,
         clarityPref: "MODERATE",
         currentPref: 0.1,
-        salinityPref: "HIGH",  // Kayalık-açık deniz türü — yüksek tuzluluğu tercih eder
+        salinityPref: "HIGH",  // Kayalık-açık deniz türü — yüksek tuzluluğu tercih eder,
+        planktonPref: "LOW",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 2, opt: 20, max: 150 },
         advice: { bait: "Yengeç, Tavuk But", lure: "Ahtapot Zokası, Plastik Yengeç", rig: "Çarpmalı Zoka", hook: "Özel Zoka" },
@@ -833,12 +903,18 @@ const SPECIES_DB = {
         peakHours: "ALL", peakHoursDesc: "Tüm gün aktif, sabah/akşam yoğun",
         tempRange: { min: 10, opt: 18, max: 24 },
         seasons: { winter: 0.60, spring: 0.80, summer: 0.75, autumn: 0.85 },
+        monthlyActivity: [0.55, 0.5, 0.65, 0.75, 0.85, 0.9, 0.85, 0.85, 0.85, 0.8, 0.7, 0.6],
+        migrationBonus: {
+        "KARADENİZ": { months: [4,5,6,7],  bonus: 0.20 },
+        "EGE":       { months: [3,4,10,11],bonus: 0.15 }
+    },
         activity: "ALL",
         pressureSensitivity: 0.5,
         wavePref: 0.5,
         clarityPref: "ANY",
         currentPref: 0.7,
         salinityPref: "MEDIUM",
+        planktonPref: "HIGH",
         regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 5, opt: 20, max: 250 },
         advice: { bait: "Karides Parçası, Tavuk Göğsü", lure: "Çapari, LRF Silikon, Micro Jig", rig: "Çapari, LRF", hook: "9 - 12 İnce" },
@@ -895,7 +971,8 @@ const SPECIES_DB = {
         wavePref: 0.4,
         clarityPref: "TURBID",
         currentPref: 0.3,
-        salinityPref: "LOW",  // Lagün türü — düşük/acı tuzlu suyu tercih eder
+        salinityPref: "LOW",  // Lagün türü — düşük/acı tuzlu suyu tercih eder,
+        planktonPref: "MEDIUM",
         regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
         depth: { min: 0, opt: 5, max: 15 },
         advice: { bait: "Ekmek İçi, Kıbrıs Sarma", lure: "Yok", rig: "Kıbrıs Takımı, Şamandıralı", hook: "6 - 9" },
@@ -915,6 +992,7 @@ const SPECIES_DB = {
         clarityPref: "CLEAR",
         currentPref: 0.4,
         salinityPref: "ANY",
+        planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 1, opt: 8, max: 40 },
         advice: { bait: "Kurt, Fleto Balık", lure: "İpek (Turuncu)", rig: "Şamandıralı Top, İpek", hook: "6 - 10 İnce" },
@@ -957,6 +1035,7 @@ const SPECIES_DB = {
         clarityPref: "CLEAR",
         currentPref: 0.8,
         salinityPref: "HIGH",
+        planktonPref: "HIGH",
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 10, opt: 50, max: 300 },
         advice: { bait: "Canlı İstavrit, Sardalya", lure: "Popper, Stickbait, Metal Jig", rig: "Trolling, Jigging, Popping", hook: "3/0 - 6/0 + Çelik Tel" },
@@ -976,6 +1055,7 @@ const SPECIES_DB = {
         clarityPref: "MODERATE",
         currentPref: 0.5,
         salinityPref: "HIGH",
+        planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 15, opt: 30, max: 50 },
         advice: { bait: "Canlı Kalamar, Sübye, Karides", lure: "Metal Jig, Maket Balık", rig: "Jigging, Dip Sırtısı, Trolling", hook: "2/0 - 5/0" },
@@ -995,6 +1075,7 @@ const SPECIES_DB = {
         clarityPref: "MODERATE",
         currentPref: 0.4,
         salinityPref: "MEDIUM",
+        planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 10, opt: 60, max: 250 },
         advice: { bait: "Karides, Kalamar, Midye, Sülünez", lure: "Jig, Silikon", rig: "Dip Takımı", hook: "2 - 6" },
@@ -1053,6 +1134,7 @@ const SPECIES_DB = {
         clarityPref: "CLEAR",
         currentPref: 0.3,
         salinityPref: "MEDIUM",
+        planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 1, opt: 15, max: 40 },
         advice: { bait: "Ekmek, Midye, Kurt", lure: "Micro Jig", rig: "Şamandıralı, LRF", hook: "8 - 12" },
@@ -1110,6 +1192,7 @@ const SPECIES_DB = {
         clarityPref: "TURBID",
         currentPref: 0.5,
         salinityPref: "MEDIUM",
+        planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 1, opt: 15, max: 50 },
         advice: { bait: "Midye, Yengeç, Mamun", lure: "Silikon", rig: "Şeytan Oltası, Dip", hook: "1 - 4" },
@@ -1172,6 +1255,7 @@ const SPECIES_DB = {
         clarityPref: "CLEAR",
         currentPref: 0.5,
         salinityPref: "ANY",
+        planktonPref: "LOW",
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 30, opt: 60, max: 100 },
         advice: { bait: "Canlı Kalamar, Teke", lure: "Jig, Inchiku", rig: "Jig Takımı, Derin Dip", hook: "2/0 - 4/0" },
@@ -1191,6 +1275,7 @@ const SPECIES_DB = {
         clarityPref: "CLEAR",
         currentPref: 0.3,
         salinityPref: "HIGH",
+        planktonPref: "LOW",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 2, opt: 10, max: 25 },
         advice: { bait: "Kalamar Zokası", lure: "Egi 2.5-3.5", rig: "Eging Takımı", hook: "Zoka" },
@@ -1248,6 +1333,7 @@ const SPECIES_DB = {
         clarityPref: "CLEAR",
         currentPref: 0.5,
         salinityPref: "HIGH",
+        planktonPref: "HIGH",
         regions: ["AKDENİZ", "EGE"],
         depth: { min: 0, opt: 10, max: 35 },
         advice: { bait: "Küçük balık", lure: "Popper, Sahte Balık", rig: "Trolling, Spin", hook: "2/0 - 4/0" },
@@ -1261,12 +1347,14 @@ const SPECIES_DB = {
         peakHours: "DAY", peakHoursDesc: "Sabah/Akşam",
         tempRange: { min: 10, opt: 15, max: 20 },
         seasons: { winter: 0.60, spring: 0.85, summer: 0.40, autumn: 0.75 },
+        monthlyActivity: [0.55, 0.5, 0.7, 0.85, 0.9, 0.4, 0.3, 0.35, 0.6, 0.8, 0.75, 0.6],
         activity: "DAY",
         pressureSensitivity: 0.5,
         wavePref: 0.4,
         clarityPref: "CLEAR",
         currentPref: 0.5,
         salinityPref: "HIGH",
+        planktonPref: "HIGH",
         regions: ["MARMARA", "EGE"],
         depth: { min: 5, opt: 20, max: 50 },
         advice: { bait: "Çapari", lure: "Küçük Kaşık", rig: "Çapari Takımı", hook: "6 - 10" },
@@ -1280,12 +1368,18 @@ const SPECIES_DB = {
         peakHours: "DAY", peakHoursDesc: "Gündüz",
         tempRange: { min: 15, opt: 22, max: 27 },
         seasons: { winter: 0.40, spring: 0.70, summer: 0.85, autumn: 0.75 },
+        monthlyActivity: [0.35, 0.3, 0.55, 0.7, 0.85, 0.9, 0.9, 0.85, 0.8, 0.7, 0.5, 0.4],
+        migrationBonus: {
+        "EGE":       { months: [4,5,6,7,8], bonus: 0.20 },
+        "AKDENİZ":   { months: [3,4,5],    bonus: 0.15 }
+    },
         activity: "DAY",
         pressureSensitivity: 0.5,
         wavePref: 0.4,
         clarityPref: "CLEAR",
         currentPref: 0.5,
         salinityPref: "MEDIUM",
+        planktonPref: "HIGH",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 5, opt: 25, max: 50 },
         advice: { bait: "Çapari", lure: "Kaşık", rig: "Çapari Takımı, Spin", hook: "6 - 10" },
@@ -1381,6 +1475,7 @@ const SPECIES_DB = {
         clarityPref: "CLEAR",
         currentPref: 0.5,
         salinityPref: "HIGH",
+        planktonPref: "HIGH",
         regions: ["AKDENİZ", "EGE"],
         depth: { min: 2, opt: 15, max: 40 },
         advice: { bait: "Yapay tercih", lure: "Uzun Sahte Balık", rig: "Spin", hook: "2/0 - 4/0" },
@@ -1527,12 +1622,18 @@ const SPECIES_DB = {
         peakHours: "DAY", peakHoursDesc: "Gündüz, sürü halinde",
         tempRange: { min: 8, opt: 12, max: 18 },
         seasons: { winter: 0.95, spring: 0.50, summer: 0.20, autumn: 0.70 },
+        monthlyActivity: [0.95, 0.9, 0.55, 0.4, 0.25, 0.15, 0.15, 0.2, 0.45, 0.7, 0.9, 0.95],
+        migrationBonus: {
+        "KARADENİZ": { months: [9,10,11,0], bonus: 0.35 },
+        "MARMARA":   { months: [10,11,0],  bonus: 0.25 }
+    },
         activity: "DAY",
         pressureSensitivity: 0.4,
         wavePref: 0.4,
         clarityPref: "MODERATE",
         currentPref: 0.5,
         salinityPref: "ANY",
+        planktonPref: "HIGH",
         regions: ["KARADENİZ", "MARMARA"],
         depth: { min: 5, opt: 25, max: 60 },
         advice: { bait: "Çapari", lure: "İnce Çapari", rig: "Surf, Çapari", hook: "10 - 14" },
@@ -1593,6 +1694,7 @@ const SPECIES_DB = {
         clarityPref: "MODERATE",
         currentPref: 0.3,
         salinityPref: "HIGH",
+        planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 1, opt: 15, max: 50 },
         advice: { bait: "Ekmek, Kurt, Karides", lure: "Yok", rig: "Çapari, Dip", hook: "10 - 14" },
@@ -1606,12 +1708,18 @@ const SPECIES_DB = {
         peakHours: "DAY", peakHoursDesc: "Sabah-Öğlen, açık deniz",
         tempRange: { min: 18, opt: 24, max: 30 },
         seasons: { winter: 0.30, spring: 0.60, summer: 0.90, autumn: 0.70 },
+        monthlyActivity: [0.25, 0.25, 0.45, 0.6, 0.75, 0.9, 0.95, 0.9, 0.75, 0.65, 0.45, 0.3],
+        migrationBonus: {
+        "AKDENİZ":   { months: [4,5,6,7,8], bonus: 0.25 },
+        "EGE":       { months: [5,6,7],    bonus: 0.20 }
+    },
         activity: "DAY",
         pressureSensitivity: 0.5,
         wavePref: 0.5,
         clarityPref: "CLEAR",
         currentPref: 0.6,
         salinityPref: "MEDIUM",
+        planktonPref: "HIGH",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 5, opt: 50, max: 200 },
         advice: { bait: "Canlı balık, Sardalya", lure: "Rapala, Metal Jig", rig: "Trolling", hook: "2/0 - 4/0" },
@@ -1625,12 +1733,19 @@ const SPECIES_DB = {
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah-Akşam",
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.50, spring: 0.65, summer: 0.55, autumn: 0.90 },
+        monthlyActivity: [0.45, 0.4, 0.55, 0.65, 0.7, 0.55, 0.5, 0.55, 0.75, 0.95, 0.85, 0.55],
+        migrationBonus: {
+        "KARADENİZ": { months: [4,5,6,7],  bonus: 0.30 },
+        "MARMARA":   { months: [9,10],     bonus: 0.40 },
+        "EGE":       { months: [3,4,10,11],bonus: 0.20 }
+    },
         activity: "CREPUSCULAR",
         pressureSensitivity: 0.6,
         wavePref: 0.5,
         clarityPref: "MODERATE",
         currentPref: 0.5,
         salinityPref: "MEDIUM",
+        planktonPref: "HIGH",
         regions: ["MARMARA", "KARADENİZ", "EGE"],
         depth: { min: 5, opt: 30, max: 100 },
         advice: { bait: "İstavrit, Sardalya, Sahte Yem", lure: "Tüylü Çapari, Kaşık, Kaplamalı Jig", rig: "Çapari, Trolling, Sırtı", hook: "1/0 - 3/0" },
@@ -1644,12 +1759,14 @@ const SPECIES_DB = {
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah-Akşam, derin",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.70, spring: 0.50, summer: 0.30, autumn: 0.65 },
+        monthlyActivity: [0.6, 0.55, 0.5, 0.55, 0.5, 0.3, 0.25, 0.3, 0.55, 0.75, 0.7, 0.65],
         activity: "CREPUSCULAR",
         pressureSensitivity: 0.6,
         wavePref: 0.6,
         clarityPref: "MODERATE",
         currentPref: 0.6,
         salinityPref: "ANY",
+        planktonPref: "HIGH",
         regions: ["MARMARA", "KARADENİZ", "EGE"],
         depth: { min: 20, opt: 60, max: 150 },
         advice: { bait: "Canlı balık", lure: "Büyük Rapala, Jig", rig: "Trolling", hook: "3/0 - 5/0" },
@@ -1663,12 +1780,14 @@ const SPECIES_DB = {
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah-Akşam",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.35, spring: 0.60, summer: 0.80, autumn: 0.90 },
+        monthlyActivity: [0.3, 0.25, 0.45, 0.6, 0.75, 0.85, 0.9, 0.95, 0.9, 0.8, 0.55, 0.35],
         activity: "CREPUSCULAR",
         pressureSensitivity: 0.5,
         wavePref: 0.5,
         clarityPref: "MODERATE",
         currentPref: 0.4,
         salinityPref: "ANY",
+        planktonPref: "HIGH",
         regions: ["MARMARA", "KARADENİZ", "EGE", "AKDENİZ"],
         depth: { min: 2, opt: 15, max: 40 },
         advice: { bait: "Çaça, Hamsi", lure: "Küçük Kaşık", rig: "Spin, Çapari", hook: "4 - 8" },
@@ -1685,12 +1804,14 @@ const SPECIES_DB = {
         peakHours: "DAY", peakHoursDesc: "Gündüz, yüzey",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.60, spring: 0.75, summer: 0.85, autumn: 0.70 },
+        monthlyActivity: [0.55, 0.5, 0.6, 0.7, 0.85, 0.9, 0.9, 0.85, 0.75, 0.65, 0.6, 0.55],
         activity: "DAY",
         pressureSensitivity: 0.3,
         wavePref: 0.3,
         clarityPref: "ANY",
         currentPref: 0.4,
         salinityPref: "ANY",
+        planktonPref: "HIGH",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 10, opt: 25, max: 100 },
         advice: { bait: "-", lure: "Tüylü Çapari", rig: "Çapari / Ağ", hook: "-" },
@@ -1710,6 +1831,7 @@ const SPECIES_DB = {
         clarityPref: "MODERATE",
         currentPref: 0.4,
         salinityPref: "ANY",
+        planktonPref: "LOW",
         regions: ["KARADENİZ", "MARMARA"],
         depth: { min: 20, opt: 60, max: 200 },
         advice: { bait: "Karides, Kurt, Midye, Tavuk Göğsü", lure: "Yok", rig: "Klasik Çapari, Üç Köstekli Dip Oltası", hook: "No: 2" },
@@ -1729,6 +1851,7 @@ const SPECIES_DB = {
         clarityPref: "ANY",
         currentPref: 0.3,
         salinityPref: "LOW",
+        planktonPref: "LOW",
         regions: ["KARADENİZ", "MARMARA"],
         depth: { min: 20, opt: 40, max: 70 },
         advice: { bait: "Canlı Hamsi, İstavrit, Balık Fleto", lure: "Yok", rig: "Uzun Köstekli Ağır Dip Oltası", hook: "2 - 6" },
@@ -1748,6 +1871,7 @@ const SPECIES_DB = {
         clarityPref: "MODERATE",
         currentPref: 0.3,
         salinityPref: "LOW",
+        planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 5, opt: 30, max: 100 },
         advice: { bait: "Kurt, Karides", lure: "Yok", rig: "Dip", hook: "8 - 12" },
@@ -1767,6 +1891,7 @@ const SPECIES_DB = {
         clarityPref: "MODERATE",
         currentPref: 0.3,
         salinityPref: "ANY",
+        planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 3, opt: 25, max: 80 },
         advice: { bait: "Kurt, Karides", lure: "Yok", rig: "Dip", hook: "8 - 12" },
@@ -1805,6 +1930,7 @@ const SPECIES_DB = {
         clarityPref: "CLEAR",
         currentPref: 0.4,
         salinityPref: "HIGH",
+        planktonPref: "LOW",
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 20, opt: 50, max: 100 },
         advice: { bait: "Karides, Tavuk Göğsü, Kalamar", lure: "Yok", rig: "Üçlü Dip Takımı", hook: "4 - 8" },
@@ -1824,6 +1950,7 @@ const SPECIES_DB = {
         clarityPref: "MODERATE",
         currentPref: 0.3,
         salinityPref: "HIGH",
+        planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 5, opt: 30, max: 100 },
         advice: { bait: "Ekmek, Kurt", lure: "Yok", rig: "Çapari, Dip", hook: "10 - 14" },
@@ -1843,6 +1970,7 @@ const SPECIES_DB = {
         clarityPref: "CLEAR",
         currentPref: 0.3,
         salinityPref: "MEDIUM",
+        planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 10, opt: 50, max: 200 },
         advice: { bait: "Canlı balık, Ahtapot", lure: "Büyük Silikon", rig: "Dip", hook: "4/0 - 6/0" },
@@ -1862,6 +1990,7 @@ const SPECIES_DB = {
         clarityPref: "MODERATE",
         currentPref: 0.4,
         salinityPref: "HIGH",
+        planktonPref: "LOW",
         regions: ["KARADENİZ", "MARMARA"],
         depth: { min: 20, opt: 80, max: 200 },
         advice: { bait: "Kurt, Midye, Balık parçası", lure: "Yok", rig: "Dip, Uzun Olta", hook: "2 - 6" },
@@ -1876,12 +2005,14 @@ const SPECIES_DB = {
     peakHours: "DAY", peakHoursDesc: "Gündüz sürü halinde yüzeye yakın gezer",
     tempRange: { min: 12, opt: 20, max: 27 },
     seasons: { winter: 0.40, spring: 0.70, summer: 0.90, autumn: 0.70 },
+    monthlyActivity: [0.35, 0.35, 0.55, 0.7, 0.85, 0.95, 0.95, 0.9, 0.75, 0.6, 0.45, 0.35],
     activity: "DAY",
     pressureSensitivity: 0.25,
     wavePref: 0.2,
     clarityPref: "CLEAR",
     currentPref: 0.3,
     salinityPref: "LOW",
+    planktonPref: "HIGH",
     regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
     depth: { min: 1, opt: 5, max: 20 },
     advice: { bait: "Ekmek İçi, Kurt", lure: "Micro Jig", rig: "Çoklu İğne", hook: "No:10-14" },
@@ -1902,6 +2033,7 @@ const SPECIES_DB = {
     clarityPref: "CLEAR",
     currentPref: 0.5,
     salinityPref: "ANY",
+    planktonPref: "LOW",
     regions: ["EGE", "AKDENİZ", "MARMARA"],
     depth: { min: 30, opt: 80, max: 250 },
     advice: { bait: "İstavrit, Sardalya", lure: "Metal Jig", rig: "Dip Takımı", hook: "No:1-3" },
@@ -1922,6 +2054,7 @@ const SPECIES_DB = {
     clarityPref: "CLEAR",
     currentPref: 0.4,
     salinityPref: "MEDIUM",
+    planktonPref: "MEDIUM",
     regions: ["EGE", "AKDENİZ", "MARMARA"],
     depth: { min: 2, opt: 15, max: 80 },
     advice: { bait: "Karides, Kurt", lure: "Küçük Silikon", rig: "Dip Takımı", hook: "No:6-8" },
@@ -1936,12 +2069,14 @@ const SPECIES_DB = {
     peakHours: "DAY", peakHoursDesc: "Gündüz sürü halinde orta su",
     tempRange: { min: 8, opt: 12, max: 20 },
     seasons: { winter: 0.80, spring: 0.85, summer: 0.40, autumn: 0.70 },
+    monthlyActivity: [0.8, 0.75, 0.85, 0.85, 0.7, 0.45, 0.3, 0.3, 0.5, 0.65, 0.75, 0.8],
     activity: "DAY",
     pressureSensitivity: 0.25,
     wavePref: 0.4,
     clarityPref: "ANY",
     currentPref: 0.6,
     salinityPref: "MEDIUM",
+    planktonPref: "HIGH",
     regions: ["MARMARA", "KARADENİZ"],
     depth: { min: 5, opt: 25, max: 120 },
     advice: { bait: "Yok", lure: "Çapari", rig: "Çapari", hook: "No:12-16" },
@@ -1956,12 +2091,14 @@ const SPECIES_DB = {
     peakHours: "DAY", peakHoursDesc: "Gündüz sürü halinde",
     tempRange: { min: 6, opt: 12, max: 18 },
     seasons: { winter: 0.90, spring: 0.80, summer: 0.30, autumn: 0.70 },
+    monthlyActivity: [0.9, 0.85, 0.8, 0.65, 0.4, 0.25, 0.2, 0.25, 0.45, 0.65, 0.75, 0.85],
     activity: "DAY",
     pressureSensitivity: 0.2,
     wavePref: 0.5,
     clarityPref: "ANY",
     currentPref: 0.7,
     salinityPref: "LOW",
+    planktonPref: "HIGH",
     regions: ["KARADENİZ", "MARMARA"],
     depth: { min: 10, opt: 30, max: 100 },
     advice: { bait: "Yok", lure: "Çapari", rig: "Çapari", hook: "No:14-18" },
@@ -1976,12 +2113,18 @@ const SPECIES_DB = {
     peakHours: "DAY", peakHoursDesc: "Göç döneminde gündüz aktif",
     tempRange: { min: 10, opt: 16, max: 22 },
     seasons: { winter: 0.20, spring: 0.90, summer: 0.40, autumn: 0.60 },
+    monthlyActivity: [0.2, 0.25, 0.6, 0.9, 0.95, 0.45, 0.3, 0.3, 0.5, 0.65, 0.55, 0.25],
+    migrationBonus: {
+        "MARMARA":   { months: [2,3,4],    bonus: 0.35 },
+        "KARADENİZ": { months: [3,4],      bonus: 0.25 }
+    },
     activity: "DAY",
     pressureSensitivity: 0.35,
     wavePref: 0.7,
     clarityPref: "MODERATE",
     currentPref: 0.8,
     salinityPref: "LOW",
+    planktonPref: "HIGH",
     regions: ["KARADENİZ", "MARMARA"],
     depth: { min: 2, opt: 15, max: 60 },
     advice: { bait: "Küçük Balık", lure: "Kaşık", rig: "Spin", hook: "No:4-8" },
@@ -2177,17 +2320,34 @@ function calculateFishScore(fish, key, params) {
         timeMode, solunar, region, targetDate, isInstant,
         currentSpeed, pressureTrend, moonPhase,
         depthAvg, hour, salinity,
-        cloudCover, wavePeriod, swellHeight, oceanCurrent, tempShock, uvIndex
+        cloudCover, wavePeriod, swellHeight, oceanCurrent, tempShock, uvIndex,
+        chlorophyll
     } = params;
 
     const season = getSeason(targetDate.getMonth());
+    const currentMonth = targetDate.getMonth(); // 0=Ocak, 11=Aralık
     let activeTriggers = [];
     
     // SKOR DETAYLARI (Yıldız Sistemi)
     const scoreDetails = {};
     
     // 1. MEVSİMSEL (Max 25)
-    const seasonalEff = fish.seasons[season] || 0.3;
+    // monthlyActivity varsa 12 aylık hassas sistem, yoksa 4 mevsim kaba sistem
+    let seasonalEff;
+    if (fish.monthlyActivity && fish.monthlyActivity.length === 12) {
+        seasonalEff = fish.monthlyActivity[currentMonth];
+
+        // Göç bonusu — tür + bölge + ay uyumuysa ekle
+        if (fish.migrationBonus && fish.migrationBonus[region]) {
+            const mb = fish.migrationBonus[region];
+            if (mb.months.includes(currentMonth)) {
+                seasonalEff = Math.min(1.0, seasonalEff + mb.bonus);
+                activeTriggers.push(`🔀 Göç Dönemi (${region})`);
+            }
+        }
+    } else {
+        seasonalEff = fish.seasons[season] || 0.3;
+    }
     let s_season = seasonalEff * 25;
     scoreDetails.season = { score: s_season, max: 25, stars: Math.round(seasonalEff * 5) };
     
@@ -2383,6 +2543,37 @@ function calculateFishScore(fish, key, params) {
     
     if (key === "levrek" && wave > 0.7 && clarity < 60) { s_trigger += 2; activeTriggers.push("Köpüklü Su"); }
     if (key === "lufer" && windSpeed > 15 && windSpeed < 35) { s_trigger += 2; activeTriggers.push("Rüzgarlı"); }
+
+    // [YENİ] KLOROFİL-A — Plankton yoğunluğu → besin zinciri etkisi
+    // Sadece planktonPref tanımlı türlere uygulanır (pelajik, sürü, kıyı avcılar)
+    if (chlorophyll !== null && chlorophyll !== undefined && fish.planktonPref) {
+        const chl = parseFloat(chlorophyll);
+        if (!isNaN(chl)) {
+            if (fish.planktonPref === 'HIGH') {
+                // Yüksek klorofil sevenler: Lüfer, Palamut, İstavrit, Hamsi vb.
+                if (chl >= 1.5)      { s_trigger += 3; activeTriggers.push(`🌿 Zengin Plankton (${chl.toFixed(2)} mg/m³)`); }
+                else if (chl >= 0.5) { s_trigger += 1.5; activeTriggers.push(`🌿 Aktif Plankton`); }
+                else if (chl < 0.1)  { s_trigger -= 1.5; } // Çok düşük — yem azalmış
+            } else if (fish.planktonPref === 'MEDIUM') {
+                // Orta tercih: Levrek, Çipura, Kefal vb.
+                if (chl >= 0.5 && chl <= 3.0) { s_trigger += 1.5; activeTriggers.push(`🌿 Uygun Plankton`); }
+                else if (chl > 5.0)            { s_trigger -= 1; } // Bloom = oksijen sorunu
+            } else if (fish.planktonPref === 'LOW') {
+                // Düşük klorofil sevenler: Kalamar, derin dip türleri
+                if (chl < 0.3)       { s_trigger += 1.5; activeTriggers.push(`🌿 Temiz Su`); }
+                else if (chl > 2.0)  { s_trigger -= 1; }
+            }
+            scoreDetails.chlorophyll = {
+                value: chl,
+                pref: fish.planktonPref,
+                stars: fish.planktonPref === 'HIGH'
+                    ? (chl >= 1.5 ? 5 : chl >= 0.5 ? 4 : chl >= 0.1 ? 2 : 1)
+                    : fish.planktonPref === 'MEDIUM'
+                        ? (chl >= 0.5 && chl <= 3.0 ? 5 : chl < 0.5 ? 3 : 2)
+                        : (chl < 0.3 ? 5 : chl < 1.0 ? 3 : 2)
+            };
+        }
+    }
     
     s_trigger = Math.min(12, Math.max(-5, s_trigger));
     scoreDetails.trigger = { score: s_trigger, max: 12, triggers: activeTriggers };
@@ -2627,6 +2818,33 @@ app.get('/api/forecast', async (req, res) => {
         if (!weather || !marine) {
             return res.status(503).json({ error: 'API_UNAVAILABLE', message: 'Hava/deniz verisi alınamadı, lütfen tekrar deneyin' });
         }
+
+        // Klorofil-a verisi — bağımsız çek (başarısız olsa forecast devam eder)
+        let chlorophyllData = null;
+        try {
+            const chlCacheKey = `plankton_${parseFloat(lat).toFixed(2)}_${parseFloat(lon).toFixed(2)}`;
+            if (db) {
+                const chlRef = db.collection('planktonCache').doc(chlCacheKey);
+                const cached = await chlRef.get();
+                if (cached.exists) {
+                    const d = cached.data();
+                    if (Date.now() - d.savedAt < 6 * 60 * 60 * 1000) {
+                        chlorophyllData = d.result;
+                    }
+                }
+            }
+            if (!chlorophyllData) {
+                chlorophyllData = await fetchChlorophyll(lat, lon);
+                if (chlorophyllData && db) {
+                    const chlCacheKey2 = `plankton_${parseFloat(lat).toFixed(2)}_${parseFloat(lon).toFixed(2)}`;
+                    db.collection('planktonCache').doc(chlCacheKey2)
+                        .set({ result: chlorophyllData, savedAt: Date.now() }).catch(() => {});
+                }
+            }
+        } catch (e) {
+            console.log('[FORECAST] Chlorophyll fetch skipped:', e.message);
+        }
+        const chlorophyll = chlorophyllData?.chlorophyll ?? null;
         
         // Derinlik verisini işle
         let depthData = { avg: null, min: null, max: null };
@@ -2774,7 +2992,8 @@ app.get('/api/forecast', async (req, res) => {
                     wavePeriod,
                     swellHeight,
                     oceanCurrent,
-                    tempShock
+                    tempShock,
+                    chlorophyll
                 };
 
                 for (const [key, fish] of Object.entries(SPECIES_DB)) {
@@ -2876,6 +3095,12 @@ app.get('/api/forecast', async (req, res) => {
                 wavePeriod: parseFloat(wavePeriod.toFixed(1)),
                 swellHeight: parseFloat(swellHeight.toFixed(2)),
                 tempShock: tempShock.shock ? tempShock : null,
+                chlorophyll: chlorophyllData ? {
+                    value: chlorophyllData.chlorophyll,
+                    date: chlorophyllData.date,
+                    daysAgo: chlorophyllData.daysAgo,
+                    stale: chlorophyllData.stale || false
+                } : null,
                 score: parseFloat(topScore.toFixed(1)),
                 confidence: 92 - (i * 6), tacticKey, tacticData, weatherSummary,
                 fishList: fishList.slice(0, 10), moonPhase: moon.phase,
@@ -2937,7 +3162,8 @@ app.get('/api/forecast', async (req, res) => {
                 wavePeriod: i_wavePeriod,
                 swellHeight: i_swellHeight,
                 oceanCurrent: i_oceanCurrent,
-                tempShock: i_tempShock
+                tempShock: i_tempShock,
+                chlorophyll
             };
 
             let instantFishList = [];
@@ -3178,7 +3404,8 @@ app.get('/api/fish-search', async (req, res) => {
             wavePeriod,
             swellHeight,
             oceanCurrent,
-            tempShock
+            tempShock,
+            chlorophyll: null  // fish-search: /api/plankton ile ayrı çekilir
         };
 
         const result = calculateFishScore(fish, fishKey, baseParams);
@@ -3788,6 +4015,60 @@ app.get('/api/scan', async (req, res) => {
 });
 
 // Kalan tarama hakkını sorgula
+// ═══════════════════════════════════════════════════════════════════════════
+// KLOROFİL-A ENDPOİNTİ — Firestore cache (6 saat) + NOAA fallback
+// ═══════════════════════════════════════════════════════════════════════════
+app.get('/api/plankton', async (req, res) => {
+    const lat = parseFloat(req.query.lat);
+    const lon = parseFloat(req.query.lon);
+    if (isNaN(lat) || isNaN(lon)) return res.status(400).json({ error: 'lat/lon gerekli' });
+
+    const cacheKey = `plankton_${lat.toFixed(2)}_${lon.toFixed(2)}`;
+
+    try {
+        // 1. Firestore cache kontrolü (6 saat)
+        if (db) {
+            const cacheRef = db.collection('planktonCache').doc(cacheKey);
+            const cached = await cacheRef.get();
+            if (cached.exists) {
+                const d = cached.data();
+                const ageMs = Date.now() - d.savedAt;
+                if (ageMs < 6 * 60 * 60 * 1000) {
+                    return res.json({ ...d.result, fromCache: true });
+                }
+            }
+        }
+
+        // 2. NOAA'dan çek
+        const result = await fetchChlorophyll(lat, lon);
+
+        if (result) {
+            // Başarılı — Firestore'a kaydet
+            if (db) {
+                const cacheRef = db.collection('planktonCache').doc(cacheKey);
+                await cacheRef.set({ result, savedAt: Date.now() }).catch(() => {});
+            }
+            return res.json(result);
+        }
+
+        // 3. NOAA başarısız — Firestore'dan en son kaydı dön (eski de olsa)
+        if (db) {
+            const cacheRef = db.collection('planktonCache').doc(cacheKey);
+            const stale = await cacheRef.get();
+            if (stale.exists) {
+                return res.json({ ...stale.data().result, fromCache: true, stale: true });
+            }
+        }
+
+        // 4. Hiç veri yok
+        return res.json({ chlorophyll: null, date: null, noData: true });
+
+    } catch (e) {
+        console.error('[PLANKTON]', e.message);
+        return res.json({ chlorophyll: null, date: null, noData: true });
+    }
+});
+
 app.get('/api/scan-usage', async (req, res) => {
     if (!req.user) return res.json({ remainingScans: 0 });
     
