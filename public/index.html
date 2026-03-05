@@ -6124,35 +6124,41 @@ function handleBackButton() {
 })();
 
 // ═══════════════════════════════════════════════════════════════════
-// HUD SWIPE-TO-DISMISS — sadece drag handle üzerinden
+// HUD SWIPE-TO-DISMISS — tüm HUD'dan, hızlı aşağı swipe ile
+// Scroll ile çakışmaz: sadece velocity > 0.5 px/ms olan hızlı
+// aşağı hareketi yakalar, yavaş scroll'u geçirir
 // ═══════════════════════════════════════════════════════════════════
 (function() {
-    let startY = 0, startTime = 0, dragging = false, dy = 0;
+    let startY = 0, startTime = 0, startScrollTop = 0;
+
     document.addEventListener('DOMContentLoaded', function() {
-        const handle = document.getElementById('hud-drag-handle');
         const hud = document.getElementById('hud');
-        if (!handle || !hud) return;
-        handle.addEventListener('touchstart', function(e) {
-            startY = e.touches[0].clientY; startTime = Date.now();
-            dragging = true; dy = 0; hud.style.transition = 'none';
+        if (!hud) return;
+
+        hud.addEventListener('touchstart', function(e) {
+            startY = e.touches[0].clientY;
+            startTime = Date.now();
+            const content = hud.querySelector('.hud-content');
+            startScrollTop = content ? content.scrollTop : 0;
         }, { passive: true });
-        handle.addEventListener('touchmove', function(e) {
-            if (!dragging) return;
-            dy = e.touches[0].clientY - startY;
-            if (dy < 0) { dy = 0; return; }
-            hud.style.transform = 'translateY(' + dy + 'px)';
-            hud.style.opacity = String(Math.max(0.3, 1 - dy / 300));
-        }, { passive: true });
-        handle.addEventListener('touchend', function() {
-            if (!dragging) return;
-            dragging = false;
-            const velocity = dy / (Date.now() - startTime);
-            hud.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-            if (dy > 100 || velocity > 0.4) {
+
+        hud.addEventListener('touchend', function(e) {
+            const endY = e.changedTouches[0].clientY;
+            const dy = endY - startY;
+            const dt = Date.now() - startTime;
+            const velocity = dy / dt; // px/ms
+
+            // Koşullar: aşağı yön + hızlı (fırlatma hareketi) + scroll en üstteydi
+            if (dy > 60 && velocity > 0.5 && startScrollTop === 0) {
+                hud.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
                 hud.style.transform = 'translateY(100%)';
                 hud.style.opacity = '0';
-                setTimeout(function() { closeHud(); hud.style.transform = ''; hud.style.opacity = ''; }, 280);
-            } else { hud.style.transform = ''; hud.style.opacity = ''; }
+                setTimeout(function() {
+                    closeHud();
+                    hud.style.transform = '';
+                    hud.style.opacity = '';
+                }, 240);
+            }
         }, { passive: true });
     });
 })();
