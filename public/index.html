@@ -6020,6 +6020,63 @@ if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').catch(() => {});
     });
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// ANDROID GERİ TUŞU YÖNETİMİ — PWA siyah ekran sorunu
+// ═══════════════════════════════════════════════════════════════════
+history.pushState({ page: 'app' }, '', window.location.href);
+
+window.addEventListener('popstate', function(e) {
+    // 1. Paywall
+    const paywall = document.getElementById('paywall-modal');
+    if (paywall && paywall.style.display !== 'none') {
+        closePaywall();
+        history.pushState({ page: 'app' }, '', window.location.href);
+        return;
+    }
+    // 2. Metric modal
+    const metricModal = document.getElementById('metric-modal');
+    if (metricModal && metricModal.style.display !== 'none') {
+        metricModal.style.display = 'none';
+        history.pushState({ page: 'app' }, '', window.location.href);
+        return;
+    }
+    // 3. Fish photo modal
+    const photoModal = document.getElementById('fish-photo-modal');
+    if (photoModal && photoModal.style.display !== 'none') {
+        photoModal.style.display = 'none';
+        history.pushState({ page: 'app' }, '', window.location.href);
+        return;
+    }
+    // 4. Scan modal
+    const scanProgress = document.getElementById('scan-progress');
+    if (scanProgress && scanProgress.style.display !== 'none') {
+        if (typeof closeScanModal === 'function') closeScanModal();
+        history.pushState({ page: 'app' }, '', window.location.href);
+        return;
+    }
+    // 5. HUD
+    const hud = document.getElementById('hud');
+    if (hud && hud.style.display !== 'none') {
+        closeHud();
+        history.pushState({ page: 'app' }, '', window.location.href);
+        return;
+    }
+    // 6. Search box
+    const searchBox = document.getElementById('fish-search-box');
+    if (searchBox && searchBox.style.display !== 'none') {
+        searchBox.style.display = 'none';
+        history.pushState({ page: 'app' }, '', window.location.href);
+        return;
+    }
+    // Hiçbir şey açık değil — uygulamadan çık
+    if (navigator.app && navigator.app.exitApp) {
+        navigator.app.exitApp();
+    } else {
+        history.back();
+    }
+});
+
 </script>
 </body>
 </html>
