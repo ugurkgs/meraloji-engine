@@ -4165,6 +4165,8 @@
                 setMode('daily');
                 const hud = document.getElementById('hud');
                 hud.style.display = 'flex';
+            history.pushState({ page: 'hud' }, '', window.location.href);
+            history.pushState({ page: 'hud' }, '', window.location.href);
                 // Scroll to top when HUD opens
                 const hudContent = hud.querySelector('.hud-content');
                 if (hudContent) hudContent.scrollTop = 0;
@@ -5941,10 +5943,12 @@ function showUserMenu() {
 
 function showPaywall(reason) {
     loadProSlotsCount(); // Paywall açılırken sayacı tazele
+    history.pushState({ page: 'paywall' }, '', window.location.href);
     const modal = document.getElementById('paywall-modal');
     const title = document.getElementById('paywall-title');
     const subtitle = document.getElementById('paywall-subtitle');
     loadProSlotsCount(); // Paywall açılırken sayacı tazele
+    history.pushState({ page: 'paywall' }, '', window.location.href);
     
     if (reason === 'click') {
         title.textContent = 'Günlük 5 Tahmin Hakkınız Doldu';
@@ -6022,59 +6026,48 @@ if ('serviceWorker' in navigator) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// ANDROID GERİ TUŞU YÖNETİMİ — PWA siyah ekran sorunu
+// ANDROID GERİ TUŞU YÖNETİMİ — TWA/PWA
+// TWA'da geri tuşu Chrome history'yi kullanır.
+// Çözüm: her panel açılışında history'ye kayıt ekle,
+// kapanışta popstate otomatik tetiklenir.
 // ═══════════════════════════════════════════════════════════════════
-history.pushState({ page: 'app' }, '', window.location.href);
 
-window.addEventListener('popstate', function(e) {
-    // 1. Paywall
+function handleBackButton() {
+    // Öncelik sırasıyla açık olanı kapat
     const paywall = document.getElementById('paywall-modal');
-    if (paywall && paywall.style.display !== 'none') {
-        closePaywall();
-        history.pushState({ page: 'app' }, '', window.location.href);
-        return;
-    }
-    // 2. Metric modal
+    if (paywall && paywall.style.display !== 'none') { closePaywall(); return true; }
+
     const metricModal = document.getElementById('metric-modal');
-    if (metricModal && metricModal.style.display !== 'none') {
-        metricModal.style.display = 'none';
-        history.pushState({ page: 'app' }, '', window.location.href);
-        return;
-    }
-    // 3. Fish photo modal
+    if (metricModal && metricModal.style.display !== 'none') { metricModal.style.display = 'none'; return true; }
+
     const photoModal = document.getElementById('fish-photo-modal');
-    if (photoModal && photoModal.style.display !== 'none') {
-        photoModal.style.display = 'none';
-        history.pushState({ page: 'app' }, '', window.location.href);
-        return;
-    }
-    // 4. Scan modal
+    if (photoModal && photoModal.style.display !== 'none') { photoModal.style.display = 'none'; return true; }
+
     const scanProgress = document.getElementById('scan-progress');
-    if (scanProgress && scanProgress.style.display !== 'none') {
-        if (typeof closeScanModal === 'function') closeScanModal();
-        history.pushState({ page: 'app' }, '', window.location.href);
-        return;
-    }
-    // 5. HUD
+    if (scanProgress && scanProgress.style.display !== 'none') { if (typeof closeScanModal === 'function') closeScanModal(); return true; }
+
     const hud = document.getElementById('hud');
-    if (hud && hud.style.display !== 'none') {
-        closeHud();
-        history.pushState({ page: 'app' }, '', window.location.href);
-        return;
-    }
-    // 6. Search box
+    if (hud && hud.style.display !== 'none') { closeHud(); return true; }
+
     const searchBox = document.getElementById('fish-search-box');
-    if (searchBox && searchBox.style.display !== 'none') {
-        searchBox.style.display = 'none';
+    if (searchBox && searchBox.style.display !== 'none') { searchBox.style.display = 'none'; return true; }
+
+    return false; // Hiçbir şey kapatılmadı
+}
+
+// Yöntem 1: popstate (PWA standalone modda çalışır)
+window.addEventListener('popstate', function(e) {
+    const handled = handleBackButton();
+    if (handled) {
+        // Bir şey kapattık, stack'e yeni kayıt ekle ki bir sonraki geri tuşu da çalışsın
         history.pushState({ page: 'app' }, '', window.location.href);
-        return;
     }
-    // Hiçbir şey açık değil — uygulamadan çık
-    if (navigator.app && navigator.app.exitApp) {
-        navigator.app.exitApp();
-    } else {
-        history.back();
-    }
+    // handled=false ise browser kendi davranışını yapar (çıkış)
+});
+
+// Başlangıçta stack'e kayıt ekle
+window.addEventListener('load', function() {
+    history.pushState({ page: 'app' }, '', window.location.href);
 });
 
 </script>
