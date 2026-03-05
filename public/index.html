@@ -2257,6 +2257,10 @@
          HUD PANEL
          ═══════════════════════════════════════════════════════════════════ -->
     <div id="hud">
+        <!-- Swipe-to-close drag handle -->
+        <div id="hud-drag-handle" style="width:100%;padding:10px 0 4px;display:flex;justify-content:center;align-items:center;cursor:grab;touch-action:none;flex-shrink:0;">
+            <div style="width:40px;height:4px;background:rgba(255,255,255,0.25);border-radius:2px;"></div>
+        </div>
         <div class="hud-header">
             <div class="hud-title-area">
                 <span class="hud-title" id="region-title">--</span>
@@ -6057,64 +6061,54 @@ function handleBackButton() {
 
     const scanProgress = document.getElementById('scan-progress');
 // ═══════════════════════════════════════════════════════════════════
-// HUD SWIPE-TO-DISMISS
+// HUD SWIPE-TO-DISMISS — sadece drag handle üzerinden
+// touch-action:none olan handle, Chrome scroll intercept etmez
 // ═══════════════════════════════════════════════════════════════════
 (function() {
-    let touchStartY = 0;
-    let touchStartTime = 0;
-    let isDragging = false;
-    let currentTranslate = 0;
+    let startY = 0;
+    let startTime = 0;
+    let dragging = false;
+    let dy = 0;
 
-    function initSwipeToClose() {
+    document.addEventListener('DOMContentLoaded', function() {
+        const handle = document.getElementById('hud-drag-handle');
         const hud = document.getElementById('hud');
-        if (!hud || hud._swipeInit) return;
-        hud._swipeInit = true;
+        if (!handle || !hud) return;
 
-        hud.addEventListener('touchstart', function(e) {
-            const header = hud.querySelector('.hud-header');
-            const content = hud.querySelector('.hud-content');
-            const isAtTop = !content || content.scrollTop === 0;
-            const isHeader = header && header.contains(e.target);
-            if (!isHeader && !isAtTop) return;
-            touchStartY = e.touches[0].clientY;
-            touchStartTime = Date.now();
-            isDragging = true;
-            currentTranslate = 0;
+        handle.addEventListener('touchstart', function(e) {
+            startY = e.touches[0].clientY;
+            startTime = Date.now();
+            dragging = true;
+            dy = 0;
             hud.style.transition = 'none';
         }, { passive: true });
 
-        hud.addEventListener('touchmove', function(e) {
-            if (!isDragging) return;
-            const deltaY = e.touches[0].clientY - touchStartY;
-            if (deltaY < 0) { isDragging = false; hud.style.transform = ''; return; }
-            currentTranslate = deltaY;
-            hud.style.transform = 'translateY(' + deltaY + 'px)';
-            hud.style.opacity = Math.max(0.3, 1 - deltaY / 300);
+        handle.addEventListener('touchmove', function(e) {
+            if (!dragging) return;
+            dy = e.touches[0].clientY - startY;
+            if (dy < 0) { dy = 0; return; }
+            hud.style.transform = 'translateY(' + dy + 'px)';
+            hud.style.opacity = String(Math.max(0.3, 1 - dy / 300));
         }, { passive: true });
 
-        hud.addEventListener('touchend', function() {
-            if (!isDragging) return;
-            isDragging = false;
-            const velocity = currentTranslate / (Date.now() - touchStartTime);
+        handle.addEventListener('touchend', function() {
+            if (!dragging) return;
+            dragging = false;
+            const velocity = dy / (Date.now() - startTime);
             hud.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-            if (currentTranslate > 120 || velocity > 0.5) {
+            if (dy > 100 || velocity > 0.4) {
                 hud.style.transform = 'translateY(100%)';
                 hud.style.opacity = '0';
-                setTimeout(() => { closeHud(); hud.style.transform = ''; hud.style.opacity = ''; }, 280);
+                setTimeout(function() {
+                    closeHud();
+                    hud.style.transform = '';
+                    hud.style.opacity = '';
+                }, 280);
             } else {
                 hud.style.transform = '';
                 hud.style.opacity = '';
             }
         }, { passive: true });
-    }
-
-    // HUD her açıldığında init et
-    document.addEventListener('DOMContentLoaded', function() {
-        const hud = document.getElementById('hud');
-        if (!hud) return;
-        new MutationObserver(function() {
-            if (hud.style.display === 'flex') initSwipeToClose();
-        }).observe(hud, { attributes: true, attributeFilter: ['style'] });
     });
 })();
 
