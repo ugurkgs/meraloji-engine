@@ -2256,6 +2256,8 @@
     <!-- ═══════════════════════════════════════════════════════════════════
          HUD PANEL
          ═══════════════════════════════════════════════════════════════════ -->
+    <!-- HUD backdrop — geri tuşu için tam ekran overlay -->
+    <div id="hud-backdrop" onclick="closeHud()" style="display:none; position:fixed; inset:0; z-index:1499; background:rgba(0,0,0,0.01);"></div>
     <div id="hud">
         <!-- Swipe-to-close drag handle -->
         <div id="hud-drag-handle" style="width:100%;padding:10px 0 4px;display:flex;justify-content:center;align-items:center;cursor:grab;touch-action:none;flex-shrink:0;">
@@ -4181,6 +4183,7 @@
                 setMode('daily');
                 const hud = document.getElementById('hud');
                 hud.style.display = 'flex';
+            document.getElementById('hud-backdrop').style.display = 'block';
             history.pushState({ page: 'hud' }, '', window.location.href);
                 // Scroll to top when HUD opens
                 const hudContent = hud.querySelector('.hud-content');
@@ -5196,6 +5199,8 @@
 
         function closeHud() {
             document.getElementById('hud').style.display = 'none';
+            const backdrop = document.getElementById('hud-backdrop');
+            if (backdrop) backdrop.style.display = 'none';
         }
 
         function toggleMenu() {
