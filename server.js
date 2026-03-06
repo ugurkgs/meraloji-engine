@@ -3797,24 +3797,12 @@ app.get('/api/fish-search', async (req, res) => {
 // Pro slot sayacı — public endpoint, auth gerektirmez
 app.get('/api/pro-slots', async (req, res) => {
     try {
-        if (!db) return res.json({ count: 0, remaining: 1000 });
+        if (!db) return res.json({ count: 0, remaining: 500 });
         const snap = await db.collection('stats').doc('pro_count').get();
         const count = snap.exists ? (snap.data().count || 0) : 0;
-        res.json({ count, remaining: Math.max(0, 1000 - count) });
+        res.json({ count, remaining: Math.max(0, 500 - count) });
     } catch(e) {
-        res.json({ count: 0, remaining: 1000 });
-    }
-});
-
-// Pro slot sayacı — public endpoint, auth gerektirmez
-app.get('/api/pro-slots', async (req, res) => {
-    try {
-        if (!db) return res.json({ count: 0, remaining: 1000 });
-        const snap = await db.collection('stats').doc('pro_count').get();
-        const count = snap.exists ? (snap.data().count || 0) : 0;
-        res.json({ count, remaining: Math.max(0, 1000 - count) });
-    } catch(e) {
-        res.json({ count: 0, remaining: 1000 });
+        res.json({ count: 0, remaining: 500 });
     }
 });
 
