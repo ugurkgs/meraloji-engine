@@ -143,13 +143,19 @@ async function fetchChlorophyll(lat, lon) {
 // Auth middleware & Freemium Limitleri
 const FREE_DAILY_CLICKS = 5;    // Ücretsiz kullanıcı günde 5 tıklama
 const FREE_DAILY_SCANS = 1;     // Ücretsiz kullanıcı günde 1 tarama
+const GRACE_PERIOD_DAYS = 14;   // Yeni kullanıcıya 14 gün tam erişim
 const VALID_SUBSCRIPTIONS = ['meraloji_pro_monthly', 'meraloji_pro_yearly'];
+
+// Firebase Auth createdAt cache — her kullanıcı için 24 saat cache'le
+const userCreationCache = new NodeCache({ stdTTL: 86400 });
 
 async function verifyAuth(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ') || !admin) {
         req.user = null;
         req.isPremium = false;
+        req.isGracePeriod = false;
+        req.graceDaysLeft = 0;
         return next();
     }
     try {
@@ -157,6 +163,8 @@ async function verifyAuth(req, res, next) {
         const decoded = await admin.auth().verifyIdToken(token);
         req.user = decoded;
         req.isPremium = false;
+        req.isGracePeriod = false;
+        req.graceDaysLeft = 0;
 
         if (db) {
             // Abonelik kontrol
@@ -168,10 +176,32 @@ async function verifyAuth(req, res, next) {
                 }
             }
         }
+
+        // Grace period: PRO değilse, Firebase Auth hesap oluşturma tarihine bak
+        if (!req.isPremium && admin) {
+            try {
+                let createdAt = userCreationCache.get(decoded.uid);
+                if (createdAt === undefined) {
+                    const userRecord = await admin.auth().getUser(decoded.uid);
+                    createdAt = new Date(userRecord.metadata.creationTime).getTime();
+                    userCreationCache.set(decoded.uid, createdAt);
+                }
+                const gracePeriodMs = GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000;
+                const elapsed = Date.now() - createdAt;
+                if (elapsed < gracePeriodMs) {
+                    req.isGracePeriod = true;
+                    req.graceDaysLeft = Math.max(0, Math.ceil((gracePeriodMs - elapsed) / 86400000));
+                }
+            } catch (e) {
+                console.log('[AUTH-MW] Grace period check failed:', e.message);
+            }
+        }
     } catch (e) {
         console.log('[AUTH-MW] Token verify failed:', e.message);
         req.user = null;
         req.isPremium = false;
+        req.isGracePeriod = false;
+        req.graceDaysLeft = 0;
     }
     next();
 }
@@ -3810,16 +3840,18 @@ app.get('/api/subscription-status', async (req, res) => {
     res.json({
         isLoggedIn: true,
         isPremium: req.isPremium,
+        isGracePeriod: req.isGracePeriod,
+        graceDaysLeft: req.graceDaysLeft,
         uid: req.user.uid,
         email: req.user.email,
         name: req.user.name || req.user.email,
         usage: {
             clicksUsed,
             scansUsed,
-            clickLimit: req.isPremium ? -1 : FREE_DAILY_CLICKS,   // -1 = sınırsız
-            scanLimit: req.isPremium ? -1 : FREE_DAILY_SCANS,
-            clicksRemaining: req.isPremium ? -1 : Math.max(0, FREE_DAILY_CLICKS - clicksUsed),
-            scansRemaining: req.isPremium ? -1 : Math.max(0, FREE_DAILY_SCANS - scansUsed)
+            clickLimit: (req.isPremium || req.isGracePeriod) ? -1 : FREE_DAILY_CLICKS,
+            scanLimit: (req.isPremium || req.isGracePeriod) ? -1 : FREE_DAILY_SCANS,
+            clicksRemaining: (req.isPremium || req.isGracePeriod) ? -1 : Math.max(0, FREE_DAILY_CLICKS - clicksUsed),
+            scansRemaining: (req.isPremium || req.isGracePeriod) ? -1 : Math.max(0, FREE_DAILY_SCANS - scansUsed)
         }
     });
 });
@@ -3830,9 +3862,9 @@ app.get('/api/subscription-status', async (req, res) => {
 app.post('/api/use-click', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
     
-    // PRO kullanıcı = sınırsız
-    if (req.isPremium) {
-        return res.json({ allowed: true, remaining: -1 });
+    // PRO veya grace period = sınırsız
+    if (req.isPremium || req.isGracePeriod) {
+        return res.json({ allowed: true, remaining: -1, isGracePeriod: req.isGracePeriod });
     }
     
     const uid = req.user.uid;
@@ -4074,12 +4106,12 @@ app.get('/api/scan', async (req, res) => {
     const radiusKm = Math.min(20, Math.max(3, parseFloat(radius) || 5));
     const uid = req.user.uid;
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    const dailyLimit = req.isPremium ? 999 : FREE_DAILY_SCANS;
+    const dailyLimit = (req.isPremium || req.isGracePeriod) ? 999 : FREE_DAILY_SCANS;
 
     try {
-        // ── Günlük limit kontrolü (PRO = sınırsız) ──
+        // ── Günlük limit kontrolü (PRO ve grace period = sınırsız) ──
         const usageRef = db ? db.collection('scanUsage').doc(`${uid}_${today}`) : null;
-        if (!req.isPremium && usageRef) {
+        if (!req.isPremium && !req.isGracePeriod && usageRef) {
             const usageDoc = await usageRef.get();
             const usageCount = usageDoc.exists ? (usageDoc.data().count || 0) : 0;
             if (usageCount >= FREE_DAILY_SCANS) {
@@ -4102,20 +4134,20 @@ app.get('/api/scan', async (req, res) => {
                 const d = cached.data();
                 const ageMs = Date.now() - d.createdAt;
                 if (ageMs < 3 * 60 * 60 * 1000) { // 3 saat
-                    // Cache hit → sadece free kullanıcı için sayacı artır
+                    // Cache hit → sadece free (grace period dışı) kullanıcı için sayacı artır
                     let newCount = 0;
-                    if (!req.isPremium && usageRef) {
+                    if (!req.isPremium && !req.isGracePeriod && usageRef) {
                         const curDoc = await usageRef.get();
                         newCount = curDoc.exists ? (curDoc.data().count || 0) + 1 : 1;
                         await usageRef.set({ count: newCount, uid, date: today }, { merge: true });
                     }
-                    return res.json({ ...d.result, fromCache: true, cacheAge: Math.round(ageMs / 60000), remainingScans: req.isPremium ? 999 : Math.max(0, FREE_DAILY_SCANS - newCount) });
+                    return res.json({ ...d.result, fromCache: true, cacheAge: Math.round(ageMs / 60000), remainingScans: (req.isPremium || req.isGracePeriod) ? 999 : Math.max(0, FREE_DAILY_SCANS - newCount) });
                 }
             }
         }
 
-        // ── Kullanım sayacını artır (sadece free kullanıcı) ──
-        if (!req.isPremium && usageRef) {
+        // ── Kullanım sayacını artır (sadece free — PRO ve grace period hariç) ──
+        if (!req.isPremium && !req.isGracePeriod && usageRef) {
             const currentDoc = await usageRef.get();
             const currentCount = currentDoc.exists ? (currentDoc.data().count || 0) : 0;
             await usageRef.set({ count: currentCount + 1, uid, date: today }, { merge: true });
@@ -4281,9 +4313,9 @@ app.get('/api/plankton', async (req, res) => {
 app.get('/api/scan-usage', async (req, res) => {
     if (!req.user) return res.json({ remainingScans: 0 });
     
-    // PRO = sınırsız
-    if (req.isPremium) {
-        return res.json({ remainingScans: 999, usedToday: 0, isPremium: true });
+    // PRO veya grace period = sınırsız
+    if (req.isPremium || req.isGracePeriod) {
+        return res.json({ remainingScans: 999, usedToday: 0, isPremium: req.isPremium, isGracePeriod: req.isGracePeriod });
     }
     
     const uid = req.user.uid;
