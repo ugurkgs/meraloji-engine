@@ -735,7 +735,21 @@
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 8px;
+        }
+
+        #metrics-grid-top {
+            margin-bottom: 0;
+        }
+
+        #metrics-grid-bottom {
+            margin-top: 8px;
             margin-bottom: 24px;
+        }
+
+        #metrics-toggle {
+            padding: 8px 0 4px;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 0;
         }
 
         @media (max-width: 480px) {
@@ -2318,7 +2332,13 @@
 
             <div class="tactic-box" id="tactic-display">Analiz bekleniyor...</div>
 
-            <div class="metrics-grid" id="metrics-grid"></div>
+            <div id="metrics-section">
+                <div class="metrics-grid" id="metrics-grid-top"></div>
+                <div id="metrics-toggle" onclick="toggleMetrics()" style="text-align:center;padding:6px 0;cursor:pointer;font-size:0.72rem;color:var(--cyan);user-select:none;display:none;">
+                    <span id="metrics-toggle-text">Teknik Veriler ▼</span>
+                </div>
+                <div class="metrics-grid" id="metrics-grid-bottom" style="display:none;"></div>
+            </div>
 
             <div class="section-title" id="species-title">Türler (Detay için tıklayın)</div>
             
@@ -4294,7 +4314,9 @@
                     ? t('landMessage')
                     : 'Batimetri verisi çok düşük. Bu nokta kara sınırında veya çok sığ olabilir.';
                 document.getElementById('tactic-display').innerText = landMsg;
-                document.getElementById('metrics-grid').innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--text-muted);">${t('noSeaData')}</div>`;
+                document.getElementById('metrics-grid-top').innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--text-muted);">${t('noSeaData')}</div>`;
+                document.getElementById('metrics-grid-bottom').innerHTML = '';
+                document.getElementById('metrics-toggle').style.display = 'none';
                 document.getElementById('fish-list').innerHTML = `<div style="text-align: center; padding: 30px; color: var(--text-muted);">${t('selectSea')}</div>`;
                 document.getElementById('confidence-display').innerText = '';
                 document.getElementById('activity-windows').style.display = 'none';
@@ -4424,7 +4446,7 @@
 
         function renderMetrics(global, data) {
             const daily = global.forecast[0];
-            const grid = document.getElementById('metrics-grid');
+            const grid = document.getElementById('metrics-grid-top');
             
             // Rüzgar yönü hesapla
             const windDirDeg = data.windDirection || daily.windDirection || 0;
@@ -4454,7 +4476,11 @@
                 { key: 'thermocline', val: daily.thermoclineDepth ? daily.thermoclineDepth : '—', unit: daily.thermoclineDepth ? 'm' : '', extra: daily.thermoclineDepth ? `<span style="font-size:0.5rem;color:var(--cyan);">termoklin</span>` : `<span style="font-size:0.5rem;color:var(--text-muted);">kış/yok</span>` }
             ];
 
-            grid.innerHTML = metrics.map(m => {
+            const topGrid = document.getElementById('metrics-grid-top');
+            const bottomGrid = document.getElementById('metrics-grid-bottom');
+            const toggleBtn = document.getElementById('metrics-toggle');
+
+            const renderCard = (m) => {
                 const metricInfo = METRIC_DATA[m.key];
                 const icon = metricInfo?.icon || '📊';
                 let val = typeof m.val === 'number'
@@ -4480,7 +4506,26 @@
                         <div class="metric-label">${title.split(' ')[0]}</div>
                     </div>
                 `;
-            }).join('');
+            };
+
+            // İlk 3 kart her zaman görünür, geri kalanı açılır-kapanır
+            topGrid.innerHTML = metrics.slice(0, 3).map(renderCard).join('');
+            bottomGrid.innerHTML = metrics.slice(3).map(renderCard).join('');
+            toggleBtn.style.display = metrics.length > 3 ? 'block' : 'none';
+        }
+
+        let metricsExpanded = false;
+        function toggleMetrics() {
+            metricsExpanded = !metricsExpanded;
+            const bottom = document.getElementById('metrics-grid-bottom');
+            const text = document.getElementById('metrics-toggle-text');
+            if (metricsExpanded) {
+                bottom.style.display = 'grid';
+                text.textContent = 'Teknik Veriler ▲';
+            } else {
+                bottom.style.display = 'none';
+                text.textContent = 'Teknik Veriler ▼';
+            }
         }
 
         function getMoonPhaseShort(phase) {
@@ -5989,7 +6034,7 @@ function updateUserUI() {
             proTag.style.display = 'inline';
             proTag.style.background = 'linear-gradient(90deg, #00c8c8, #00ffcc)';
         } else if (isGracePeriod) {
-            proTag.textContent = ` ${graceDaysLeft}g🎁`;
+            proTag.textContent = `🎁 ${graceDaysLeft}g`;
             proTag.style.display = 'inline';
             proTag.style.background = 'linear-gradient(90deg, #f7b731, #f5a623)';
         } else {
