@@ -3926,17 +3926,20 @@ try {
     console.log('[VERIFY-SUB] Kullanıcı bilgisi alınamadı:', e.message);
 }
 
-await userSubRef.set({
-    status: 'active',
-    subscriptionId: subId,
-    purchaseToken: purchaseToken,
-    isYearly,
-    startedAt: Date.now(),
-    expiresAt: Date.now() + durationMs,
-    updatedAt: Date.now(),
-    email: userEmail,
-    displayName: userDisplayName
-}, { merge: true });
+const userEmail = req.user.email || null;
+            const userDisplayName = req.user.name || null;
+
+            await userSubRef.set({
+                status: 'active',
+                subscriptionId: subId,
+                purchaseToken: purchaseToken,
+                isYearly,
+                startedAt: Date.now(),
+                expiresAt: Date.now() + durationMs,
+                updatedAt: Date.now(),
+                email: userEmail,
+                displayName: userDisplayName
+            }, { merge: true });
 
             // Yeni pro kullanıcıysa stats/pro_count sayacını artır
             if (isNewPro) {
