@@ -3915,15 +3915,28 @@ app.post('/api/verify-subscription', async (req, res) => {
             const existing = await userSubRef.get();
             const isNewPro = !existing.exists || existing.data().status !== 'active';
 
-            await userSubRef.set({
-                status: 'active',
-                subscriptionId: subId,
-                purchaseToken,
-                isYearly,
-                startedAt: Date.now(),
-                expiresAt: Date.now() + durationMs,
-                updatedAt: Date.now()
-            }, { merge: true });
+            // Kullanıcı bilgisini Firebase Auth'dan çek
+let userEmail = null;
+let userDisplayName = null;
+try {
+    const userRecord = await admin.auth().getUser(uid);
+    userEmail = userRecord.email || null;
+    userDisplayName = userRecord.displayName || null;
+} catch (e) {
+    console.log('[VERIFY-SUB] Kullanıcı bilgisi alınamadı:', e.message);
+}
+
+await userSubRef.set({
+    status: 'active',
+    subscriptionId: subId,
+    purchaseToken: purchaseToken,
+    isYearly,
+    startedAt: Date.now(),
+    expiresAt: Date.now() + durationMs,
+    updatedAt: Date.now(),
+    email: userEmail,
+    displayName: userDisplayName
+}, { merge: true });
 
             // Yeni pro kullanıcıysa stats/pro_count sayacını artır
             if (isNewPro) {
