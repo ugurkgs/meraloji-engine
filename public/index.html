@@ -40,7 +40,7 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">"
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
     
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
@@ -2095,7 +2095,7 @@
                     <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:linear-gradient(90deg,#00c8c8,#00ffcc); color:#000; font-size:9px; font-weight:700; padding:2px 10px; border-radius:10px;">EN AVANTAJLI</div>
                     <div style="font-size:11px; color:#8892a3; margin-bottom:4px;">YILLIK</div>
                     <div style="font-size:22px; font-weight:700; color:#00ffcc;">₺59,99</div>
-                    <div style="font-size:10px; color:#8892a3;">+ KDV &nbsp;·&nbsp; Aylık ₺5 — %83 tasarruf</div>
+                    <div style="font-size:10px; color:#8892a3;">+ KDV &nbsp;·&nbsp; Aylık ₺5 — %50 tasarruf</div>
                     <div style="font-size:10px; color:#ff851b;">🎯 İlk 500 kişiye özel</div>
                     <div style="font-size:10px; color:#8892a3; text-decoration:line-through;">Sonra ₺199,99/yıl</div>
                 </div>
@@ -4835,7 +4835,7 @@
                         <h3>🔒 +${list.length - 5} balık daha var!</h3>
                         <p>İlk 3 sonucun skorunu, yem/olta detaylarını ve tüm ${list.length} türü gör</p>
                         <div style="background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.3);border-radius:8px;padding:8px 12px;margin-bottom:10px;">
-                            <div style="font-size:0.7rem;color:#ff851b;margin-bottom:2px;">🎯 İLK 1000'E ÖZEL FİYAT</div>
+                            <div style="font-size:0.7rem;color:#ff851b;margin-bottom:2px;">🎯 İLK 500'E ÖZEL FİYAT</div>
                             <div style="font-size:1.1rem;font-weight:700;color:#00ffcc;">₺9,99/ay + KDV</div>
                             <div style="font-size:0.68rem;color:var(--text-muted);">Yıllık: ₺59,99 + KDV (₺5/ay)</div>
                             <div style="margin-top:6px;font-size:0.72rem;">
@@ -5993,7 +5993,7 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-// Firestore'dan toplam pro kullanıcı sayısını çek — 1000 kişi kontenjanı
+// Firestore'dan toplam pro kullanıcı sayısını çek — 500 kişi kontenjanı
 // Pro slot sayacı — /api/pro-slots endpoint'inden çeker
 async function loadProSlotsCount() {
     try {
