@@ -6108,7 +6108,8 @@ async function upgradeToPro(plan) {
     if (window.matchMedia('(display-mode: standalone)').matches) {
         const user = firebase.auth().currentUser;
         if (user) {
-            window.location.href = `intent://satin-al?uid=${user.uid}&plan=${subId}#Intent;scheme=meraloji;package=com.meraloji.fish;end`;
+           const idToken = await user.getIdToken(true);
+            window.location.href = `intent://satin-al?uid=${user.uid}&plan=${subId}&token=${idToken}#Intent;scheme=meraloji;package=com.meraloji.fish;end`;
         } else {
             alert("Lütfen önce giriş yapın.");
         }
