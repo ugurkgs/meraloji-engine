@@ -3754,6 +3754,42 @@
                 ref: "0-0.5m: Düşük\n0.5-1.5m: Orta\n1.5m+: Güçlü",
                 algo: "wavePeriod ile birlikte değerlendirilir",
                 source: "Open-Meteo Marine API; ECMWF WAM Model"
+            },
+            chlorophyll: {
+                icon: "🌿",
+                title: "KLOROFİL-A",
+                titleEn: "CHLOROPHYLL-A",
+                desc: "Deniz yüzeyindeki fitoplankton yoğunluğu (mg/m³). Besin zincirinin temelidir.",
+                descEn: "Phytoplankton concentration at sea surface (mg/m³). Foundation of the food chain.",
+                importance: "Yüksek klorofil = zengin plankton = küçük balık = büyük balık. Pelajik türler (Lüfer, Palamut) için kritik gösterge.",
+                importanceEn: "High chlorophyll = rich plankton = small fish = large fish. Critical indicator for pelagic species (Bluefish, Bonito).",
+                ref: "<0.1: Çok düşük (oligotrofik)\n0.1-0.5: Düşük\n0.5-1.5: Aktif plankton\n1.5-5.0: Zengin besin\n>5.0: Bloom",
+                algo: "HIGH tercih: chl≥1.5 → +3 trigger\nMEDIUM: chl 0.5-3.0 → +1.5\nLOW: chl<0.3 → +1.5",
+                source: "NOAA CoastWatch ERDDAP - VIIRS Chlorophyll-a Daily (noaacwNPPVIIRSchlaDaily); 4km çözünürlük"
+            },
+            sstTrend: {
+                icon: "🌡️",
+                title: "SST TRENDİ",
+                titleEn: "SST TREND",
+                desc: "Son 7 günlük deniz yüzey sıcaklığı değişim hızı (°C/gün). Anlık değil, yön bilgisi.",
+                descEn: "Rate of sea surface temperature change over last 7 days (°C/day). Direction, not just value.",
+                importance: "Soğuyan su göçmen türleri (Lüfer, Palamut) getirir. Isınan su yazlık türler için bonus. Stabil su tüm türler için iyidir.",
+                importanceEn: "Cooling water brings migratory species (Bluefish, Bonito). Warming water bonuses summer species. Stable water benefits all.",
+                ref: "≥+0.3°C/gün: Hızlı ısınıyor\n+0.1: Isınıyor\n±0.1: Stabil\n-0.1: Soğuyor\n≤-0.3°C/gün: Hızlı soğuyor",
+                algo: "7 günlük lineer regresyon\ncooling türler: -0.1°C/gün → +1.5\nstable tüm türler: +1.0",
+                source: "Open-Meteo Marine API - Sea Surface Temperature (past_days=7); Lineer regresyon hesabı"
+            },
+            thermocline: {
+                icon: "🔵",
+                title: "TERMOKLİN",
+                titleEn: "THERMOCLINE",
+                desc: "Sıcak yüzey suyu ile soğuk derin su arasındaki geçiş katmanının tahmini derinliği (metre).",
+                descEn: "Estimated depth of the transition layer between warm surface water and cold deep water (meters).",
+                importance: "Besin maddeleri termoklinde yoğunlaşır. Dip balıkları altında, pelajik türler üstünde avlanır. Termoklin sınırı en verimli bölgedir.",
+                importanceEn: "Nutrients concentrate at thermocline. Bottom fish feed below, pelagic species above. Thermocline boundary is the most productive zone.",
+                ref: "Kış: Yok\nİlkbahar: 15-25m\nYaz: 25-45m\nSonbahar: Zayıflar",
+                algo: "±6m bandı → +3 trigger\nDip tür altında → +1.5\nYüzey tür altında → ceza\nKasım-Mart → null",
+                source: "SST + mevsim + bölge tahmin modeli; NOAA Thermocline Depth Guidelines"
             }
         };
 
@@ -4404,13 +4440,26 @@
                 { key: 'moon', val: '', unit: '' },
                 { key: 'tide', val: daily.tide, unit: 'm' },
                 { key: 'current', val: daily.current, unit: '', extra: daily.currentIsReal ? `<span style="color:var(--green);font-size:0.55rem;">● ${t('realCurrent')}</span>` : '' },
-                { key: 'cloud', val: daily.cloud, unit: '' }
+                { key: 'cloud', val: daily.cloud, unit: '' },
+                { key: 'chlorophyll', val: daily.chlorophyll ? daily.chlorophyll.value : '—', unit: daily.chlorophyll ? '' : '', extra: daily.chlorophyll ? `<span style="font-size:0.5rem;color:var(--text-muted);">${daily.chlorophyll.daysAgo ? daily.chlorophyll.daysAgo + 'g önce' : ''}</span>` : '<span style="font-size:0.5rem;color:var(--text-muted);">veri yok</span>' },
+                { key: 'sstTrend', val: (() => {
+                    if (!daily.sstTrend) return '—';
+                    const d = daily.sstTrend.direction;
+                    if (d === 'WARMING_FAST') return '↑↑';
+                    if (d === 'WARMING')      return '↑';
+                    if (d === 'COOLING_FAST') return '↓↓';
+                    if (d === 'COOLING')      return '↓';
+                    return '→';
+                })(), unit: '', extra: daily.sstTrend && daily.sstTrend.trend !== 0 ? `<span style="font-size:0.5rem;color:var(--text-muted);">${daily.sstTrend.trend > 0 ? '+' : ''}${daily.sstTrend.trend}°/g</span>` : '' },
+                { key: 'thermocline', val: daily.thermoclineDepth ? daily.thermoclineDepth : '—', unit: daily.thermoclineDepth ? 'm' : '', extra: daily.thermoclineDepth ? `<span style="font-size:0.5rem;color:var(--cyan);">termoklin</span>` : `<span style="font-size:0.5rem;color:var(--text-muted);">kış/yok</span>` }
             ];
 
             grid.innerHTML = metrics.map(m => {
                 const metricInfo = METRIC_DATA[m.key];
                 const icon = metricInfo?.icon || '📊';
-                let val = typeof m.val === 'number' ? m.val.toFixed(0) : m.val;
+                let val = typeof m.val === 'number'
+                    ? (m.key === 'chlorophyll' ? m.val.toFixed(2) : m.val.toFixed(0))
+                    : m.val; // string değerler (ok işaretleri, '—') olduğu gibi
                 
                 // Ay fazı için özel gösterim
                 if (m.key === 'moon') {
