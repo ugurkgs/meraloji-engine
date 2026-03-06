@@ -4364,12 +4364,13 @@ app.post('/api/verify-purchase', async (req, res) => {
             }, { merge: true });
 
             // Yeni pro kullanıcıysa sayacı artır
-            if (isNewPro) {
+            if (isNewPro && isYearly) {
                 const statsRef = db.collection('stats').doc('pro_count');
                 const statsSnap = await statsRef.get();
                 const currentCount = statsSnap.exists ? (statsSnap.data().count || 0) : 0;
                 await statsRef.set({ count: currentCount + 1 }, { merge: true });
             }
+        }
         }
   res.status(200).send({ success: true });
     } catch (error) {
@@ -4410,7 +4411,7 @@ app.post('/api/verify-subscription', async (req, res) => {
                 updatedAt: Date.now()
             }, { merge: true });
 
-            if (isNewPro) {
+            if (isNewPro && isYearly) {
                 const statsRef = db.collection('stats').doc('pro_count');
                 const statsSnap = await statsRef.get();
                 const currentCount = statsSnap.exists ? (statsSnap.data().count || 0) : 0;
