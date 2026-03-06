@@ -3952,8 +3952,8 @@
                 return;
             }
 
-            // 🔒 Tıklama limiti kontrolü (PRO = sınırsız)
-            if (!isPremium) {
+            // 🔒 Tıklama limiti kontrolü (PRO ve grace period = sınırsız)
+            if (!isPremium && !isGracePeriod) {
                 try {
                     const clickRes = await fetch('/api/use-click', { 
                         method: 'POST', 
@@ -4536,12 +4536,13 @@
                 return;
             }
 
-            // Premium gate: ücretsiz kullanıcıya 5 balık (3 gizli + 2 normal)
-            const displayList = isPremium ? list : list.slice(0, 5);
+            // Premium gate: grace period veya PRO → tam erişim, değilse 5 balık (3 gizli + 2 normal)
+            const hasFullAccess = isPremium || isGracePeriod;
+            const displayList = hasFullAccess ? list : list.slice(0, 5);
 
             container.innerHTML = displayList.map((f, idx) => {
-                // Ücretsiz kullanıcı: ilk 3 balık skor/detay gizli
-                const isLocked = !isPremium && idx < 3;
+                // Grace period veya PRO: kilit yok. Free: ilk 3 balık skor/detay gizli
+                const isLocked = !hasFullAccess && idx < 3;
                 const isProtected = f.legalSize === 'YASAK' || f.category === 'KORUMA';
                 const scoreClass = isProtected ? 'score-low' : (f.score >= 70 ? 'score-high' : (f.score >= 50 ? 'score-mid' : 'score-low'));
                 const reasonClass = f.score >= 50 && !isProtected ? 'positive' : 'negative';
@@ -4573,7 +4574,7 @@
                 // [YENİ] 24 Saatlik Skor Grafiği
                 let hourlyChartHtml = '';
                 if (f.hourlyScores && f.hourlyScores.length === 24 && CURRENT_MODE === 'daily') {
-                    if (!isPremium) {
+                    if (!isPremium && !isGracePeriod) {
                         hourlyChartHtml = `
                             <div onclick="showPaywall('chart')" style="margin-top:8px;padding:12px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px dashed var(--border-subtle);text-align:center;cursor:pointer;">
                                 <div style="font-size:0.7rem;color:var(--cyan);">📈 SAATLİK SKOR GRAFİĞİ</div>
@@ -4619,7 +4620,7 @@
                 // Yıldız sistemi (scoreDetails varsa)
                 let starsHtml = '';
                 if (f.scoreDetails) {
-                    if (!isPremium) {
+                    if (!isPremium && !isGracePeriod) {
                         starsHtml = `
                             <div onclick="showPaywall('analysis')" style="margin-top:8px;padding:12px;background:rgba(0,0,0,0.2);border-radius:6px;border:1px dashed var(--border-subtle);text-align:center;cursor:pointer;">
                                 <div style="font-size:0.7rem;color:var(--cyan);">📊 SKOR ANALİZİ (15+ parametre)</div>
@@ -4771,8 +4772,8 @@
                 `;
             }).join('');
 
-            // Premium gate göster
-            if (!isPremium && list.length > 5) {
+            // Premium gate göster (grace period'da gösterme)
+            if (!hasFullAccess && list.length > 5) {
                 const remaining = window._proSlotsRemaining ?? '...';
                 const remainingColor = typeof remaining === 'number' && remaining < 200 ? '#ff4444' : typeof remaining === 'number' && remaining < 500 ? '#ff851b' : '#00ffcc';
                 container.innerHTML += `
@@ -4904,21 +4905,8 @@
                 document.getElementById('fish-search-input').value = found.name;
             }
 
-            // PRO kontrolü — ücretsiz kullanıcı search sonucu göremez
-            if (!isPremium) {
-                resultDiv.style.display = 'block';
-                resultDiv.innerHTML = `
-                    <div style="padding:20px; text-align:center; background:rgba(0,0,0,0.3); border-radius:10px; border:1px dashed var(--border-subtle);">
-                        <div style="font-size:2rem; margin-bottom:8px;">🔒</div>
-                        <div style="font-size:0.9rem; font-weight:700; color:var(--cyan); margin-bottom:6px;">PRO Özelliği</div>
-                        <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:14px;">Türe özel skor analizi, en iyi saat ve detaylar PRO üyelere özeldir</div>
-                        <button onclick="showPaywall('search')" style="padding:10px 24px; border:none; border-radius:8px; background:linear-gradient(135deg,#00c8c8,#00ffcc); color:#000; font-weight:700; cursor:pointer; font-size:0.85rem;">PRO'ya Yükselt →</button>
-                    </div>`;
-                return;
-            }
-
-            // PRO kontrolü — ücretsiz kullanıcı search sonucu göremez
-            if (!isPremium) {
+            // PRO/Grace kontrolü — ücretsiz kullanıcı search sonucu göremez
+            if (!isPremium && !isGracePeriod) {
                 resultDiv.style.display = 'block';
                 resultDiv.innerHTML = `
                     <div style="padding:20px; text-align:center; background:rgba(0,0,0,0.3); border-radius:10px; border:1px dashed var(--border-subtle);">
@@ -5116,7 +5104,7 @@
 
                 let starsHtml = '';
                 if (sd) {
-                    if (!isPremium) {
+                    if (!isPremium && !isGracePeriod) {
                         starsHtml = `<div onclick="showPaywall('analysis')" style="margin-top:10px; padding:14px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px dashed var(--border-subtle); text-align:center; cursor:pointer;">
                             <div style="font-size:0.75rem; color:var(--cyan);">📊 SKOR ANALİZİ (15+ parametre)</div>
                             <div style="font-size:0.65rem; color:#8892a3; margin-top:6px;">🔒 Su sıcaklığı, dalga, rüzgar, basınç, akıntı, mevsim...</div>
@@ -5295,8 +5283,8 @@
 
             const content = document.getElementById('weekly-content');
             content.innerHTML = GLOBAL_DATA.forecast.map((day, i) => {
-                // Premium gate: ücretsiz kullanıcıya sadece 1 gün
-                if (!isPremium && i > 0) {
+                // Premium gate: ücretsiz kullanıcıya sadece 1 gün (grace period = tam erişim)
+                if (!isPremium && !isGracePeriod && i > 0) {
                     if (i === 1) {
                         return `<div class="premium-gate">
                             <h3>🔒 7 Günlük Tahmin</h3>
@@ -5448,8 +5436,8 @@
         }
 
         async function openScanFlow() {
-            // Free kullanıcı da tarama yapabilir (günde 1 hak)
-            if (!isPremium) {
+            // Free kullanıcı da tarama yapabilir (günde 1 hak), grace period = sınırsız
+            if (!isPremium && !isGracePeriod) {
                 const rem = await loadScanUsage();
                 if (rem <= 0) {
                     showPaywall('scan');
@@ -5780,7 +5768,7 @@
             if (!silent) {
                 const toast = document.createElement('div');
                 toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--bg-panel);border:1px solid var(--border-glow);color:var(--text-primary);padding:12px 20px;border-radius:12px;z-index:9999;font-size:0.82rem;max-width:320px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
-                toast.innerHTML = isPremium 
+                toast.innerHTML = (isPremium || isGracePeriod)
                     ? '🧹 Tarama pinleri temizlendi.'
                     : '🧹 Tarama pinleri temizlendi.<br><span style="color:var(--yellow);font-size:0.75rem;">⚠️ Temizlemek hak iade etmez. Haklar 1 gün sonra yenilenir.</span>';
                 document.body.appendChild(toast);
@@ -5798,7 +5786,7 @@
             // Uyarı toast
             const toast = document.createElement('div');
             toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--bg-panel);border:1px solid var(--border-glow);color:var(--text-primary);padding:12px 20px;border-radius:12px;z-index:9999;font-size:0.82rem;max-width:320px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
-            toast.innerHTML = isPremium
+            toast.innerHTML = (isPremium || isGracePeriod)
                 ? '🧹 Tarama kaldırıldı.'
                 : '🧹 Tarama kaldırıldı.<br><span style="color:var(--yellow);font-size:0.75rem;">⚠️ Silmek hak iade etmez. Haklar gece yarısı yenilenir.</span>';
             document.body.appendChild(toast);
@@ -5912,6 +5900,8 @@ const auth = firebase.auth();
 
 let currentUser = null;
 let isPremium = false;
+let isGracePeriod = false;
+let graceDaysLeft = 0;
 let authToken = null;
 let usageData = { clicksRemaining: 5, scansRemaining: 1, clickLimit: 5, scanLimit: 1 };
 
@@ -5942,6 +5932,8 @@ auth.onAuthStateChanged(async (user) => {
     } else {
         currentUser = null;
         isPremium = false;
+        isGracePeriod = false;
+        graceDaysLeft = 0;
         authToken = null;
         document.getElementById('login-overlay').classList.remove('hidden');
     }
@@ -5973,11 +5965,15 @@ async function checkSubscriptionStatus() {
         });
         const data = await res.json();
         isPremium = data.isPremium;
+        isGracePeriod = data.isGracePeriod || false;
+        graceDaysLeft = data.graceDaysLeft || 0;
         if (data.usage) {
             usageData = data.usage;
         }
     } catch (e) {
         isPremium = false;
+        isGracePeriod = false;
+        graceDaysLeft = 0;
     }
 }
 
@@ -5992,6 +5988,10 @@ function updateUserUI() {
             proTag.textContent = 'PRO';
             proTag.style.display = 'inline';
             proTag.style.background = 'linear-gradient(90deg, #00c8c8, #00ffcc)';
+        } else if (isGracePeriod) {
+            proTag.textContent = `🎁 ${graceDaysLeft}g`;
+            proTag.style.display = 'inline';
+            proTag.style.background = 'linear-gradient(90deg, #f7b731, #f5a623)';
         } else {
             proTag.textContent = `${usageData.clicksRemaining}/${usageData.clickLimit}`;
             proTag.style.display = 'inline';
@@ -6008,7 +6008,7 @@ function signOut() {
 }
 
 function showUserMenu() {
-    if (confirm(isPremium ? 'Çıkış yapmak istiyor musunuz?' : 'Çıkış yapmak istiyor musunuz?\n\nPRO abone olmak için Google Play\'den MERALOJİ uygulamasını indirin.')) {
+    if (confirm((isPremium || isGracePeriod) ? 'Çıkış yapmak istiyor musunuz?' : 'Çıkış yapmak istiyor musunuz?\n\nPRO abone olmak için Google Play\'den MERALOJİ uygulamasını indirin.')) {
         signOut();
     }
 }
