@@ -287,6 +287,42 @@ function calculateClarity(wave, windSpeed, rain) {
 }
 
 // Akıntı Tahmini
+// Termoklin Derinliği Tahmini — SST + mevsim + bölgeden
+// Kışın null döner (termoklin yok). Yazın 10-50m arası.
+// Ay Işığı Şiddeti — SunCalc ile matematiksel hesap, dış API yok
+// Sadece gece saatlerinde anlamlı. Sonuç: 0-1 arası.
+function calculateMoonlightIntensity(date, lat, lon, cloudCover) {
+    try {
+        const illum = SunCalc.getMoonIllumination(date);
+        const pos   = SunCalc.getMoonPosition(date, lat, lon);
+
+        // Ay ufkun altındaysa karanlık
+        if (pos.altitude <= 0) return 0;
+
+        // Gerçek aydınlanma oranı (0=yeni ay, 1=dolunay)
+        const brightness = illum.fraction;
+
+        // Ay yükseklik etkisi — ufukta düşük, tepede maksimum
+        const altitudeFactor = Math.sin(pos.altitude);
+
+        // Bulutluluk söndürme
+        const cloudFactor = 1 - (cloudCover / 100);
+
+        return parseFloat((brightness * altitudeFactor * cloudFactor).toFixed(3));
+    } catch(e) {
+        return 0;
+    }
+}
+
+function estimateThermoclineDepth(sst, month, region) {
+    // Kasım-Mart arası termoklin yok (month: 0=Ocak, 2=Mart, 10=Kasım)
+    if (month >= 10 || month <= 2) return null;
+    // Nisan-Ekim: kuvvet SST'ye bağlı (15°C altında zayıf)
+    const summerStrength = Math.max(0, Math.min(1.2, (sst - 15) / 10));
+    const base = region === 'KARADENİZ' ? 10 : region === 'MARMARA' ? 18 : 25;
+    return Math.round(base + summerStrength * 20); // KARADENİZ: 10-34m, EGE/AKDENİZ: 25-49m
+}
+
 function estimateCurrent(wave, windSpeed, region) {
     let base = (safeNum(wave) * 0.4) + (safeNum(windSpeed) * 0.02);
     if (region === 'MARMARA') base *= 1.8;
@@ -316,32 +352,63 @@ function calculatePressureTrend(pressureHistory) {
     return { trend: 'STABLE', change };
 }
 
-// [YENİ] Sıcaklık Şoku Tespiti — Dün vs Bugün SST karşılaştırması
+// SST Analizi — Şok (dün vs bugün) + 7 günlük trend (lineer regresyon)
 function calculateTempShock(marine, hourlyStartIdx) {
-    if (!marine.hourly?.sea_surface_temperature) return { shock: false, change: 0, direction: 'STABLE' };
-    
+    if (!marine.hourly?.sea_surface_temperature) {
+        return { shock: false, change: 0, direction: 'STABLE', trend: 0, trendDirection: 'STABLE' };
+    }
+
     const sst = marine.hourly.sea_surface_temperature;
-    
-    // Dünün SST ortalaması (hourlyStartIdx - 24 ~ hourlyStartIdx - 1)
+
+    // ── 1. ANLIK ŞOK: Dün vs Bugün ──
     const yesterdayStart = Math.max(0, hourlyStartIdx - 24);
     const yesterdayTemps = sst.slice(yesterdayStart, hourlyStartIdx)
         .filter(t => t !== null && t !== undefined && !isNaN(t));
-    
-    // Bugünün SST ortalaması (hourlyStartIdx ~ hourlyStartIdx + 24)
     const todayTemps = sst.slice(hourlyStartIdx, hourlyStartIdx + 24)
         .filter(t => t !== null && t !== undefined && !isNaN(t));
-    
-    if (yesterdayTemps.length < 4 || todayTemps.length < 4) return { shock: false, change: 0, direction: 'STABLE' };
-    
-    const yesterdayAvg = yesterdayTemps.reduce((a, b) => a + b, 0) / yesterdayTemps.length;
-    const todayAvg = todayTemps.reduce((a, b) => a + b, 0) / todayTemps.length;
-    const change = Math.round((todayAvg - yesterdayAvg) * 10) / 10;
-    
-    return {
-        shock: Math.abs(change) >= 1.5,
-        change,
-        direction: change <= -1.5 ? 'COOLING' : change >= 1.5 ? 'WARMING' : 'STABLE'
-    };
+
+    let shock = false, change = 0, direction = 'STABLE';
+    if (yesterdayTemps.length >= 4 && todayTemps.length >= 4) {
+        const yAvg = yesterdayTemps.reduce((a, b) => a + b, 0) / yesterdayTemps.length;
+        const tAvg = todayTemps.reduce((a, b) => a + b, 0) / todayTemps.length;
+        change = Math.round((tAvg - yAvg) * 10) / 10;
+        shock = Math.abs(change) >= 1.5;
+        direction = change <= -1.5 ? 'COOLING' : change >= 1.5 ? 'WARMING' : 'STABLE';
+    }
+
+    // ── 2. 7 GÜNLÜK TREND: lineer regresyon (°C/gün) ──
+    // past_days=7 → hourlyStartIdx etrafında 7 × 24 saatlik günlük ortalamalar
+    let trend = 0, trendDirection = 'STABLE';
+    const dailyAvgs = [];
+    for (let d = -6; d <= 0; d++) {
+        const start = hourlyStartIdx + (d * 24);
+        const end = start + 24;
+        if (start < 0) continue;
+        const slice = sst.slice(Math.max(0, start), end)
+            .filter(t => t !== null && t !== undefined && !isNaN(t));
+        if (slice.length >= 4) {
+            dailyAvgs.push(slice.reduce((a, b) => a + b, 0) / slice.length);
+        }
+    }
+
+    if (dailyAvgs.length >= 4) {
+        // Basit lineer regresyon: y = a + b*x, b = trend (°C/gün)
+        const n = dailyAvgs.length;
+        const xs = Array.from({ length: n }, (_, i) => i);
+        const xMean = xs.reduce((a, b) => a + b, 0) / n;
+        const yMean = dailyAvgs.reduce((a, b) => a + b, 0) / n;
+        const num = xs.reduce((sum, x, i) => sum + (x - xMean) * (dailyAvgs[i] - yMean), 0);
+        const den = xs.reduce((sum, x) => sum + (x - xMean) ** 2, 0);
+        trend = den > 0 ? parseFloat((num / den).toFixed(3)) : 0;
+
+        if (trend >= 0.3)       trendDirection = 'WARMING_FAST';
+        else if (trend >= 0.1)  trendDirection = 'WARMING';
+        else if (trend <= -0.3) trendDirection = 'COOLING_FAST';
+        else if (trend <= -0.1) trendDirection = 'COOLING';
+        else                    trendDirection = 'STABLE';
+    }
+
+    return { shock, change, direction, trend, trendDirection, dailyAvgs };
 }
 
 // Zaman Dilimi
@@ -545,7 +612,9 @@ function getHourWeight(hour, activityWindows, fishActivity) {
 }
 
 // Günlük ağırlıklı ortalama skor hesapla
-function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, activityWindows, hourlyStartIdx) {
+function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, activityWindows, hourlyStartIdx, marineHourlyStartIdx) {
+    // marineHourlyStartIdx yoksa hourlyStartIdx'i kullan (geriye dönük uyum: fish-search, scan)
+    const mStartIdx = marineHourlyStartIdx !== undefined ? marineHourlyStartIdx : hourlyStartIdx;
     let totalScore = 0;
     let totalWeight = 0;
     let bestHour = -1;
@@ -557,18 +626,19 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
     
     // 24 saat için hesapla
     for (let h = 0; h < 24; h++) {
-        const hourlyIdx = hourlyStartIdx + h;
+        const wIdx = hourlyStartIdx + h;    // weather indeksi
+        const mIdx = mStartIdx + h;         // marine indeksi
         
-        // Bu saat için verileri al
-        const hourlyTemp = safeNum(marine.hourly?.sea_surface_temperature?.[hourlyIdx], baseParams.tempWater);
-        const hourlyWave = safeNum(marine.hourly?.wave_height?.[hourlyIdx], baseParams.wave);
-        const hourlyWind = safeNum(weather.hourly?.wind_speed_10m?.[hourlyIdx], baseParams.windSpeed);
-        const hourlyRain = safeNum(weather.hourly?.rain?.[hourlyIdx], baseParams.rain);
-        const hourlyCloud = safeNum(weather.hourly?.cloud_cover?.[hourlyIdx], 50);
-        const hourlyUV = safeNum(weather.hourly?.uv_index?.[hourlyIdx], 0);
-        const hourlyWavePeriod = safeNum(marine.hourly?.wave_period?.[hourlyIdx], 0);
-        const hourlySwell = safeNum(marine.hourly?.swell_wave_height?.[hourlyIdx], 0);
-        const hourlyOceanCurrent = marine.hourly?.ocean_current_velocity?.[hourlyIdx];
+        // Bu saat için verileri al — marine ve weather ayrı offset'lerle
+        const hourlyTemp = safeNum(marine.hourly?.sea_surface_temperature?.[mIdx], baseParams.tempWater);
+        const hourlyWave = safeNum(marine.hourly?.wave_height?.[mIdx], baseParams.wave);
+        const hourlyWind = safeNum(weather.hourly?.wind_speed_10m?.[wIdx], baseParams.windSpeed);
+        const hourlyRain = safeNum(weather.hourly?.rain?.[wIdx], baseParams.rain);
+        const hourlyCloud = safeNum(weather.hourly?.cloud_cover?.[wIdx], 50);
+        const hourlyUV = safeNum(weather.hourly?.uv_index?.[wIdx], 0);
+        const hourlyWavePeriod = safeNum(marine.hourly?.wave_period?.[mIdx], 0);
+        const hourlySwell = safeNum(marine.hourly?.swell_wave_height?.[mIdx], 0);
+        const hourlyOceanCurrent = marine.hourly?.ocean_current_velocity?.[mIdx];
         const hourlyClear = calculateClarity(hourlyWave, hourlyWind, hourlyRain);
         
         // Bu saat için timeMode (SunCalc tekrar çağrılmıyor)
@@ -615,7 +685,8 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
 }
 
 // 3 saatlik pencere ortalaması (anlık için)
-function calculate3HourWindowScore(fish, key, baseParams, weather, marine, centerHour, hourlyStartIdx) {
+function calculate3HourWindowScore(fish, key, baseParams, weather, marine, centerHour, hourlyStartIdx, marineHourlyStartIdx) {
+    const mStartIdx = marineHourlyStartIdx !== undefined ? marineHourlyStartIdx : hourlyStartIdx;
     let totalScore = 0;
     let count = 0;
     
@@ -625,17 +696,18 @@ function calculate3HourWindowScore(fish, key, baseParams, weather, marine, cente
         if (h < 0) h += 24;
         if (h >= 24) h -= 24;
         
-        const hourlyIdx = hourlyStartIdx + h;
+        const wIdx = hourlyStartIdx + h;    // weather indeksi
+        const mIdx = mStartIdx + h;         // marine indeksi
         
-        const hourlyTemp = safeNum(marine.hourly?.sea_surface_temperature?.[hourlyIdx], baseParams.tempWater);
-        const hourlyWave = safeNum(marine.hourly?.wave_height?.[hourlyIdx], baseParams.wave);
-        const hourlyWind = safeNum(weather.hourly?.wind_speed_10m?.[hourlyIdx], baseParams.windSpeed);
-        const hourlyRain = safeNum(weather.hourly?.rain?.[hourlyIdx], baseParams.rain);
-        const hourlyCloud = safeNum(weather.hourly?.cloud_cover?.[hourlyIdx], 50);
-        const hourlyUV = safeNum(weather.hourly?.uv_index?.[hourlyIdx], 0);
-        const hourlyWavePeriod = safeNum(marine.hourly?.wave_period?.[hourlyIdx], 0);
-        const hourlySwell = safeNum(marine.hourly?.swell_wave_height?.[hourlyIdx], 0);
-        const hourlyOceanCurrent = marine.hourly?.ocean_current_velocity?.[hourlyIdx];
+        const hourlyTemp = safeNum(marine.hourly?.sea_surface_temperature?.[mIdx], baseParams.tempWater);
+        const hourlyWave = safeNum(marine.hourly?.wave_height?.[mIdx], baseParams.wave);
+        const hourlyWind = safeNum(weather.hourly?.wind_speed_10m?.[wIdx], baseParams.windSpeed);
+        const hourlyRain = safeNum(weather.hourly?.rain?.[wIdx], baseParams.rain);
+        const hourlyCloud = safeNum(weather.hourly?.cloud_cover?.[wIdx], 50);
+        const hourlyUV = safeNum(weather.hourly?.uv_index?.[wIdx], 0);
+        const hourlyWavePeriod = safeNum(marine.hourly?.wave_period?.[mIdx], 0);
+        const hourlySwell = safeNum(marine.hourly?.swell_wave_height?.[mIdx], 0);
+        const hourlyOceanCurrent = marine.hourly?.ocean_current_velocity?.[mIdx];
         const hourlyClear = calculateClarity(hourlyWave, hourlyWind, hourlyRain);
         
         const hourDate = new Date(baseParams.targetDate);
@@ -686,6 +758,8 @@ const SPECIES_DB = {
         currentPref: 0.6,
         salinityPref: "MEDIUM",
         planktonPref: "MEDIUM",
+        moonPref: "dark",
+        sstTrendPref: "warming",
         regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 1, opt: 8, max: 40 },
         advice: { bait: "Canlı Teke, Mamun, Boru Kurdu", lure: "WTD, 10-14cm Maket, Silikon", rig: "Gezer Kurşunlu Dip, Spin", hook: "1/0 - 4/0 Geniş Pala" },
@@ -712,6 +786,8 @@ const SPECIES_DB = {
         currentPref: 0.85,
         salinityPref: "MEDIUM",
         planktonPref: "HIGH",
+        moonPref: "dark",
+        sstTrendPref: "cooling",
         regions: ["MARMARA", "EGE", "KARADENİZ"],
         depth: { min: 1, opt: 8, max: 40 },
         advice: { bait: "Yaprak Zargana, İstavrit Fleto", lure: "Kaşık, Ağır Rapala, Poşhter", rig: "Uzun Olta, Mantarlı Çinekop, Hırsızlı Zoka", hook: "1 - 4/0 Uzun Pala + Çelik Tel" },
@@ -790,6 +866,7 @@ const SPECIES_DB = {
         currentPref: 0.3,
         salinityPref: "MEDIUM",
         planktonPref: "MEDIUM",
+        sstTrendPref: "warming",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 0, opt: 10, max: 150 },
         advice: { bait: "Canlı Mamun, Yengeç, Midye", lure: "Micro Jig, Rubber", rig: "Hırsızlı Dip Takımı", hook: "Chinu No:2-4" },
@@ -849,6 +926,8 @@ const SPECIES_DB = {
         currentPref: 0.2,
         salinityPref: "HIGH",  // Açık deniz türü — yüksek tuzluluğu tercih eder,
         planktonPref: "LOW",
+        moonPref: "bright",
+        sstTrendPref: "stable",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 2, opt: 20, max: 150 },
         advice: { bait: "Yok", lure: "Kalamar Zokası (Renkli/Fosforlu)", rig: "Zoka At-Çek (Whipping)", hook: "Özel Zoka İğnesi" },
@@ -915,6 +994,8 @@ const SPECIES_DB = {
         currentPref: 0.7,
         salinityPref: "MEDIUM",
         planktonPref: "HIGH",
+        moonPref: "bright",
+        sstTrendPref: "any",
         regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 5, opt: 20, max: 250 },
         advice: { bait: "Karides Parçası, Tavuk Göğsü", lure: "Çapari, LRF Silikon, Micro Jig", rig: "Çapari, LRF", hook: "9 - 12 İnce" },
@@ -934,6 +1015,7 @@ const SPECIES_DB = {
         clarityPref: "ANY",
         currentPref: 0.3,
         salinityPref: "HIGH",
+        sstTrendPref: "stable",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 10, opt: 80, max: 300 },
         advice: { bait: "Karides, Kurt, Midye, Tavuk Göğsü", lure: "Genelde Yok", rig: "Üçlü Dip Oltası", hook: "9 - 11 İnce Telli" },
@@ -973,6 +1055,7 @@ const SPECIES_DB = {
         currentPref: 0.3,
         salinityPref: "LOW",  // Lagün türü — düşük/acı tuzlu suyu tercih eder,
         planktonPref: "MEDIUM",
+        sstTrendPref: "any",
         regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
         depth: { min: 0, opt: 5, max: 15 },
         advice: { bait: "Ekmek İçi, Kıbrıs Sarma", lure: "Yok", rig: "Kıbrıs Takımı, Şamandıralı", hook: "6 - 9" },
@@ -993,6 +1076,7 @@ const SPECIES_DB = {
         currentPref: 0.4,
         salinityPref: "ANY",
         planktonPref: "MEDIUM",
+        moonPref: "bright",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 1, opt: 8, max: 40 },
         advice: { bait: "Kurt, Fleto Balık", lure: "İpek (Turuncu)", rig: "Şamandıralı Top, İpek", hook: "6 - 10 İnce" },
@@ -1015,6 +1099,7 @@ const SPECIES_DB = {
         clarityPref: "CLEAR",
         currentPref: 0.3,
         salinityPref: "HIGH",
+        sstTrendPref: "stable",
         protected: true,
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 5, opt: 30, max: 200 },
@@ -1036,6 +1121,7 @@ const SPECIES_DB = {
         currentPref: 0.8,
         salinityPref: "HIGH",
         planktonPref: "HIGH",
+        moonPref: "dark",
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 10, opt: 50, max: 300 },
         advice: { bait: "Canlı İstavrit, Sardalya", lure: "Popper, Stickbait, Metal Jig", rig: "Trolling, Jigging, Popping", hook: "3/0 - 6/0 + Çelik Tel" },
@@ -1076,6 +1162,7 @@ const SPECIES_DB = {
         currentPref: 0.4,
         salinityPref: "MEDIUM",
         planktonPref: "MEDIUM",
+        sstTrendPref: "stable",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 10, opt: 60, max: 250 },
         advice: { bait: "Karides, Kalamar, Midye, Sülünez", lure: "Jig, Silikon", rig: "Dip Takımı", hook: "2 - 6" },
@@ -1276,6 +1363,7 @@ const SPECIES_DB = {
         currentPref: 0.3,
         salinityPref: "HIGH",
         planktonPref: "LOW",
+        moonPref: "bright",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 2, opt: 10, max: 25 },
         advice: { bait: "Kalamar Zokası", lure: "Egi 2.5-3.5", rig: "Eging Takımı", hook: "Zoka" },
@@ -1295,6 +1383,7 @@ const SPECIES_DB = {
         clarityPref: "CLEAR",
         currentPref: 0.6,
         salinityPref: "MEDIUM",
+        moonPref: "dark",
         regions: ["AKDENİZ", "EGE"],
         depth: { min: 10, opt: 35, max: 70 },
         advice: { bait: "Canlı Zargana", lure: "Jig 60-150g, Popper", rig: "Jigging Setup", hook: "3/0 - 5/0" },
@@ -1334,6 +1423,8 @@ const SPECIES_DB = {
         currentPref: 0.5,
         salinityPref: "HIGH",
         planktonPref: "HIGH",
+        moonPref: "dark",
+        sstTrendPref: "warming",
         regions: ["AKDENİZ", "EGE"],
         depth: { min: 0, opt: 10, max: 35 },
         advice: { bait: "Küçük balık", lure: "Popper, Sahte Balık", rig: "Trolling, Spin", hook: "2/0 - 4/0" },
@@ -1355,6 +1446,7 @@ const SPECIES_DB = {
         currentPref: 0.5,
         salinityPref: "HIGH",
         planktonPref: "HIGH",
+        sstTrendPref: "any",
         regions: ["MARMARA", "EGE"],
         depth: { min: 5, opt: 20, max: 50 },
         advice: { bait: "Çapari", lure: "Küçük Kaşık", rig: "Çapari Takımı", hook: "6 - 10" },
@@ -1380,6 +1472,7 @@ const SPECIES_DB = {
         currentPref: 0.5,
         salinityPref: "MEDIUM",
         planktonPref: "HIGH",
+        sstTrendPref: "warming",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 5, opt: 25, max: 50 },
         advice: { bait: "Çapari", lure: "Kaşık", rig: "Çapari Takımı, Spin", hook: "6 - 10" },
@@ -1476,6 +1569,8 @@ const SPECIES_DB = {
         currentPref: 0.5,
         salinityPref: "HIGH",
         planktonPref: "HIGH",
+        moonPref: "dark",
+        sstTrendPref: "warming",
         regions: ["AKDENİZ", "EGE"],
         depth: { min: 2, opt: 15, max: 40 },
         advice: { bait: "Yapay tercih", lure: "Uzun Sahte Balık", rig: "Spin", hook: "2/0 - 4/0" },
@@ -1634,6 +1729,8 @@ const SPECIES_DB = {
         currentPref: 0.5,
         salinityPref: "ANY",
         planktonPref: "HIGH",
+        moonPref: "bright",
+        sstTrendPref: "cooling",
         regions: ["KARADENİZ", "MARMARA"],
         depth: { min: 5, opt: 25, max: 60 },
         advice: { bait: "Çapari", lure: "İnce Çapari", rig: "Surf, Çapari", hook: "10 - 14" },
@@ -1720,6 +1817,7 @@ const SPECIES_DB = {
         currentPref: 0.6,
         salinityPref: "MEDIUM",
         planktonPref: "HIGH",
+        sstTrendPref: "warming",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 5, opt: 50, max: 200 },
         advice: { bait: "Canlı balık, Sardalya", lure: "Rapala, Metal Jig", rig: "Trolling", hook: "2/0 - 4/0" },
@@ -1746,6 +1844,8 @@ const SPECIES_DB = {
         currentPref: 0.5,
         salinityPref: "MEDIUM",
         planktonPref: "HIGH",
+        moonPref: "dark",
+        sstTrendPref: "cooling",
         regions: ["MARMARA", "KARADENİZ", "EGE"],
         depth: { min: 5, opt: 30, max: 100 },
         advice: { bait: "İstavrit, Sardalya, Sahte Yem", lure: "Tüylü Çapari, Kaşık, Kaplamalı Jig", rig: "Çapari, Trolling, Sırtı", hook: "1/0 - 3/0" },
@@ -1767,6 +1867,8 @@ const SPECIES_DB = {
         currentPref: 0.6,
         salinityPref: "ANY",
         planktonPref: "HIGH",
+        moonPref: "dark",
+        sstTrendPref: "cooling",
         regions: ["MARMARA", "KARADENİZ", "EGE"],
         depth: { min: 20, opt: 60, max: 150 },
         advice: { bait: "Canlı balık", lure: "Büyük Rapala, Jig", rig: "Trolling", hook: "3/0 - 5/0" },
@@ -1788,6 +1890,8 @@ const SPECIES_DB = {
         currentPref: 0.4,
         salinityPref: "ANY",
         planktonPref: "HIGH",
+        moonPref: "dark",
+        sstTrendPref: "cooling",
         regions: ["MARMARA", "KARADENİZ", "EGE", "AKDENİZ"],
         depth: { min: 2, opt: 15, max: 40 },
         advice: { bait: "Çaça, Hamsi", lure: "Küçük Kaşık", rig: "Spin, Çapari", hook: "4 - 8" },
@@ -1812,6 +1916,8 @@ const SPECIES_DB = {
         currentPref: 0.4,
         salinityPref: "ANY",
         planktonPref: "HIGH",
+        moonPref: "bright",
+        sstTrendPref: "warming",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 10, opt: 25, max: 100 },
         advice: { bait: "-", lure: "Tüylü Çapari", rig: "Çapari / Ağ", hook: "-" },
@@ -1852,6 +1958,7 @@ const SPECIES_DB = {
         currentPref: 0.3,
         salinityPref: "LOW",
         planktonPref: "LOW",
+        sstTrendPref: "stable",
         regions: ["KARADENİZ", "MARMARA"],
         depth: { min: 20, opt: 40, max: 70 },
         advice: { bait: "Canlı Hamsi, İstavrit, Balık Fleto", lure: "Yok", rig: "Uzun Köstekli Ağır Dip Oltası", hook: "2 - 6" },
@@ -1931,6 +2038,7 @@ const SPECIES_DB = {
         currentPref: 0.4,
         salinityPref: "HIGH",
         planktonPref: "LOW",
+        sstTrendPref: "stable",
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 20, opt: 50, max: 100 },
         advice: { bait: "Karides, Tavuk Göğsü, Kalamar", lure: "Yok", rig: "Üçlü Dip Takımı", hook: "4 - 8" },
@@ -1971,6 +2079,8 @@ const SPECIES_DB = {
         currentPref: 0.3,
         salinityPref: "MEDIUM",
         planktonPref: "MEDIUM",
+        moonPref: "dark",
+        sstTrendPref: "warming",
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 10, opt: 50, max: 200 },
         advice: { bait: "Canlı balık, Ahtapot", lure: "Büyük Silikon", rig: "Dip", hook: "4/0 - 6/0" },
@@ -2013,6 +2123,8 @@ const SPECIES_DB = {
     currentPref: 0.3,
     salinityPref: "LOW",
     planktonPref: "HIGH",
+    moonPref: "bright",
+    sstTrendPref: "warming",
     regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
     depth: { min: 1, opt: 5, max: 20 },
     advice: { bait: "Ekmek İçi, Kurt", lure: "Micro Jig", rig: "Çoklu İğne", hook: "No:10-14" },
@@ -2077,6 +2189,7 @@ const SPECIES_DB = {
     currentPref: 0.6,
     salinityPref: "MEDIUM",
     planktonPref: "HIGH",
+    moonPref: "bright",
     regions: ["MARMARA", "KARADENİZ"],
     depth: { min: 5, opt: 25, max: 120 },
     advice: { bait: "Yok", lure: "Çapari", rig: "Çapari", hook: "No:12-16" },
@@ -2125,6 +2238,7 @@ const SPECIES_DB = {
     currentPref: 0.8,
     salinityPref: "LOW",
     planktonPref: "HIGH",
+    sstTrendPref: "cooling",
     regions: ["KARADENİZ", "MARMARA"],
     depth: { min: 2, opt: 15, max: 60 },
     advice: { bait: "Küçük Balık", lure: "Kaşık", rig: "Spin", hook: "No:4-8" },
@@ -2321,7 +2435,7 @@ function calculateFishScore(fish, key, params) {
         currentSpeed, pressureTrend, moonPhase,
         depthAvg, hour, salinity,
         cloudCover, wavePeriod, swellHeight, oceanCurrent, tempShock, uvIndex,
-        chlorophyll
+        chlorophyll, thermoclineDepth, moonlightIntensity
     } = params;
 
     const season = getSeason(targetDate.getMonth());
@@ -2528,21 +2642,95 @@ function calculateFishScore(fish, key, params) {
         };
     }
     
-    // [YENİ] Sıcaklık Şoku — 24 saat içinde ≥1.5°C SST değişimi
+    // Sıcaklık Şoku — 24 saat içinde ≥1.5°C SST değişimi
     if (tempShock && tempShock.shock) {
         if (tempShock.direction === 'COOLING') {
-            // Soğuma şoku: yem avına tetikler — feeding frenzy benzeri etki
             s_trigger += 3;
             activeTriggers.push(`⚡ Sıcaklık Şoku (${tempShock.change}°C)`);
         } else if (tempShock.direction === 'WARMING') {
-            // Ani ısınma: metabolizma artar ama kısa süreli stres
             s_trigger += 1;
         }
         scoreDetails.tempShock = { change: tempShock.change, direction: tempShock.direction };
     }
+
+    // SST 7 Günlük Trend — yavaş ama süregelen değişim
+    if (tempShock && tempShock.trendDirection && fish.sstTrendPref) {
+        const td = tempShock.trendDirection;
+        const pref = fish.sstTrendPref;
+        if (pref === 'warming' && (td === 'WARMING' || td === 'WARMING_FAST')) {
+            s_trigger += td === 'WARMING_FAST' ? 2.5 : 1.5;
+            activeTriggers.push(`🌡️ Isınan Su Trendi`);
+        } else if (pref === 'cooling' && (td === 'COOLING' || td === 'COOLING_FAST')) {
+            s_trigger += td === 'COOLING_FAST' ? 2.5 : 1.5;
+            activeTriggers.push(`🌡️ Soğuyan Su — Göç Sinyali`);
+        } else if (pref === 'stable' && td === 'STABLE') {
+            s_trigger += 1.5;
+            activeTriggers.push(`🌡️ Stabil Su`);
+        } else if (pref !== 'any') {
+            s_trigger -= 0.5; // Tercih dışı trend — hafif ceza
+        }
+        scoreDetails.sstTrend = { trend: tempShock.trend, direction: td, pref };
+    } else if (tempShock && tempShock.trendDirection === 'STABLE' && !fish.sstTrendPref) {
+        // sstTrendPref tanımsız türler için stabil su genel bonusu
+        s_trigger += 1;
+    }
     
     if (key === "levrek" && wave > 0.7 && clarity < 60) { s_trigger += 2; activeTriggers.push("Köpüklü Su"); }
     if (key === "lufer" && windSpeed > 15 && windSpeed < 35) { s_trigger += 2; activeTriggers.push("Rüzgarlı"); }
+
+    // TERMOKLİN ETKİSİ — Sadece Nisan-Ekim, sadece thermoclineDepth varsa
+    if (thermoclineDepth !== null && thermoclineDepth !== undefined) {
+        const fishDepth = fish.depth?.opt || 10;
+        const diff = fishDepth - thermoclineDepth; // + = altında, - = üstünde
+        const atBoundary = Math.abs(diff) <= 6; // ±6m termoklin bandı
+
+        if (atBoundary) {
+            // Termoklin sınırında: besin yoğunlaşması — tüm türler için bonus
+            s_trigger += 3;
+            activeTriggers.push(`🌊 Termoklin Bandı (${thermoclineDepth}m)`);
+            scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'AT', stars: 5 };
+        } else if (diff > 6) {
+            // Balık termoklinin altında — dip türler için normal, yüzey türler için ceza
+            if (['DIP_KIYI','DIP_DERIN','KAYALIK','DİP','DERİN'].includes(fish.category)) {
+                s_trigger += 1.5; // Dip türü termoklin altında — doğal habitat
+                scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'BELOW', stars: 4 };
+            } else if (['PELAJIK','KIYI_AVCI','KIYI','SÜRÜ'].includes(fish.category)) {
+                s_trigger -= Math.min(3, diff / 10); // Yüzey türü çok derinlerde
+                scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'BELOW', stars: 2 };
+            }
+        } else {
+            // Balık termoklinin üstünde — yüzey türler normal, dip türler için hafif ceza
+            if (['DIP_DERIN','DERİN'].includes(fish.category)) {
+                s_trigger -= 1.5;
+                scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'ABOVE', stars: 2 };
+            } else {
+                scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'ABOVE', stars: 3 };
+            }
+        }
+    }
+
+    // AY IŞIĞI ŞİDDETİ — Sadece gece saatlerinde aktif
+    if (moonlightIntensity !== undefined && moonlightIntensity !== null && timeMode === 'NIGHT') {
+        const pref = fish.moonPref || 'neutral';
+        const intensity = moonlightIntensity; // 0-1
+
+        if (pref === 'bright') {
+            // Aydınlık sever: kalamar, bazı dip türleri — dolunayda av kolaylaşır
+            const bonus = Math.round(intensity * 8 * 10) / 10;
+            if (bonus > 0) { s_trigger += bonus; activeTriggers.push(`🌕 Ay Işığı (${(intensity*100).toFixed(0)}%)`); }
+            scoreDetails.moonlight = { intensity, pref, bonus, stars: Math.round(intensity * 5) };
+        } else if (pref === 'dark') {
+            // Karanlık sever: lüfer, çinekop, torik — dolunayda sürü dağılır
+            const penalty = Math.round(intensity * 8 * 10) / 10;
+            if (penalty > 1) { s_trigger -= penalty; }
+            const stars = intensity < 0.2 ? 5 : intensity < 0.5 ? 3 : 1;
+            scoreDetails.moonlight = { intensity, pref, penalty, stars };
+        } else {
+            // neutral — hafif etki, stabil ay ışığı biraz avlanmayı kolaylaştırır
+            if (intensity > 0.3) { s_trigger += 1; }
+            scoreDetails.moonlight = { intensity, pref, stars: 3 };
+        }
+    }
 
     // [YENİ] KLOROFİL-A — Plankton yoğunluğu → besin zinciri etkisi
     // Sadece planktonPref tanımlı türlere uygulanır (pelajik, sürü, kıyı avcılar)
@@ -2575,22 +2763,7 @@ function calculateFishScore(fish, key, params) {
         }
     }
     
-    s_trigger = Math.min(12, Math.max(-5, s_trigger));
-    scoreDetails.trigger = { score: s_trigger, max: 12, triggers: activeTriggers };
-    
-    // TOPLAM
-    let rawScore = s_season + s_temp + s_env + s_activity + s_trigger;
-    
-    if (moonPhase !== undefined) {
-        const moonMult = getMoonPhaseMultiplier(moonPhase);
-        rawScore *= moonMult;
-        scoreDetails.moon = { multiplier: moonMult, phase: moonPhase };
-    }
-    
-    // CEZALAR
-    let penalties = [];
-
-    // TUZLULUK UYUMU — penalties tanımından sonra, bölge tuzluluğu ile tür tercihini karşılaştır
+    // TUZLULUK UYUMU — bölge tuzluluğu ile tür tercihini karşılaştır
     // Etki: -2 (zıt) / 0 (nötr) / +1.5 (uyumlu) — s_trigger üzerinden
     if (salinity !== undefined && fish.salinityPref) {
         const salCat = salinity <= 20 ? 'LOW' : salinity <= 28 ? 'MEDIUM' : 'HIGH';
@@ -2610,9 +2783,28 @@ function calculateFishScore(fish, key, params) {
         } else {
             // Zıt kategori (LOW↔HIGH) — ceza + uyarı
             s_trigger -= 2;
-            penalties.push('Tuzluluk uyumsuz');
             scoreDetails.salinity = { match: 'MISMATCH', value: salinity, pref };
         }
+    }
+
+    s_trigger = Math.min(12, Math.max(-5, s_trigger));
+    scoreDetails.trigger = { score: s_trigger, max: 12, triggers: activeTriggers };
+    
+    // TOPLAM
+    let rawScore = s_season + s_temp + s_env + s_activity + s_trigger;
+    
+    if (moonPhase !== undefined) {
+        const moonMult = getMoonPhaseMultiplier(moonPhase);
+        rawScore *= moonMult;
+        scoreDetails.moon = { multiplier: moonMult, phase: moonPhase };
+    }
+    
+    // CEZALAR
+    let penalties = [];
+
+    // Tuzluluk uyumsuzluk cezası penalties listesine de ekle (görsel uyarı)
+    if (scoreDetails.salinity && scoreDetails.salinity.match === 'MISMATCH') {
+        penalties.push('Tuzluluk uyumsuz');
     }
     
     // === FAZ 1: DERİNLİK SOFT GATE ===
@@ -2791,8 +2983,8 @@ app.get('/api/forecast', async (req, res) => {
 
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`;
         const weatherUrlFallback = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain&past_days=1&timezone=auto`;
-        const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=1&timezone=auto`;
-        const marineUrlFallback = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=1&timezone=auto`;
+        const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=7&timezone=auto`;
+        const marineUrlFallback = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=7&timezone=auto`;
         
         // EMODnet Bathymetry API - Derinlik verisi
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lon} ${lat})`;
@@ -2912,19 +3104,23 @@ app.get('/api/forecast', async (req, res) => {
 
         const forecast = [];
         
-        // past_days=1 ile veri yapısı:
-        // hourly[0-23] = dün, hourly[24-47] = bugün, hourly[48-71] = yarın...
-        // daily[0] = dün, daily[1] = bugün, daily[2] = yarın...
-        const hourlyOffset = 24; // Bugünün başlangıcı (past_days=1 nedeniyle)
+        // Weather: past_days=1 → hourly[0-23]=dün, [24-47]=bugün, [48-71]=yarın...
+        // Marine:  past_days=7 → hourly[0-167]=geçmiş 7 gün, [168-191]=bugün, [192+]=gelecek
+        // Weather hourlyOffset (past_days=1): bugün = indeks 24
+        const hourlyOffset = 24;         // weather için bugünün başlangıcı
+        const marineHourlyOffset = 7 * 24; // marine için bugünün başlangıcı (past_days=7)
 
         for (let i = 0; i < 7; i++) {
             const targetDate = new Date();
             targetDate.setDate(targetDate.getDate() + i);
             
-            // Doğru indeksler (past_days=1 hesaba katılarak)
-            const dailyIdx = i + 1;  // daily[1] = bugün
-            const hourlyStartIdx = hourlyOffset + (i * 24); // Günün başlangıç saati
-            const hourlyIdx = hourlyStartIdx + clickHour;   // Tıklama saati için indeks
+            // Doğru indeksler
+            // weather: past_days=1, marine: past_days=7
+            const dailyIdx = i + 1;  // weather daily[1] = bugün
+            const hourlyStartIdx = hourlyOffset + (i * 24);           // weather saatlik indeks
+            const marineHourlyStartIdx = marineHourlyOffset + (i * 24); // marine saatlik indeks
+            const hourlyIdx = hourlyStartIdx + clickHour;
+            const marineHourlyIdx = marineHourlyStartIdx + clickHour;
 
             if (!weather.daily || !weather.daily.temperature_2m_max[dailyIdx]) continue;
 
@@ -2937,7 +3133,7 @@ app.get('/api/forecast', async (req, res) => {
                 pressureTrend = calculatePressureTrend(dayPressureHistory);
             }
 
-            const rawWaterTemp = marine.hourly?.sea_surface_temperature?.[hourlyIdx];
+            const rawWaterTemp = marine.hourly?.sea_surface_temperature?.[marineHourlyIdx];
             const tempWater = isLand ? 0 : safeWaterTemp(rawWaterTemp, regionName, targetDate.getMonth());
             
             const wave = isLand ? 0 : safeNum(marine.daily?.wave_height_max?.[dailyIdx]);
@@ -2949,13 +3145,15 @@ app.get('/api/forecast', async (req, res) => {
             const rain = safeNum(weather.hourly?.rain?.[hourlyIdx]);
             const uvIdx = safeNum(weather.hourly?.uv_index?.[hourlyIdx], 0);
             
-            // [YENİ] Marine hourly veriler
-            const wavePeriod = isLand ? 0 : safeNum(marine.hourly?.wave_period?.[hourlyIdx]);
-            const swellHeight = isLand ? 0 : safeNum(marine.hourly?.swell_wave_height?.[hourlyIdx]);
-            const oceanCurrent = isLand ? null : (marine.hourly?.ocean_current_velocity?.[hourlyIdx] ?? null);
+            // Marine hourly veriler (marine indeksi)
+            const wavePeriod = isLand ? 0 : safeNum(marine.hourly?.wave_period?.[marineHourlyIdx]);
+            const swellHeight = isLand ? 0 : safeNum(marine.hourly?.swell_wave_height?.[marineHourlyIdx]);
+            const oceanCurrent = isLand ? null : (marine.hourly?.ocean_current_velocity?.[marineHourlyIdx] ?? null);
             
-            // [YENİ] Sıcaklık Şoku hesapla (dün vs bugün SST)
-            const tempShock = isLand ? { shock: false, change: 0, direction: 'STABLE' } : calculateTempShock(marine, hourlyStartIdx);
+            // SST analizi: şok + 7 günlük trend (marine indeksi kullanır)
+            const tempShock = isLand ? { shock: false, change: 0, direction: 'STABLE', trend: 0, trendDirection: 'STABLE' } : calculateTempShock(marine, marineHourlyStartIdx);
+            const thermoclineDepth = isLand ? null : estimateThermoclineDepth(tempWater, targetDate.getMonth(), regionName);
+            const moonlightIntensity = calculateMoonlightIntensity(targetDate, parseFloat(lat), parseFloat(lon), cloud);
 
             const sunTimes = SunCalc.getTimes(targetDate, lat, lon);
             const timeMode = getTimeOfDay(clickHour, sunTimes);
@@ -2993,7 +3191,9 @@ app.get('/api/forecast', async (req, res) => {
                     swellHeight,
                     oceanCurrent,
                     tempShock,
-                    chlorophyll
+                    chlorophyll,
+                    thermoclineDepth,
+                    moonlightIntensity
                 };
 
                 for (const [key, fish] of Object.entries(SPECIES_DB)) {
@@ -3001,7 +3201,7 @@ app.get('/api/forecast', async (req, res) => {
                     
                     // Ağırlıklı günlük skor hesapla (24 saatlik ortalama)
                     const dailyResult = calculateWeightedDailyScore(
-                        fish, key, baseParams, weather, marine, activityWindows, hourlyStartIdx
+                        fish, key, baseParams, weather, marine, activityWindows, hourlyStartIdx, marineHourlyStartIdx
                     );
                     const dailyScore = dailyResult.score;
                     
@@ -3095,6 +3295,8 @@ app.get('/api/forecast', async (req, res) => {
                 wavePeriod: parseFloat(wavePeriod.toFixed(1)),
                 swellHeight: parseFloat(swellHeight.toFixed(2)),
                 tempShock: tempShock.shock ? tempShock : null,
+                sstTrend: { trend: tempShock.trend, direction: tempShock.trendDirection },
+                thermoclineDepth,
                 chlorophyll: chlorophyllData ? {
                     value: chlorophyllData.chlorophyll,
                     date: chlorophyllData.date,
@@ -3111,13 +3313,16 @@ app.get('/api/forecast', async (req, res) => {
 
         let instantData = null;
         if (!isLand) {
-            // past_days=1 için doğru indeks: 24 + clickHour
-            const instantIdx = 24 + clickHour;
-            const hourlyStartIdx = 24; // Bugünün başlangıcı
+            // Weather: past_days=1 → bugün offset 24
+            // Marine:  past_days=7 → bugün offset 168 (marineHourlyOffset)
+            const instantIdx = 24 + clickHour;                         // weather indeksi
+            const marineInstantIdx = marineHourlyOffset + clickHour;   // marine indeksi
+            const hourlyStartIdx = 24;                                 // weather bugün başlangıcı
+            const marineStartIdx = marineHourlyOffset;                 // marine bugün başlangıcı (168)
             const instantDate = new Date();
-            const rawInstantTemp = marine.hourly?.sea_surface_temperature?.[instantIdx];
+            const rawInstantTemp = marine.hourly?.sea_surface_temperature?.[marineInstantIdx];
             const i_tempWater = safeWaterTemp(rawInstantTemp, regionName, currentMonth);
-            const i_wave = safeNum(marine.hourly?.wave_height?.[instantIdx]);
+            const i_wave = safeNum(marine.hourly?.wave_height?.[marineInstantIdx]);
             const i_wind = safeNum(weather.hourly?.wind_speed_10m?.[instantIdx]);
             const i_rain = safeNum(weather.hourly?.rain?.[instantIdx]);
             const i_cloud = safeNum(weather.hourly?.cloud_cover?.[instantIdx]);
@@ -3132,11 +3337,13 @@ app.get('/api/forecast', async (req, res) => {
             // daily[1] = bugün (past_days=1)
             const i_windDir = safeNum(weather.daily?.wind_direction_10m_dominant?.[1]);
             
-            // [YENİ] Marine hourly veriler (instant)
-            const i_wavePeriod = safeNum(marine.hourly?.wave_period?.[instantIdx]);
-            const i_swellHeight = safeNum(marine.hourly?.swell_wave_height?.[instantIdx]);
-            const i_oceanCurrent = marine.hourly?.ocean_current_velocity?.[instantIdx] ?? null;
-            const i_tempShock = calculateTempShock(marine, hourlyStartIdx);
+            // [YENİ] Marine hourly veriler (instant) — marine indeksi kullan
+            const i_wavePeriod = safeNum(marine.hourly?.wave_period?.[marineInstantIdx]);
+            const i_swellHeight = safeNum(marine.hourly?.swell_wave_height?.[marineInstantIdx]);
+            const i_oceanCurrent = marine.hourly?.ocean_current_velocity?.[marineInstantIdx] ?? null;
+            const i_tempShock = calculateTempShock(marine, marineStartIdx);
+            const i_thermoclineDepth = estimateThermoclineDepth(i_tempWater, now.getMonth(), regionName);
+            const i_moonlightIntensity = calculateMoonlightIntensity(now, parseFloat(lat), parseFloat(lon), i_cloud);
 
             // FIX: Anlık blok için basınç trendi — forecast döngüsü scope'undan bağımsız
             let i_pressureTrend = { trend: 'STABLE', change: 0 };
@@ -3163,7 +3370,9 @@ app.get('/api/forecast', async (req, res) => {
                 swellHeight: i_swellHeight,
                 oceanCurrent: i_oceanCurrent,
                 tempShock: i_tempShock,
-                chlorophyll
+                chlorophyll,
+                thermoclineDepth: i_thermoclineDepth,
+                moonlightIntensity: i_moonlightIntensity
             };
 
             let instantFishList = [];
@@ -3172,7 +3381,7 @@ app.get('/api/forecast', async (req, res) => {
                 
                 // 3 saatlik pencere ortalaması ile daha stabil skor (gürültü filtreleme)
                 const smoothedScore = calculate3HourWindowScore(
-                    fish, key, baseParams, weather, marine, clickHour, hourlyStartIdx
+                    fish, key, baseParams, weather, marine, clickHour, hourlyStartIdx, marineStartIdx
                 );
                 
                 // Reason ve trigger bilgileri için tek anlık hesaplama
