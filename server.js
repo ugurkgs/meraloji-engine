@@ -3915,18 +3915,7 @@ app.post('/api/verify-subscription', async (req, res) => {
             const existing = await userSubRef.get();
             const isNewPro = !existing.exists || existing.data().status !== 'active';
 
-            // Kullanıcı bilgisini Firebase Auth'dan çek
-let userEmail = null;
-let userDisplayName = null;
-try {
-    const userRecord = await admin.auth().getUser(uid);
-    userEmail = userRecord.email || null;
-    userDisplayName = userRecord.displayName || null;
-} catch (e) {
-    console.log('[VERIFY-SUB] Kullanıcı bilgisi alınamadı:', e.message);
-}
-
-const userEmail = req.user.email || null;
+            const userEmail = req.user.email || null;
             const userDisplayName = req.user.name || null;
 
             await userSubRef.set({
