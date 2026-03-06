@@ -4366,8 +4366,55 @@ app.post('/api/verify-purchase', async (req, res) => {
                 await statsRef.set({ count: currentCount + 1 }, { merge: true });
             }
         }
+  res.status(200).send({ success: true });
+    } catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+});
+
+// Android verify-subscription — UID token'dan alınır, body'de gelmez
+app.post('/api/verify-subscription', async (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ error: 'Yetkilendirme gerekli' });
+    }
+
+    const uid = req.user.uid;
+    const { purchaseToken, subscriptionId } = req.body;
+
+    if (!purchaseToken) {
+        return res.status(400).json({ error: 'purchaseToken gerekli' });
+    }
+
+    const subId = subscriptionId || 'meraloji_pro_monthly';
+    const isYearly = subId.includes('yearly');
+    const durationMs = isYearly ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
+
+    try {
+        if (db) {
+            const userSubRef = db.collection('subscriptions').doc(uid);
+            const existing = await userSubRef.get();
+            const isNewPro = !existing.exists || existing.data().status !== 'active';
+
+            await userSubRef.set({
+                status: 'active',
+                subscriptionId: subId,
+                purchaseToken: purchaseToken,
+                isYearly,
+                startedAt: Date.now(),
+                expiresAt: Date.now() + durationMs,
+                updatedAt: Date.now()
+            }, { merge: true });
+
+            if (isNewPro) {
+                const statsRef = db.collection('stats').doc('pro_count');
+                const statsSnap = await statsRef.get();
+                const currentCount = statsSnap.exists ? (statsSnap.data().count || 0) : 0;
+                await statsRef.set({ count: currentCount + 1 }, { merge: true });
+            }
+        }
         res.status(200).send({ success: true });
     } catch (error) {
+        console.error('[VERIFY-SUB]', error.message);
         res.status(500).send({ error: error.message });
     }
 });
