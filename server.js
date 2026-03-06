@@ -4371,7 +4371,7 @@ app.post('/api/verify-purchase', async (req, res) => {
                 await statsRef.set({ count: currentCount + 1 }, { merge: true });
             }
         }
-        }
+        
   res.status(200).send({ success: true });
     } catch (error) {
         res.status(500).send({ error: error.message });
