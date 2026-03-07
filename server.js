@@ -3666,7 +3666,23 @@ app.get('/api/fish-search', async (req, res) => {
             swellHeight,
             oceanCurrent,
             tempShock,
-            chlorophyll: null  // fish-search: /api/plankton ile ayrı çekilir
+            chlorophyll: await (async () => {
+                try {
+                    const chlCacheKey = `plankton_${parseFloat(lat).toFixed(2)}_${parseFloat(lon).toFixed(2)}`;
+                    if (db) {
+                        const chlRef = db.collection('planktonCache').doc(chlCacheKey);
+                        const cached = await chlRef.get();
+                        if (cached.exists) {
+                            const d = cached.data();
+                            if (Date.now() - d.savedAt < 6 * 60 * 60 * 1000) {
+                                return d.result?.chlorophyll ?? null;
+                            }
+                        }
+                    }
+                    const freshChl = await fetchChlorophyll(lat, lon);
+                    return freshChl?.chlorophyll ?? null;
+                } catch(e) { return null; }
+            })()
         };
 
         const result = calculateFishScore(fish, fishKey, baseParams);
