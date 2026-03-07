@@ -2046,88 +2046,79 @@
     <!-- ═══════════════════════════════════════════════════════════════════
          PAYWALL MODAL
          ═══════════════════════════════════════════════════════════════════ -->
-    <div id="paywall-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:100000; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; padding:20px;">
-        <div style="background:linear-gradient(135deg, #0d1520, #162030); border-radius:20px; max-width:380px; width:100%; padding:30px 24px; text-align:center; border:1px solid rgba(0,200,200,0.2); box-shadow:0 20px 60px rgba(0,0,0,0.5);">
-            <!-- Close button -->
-            <div style="text-align:right; margin:-10px -4px 0 0;">
-                <button onclick="closePaywall()" style="background:none; border:none; color:#8892a3; font-size:24px; cursor:pointer;">✕</button>
-            </div>
-            
+    <div id="paywall-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:100000; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; padding:16px;">
+        <div style="background:linear-gradient(135deg, #0d1520, #162030); border-radius:20px; max-width:380px; width:100%; padding:20px 20px 16px; text-align:center; border:1px solid rgba(0,200,200,0.2); box-shadow:0 20px 60px rgba(0,0,0,0.5); max-height:92vh; overflow-y:auto;">
             <!-- Icon & Title -->
-            <div style="font-size:48px; margin-bottom:10px;">🐟</div>
-            <div id="paywall-title" style="font-size:20px; font-weight:700; color:#fff; margin-bottom:6px;">Günlük Hakkınız Doldu</div>
-            <div id="paywall-subtitle" style="font-size:13px; color:#8892a3; margin-bottom:24px;">MERALOJİ PRO ile sınırsız tahmin yapın</div>
+            <div style="font-size:36px; margin-bottom:6px;">🐟</div>
+            <div id="paywall-title" style="font-size:18px; font-weight:700; color:#fff; margin-bottom:4px;">Günlük Hakkınız Doldu</div>
+            <div id="paywall-subtitle" style="font-size:12px; color:#8892a3; margin-bottom:16px;">MERALOJİ PRO ile sınırsız tahmin yapın</div>
             
             <!-- Features -->
-            <div style="text-align:left; margin-bottom:24px;">
-                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; color:#c8d0dc; font-size:13px;">
-                    <span style="color:#00ffcc;">✓</span> Sınırsız harita tıklama
+            <div style="text-align:left; margin-bottom:16px;">
+                <div style="display:flex; align-items:center; gap:8px; padding:5px 0; color:#c8d0dc; font-size:12px;">
+                    <span style="color:#00ffcc;">✓</span> Sınırsız mera analizi ve bölge tarama
                 </div>
-                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; color:#c8d0dc; font-size:13px;">
-                    <span style="color:#00ffcc;">✓</span> 82 balık türü — tam liste
+                <div style="display:flex; align-items:center; gap:8px; padding:5px 0; color:#c8d0dc; font-size:12px;">
+                    <span style="color:#00ffcc;">✓</span> 83+ balık türü — tam liste ve av taktikleri
                 </div>
-                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; color:#c8d0dc; font-size:13px;">
-                    <span style="color:#00ffcc;">✓</span> Saatlik skor grafiği + En İyi Saat
+                <div style="display:flex; align-items:center; gap:8px; padding:5px 0; color:#c8d0dc; font-size:12px;">
+                    <span style="color:#00ffcc;">✓</span> Saatlik skor grafiği + 7 günlük tahmin
                 </div>
-                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; color:#c8d0dc; font-size:13px;">
-                    <span style="color:#00ffcc;">✓</span> Sınırsız bölge tarama
-                </div>
-                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; color:#c8d0dc; font-size:13px;">
+                <div style="display:flex; align-items:center; gap:8px; padding:5px 0; color:#c8d0dc; font-size:12px;">
                     <span style="color:#00ffcc;">✓</span> Detaylı skor analizi (15+ parametre)
-                </div>
-                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; color:#c8d0dc; font-size:13px;">
-                    <span style="color:#00ffcc;">✓</span> 7 günlük tahmin
                 </div>
             </div>
             
             <!-- Pricing Cards -->
-            <div style="display:flex; gap:10px; margin-bottom:16px;">
+            <div style="display:flex; gap:10px; margin-bottom:12px;">
                 <!-- Monthly -->
-                <div style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(0,200,200,0.15); border-radius:12px; padding:14px 10px; cursor:pointer;" onclick="upgradeToPro('monthly')">
+                <div style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(0,200,200,0.15); border-radius:12px; padding:12px 10px; cursor:pointer;" onclick="upgradeToPro('monthly')">
                     <div style="font-size:11px; color:#8892a3; margin-bottom:4px;">AYLIK</div>
                     <div style="font-size:22px; font-weight:700; color:#00ffcc;">₺9,99</div>
-                    <div style="font-size:10px; color:#8892a3;">+ KDV</div>
+                    <div style="font-size:10px; color:#8892a3;">+ KDV <span style="color:#556;">(₺11,99)</span></div>
                     <div style="font-size:10px; color:#ff851b;">⏳ 30 Haziran'a özel</div>
                     <div style="font-size:10px; color:#8892a3; text-decoration:line-through;">Sonra ₺29,99/ay</div>
                 </div>
                 <!-- Yearly -->
-                <div style="flex:1; background:rgba(0,200,200,0.08); border:2px solid rgba(0,200,200,0.4); border-radius:12px; padding:14px 10px; position:relative; cursor:pointer;" onclick="upgradeToPro('yearly')">
-                    <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:linear-gradient(90deg,#00c8c8,#00ffcc); color:#000; font-size:9px; font-weight:700; padding:2px 10px; border-radius:10px;">EN AVANTAJLI</div>
+                <div style="flex:1; background:rgba(0,200,200,0.08); border:2px solid rgba(0,200,200,0.4); border-radius:12px; padding:12px 10px; padding-top:20px; position:relative; cursor:pointer;" onclick="upgradeToPro('yearly')">
+                    <div style="position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:linear-gradient(90deg,#00c8c8,#00ffcc); color:#000; font-size:9px; font-weight:700; padding:3px 12px; border-radius:10px; white-space:nowrap;">EN AVANTAJLI</div>
                     <div style="font-size:11px; color:#8892a3; margin-bottom:4px;">YILLIK</div>
                     <div style="font-size:22px; font-weight:700; color:#00ffcc;">₺59,99</div>
-                    <div style="font-size:10px; color:#8892a3;">+ KDV &nbsp;·&nbsp; Aylık ₺5 — %83 tasarruf</div>
+                    <div style="font-size:10px; color:#8892a3;">+ KDV <span style="color:#556;">(₺71,99)</span> · %83 tasarruf</div>
                     <div style="font-size:10px; color:#ff851b;">🎯 İlk 500 kişiye özel</div>
                     <div style="font-size:10px; color:#8892a3; text-decoration:line-through;">Sonra ₺199,99/yıl</div>
                 </div>
             </div>
 
             <!-- Aylık geri sayım -->
-            <div style="background:rgba(255,133,27,0.08);border:1px solid rgba(255,133,27,0.25);border-radius:10px;padding:10px 14px;margin-bottom:10px;">
+            <div style="background:rgba(255,133,27,0.08);border:1px solid rgba(255,133,27,0.25);border-radius:10px;padding:8px 12px;margin-bottom:8px;">
                 <div style="font-size:11px;color:#ff851b;font-weight:700;margin-bottom:2px;">⏳ AYLIK FİYAT 30 HAZİRAN'A KADAR GEÇERLİ</div>
                 <div style="font-size:11px;color:#c8d0dc;">1 Temmuz'dan itibaren aylık plan <strong style="color:#fff;">₺29,99</strong> olacak.</div>
             </div>
 
             <!-- 500 kişi sayacı (yıllık) -->
-            <div style="background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.25);border-radius:10px;padding:10px 14px;margin-bottom:16px;">
-                <div style="font-size:11px;color:#ff851b;font-weight:700;margin-bottom:4px;">🎯 YILLIK PLAN — İLK 500 KİŞİYE ÖZEL FİYAT</div>
-                <div style="font-size:11px;color:#c8d0dc;">Kontenjan dolunca yıllık plan <strong style="color:#fff;">₺199,99</strong> olacak. Şimdi al, ₺59,99 fiyatı sonsuza kilitli kalır.</div>
-                <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
+            <div style="background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.25);border-radius:10px;padding:8px 12px;margin-bottom:12px;">
+                <div style="font-size:11px;color:#ff851b;font-weight:700;margin-bottom:2px;">🎯 YILLIK PLAN — İLK 500 KİŞİYE ÖZEL FİYAT</div>
+                <div style="font-size:11px;color:#c8d0dc;">Kontenjan dolunca yıllık plan <strong style="color:#fff;">₺199,99</strong> olacak.</div>
+                <div style="margin-top:6px;display:flex;align-items:center;gap:8px;">
                     <div style="font-size:12px;color:#c8d0dc;">Kalan:</div>
                     <div style="font-size:18px;font-weight:700;color:#ff4444;" id="paywall-slots">...</div>
                     <div style="font-size:11px;color:#8892a3;">/ 500 kişi</div>
                 </div>
-                <div style="margin-top:6px;background:rgba(0,0,0,0.3);border-radius:4px;height:5px;overflow:hidden;">
+                <div style="margin-top:4px;background:rgba(0,0,0,0.3);border-radius:4px;height:4px;overflow:hidden;">
                     <div id="paywall-slots-bar" style="height:100%;background:linear-gradient(90deg,#ff4444,#ff851b);width:0%;transition:width 0.8s;"></div>
                 </div>
             </div>
             
             <!-- CTA -->
-            <button onclick="upgradeToPro('yearly')" style="width:100%; padding:14px; border:none; border-radius:12px; background:linear-gradient(135deg, #00c8c8, #00ffcc); color:#000; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:0.5px;">
+            <button onclick="upgradeToPro('yearly')" style="width:100%; padding:13px; border:none; border-radius:12px; background:linear-gradient(135deg, #00c8c8, #00ffcc); color:#000; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:0.5px; margin-bottom:10px;">
                 PRO'ya Yükselt
             </button>
-            
-            <!-- Skip -->
-            <div onclick="closePaywall()" style="margin-top:12px; font-size:12px; color:#556; cursor:pointer;">Ücretsiz devam et (yarın hak yenilenir)</div>
+
+            <!-- Kapat butonu -->
+            <button onclick="closePaywall()" style="width:100%; padding:10px; border:1px solid rgba(255,255,255,0.15); border-radius:12px; background:transparent; color:#8892a3; font-size:13px; cursor:pointer;">
+                Kapat
+            </button>
         </div>
     </div>
 
@@ -4845,7 +4836,7 @@
                         <h3>🔒 +${list.length - 5} balık daha var!</h3>
                         <p>İlk 3 sonucun skorunu, yem/olta detaylarını ve tüm ${list.length} türü gör</p>
                         <div style="background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.3);border-radius:8px;padding:8px 12px;margin-bottom:10px;">
-                            <div style="font-size:0.7rem;color:#ff851b;margin-bottom:2px;">🎯 İLK 1000'E ÖZEL FİYAT</div>
+                            <div style="font-size:0.7rem;color:#ff851b;margin-bottom:2px;">🎯 İLK 500 KİŞİYE ÖZEL FİYAT</div>
                             <div style="font-size:1.1rem;font-weight:700;color:#00ffcc;">₺9,99/ay + KDV</div>
                             <div style="font-size:0.68rem;color:var(--text-muted);">Yıllık: ₺59,99 + KDV (₺5/ay)</div>
                             <div style="margin-top:6px;font-size:0.72rem;">
