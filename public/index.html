@@ -4764,6 +4764,8 @@
                             ${sd.tempShock ? `<div style="color: var(--cyan); font-size: 0.7rem; margin-top: 4px;">⚡ ${t('starTempShock')}: ${sd.tempShock.change > 0 ? '+' : ''}${sd.tempShock.change}°C/24h</div>` : ''}
                             ${sd.midday ? `<div style="color: var(--yellow); font-size: 0.7rem; margin-top: 4px;">☀️ Öğlen bastırması: ×${sd.midday.penalty.toFixed(2)}</div>` : ''}
                             ${sd.volatility ? `<div style="color: var(--cyan); font-size: 0.7rem; margin-top: 4px;">🐟 Sürü faktörü: ×${sd.volatility.multiplier}${sd.volatility.migratory ? (CURRENT_LANG === 'tr' ? ' (Yüksek Göçmen)' : ' (High Migratory)') : ''}</div>` : ''}
+                            ${sd.chlorophyll ? starLine(`🌿 Klorofil (${sd.chlorophyll.value?.toFixed(2)} mg/m³)`, sd.chlorophyll.stars, '', '', '') : ''}
+                            ${sd.thermocline ? starLine(`🌊 Termoklin (${sd.thermocline.depth}m — ${sd.thermocline.position === 'AT' ? 'Bandında' : sd.thermocline.position === 'BELOW' ? 'Altında' : 'Üstünde'})`, sd.thermocline.stars, '', '', '') : ''}
                             ${sd.camDeniz ? `<div style="color: var(--yellow); font-size: 0.7rem; margin-top: 4px;">🪟 Cam deniz cezası: ×${sd.camDeniz.penalty.toFixed(2)}</div>` : ''}
                             ${sd.penalties && sd.penalties.length > 0 ? `<div style="color: var(--red); font-size: 0.7rem; margin-top: 4px;">⚠️ ${sd.penalties.join(', ')}</div>` : ''}
                         </div>
@@ -5182,6 +5184,8 @@
                         ${c.salinity ? `<div style="font-size:0.68rem; color:var(--text-muted); margin-top:4px;">🧂 Tuzluluk: ‰${c.salinity} (${c.region})</div>` : ''}
                         ${sd.midday ? '<div style="color:var(--yellow);font-size:0.7rem;margin-top:4px;">☀️ Öğlen bastırması: ×' + sd.midday.penalty.toFixed(2) + '</div>' : ''}
                         ${sd.volatility ? '<div style="color:var(--cyan);font-size:0.7rem;margin-top:4px;">🐟 Sürü faktörü: ×' + sd.volatility.multiplier + '</div>' : ''}
+                        ${sd.chlorophyll ? starLine('🌿 Klorofil (' + (sd.chlorophyll.value?.toFixed(2)) + ' mg/m³)', sd.chlorophyll.stars, '', '', '') : ''}
+                        ${sd.thermocline ? starLine('🌊 Termoklin (' + sd.thermocline.depth + 'm — ' + (sd.thermocline.position === 'AT' ? 'Bandında' : sd.thermocline.position === 'BELOW' ? 'Altında' : 'Üstünde') + ')', sd.thermocline.stars, '', '', '') : ''}
                         ${sd.camDeniz ? '<div style="color:var(--yellow);font-size:0.7rem;margin-top:4px;">🪟 Cam deniz cezası: ×' + sd.camDeniz.penalty.toFixed(2) + '</div>' : ''}
                         ${sd.penalties && sd.penalties.length > 0 ? '<div style="color:var(--red);font-size:0.7rem;margin-top:4px;">⚠️ ' + sd.penalties.join(', ') + '</div>' : ''}
                     </div>`;
