@@ -15,7 +15,7 @@
     <title>MERALOJİ | F.I.S.H. System — Akıllı Balıkçılık Tahmin Uygulaması</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Türkiye kıyılarında 82 balık türü için gerçek zamanlı avlanma tahmini. Su sıcaklığı, dalga, basınç, ay fazı ve 15+ parametreyle bilimsel skor hesaplama. Nerede, ne zaman, hangi balık?">
+    <meta name="description" content="Türkiye kıyılarında 83+ balık türü için gerçek zamanlı avlanma tahmini. Su sıcaklığı, dalga, basınç, ay fazı ve 22 çevresel parametreyle bilimsel skor hesaplama. Nerede, ne zaman, hangi balık?">
     <meta name="keywords" content="balıkçılık, balık tahmini, olta, deniz durumu, meraloji, fishing forecast, türkiye balıkçılık, levrek, lüfer, çipura, balık avı, solunar, dalga tahmini">
     <meta name="author" content="MERALOJİ F.I.S.H Engine">
     <meta name="robots" content="index, follow">
@@ -24,7 +24,7 @@
     <!-- Open Graph (Facebook, WhatsApp, Telegram paylaşımı) -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="MERALOJİ — Akıllı Balıkçılık Tahmin Sistemi">
-    <meta property="og:description" content="82 balık türü, 15+ çevresel parametre, gerçek zamanlı skor. Haritada tıkla, hangi balığın nerede aktif olduğunu öğren.">
+    <meta property="og:description" content="83+ balık türü, 22 çevresel parametre, gerçek zamanlı skor. Haritada tıkla, hangi balığın nerede aktif olduğunu öğren.">
     <meta property="og:url" content="https://meraloji.com/">
     <meta property="og:site_name" content="MERALOJİ">
     <meta property="og:locale" content="tr_TR">
@@ -35,7 +35,7 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="MERALOJİ — Akıllı Balıkçılık Tahmin Sistemi">
-    <meta name="twitter:description" content="82 balık türü, 15+ çevresel parametre, gerçek zamanlı skor. Nerede, ne zaman, hangi balık?">
+    <meta name="twitter:description" content="83+ balık türü, 22 çevresel parametre, gerçek zamanlı skor. Nerede, ne zaman, hangi balık?">
     <meta name="twitter:image" content="https://meraloji.com/icons/og-image.png">
     
     <!-- Favicon -->
@@ -59,7 +59,7 @@
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "MERALOJİ F.I.S.H. System",
-        "description": "Türkiye kıyılarında 82 balık türü için gerçek zamanlı avlanma tahmini. Su sıcaklığı, dalga, basınç, ay fazı ve 15+ parametreyle bilimsel skor hesaplama.",
+        "description": "Türkiye kıyılarında 83+ balık türü için gerçek zamanlı avlanma tahmini. Su sıcaklığı, dalga, basınç, ay fazı ve 22 çevresel parametreyle bilimsel skor hesaplama.",
         "url": "https://meraloji.com",
         "applicationCategory": "SportsApplication",
         "operatingSystem": "Android, Web",
@@ -2065,7 +2065,7 @@
                     <span style="color:#00ffcc;">✓</span> Saatlik skor grafiği + 7 günlük tahmin
                 </div>
                 <div style="display:flex; align-items:center; gap:8px; padding:5px 0; color:#c8d0dc; font-size:12px;">
-                    <span style="color:#00ffcc;">✓</span> Detaylı skor analizi (15+ parametre)
+                    <span style="color:#00ffcc;">✓</span> Detaylı skor analizi (22 çevresel parametre)
                 </div>
             </div>
             
@@ -4678,7 +4678,7 @@
                     if (!isPremium && !isGracePeriod) {
                         starsHtml = `
                             <div onclick="showPaywall('analysis')" style="margin-top:8px;padding:12px;background:rgba(0,0,0,0.2);border-radius:6px;border:1px dashed var(--border-subtle);text-align:center;cursor:pointer;">
-                                <div style="font-size:0.7rem;color:var(--cyan);">📊 SKOR ANALİZİ (15+ parametre)</div>
+                                <div style="font-size:0.7rem;color:var(--cyan);">📊 SKOR ANALİZİ (22 parametre)</div>
                                 <div style="font-size:0.65rem;color:#8892a3;margin-top:4px;">🔒 PRO ile açılır</div>
                             </div>`;
                     } else {
@@ -5161,7 +5161,7 @@
                 if (sd) {
                     if (!isPremium && !isGracePeriod) {
                         starsHtml = `<div onclick="showPaywall('analysis')" style="margin-top:10px; padding:14px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px dashed var(--border-subtle); text-align:center; cursor:pointer;">
-                            <div style="font-size:0.75rem; color:var(--cyan);">📊 SKOR ANALİZİ (15+ parametre)</div>
+                            <div style="font-size:0.75rem; color:var(--cyan);">📊 SKOR ANALİZİ (22 parametre)</div>
                             <div style="font-size:0.65rem; color:#8892a3; margin-top:6px;">🔒 Su sıcaklığı, dalga, rüzgar, basınç, akıntı, mevsim...</div>
                             <div style="font-size:0.7rem; color:#ff851b; margin-top:6px;">PRO ile aç →</div>
                         </div>`;
@@ -6148,7 +6148,7 @@ function showPaywall(reason) {
         subtitle.textContent = 'PRO ile sınırsız bölge taraması yapın';
     } else if (reason === 'list') {
         title.textContent = 'Daha Fazla Balık Görmek İçin';
-        subtitle.textContent = '82 balık türünün tamamını PRO ile keşfedin';
+        subtitle.textContent = '83+ balık türünün tamamını PRO ile keşfedin';
     } else if (reason === 'forecast') {
         title.textContent = '7 Günlük Tahmin';
         subtitle.textContent = 'Önümüzdeki 7 günün tahminini PRO ile görün';
@@ -6157,7 +6157,7 @@ function showPaywall(reason) {
         subtitle.textContent = 'En iyi avlanma saatini PRO ile keşfedin';
     } else if (reason === 'analysis') {
         title.textContent = 'Detaylı Skor Analizi';
-        subtitle.textContent = '15+ parametre ile derinlemesine analiz';
+        subtitle.textContent = '22 çevresel parametre ile derinlemesine analiz';
     } else {
         title.textContent = 'MERALOJİ PRO';
         subtitle.textContent = 'Akıllı balıkçılığın tüm gücünü açın';
