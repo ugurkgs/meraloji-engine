@@ -2303,7 +2303,7 @@
                 <div class="user-badge" id="user-badge" onclick="showUserMenu()">
                     <img id="user-avatar" src="" alt="">
                     <span id="user-name"></span>
-                    <span id="pro-tag" class="pro-tag" style="display:none">PRO</span>
+                    <span id="pro-tag" class="pro-tag" style="display:none;cursor:pointer;" onclick="onProTagClick()">PRO</span>
                 </div>
                 <span class="hud-depth" id="depth-display">⚓ --m</span>
             </div>
@@ -6015,6 +6015,7 @@ auth.onAuthStateChanged(async (user) => {
         await checkSubscriptionStatus();
         loadProSlotsCount(); // fire-and-forget
         updateUserUI();
+        if (isGracePeriod) setTimeout(showGraceWelcome, 1500);
         try { await loadScanUsage(); } catch(e) {}
     } else {
         currentUser = null;
@@ -6076,7 +6077,7 @@ function updateUserUI() {
             proTag.style.display = 'inline';
             proTag.style.background = 'linear-gradient(90deg, #00c8c8, #00ffcc)';
         } else if (isGracePeriod) {
-            proTag.textContent = `🎁 ${graceDaysLeft}g`;
+            proTag.textContent = `🎁 Deneme ${graceDaysLeft}/14`;
             proTag.style.display = 'inline';
             proTag.style.background = 'linear-gradient(90deg, #f7b731, #f5a623)';
         } else {
@@ -6085,6 +6086,40 @@ function updateUserUI() {
             proTag.style.background = 'linear-gradient(90deg, #ff851b, #ff6b35)';
         }
         badge.style.display = 'flex';
+    }
+}
+
+// Grace period ilk giriş bildirimi
+function showGraceWelcome() {
+    const key = 'grace_welcome_shown_' + (currentUser ? currentUser.uid : 'x');
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, '1');
+
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+        background:linear-gradient(135deg,#1a2a1a,#0d1f0d);
+        border:1px solid rgba(0,200,100,0.4);
+        color:#fff; padding:14px 20px; border-radius:14px;
+        font-size:13px; z-index:99999; max-width:320px; text-align:center;
+        box-shadow:0 4px 20px rgba(0,0,0,0.5);
+    `;
+    toast.innerHTML = \`
+        <div style="font-size:22px;margin-bottom:6px;">🎁</div>
+        <div style="font-weight:700;color:#00ffcc;margin-bottom:4px;">14 Günlük Ücretsiz Deneme Başladı!</div>
+        <div style="color:#c8d0dc;font-size:12px;margin-bottom:10px;">Tüm PRO özellikleri ücretsiz kullanın. Beğenirseniz hemen abone olabilirsiniz.</div>
+        <button onclick="showPaywall('grace_welcome');this.closest('div[style]').remove();" style="background:linear-gradient(135deg,#00c8c8,#00ffcc);border:none;border-radius:8px;padding:7px 18px;font-weight:700;color:#000;cursor:pointer;font-size:12px;">PRO'ya Geç →</button>
+        <span onclick="this.closest('div[style]').remove();" style="display:block;margin-top:8px;font-size:11px;color:#556;cursor:pointer;">Daha sonra hatırlat</span>
+    \`;
+    document.body.appendChild(toast);
+    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 10000);
+}
+
+function onProTagClick() {
+    if (isGracePeriod) {
+        showPaywall('grace_tag');
+    } else if (!isPremium) {
+        showPaywall('tag');
     }
 }
 
@@ -6111,7 +6146,10 @@ function showPaywall(reason) {
     const subtitle = document.getElementById('paywall-subtitle');
     loadProSlotsCount(); // Paywall açılırken sayacı tazele
     
-    if (reason === 'click') {
+    if (reason === 'grace_welcome' || reason === 'grace_tag') {
+        title.textContent = `🎁 ${graceDaysLeft} Gün Deneme Süreniz Var`;
+        subtitle.textContent = 'Şimdi abone olun, fiyat sonsuza kilitli kalır';
+    } else if (reason === 'click') {
         title.textContent = 'Günlük 5 Tahmin Hakkınız Doldu';
         subtitle.textContent = 'PRO ile sınırsız tahmin yapın, tüm balıkları görün';
     } else if (reason === 'scan') {
