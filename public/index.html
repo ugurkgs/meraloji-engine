@@ -40,7 +40,7 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">"
     
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
@@ -2095,7 +2095,7 @@
                     <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:linear-gradient(90deg,#00c8c8,#00ffcc); color:#000; font-size:9px; font-weight:700; padding:2px 10px; border-radius:10px;">EN AVANTAJLI</div>
                     <div style="font-size:11px; color:#8892a3; margin-bottom:4px;">YILLIK</div>
                     <div style="font-size:22px; font-weight:700; color:#00ffcc;">₺59,99</div>
-                    <div style="font-size:10px; color:#8892a3;">+ KDV &nbsp;·&nbsp; Aylık ₺5 — %50 tasarruf</div>
+                    <div style="font-size:10px; color:#8892a3;">+ KDV &nbsp;·&nbsp; Aylık ₺5 — %83 tasarruf</div>
                     <div style="font-size:10px; color:#ff851b;">🎯 İlk 500 kişiye özel</div>
                     <div style="font-size:10px; color:#8892a3; text-decoration:line-through;">Sonra ₺199,99/yıl</div>
                 </div>
@@ -2303,7 +2303,7 @@
                 <div class="user-badge" id="user-badge" onclick="showUserMenu()">
                     <img id="user-avatar" src="" alt="">
                     <span id="user-name"></span>
-                    <span id="pro-tag" class="pro-tag" style="display:none;cursor:pointer;" onclick="onProTagClick()">PRO</span>
+                    <span id="pro-tag" class="pro-tag" style="display:none">PRO</span>
                 </div>
                 <span class="hud-depth" id="depth-display">⚓ --m</span>
             </div>
@@ -3138,8 +3138,13 @@
                 TACTIC_DAY: "☀️ GÜNDÜZ TAKTIK: Çipura dip kayalıklarda, Kefal yüzey yakınında, İstavrit ve Barbun da aktif. Küçük yem, ince misina.",
                 TACTIC_STANDARD: "🌤️ Normal koşullar — standart taktiklerle güzel av yapabilirsiniz. Skor listesindeki en yüksek türü hedefleyin.",
                 TACTIC_HOT_SPOT: "🔥 SICAK NOKTA! Bu mera şu an çok aktif — hemen deneyin: ",
+                TACTIC_HOT_SPOT_FUTURE: "🔥 SICAK NOKTA! Bu mera o gün çok aktif olacak — hedefleyin: ",
                 TACTIC_MODERATE: "📊 Orta aktivite, sabır gerekli. Doğru yem ve yerde şansınız yüksek: ",
+                TACTIC_MODERATE_FUTURE: "📊 Orta aktivite bekleniyor. Doğru yem ve yerde şansınız yüksek olacak: ",
                 TACTIC_LOW_ACTIVITY: "😴 Düşük aktivite. Farklı derinlik veya yakın nokta deneyin, ya da altın saati bekleyin.",
+                TACTIC_LOW_ACTIVITY_FUTURE: "😴 Düşük aktivite bekleniyor. Farklı derinlik veya yakın nokta tercih edin.",
+                TACTIC_FEEDING_FRENZY_FUTURE: "⚡ ÇILGIN BESLENME BEKLENİYOR! Basınç düşüşü öngörülüyor — balıklar çok agresif olacak.",
+                TACTIC_STANDARD_FUTURE: "🌤️ Normal koşullar bekleniyor — skor listesindeki en yüksek türü hedefleyin.",
                 TACTIC_STRONG_WIND: "💨 Çok rüzgarlı! Kıyı avı zorlaşır — rüzgar altı kıyıları ve korunaklı koyları tercih edin.",
                 TACTIC_DYNAMIC: "🎯 ÖNERİLEN HEDEF: ", // + topFishNames
                 
@@ -3366,8 +3371,13 @@
                 TACTIC_DAY: "☀️ DAYTIME TACTICS: Gilthead on rocky bottom, Mullet near surface, Horse Mackerel and Red Mullet also active. Small bait, thin line.",
                 TACTIC_STANDARD: "🌤️ Good standard conditions — solid fishing with regular tactics. Target the top species in the score list.",
                 TACTIC_HOT_SPOT: "🔥 HOT SPOT! This area is very active right now — try immediately: ",
+                TACTIC_HOT_SPOT_FUTURE: "🔥 HOT SPOT! This area will be very active — plan for: ",
                 TACTIC_MODERATE: "📊 Moderate activity, patience required. Right bait in the right spot will pay off: ",
+                TACTIC_MODERATE_FUTURE: "📊 Moderate activity expected. Right bait in the right spot will pay off: ",
                 TACTIC_LOW_ACTIVITY: "😴 Low activity. Try a different depth or nearby spot, or wait for the golden hour.",
+                TACTIC_LOW_ACTIVITY_FUTURE: "😴 Low activity expected. Try a different depth or nearby spot.",
+                TACTIC_FEEDING_FRENZY_FUTURE: "⚡ FEEDING FRENZY EXPECTED! Pressure drop forecast — fish will be very aggressive.",
+                TACTIC_STANDARD_FUTURE: "🌤️ Standard conditions expected — target the top species in the score list.",
                 TACTIC_STRONG_WIND: "💨 Very windy! Shore fishing gets tough — seek sheltered coves and lee shores.",
                 TACTIC_DYNAMIC: "🎯 RECOMMENDED TARGET: ", // + topFishNames
                 
@@ -4835,7 +4845,7 @@
                         <h3>🔒 +${list.length - 5} balık daha var!</h3>
                         <p>İlk 3 sonucun skorunu, yem/olta detaylarını ve tüm ${list.length} türü gör</p>
                         <div style="background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.3);border-radius:8px;padding:8px 12px;margin-bottom:10px;">
-                            <div style="font-size:0.7rem;color:#ff851b;margin-bottom:2px;">🎯 İLK 500'E ÖZEL FİYAT</div>
+                            <div style="font-size:0.7rem;color:#ff851b;margin-bottom:2px;">🎯 İLK 1000'E ÖZEL FİYAT</div>
                             <div style="font-size:1.1rem;font-weight:700;color:#00ffcc;">₺9,99/ay + KDV</div>
                             <div style="font-size:0.68rem;color:var(--text-muted);">Yıllık: ₺59,99 + KDV (₺5/ay)</div>
                             <div style="margin-top:6px;font-size:0.72rem;">
@@ -5376,11 +5386,34 @@
             document.getElementById('dd-score').style.color = getScoreColor(day.score);
             document.getElementById('dd-weather').innerText = t(day.weatherSummary) || day.weatherSummary;
             
-            // Dinamik taktik gösterimi
-            let tacticText = t(day.tacticKey) || day.tacticKey;
-            if (day.tacticKey === 'TACTIC_DYNAMIC' && day.topFishNames) {
+            // Dinamik taktik gösterimi — bugün vs gelecek gün ayrımı
+            const isFuture = index > 0;
+            let tacticKey = day.tacticKey;
+            
+            // Gelecek günler için _FUTURE varyantı varsa kullan
+            if (isFuture) {
+                const futureKey = tacticKey + '_FUTURE';
+                if (t(futureKey) && t(futureKey) !== futureKey) {
+                    tacticKey = futureKey;
+                }
+            }
+            
+            let tacticText = t(tacticKey) || t(day.tacticKey) || day.tacticKey;
+            
+            // Taktik verisindeki balık isimlerini ekle
+            if (day.tacticData?.fish) {
+                if (Array.isArray(day.tacticData.fish) && typeof day.tacticData.fish[0] === 'object') {
+                    // HOT_SPOT formatı: [{name, score, bait, lure}]
+                    const fishInfo = day.tacticData.fish.map(f => `${f.name} (%${Math.round(f.score)})`).join(', ');
+                    tacticText += fishInfo;
+                } else if (Array.isArray(day.tacticData.fish)) {
+                    // MODERATE formatı: ["name1", "name2"]
+                    tacticText += day.tacticData.fish.join(', ');
+                }
+            } else if (day.tacticKey === 'TACTIC_DYNAMIC' && day.topFishNames) {
                 tacticText = t('TACTIC_DYNAMIC') + day.topFishNames;
             }
+            
             document.getElementById('dd-tactic').innerText = tacticText;
 
             renderFishList(day.fishList, 'dd-fish-list');
@@ -5982,7 +6015,6 @@ auth.onAuthStateChanged(async (user) => {
         await checkSubscriptionStatus();
         loadProSlotsCount(); // fire-and-forget
         updateUserUI();
-        if (isGracePeriod) setTimeout(showGraceWelcome, 1500);
         try { await loadScanUsage(); } catch(e) {}
     } else {
         currentUser = null;
@@ -5994,7 +6026,7 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-// Firestore'dan toplam pro kullanıcı sayısını çek — 500 kişi kontenjanı
+// Firestore'dan toplam pro kullanıcı sayısını çek — 1000 kişi kontenjanı
 // Pro slot sayacı — /api/pro-slots endpoint'inden çeker
 async function loadProSlotsCount() {
     try {
@@ -6044,7 +6076,7 @@ function updateUserUI() {
             proTag.style.display = 'inline';
             proTag.style.background = 'linear-gradient(90deg, #00c8c8, #00ffcc)';
         } else if (isGracePeriod) {
-            proTag.textContent = `🎁 Deneme ${graceDaysLeft}/14`;
+            proTag.textContent = `🎁 ${graceDaysLeft}g`;
             proTag.style.display = 'inline';
             proTag.style.background = 'linear-gradient(90deg, #f7b731, #f5a623)';
         } else {
@@ -6053,41 +6085,6 @@ function updateUserUI() {
             proTag.style.background = 'linear-gradient(90deg, #ff851b, #ff6b35)';
         }
         badge.style.display = 'flex';
-    }
-}
-
-// Grace period ilk giriş bildirimi
-function showGraceWelcome() {
-    const key = 'grace_welcome_shown_' + (currentUser ? currentUser.uid : 'x');
-    if (sessionStorage.getItem(key)) return;
-    sessionStorage.setItem(key, '1');
-
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-        position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
-        background:linear-gradient(135deg,#1a2a1a,#0d1f0d);
-        border:1px solid rgba(0,200,100,0.4);
-        color:#fff; padding:14px 20px; border-radius:14px;
-        font-size:13px; z-index:99999; max-width:320px; text-align:center;
-        box-shadow:0 4px 20px rgba(0,0,0,0.5);
-    `;
-    toast.innerHTML = `
-        <div style="font-size:22px;margin-bottom:6px;">🎁</div>
-        <div style="font-weight:700;color:#00ffcc;margin-bottom:4px;">14 Günlük Ücretsiz Deneme Başladı!</div>
-        <div style="color:#c8d0dc;font-size:12px;margin-bottom:10px;">Tüm PRO özellikleri ücretsiz kullanın. Beğenirseniz hemen abone olabilirsiniz.</div>
-        <button onclick="showPaywall('grace_welcome');this.closest('div[style]').remove();" style="background:linear-gradient(135deg,#00c8c8,#00ffcc);border:none;border-radius:8px;padding:7px 18px;font-weight:700;color:#000;cursor:pointer;font-size:12px;">PRO'ya Geç →</button>
-        <span onclick="this.closest('div[style]').remove();" style="display:block;margin-top:8px;font-size:11px;color:#556;cursor:pointer;">Daha sonra hatırlat</span>
-    `;
-    document.body.appendChild(toast);
-    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 10000);
-}
-
-// Pro badge tıklandığında
-function onProTagClick() {
-    if (isGracePeriod) {
-        showPaywall('grace_tag');
-    } else if (!isPremium) {
-        showPaywall('tag');
     }
 }
 
@@ -6114,12 +6111,9 @@ function showPaywall(reason) {
     const subtitle = document.getElementById('paywall-subtitle');
     loadProSlotsCount(); // Paywall açılırken sayacı tazele
     
-    if (reason === 'grace_welcome' || reason === 'grace_tag') {
-        title.textContent = `🎁 ${graceDaysLeft} Gün Deneme Süreniz Var`;
-        subtitle.textContent = 'Şimdi abone olun, fiyat sonsuza kilitli kalır';
-    } else if (reason === 'click') {
-        title.textContent = 'Günlük Tıklama Hakkınız Doldu';
-        subtitle.textContent = 'PRO ile sınırsız nokta analizi yapın';
+    if (reason === 'click') {
+        title.textContent = 'Günlük 5 Tahmin Hakkınız Doldu';
+        subtitle.textContent = 'PRO ile sınırsız tahmin yapın, tüm balıkları görün';
     } else if (reason === 'scan') {
         title.textContent = 'Günlük Tarama Hakkınız Doldu';
         subtitle.textContent = 'PRO ile sınırsız bölge taraması yapın';
