@@ -1071,6 +1071,28 @@ const SPECIES_DB = {
         legalSize: "Yok",
         note: "⚠️ DİKENLERİ ZEHİRLİ! Dikkatli olun."
     },
+
+    "trakun": {
+    name: "Trakun (Tral)", nameEn: "Blue Runner", icon: "🐟", scientificName: "Caranx crysos",
+    photoId: 73,
+    category: "PELAGIC",
+    peakHours: "DAY", peakHoursDesc: "Sabah ve öğleden sonra sürü halinde aktif",
+    tempRange: { min: 17, opt: 25, max: 28 },
+    seasons: { winter: 0.20, spring: 0.55, summer: 0.95, autumn: 0.70 },
+    activity: "DAY",
+    pressureSensitivity: 0.3,
+    wavePref: 0.5,
+    clarityPref: "CLEAR",
+    currentPref: 0.6,
+    salinityPref: "HIGH",
+    planktonPref: "HIGH",
+    sstTrendPref: "WARMING",
+    regions: ["EGE", "AKDENİZ"],
+    depth: { min: 0, opt: 20, max: 50 },
+    advice: { bait: "Hamsi, İstavrit", lure: "Metal Kaşık, Jig", rig: "Paternoster, Trolling", hook: "2 - 4" },
+    legalSize: "18 cm",
+    note: "Sürü halinde yüzer. Yaz aylarında Ege ve Akdeniz kıyılarında yoğun."
+},
     "kefal": {
         name: "Kefal", nameEn: "Flathead Grey Mullet", icon: "🐟", scientificName: "Mugil cephalus",
         photoId: 44,
