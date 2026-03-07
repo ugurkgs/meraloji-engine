@@ -864,7 +864,7 @@ const SPECIES_DB = {
     },
     "ispendek": {
     name: "İspendek", nameEn: "Picarel", icon: "🐟", scientificName: "Spicara smaris",
-    photoId: 48,
+    photoId: 9,
     category: "KIYI",
     peakHours: "DAY", peakHoursDesc: "Gündüz aktif, sabah erken ve akşamüstü zirve",
     tempRange: { min: 13, opt: 19, max: 25 },
