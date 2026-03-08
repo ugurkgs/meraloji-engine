@@ -40,7 +40,7 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">"
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
     
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
@@ -4040,7 +4040,6 @@
                 
                 // API hatası kontrolü
                 if (data.error || !data.forecast) {
-                    hideLoading();
                     const msg = data.message || data.error || 'Veri alınamadı';
                     document.getElementById('log-output').innerHTML = `<div class="log-line" style="color:var(--yellow);">⚠️ ${msg} — tekrar deneyin</div>`;
                     setTimeout(() => { hideLoading(); }, 2000);
@@ -4774,7 +4773,8 @@
                 } // close if (scoreDetails)
 
                 // Fotoğraf butonu
-                const photoBtn = f.photoId ? `<span class="fish-photo-btn" onclick="showFishPhoto(${f.photoId}, '${displayName}', event)">👁️</span>` : '';
+                const safeDisplayName = (displayName || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const photoBtn = f.photoId ? `<span class="fish-photo-btn" onclick="showFishPhoto(${f.photoId}, '${safeDisplayName}', event)">👁️</span>` : '';
 
                 const protectedBanner = isProtected ? `
                     <div style="background:#cc0000;color:white;padding:6px 10px;font-size:0.78rem;font-weight:bold;border-radius:4px 4px 0 0;text-align:center;">
@@ -6139,7 +6139,6 @@ function showPaywall(reason) {
     const modal = document.getElementById('paywall-modal');
     const title = document.getElementById('paywall-title');
     const subtitle = document.getElementById('paywall-subtitle');
-    loadProSlotsCount(); // Paywall açılırken sayacı tazele
     
     if (reason === 'grace_welcome' || reason === 'grace_tag') {
         title.textContent = `🎁 ${graceDaysLeft} Gün Deneme Süreniz Var`;
