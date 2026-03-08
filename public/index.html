@@ -3985,7 +3985,7 @@
             // 🔒 Tıklama limiti kontrolü (PRO ve grace period = sınırsız)
             if (!isPremium && !isGracePeriod) {
                 try {
-                    const clickRes = await fetch('/api/use-click', { 
+                    const clickRes = await apiFetch('/api/use-click', { 
                         method: 'POST', 
                         headers: { 
                             'Content-Type': 'application/json',
@@ -4035,7 +4035,7 @@
             showLoading();
 
             try {
-                const res = await fetch(`/api/forecast?lat=${lat}&lon=${lon}`);
+                const res = await apiFetch(`/api/forecast?lat=${lat}&lon=${lon}`);
                 const data = await res.json();
                 
                 // API hatası kontrolü
@@ -4627,14 +4627,14 @@
                 
                 // [YENİ] 24 Saatlik Skor Grafiği
                 let hourlyChartHtml = '';
-                if (f.hourlyScores && f.hourlyScores.length === 24 && CURRENT_MODE === 'daily') {
+                if (CURRENT_MODE === 'daily') { // veri yoksa bile kilit göster
                     if (!isPremium && !isGracePeriod) {
                         hourlyChartHtml = `
                             <div onclick="showPaywall('chart')" style="margin-top:8px;padding:12px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px dashed var(--border-subtle);text-align:center;cursor:pointer;">
                                 <div style="font-size:0.7rem;color:var(--cyan);">📈 SAATLİK SKOR GRAFİĞİ</div>
                                 <div style="font-size:0.65rem;color:#8892a3;margin-top:4px;">🔒 PRO ile açılır</div>
                             </div>`;
-                    } else {
+                    } else if (f.hourlyScores && f.hourlyScores.length === 24) {
                     const scores = f.hourlyScores;
                     const maxS = Math.max(...scores, 1);
                     const nowH = new Date().getHours();
@@ -4671,16 +4671,15 @@
                     } // close else (isPremium)
                 } // close if (hourlyScores)
                 
-                // Yıldız sistemi (scoreDetails varsa)
+                // Yıldız sistemi — önce premium kontrolü, veri yokluğu kilit göstermeyi engellemesin
                 let starsHtml = '';
-                if (f.scoreDetails) {
-                    if (!isPremium && !isGracePeriod) {
-                        starsHtml = `
-                            <div onclick="showPaywall('analysis')" style="margin-top:8px;padding:12px;background:rgba(0,0,0,0.2);border-radius:6px;border:1px dashed var(--border-subtle);text-align:center;cursor:pointer;">
-                                <div style="font-size:0.7rem;color:var(--cyan);">📊 SKOR ANALİZİ (22 parametre)</div>
+                if (!isPremium && !isGracePeriod) {
+                    starsHtml = `
+                        <div onclick="showPaywall('analysis')" style="margin-top:8px;padding:12px;background:rgba(0,0,0,0.2);border-radius:6px;border:1px dashed var(--border-subtle);text-align:center;cursor:pointer;">
+                            <div style="font-size:0.7rem;color:var(--cyan);">📊 SKOR ANALİZİ (22 parametre)</div>
                                 <div style="font-size:0.65rem;color:#8892a3;margin-top:4px;">🔒 PRO ile açılır</div>
                             </div>`;
-                    } else {
+                } else if (f.scoreDetails) { // PRO kullanıcı — veri varsa göster
                     const sd = f.scoreDetails;
                     const starLine = (label, stars, pts, maxPts, note) => {
                         const filled = '★'.repeat(Math.max(0, Math.min(5, stars)));
@@ -4769,8 +4768,8 @@
                             ${sd.penalties && sd.penalties.length > 0 ? `<div style="color: var(--red); font-size: 0.7rem; margin-top: 4px;">⚠️ ${sd.penalties.join(', ')}</div>` : ''}
                         </div>
                     `;
-                    } // close else (isPremium)
-                } // close if (scoreDetails)
+                    } // close else if (scoreDetails)
+                } // close if (!isPremium)
 
                 // Fotoğraf butonu
                 const safeDisplayName = (displayName || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
@@ -4862,7 +4861,7 @@
         async function loadSpeciesList() {
             if (SPECIES_LIST_CACHE) return SPECIES_LIST_CACHE;
             try {
-                const res = await fetch('/api/species-list');
+                const res = await apiFetch('/api/species-list');
                 SPECIES_LIST_CACHE = await res.json();
                 return SPECIES_LIST_CACHE;
             } catch (e) {
@@ -4979,7 +4978,7 @@
             resultDiv.style.display = 'block';
 
             try {
-                const res = await fetch(`/api/fish-search?lat=${lastLatLon.lat}&lon=${lastLatLon.lon}&fishKey=${fishKey}`);
+                const res = await apiFetch(`/api/fish-search?lat=${lastLatLon.lat}&lon=${lastLatLon.lon}&fishKey=${fishKey}`);
                 const data = await res.json();
 
                 if (data.error === 'land') {
@@ -5160,14 +5159,14 @@
                 };
 
                 let starsHtml = '';
-                if (sd) {
-                    if (!isPremium && !isGracePeriod) {
-                        starsHtml = `<div onclick="showPaywall('analysis')" style="margin-top:10px; padding:14px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px dashed var(--border-subtle); text-align:center; cursor:pointer;">
+                // Önce premium kontrolü — veri null gelse bile kilit göster
+                if (!isPremium && !isGracePeriod) {
+                    starsHtml = `<div onclick="showPaywall('analysis')" style="margin-top:10px; padding:14px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px dashed var(--border-subtle); text-align:center; cursor:pointer;">
                             <div style="font-size:0.75rem; color:var(--cyan);">📊 SKOR ANALİZİ (22 parametre)</div>
                             <div style="font-size:0.65rem; color:#8892a3; margin-top:6px;">🔒 Su sıcaklığı, dalga, rüzgar, basınç, akıntı, mevsim...</div>
                             <div style="font-size:0.7rem; color:#ff851b; margin-top:6px;">PRO ile aç →</div>
                         </div>`;
-                    } else {
+                } else if (sd) { // PRO kullanıcı — veri varsa göster
                     starsHtml = `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border-subtle);">
                         <div style="font-size:0.72rem; color:var(--cyan); margin-bottom:6px;">📊 SKOR ANALİZİ</div>
                         ${sd.season ? starLine('Mevsim (' + c.season + ')', sd.season.stars, sd.season.score, sd.season.max, seasonNote()) : ''}
@@ -5189,8 +5188,8 @@
                         ${sd.camDeniz ? '<div style="color:var(--yellow);font-size:0.7rem;margin-top:4px;">🪟 Cam deniz cezası: ×' + sd.camDeniz.penalty.toFixed(2) + '</div>' : ''}
                         ${sd.penalties && sd.penalties.length > 0 ? '<div style="color:var(--red);font-size:0.7rem;margin-top:4px;">⚠️ ' + sd.penalties.join(', ') + '</div>' : ''}
                     </div>`;
-                    } // close else (isPremium)
-                } // close if (sd)
+                    } // close else if (sd)
+                } // close if (!isPremium)
 
                 // Koşullar özeti
                 const condHtml = `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border-subtle); font-size:0.72rem; color:var(--text-muted);">
@@ -5488,7 +5487,7 @@
 
         async function loadScanUsage() {
             try {
-                const res = await fetch('/api/scan-usage', {
+                const res = await apiFetch('/api/scan-usage', {
                     headers: authToken ? { 'Authorization': 'Bearer ' + authToken } : {}
                 });
                 const data = await res.json();
@@ -5608,8 +5607,7 @@
 
             let response;
             try {
-                response = await fetch(url, {
-                    headers: authToken ? { 'Authorization': 'Bearer ' + authToken } : {},
+                response = await apiFetch(url, {
                     signal: scanAbortController.signal
                 });
             } catch(e) {
@@ -6026,7 +6024,7 @@ auth.onAuthStateChanged(async (user) => {
 // Pro slot sayacı — /api/pro-slots endpoint'inden çeker
 async function loadProSlotsCount() {
     try {
-        const res = await fetch('/api/pro-slots');
+        const res = await apiFetch('/api/pro-slots');
         if (!res.ok) return;
         const data = await res.json();
         const remaining = data.remaining ?? '...';
@@ -6043,7 +6041,7 @@ async function loadProSlotsCount() {
 async function checkSubscriptionStatus() {
     if (!authToken) return;
     try {
-        const res = await fetch('/api/subscription-status', {
+        const res = await apiFetch('/api/subscription-status', {
             headers: { 'Authorization': 'Bearer ' + authToken }
         });
         const data = await res.json();
@@ -6193,24 +6191,24 @@ async function upgradeToPro(plan) {
     }
 }
 
-// Tüm API çağrılarına auth token ekle — her çağrıda taze token al
-const _origFetch = window.fetch;
-window.fetch = async function(url, opts = {}) {
-    if (typeof url === 'string' && url.startsWith('/api/') && currentUser) {
+// Tüm /api/ çağrıları için güvenli wrapper — global window.fetch ezilmez
+// Leaflet, Firebase SDK gibi 3. taraf kütüphaneler bu fonksiyondan etkilenmez
+async function apiFetch(url, opts = {}) {
+    if (currentUser) {
         try {
             const freshToken = await currentUser.getIdToken(false);
             authToken = freshToken;
-            opts.headers = opts.headers || {};
-            opts.headers['Authorization'] = 'Bearer ' + freshToken;
+            opts.headers = { ...opts.headers, 'Authorization': 'Bearer ' + freshToken };
         } catch (e) {
             if (authToken) {
-                opts.headers = opts.headers || {};
-                opts.headers['Authorization'] = 'Bearer ' + authToken;
+                opts.headers = { ...opts.headers, 'Authorization': 'Bearer ' + authToken };
             }
         }
+    } else if (authToken) {
+        opts.headers = { ...opts.headers, 'Authorization': 'Bearer ' + authToken };
     }
-    return _origFetch.call(this, url, opts);
-};
+    return fetch(url, opts);
+}
 
 // Service Worker
 if ('serviceWorker' in navigator) {
