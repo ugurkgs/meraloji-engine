@@ -834,7 +834,7 @@ const SPECIES_DB = {
         currentPref: 0.85,
         salinityPref: "MEDIUM",
         planktonPref: "HIGH",
-        moonPref: "bright"  // BİYOLOJİK DÜZELTİ: Dolunayda avları (istavrit, çaça) yüzeye çıkar; Lüfer derinde yoğun beslenır — "dark" efsanesi balıkçı miti,
+        moonPref: "bright"  // BİYOLOJİK DÜZELTİ: Dolunayda avları (istavrit, çaça) yüzeye çıkar; Lüfer derinde yoğun beslenır — "dark" efsanesi balıkçı miti
         sstTrendPref: "cooling",
         regions: ["MARMARA", "EGE", "KARADENİZ"],
         depth: { min: 1, opt: 8, max: 40 },
@@ -1749,7 +1749,7 @@ const SPECIES_DB = {
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık ve gündüz — kuma gömülü puskuru avcısı",
         tempRange: { min: 12, opt: 18, max: 26 },
         seasons: { winter: 0.50, spring: 0.65, summer: 0.75, autumn: 0.70 },
-        activity: "DAWN_DUSK"  // BİYOLOJİK DÜZELTİ: Uranoscopus scaber gündüz-alacakaranlık tuzak avcısıdır, gece gezen değil,
+        activity: "DAWN_DUSK"  // BİYOLOJİK DÜZELTİ: Uranoscopus scaber gündüz-alacakaranlık tuzak avcısıdır, gece gezen değil
         pressureSensitivity: 0.4,
         wavePref: 0.3,
         clarityPref: "TURBID",
