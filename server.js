@@ -2933,8 +2933,18 @@ function calculateFishScore(fish, key, params) {
     // TOPLAM
     let rawScore = s_season + s_temp + s_env + s_activity + s_trigger;
     
+    if (moonPhase !== undefined) {
+        const moonMult = getMoonPhaseMultiplier(moonPhase);
+        rawScore *= moonMult;
+        scoreDetails.moon = { multiplier: moonMult, phase: moonPhase };
+    }
+    
+    // CEZALAR
+    let penalties = [];
+
     // [DÜZELTME: Gating] — Letal sıcaklıkta diğer tüm koşullar anlamsız.
     // Balık o sıcaklıkta biyolojik olarak aktif olamaz → skoru katmerli bastır.
+    // NOT: penalties tanımından SONRA olmalı (temporal dead zone hatası önlenir).
     const tempGate = getTempGateMultiplier(tempWater, fish.tempRange);
     if (tempGate < 1.0) {
         rawScore *= tempGate;
@@ -2945,15 +2955,6 @@ function calculateFishScore(fish, key, params) {
         }
         scoreDetails.tempGate = { multiplier: parseFloat(tempGate.toFixed(2)), tempWater, min: fish.tempRange.min, max: fish.tempRange.max };
     }
-    
-    if (moonPhase !== undefined) {
-        const moonMult = getMoonPhaseMultiplier(moonPhase);
-        rawScore *= moonMult;
-        scoreDetails.moon = { multiplier: moonMult, phase: moonPhase };
-    }
-    
-    // CEZALAR
-    let penalties = [];
 
     // Tuzluluk uyumsuzluk cezası penalties listesine de ekle (görsel uyarı)
     if (scoreDetails.salinity && scoreDetails.salinity.match === 'MISMATCH') {
@@ -3139,7 +3140,9 @@ app.get('/api/forecast', async (req, res) => {
         const clickHour = now.getHours();
         const currentMonth = now.getMonth();
 
-        const cacheKey = `forecast_v24_${lat}_${lon}_h${clickHour}`;
+        // Izgara snap — 0.1° ≈ 11km hücre, cache hit oranını dramatik artırır
+        const { gLat, gLon } = snapToGrid(lat, lon);
+        const cacheKey = `forecast_v24_${gLat}_${gLon}_h${clickHour}`;
         const cachedData = cache.get(cacheKey);
         if (cachedData) return res.json(cachedData);
 
@@ -3157,8 +3160,8 @@ app.get('/api/forecast', async (req, res) => {
         // Paralel fetch — hata durumunda fallback URL'ye düş
         // [CRON CACHE] — background cron daha önce çektiyse direk kullan, API'ye gitme
         let [weather, marine, bathymetryRes] = await Promise.all([
-            (cache.get(`raw_weather_${lat}_${lon}`) ? Promise.resolve(cache.get(`raw_weather_${lat}_${lon}`)) : safeFetchJSON(weatherUrl)),
-            (cache.get(`raw_marine_${lat}_${lon}`)  ? Promise.resolve(cache.get(`raw_marine_${lat}_${lon}`))  : safeFetchJSON(marineUrl)),
+            (cache.get(`raw_weather_${gLat}_${gLon}`) ? Promise.resolve(cache.get(`raw_weather_${gLat}_${gLon}`)) : safeFetchJSON(weatherUrl)),
+            (cache.get(`raw_marine_${gLat}_${gLon}`)  ? Promise.resolve(cache.get(`raw_marine_${gLat}_${gLon}`))  : safeFetchJSON(marineUrl)),
             fetchWithTimeout(bathymetryUrl).catch(() => null)
         ]);
         
@@ -4646,6 +4649,19 @@ app.get('/api/scan-usage', async (req, res) => {
 
 
 // ═══════════════════════════════════════════════════════════════════════════
+// IZGARA SNAP — Cache key'leri için koordinat yuvarlama
+// 0.1 derece ≈ 11 km — bu alanda hava/deniz verisi pratikte aynıdır.
+// Kullanıcı 38.4187'ye tıklasa da 38.4952'ye tıklasa da aynı key → cache hit.
+// API çağrısı için tam koordinat (latF/lonF) kullanılmaya devam eder.
+// ═══════════════════════════════════════════════════════════════════════════
+function snapToGrid(lat, lon, precision = 1) {
+    const factor = Math.pow(10, precision);
+    const gLat = (Math.round(parseFloat(lat) * factor) / factor).toFixed(precision);
+    const gLon = (Math.round(parseFloat(lon) * factor) / factor).toFixed(precision);
+    return { gLat, gLon };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // BACKGROUND CRON CACHE — Popüler noktaların verisini önceden çek
 // Kullanıcı isteği geldiğinde API'ye değil, cache'e vurur → ~0ms yanıt.
 // Mevcut NodeCache altyapısı kullanılıyor, yeni bağımlılık yok.
@@ -4669,8 +4685,9 @@ const HOT_SPOTS = [
 async function warmCacheForSpot(lat, lon) {
     const latF = parseFloat(lat).toFixed(4);
     const lonF = parseFloat(lon).toFixed(4);
+    const { gLat, gLon } = snapToGrid(lat, lon);
     const clickHour = new Date().getHours();
-    const cacheKey = `forecast_v24_${latF}_${lonF}_h${clickHour}`;
+    const cacheKey = `forecast_v24_${gLat}_${gLon}_h${clickHour}`;
 
     // Zaten cache'de varsa tekrar çekme
     if (cache.get(cacheKey)) return;
@@ -4685,10 +4702,10 @@ async function warmCacheForSpot(lat, lon) {
         ]);
 
         if (weather && marine) {
-            // Ham API verisini ayrı cache anahtarıyla sakla — /api/forecast bunu okuyacak
-            cache.set(`raw_weather_${latF}_${lonF}`, weather, 3900); // ~65 dk TTL
-            cache.set(`raw_marine_${latF}_${lonF}`,  marine,  3900);
-            console.log(`[CRON] ✅ Cache ısındı: ${latF},${lonF}`);
+            // Ham API verisini snap key ile sakla — /api/forecast bunu okuyacak
+            cache.set(`raw_weather_${gLat}_${gLon}`, weather, 3900);
+            cache.set(`raw_marine_${gLat}_${gLon}`,  marine,  3900);
+            console.log(`[CRON] ✅ Cache ısındı: ${gLat},${gLon} (${lat},${lon})`);
         }
     } catch (e) {
         console.log(`[CRON] ⚠️ Spot ısıtma başarısız (${latF},${lonF}): ${e.message}`);
