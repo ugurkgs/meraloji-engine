@@ -4633,11 +4633,11 @@
                             <div style="font-size:0.7rem;color:var(--cyan);">📈 SAATLİK SKOR GRAFİĞİ</div>
                             <div style="font-size:0.65rem;color:#8892a3;margin-top:4px;">🔒 PRO ile açılır</div>
                         </div>`;
-                } else if (data.hourlyScores && data.hourlyScores.length === 24) {
-                    const scores = data.hourlyScores;
-                    const maxS = Math.max(...scores, 1);
-                    const nowH = new Date().getHours();
-                    const bestH = data.bestHour ? parseInt(data.bestHour) : -1;
+                } else if (f.hourlyScores && f.hourlyScores.length === 24) {
+                const scores = f.hourlyScores; 
+                const maxS = Math.max(...scores, 1);
+                const nowH = new Date().getHours();
+                const bestH = f.bestHour ? parseInt(f.bestHour) : -1;
                     
                     const bars = scores.map((s, h) => {
                         const pct = Math.max(2, (s / maxS) * 100);
