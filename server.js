@@ -261,7 +261,7 @@ function getGaussianScore(val, min, opt, max) {
     if (val >= opt - 2 && val <= opt + 2) return 1.0;
     
     const distance = Math.abs(val - opt);
-    const range = Math.max(opt - min, max - opt);
+    const range = Math.max(opt - min, max - opt, 0.1) // FIX: sıfıra bölünme önlemi (min==opt==max edge case);
     const score = Math.exp(-Math.pow(distance / (range * 0.5), 2));
     return Math.max(0.1, score);
 }
@@ -834,7 +834,7 @@ const SPECIES_DB = {
         currentPref: 0.85,
         salinityPref: "MEDIUM",
         planktonPref: "HIGH",
-        moonPref: "dark",
+        moonPref: "bright"  // BİYOLOJİK DÜZELTİ: Dolunayda avları (istavrit, çaça) yüzeye çıkar; Lüfer derinde yoğun beslenır — "dark" efsanesi balıkçı miti,
         sstTrendPref: "cooling",
         regions: ["MARMARA", "EGE", "KARADENİZ"],
         depth: { min: 1, opt: 8, max: 40 },
@@ -1746,10 +1746,10 @@ const SPECIES_DB = {
         name: "Kurbağa Balığı (Trakonya)", nameEn: "Atlantic Stargazer", icon: "🐟", scientificName: "Uranoscopus scaber",
         photoId: 79,
         category: "DİP",
-        peakHours: "NIGHT", peakHoursDesc: "Gece, kumlu dip",
+        peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık ve gündüz — kuma gömülü puskuru avcısı",
         tempRange: { min: 12, opt: 18, max: 26 },
         seasons: { winter: 0.50, spring: 0.65, summer: 0.75, autumn: 0.70 },
-        activity: "NIGHT",
+        activity: "DAWN_DUSK"  // BİYOLOJİK DÜZELTİ: Uranoscopus scaber gündüz-alacakaranlık tuzak avcısıdır, gece gezen değil,
         pressureSensitivity: 0.4,
         wavePref: 0.3,
         clarityPref: "TURBID",
@@ -2713,14 +2713,35 @@ function calculateFishScore(fish, key, params) {
     }
     
     // Sıcaklık Şoku — 24 saat içinde ≥1.5°C SST değişimi
+    // BİYOLOJİK DÜZELTİ: Ani soğuma tüm balıklar için bonus değil!
+    // Pelagik göçmenler (Lüfer, Palamut, vb.) soğuma sinyalini göç/beslenme tetikleyicisi
+    // olarak kullanır. Kıyı türleri (Çipura, Levrek, Karagöz) ise ani soğumada
+    // "cold shock" yaşar → lethargic hale gelir → ceza almalı.
     if (tempShock && tempShock.shock) {
+        const isMigratoryPelagic = fish.category === 'PELAJIK' || fish.sstTrendPref === 'cooling';
+        const isCoastalSensitive = fish.category === 'KIYI' || fish.category === 'DİP';
         if (tempShock.direction === 'COOLING') {
-            s_trigger += 3;
-            activeTriggers.push(`⚡ Sıcaklık Şoku (${tempShock.change}°C)`);
+            if (isMigratoryPelagic) {
+                // Pelagik göçmenler için güçlü pozitif tetikleyici
+                s_trigger += 3;
+                activeTriggers.push(`⚡ Sıcaklık Şoku (${tempShock.change}°C) — Göç Sinyali`);
+            } else if (isCoastalSensitive) {
+                // Kıyı/dip türleri için ceza: ani soğuma → uyuşukluk
+                s_trigger -= 1.5;
+                activeTriggers.push(`🥶 Ani Soğuma (${tempShock.change}°C) — Yavaşlatıcı`);
+            } else {
+                // Diğer türler — nötr, hafif negatif
+                s_trigger += 0.5;
+            }
         } else if (tempShock.direction === 'WARMING') {
-            s_trigger += 1;
+            if (fish.sstTrendPref === 'warming') {
+                s_trigger += 2; // Isınmayı seven türler için bonus
+                activeTriggers.push(`🌡️ Isınma Şoku (${tempShock.change}°C) — Aktifleşme`);
+            } else {
+                s_trigger += 0.5; // Genel hafif ısınma bonusu
+            }
         }
-        scoreDetails.tempShock = { change: tempShock.change, direction: tempShock.direction };
+        scoreDetails.tempShock = { change: tempShock.change, direction: tempShock.direction, isMigratoryPelagic, isCoastalSensitive };
     }
 
     // SST 7 Günlük Trend — yavaş ama süregelen değişim
@@ -3014,14 +3035,26 @@ function calculateFishScore(fish, key, params) {
     // === FAZ 2: OVER-STACKING KORUMA — Minimum taban ===
     rawScore = Math.max(3, rawScore);
     
-    // === CONFIDENCE COMPRESSION ===
-    // ESKİ: cap 88, üst band ×0.4 → kullanıcı asla 88+ göremiyordu
-    // YENİ: cap 95, üst band ×0.6 → "Mükemmel koşullar" (70-100) artık ulaşılabilir
+    // === MATEMATİKSEL OLARAK KUSURSUZ ASİMPTOTİK SIKIŞTIRMA ===
+    // Skor 75'e kadar normal artar. 75'ten sonra 99'a doğru eksponansiyel
+    // olarak sönümlenir (yumuşak kavis). Grafikte kırılma/zıplama olmaz.
+    //
+    // Kanıt:
+    //   rawScore = 75  → 99 - 24 * e^0       = 75.0   (kırılma yok)
+    //   rawScore = 90  → 99 - 24 * e^(-15/24) ≈ 86.1
+    //   rawScore = 120 → 99 - 24 * e^(-45/24) ≈ 95.3
+    //   rawScore = 200 → 99 - 24 * e^(-125/24)≈ 98.8  (hiçbir zaman 99'u geçemez)
     let finalScore = Math.max(5, rawScore);
-    if (finalScore > 80) {
-        finalScore = 80 + (finalScore - 80) * 0.6;
+
+    if (finalScore > 75) {
+        const asymptote = 99;        // Teorik maksimum — asla ulaşılamaz
+        const diff = asymptote - 75; // 24 birimlik esneme payı
+        const k = 1 / diff;          // Eğim 75'te kesintisiz eşleşir (k = 1/24)
+        finalScore = asymptote - diff * Math.exp(-k * (finalScore - 75));
     }
-    finalScore = Math.min(95, finalScore);
+
+    // Güvenlik amaçlı yuvarlama ve cap
+    finalScore = Math.min(99, finalScore);
     
     let reason = "";
     if (finalScore < 25) reason = activeTriggers.length > 0 ? activeTriggers[0] : "Koşullar Uygun Değil";
@@ -3530,11 +3563,39 @@ app.get('/api/forecast', async (req, res) => {
             };
         }
 
+        // ── PRO VERİSİ SIFIRLAMA: Premium olmayan kullanıcılara detaylı veri gönderme ──
+        const isProUser = req.isPremium || req.isGracePeriod;
+        const sanitizedForecast = forecast.map(day => ({
+            ...day,
+            fishList: isProUser
+                ? day.fishList  // PRO: tam liste (10 balık, hourlyScores, scoreDetails dahil)
+                : day.fishList.slice(0, 3).map(f => ({
+                    // FREE: sadece temel alanlar, detaylı analiz yok
+                    key: f.key, name: f.name, icon: f.icon, score: f.score,
+                    category: f.category, reason: f.reason,
+                    triggers: f.triggers ? f.triggers.slice(0, 2) : [],
+                    // hourlyScores ve scoreDetails kasıtlı olarak çıkarıldı
+                }))
+        }));
+
+        const sanitizedInstant = instantData ? {
+            ...instantData,
+            fishList: isProUser
+                ? instantData.fishList
+                : instantData.fishList.slice(0, 3).map(f => ({
+                    key: f.key, name: f.name, icon: f.icon, score: f.score,
+                    category: f.category, reason: f.reason,
+                    triggers: f.triggers ? f.triggers.slice(0, 2) : [],
+                }))
+        } : null;
+
         const responseData = {
             version: "F.I.S.H. v3.0", region: regionName, isLand, landReason, clickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
             depth: depthData,  // EMODnet Bathymetry derinlik verisi
-            forecast, instant: instantData
+            forecast: sanitizedForecast,
+            instant: sanitizedInstant,
+            isPro: isProUser  // Frontend'in PRO badge/lock göstermesi için
         };
 
         cache.set(cacheKey, responseData);
@@ -3812,9 +3873,9 @@ app.get('/api/fish-search', async (req, res) => {
             dailyScore: dailyScore,
             bestHour: bestHour,
             bestHourScore: bestHourScore,
-            hourlyScores: hourlyScores,
+            hourlyScores: (req.isPremium || req.isGracePeriod) ? hourlyScores : null,
             isInDailyList: isInDailyList,
-            scoreDetails: result.scoreDetails,
+            scoreDetails: (req.isPremium || req.isGracePeriod) ? result.scoreDetails : null,
             triggers: result.activeTriggers,
             reason: result.reason,
             reasons: isInDailyList ? [] : reasons,
@@ -4347,6 +4408,13 @@ app.get('/api/scan', async (req, res) => {
             res.write(`data: ${JSON.stringify(data)}\n\n`);
         };
 
+        // ── İstemci bağlantıyı keserse döngüyü durdur (bellek sızıntısı önlemi) ──
+        let clientDisconnected = false;
+        req.on('close', () => {
+            clientDisconnected = true;
+            console.log('[SCAN] Client disconnected, aborting scan loop.');
+        });
+
         const gridPoints = generateGridPoints(centerLat, centerLon, radiusKm);
         const total = gridPoints.length;
         const results = [];
@@ -4372,6 +4440,7 @@ app.get('/api/scan', async (req, res) => {
 
         for (let i = 0; i < gridPoints.length; i++) {
             const pt = gridPoints[i];
+            if (clientDisconnected) break; // İstemci kapattı — işlemi sonlandır
 
             // Bathymetry: her nokta için ayrı çek (kara tespiti)
             let bathyRaw = null;
