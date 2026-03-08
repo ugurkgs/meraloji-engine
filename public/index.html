@@ -4625,20 +4625,19 @@
                     ? `<div style="color: var(--green); font-size: 0.78rem;">⭐ <strong>${CURRENT_LANG === 'tr' ? 'Bugün En İyi Saat' : 'Best Hour Today'}:</strong> ${f.bestHour} (%${f.bestHourScore ? f.bestHourScore.toFixed(0) : '?'})</div>`
                     : '';
                 
-                // [YENİ] 24 Saatlik Skor Grafiği
+                // === SAATLİK GRAFİK OLUŞTURMA ===
                 let hourlyChartHtml = '';
-                if (CURRENT_MODE === 'daily') { // veri yoksa bile kilit göster
-                    if (!isPremium && !isGracePeriod) {
-                        hourlyChartHtml = `
-                            <div onclick="showPaywall('chart')" style="margin-top:8px;padding:12px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px dashed var(--border-subtle);text-align:center;cursor:pointer;">
-                                <div style="font-size:0.7rem;color:var(--cyan);">📈 SAATLİK SKOR GRAFİĞİ</div>
-                                <div style="font-size:0.65rem;color:#8892a3;margin-top:4px;">🔒 PRO ile açılır</div>
-                            </div>`;
-                    } else if (data.hourlyScores && data.hourlyScores.length === 24) {
-                const scores = data.hourlyScores; // "f" yerine "data" oldu
-                const maxS = Math.max(...scores, 1);
-                const nowH = new Date().getHours();
-                const bestH = data.bestHour ? parseInt(data.bestHour) : -1; // "f" yerine "data" oldu
+                if (!isPremium && !isGracePeriod) {
+                    hourlyChartHtml = `
+                        <div onclick="showPaywall('chart')" style="margin-top:8px;padding:12px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px dashed var(--border-subtle);text-align:center;cursor:pointer;">
+                            <div style="font-size:0.7rem;color:var(--cyan);">📈 SAATLİK SKOR GRAFİĞİ</div>
+                            <div style="font-size:0.65rem;color:#8892a3;margin-top:4px;">🔒 PRO ile açılır</div>
+                        </div>`;
+                } else if (data.hourlyScores && data.hourlyScores.length === 24) {
+                    const scores = data.hourlyScores;
+                    const maxS = Math.max(...scores, 1);
+                    const nowH = new Date().getHours();
+                    const bestH = data.bestHour ? parseInt(data.bestHour) : -1;
                     
                     const bars = scores.map((s, h) => {
                         const pct = Math.max(2, (s / maxS) * 100);
@@ -4652,7 +4651,6 @@
                         </div>`;
                     }).join('');
                     
-                    // Saat etiketleri (her 3 saatte bir)
                     const labels = [0,3,6,9,12,15,18,21].map(h => 
                         `<span style="position:absolute;left:${(h/24)*100}%;font-size:0.5rem;color:var(--text-muted);transform:translateX(-50%);">${String(h).padStart(2,'0')}</span>`
                     ).join('');
@@ -4668,6 +4666,7 @@
                                 ${labels}
                             </div>
                         </div>`;
+                }
                     } // close else (isPremium)
                 } // close if (hourlyScores)
                 
