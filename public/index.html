@@ -5019,6 +5019,42 @@
                     ? `<div style="font-size:0.75rem; color:var(--green); margin-bottom:8px;">✅ Bu tür bugün listelenmiş (günlük skor: %${dailyScore?.toFixed(1)})</div>`
                     : '';
 
+                // === SAATLİK GRAFİK (search context) ===
+                let hourlyChartHtml = '';
+                if (!isPremium && !isGracePeriod) {
+                    hourlyChartHtml = `
+                        <div onclick="showPaywall('chart')" style="margin-top:8px;padding:12px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px dashed var(--border-subtle);text-align:center;cursor:pointer;">
+                            <div style="font-size:0.7rem;color:var(--cyan);">📈 SAATLİK SKOR GRAFİĞİ</div>
+                            <div style="font-size:0.65rem;color:#8892a3;margin-top:4px;">🔒 PRO ile açılır</div>
+                        </div>`;
+                } else if (f.hourlyScores && f.hourlyScores.length === 24) {
+                    const scores = f.hourlyScores;
+                    const maxS = Math.max(...scores, 1);
+                    const nowH = new Date().getHours();
+                    const bestH = bestHour ? parseInt(bestHour) : -1;
+                    const bars = scores.map((s, h) => {
+                        const pct = Math.max(2, (s / maxS) * 100);
+                        const isBest = h === bestH;
+                        const isNow = h === nowH;
+                        const color = isBest ? 'var(--green)' : s >= 70 ? 'rgba(0,220,130,0.75)' : s >= 50 ? 'rgba(255,200,0,0.7)' : 'rgba(255,80,80,0.5)';
+                        const border = isNow ? 'border:1px solid var(--cyan);' : '';
+                        const title = `${String(h).padStart(2,'0')}:00 → %${s.toFixed(0)}`;
+                        return `<div title="${title}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;">
+                            <div style="width:100%;min-width:3px;height:${pct}%;background:${color};border-radius:2px 2px 0 0;${border}${isBest ? 'box-shadow:0 0 4px var(--green);' : ''}"></div>
+                        </div>`;
+                    }).join('');
+                    const labels = [0,3,6,9,12,15,18,21].map(h =>
+                        `<span style="position:absolute;left:${(h/24)*100}%;font-size:0.5rem;color:var(--text-muted);transform:translateX(-50%);">${String(h).padStart(2,'0')}</span>`
+                    ).join('');
+                    const chartTitle = CURRENT_LANG === 'tr' ? 'SAATLİK SKOR' : 'HOURLY SCORE';
+                    hourlyChartHtml = `
+                        <div style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px solid var(--border-subtle);">
+                            <div style="font-size:0.65rem;color:var(--cyan);margin-bottom:6px;">📈 ${chartTitle}</div>
+                            <div style="display:flex;gap:1px;height:40px;align-items:flex-end;">${bars}</div>
+                            <div style="position:relative;height:12px;margin-top:2px;">${labels}</div>
+                        </div>`;
+                }
+
                 // === NEDEN LİSTELENMEDİ (sadece listede yoksa) ===
                 let reasonsHtml = '';
                 if (!isInList && data.reasons && data.reasons.length > 0) {
