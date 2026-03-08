@@ -4666,9 +4666,7 @@
                                 ${labels}
                             </div>
                         </div>`;
-                }
-                    } // close else (isPremium)
-                } // close if (hourlyScores)
+                } // close else if (hourlyScores)
                 
                 // Yıldız sistemi — önce premium kontrolü, veri yokluğu kilit göstermeyi engellemesin
                 let starsHtml = '';
@@ -4768,7 +4766,6 @@
                         </div>
                     `;
                     } // close else if (scoreDetails)
-                } // close if (!isPremium)
 
                 // Fotoğraf butonu
                 const safeDisplayName = (displayName || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
@@ -5188,7 +5185,6 @@
                         ${sd.penalties && sd.penalties.length > 0 ? '<div style="color:var(--red);font-size:0.7rem;margin-top:4px;">⚠️ ' + sd.penalties.join(', ') + '</div>' : ''}
                     </div>`;
                     } // close else if (sd)
-                } // close if (!isPremium)
 
                 // Koşullar özeti
                 const condHtml = `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border-subtle); font-size:0.72rem; color:var(--text-muted);">
