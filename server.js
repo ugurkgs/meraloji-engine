@@ -244,11 +244,32 @@ function safeWaterTemp(val, region, month) {
     return Number(val);
 }
 
-// Gaussian Çan Eğrisi
-function getGaussianScore(val, min, opt, max) {
+// Trapezoidal Üyelik Fonksiyonu + Gaussian Çan Eğrisi
+// [DÜZELTME: Trapezoid] — Tek nokta optimum yerine gerçekçi "konfor platosu"
+// Balıklar tam olarak tek bir sıcaklıkta değil, bir aralıkta eşit verimlilik gösterir.
+// optMin/optMax verilirse trapezoid kullanılır; yoksa eski gaussian mantığı çalışır.
+function getGaussianScore(val, min, opt, max, optMin, optMax) {
     val = safeNum(val);
-    
-    // Aralık dışı yumuşak geçiş (eskiden sert 0.05 idi)
+
+    // ── TRAPEZOID modu (optMin/optMax verilmişse) ──
+    // Şekil:      optMin───optMax
+    //            /                \
+    //          min                max
+    if (optMin !== undefined && optMax !== undefined) {
+        if (val < min) {
+            const overshoot = (min - val) / Math.max(1, min * 0.3);
+            return Math.max(0.03, 0.25 * Math.exp(-overshoot * overshoot));
+        }
+        if (val > max) {
+            const overshoot = (val - max) / Math.max(1, max * 0.15);
+            return Math.max(0.03, 0.25 * Math.exp(-overshoot * overshoot));
+        }
+        if (val >= optMin && val <= optMax) return 1.0; // konfor platosu
+        if (val < optMin) return Math.max(0.1, (val - min) / Math.max(0.1, optMin - min));
+        return Math.max(0.1, (max - val) / Math.max(0.1, max - optMax));
+    }
+
+    // ── GAUSSIAN modu (eski davranış, geriye dönük uyumluluk) ──
     if (val < min) {
         const overshoot = (min - val) / Math.max(1, min * 0.3);
         return Math.max(0.03, 0.25 * Math.exp(-overshoot * overshoot));
@@ -257,13 +278,33 @@ function getGaussianScore(val, min, opt, max) {
         const overshoot = (val - max) / Math.max(1, max * 0.15);
         return Math.max(0.03, 0.25 * Math.exp(-overshoot * overshoot));
     }
-    
     if (val >= opt - 2 && val <= opt + 2) return 1.0;
-    
     const distance = Math.abs(val - opt);
-    const range = Math.max(opt - min, max - opt, 0.1) // FIX: sıfıra bölünme önlemi (min==opt==max edge case);
+    const range = Math.max(opt - min, max - opt, 0.1);
     const score = Math.exp(-Math.pow(distance / (range * 0.5), 2));
     return Math.max(0.1, score);
+}
+
+// [DÜZELTME: Gating Multiplier] — Ölümcül sıcaklıkta skoru sıfıra götür
+// Balık biyolojik olarak o sıcaklıkta var olamıyorsa diğer tüm koşullar anlamsız.
+// min'in %20 altı veya max'ın %20 üstü = letal bölge → skor katmerli çöker.
+// Bu fonksiyon calculateFishScore içinde rawScore'a çarpan olarak uygulanır.
+function getTempGateMultiplier(tempWater, tempRange) {
+    const { min, max } = tempRange;
+    const range = max - min;
+    // Letal alt sınır: min'in 20%'si altına inince lineer 0'a düşer
+    if (tempWater < min) {
+        const lethalMargin = range * 0.20;
+        const overshoot = min - tempWater;
+        return Math.max(0.0, 1.0 - (overshoot / lethalMargin));
+    }
+    // Letal üst sınır: max'ın 20%'si üstüne çıkınca lineer 0'a düşer
+    if (tempWater > max) {
+        const lethalMargin = range * 0.20;
+        const overshoot = tempWater - max;
+        return Math.max(0.0, 1.0 - (overshoot / lethalMargin));
+    }
+    return 1.0; // Normal aralıkta: etkisiz
 }
 
 // Rüzgar Yönü Skoru
@@ -2536,7 +2577,15 @@ function calculateFishScore(fish, key, params) {
     scoreDetails.season = { score: s_season, max: 25, stars: Math.round(seasonalEff * 5) };
     
     // 2. SICAKLIK (Max 25)
-    const tempScore = getGaussianScore(tempWater, fish.tempRange.min, fish.tempRange.opt, fish.tempRange.max);
+    // [DÜZELTME: Trapezoid] — optMin/optMax varsa trapezoid, yoksa gaussian kullan.
+    // optMin/optMax SPECIES_DB'ye girmeden dinamik olarak türetiliyor:
+    //   optMin = opt ile min arasının %30'u yakını (sağ tarafa doğru)
+    //   optMax = opt ile max arasının %30'u yakını (sol tarafa doğru)
+    // Bu şekilde hiçbir türde SPECIES_DB değişikliği gerekmez.
+    const tMin = fish.tempRange.min, tOpt = fish.tempRange.opt, tMax = fish.tempRange.max;
+    const tOptMin = fish.tempRange.optMin ?? (tOpt - (tOpt - tMin) * 0.35);
+    const tOptMax = fish.tempRange.optMax ?? (tOpt + (tMax - tOpt) * 0.35);
+    const tempScore = getGaussianScore(tempWater, tMin, tOpt, tMax, tOptMin, tOptMax);
     let s_temp = tempScore * 25;
     scoreDetails.temp = { score: s_temp, max: 25, stars: Math.round(tempScore * 5), value: tempWater };
     
@@ -2884,6 +2933,19 @@ function calculateFishScore(fish, key, params) {
     // TOPLAM
     let rawScore = s_season + s_temp + s_env + s_activity + s_trigger;
     
+    // [DÜZELTME: Gating] — Letal sıcaklıkta diğer tüm koşullar anlamsız.
+    // Balık o sıcaklıkta biyolojik olarak aktif olamaz → skoru katmerli bastır.
+    const tempGate = getTempGateMultiplier(tempWater, fish.tempRange);
+    if (tempGate < 1.0) {
+        rawScore *= tempGate;
+        if (tempGate === 0.0) {
+            penalties.push("Letal sıcaklık");
+        } else if (tempGate < 0.5) {
+            penalties.push("Kritik sıcaklık");
+        }
+        scoreDetails.tempGate = { multiplier: parseFloat(tempGate.toFixed(2)), tempWater, min: fish.tempRange.min, max: fish.tempRange.max };
+    }
+    
     if (moonPhase !== undefined) {
         const moonMult = getMoonPhaseMultiplier(moonPhase);
         rawScore *= moonMult;
@@ -3093,9 +3155,10 @@ app.get('/api/forecast', async (req, res) => {
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lon} ${lat})`;
 
         // Paralel fetch — hata durumunda fallback URL'ye düş
+        // [CRON CACHE] — background cron daha önce çektiyse direk kullan, API'ye gitme
         let [weather, marine, bathymetryRes] = await Promise.all([
-            safeFetchJSON(weatherUrl),
-            safeFetchJSON(marineUrl),
+            (cache.get(`raw_weather_${lat}_${lon}`) ? Promise.resolve(cache.get(`raw_weather_${lat}_${lon}`)) : safeFetchJSON(weatherUrl)),
+            (cache.get(`raw_marine_${lat}_${lon}`)  ? Promise.resolve(cache.get(`raw_marine_${lat}_${lon}`))  : safeFetchJSON(marineUrl)),
             fetchWithTimeout(bathymetryUrl).catch(() => null)
         ]);
         
@@ -4581,6 +4644,73 @@ app.get('/api/scan-usage', async (req, res) => {
     }
 });
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BACKGROUND CRON CACHE — Popüler noktaların verisini önceden çek
+// Kullanıcı isteği geldiğinde API'ye değil, cache'e vurur → ~0ms yanıt.
+// Mevcut NodeCache altyapısı kullanılıyor, yeni bağımlılık yok.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Türkiye'nin en yoğun balıkçılık noktaları (lat, lon)
+const HOT_SPOTS = [
+    { name: "Boğaz-İstanbul", lat: 41.0420, lon: 29.0050 },
+    { name: "Marmara-Adalar",  lat: 40.8800, lon: 29.1300 },
+    { name: "Çanakkale Boğazı",lat: 40.1553, lon: 26.4142 },
+    { name: "İzmir Körfezi",   lat: 38.4192, lon: 26.9160 },
+    { name: "Antalya",         lat: 36.8969, lon: 30.7133 },
+    { name: "Trabzon",         lat: 41.0015, lon: 39.7178 },
+    { name: "Samsun",          lat: 41.2867, lon: 36.3300 },
+    { name: "Bodrum",          lat: 37.0344, lon: 27.4305 },
+    { name: "Fethiye",         lat: 36.6558, lon: 29.1165 },
+    { name: "Sinop",           lat: 42.0231, lon: 35.1553 },
+];
+
+// Tek bir nokta için hava + deniz verisini çekip cache'e yaz
+async function warmCacheForSpot(lat, lon) {
+    const latF = parseFloat(lat).toFixed(4);
+    const lonF = parseFloat(lon).toFixed(4);
+    const clickHour = new Date().getHours();
+    const cacheKey = `forecast_v24_${latF}_${lonF}_h${clickHour}`;
+
+    // Zaten cache'de varsa tekrar çekme
+    if (cache.get(cacheKey)) return;
+
+    try {
+        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`;
+        const marineUrl  = `https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=7&timezone=auto`;
+
+        const [weather, marine] = await Promise.all([
+            safeFetchJSON(weatherUrl, 12000),
+            safeFetchJSON(marineUrl,  12000),
+        ]);
+
+        if (weather && marine) {
+            // Ham API verisini ayrı cache anahtarıyla sakla — /api/forecast bunu okuyacak
+            cache.set(`raw_weather_${latF}_${lonF}`, weather, 3900); // ~65 dk TTL
+            cache.set(`raw_marine_${latF}_${lonF}`,  marine,  3900);
+            console.log(`[CRON] ✅ Cache ısındı: ${latF},${lonF}`);
+        }
+    } catch (e) {
+        console.log(`[CRON] ⚠️ Spot ısıtma başarısız (${latF},${lonF}): ${e.message}`);
+    }
+}
+
+// Tüm hot spot'ları sırayla ısıt (paralel yaparsak API rate limit riski var)
+async function warmAllHotSpots() {
+    console.log(`[CRON] 🌡️ Hot spot cache ısıtması başladı (${HOT_SPOTS.length} nokta)`);
+    for (const spot of HOT_SPOTS) {
+        await warmCacheForSpot(spot.lat, spot.lon);
+        await new Promise(r => setTimeout(r, 800)); // API'ye nezaket aralığı
+    }
+    console.log(`[CRON] ✅ Hot spot cache ısıtması tamamlandı`);
+}
+
+// Sunucu başladıktan 10 sn sonra ilk ısıtma, sonra her 55 dakikada bir tekrar
+// (55 dk: cache TTL 60 dk — expire olmadan önce yenile)
+setTimeout(() => {
+    warmAllHotSpots();
+    setInterval(warmAllHotSpots, 55 * 60 * 1000);
+}, 10_000);
 
 app.listen(PORT, () => {
     console.log(`
