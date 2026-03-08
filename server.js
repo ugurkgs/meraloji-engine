@@ -52,7 +52,13 @@ try {
 }
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: [
+        'https://meraloji.com',
+        'https://www.meraloji.com',
+        'http://localhost:3000'
+    ]
+}));
 app.use(express.json());
 
 app.set('trust proxy', 1); // Render proxy arkasında
@@ -506,10 +512,22 @@ function getRegion(lat, lon) {
     
     if (!inTurkey) return 'AÇIK DENİZ';
     
+    // MARMARA: Kuzey Ege'den Karadeniz'e geçiş bölgesi
     if (lat > 40.5 && lon < 32.0 && lon > 26.0) return 'MARMARA';
-    if (lat > 40.8 && lon >= 32.0 && lon < 42.0) return 'KARADENİZ';
+    
+    // KARADENİZ: Sinop, Samsun, Trabzon + Batı Karadeniz (Zonguldak, Bartın)
+    if (lat > 40.5 && lon >= 32.0 && lon < 42.0) return 'KARADENİZ';
+    
+    // Doğu Karadeniz uç noktaları (Hopa, Artvin)
+    if (lat > 40.5 && lon >= 42.0) return 'KARADENİZ';
+    
+    // EGE: Batı kıyısı
     if (lat <= 40.5 && lat > 36.0 && lon < 30.0) return 'EGE';
+    
+    // AKDENİZ: Güney kıyısı (Antalya, Mersin, Hatay)
     if (lat <= 37.0 && lon >= 30.0) return 'AKDENİZ';
+    
+    // AKDENİZ: İç geçiş bölgesi
     if (lat > 37.0 && lat <= 40.5 && lon >= 30.0 && lon < 36.0) return 'AKDENİZ';
     
     return 'TÜRKİYE';
@@ -3926,12 +3944,124 @@ app.post('/api/use-click', async (req, res) => {
     }
 });
 
+// ═══════════════════════════════════════════════════════════════
+// Google Play Developer API ile Abonelik Doğrulama
+// ═══════════════════════════════════════════════════════════════
+// KURULUM:
+// 1. Google Cloud Console → APIs & Services → "Google Play Android Developer API" etkinleştir
+// 2. IAM → Service Account oluştur (veya Firebase'in mevcut SA'sını kullan)
+// 3. Google Play Console → Settings → API Access → Service Account'u bağla
+//    ve "View financial data, orders, and cancellation survey responses" + 
+//    "Manage orders and subscriptions" izinlerini ver
+// 4. SA key JSON'unu GOOGLE_PLAY_KEY_JSON env variable'ına koy
+//    VEYA Firebase SA zaten bu yetkiye sahipse ek bir şey gerekmez
+// 5. Aşağıdaki GOOGLE_PLAY_VERIFY bayrağını true yap
+// ═══════════════════════════════════════════════════════════════
+
+const GOOGLE_PLAY_VERIFY = process.env.GOOGLE_PLAY_VERIFY === 'true'; // Env'den oku, default false
+const GOOGLE_PACKAGE_NAME = 'com.meraloji.fish';
+
+// Google Play API erişimi için auth client — lazy init, bir kez oluşturulur
+let _playAuthClient = null;
+async function getPlayAuthClient() {
+    if (_playAuthClient) return _playAuthClient;
+    try {
+        const { GoogleAuth } = require('google-auth-library');
+        
+        // Önce özel Play key var mı bak, yoksa default credentials (Firebase SA) kullan
+        const authOpts = { scopes: ['https://www.googleapis.com/auth/androidpublisher'] };
+        if (process.env.GOOGLE_PLAY_KEY_JSON) {
+            authOpts.credentials = JSON.parse(process.env.GOOGLE_PLAY_KEY_JSON);
+        }
+        
+        const auth = new GoogleAuth(authOpts);
+        _playAuthClient = await auth.getClient();
+        console.log('✅ Google Play API auth client ready');
+        return _playAuthClient;
+    } catch (e) {
+        console.error('❌ Google Play auth client init failed:', e.message);
+        return null;
+    }
+}
+
+// Başlangıçta client'ı hazırla (VERIFY açıksa)
+if (GOOGLE_PLAY_VERIFY) {
+    getPlayAuthClient().catch(() => {});
+}
+
 app.post('/api/verify-subscription', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
     const { purchaseToken, subscriptionId } = req.body;
     if (!purchaseToken) return res.status(400).json({ error: 'purchaseToken gerekli' });
     
     const subId = subscriptionId || 'meraloji_pro_monthly';
+    
+    // ── Geçerli abonelik ID kontrolü ──
+    if (!VALID_SUBSCRIPTIONS.includes(subId)) {
+        return res.status(400).json({ error: 'Geçersiz abonelik planı' });
+    }
+    
+    // ── Google Play Doğrulaması ──
+    if (GOOGLE_PLAY_VERIFY) {
+        try {
+            const client = await getPlayAuthClient();
+            if (!client) {
+                console.error('[VERIFY] Play auth client yok — doğrulama yapılamıyor');
+                return res.status(503).json({ error: 'Doğrulama servisi hazır değil, lütfen tekrar deneyin' });
+            }
+            
+            const verifyUrl = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${GOOGLE_PACKAGE_NAME}/purchases/subscriptionsv2/tokens/${purchaseToken}`;
+            
+            const response = await client.request({ url: verifyUrl });
+            const purchase = response.data;
+            
+            if (!purchase) {
+                console.log(`[VERIFY] ❌ Boş yanıt — uid:${req.user.uid} token:${purchaseToken.slice(0,20)}...`);
+                return res.status(403).json({ error: 'Geçersiz satın alma' });
+            }
+            
+            // subscriptionState: aktif abonelik durumları
+            // Ref: https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.subscriptionsv2
+            const state = purchase.subscriptionState;
+            const validStates = [
+                'SUBSCRIPTION_STATE_ACTIVE',
+                'SUBSCRIPTION_STATE_IN_GRACE_PERIOD'
+            ];
+            
+            if (!validStates.includes(state)) {
+                console.log(`[VERIFY] ❌ Geçersiz durum: ${state} — uid:${req.user.uid}`);
+                return res.status(403).json({ error: 'Abonelik aktif değil', state });
+            }
+            
+            // Paket adı kontrolü (opsiyonel ama ekstra güvenlik)
+            const linkedToken = purchase.lineItems?.[0]?.productId;
+            if (linkedToken && !VALID_SUBSCRIPTIONS.includes(linkedToken)) {
+                console.log(`[VERIFY] ❌ Ürün ID uyuşmuyor: ${linkedToken} — uid:${req.user.uid}`);
+                return res.status(403).json({ error: 'Ürün eşleşmedi' });
+            }
+            
+            console.log(`[VERIFY] ✅ Google Play doğrulandı — uid:${req.user.uid} sub:${subId} state:${state}`);
+            
+        } catch (verifyError) {
+            const status = verifyError?.response?.status;
+            if (status === 404) {
+                console.log(`[VERIFY] ❌ Token bulunamadı (404) — uid:${req.user.uid}`);
+                return res.status(403).json({ error: 'Satın alma bulunamadı' });
+            }
+            if (status === 401 || status === 403) {
+                console.error(`[VERIFY] ❌ Yetki hatası (${status}) — Play Console SA izinlerini kontrol edin`);
+                return res.status(503).json({ error: 'Doğrulama servisi yapılandırma hatası' });
+            }
+            console.error('[VERIFY] ❌ Google Play API hatası:', verifyError.message);
+            return res.status(503).json({ error: 'Doğrulama başarısız, lütfen tekrar deneyin' });
+        }
+    } else {
+        // ⚠️ UYARI: Google Play doğrulaması kapalı — herhangi bir token kabul ediliyor!
+        // Production'da GOOGLE_PLAY_VERIFY=true env variable'ı ekleyin.
+        console.warn(`[VERIFY] ⚠️ DOĞRULAMA KAPALI — uid:${req.user.uid} token kabul ediliyor`);
+    }
+    
+    // ── Firestore'a Kaydet ──
     const isYearly = subId.includes('yearly');
     const durationMs = isYearly ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
     
@@ -3953,10 +4083,10 @@ app.post('/api/verify-subscription', async (req, res) => {
                 expiresAt: Date.now() + durationMs,
                 updatedAt: Date.now(),
                 email: userEmail,
-                displayName: userDisplayName
+                displayName: userDisplayName,
+                verifiedByGoogle: GOOGLE_PLAY_VERIFY  // Doğrulama yapılıp yapılmadığını kaydet
             }, { merge: true });
 
-            // Yeni pro + yıllık plan ise stats/pro_count sayacını artır (500 kota sadece yıllık için)
             if (isNewPro && isYearly) {
                 const statsRef = db.collection('stats').doc('pro_count');
                 await statsRef.set({ count: (await statsRef.get()).data()?.count + 1 || 1 }, { merge: true });
@@ -3964,6 +4094,7 @@ app.post('/api/verify-subscription', async (req, res) => {
         }
         res.json({ success: true, isPremium: true, subscriptionId: subId });
     } catch (error) {
+        console.error('[VERIFY] Firestore hatası:', error.message);
         res.status(500).json({ error: 'Doğrulama hatası' });
     }
 });
@@ -4200,7 +4331,7 @@ app.get('/api/scan', async (req, res) => {
         const total = gridPoints.length;
         const results = [];
         // Gecikme: bathymetry API'si için nokta başına ~2 sn yeterli
-        const DELAY_MS = Math.ceil((total * 2000) / total);
+        const DELAY_MS = 2000;
 
         sendEvent({ type: 'start', total, radiusKm, fishKey: fishKey || null });
         if (res.flush) res.flush();
