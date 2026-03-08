@@ -878,7 +878,7 @@ const SPECIES_DB = {
         depth: { min: 1, opt: 8, max: 40 },
         advice: { bait: "Boru Kurdu, Sülünez, Sardalya", lure: "Silikon Yemler", rig: "Ağır Dip Takımı", hook: "1/0 - 2/0" },
         legalSize: "Yok (5kg/gün)",
-        note: "Gece ve alacakaranlıkta aktif. Çalkantılı suyu sever. (Not: Granyoz ile aynı tür — Argyrosomus regius; bu profil kıyı avcılığı için optimize edilmiştir.)"
+        note: "Gece ve alacakaranlıkta aktif. Çalkantılı suyu sever."
     },
     "ispendek": {
     name: "İspendek", nameEn: "Picarel", icon: "🐟", scientificName: "Spicara smaris",
@@ -897,7 +897,7 @@ const SPECIES_DB = {
     depth: { min: 5, opt: 25, max: 100 },
     advice: { bait: "Ekmek İçi, Küçük Solucan, Midye", lure: "Micro Jig, Küçük Kaşık", rig: "Çoklu İğneli Takım, Şamandıralı", hook: "No:8-12 Olta İğnesi" },
     legalSize: "11 cm",
-    note: "Sürü halinde gezer. Çoğunlukla tabana yakın dolaşır. Küçük yem ve ince misina verimi artırır. Yazın kıyıya yaklaşır. (Not: İzmarit ile aynı tür — Spicara smaris; bu profil sığ kıyı için optimize edilmiştir.)"
+    note: "Sürü halinde gezer. Çoğunlukla tabana yakın dolaşır. Küçük yem ve ince misina verimi artırır. Yazın kıyıya yaklaşır."
 
 },
     "cipura": {
@@ -1196,7 +1196,7 @@ const SPECIES_DB = {
         depth: { min: 10, opt: 50, max: 300 },
         advice: { bait: "Canlı İstavrit, Sardalya", lure: "Popper, Stickbait, Metal Jig", rig: "Trolling, Jigging, Popping", hook: "3/0 - 6/0 + Çelik Tel" },
         legalSize: "30 cm",
-        note: "Güçlü avcı! Tekne gerektirir. Yaz aylarında açıklarda bollaşır. (Not: Sarıkuyruk ile aynı tür — Seriola dumerili; bu profil Ege/Akdeniz açık su için optimize edilmiştir.)"
+        note: "Güçlü avcı! Tekne gerektirir. Yaz aylarında açıklarda bollaşır."
     },
     "sinarit": {
         name: "Sinarit", nameEn: "Common Dentex", icon: "🐟", scientificName: "Dentex dentex",
@@ -1458,7 +1458,7 @@ const SPECIES_DB = {
         depth: { min: 10, opt: 35, max: 70 },
         advice: { bait: "Canlı Zargana", lure: "Jig 60-150g, Popper", rig: "Jigging Setup", hook: "3/0 - 5/0" },
         legalSize: "45 cm",
-        note: "Güçlü game fish. Jigging'in yıldızı. Acımasız direnç gösterir. (Not: Akya ile aynı tür — Seriola dumerili; bu profil kıyı jigging için, Akya profili ise açık su trolling için optimize edilmiştir.)"
+        note: "Güçlü game fish. Jigging'in yıldızı. Acımasız direnç gösterir."
     },
     "granyoz": {
         name: "Granyoz (Sarıağız)", nameEn: "Meagre", icon: "🐟", scientificName: "Argyrosomus regius",
@@ -1477,7 +1477,7 @@ const SPECIES_DB = {
         depth: { min: 5, opt: 25, max: 60 },
         advice: { bait: "Canlı Teke, Sübye", lure: "Silikon 12-18cm", rig: "Dip, Spin", hook: "2/0 - 4/0" },
         legalSize: "42 cm",
-        note: "Gece avcısı dev. 50kg'a ulaşabilir. Ses çıkarır (davul balığı). (Not: Minekop ile aynı tür — Argyrosomus regius; bu profil daha büyük boy ve derine odaklanmış, Minekop profili kıyı için optimize edilmiştir.)"
+        note: "Gece avcısı dev. 50kg'a ulaşabilir. Ses çıkarır (davul balığı)."
     },
     "lambuga": {
         name: "Lambuga (Mahi Mahi)", nameEn: "Common Dolphinfish", icon: "🐟", scientificName: "Coryphaena hippurus",
@@ -2133,7 +2133,7 @@ const SPECIES_DB = {
         depth: { min: 5, opt: 30, max: 100 },
         advice: { bait: "Ekmek, Kurt", lure: "Yok", rig: "Çapari, Dip", hook: "10 - 14" },
         legalSize: "Yok",
-        note: "Küçük ama lezzetli. Sürü halinde avlanır. (Not: İspendek ile aynı tür — Spicara smaris; bu profil daha derin su için optimize edilmiştir.)"
+        note: "Küçük ama lezzetli. Sürü halinde avlanır."
     },
     "lahoz": {
         name: "Lahoz (Lagos)", nameEn: "Dusky Grouper", icon: "🐟", scientificName: "Epinephelus marginatus",
@@ -3968,12 +3968,32 @@ async function getPlayAuthClient() {
     try {
         const { GoogleAuth } = require('google-auth-library');
         
-        // Önce özel Play key var mı bak, yoksa default credentials (Firebase SA) kullan
         const authOpts = { scopes: ['https://www.googleapis.com/auth/androidpublisher'] };
+
+        // 1. Önce GOOGLE_PLAY_KEY_JSON'a bak
         if (process.env.GOOGLE_PLAY_KEY_JSON) {
-            authOpts.credentials = JSON.parse(process.env.GOOGLE_PLAY_KEY_JSON);
+            try {
+                authOpts.credentials = JSON.parse(process.env.GOOGLE_PLAY_KEY_JSON);
+                console.log('[PLAY-AUTH] GOOGLE_PLAY_KEY_JSON kullanılıyor');
+            } catch (parseErr) {
+                console.warn('[PLAY-AUTH] GOOGLE_PLAY_KEY_JSON parse hatası, fallback deneniyor:', parseErr.message);
+            }
         }
-        
+
+        // 2. Yoksa veya parse başarısızsa — FIREBASE_SERVICE_ACCOUNT'u kullan (zaten çalışıyor)
+        if (!authOpts.credentials && process.env.FIREBASE_SERVICE_ACCOUNT) {
+            try {
+                authOpts.credentials = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+                console.log('[PLAY-AUTH] FIREBASE_SERVICE_ACCOUNT kullanılıyor (fallback)');
+            } catch (parseErr) {
+                console.warn('[PLAY-AUTH] FIREBASE_SERVICE_ACCOUNT parse hatası:', parseErr.message);
+            }
+        }
+
+        if (!authOpts.credentials) {
+            throw new Error('Hiçbir credentials bulunamadı — GOOGLE_PLAY_KEY_JSON veya FIREBASE_SERVICE_ACCOUNT gerekli');
+        }
+
         const auth = new GoogleAuth(authOpts);
         _playAuthClient = await auth.getClient();
         console.log('✅ Google Play API auth client ready');
