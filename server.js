@@ -3231,9 +3231,10 @@ app.get('/api/forecast', async (req, res) => {
                 city: offlineAnalysis.city
             });
         }
-        // SEA → EMODnet çağrısı atlanır (deniz olduğunu zaten biliyoruz)
+        // SEA → EMODnet çağrısı atlanmaz (derinlik bilgisi lazım)
         // COASTAL_LAND → mevcut snap sistemi devreye girer (EMODnet ile doğrulama)
-        const skipBathymetry = (offlineAnalysis.status === 'SEA');
+        // INLAND → zaten yukarıda early exit yaptı, buraya gelmez
+        const skipBathymetry = false; // Derinlik bilgisi her zaman gösterilmeli
         // ──────────────────────────────────────────────────────────────────
 
         const regionName = getRegion(lat, lon);
@@ -3859,10 +3860,7 @@ app.get('/api/fish-search', async (req, res) => {
                 city: offlineAnalysis.city
             });
         }
-        const skipBathymetry = (offlineAnalysis.status === 'SEA');
-        // ──────────────────────────────────────────────────────────────────
-
-        const regionName = getRegion(latF, lonF);
+        const skipBathymetry = false; // Derinlik bilgisi her zaman gösterilmeli
 
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`;
         const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=1&timezone=auto`;
