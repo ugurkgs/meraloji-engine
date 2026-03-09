@@ -2951,24 +2951,19 @@
         // Harita Katmanları - 3 aşamalı döngü
         const MAP_LAYERS = [
             {
-                name: 'Coğrafi',
-                url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-                options: { maxZoom: 19, attribution: '© CartoDB © OSM' }
+                name: 'Harita',
+                url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                options: { maxZoom: 19, subdomains: ['a','b','c'], attribution: '© OpenStreetMap' }
             },
             {
                 name: 'Uydu',
-                // Google Maps ile hizalaması en doğru ücretsiz satellite kaynağı
-                url: 'https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
-                options: {
-                    maxZoom: 20,
-                    subdomains: ['0','1','2','3'],
-                    attribution: '© Google'
-                }
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                options: { maxZoom: 19, attribution: '© Esri' }
             },
             {
-                name: 'Karanlık',
-                url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-                options: { maxZoom: 19, attribution: '© CartoDB © OSM' }
+                name: 'Deniz',
+                url: 'https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png',
+                options: { maxZoom: 18, attribution: '© OpenSeaMap', opacity: 0.8 }
             }
         ];
 
