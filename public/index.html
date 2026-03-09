@@ -3785,6 +3785,18 @@
                 algo: "wavePeriod ile birlikte değerlendirilir",
                 source: "Open-Meteo Marine API; ECMWF WAM Model"
             },
+            airTemp: {
+                icon: "🌤️",
+                title: "HAVA SICAKLIĞI",
+                titleEn: "AIR TEMPERATURE",
+                desc: "2 metre yükseklikteki hava sıcaklığı (°C). Deniz sıcaklığından bağımsız olarak ölçülür.",
+                descEn: "Air temperature at 2m height (°C). Measured independently from sea surface temperature.",
+                importance: "Plaj ve kıyı kullanıcıları için konfor göstergesi. Büyük fark (>8°C) hava değişimini işaret eder.",
+                importanceEn: "Comfort indicator for beach and coastal users. Large difference (>8°C) signals weather change.",
+                ref: "Kış: 5-15°C\nİlkbahar: 15-20°C\nYaz: 25-35°C\nSonbahar: 15-25°C",
+                algo: "Open-Meteo temperature_2m hourly",
+                source: "Open-Meteo Forecast API - temperature_2m; ERA5 Reanalysis"
+            },
             chlorophyll: {
                 icon: "🌿",
                 title: "KLOROFİL-A",
@@ -4506,7 +4518,8 @@
             const windDirName = getWindDirectionName(windDirDeg);
             
             const metrics = [
-                { key: 'temp', val: data.temp || daily.temp, unit: '°' },
+                { key: 'temp',    val: data.temp || daily.temp, unit: '°' },
+                { key: 'airTemp', val: daily.airTemp !== undefined ? daily.airTemp : null, unit: '°' },
                 { key: 'wind', val: data.wind || daily.wind, unit: ' km', extra: windDirName },
                 { key: 'clarity', val: data.clarity || daily.clarity, unit: '%' },
                 { key: 'wave', val: daily.wave, unit: 'm', extra: daily.wavePeriod ? `<span style="font-size:0.55rem;color:var(--text-muted);">${daily.wavePeriod}s</span>` : '' },
@@ -4534,6 +4547,8 @@
             const toggleBtn = document.getElementById('metrics-toggle');
 
             const renderCard = (m) => {
+                // Değer null/undefined ise kart gösterme
+                if (m.val === null || m.val === undefined) return '';
                 const metricInfo = METRIC_DATA[m.key];
                 const icon = metricInfo?.icon || '📊';
                 let val = typeof m.val === 'number'
