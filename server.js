@@ -3261,10 +3261,58 @@ app.get('/api/forecast', async (req, res) => {
             }
             // bathymetryRaw <= -0.5 = normal deniz
         }
-        
+
         if (isLand) {
             console.log(`[LAND] lat:${lat} lon:${lon} reason:${landReason} bathyRaw:${bathymetryRaw}`);
         }
+
+        // ── KIYI SNAP ─────────────────────────────────────────────────────────
+        // CERTAIN_LAND: bathymetri pozitif = kıyı taşı / kıyı şeridi.
+        // En yakın deniz noktası aranır (max ~1200m). Bulunursa:
+        //   • Sadece marine verisi snap noktasından çekilir (weather aynı kalır)
+        //   • isLand false yapılır → normal balık skoru üretilir
+        //   • snapInfo response'a eklenir → frontend "Xm açığın verisi" yazar
+        //
+        // 'Dalga verisi yok — iç bölge': snap denenmez (gerçek iç bölge, deniz uzakta).
+        // ─────────────────────────────────────────────────────────────────────
+        let snapInfo = null;
+        if (isLand && landReason === 'CERTAIN_LAND') {
+            try {
+                const snap = await findNearestSeaPoint(lat, lon);
+                if (snap) {
+                    // Snap noktasının marine verisini çek — past_days=7 (tempShock için)
+                    const snapMarineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=7&timezone=auto`;
+                    const snapMarine = await safeFetchJSON(snapMarineUrl, 10000);
+
+                    // Marine verisi geçerliyse snap'i uygula
+                    const snapWaves = snapMarine?.hourly?.wave_height?.filter(v => v !== null && v !== undefined) || [];
+                    if (snapMarine && !snapMarine.error && snapWaves.some(v => v > 0)) {
+                        marine = snapMarine;
+                        depthData = {
+                            avg: Math.abs(snap.depthRaw),
+                            min: Math.abs(snap.depthRaw),
+                            max: Math.abs(snap.depthRaw)
+                        };
+                        isLand = false;
+                        landReason = '';
+                        snapInfo = {
+                            distanceM: snap.distanceM,
+                            snapLat:   parseFloat(snap.lat),
+                            snapLon:   parseFloat(snap.lon)
+                        };
+                        console.log(`[SNAP] ✅ Kıyı→Deniz: ${snap.distanceM}m açık (${snap.lat},${snap.lon}), derinlik: ${Math.abs(snap.depthRaw).toFixed(1)}m`);
+                    } else {
+                        console.log(`[SNAP] ⚠️ Snap noktası (${snap.lat},${snap.lon}) için marine verisi alınamadı`);
+                    }
+                } else {
+                    console.log(`[SNAP] Yakın çevrede deniz bulunamadı (${lat},${lon}) — kara yanıtı dönecek`);
+                }
+            } catch (snapErr) {
+                // Snap başarısız olursa mevcut isLand davranışı korunur
+                console.log(`[SNAP] Hata (non-critical): ${snapErr.message}`);
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────────
 
         // FIX: Basınç trendi döngü içinde her gün için ayrı hesaplanıyor.
         // Eski kod sadece bugün (i===0) için hesaplıyordu, 6 gün null kalıyordu.
@@ -3658,10 +3706,11 @@ app.get('/api/forecast', async (req, res) => {
         const responseData = {
             version: "F.I.S.H. v3.0", region: regionName, isLand, landReason, clickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
-            depth: depthData,  // EMODnet Bathymetry derinlik verisi
+            depth: depthData,        // EMODnet Bathymetry derinlik verisi
+            snapInfo,                // null veya { distanceM, snapLat, snapLon } — kıyı snap bilgisi
             forecast: sanitizedForecast,
             instant: sanitizedInstant,
-            isPro: isProUser  // Frontend'in PRO badge/lock göstermesi için
+            isPro: isProUser         // Frontend'in PRO badge/lock göstermesi için
         };
 
         cache.set(cacheKey, responseData);
@@ -3743,22 +3792,46 @@ app.get('/api/fish-search', async (req, res) => {
         // Gelişmiş kara tespiti
         let isLand = false;
         let landReason = '';
-        
-        if (!marine.hourly || !marine.hourly.wave_height || 
+
+        if (!marine.hourly || !marine.hourly.wave_height ||
             marine.hourly.wave_height.slice(0, 48).filter(v => v !== null && v !== undefined).every(v => v === 0)) {
             isLand = true;
             landReason = 'Deniz verisi yok';
         }
-        
+
         if (!isLand && bathymetryRaw !== null) {
             if (bathymetryRaw > 0) {
                 isLand = true;
-                landReason = 'Burası kara parçası (yükseklik: +' + bathymetryRaw.toFixed(1) + 'm)';
+                landReason = 'CERTAIN_LAND';
             }
         }
 
+        // ── KIYI SNAP (fish-search) ───────────────────────────────────────────
+        let snapInfo = null;
+        if (isLand && landReason === 'CERTAIN_LAND') {
+            try {
+                const snap = await findNearestSeaPoint(latF, lonF);
+                if (snap) {
+                    const snapMarineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=1&timezone=auto`;
+                    const snapMarine = await safeFetchJSON(snapMarineUrl, 10000);
+                    const snapWaves = snapMarine?.hourly?.wave_height?.filter(v => v !== null && v !== undefined) || [];
+                    if (snapMarine && !snapMarine.error && snapWaves.some(v => v > 0)) {
+                        marine = snapMarine;
+                        depthAvg = Math.abs(snap.depthRaw);
+                        isLand = false;
+                        landReason = '';
+                        snapInfo = { distanceM: snap.distanceM, snapLat: parseFloat(snap.lat), snapLon: parseFloat(snap.lon) };
+                        console.log(`[SNAP/search] ✅ ${snap.distanceM}m açık (${snap.lat},${snap.lon})`);
+                    }
+                }
+            } catch (snapErr) {
+                console.log(`[SNAP/search] Hata (non-critical): ${snapErr.message}`);
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         if (isLand) {
-            return res.json({ error: 'land', message: landReason || 'Burası kara parçası' });
+            return res.json({ error: 'land', message: landReason === 'CERTAIN_LAND' ? 'Burası kara parçası' : (landReason || 'Burası kara parçası') });
         }
 
         const hourlyOffset = 24;
@@ -3964,7 +4037,8 @@ app.get('/api/fish-search', async (req, res) => {
                 moonPhase: moon.phase,
                 solunar: solunar,
                 rain: rain
-            }
+            },
+            snapInfo  // null veya { distanceM, snapLat, snapLon }
         });
 
     } catch (error) {
@@ -4300,6 +4374,98 @@ async function fetchBathymetry(lat, lon) {
         const b = await res.json();
         return b && b.avg !== undefined ? b.avg : null;
     } catch(e) { return null; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KIYI SNAP — Kara (bathyRaw > 0) tespit edildiğinde en yakın deniz noktasını
+// bulur. Sadece CERTAIN_LAND durumunda çağrılır (iç bölge/dalga-yok için değil).
+//
+// Algoritma: 8 pusula yönünde 3 kademeli halka arama (300m → 700m → 1200m).
+// Her halkada 8 bathymetry çağrısı paralel yapılır (4s timeout).
+// İlk bulunan ≥1m derin noktayı döner.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Snap için kısa timeout'lu bathymetry fetch (ana akışı bloke etmemek için)
+async function fetchBathymetrySnap(lat, lon) {
+    const latF = parseFloat(lat).toFixed(4);
+    const lonF = parseFloat(lon).toFixed(4);
+    try {
+        const res = await Promise.race([
+            fetch(`https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('snap_timeout')), 4000))
+        ]);
+        if (!res.ok) return null;
+        const b = await res.json();
+        return (b && b.avg !== undefined) ? b.avg : null;
+    } catch (e) { return null; }
+}
+
+async function findNearestSeaPoint(lat, lon) {
+    const latF = parseFloat(lat);
+    const lonF = parseFloat(lon);
+
+    // 8 pusula yönü: [dLat katsayısı, dLon katsayısı]
+    // Sıralama: önce kardinal (N/S/E/W), sonra çapraz — genellikle kıyı kardinal yöndedir
+    const DIRS = [
+        [0, -1],  // Batı (deniz genellikle batıda — Türk kıyıları)
+        [0, 1],   // Doğu
+        [1, 0],   // Kuzey
+        [-1, 0],  // Güney
+        [1, -1],  // KuzeyBatı
+        [-1, -1], // GüneyBatı
+        [1, 1],   // KuzeyDoğu
+        [-1, 1],  // GüneyDoğu
+    ];
+
+    // Türkiye enlemi ~39°N için derece/metre yaklaşımı
+    // 1° lat ≈ 111,320m → 300m ≈ 0.00270°
+    // 1° lon ≈ 86,500m (cos39°×111320) → 300m ≈ 0.00347°
+    const BASE_LAT = 0.0027;
+    const BASE_LON = 0.0035;
+
+    // 3 halka: ~300m, ~700m, ~1200m
+    const RINGS = [
+        { dLat: BASE_LAT * 1,   dLon: BASE_LON * 1   },
+        { dLat: BASE_LAT * 2.5, dLon: BASE_LON * 2.5 },
+        { dLat: BASE_LAT * 4.5, dLon: BASE_LON * 4.5 },
+    ];
+
+    for (const ring of RINGS) {
+        const candidates = DIRS.map(([dy, dx]) => {
+            const cLat = (latF + dy * ring.dLat).toFixed(4);
+            const cLon = (lonF + dx * ring.dLon).toFixed(4);
+            // Gerçek mesafe (Pisagor — düz dünya yaklaşımı, <2km için yeterli)
+            const dm = Math.round(Math.sqrt(
+                Math.pow(dy * ring.dLat * 111320, 2) +
+                Math.pow(dx * ring.dLon * 86500, 2)
+            ));
+            return { lat: cLat, lon: cLon, distM: dm };
+        });
+
+        // Halkanın 8 noktasını paralel sorgula
+        const results = await Promise.all(
+            candidates.map(async (c) => {
+                const raw = await fetchBathymetrySnap(c.lat, c.lon);
+                return { ...c, bathyRaw: raw };
+            })
+        );
+
+        // ≥1m derin deniz noktaları (bathyRaw < -1)
+        const seaPoints = results.filter(r => r.bathyRaw !== null && r.bathyRaw < -1);
+        if (seaPoints.length > 0) {
+            // Birden fazla bulunursa en yakını seç
+            seaPoints.sort((a, b) => a.distM - b.distM);
+            const best = seaPoints[0];
+            return {
+                lat:       best.lat,
+                lon:       best.lon,
+                depthRaw:  best.bathyRaw,
+                distanceM: best.distM
+            };
+        }
+    }
+
+    return null; // Yakın çevrede deniz bulunamadı
 }
 
 // Paylaşılan hava verisiyle tek nokta skoru hesapla (API çağrısı yok)
