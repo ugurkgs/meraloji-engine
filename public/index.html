@@ -2948,7 +2948,7 @@
         let lastLatLon = null;
         let currentLayerIndex = 0;
 
-        // Harita Katmanları - 3 aşamalı döngü
+        // Harita Katmanları - 2 aşamalı döngü
         const MAP_LAYERS = [
             {
                 name: 'Harita',
@@ -2960,11 +2960,7 @@
                 url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                 options: { maxZoom: 19, attribution: '© Esri' }
             },
-            {
-                name: 'Deniz',
-                url: 'https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png',
-                options: { maxZoom: 18, attribution: '© OpenSeaMap', opacity: 0.8 }
-            }
+            
         ];
 
         let currentTileLayer = null;
