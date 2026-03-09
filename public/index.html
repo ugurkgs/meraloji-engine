@@ -4299,14 +4299,21 @@
             } else {
                 coordsDisplay.style.display = 'none';
             }
-            
-            // Derinlik bilgisini göster (min 1m)
+
+            // Derinlik bilgisini göster
             const depthDisplay = document.getElementById('depth-display');
             if (global.depth && global.depth.avg !== null) {
                 const depthLabel = CURRENT_LANG === 'tr' ? 'Derinlik' : 'Depth';
                 const isShallow = global.landReason === 'SHALLOW';
                 const shallowNote = isShallow ? ' <span style="color:var(--yellow);font-size:0.7rem;">⚠️ Sığ</span>' : '';
-                depthDisplay.innerHTML = `⚓ ${depthLabel}: <strong>${fmtDepth(global.depth.avg)}</strong>${shallowNote}`;
+                // Snap bilgisi: kıyıdan açığa kaydırıldıysa mesafeyi göster
+                let snapNote = '';
+                if (global.snapInfo) {
+                    const dm = global.snapInfo.distanceM;
+                    const distStr = dm < 1000 ? `${dm}m` : `${(dm / 1000).toFixed(1)}km`;
+                    snapNote = ` <span style="color:var(--cyan);font-size:0.68rem;">📍 ${distStr} açığın verisi</span>`;
+                }
+                depthDisplay.innerHTML = `⚓ ${depthLabel}: <strong>${fmtDepth(global.depth.avg)}</strong>${shallowNote}${snapNote}`;
                 depthDisplay.style.display = 'block';
             } else {
                 depthDisplay.style.display = 'none';
@@ -4314,21 +4321,58 @@
 
             if (global.isLand) {
                 const isCertainLand = global.landReason === 'CERTAIN_LAND';
-                const landIcon = isCertainLand ? '🏔️' : '🌊';
-                const landTitle = isCertainLand ? t('land') : 'Kara veya Sığ Bölge';
-                document.getElementById('score-display').innerHTML = `<span style="font-size: 1.2rem;">${landIcon} ${landTitle}</span>`;
-                document.getElementById('score-display').style.color = isCertainLand ? 'var(--red)' : 'var(--yellow)';
-                document.getElementById('weather-display').innerText = "";
-                const landMsg = isCertainLand
-                    ? t('landMessage')
-                    : 'Batimetri verisi çok düşük. Bu nokta kara sınırında veya çok sığ olabilir.';
-                document.getElementById('tactic-display').innerText = landMsg;
-                document.getElementById('metrics-grid-top').innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--text-muted);">${t('noSeaData')}</div>`;
-                document.getElementById('metrics-grid-bottom').innerHTML = '';
-                document.getElementById('metrics-toggle').style.display = 'none';
-                document.getElementById('fish-list').innerHTML = `<div style="text-align: center; padding: 30px; color: var(--text-muted);">${t('selectSea')}</div>`;
+                const isInland     = global.landReason !== 'CERTAIN_LAND'; // dalga verisi yok = gerçek iç bölge
+
+                // Skor alanı
+                document.getElementById('score-display').innerHTML =
+                    `<span style="font-size:1.1rem;">${isCertainLand ? '🏖️' : '🏔️'} ${isCertainLand ? 'Kıyı Noktası' : 'Kara Bölge'}</span>`;
+                document.getElementById('score-display').style.color = isCertainLand ? 'var(--yellow)' : 'var(--red)';
                 document.getElementById('confidence-display').innerText = '';
                 document.getElementById('activity-windows').style.display = 'none';
+                document.getElementById('fish-list').innerHTML =
+                    `<div style="text-align:center;padding:24px;color:var(--text-muted);">🎣 Balık skoru için deniz kesimine tıklayın</div>`;
+
+                // Hava durumu — land olsa da weather verisi var, plaj kullanıcısına göster
+                const f0 = data.forecast && data.forecast[0];
+                if (f0) {
+                    // Hava özeti
+                    const weatherKey = f0.weatherSummary || '';
+                    document.getElementById('weather-display').innerText = t(weatherKey) || weatherKey;
+                    document.getElementById('tactic-display').innerText =
+                        isCertainLand
+                            ? '🌊 En yakın deniz noktası bulunamadı — daha açığa tıklayın'
+                            : '🏔️ İç bölge — deniz verisi mevcut değil';
+
+                    // Hava metrik grid — rüzgar, yağış, hava sıcaklığı
+                    const windDirStr = f0.windDirection !== undefined ? ` ${getWindDirectionName(f0.windDirection)}` : '';
+                    document.getElementById('metrics-grid-top').innerHTML = `
+                        <div class="metric-card">
+                            <div class="metric-label">💨 RÜZGAR</div>
+                            <div class="metric-value">${f0.wind || 0}<span class="metric-unit">km/s</span></div>
+                            <div class="metric-sub">${windDirStr}</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">🌡️ HAVA</div>
+                            <div class="metric-value">${f0.airTemp !== undefined ? f0.airTemp.toFixed(1) : '--'}<span class="metric-unit">°C</span></div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">🌧️ YAĞIŞ</div>
+                            <div class="metric-value">${f0.rain || '0mm'}</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">☁️ BULUT</div>
+                            <div class="metric-value">${f0.cloud || '0%'}</div>
+                        </div>`;
+                    document.getElementById('metrics-grid-bottom').innerHTML = '';
+                    document.getElementById('metrics-toggle').style.display = 'none';
+                } else {
+                    document.getElementById('weather-display').innerText = '';
+                    document.getElementById('tactic-display').innerText = t('landMessage') || 'Deniz alanı seçin';
+                    document.getElementById('metrics-grid-top').innerHTML =
+                        `<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);">${t('noSeaData') || 'Deniz verisi yok'}</div>`;
+                    document.getElementById('metrics-grid-bottom').innerHTML = '';
+                    document.getElementById('metrics-toggle').style.display = 'none';
+                }
                 depthDisplay.style.display = 'none';
                 return;
             }
