@@ -7,6 +7,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const SunCalc = require('suncalc');
 const rateLimit = require('express-rate-limit');
 const NodeCache = require('node-cache');
@@ -84,6 +85,75 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 const cache = new NodeCache({ stdTTL: 3600, checkperiod: 600 });
+
+// ═══════════════════════════════════════════════════════════════════════
+// OFFLİNE KONUM ANALİZİ — Türkiye + KKTC Şehir Sınırları (turf.js yok)
+// ═══════════════════════════════════════════════════════════════════════
+
+// Kıyı şeridine sahip iller — sadece bunlar için Snap çalışır
+const COASTAL_PROVINCES = new Set([
+    'İstanbul', 'Tekirdağ', 'Edirne', 'Kırklareli', 'Çanakkale', 'Balıkesir',
+    'İzmir', 'Manisa', 'Aydın', 'Muğla', 'Antalya', 'Mersin', 'Adana', 'Hatay',
+    'Yalova', 'Kocaeli', 'Bursa', 'Sakarya', 'Düzce', 'Zonguldak', 'Bartın',
+    'Kastamonu', 'Sinop', 'Samsun', 'Ordu', 'Giresun', 'Trabzon', 'Rize', 'Artvin',
+    'Osmaniye', 'KKTC'
+]);
+
+// Native ray casting — turf.js gerektirmez
+function _rayInRing(lat, lon, ring) {
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const xi = ring[i][0], yi = ring[i][1];
+        const xj = ring[j][0], yj = ring[j][1];
+        if (((yi > lat) !== (yj > lat)) && (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi)) {
+            inside = !inside;
+        }
+    }
+    return inside;
+}
+
+function _pointInFeature(lat, lon, feature) {
+    const geom = feature.geometry;
+    if (geom.type === 'Polygon') {
+        return _rayInRing(lat, lon, geom.coordinates[0]);
+    } else if (geom.type === 'MultiPolygon') {
+        return geom.coordinates.some(poly => _rayInRing(lat, lon, poly[0]));
+    }
+    return false;
+}
+
+// GeoJSON'u RAM'e yükle (sunucu başlangıcında 1 kez)
+let _cityFeatures = [];
+try {
+    const geoRaw = fs.readFileSync(path.join(__dirname, 'tr-cities.json'), 'utf8');
+    _cityFeatures = JSON.parse(geoRaw).features;
+    console.log(`✅ Offline harita yüklendi — ${_cityFeatures.length} şehir/bölge`);
+} catch (e) {
+    console.warn('⚠️  tr-cities.json bulunamadı — offline konum analizi devre dışı:', e.message);
+}
+
+/**
+ * analyzeLocationOffline(lat, lon)
+ * Döner: { status: 'SEA' | 'COASTAL_LAND' | 'INLAND', city?: string }
+ *   SEA          → Hiçbir ilin içinde değil = deniz. API'lere geç.
+ *   COASTAL_LAND → Kıyı ili sınırı içinde.  Snap sistemi çalışsın.
+ *   INLAND       → İç bölge ili.             Sıfır API, anında reddet.
+ */
+function analyzeLocationOffline(lat, lon) {
+    if (_cityFeatures.length === 0) return { status: 'SEA' }; // veri yoksa izin ver
+    const latF = parseFloat(lat);
+    const lonF = parseFloat(lon);
+    for (const feature of _cityFeatures) {
+        if (_pointInFeature(latF, lonF, feature)) {
+            const city = feature.properties.name;
+            return COASTAL_PROVINCES.has(city)
+                ? { status: 'COASTAL_LAND', city }
+                : { status: 'INLAND',       city };
+        }
+    }
+    return { status: 'SEA' };
+}
+// ═══════════════════════════════════════════════════════════════════════
 
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use('/api/', limiter);
@@ -3146,6 +3216,26 @@ app.get('/api/forecast', async (req, res) => {
         const cachedData = cache.get(cacheKey);
         if (cachedData) return res.json(cachedData);
 
+        // ── OFFLİNE KONUM ANALİZİ ─────────────────────────────────────────
+        // API'lere gitmeden önce şehir sınırı kontrolü
+        const offlineAnalysis = analyzeLocationOffline(lat, lon);
+        console.log(`[OFFLINE] lat:${lat} lon:${lon} → ${offlineAnalysis.status}${offlineAnalysis.city ? ' ('+offlineAnalysis.city+')' : ''}`);
+
+        if (offlineAnalysis.status === 'INLAND') {
+            // İç bölge: sıfır API, anında reddet
+            return res.json({
+                error: 'land',
+                message: `Burası kara (${offlineAnalysis.city}). Lütfen deniz veya kıyı bir nokta seçin.`,
+                isLand: true,
+                landReason: 'INLAND',
+                city: offlineAnalysis.city
+            });
+        }
+        // SEA → EMODnet çağrısı atlanır (deniz olduğunu zaten biliyoruz)
+        // COASTAL_LAND → mevcut snap sistemi devreye girer (EMODnet ile doğrulama)
+        const skipBathymetry = (offlineAnalysis.status === 'SEA');
+        // ──────────────────────────────────────────────────────────────────
+
         const regionName = getRegion(lat, lon);
         const salinity = getSalinity(regionName);
 
@@ -3154,15 +3244,16 @@ app.get('/api/forecast', async (req, res) => {
         const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=7&timezone=auto`;
         const marineUrlFallback = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=7&timezone=auto`;
         
-        // EMODnet Bathymetry API - Derinlik verisi
+        // EMODnet Bathymetry API - Derinlik verisi (SEA ise atlanır)
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lon} ${lat})`;
 
         // Paralel fetch — hata durumunda fallback URL'ye düş
         // [CRON CACHE] — background cron daha önce çektiyse direk kullan, API'ye gitme
+        // [OFFLİNE OPT] — SEA ise EMODnet çağrısı atlanır (~400ms tasarruf)
         let [weather, marine, bathymetryRes] = await Promise.all([
             (cache.get(`raw_weather_${gLat}_${gLon}`) ? Promise.resolve(cache.get(`raw_weather_${gLat}_${gLon}`)) : safeFetchJSON(weatherUrl)),
             (cache.get(`raw_marine_${gLat}_${gLon}`)  ? Promise.resolve(cache.get(`raw_marine_${gLat}_${gLon}`))  : safeFetchJSON(marineUrl)),
-            fetchWithTimeout(bathymetryUrl).catch(() => null)
+            skipBathymetry ? Promise.resolve(null) : fetchWithTimeout(bathymetryUrl).catch(() => null)
         ]);
         
         // Fallback: gelişmiş URL başarısızsa basit URL dene
@@ -3757,6 +3848,20 @@ app.get('/api/fish-search', async (req, res) => {
         const now = new Date();
         const clickHour = now.getHours();
 
+        // ── OFFLİNE KONUM ANALİZİ ─────────────────────────────────────────
+        const offlineAnalysis = analyzeLocationOffline(latF, lonF);
+        if (offlineAnalysis.status === 'INLAND') {
+            return res.json({
+                error: 'land',
+                message: `Burası kara (${offlineAnalysis.city}). Lütfen deniz veya kıyı bir nokta seçin.`,
+                isLand: true,
+                landReason: 'INLAND',
+                city: offlineAnalysis.city
+            });
+        }
+        const skipBathymetry = (offlineAnalysis.status === 'SEA');
+        // ──────────────────────────────────────────────────────────────────
+
         const regionName = getRegion(latF, lonF);
 
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`;
@@ -3766,7 +3871,7 @@ app.get('/api/fish-search', async (req, res) => {
         let [weather, marine, bathymetryRes] = await Promise.all([
             safeFetchJSON(weatherUrl),
             safeFetchJSON(marineUrl),
-            fetchWithTimeout(bathymetryUrl).catch(() => null)
+            skipBathymetry ? Promise.resolve(null) : fetchWithTimeout(bathymetryUrl).catch(() => null)
         ]);
         
         if (!weather || weather.error) {
