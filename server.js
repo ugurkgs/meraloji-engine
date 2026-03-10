@@ -22,10 +22,13 @@ function fetchWithTimeout(url, timeoutMs = 8000) {
 }
 
 // Güvenli JSON fetch — hata durumunda null döner, crash etmez
-async function safeFetchJSON(url, timeoutMs = 8000) {
+async function safeFetchJSON(url, timeoutMs = 12000) {
     try {
         const res = await fetchWithTimeout(url, timeoutMs);
-        if (!res.ok) return null;
+        if (!res.ok) {
+            console.log(`[FETCH] ${url.split('?')[0]} HTTP ${res.status} ${res.statusText}`);
+            return null;
+        }
         return await res.json();
     } catch (e) {
         console.log(`[FETCH] ${url.split('?')[0]} failed: ${e.message}`);
