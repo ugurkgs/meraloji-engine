@@ -22,28 +22,37 @@ function fetchWithTimeout(url, timeoutMs = 8000) {
 }
 
 // Güvenli JSON fetch — hata durumunda null döner, crash etmez
-async function safeFetchJSON(url, timeoutMs = 12000, retries = 2) {
-    for (let attempt = 0; attempt <= retries; attempt++) {
-        try {
-            const res = await fetchWithTimeout(url, timeoutMs);
-            if (res.status === 429) {
-                const wait = (attempt + 1) * 2000; // 2s, 4s
-                console.log(`[FETCH] 429 rate limit, waiting ${wait}ms (attempt ${attempt+1})`);
-                await new Promise(r => setTimeout(r, wait));
-                continue;
-            }
-            if (!res.ok) {
-                console.log(`[FETCH] ${url.split('?')[0]} HTTP ${res.status} ${res.statusText}`);
-                return null;
-            }
-            return await res.json();
-        } catch (e) {
-            console.log(`[FETCH] ${url.split('?')[0]} failed: ${e.message}`);
-            if (attempt === retries) return null;
-            await new Promise(r => setTimeout(r, 1000));
+// 429 gelirse retry YOK — daha fazla istek atmak yasak
+async function safeFetchJSON(url, timeoutMs = 12000) {
+    try {
+        const res = await fetchWithTimeout(url, timeoutMs);
+        if (res.status === 429) {
+            console.log(`[FETCH] 429 rate limit: ${url.split('?')[0]}`);
+            return null;
         }
+        if (!res.ok) {
+            console.log(`[FETCH] ${url.split('?')[0]} HTTP ${res.status}`);
+            return null;
+        }
+        return await res.json();
+    } catch (e) {
+        console.log(`[FETCH] ${url.split('?')[0]} failed: ${e.message}`);
+        return null;
     }
-    return null;
+}
+
+// Open-Meteo istek kuyruğu — aynı anda max 2 istek, aralarında 500ms
+const _omQueue = { active: 0, max: 2 };
+async function queuedFetch(url, timeoutMs = 12000) {
+    while (_omQueue.active >= _omQueue.max) {
+        await new Promise(r => setTimeout(r, 200));
+    }
+    _omQueue.active++;
+    try {
+        return await safeFetchJSON(url, timeoutMs);
+    } finally {
+        _omQueue.active--;
+    }
 }
 
 // Firebase Admin SDK
@@ -1713,7 +1722,7 @@ const SPECIES_DB = {
     },
     "lokum": {
         name: "Lokum Balığı", nameEn: "Silver Biddy", icon: "🐟", scientificName: "Sillago sihama",
-        photoId: 75,
+        photoId: 85,
         category: "KUMSAL",
         peakHours: "DAY", peakHoursDesc: "Gündüz, kumlu sığ su ve kıyı şeridi",
         tempRange: { min: 20, opt: 26, max: 30 },
@@ -3303,19 +3312,19 @@ app.get('/api/forecast', async (req, res) => {
         // [CRON CACHE] — background cron daha önce çektiyse direk kullan, API'ye gitme
         // [OFFLİNE OPT] — SEA ise EMODnet çağrısı atlanır (~400ms tasarruf)
         let [weather, marine, bathymetryRes] = await Promise.all([
-            (cache.get(`raw_weather_${gLat}_${gLon}`) ? Promise.resolve(cache.get(`raw_weather_${gLat}_${gLon}`)) : safeFetchJSON(weatherUrl)),
-            (cache.get(`raw_marine_${gLat}_${gLon}`)  ? Promise.resolve(cache.get(`raw_marine_${gLat}_${gLon}`))  : safeFetchJSON(marineUrl)),
+            (cache.get(`raw_weather_${gLat}_${gLon}`) ? Promise.resolve(cache.get(`raw_weather_${gLat}_${gLon}`)) : queuedFetch(weatherUrl)),
+            (cache.get(`raw_marine_${gLat}_${gLon}`)  ? Promise.resolve(cache.get(`raw_marine_${gLat}_${gLon}`))  : queuedFetch(marineUrl)),
             skipBathymetry ? Promise.resolve(null) : fetchWithTimeout(bathymetryUrl).catch(() => null)
         ]);
         
         // Fallback: gelişmiş URL başarısızsa basit URL dene
         if (!weather || weather.error) {
             console.log('[FALLBACK] Weather enhanced failed, trying basic URL');
-            weather = await safeFetchJSON(weatherUrlFallback);
+            weather = await queuedFetch(weatherUrlFallback);
         }
         if (!marine || marine.error) {
             console.log('[FALLBACK] Marine enhanced failed, trying basic URL');
-            marine = await safeFetchJSON(marineUrlFallback);
+            marine = await queuedFetch(marineUrlFallback);
         }
         
         // Weather kesin gerekli, marine olmadan varsayılan değerlerle devam et
@@ -3950,8 +3959,8 @@ app.get('/api/fish-search', async (req, res) => {
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`;
 
         let [weather, marine, bathymetryRes] = await Promise.all([
-            safeFetchJSON(weatherUrl),
-            safeFetchJSON(marineUrl),
+            queuedFetch(weatherUrl),
+            queuedFetch(marineUrl),
             skipBathymetry ? Promise.resolve(null) : fetchWithTimeout(bathymetryUrl).catch(() => null)
         ]);
         
@@ -4559,7 +4568,7 @@ async function fetchCenterWeather(lat, lon) {
     const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`;
     const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=1&timezone=auto`;
     
-    let [weather, marine] = await Promise.all([safeFetchJSON(weatherUrl), safeFetchJSON(marineUrl)]);
+    let [weather, marine] = await Promise.all([queuedFetch(weatherUrl), queuedFetch(marineUrl)]);
     
     if (!weather || weather.error) {
         weather = await safeFetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain&past_days=1&timezone=auto`);
@@ -5072,8 +5081,8 @@ async function warmCacheForSpot(lat, lon) {
         const marineUrl  = `https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=7&timezone=auto`;
 
         const [weather, marine] = await Promise.all([
-            safeFetchJSON(weatherUrl, 12000),
-            safeFetchJSON(marineUrl,  12000),
+            queuedFetch(weatherUrl, 12000),
+            queuedFetch(marineUrl, 12000),
         ]);
 
         if (weather && marine) {
