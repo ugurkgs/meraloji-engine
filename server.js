@@ -3424,6 +3424,12 @@ app.get('/api/forecast', async (req, res) => {
         const hourlyOffset = 24;         // weather için bugünün başlangıcı
         const marineHourlyOffset = 7 * 24; // marine için bugünün başlangıcı (past_days=7)
 
+        // UTC offset düzeltmesi — sunucu UTC'de çalışır, Open-Meteo yerel saat döner
+        // utc_offset_seconds kullanarak gerçek yerel saati hesapla
+        const utcOffsetSeconds = weather.utc_offset_seconds || 0;
+        const localClickHour = Math.floor((Date.now() / 1000 + utcOffsetSeconds) % 86400 / 3600);
+        const correctedClickHour = localClickHour; // artık clickHour yerine bunu kullan
+
         for (let i = 0; i < 7; i++) {
             const targetDate = new Date();
             targetDate.setDate(targetDate.getDate() + i);
@@ -3433,15 +3439,15 @@ app.get('/api/forecast', async (req, res) => {
             const dailyIdx = i + 1;  // weather daily[1] = bugün
             const hourlyStartIdx = hourlyOffset + (i * 24);           // weather saatlik indeks
             const marineHourlyStartIdx = marineHourlyOffset + (i * 24); // marine saatlik indeks
-            const hourlyIdx = hourlyStartIdx + clickHour;
-            const marineHourlyIdx = marineHourlyStartIdx + clickHour;
+            const hourlyIdx = hourlyStartIdx + correctedClickHour;
+            const marineHourlyIdx = marineHourlyStartIdx + correctedClickHour;
 
             if (!weather.daily || !weather.daily.temperature_2m_max[dailyIdx]) continue;
 
             // FIX: Her gün için ayrı basınç trendi hesapla (eski: sadece bugün, diğer 6 gün null)
             let pressureTrend = { trend: 'STABLE', change: 0 };
             if (hourlyPressureData) {
-                const dayPressureIdx = hourlyStartIdx + clickHour;
+                const dayPressureIdx = hourlyStartIdx + correctedClickHour;
                 const dayPressureStart = Math.max(0, dayPressureIdx - 6);
                 const dayPressureHistory = hourlyPressureData.slice(dayPressureStart, dayPressureIdx + 1);
                 pressureTrend = calculatePressureTrend(dayPressureHistory);
@@ -3470,7 +3476,7 @@ app.get('/api/forecast', async (req, res) => {
             const moonlightIntensity = calculateMoonlightIntensity(targetDate, parseFloat(lat), parseFloat(lon), cloud);
 
             const sunTimes = SunCalc.getTimes(targetDate, lat, lon);
-            const timeMode = getTimeOfDay(clickHour, sunTimes);
+            const timeMode = getTimeOfDay(correctedClickHour, sunTimes);
             const moon = SunCalc.getMoonIllumination(targetDate);
             const solunar = getSolunarWindow(targetDate, lat, lon);
             
@@ -3498,7 +3504,7 @@ app.get('/api/forecast', async (req, res) => {
                     lon: parseFloat(lon),
                     depthAvg: depthData.avg,
                     salinity,
-                    hour: clickHour,
+                    hour: correctedClickHour,
                     cloudCover: cloud,
                     uvIndex: uvIdx,
                     wavePeriod,
@@ -3629,8 +3635,8 @@ app.get('/api/forecast', async (req, res) => {
         if (!isLand) {
             // Weather: past_days=1 → bugün offset 24
             // Marine:  past_days=7 → bugün offset 168 (marineHourlyOffset)
-            const instantIdx = 24 + clickHour;                         // weather indeksi
-            const marineInstantIdx = marineHourlyOffset + clickHour;   // marine indeksi
+            const instantIdx = 24 + correctedClickHour;                         // weather indeksi
+            const marineInstantIdx = marineHourlyOffset + correctedClickHour;   // marine indeksi
             const hourlyStartIdx = 24;                                 // weather bugün başlangıcı
             const marineStartIdx = marineHourlyOffset;                 // marine bugün başlangıcı (168)
             const instantDate = new Date();
@@ -3643,7 +3649,7 @@ app.get('/api/forecast', async (req, res) => {
             const i_uv = safeNum(weather.hourly?.uv_index?.[instantIdx], 0);
             const i_pressure = safeNum(weather.hourly?.surface_pressure?.[instantIdx], 1013);
             const i_sunTimes = SunCalc.getTimes(instantDate, lat, lon);
-            const i_timeMode = getTimeOfDay(clickHour, i_sunTimes);
+            const i_timeMode = getTimeOfDay(correctedClickHour, i_sunTimes);
             const i_solunar = getSolunarWindow(instantDate, lat, lon);
             const i_clarity = calculateClarity(i_wave, i_wind, i_rain);
             const i_current = estimateCurrent(i_wave, i_wind, regionName);
@@ -3677,7 +3683,7 @@ app.get('/api/forecast', async (req, res) => {
                 lat: parseFloat(lat), lon: parseFloat(lon),
                 depthAvg: depthData.avg,
                 salinity,
-                hour: clickHour,
+                hour: correctedClickHour,
                 cloudCover: i_cloud,
                 uvIndex: i_uv,
                 wavePeriod: i_wavePeriod,
@@ -3695,7 +3701,7 @@ app.get('/api/forecast', async (req, res) => {
                 
                 // 3 saatlik pencere ortalaması ile daha stabil skor (gürültü filtreleme)
                 const smoothedScore = calculate3HourWindowScore(
-                    fish, key, baseParams, weather, marine, clickHour, hourlyStartIdx, marineStartIdx
+                    fish, key, baseParams, weather, marine, correctedClickHour, hourlyStartIdx, marineStartIdx
                 );
                 
                 // Reason ve trigger bilgileri için tek anlık hesaplama
@@ -3801,7 +3807,7 @@ app.get('/api/forecast', async (req, res) => {
         } : null;
 
         const responseData = {
-            version: "F.I.S.H. v3.0", region: regionName, isLand, landReason, clickHour,
+            version: "F.I.S.H. v3.0", region: regionName, isLand, landReason, clickHour: correctedClickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
             depth: depthData,        // EMODnet Bathymetry derinlik verisi
             snapInfo,                // null veya { distanceM, snapLat, snapLon } — kıyı snap bilgisi
@@ -3852,7 +3858,7 @@ app.get('/api/fish-search', async (req, res) => {
         const latF = parseFloat(lat).toFixed(4);
         const lonF = parseFloat(lon).toFixed(4);
         const now = new Date();
-        const clickHour = now.getHours();
+        let clickHour = now.getHours(); // UTC saati — weather fetch sonrası düzeltilir
 
         // ── OFFLİNE KONUM ANALİZİ ─────────────────────────────────────────
         const offlineAnalysis = analyzeLocationOffline(latF, lonF);
@@ -3884,6 +3890,10 @@ app.get('/api/fish-search', async (req, res) => {
             marine = await safeFetchJSON(`https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=1&timezone=auto`);
         }
         if (!weather || !marine) return res.status(503).json({ error: 'API_UNAVAILABLE' });
+
+        // UTC offset düzeltmesi — sunucu UTC, Open-Meteo yerel saat döner
+        const _utcOff = weather.utc_offset_seconds || 0;
+        clickHour = Math.floor((Date.now() / 1000 + _utcOff) % 86400 / 3600);
 
         let depthAvg = null;
         let bathymetryRaw = null;
@@ -3987,7 +3997,7 @@ app.get('/api/fish-search', async (req, res) => {
             lat: parseFloat(latF), lon: parseFloat(lonF),
             depthAvg: depthAvg,
             salinity,
-            hour: clickHour,
+            hour: clickHour, // fish-search: already corrected above
             cloudCover: cloud,
             uvIndex: uv,
             wavePeriod,
@@ -4583,7 +4593,8 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
     const latF = parseFloat(lat).toFixed(4);
     const lonF = parseFloat(lon).toFixed(4);
     const now = new Date();
-    const clickHour = now.getHours();
+    const _utcOff2 = weather?.utc_offset_seconds || 0;
+    const clickHour = Math.floor((Date.now() / 1000 + _utcOff2) % 86400 / 3600);
     const regionName = getRegion(latF, lonF);
 
     try {
