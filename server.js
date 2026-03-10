@@ -22,18 +22,28 @@ function fetchWithTimeout(url, timeoutMs = 8000) {
 }
 
 // Güvenli JSON fetch — hata durumunda null döner, crash etmez
-async function safeFetchJSON(url, timeoutMs = 12000) {
-    try {
-        const res = await fetchWithTimeout(url, timeoutMs);
-        if (!res.ok) {
-            console.log(`[FETCH] ${url.split('?')[0]} HTTP ${res.status} ${res.statusText}`);
-            return null;
+async function safeFetchJSON(url, timeoutMs = 12000, retries = 2) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            const res = await fetchWithTimeout(url, timeoutMs);
+            if (res.status === 429) {
+                const wait = (attempt + 1) * 2000; // 2s, 4s
+                console.log(`[FETCH] 429 rate limit, waiting ${wait}ms (attempt ${attempt+1})`);
+                await new Promise(r => setTimeout(r, wait));
+                continue;
+            }
+            if (!res.ok) {
+                console.log(`[FETCH] ${url.split('?')[0]} HTTP ${res.status} ${res.statusText}`);
+                return null;
+            }
+            return await res.json();
+        } catch (e) {
+            console.log(`[FETCH] ${url.split('?')[0]} failed: ${e.message}`);
+            if (attempt === retries) return null;
+            await new Promise(r => setTimeout(r, 1000));
         }
-        return await res.json();
-    } catch (e) {
-        console.log(`[FETCH] ${url.split('?')[0]} failed: ${e.message}`);
-        return null;
     }
+    return null;
 }
 
 // Firebase Admin SDK
@@ -5063,17 +5073,18 @@ async function warmAllHotSpots() {
     console.log(`[CRON] 🌡️ Hot spot cache ısıtması başladı (${HOT_SPOTS.length} nokta)`);
     for (const spot of HOT_SPOTS) {
         await warmCacheForSpot(spot.lat, spot.lon);
-        await new Promise(r => setTimeout(r, 800)); // API'ye nezaket aralığı
+        await new Promise(r => setTimeout(r, 3000)); // API'ye nezaket aralığı (429 önleme)
     }
     console.log(`[CRON] ✅ Hot spot cache ısıtması tamamlandı`);
 }
 
-// Sunucu başladıktan 10 sn sonra ilk ısıtma, sonra her 55 dakikada bir tekrar
+// Sunucu başladıktan 60 sn sonra ilk ısıtma, sonra her 55 dakikada bir tekrar
 // (55 dk: cache TTL 60 dk — expire olmadan önce yenile)
+// 60 sn gecikme: sunucu tam ayağa kalksın, kullanıcı istekleriyle çakışmasın
 setTimeout(() => {
     warmAllHotSpots();
     setInterval(warmAllHotSpots, 55 * 60 * 1000);
-}, 10_000);
+}, 60_000);
 
 app.listen(PORT, () => {
     console.log(`
