@@ -2523,7 +2523,7 @@
             <div id="metrics-section">
                 <div class="metrics-grid" id="metrics-grid-top"></div>
                 <div id="metrics-toggle" onclick="toggleMetrics()" style="text-align:center;padding:6px 0;cursor:pointer;font-size:0.72rem;color:var(--cyan);user-select:none;display:none;">
-                    <span id="metrics-toggle-text">Teknik Veriler ▼</span>
+                    <span id="metrics-toggle-text">Oşinografik Bilgiler ▼</span>
                 </div>
                 <div class="metrics-grid" id="metrics-grid-bottom" style="display:none;"></div>
             </div>
@@ -4779,10 +4779,10 @@
             const text = document.getElementById('metrics-toggle-text');
             if (metricsExpanded) {
                 bottom.style.display = 'grid';
-                text.textContent = 'Teknik Veriler ▲';
+                text.textContent = 'Oşinografik Bilgiler ▲';
             } else {
                 bottom.style.display = 'none';
-                text.textContent = 'Teknik Veriler ▼';
+                text.textContent = 'Oşinografik Bilgiler ▼';
             }
         }
 
@@ -5058,16 +5058,16 @@
                         </div>
                         <div class="fish-details">
                             ${f.reason ? `<div class="fish-reason ${reasonClass}">${reasonIcon} ${f.reason}</div>` : ''}
+                            ${peakTimeLine}
+                            ${bestHourLine}
+                            ${hourlyChartHtml}
+                            ${starsHtml}
+                            ${f.note ? `<div class="fish-tip">💡 ${f.note}</div>` : ''}
                             <div>🎯 <strong>${t('bait')}:</strong> ${baitText}</div>
                             <div>🎣 <strong>${t('hook')}:</strong> ${f.method}</div>
                             ${lureText ? `<div>🎪 <strong>${t('lure')}:</strong> ${lureText}</div>` : ''}
                             ${rigText ? `<div>⚙️ <strong>${t('rig')}:</strong> ${rigText}</div>` : ''}
                             ${legalText ? `<div>📏 <strong>${t('legalSize')}:</strong> ${legalText}</div>` : ''}
-                            ${peakTimeLine}
-                            ${bestHourLine}
-                            ${hourlyChartHtml}
-                            ${f.note ? `<div class="fish-tip">💡 ${f.note}</div>` : ''}
-                            ${starsHtml}
                         </div>
                     </div>
                 `;
