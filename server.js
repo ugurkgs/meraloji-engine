@@ -1661,11 +1661,11 @@ const SPECIES_DB = {
         note: "Uskumruya benzer ama daha sıcak su sever. Yaz mevsimi balığı."
     },
     "iskatarya": {
-    name: "İskatarya (Kolyoz)", nameEn: "Chub Mackerel", icon: "🐟", scientificName: "Scomber colias",
+    name: "İskatarya", nameEn: "Atlantic Chub Mackerel", icon: "🐟", scientificName: "Scomber colias",
     photoId: 73,
     category: "PELAJİK",
     peakHours: "DAY", peakHoursDesc: "Sabah erken ve akşamüstü, yüzey",
-    tempRange: { min: 14, opt: 20, max: 26 },
+    tempRange: { min: 15, opt: 20, max: 26 },
     seasons: { winter: 0.20, spring: 0.75, summer: 0.90, autumn: 0.80 },
     activity: "DAY",
     pressureSensitivity: 0.4,
@@ -1674,10 +1674,10 @@ const SPECIES_DB = {
     currentPref: 0.5,
     salinityPref: "MEDIUM",
     regions: ["EGE", "AKDENİZ", "MARMARA"],
-    depth: { min: 0, opt: 20, max: 80 },
-    advice: { bait: "Küçük balık, Kalamar parçası", lure: "Tüylü iğne, Sahte balık", rig: "Çoklu iğneli", hook: "8 - 12" },
-    legalSize: "18",
-    note: "Sürü halinde göç eder. İlkbahar-sonbahar kıyıya yaklaşır. Sabah erken saatlerde yüzeyde aktif."
+    depth: { min: 0, opt: 25, max: 200 },
+    advice: { bait: "Çapari, Küçük balık", lure: "Tüylü iğne, Kaşık", rig: "Çoklu iğneli", hook: "8 - 12" },
+    legalSize: "18 cm",
+    note: "Kolyoza benzer ama karnında noktalı desen ayırt eder. Sürü halinde göç eder, sabah erken yüzeyde aktif."
 },
     "sarpa": {
         name: "Sarpa (Salpa)", nameEn: "Salema", icon: "🐟", scientificName: "Sarpa salpa",
