@@ -5078,13 +5078,11 @@ async function warmAllHotSpots() {
     console.log(`[CRON] ✅ Hot spot cache ısıtması tamamlandı`);
 }
 
-// Sunucu başladıktan 60 sn sonra ilk ısıtma, sonra her 55 dakikada bir tekrar
-// (55 dk: cache TTL 60 dk — expire olmadan önce yenile)
-// 60 sn gecikme: sunucu tam ayağa kalksın, kullanıcı istekleriyle çakışmasın
-setTimeout(() => {
-    warmAllHotSpots();
-    setInterval(warmAllHotSpots, 55 * 60 * 1000);
-}, 60_000);
+// CRON DEVRE DIŞI — İleride dinamik hotspot sistemiyle (kullanıcı konumuna göre) aktif edilecek
+// setTimeout(() => {
+//     warmAllHotSpots();
+//     setInterval(warmAllHotSpots, 55 * 60 * 1000);
+// }, 60_000);
 
 app.listen(PORT, () => {
     console.log(`
