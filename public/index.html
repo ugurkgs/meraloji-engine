@@ -2476,10 +2476,13 @@
             <div class="hud-title-area">
                 <span class="hud-title" id="region-title">--</span>
                 <span class="hud-coords" id="coords-display"></span>
-                <div class="user-badge" id="user-badge" onclick="showUserMenu()">
-                    <img id="user-avatar" src="" alt="">
-                    <span id="user-name"></span>
-                    <span id="pro-tag" class="pro-tag" style="display:none;cursor:pointer;" onclick="onProTagClick()">PRO</span>
+                <div class="user-badge" id="user-badge">
+                    <span id="user-badge-left" onclick="showUserMenu()" style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <img id="user-avatar" src="" alt="">
+                        <span id="user-name"></span>
+                        <span id="pro-tag" class="pro-tag" style="display:none;cursor:pointer;" onclick="event.stopPropagation();onProTagClick()">PRO</span>
+                    </span>
+                    <button id="upgrade-header-btn" onclick="showPaywall('header_upgrade')" style="display:none;margin-left:8px;padding:4px 10px;background:linear-gradient(135deg,#00d4ff,#00ff88);border:none;border-radius:20px;font-family:'Outfit',sans-serif;font-size:10px;font-weight:700;color:#040d1a;cursor:pointer;letter-spacing:0.5px;white-space:nowrap;box-shadow:0 0 10px rgba(0,212,255,0.3);">PRO'ya Geç ✦</button>
                 </div>
                 <span class="hud-depth" id="depth-display">⚓ --m</span>
             </div>
@@ -4232,8 +4235,15 @@
                 
                 // API hatası kontrolü
                 if (data.error || !data.forecast) {
-                    const msg = data.message || data.error || 'Veri alınamadı';
-                    document.getElementById('log-output').innerHTML = `<div class="log-line" style="color:var(--yellow);">⚠️ ${msg} — tekrar deneyin</div>`;
+                    let msg;
+                    if (data.error === 'API_UNAVAILABLE') {
+                        msg = '🌊 Sunucu şu an yoğun, 30 saniye sonra tekrar dene';
+                    } else if (data.isLand) {
+                        msg = data.message || 'Bu nokta karada';
+                    } else {
+                        msg = data.message || data.error || 'Veri alınamadı';
+                    }
+                    document.getElementById('log-output').innerHTML = `<div class="log-line" style="color:var(--yellow);">⚠️ ${msg}</div>`;
                     setTimeout(() => { hideLoading(); }, 2000);
                     return;
                 }
@@ -6336,18 +6346,22 @@ function updateUserUI() {
         document.getElementById('user-name').textContent = (currentUser.displayName || currentUser.email || '').split(' ')[0];
         
         const proTag = document.getElementById('pro-tag');
+        const upgradeHeaderBtn = document.getElementById('upgrade-header-btn');
         if (isPremium) {
             proTag.textContent = 'PRO';
             proTag.style.display = 'inline';
             proTag.style.background = 'linear-gradient(90deg, #00c8c8, #00ffcc)';
+            if (upgradeHeaderBtn) upgradeHeaderBtn.style.display = 'none';
         } else if (isGracePeriod) {
             proTag.textContent = `🎁 Deneme ${graceDaysLeft}/14`;
             proTag.style.display = 'inline';
             proTag.style.background = 'linear-gradient(90deg, #f7b731, #f5a623)';
+            if (upgradeHeaderBtn) upgradeHeaderBtn.style.display = 'inline-block';
         } else {
             proTag.textContent = `${usageData.clicksRemaining}/${usageData.clickLimit}`;
             proTag.style.display = 'inline';
             proTag.style.background = 'linear-gradient(90deg, #ff851b, #ff6b35)';
+            if (upgradeHeaderBtn) upgradeHeaderBtn.style.display = 'inline-block';
         }
         badge.style.display = 'flex';
     }
@@ -6394,7 +6408,7 @@ function signOut() {
 }
 
 function showUserMenu() {
-    if (confirm((isPremium || isGracePeriod) ? 'Çıkış yapmak istiyor musunuz?' : 'Çıkış yapmak istiyor musunuz?\n\nPRO abone olmak için Google Play\'den MERALOJİ uygulamasını indirin.')) {
+    if (confirm('Çıkış yapmak istiyor musunuz?')) {
         signOut();
     }
 }
