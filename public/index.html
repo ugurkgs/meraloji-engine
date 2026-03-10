@@ -2061,9 +2061,153 @@
             cursor: pointer; text-decoration: underline;
         }
 
+
+        /* ═══════════════════════════════════════════════════════
+           ONBOARDING OVERLAY
+        ═══════════════════════════════════════════════════════ */
+        #onboarding-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(4, 13, 26, 0.97);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            backdrop-filter: blur(8px);
+            animation: onboardFadeIn 0.5s ease;
+        }
+        @keyframes onboardFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        #onboarding-overlay.hiding { animation: onboardFadeOut 0.4s ease forwards; }
+        @keyframes onboardFadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.97); } }
+        .onboard-card {
+            background: rgba(8, 24, 48, 0.98);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 20px;
+            padding: 32px 28px 28px;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 0 60px rgba(0, 212, 255, 0.08), 0 20px 60px rgba(0,0,0,0.6);
+        }
+        .onboard-logo { text-align: center; margin-bottom: 24px; }
+        .onboard-logo-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px; font-weight: 700;
+            color: #00d4ff; letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(0,212,255,0.5);
+        }
+        .onboard-logo-sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; color: rgba(255,255,255,0.35);
+            letter-spacing: 3px; margin-top: 2px;
+        }
+        .onboard-steps { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; }
+        .onboard-step {
+            display: flex; align-items: flex-start; gap: 14px;
+            padding: 14px;
+            background: rgba(0, 212, 255, 0.04);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 12px;
+        }
+        .onboard-step-icon { font-size: 26px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+        .onboard-step-text { flex: 1; }
+        .onboard-step-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px; font-weight: 600; color: #ffffff; margin-bottom: 3px;
+        }
+        .onboard-step-desc {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; color: rgba(255,255,255,0.45); line-height: 1.5;
+        }
+        .onboard-step-desc .score-hi { color: #00ff88; font-weight: 600; }
+        .onboard-step-desc .score-mid { color: #00d4ff; font-weight: 600; }
+        .onboard-disclaimer {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; color: rgba(255,255,255,0.3);
+            text-align: center; line-height: 1.6;
+            margin-bottom: 24px; padding: 10px 12px;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 8px; background: rgba(255,255,255,0.02);
+        }
+        .onboard-btn {
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, #00d4ff 0%, #00ff88 100%);
+            border: none; border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px; font-weight: 700; color: #040d1a;
+            cursor: pointer; letter-spacing: 0.5px;
+            box-shadow: 0 0 24px rgba(0,212,255,0.3);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .onboard-btn:active { transform: scale(0.98); }
+        .onboard-skip {
+            text-align: center; margin-top: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; color: rgba(255,255,255,0.2);
+            cursor: pointer; letter-spacing: 1px;
+        }
+        .onboard-skip:hover { color: rgba(255,255,255,0.4); }
+
     </style>
 </head>
 <body>
+
+    <!-- ═══════════════════════════════════
+         ONBOARDING OVERLAY
+    ════════════════════════════════════ -->
+    <div id="onboarding-overlay">
+        <div class="onboard-card">
+            <div class="onboard-logo">
+                <div class="onboard-logo-title">🐟 MERALOJİ F.I.S.H.</div>
+                <div class="onboard-logo-sub">FISHING INTELLIGENCE SYSTEM</div>
+            </div>
+
+            <div class="onboard-steps">
+                <div class="onboard-step">
+                    <div class="onboard-step-icon">🗺️</div>
+                    <div class="onboard-step-text">
+                        <div class="onboard-step-title">Haritada denize tıkla</div>
+                        <div class="onboard-step-desc">Ege, Akdeniz, Marmara veya Karadeniz'de herhangi bir noktayı seç</div>
+                    </div>
+                </div>
+                <div class="onboard-step">
+                    <div class="onboard-step-icon">📊</div>
+                    <div class="onboard-step-text">
+                        <div class="onboard-step-title">Günlük veya Anlık skoru gör</div>
+                        <div class="onboard-step-desc">7 günlük tahmin veya şu anki koşullar için detaylı balık listesi</div>
+                    </div>
+                </div>
+                <div class="onboard-step">
+                    <div class="onboard-step-icon">🎯</div>
+                    <div class="onboard-step-text">
+                        <div class="onboard-step-title">Skoru yorumla</div>
+                        <div class="onboard-step-desc">
+                            <span class="score-hi">85+</span> Balık için güzel bir an&nbsp;&nbsp;
+                            <span class="score-mid">70+</span> Koşullar iyi
+                        </div>
+                    </div>
+                </div>
+                <div class="onboard-step">
+                    <div class="onboard-step-icon">🔬</div>
+                    <div class="onboard-step-text">
+                        <div class="onboard-step-title">Bilimsel veri, garanti değil</div>
+                        <div class="onboard-step-desc">Skorlar oşinografik ve balık biyolojisi verilerine göre hesaplanır. Yüksek skor avı kolaylaştırır, garantilemez.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="onboard-disclaimer">
+                Dalga · Sıcaklık · Solunar · Bathymetri · Mevsim<br>
+                verilerini birleştiren çok değişkenli bir tahmin sistemi
+            </div>
+
+            <button class="onboard-btn" onclick="closeOnboarding()">Haritaya Git 🗺️</button>
+            <div class="onboard-skip" onclick="closeOnboarding()">Bir daha gösterme</div>
+        </div>
+    </div>
+
+
     <!-- ═══════════════════════════════════════════════════════════════════
          LOGIN OVERLAY
          ═══════════════════════════════════════════════════════════════════ -->
@@ -6428,7 +6572,26 @@ window.addEventListener('popstate', function(e) {
     });
 })();
 
-window.addEventListener('load', function() {
+
+    // ── ONBOARDING ──────────────────────────────────────────────────────
+    function closeOnboarding() {
+        const overlay = document.getElementById('onboarding-overlay');
+        if (!overlay) return;
+        overlay.classList.add('hiding');
+        localStorage.setItem('meraloji_onboarding_seen', '1');
+        setTimeout(() => overlay.remove(), 400);
+    }
+
+    (function initOnboarding() {
+        const seen = localStorage.getItem('meraloji_onboarding_seen');
+        if (seen) {
+            const overlay = document.getElementById('onboarding-overlay');
+            if (overlay) overlay.remove();
+        }
+    })();
+
+
+    window.addEventListener('load', function() {
     history.pushState(null, document.title, window.location.href);
 });
 
