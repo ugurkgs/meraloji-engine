@@ -3286,9 +3286,28 @@ app.get('/api/forecast', async (req, res) => {
             marine = await safeFetchJSON(marineUrlFallback);
         }
         
-        // Her ikisi de başarısızsa hata dön
-        if (!weather || !marine) {
+        // Weather kesin gerekli, marine olmadan varsayılan değerlerle devam et
+        if (!weather) {
             return res.status(503).json({ error: 'API_UNAVAILABLE', message: 'Hava/deniz verisi alınamadı, lütfen tekrar deneyin' });
+        }
+        if (!marine) {
+            console.log('[FALLBACK] Marine API failed, using default marine values');
+            const hourCount = 24 * 9; // past_days=7 + 2 gün
+            marine = {
+                utc_offset_seconds: weather.utc_offset_seconds || 10800,
+                hourly: {
+                    time: weather.hourly?.time || [],
+                    wave_height: new Array(hourCount).fill(0.3),
+                    wave_period: new Array(hourCount).fill(6),
+                    swell_wave_height: new Array(hourCount).fill(0.2),
+                    sea_surface_temperature: new Array(hourCount).fill(
+                        getDefaultWaterTemp(regionName, currentMonth)
+                    )
+                },
+                daily: {
+                    wave_height_max: new Array(9).fill(0.3)
+                }
+            };
         }
 
         // Klorofil-a verisi — bağımsız çek (başarısız olsa forecast devam eder)
@@ -3910,7 +3929,23 @@ app.get('/api/fish-search', async (req, res) => {
         if (!marine || marine.error) {
             marine = await safeFetchJSON(`https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=1&timezone=auto`);
         }
-        if (!weather || !marine) return res.status(503).json({ error: 'API_UNAVAILABLE' });
+        if (!weather) return res.status(503).json({ error: 'API_UNAVAILABLE' });
+        if (!marine) {
+            console.log('[FALLBACK] fish-search Marine API failed, using defaults');
+            const _currentMonth = new Date().getMonth();
+            const _hourCount = 24 * 3;
+            marine = {
+                utc_offset_seconds: weather.utc_offset_seconds || 10800,
+                hourly: {
+                    time: weather.hourly && weather.hourly.time ? weather.hourly.time : [],
+                    wave_height: new Array(_hourCount).fill(0.3),
+                    wave_period: new Array(_hourCount).fill(6),
+                    swell_wave_height: new Array(_hourCount).fill(0.2),
+                    sea_surface_temperature: new Array(_hourCount).fill(getDefaultWaterTemp(regionName, _currentMonth))
+                },
+                daily: { wave_height_max: new Array(3).fill(0.3) }
+            };
+        }
 
         // UTC offset düzeltmesi — sunucu UTC, Open-Meteo yerel saat döner
         const _utcOff = weather.utc_offset_seconds || 0;
