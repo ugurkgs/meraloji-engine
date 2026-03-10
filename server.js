@@ -1711,6 +1711,25 @@ const SPECIES_DB = {
         legalSize: "18 cm",
         note: "Kolyoza benzer ama karnında noktalı desen ayırt eder. Sürü halinde göç eder, sabah erken yüzeyde aktif."
     },
+    "lokum": {
+        name: "Lokum Balığı", nameEn: "Silver Biddy", icon: "🐟", scientificName: "Sillago sihama",
+        photoId: 75,
+        category: "KUMSAL",
+        peakHours: "DAY", peakHoursDesc: "Gündüz, kumlu sığ su ve kıyı şeridi",
+        tempRange: { min: 20, opt: 26, max: 30 },
+        seasons: { winter: 0.10, spring: 0.50, summer: 1.00, autumn: 0.70 },
+        activity: "DAY",
+        pressureSensitivity: 0.3,
+        wavePref: 0.2,
+        clarityPref: "HIGH",
+        currentPref: 0.3,
+        salinityPref: "MEDIUM",
+        regions: ["EGE", "AKDENİZ", "KKTC"],
+        depth: { min: 0, opt: 10, max: 70 },
+        advice: { bait: "Karides, Solucan, Deniz kurdu", lure: "Küçük jig", rig: "Hafif dip", hook: "8 - 12" },
+        legalSize: "15 cm",
+        note: "Lesepsiyen istilacı tür. Kumlu ve çamurlu sığ sularda sürü halinde. Yaz aylarında Akdeniz ve Ege kıyılarında çok yaygın. Dipte karides ve solucanla kolayca avlanır."
+    },
     "muren": {
         name: "Müren", nameEn: "Mediterranean Moray", icon: "🐍", scientificName: "Muraena helena",
         photoId: 54,
