@@ -3306,9 +3306,14 @@ app.get('/api/forecast', async (req, res) => {
             if (bathymetryRes && bathymetryRes.ok) {
                 const bathymetry = await bathymetryRes.json();
                 if (bathymetry && bathymetry.avg !== undefined) {
-                    bathymetryRaw = bathymetry.avg; // Ham değeri sakla
+                    // Kara/deniz tespiti için avg kullan (grid ortalaması)
+                    // Derinlik gösterimi için smoothed kullan (daha gerçekçi)
+                    bathymetryRaw = bathymetry.avg;
+                    const depthValue = (bathymetry.smoothed !== undefined && bathymetry.smoothed < 0)
+                        ? Math.abs(bathymetry.smoothed)
+                        : Math.abs(bathymetry.avg);
                     depthData = {
-                        avg: Math.abs(bathymetry.avg),  // Pozitif metre değeri
+                        avg: depthValue,
                         min: Math.abs(bathymetry.min || bathymetry.avg),
                         max: Math.abs(bathymetry.max || bathymetry.avg)
                     };
@@ -3887,7 +3892,9 @@ app.get('/api/fish-search', async (req, res) => {
                 const bathymetry = await bathymetryRes.json();
                 if (bathymetry && bathymetry.avg !== undefined) {
                     bathymetryRaw = bathymetry.avg;
-                    depthAvg = Math.abs(bathymetry.avg);
+                    depthAvg = (bathymetry.smoothed !== undefined && bathymetry.smoothed < 0)
+                        ? Math.abs(bathymetry.smoothed)
+                        : Math.abs(bathymetry.avg);
                 }
             }
         } catch (e) {}
