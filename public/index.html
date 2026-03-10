@@ -211,7 +211,7 @@
         #zoom-controls {
             position: fixed;
             right: 14px;
-            bottom: 120px;
+            bottom: 200px;
             z-index: 500;
             display: flex;
             flex-direction: column;
@@ -3000,11 +3000,7 @@
                 name: 'Uydu',
                 url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                 options: { maxZoom: 19, attribution: '© Esri' }
-            },
-            {
-                name: 'Deniz',
-                url: 'https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png',
-                options: { maxZoom: 18, attribution: '© OpenSeaMap', opacity: 0.8 }
+
             }
         ];
 
