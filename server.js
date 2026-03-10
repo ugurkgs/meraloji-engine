@@ -1660,25 +1660,6 @@ const SPECIES_DB = {
         legalSize: "18 cm",
         note: "Uskumruya benzer ama daha sıcak su sever. Yaz mevsimi balığı."
     },
-    "iskatarya": {
-    name: "İskatarya", nameEn: "Atlantic Chub Mackerel", icon: "🐟", scientificName: "Scomber colias",
-    photoId: 73,
-    category: "PELAJİK",
-    peakHours: "DAY", peakHoursDesc: "Sabah erken ve akşamüstü, yüzey",
-    tempRange: { min: 15, opt: 20, max: 26 },
-    seasons: { winter: 0.20, spring: 0.75, summer: 0.90, autumn: 0.80 },
-    activity: "DAY",
-    pressureSensitivity: 0.4,
-    wavePref: 0.4,
-    clarityPref: "MEDIUM",
-    currentPref: 0.5,
-    salinityPref: "MEDIUM",
-    regions: ["EGE", "AKDENİZ", "MARMARA"],
-    depth: { min: 0, opt: 25, max: 200 },
-    advice: { bait: "Çapari, Küçük balık", lure: "Tüylü iğne, Kaşık", rig: "Çoklu iğneli", hook: "8 - 12" },
-    legalSize: "18 cm",
-    note: "Kolyoza benzer ama karnında noktalı desen ayırt eder. Sürü halinde göç eder, sabah erken yüzeyde aktif."
-},
     "sarpa": {
         name: "Sarpa (Salpa)", nameEn: "Salema", icon: "🐟", scientificName: "Sarpa salpa",
         photoId: 22,
@@ -1697,6 +1678,25 @@ const SPECIES_DB = {
         advice: { bait: "Ekmek, Yosun", lure: "Yok", rig: "Şamandıralı", hook: "10 - 14" },
         legalSize: "Yok",
         note: "Otobur balık. Ekmekle kolay avlanır. Halüsinasyon yapabilir (dikkat!)."
+    },
+    "iskatarya": {
+        name: "İskatarya", nameEn: "Atlantic Chub Mackerel", icon: "🐟", scientificName: "Scomber colias",
+        photoId: 73,
+        category: "PELAJİK",
+        peakHours: "DAY", peakHoursDesc: "Sabah erken ve akşamüstü, yüzey",
+        tempRange: { min: 15, opt: 20, max: 26 },
+        seasons: { winter: 0.20, spring: 0.75, summer: 0.90, autumn: 0.80 },
+        activity: "DAY",
+        pressureSensitivity: 0.4,
+        wavePref: 0.4,
+        clarityPref: "MEDIUM",
+        currentPref: 0.5,
+        salinityPref: "MEDIUM",
+        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        depth: { min: 0, opt: 25, max: 200 },
+        advice: { bait: "Çapari, Küçük balık", lure: "Tüylü iğne, Kaşık", rig: "Çoklu iğneli", hook: "8 - 12" },
+        legalSize: "18 cm",
+        note: "Kolyoza benzer ama karnında noktalı desen ayırt eder. Sürü halinde göç eder, sabah erken yüzeyde aktif."
     },
     "muren": {
         name: "Müren", nameEn: "Mediterranean Moray", icon: "🐍", scientificName: "Muraena helena",
@@ -3891,6 +3891,8 @@ app.get('/api/fish-search', async (req, res) => {
             });
         }
         const skipBathymetry = false; // Derinlik bilgisi her zaman gösterilmeli
+
+        const regionName = getRegion(latF, lonF);
 
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`;
         const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=1&timezone=auto`;
