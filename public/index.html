@@ -4666,16 +4666,32 @@
             // Önceki tooltip'i kaldır
             const existing = document.querySelector('.activity-tooltip');
             if (existing) existing.remove();
-            
-            const tips = {
-                morning: t('morningWaterTip'),
-                evening: t('eveningWaterTip'),
-                night: t('nightHuntTip')
-            };
-            
+
+            // Dinamik tür listesi — o noktanın balık listesinden filtrele
+            function getActiveSpecies(activityFilter) {
+                if (!GLOBAL_DATA || !GLOBAL_DATA.fishList) return '';
+                const filtered = GLOBAL_DATA.fishList
+                    .filter(f => f.score > 50 && f.activity === activityFilter)
+                    .slice(0, 3)
+                    .map(f => f.name);
+                return filtered.length ? filtered.join(', ') : '';
+            }
+
+            let tipText;
+            if (type === 'morning') {
+                const species = getActiveSpecies('DAWN_DUSK') || getActiveSpecies('DAY');
+                tipText = 'Şafak ±2 saat. Avcı balıklar besleniyor.' + (species ? ' ' + species + ' aktif.' : '');
+            } else if (type === 'evening') {
+                const species = getActiveSpecies('DAWN_DUSK') || getActiveSpecies('DAY');
+                tipText = 'Gün batımı ±2 saat. Günün en verimli saatleri.' + (species ? ' ' + species + ' aktif.' : '');
+            } else {
+                const species = getActiveSpecies('NIGHT');
+                tipText = '22:00 - 03:00. Gece avcıları.' + (species ? ' ' + species + ' aktif.' : '');
+            }
+
             const tooltip = document.createElement('div');
             tooltip.className = 'activity-tooltip';
-            tooltip.innerText = tips[type];
+            tooltip.innerText = tipText;
             
             // Pozisyonlama
             const row = event.currentTarget;
