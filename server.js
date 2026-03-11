@@ -5106,6 +5106,43 @@ async function warmAllHotSpots() {
     console.log(`[CRON] ✅ Hot spot cache ısıtması tamamlandı`);
 }
 
+// ── OTOMATİK TEMİZLEME CRON — Her gece 03:00'te çalışır ─────────────────
+async function cleanOldUsageDocs() {
+    if (!db) return;
+    try {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 7); // 7 günden eski
+        const cutoffStr = cutoff.toISOString().split('T')[0]; // '2026-03-04'
+
+        for (const col of ['clickUsage', 'scanUsage']) {
+            const snap = await db.collection(col).listDocuments();
+            let deleted = 0;
+            for (const doc of snap) {
+                // ID formatı: uid_2026-03-04 — tarih kısmını al
+                const parts = doc.id.split('_');
+                const dateStr = parts[parts.length - 1];
+                if (dateStr < cutoffStr) {
+                    await doc.delete();
+                    deleted++;
+                }
+            }
+            if (deleted > 0) console.log('[CLEANUP] ' + col + ': ' + deleted + ' eski doküman silindi');
+        }
+    } catch (e) {
+        console.log('[CLEANUP] Hata:', e.message);
+    }
+}
+
+// Her gece 03:00'te temizlik (UTC 00:00 = Türkiye 03:00)
+const now = new Date();
+const nextCleanup = new Date();
+nextCleanup.setUTCHours(0, 0, 0, 0);
+if (nextCleanup <= now) nextCleanup.setDate(nextCleanup.getDate() + 1);
+setTimeout(() => {
+    cleanOldUsageDocs();
+    setInterval(cleanOldUsageDocs, 24 * 60 * 60 * 1000);
+}, nextCleanup - now);
+
 // CRON DEVRE DIŞI — İleride dinamik hotspot sistemiyle (kullanıcı konumuna göre) aktif edilecek
 // setTimeout(() => {
 //     warmAllHotSpots();
