@@ -2307,7 +2307,7 @@ const SPECIES_DB = {
         note: "Küçük ama lezzetli. Sürü halinde avlanır."
     },
     "lahoz": {
-        name: "Lahoz (Lagos)", nameEn: "Dusky Grouper", icon: "🐟", scientificName: "Epinephelus marginatus",
+        name: "Lahoz (Lagos/Grida)", nameEn: "Dusky Grouper", icon: "🐟", scientificName: "Epinephelus marginatus",
         photoId: 8,
         category: "DIP_KIYI",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık, kayalık dip",
