@@ -2307,12 +2307,13 @@ const SPECIES_DB = {
         note: "Küçük ama lezzetli. Sürü halinde avlanır."
     },
     "lahoz": {
-        name: "Lahoz (Lagos/Grida)", nameEn: "Dusky Grouper", icon: "🐟", scientificName: "Epinephelus marginatus",
+        name: "Grida (Lagos/Lahoz)", nameEn: "Dusky Grouper", icon: "🐟", scientificName: "Epinephelus marginatus",
         photoId: 8,
         category: "DIP_KIYI",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık, kayalık dip",
         tempRange: { min: 14, opt: 20, max: 26 },
-        seasons: { winter: 0.45, spring: 0.65, summer: 0.80, autumn: 0.65 },
+        seasons: { winter: 0.45, spring: 0.65, summer: 0.00, autumn: 0.65 },
+        monthlyActivity: [0.45, 0.45, 0.55, 0.65, 0.70, 0.00, 0.00, 0.00, 0.70, 0.65, 0.55, 0.45],
         activity: "DAY",
         pressureSensitivity: 0.5,
         wavePref: 0.3,
@@ -2325,8 +2326,8 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 10, opt: 50, max: 200 },
         advice: { bait: "Canlı balık, Ahtapot", lure: "Büyük Silikon", rig: "Dip", hook: "4/0 - 6/0" },
-        legalSize: "45 cm",
-        note: "⚠️ KORUMA ALTINDA. Yakaladığınızda serbest bırakın!"
+        legalSize: "45 cm — Haziran/Temmuz/Ağustos avı yasak. Günlük limit: 2 adet.",
+        note: "⚠️ KORUMA ALTINDA. 1 Haziran - 31 Ağustos arası avlanması yasaktır. 45 cm altı tüm yıl yasak. Yakaladığınızda mutlaka serbest bırakın!"
     },
     "mersin": {
         name: "Mersin Balığı", nameEn: "Sturgeon", icon: "🐟", scientificName: "Acipenser spp.",
