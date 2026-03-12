@@ -3427,8 +3427,8 @@
                 metricSwell: "Swell",
                 tempShockCooling: "Soğuma şoku — yem avı tetiklendi",
                 tempShockWarming: "Ani ısınma — kısa süreli stres",
-                realCurrent: "Gerçek Veri",
-                estimatedCurrent: "Tahmin",
+                realCurrent: "Alınan",
+                estimatedCurrent: "Hesaplanan",
                 
                 // Yardım Modal
                 helpTitle: "Nasıl Kullanılır?",
@@ -3660,8 +3660,8 @@
                 metricSwell: "Swell",
                 tempShockCooling: "Cooling shock — feeding triggered",
                 tempShockWarming: "Sudden warming — short stress",
-                realCurrent: "Real Data",
-                estimatedCurrent: "Estimated",
+                realCurrent: "Measured",
+                estimatedCurrent: "Calculated",
                 
                 // Help Modal
                 helpTitle: "How to Use?",
@@ -4809,7 +4809,7 @@
                 { key: 'pressure', val: data.pressure || daily.pressure, unit: '' },
                 { key: 'moon', val: '', unit: '' },
                 { key: 'tide', val: daily.tide, unit: 'm' },
-                { key: 'current', val: daily.current, unit: '', extra: daily.currentIsReal ? `<span style="color:var(--green);font-size:0.55rem;">● ${t('realCurrent')}</span>` : '' },
+                { key: 'current', val: daily.current, unit: '', extra: daily.currentIsReal ? `<span style="color:var(--cyan);font-size:0.55rem;">● ${t('realCurrent')}</span>` : `<span style="color:var(--text-muted);font-size:0.55rem;">● ${t('estimatedCurrent')}</span>` },
                 { key: 'cloud', val: daily.cloud, unit: '' },
                 { key: 'chlorophyll', val: daily.chlorophyll ? daily.chlorophyll.value : '—', unit: daily.chlorophyll ? '' : '', extra: daily.chlorophyll ? `<span style="font-size:0.5rem;color:var(--text-muted);">${daily.chlorophyll.daysAgo ? daily.chlorophyll.daysAgo + 'g önce' : ''}</span>` : '<span style="font-size:0.5rem;color:var(--text-muted);">veri yok</span>' },
                 { key: 'sstTrend', val: (() => {
