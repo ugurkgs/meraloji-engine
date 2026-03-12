@@ -1,5 +1,5 @@
-// MERALOJİ F.I.S.H. Service Worker v3.1
-const CACHE_NAME = 'meraloji-v3.1';
+// MERALOJİ F.I.S.H. Service Worker v3.2
+const CACHE_NAME = 'meraloji-v3.2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -33,8 +33,8 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(event.request)
         .then(res => {
-          // 401, 403, 500 gibi hatalı yanıtları cache'e yazma
           if (res.ok) {
+            // Clone HEMEN senkron olarak alınmalı — async .then() içinde çağrılırsa body tüketilmiş olur
             const clone = res.clone();
             caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
           }
@@ -49,14 +49,16 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) {
     if (url.hostname.includes('tile') || url.hostname.includes('openstreetmap')) {
       event.respondWith(
-        caches.match(event.request).then(cached =>
-          cached || fetch(event.request).then(res => {
+        caches.match(event.request).then(cached => {
+          if (cached) return cached;
+          return fetch(event.request).then(res => {
             if (res.ok) {
-              caches.open(CACHE_NAME).then(c => c.put(event.request, res.clone()));
+              const clone = res.clone();
+              caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
             }
             return res;
-          })
-        )
+          });
+        })
       );
       return;
     }
@@ -68,17 +70,18 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) {
-        // Arka planda yenile — clone kullan, return etmiyoruz ama clone şart
         fetch(event.request).then(res => {
           if (res.ok) {
-            caches.open(CACHE_NAME).then(c => c.put(event.request, res.clone()));
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
           }
         }).catch(() => {});
         return cached;
       }
       return fetch(event.request).then(res => {
         if (res.ok) {
-          caches.open(CACHE_NAME).then(c => c.put(event.request, res.clone()));
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
         }
         return res;
       });
