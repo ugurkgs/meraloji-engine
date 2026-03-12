@@ -6632,7 +6632,7 @@ window.addEventListener('popstate', function(e) {
 
 
     // ── ONBOARDING ──────────────────────────────────────────────────────
-    function closeOnboarding() {
+    window.closeOnboarding = function closeOnboarding() {
         const overlay = document.getElementById('onboarding-overlay');
         if (!overlay) return;
         overlay.classList.add('hiding');
