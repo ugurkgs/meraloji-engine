@@ -6311,44 +6311,74 @@
             showCustomInput({
                 title: titleText,
                 placeholder: placeholderText,
-                onSubmit: (name) => {
-                    const fav = {
-                        id: 'fav_' + Date.now(),
-                        name: name,
-                        lat: lastLatLon.lat,
-                        lon: lastLatLon.lon,
-                        createdAt: Date.now()
-                    };
-                    const favs = JSON.parse(localStorage.getItem(_favsKey()) || '[]');
-                    favs.push(fav);
-                    localStorage.setItem(_favsKey(), JSON.stringify(favs));
-                    _showFavToast('⭐ ' + (CURRENT_LANG === 'tr' ? 'Kaydedildi!' : 'Saved!'), 'var(--green)');
-                    loadFavorites();
+                onSubmit: async (name) => {
+                    try {
+                        const res = await apiFetch('/api/favorites', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name, lat: lastLatLon.lat, lon: lastLatLon.lon })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            // localStorage cache'i de güncelle
+                            const favs = JSON.parse(localStorage.getItem(_favsKey()) || '[]');
+                            favs.push({ id: data.id, name, lat: lastLatLon.lat, lon: lastLatLon.lon, createdAt: Date.now() });
+                            localStorage.setItem(_favsKey(), JSON.stringify(favs));
+                            _showFavToast('⭐ ' + (CURRENT_LANG === 'tr' ? 'Kaydedildi!' : 'Saved!'), 'var(--green)');
+                            renderFavList(favs);
+                        } else {
+                            _showFavToast('❌ Kaydedilemedi', 'var(--red)');
+                        }
+                    } catch(e) {
+                        _showFavToast('❌ Bağlantı hatası', 'var(--red)');
+                    }
                 }
             });
         }
 
-        function loadFavorites() {
+        async function loadFavorites() {
             const container = document.getElementById('fav-list');
             if (!container) return;
-            const favs = JSON.parse(localStorage.getItem(_favsKey()) || '[]');
+            // Önce localStorage cache'den hızlıca göster
+            const cached = JSON.parse(localStorage.getItem(_favsKey()) || '[]');
+            if (cached.length > 0) renderFavList(cached);
+            // Sonra sunucudan güncel listeyi çek
+            try {
+                const res = await apiFetch('/api/favorites');
+                const data = await res.json();
+                if (data.favorites) {
+                    localStorage.setItem(_favsKey(), JSON.stringify(data.favorites));
+                    renderFavList(data.favorites);
+                }
+            } catch(e) {
+                if (cached.length === 0) renderFavList([]);
+            }
+        }
+
+        function renderFavList(favs) {
+            const container = document.getElementById('fav-list');
+            if (!container) return;
             if (favs.length === 0) {
                 container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem;">Henüz kayıt yok</div>';
                 return;
             }
-            container.innerHTML = favs.map((f, i) => `
+            container.innerHTML = favs.map(f => `
                 <div style="display: flex; gap: 8px; margin-bottom: 6px;">
-                    <button class="menu-btn" style="flex: 1;" onclick="goToFavorite('${f.id || i}',${f.lat},${f.lon})">📍 ${f.name}</button>
-                    <button onclick="deleteFavorite('${f.id || i}')" style="background: var(--red); color: white; border: none; border-radius: 4px; width: 28px; height: 28px; font-size: 12px; cursor: pointer; flex-shrink: 0;">✕</button>
+                    <button class="menu-btn" style="flex: 1;" onclick="goToFavorite('${f.id}',${f.lat},${f.lon})">📍 ${f.name}</button>
+                    <button onclick="deleteFavorite('${f.id}')" style="background: var(--red); color: white; border: none; border-radius: 4px; width: 28px; height: 28px; font-size: 12px; cursor: pointer; flex-shrink: 0;">✕</button>
                 </div>
             `).join('');
         }
 
-        function deleteFavorite(favId) {
+        async function deleteFavorite(favId) {
+            try {
+                await apiFetch('/api/favorites/' + favId, { method: 'DELETE' });
+            } catch(e) {}
+            // Her durumda localStorage'dan da sil ve UI'ı güncelle
             let favs = JSON.parse(localStorage.getItem(_favsKey()) || '[]');
-            favs = favs.filter((f, i) => (f.id || String(i)) !== String(favId));
+            favs = favs.filter(f => f.id !== favId);
             localStorage.setItem(_favsKey(), JSON.stringify(favs));
-            loadFavorites();
+            renderFavList(favs);
         }
 
         function goToFavorite(favId, lat, lon) {
@@ -6412,7 +6442,7 @@ auth.onAuthStateChanged(async (user) => {
         updateUserUI();
         if (isGracePeriod) setTimeout(showGraceWelcome, 1500);
         try { await loadScanUsage(); } catch(e) {}
-        try { loadFavorites(); } catch(e) {}
+        try { await loadFavorites(); } catch(e) {}
     } else {
         currentUser = null;
         isPremium = false;
