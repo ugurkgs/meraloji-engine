@@ -154,6 +154,16 @@ try {
     console.warn('⚠️  tr-cities.json bulunamadı — offline konum analizi devre dışı:', e.message);
 }
 
+// Deniz bölgesi poligonlarını RAM'e yükle (sunucu başlangıcında 1 kez)
+let _seaRegionFeatures = [];
+try {
+    const seaRaw = fs.readFileSync(path.join(__dirname, 'tr-sea-regions.json'), 'utf8');
+    _seaRegionFeatures = JSON.parse(seaRaw).features;
+    console.log(`✅ Deniz bölgeleri yüklendi — ${_seaRegionFeatures.length} bölge`);
+} catch (e) {
+    console.warn('⚠️  tr-sea-regions.json bulunamadı — koordinat kutusu yöntemine düşülüyor:', e.message);
+}
+
 /**
  * analyzeLocationOffline(lat, lon)
  * Döner: { status: 'SEA' | 'COASTAL_LAND' | 'INLAND', city?: string }
@@ -639,30 +649,27 @@ function getWeatherCondition(rain, wind, cloud, clarity, timeMode) {
     return "CLEAR_SUNNY";
 }
 
-// Bölge Tespiti
+// Bölge Tespiti — poligon tabanlı (tr-sea-regions.json)
+// Fallback: dosya yüklenemezse eski koordinat kutusu yöntemi
 function getRegion(lat, lon) {
+    // Poligon yöntemi
+    if (_seaRegionFeatures.length > 0) {
+        for (const feature of _seaRegionFeatures) {
+            if (_pointInFeature(lat, lon, feature)) {
+                return feature.properties.name;
+            }
+        }
+        return 'AÇIK DENİZ';
+    }
+
+    // Fallback — koordinat kutusu yöntemi
     const inTurkey = lat >= 35.8 && lat <= 42.2 && lon >= 25.5 && lon <= 44.8;
-    
     if (!inTurkey) return 'AÇIK DENİZ';
-    
-    // MARMARA: Kuzey Ege'den Karadeniz'e geçiş bölgesi
     if (lat > 40.5 && lon < 32.0 && lon > 26.0) return 'MARMARA';
-    
-    // KARADENİZ: Sinop, Samsun, Trabzon + Batı Karadeniz (Zonguldak, Bartın)
-    if (lat > 40.5 && lon >= 32.0 && lon < 42.0) return 'KARADENİZ';
-    
-    // Doğu Karadeniz uç noktaları (Hopa, Artvin)
-    if (lat > 40.5 && lon >= 42.0) return 'KARADENİZ';
-    
-    // EGE: Batı kıyısı
+    if (lat > 40.5 && lon >= 32.0) return 'KARADENİZ';
     if (lat <= 40.5 && lat > 36.0 && lon < 30.0) return 'EGE';
-    
-    // AKDENİZ: Güney kıyısı (Antalya, Mersin, Hatay)
     if (lat <= 37.0 && lon >= 30.0) return 'AKDENİZ';
-    
-    // AKDENİZ: İç geçiş bölgesi
     if (lat > 37.0 && lat <= 40.5 && lon >= 30.0 && lon < 36.0) return 'AKDENİZ';
-    
     return 'TÜRKİYE';
 }
 
