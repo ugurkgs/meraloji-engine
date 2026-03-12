@@ -6597,8 +6597,9 @@ function closeCustomInput() {
 }
 function submitCustomInput() {
     const val = document.getElementById('custom-input-field').value.trim();
-    closeCustomInput();
-    if (val && _inputCallback) _inputCallback(val);
+    const cb = _inputCallback; // ← önce sakla
+    closeCustomInput();        // sonra kapat (null'lar)
+    if (val && cb) cb(val);    // saklanan callback'i çağır
 }
 
 function showUserMenu() {
