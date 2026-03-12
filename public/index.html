@@ -2535,6 +2535,18 @@
          ═══════════════════════════════════════════════════════════════════ -->
     <div id="loading">
         <div class="radar-spinner"></div>
+        <div id="loading-progress-wrap" style="width:240px;margin-bottom:16px;display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span id="loading-status-text" style="font-size:0.72rem;color:var(--text-muted);font-family:var(--font-mono);">Veri alınıyor...</span>
+                <span id="loading-pct-text" style="font-size:0.72rem;color:var(--cyan);font-family:var(--font-mono);">%0</span>
+            </div>
+            <div style="background:var(--border);border-radius:4px;height:3px;overflow:hidden;">
+                <div id="loading-progress-bar" style="height:100%;width:0%;background:var(--cyan);border-radius:4px;transition:width 0.4s ease;"></div>
+            </div>
+            <div id="loading-wait-msg" style="margin-top:10px;font-size:0.68rem;color:var(--yellow);text-align:center;opacity:0;transition:opacity 0.5s;">
+                ⏳ Sunucu meşgul olabilir, lütfen bekleyin...
+            </div>
+        </div>
         <div id="log-output"></div>
     </div>
 
@@ -4486,13 +4498,62 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         }
 
+        let _loadingTimer = null;
+        let _loadingWaitTimer = null;
+
         function showLoading() {
             document.getElementById('loading').style.display = 'flex';
             document.getElementById('log-output').innerHTML = '';
+
+            // Progress bar göster
+            const wrap = document.getElementById('loading-progress-wrap');
+            const bar = document.getElementById('loading-progress-bar');
+            const pct = document.getElementById('loading-pct-text');
+            const statusText = document.getElementById('loading-status-text');
+            const waitMsg = document.getElementById('loading-wait-msg');
+
+            wrap.style.display = 'block';
+            bar.style.transition = 'none';
+            bar.style.width = '0%';
+            pct.textContent = '%0';
+            waitMsg.style.opacity = '0';
+            statusText.textContent = CURRENT_LANG === 'tr' ? 'Veri alınıyor...' : 'Fetching data...';
+
+            // Fake progress: 4 saniyede %85'e kadar
+            let current = 0;
+            clearInterval(_loadingTimer);
+            _loadingTimer = setInterval(() => {
+                const remaining = 85 - current;
+                current += remaining * 0.06;
+                if (current > 84) current = 84;
+                bar.style.transition = 'width 0.4s ease';
+                bar.style.width = current.toFixed(1) + '%';
+                pct.textContent = '%' + Math.round(current);
+            }, 250);
+
+            // 3 saniye geçince uyarı göster
+            clearTimeout(_loadingWaitTimer);
+            _loadingWaitTimer = setTimeout(() => {
+                waitMsg.style.opacity = '1';
+                statusText.textContent = CURRENT_LANG === 'tr' ? 'Hesaplanıyor...' : 'Processing...';
+            }, 3000);
         }
 
         function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
+            // %100'e tamamla, sonra gizle
+            clearInterval(_loadingTimer);
+            clearTimeout(_loadingWaitTimer);
+            const bar = document.getElementById('loading-progress-bar');
+            const pct = document.getElementById('loading-pct-text');
+            if (bar) {
+                bar.style.transition = 'width 0.25s ease';
+                bar.style.width = '100%';
+                if (pct) pct.textContent = '%100';
+            }
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                if (bar) bar.style.width = '0%';
+            }, 280);
         }
 
         function runLoadingAnimation(data) {
@@ -5149,7 +5210,15 @@
                             <div class="fish-score" style="color:${isProtected ? '#cc0000' : getScoreColor(f.score)}">${isProtected ? 'YASAK' : '%'+f.score.toFixed(1)}</div>
                         </div>
                         <div class="fish-details">
-                            ${f.reason ? `<div class="fish-reason ${reasonClass}">${reasonIcon} ${f.reason}</div>` : ''}
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                                ${f.reason ? `<div class="fish-reason ${reasonClass}">${reasonIcon} ${f.reason}</div>` : '<div></div>'}
+                                ${f.rawScore != null ? `
+                                <div onclick="event.stopPropagation();showRawScoreInfo(this,${f.score.toFixed(1)},${f.rawScore})"
+                                     style="cursor:pointer;font-size:0.65rem;color:var(--text-muted);opacity:0.55;white-space:nowrap;user-select:none;"
+                                     title="Ham skor">
+                                    ham: ${f.rawScore.toFixed(0)}
+                                </div>` : ''}
+                            </div>
                             ${peakTimeLine}
                             ${bestHourLine}
                             ${hourlyChartHtml}
@@ -6616,6 +6685,42 @@ function showUserMenu() {
 // ═══════════════════════════════════════════════════════════════
 // 💰 PAYWALL & UPGRADE
 // ═══════════════════════════════════════════════════════════════
+
+function showRawScoreInfo(el, refined, raw) {
+    const existing = document.getElementById('raw-score-tooltip');
+    if (existing) { existing.remove(); return; }
+
+    const tooltip = document.createElement('div');
+    tooltip.id = 'raw-score-tooltip';
+    tooltip.style.cssText = `
+        position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+        background:var(--card-bg);border:1px solid var(--border);border-radius:12px;
+        padding:14px 18px;z-index:9999;max-width:300px;width:90%;
+        box-shadow:0 8px 32px rgba(0,0,0,0.5);
+    `;
+    tooltip.innerHTML = `
+        <div style="font-size:0.8rem;font-weight:700;color:var(--cyan);margin-bottom:10px;">Skor Nasıl Hesaplanır?</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:0.75rem;color:var(--text-muted);">Ham Skor</span>
+            <span style="font-size:0.85rem;font-weight:600;color:var(--text);">${raw.toFixed(0)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+            <span style="font-size:0.75rem;color:var(--text-muted);">Rafine Skor</span>
+            <span style="font-size:0.85rem;font-weight:600;color:var(--cyan);">%${refined.toFixed(0)}</span>
+        </div>
+        <div style="font-size:0.68rem;color:var(--text-muted);line-height:1.5;border-top:1px solid var(--border);padding-top:10px;">
+            Ham skor tüm parametrelerin birleşimidir. Rafine skor, yüksek değerleri logaritmik olarak sıkıştırır — 
+            balıkçılıkta %100 kesinlik olmadığı için hiçbir skor 99'u geçemez.
+        </div>
+        <div style="text-align:center;margin-top:10px;">
+            <button onclick="document.getElementById('raw-score-tooltip').remove()" 
+                    style="background:none;border:1px solid var(--border);color:var(--text-muted);
+                           padding:4px 16px;border-radius:8px;font-size:0.72rem;cursor:pointer;">Kapat</button>
+        </div>
+    `;
+    document.body.appendChild(tooltip);
+    setTimeout(() => { if (document.getElementById('raw-score-tooltip')) document.getElementById('raw-score-tooltip').remove(); }, 6000);
+}
 
 function showPaywall(reason) {
     loadProSlotsCount(); // Paywall açılırken sayacı tazele
