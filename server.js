@@ -1432,7 +1432,7 @@ const SPECIES_DB = {
         note: "Kuyruk sapındaki siyah benekle tanınır. Kayalık sever."
     },
     "kupes": {
-        name: "Kupes", nameEn: "Bogue", icon: "🐟", scientificName: "Boops boops",
+        name: "Kupes/Mandagöz", nameEn: "Bogue", icon: "🐟", scientificName: "Boops boops",
         photoId: 16,
         category: "KIYI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, sürü halinde yüzey yakını",
@@ -2609,7 +2609,9 @@ const SPECIES_DB = {
 },
 
 "lidaki": {
-    name: "Lidaki", nameEn: "Annular Seabream", icon: "🐟", scientificName: "Diplodus annularis",
+    name: "Lidaki", nameEn: "Young Gilthead Seabream", 
+    scientificName: "Sparus aurata",  // ← Diplodus annularis değil
+    note: "Çipuranın 180-200g altındaki genci. Çok lezzetli, yüksek ekonomik değer.",
     photoId: 69,
     category: "KIYI",
     peakHours: "DAY", peakHoursDesc: "Gündüz sığ sularda",
@@ -2627,25 +2629,25 @@ const SPECIES_DB = {
     legalSize: "-",
     note: "Sığ ve berrak suyu sever."
 },
-    "mandagoz": {
-        name: "Mandagöz", nameEn: "Bogue", icon: "🐟", scientificName: "Boops boops",
-        photoId: 82,
-        category: "DIP_KIYI",
-        peakHours: "DAY", peakHoursDesc: "Gündüz, sürü halinde",
-        tempRange: { min: 12, opt: 18, max: 24 },
-        seasons: { winter: 0.55, spring: 0.70, summer: 0.80, autumn: 0.70 },
-        activity: "DAY",
-        pressureSensitivity: 0.4,
-        wavePref: 0.3,
-        clarityPref: "MODERATE",
-        currentPref: 0.3,
-        salinityPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 3, opt: 20, max: 80 },
-        advice: { bait: "Ekmek, Kurt, Hamur", lure: "Yok", rig: "Çapari, Dip", hook: "10 - 14" },
-        legalSize: "Yok",
-        note: "Kupes'e benzer. Sürü halinde avlanır. Yem balığı olarak kullanılır."
-    }
+    "yilan_baligi": {
+    name: "Yılan Balığı", nameEn: "European Eel", icon: "🐍", scientificName: "Anguilla anguilla",
+    photoId: 82,
+    category: "LAGUN",
+    peakHours: "NIGHT", peakHoursDesc: "Gece, dip ve lagün",
+    tempRange: { min: 10, opt: 20, max: 26 },
+    seasons: { winter: 0.30, spring: 0.65, summer: 0.85, autumn: 0.75 },
+    activity: "NIGHT",
+    pressureSensitivity: 0.3,
+    wavePref: 0.2,
+    clarityPref: "TURBID",
+    currentPref: 0.2,
+    salinityPref: "LOW",
+    regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
+    depth: { min: 0, opt: 5, max: 20 },
+    advice: { bait: "Solucan, Karides, Küçük Balık", lure: "Yok", rig: "Dip Takımı, Gece Oltası", hook: "4 - 8" },
+    legalSize: "50 cm",
+    note: "Gece avcısı. Lagün, nehir ağzı ve sığ kıyılarda bulunur. İç sularda min. boy 50 cm, günlük limit 3 adet. Avrupa genelinde nesli tehlike altında — vicdani limit uygulayın."
+}
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
