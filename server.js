@@ -3312,8 +3312,8 @@ app.get('/api/forecast', async (req, res) => {
 
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`;
         const weatherUrlFallback = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain&past_days=1&timezone=auto`;
-        const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=7&timezone=auto`;
-        const marineUrlFallback = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=7&timezone=auto`;
+        const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`;
+        const marineUrlFallback = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`;
         
         // EMODnet Bathymetry API - Derinlik verisi (SEA ise atlanır)
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lon} ${lat})`;
@@ -3467,7 +3467,7 @@ app.get('/api/forecast', async (req, res) => {
                 const snap = await findNearestSeaPoint(lat, lon);
                 if (snap) {
                     // Snap noktasının marine verisini çek — past_days=7 (tempShock için)
-                    const snapMarineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=7&timezone=auto`;
+                    const snapMarineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`;
                     const snapMarine = await safeFetchJSON(snapMarineUrl, 10000);
 
                     // Marine verisi geçerliyse snap'i uygula
@@ -3544,7 +3544,7 @@ app.get('/api/forecast', async (req, res) => {
             let pressureTrend = { trend: 'STABLE', change: 0 };
             if (hourlyPressureData) {
                 const dayPressureIdx = hourlyStartIdx + correctedClickHour;
-                const dayPressureStart = Math.max(0, dayPressureIdx - 6);
+                const dayPressureStart = Math.max(0, dayPressureIdx - 24); // 24 saatlik trend
                 const dayPressureHistory = hourlyPressureData.slice(dayPressureStart, dayPressureIdx + 1);
                 pressureTrend = calculatePressureTrend(dayPressureHistory);
             }
@@ -3764,7 +3764,7 @@ app.get('/api/forecast', async (req, res) => {
             // FIX: Anlık blok için basınç trendi — forecast döngüsü scope'undan bağımsız
             let i_pressureTrend = { trend: 'STABLE', change: 0 };
             if (hourlyPressureData) {
-                const iPressureStart = Math.max(0, instantIdx - 6);
+                const iPressureStart = Math.max(0, instantIdx - 24); // 24 saatlik trend
                 i_pressureTrend = calculatePressureTrend(hourlyPressureData.slice(iPressureStart, instantIdx + 1));
             }
 
@@ -3972,7 +3972,7 @@ app.get('/api/fish-search', async (req, res) => {
         const regionName = getRegion(latF, lonF);
 
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`;
-        const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=1&timezone=auto`;
+        const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`;
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`;
 
         let [weather, marine, bathymetryRes] = await Promise.all([
@@ -4046,7 +4046,7 @@ app.get('/api/fish-search', async (req, res) => {
             try {
                 const snap = await findNearestSeaPoint(latF, lonF);
                 if (snap) {
-                    const snapMarineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=1&timezone=auto`;
+                    const snapMarineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`;
                     const snapMarine = await safeFetchJSON(snapMarineUrl, 10000);
                     const snapWaves = snapMarine?.hourly?.wave_height?.filter(v => v !== null && v !== undefined) || [];
                     if (snapMarine && !snapMarine.error && snapWaves.some(v => v > 0)) {
@@ -4098,7 +4098,7 @@ app.get('/api/fish-search', async (req, res) => {
         if (weather.hourly?.surface_pressure) {
             const hourlyPressure = weather.hourly.surface_pressure;
             const currentPressureIdx = 24 + clickHour;
-            const startIdx = Math.max(0, currentPressureIdx - 6);
+            const startIdx = Math.max(0, currentPressureIdx - 24); // 24 saatlik trend
             pressureTrend = calculatePressureTrend(hourlyPressure.slice(startIdx, currentPressureIdx + 1));
         }
 
@@ -4583,7 +4583,7 @@ async function fetchCenterWeather(lat, lon) {
     const latF = parseFloat(lat).toFixed(4);
     const lonF = parseFloat(lon).toFixed(4);
     const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`;
-    const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=1&timezone=auto`;
+    const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`;
     
     let [weather, marine] = await Promise.all([queuedFetch(weatherUrl), queuedFetch(marineUrl)]);
     
@@ -5095,7 +5095,7 @@ async function warmCacheForSpot(lat, lon) {
 
     try {
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`;
-        const marineUrl  = `https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature&past_days=7&timezone=auto`;
+        const marineUrl  = `https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`;
 
         const [weather, marine] = await Promise.all([
             queuedFetch(weatherUrl, 12000),
