@@ -79,7 +79,6 @@
     </script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -6292,19 +6291,17 @@
         }
 
         // ── Favori CRUD (Firestore + localStorage fallback) ──────────────
-        function _favsCollection() {
-            if (typeof db !== 'undefined' && db && currentUser) {
-                return db.collection('users').doc(currentUser.uid).collection('favorites');
-            }
-            return null;
+        function _favsKey() {
+            return 'meraloji_favs_' + (currentUser ? currentUser.uid : 'guest');
         }
 
-        function _showFavToast(msg, color = 'var(--green)') {
+        function _showFavToast(msg, color) {
+            color = color || 'var(--cyan)';
             const t = document.createElement('div');
-            t.style.cssText = `position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--bg-panel);border:1px solid ${color};color:var(--text-primary);padding:10px 18px;border-radius:12px;z-index:99999;font-size:0.83rem;max-width:280px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.4);pointer-events:none;`;
+            t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--bg-panel);border:1px solid ' + color + ';color:var(--text-primary);padding:10px 18px;border-radius:12px;z-index:99999;font-size:0.83rem;max-width:280px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.4);pointer-events:none;';
             t.textContent = msg;
             document.body.appendChild(t);
-            setTimeout(() => t.remove(), 2500);
+            setTimeout(() => { if (t.parentNode) t.remove(); }, 2500);
         }
 
         function saveFavorite() {
@@ -6314,87 +6311,47 @@
             showCustomInput({
                 title: titleText,
                 placeholder: placeholderText,
-                onSubmit: async (name) => {
-                    const fav = { name, lat: lastLatLon.lat, lon: lastLatLon.lon, createdAt: Date.now() };
-                    const col = _favsCollection();
-                    if (col) {
-                        try {
-                            await col.add(fav);
-                            _showFavToast('⭐ ' + (CURRENT_LANG === 'tr' ? 'Kaydedildi!' : 'Saved!'));
-                            loadFavorites();
-                        } catch(e) {
-                            // Firestore başarısız → localStorage'a düş
-                            _saveFavLocal(fav);
-                        }
-                    } else {
-                        _saveFavLocal(fav);
-                    }
+                onSubmit: (name) => {
+                    const fav = {
+                        id: 'fav_' + Date.now(),
+                        name: name,
+                        lat: lastLatLon.lat,
+                        lon: lastLatLon.lon,
+                        createdAt: Date.now()
+                    };
+                    const favs = JSON.parse(localStorage.getItem(_favsKey()) || '[]');
+                    favs.push(fav);
+                    localStorage.setItem(_favsKey(), JSON.stringify(favs));
+                    _showFavToast('⭐ ' + (CURRENT_LANG === 'tr' ? 'Kaydedildi!' : 'Saved!'), 'var(--green)');
+                    loadFavorites();
                 }
             });
         }
 
-        function _saveFavLocal(fav) {
-            const favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
-            favs.push(fav);
-            localStorage.setItem('meraloji_favs', JSON.stringify(favs));
-            _showFavToast('⭐ ' + (CURRENT_LANG === 'tr' ? 'Kaydedildi!' : 'Saved!'));
-            loadFavorites();
-        }
-
-        async function loadFavorites() {
+        function loadFavorites() {
             const container = document.getElementById('fav-list');
             if (!container) return;
-            let favs = [];
-            const col = _favsCollection();
-            if (col) {
-                try {
-                    const snap = await col.orderBy('createdAt', 'asc').get();
-                    snap.forEach(doc => favs.push({ id: doc.id, ...doc.data() }));
-                    // localStorage'daki eski favorileri Firestore'a migrate et
-                    const local = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
-                    if (local.length > 0) {
-                        for (const f of local) {
-                            try { await col.add({ ...f, createdAt: f.createdAt || Date.now() }); } catch(e) {}
-                        }
-                        localStorage.removeItem('meraloji_favs');
-                        // Tekrar yükle
-                        const snap2 = await col.orderBy('createdAt', 'asc').get();
-                        favs = [];
-                        snap2.forEach(doc => favs.push({ id: doc.id, ...doc.data() }));
-                    }
-                } catch(e) {
-                    favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
-                }
-            } else {
-                favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
-            }
-
+            const favs = JSON.parse(localStorage.getItem(_favsKey()) || '[]');
             if (favs.length === 0) {
                 container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem;">Henüz kayıt yok</div>';
                 return;
             }
-
             container.innerHTML = favs.map((f, i) => `
                 <div style="display: flex; gap: 8px; margin-bottom: 6px;">
-                    <button class="menu-btn" style="flex: 1;" onclick="goToFavorite('${f.id || i}', ${JSON.stringify(f.lat)}, ${JSON.stringify(f.lon)})">📍 ${f.name}</button>
+                    <button class="menu-btn" style="flex: 1;" onclick="goToFavorite('${f.id || i}',${f.lat},${f.lon})">📍 ${f.name}</button>
                     <button onclick="deleteFavorite('${f.id || i}')" style="background: var(--red); color: white; border: none; border-radius: 4px; width: 28px; height: 28px; font-size: 12px; cursor: pointer; flex-shrink: 0;">✕</button>
                 </div>
             `).join('');
         }
 
-        async function deleteFavorite(idOrIndex) {
-            const col = _favsCollection();
-            if (col && typeof idOrIndex === 'string' && idOrIndex.length > 5) {
-                try { await col.doc(idOrIndex).delete(); } catch(e) {}
-            } else {
-                const favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
-                favs.splice(parseInt(idOrIndex), 1);
-                localStorage.setItem('meraloji_favs', JSON.stringify(favs));
-            }
+        function deleteFavorite(favId) {
+            let favs = JSON.parse(localStorage.getItem(_favsKey()) || '[]');
+            favs = favs.filter((f, i) => (f.id || String(i)) !== String(favId));
+            localStorage.setItem(_favsKey(), JSON.stringify(favs));
             loadFavorites();
         }
 
-        function goToFavorite(idOrIndex, lat, lon) {
+        function goToFavorite(favId, lat, lon) {
             if (lat && lon) {
                 toggleMenu();
                 map.flyTo([lat, lon], 14);
@@ -6422,7 +6379,6 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const db = firebase.firestore();
 
 let currentUser = null;
 let isPremium = false;
@@ -6456,7 +6412,7 @@ auth.onAuthStateChanged(async (user) => {
         updateUserUI();
         if (isGracePeriod) setTimeout(showGraceWelcome, 1500);
         try { await loadScanUsage(); } catch(e) {}
-        try { await loadFavorites(); } catch(e) {}
+        try { loadFavorites(); } catch(e) {}
     } else {
         currentUser = null;
         isPremium = false;
