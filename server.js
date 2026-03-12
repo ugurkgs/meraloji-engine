@@ -5150,6 +5150,59 @@ setTimeout(() => {
 //     setInterval(warmAllHotSpots, 55 * 60 * 1000);
 // }, 60_000);
 
+// ═══════════════════════════════════════════════════════════════
+// ⭐ FAVORİLER
+// ═══════════════════════════════════════════════════════════════
+
+app.get('/api/favorites', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
+    if (!db) return res.json({ favorites: [] });
+    try {
+        const snap = await db.collection('users').doc(req.user.uid)
+            .collection('favorites').orderBy('createdAt', 'asc').get();
+        const favorites = [];
+        snap.forEach(doc => favorites.push({ id: doc.id, ...doc.data() }));
+        res.json({ favorites });
+    } catch(e) {
+        console.error('[FAV-GET]', e.message);
+        res.status(500).json({ error: 'Favoriler alınamadı' });
+    }
+});
+
+app.post('/api/favorites', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
+    if (!db) return res.status(503).json({ error: 'Veritabanı hazır değil' });
+    const { name, lat, lon } = req.body;
+    if (!name || lat === undefined || lon === undefined)
+        return res.status(400).json({ error: 'name, lat, lon gerekli' });
+    try {
+        const ref = await db.collection('users').doc(req.user.uid)
+            .collection('favorites').add({
+                name: String(name).slice(0, 60),
+                lat: parseFloat(lat),
+                lon: parseFloat(lon),
+                createdAt: Date.now()
+            });
+        res.json({ success: true, id: ref.id });
+    } catch(e) {
+        console.error('[FAV-POST]', e.message);
+        res.status(500).json({ error: 'Favori kaydedilemedi' });
+    }
+});
+
+app.delete('/api/favorites/:id', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
+    if (!db) return res.status(503).json({ error: 'Veritabanı hazır değil' });
+    try {
+        await db.collection('users').doc(req.user.uid)
+            .collection('favorites').doc(req.params.id).delete();
+        res.json({ success: true });
+    } catch(e) {
+        console.error('[FAV-DELETE]', e.message);
+        res.status(500).json({ error: 'Favori silinemedi' });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════════╗
