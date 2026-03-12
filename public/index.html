@@ -6642,4 +6642,16 @@ window.addEventListener('popstate', function(e) {
 
     (function initOnboarding() {
         const seen = localStorage.getItem('meraloji_onboarding_seen');
-        if (seen)
+        if (seen) {
+            const el = document.getElementById('onboarding-overlay');
+            if (el) el.remove();
+            return;
+        }
+        // İlk kez — göster
+        const overlay = document.getElementById('onboarding-overlay');
+        if (overlay) overlay.style.display = 'flex';
+    })();
+
+</script>
+</body>
+</html>
