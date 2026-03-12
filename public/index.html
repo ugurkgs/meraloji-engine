@@ -78,6 +78,7 @@
     </script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -2298,6 +2299,37 @@
             <button onclick="closePaywall()" style="width:100%; padding:10px; border:1px solid rgba(255,255,255,0.15); border-radius:12px; background:transparent; color:#8892a3; font-size:13px; cursor:pointer;">
                 Kapat
             </button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         CUSTOM CONFIRM MODAL (signout vb.)
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="custom-confirm-modal" style="display:none; position:fixed; inset:0; z-index:200000; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:24px;">
+        <div style="background:var(--bg-panel); border:1px solid var(--border-glow); border-radius:20px; padding:24px; max-width:320px; width:100%; text-align:center; box-shadow:0 8px 40px rgba(0,0,0,0.6);">
+            <div id="confirm-icon" style="font-size:2.2rem; margin-bottom:10px;">🚪</div>
+            <div id="confirm-title" style="font-size:1rem; font-weight:700; color:var(--text-primary); margin-bottom:6px;"></div>
+            <div id="confirm-subtitle" style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:20px;"></div>
+            <div style="display:flex; gap:10px;">
+                <button id="confirm-cancel-btn" onclick="closeCustomConfirm()" style="flex:1; padding:12px; border:1px solid var(--border-subtle); border-radius:12px; background:transparent; color:var(--text-secondary); font-size:0.9rem; cursor:pointer;">Vazgeç</button>
+                <button id="confirm-ok-btn" style="flex:1; padding:12px; border:none; border-radius:12px; background:var(--red); color:#fff; font-size:0.9rem; font-weight:700; cursor:pointer;"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         CUSTOM INPUT MODAL (favori adı vb.)
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="custom-input-modal" style="display:none; position:fixed; inset:0; z-index:200000; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:24px;">
+        <div style="background:var(--bg-panel); border:1px solid var(--border-glow); border-radius:20px; padding:24px; max-width:320px; width:100%; box-shadow:0 8px 40px rgba(0,0,0,0.6);">
+            <div id="input-modal-title" style="font-size:1rem; font-weight:700; color:var(--text-primary); margin-bottom:14px; text-align:center;"></div>
+            <input id="custom-input-field" type="text" maxlength="40"
+                style="width:100%; padding:12px 14px; background:rgba(255,255,255,0.06); border:1px solid var(--border-glow); border-radius:12px; color:var(--text-primary); font-size:0.95rem; font-family:var(--font-display); outline:none; margin-bottom:16px;"
+                placeholder="">
+            <div style="display:flex; gap:10px;">
+                <button onclick="closeCustomInput()" style="flex:1; padding:12px; border:1px solid var(--border-subtle); border-radius:12px; background:transparent; color:var(--text-secondary); font-size:0.9rem; cursor:pointer;">İptal</button>
+                <button onclick="submitCustomInput()" style="flex:1; padding:12px; border:none; border-radius:12px; background:linear-gradient(135deg,var(--cyan),var(--green)); color:#000; font-size:0.9rem; font-weight:700; cursor:pointer;">Kaydet</button>
+            </div>
         </div>
     </div>
 
@@ -5936,7 +5968,14 @@
                 }
             } catch(e) {
                 document.getElementById('scan-progress').style.display = 'none';
-                if (e.name !== 'AbortError') showScanError('Tarama hatası: ' + e.message);
+                if (e.name !== 'AbortError') {
+                    // Ağ hatası: yarım kalan grubu temizle ve storage'ı güncelle
+                    if (activeGroupId !== null) {
+                        removeScanGroup(activeGroupId);
+                        activeGroupId = null;
+                    }
+                    showScanError('Tarama hatası: ' + e.message);
+                }
             } finally {
                 scanAbortController = null;
             }
@@ -6207,23 +6246,84 @@
             if (modal) modal.style.display = 'flex';
         }
 
-        function saveFavorite() {
-            if (!lastLatLon) return;
-            const promptText = CURRENT_LANG === 'tr' ? "Mera adı:" : "Spot name:";
-            const name = prompt(promptText);
-            if (name) {
-                const favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
-                favs.push({ name, ...lastLatLon });
-                localStorage.setItem('meraloji_favs', JSON.stringify(favs));
-                loadFavorites();
-                alert("Kaydedildi!");
+        // ── Favori CRUD (Firestore + localStorage fallback) ──────────────
+        function _favsCollection() {
+            if (typeof db !== 'undefined' && db && currentUser) {
+                return db.collection('users').doc(currentUser.uid).collection('favorites');
             }
+            return null;
         }
 
-        function loadFavorites() {
+        function _showFavToast(msg, color = 'var(--green)') {
+            const t = document.createElement('div');
+            t.style.cssText = `position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--bg-panel);border:1px solid ${color};color:var(--text-primary);padding:10px 18px;border-radius:12px;z-index:99999;font-size:0.83rem;max-width:280px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.4);pointer-events:none;`;
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2500);
+        }
+
+        function saveFavorite() {
+            if (!lastLatLon) return;
+            const titleText = CURRENT_LANG === 'tr' ? '📍 Mera Adı' : '📍 Spot Name';
+            const placeholderText = CURRENT_LANG === 'tr' ? 'örn. Ege Kabuğu' : 'e.g. Rocky Cape';
+            showCustomInput({
+                title: titleText,
+                placeholder: placeholderText,
+                onSubmit: async (name) => {
+                    const fav = { name, lat: lastLatLon.lat, lon: lastLatLon.lon, createdAt: Date.now() };
+                    const col = _favsCollection();
+                    if (col) {
+                        try {
+                            await col.add(fav);
+                            _showFavToast('⭐ ' + (CURRENT_LANG === 'tr' ? 'Kaydedildi!' : 'Saved!'));
+                            loadFavorites();
+                        } catch(e) {
+                            // Firestore başarısız → localStorage'a düş
+                            _saveFavLocal(fav);
+                        }
+                    } else {
+                        _saveFavLocal(fav);
+                    }
+                }
+            });
+        }
+
+        function _saveFavLocal(fav) {
             const favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
+            favs.push(fav);
+            localStorage.setItem('meraloji_favs', JSON.stringify(favs));
+            _showFavToast('⭐ ' + (CURRENT_LANG === 'tr' ? 'Kaydedildi!' : 'Saved!'));
+            loadFavorites();
+        }
+
+        async function loadFavorites() {
             const container = document.getElementById('fav-list');
-            
+            if (!container) return;
+            let favs = [];
+            const col = _favsCollection();
+            if (col) {
+                try {
+                    const snap = await col.orderBy('createdAt', 'asc').get();
+                    snap.forEach(doc => favs.push({ id: doc.id, ...doc.data() }));
+                    // localStorage'daki eski favorileri Firestore'a migrate et
+                    const local = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
+                    if (local.length > 0) {
+                        for (const f of local) {
+                            try { await col.add({ ...f, createdAt: f.createdAt || Date.now() }); } catch(e) {}
+                        }
+                        localStorage.removeItem('meraloji_favs');
+                        // Tekrar yükle
+                        const snap2 = await col.orderBy('createdAt', 'asc').get();
+                        favs = [];
+                        snap2.forEach(doc => favs.push({ id: doc.id, ...doc.data() }));
+                    }
+                } catch(e) {
+                    favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
+                }
+            } else {
+                favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
+            }
+
             if (favs.length === 0) {
                 container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem;">Henüz kayıt yok</div>';
                 return;
@@ -6231,27 +6331,30 @@
 
             container.innerHTML = favs.map((f, i) => `
                 <div style="display: flex; gap: 8px; margin-bottom: 6px;">
-                    <button class="menu-btn" style="flex: 1;" onclick="goToFavorite(${i})">📍 ${f.name}</button>
-                    <button onclick="deleteFavorite(${i})" style="background: var(--red); color: white; border: none; border-radius: 4px; width: 28px; height: 28px; font-size: 12px; cursor: pointer; flex-shrink: 0;">✕</button>
+                    <button class="menu-btn" style="flex: 1;" onclick="goToFavorite('${f.id || i}', ${JSON.stringify(f.lat)}, ${JSON.stringify(f.lon)})">📍 ${f.name}</button>
+                    <button onclick="deleteFavorite('${f.id || i}')" style="background: var(--red); color: white; border: none; border-radius: 4px; width: 28px; height: 28px; font-size: 12px; cursor: pointer; flex-shrink: 0;">✕</button>
                 </div>
             `).join('');
         }
 
-        function deleteFavorite(index) {
-            const favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
-            favs.splice(index, 1);
-            localStorage.setItem('meraloji_favs', JSON.stringify(favs));
+        async function deleteFavorite(idOrIndex) {
+            const col = _favsCollection();
+            if (col && typeof idOrIndex === 'string' && idOrIndex.length > 5) {
+                try { await col.doc(idOrIndex).delete(); } catch(e) {}
+            } else {
+                const favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
+                favs.splice(parseInt(idOrIndex), 1);
+                localStorage.setItem('meraloji_favs', JSON.stringify(favs));
+            }
             loadFavorites();
         }
 
-        function goToFavorite(index) {
-            const favs = JSON.parse(localStorage.getItem('meraloji_favs') || '[]');
-            const fav = favs[index];
-            if (fav) {
+        function goToFavorite(idOrIndex, lat, lon) {
+            if (lat && lon) {
                 toggleMenu();
-                map.flyTo([fav.lat, fav.lon], 14);
+                map.flyTo([lat, lon], 14);
                 setTimeout(() => {
-                    handleMapClick({ latlng: { lat: fav.lat, lng: fav.lon } });
+                    handleMapClick({ latlng: { lat: parseFloat(lat), lng: parseFloat(lon) } });
                 }, 500);
             }
         }
@@ -6274,6 +6377,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
+const db = firebase.firestore();
 
 let currentUser = null;
 let isPremium = false;
@@ -6307,6 +6411,7 @@ auth.onAuthStateChanged(async (user) => {
         updateUserUI();
         if (isGracePeriod) setTimeout(showGraceWelcome, 1500);
         try { await loadScanUsage(); } catch(e) {}
+        try { await loadFavorites(); } catch(e) {}
     } else {
         currentUser = null;
         isPremium = false;
@@ -6386,8 +6491,8 @@ function updateUserUI() {
 // Grace period ilk giriş bildirimi
 function showGraceWelcome() {
     const key = 'grace_welcome_shown_' + (currentUser ? currentUser.uid : 'x');
-    if (sessionStorage.getItem(key)) return;
-    sessionStorage.setItem(key, '1');
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1');
 
     const toast = document.createElement('div');
     toast.style.cssText = `
@@ -6423,10 +6528,57 @@ function signOut() {
     auth.signOut();
 }
 
+// ── Custom Confirm Modal ─────────────────────────────────────────
+let _confirmCallback = null;
+function showCustomConfirm({ icon = '❓', title, subtitle, okLabel, okColor = 'var(--red)', onOk }) {
+    document.getElementById('confirm-icon').textContent = icon;
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-subtitle').textContent = subtitle || '';
+    const okBtn = document.getElementById('confirm-ok-btn');
+    okBtn.textContent = okLabel;
+    okBtn.style.background = okColor;
+    _confirmCallback = onOk;
+    okBtn.onclick = () => { closeCustomConfirm(); if (_confirmCallback) _confirmCallback(); };
+    const modal = document.getElementById('custom-confirm-modal');
+    modal.style.display = 'flex';
+}
+function closeCustomConfirm() {
+    document.getElementById('custom-confirm-modal').style.display = 'none';
+    _confirmCallback = null;
+}
+
+// ── Custom Input Modal ───────────────────────────────────────────
+let _inputCallback = null;
+function showCustomInput({ title, placeholder = '', onSubmit }) {
+    document.getElementById('input-modal-title').textContent = title;
+    const field = document.getElementById('custom-input-field');
+    field.placeholder = placeholder;
+    field.value = '';
+    _inputCallback = onSubmit;
+    const modal = document.getElementById('custom-input-modal');
+    modal.style.display = 'flex';
+    setTimeout(() => field.focus(), 100);
+    field.onkeydown = (e) => { if (e.key === 'Enter') submitCustomInput(); };
+}
+function closeCustomInput() {
+    document.getElementById('custom-input-modal').style.display = 'none';
+    _inputCallback = null;
+}
+function submitCustomInput() {
+    const val = document.getElementById('custom-input-field').value.trim();
+    closeCustomInput();
+    if (val && _inputCallback) _inputCallback(val);
+}
+
 function showUserMenu() {
-    if (confirm('Çıkış yapmak istiyor musunuz?')) {
-        signOut();
-    }
+    showCustomConfirm({
+        icon: '🚪',
+        title: 'Çıkış Yap',
+        subtitle: 'Hesabınızdan çıkış yapılacak.',
+        okLabel: 'Çıkış Yap',
+        okColor: 'var(--red)',
+        onOk: signOut
+    });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -6523,6 +6675,12 @@ if ('serviceWorker' in navigator) {
 // ═══════════════════════════════════════════════════════════════════
 
 function handleBackButton() {
+    // 0. Custom modals
+    const customConfirm = document.getElementById('custom-confirm-modal');
+    if (customConfirm && customConfirm.style.display === 'flex') { closeCustomConfirm(); return true; }
+    const customInput = document.getElementById('custom-input-modal');
+    if (customInput && customInput.style.display === 'flex') { closeCustomInput(); return true; }
+
     // 1. Paywall
     const paywall = document.getElementById('paywall-modal');
     if (paywall && paywall.style.display === 'flex') { closePaywall(); return true; }
