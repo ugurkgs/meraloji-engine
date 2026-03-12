@@ -2289,8 +2289,16 @@
                 </div>
             </div>
             
+            <!-- Web kullanıcısı uyarısı -->
+            <div id="web-upgrade-notice" style="display:none; background:rgba(0,212,255,0.06); border:1px solid rgba(0,212,255,0.2); border-radius:12px; padding:14px; margin-bottom:12px; text-align:center;">
+                <div style="font-size:20px; margin-bottom:6px;">📱</div>
+                <div style="font-size:13px; font-weight:700; color:#00d4ff; margin-bottom:4px;">Uygulama Yakında Google Play'de!</div>
+                <div style="font-size:11px; color:#8892a3; margin-bottom:10px; line-height:1.5;">Abonelik şu an yalnızca Android uygulaması üzerinden yapılabiliyor. Erken erişim için bize yazın:</div>
+                <a href="mailto:meralojifishsystem@gmail.com?subject=Erken Erişim Talebi" style="display:inline-block; padding:8px 16px; background:linear-gradient(135deg,#00d4ff,#00ff88); border-radius:8px; color:#040d1a; font-size:12px; font-weight:700; text-decoration:none;">✉️ meralojifishsystem@gmail.com</a>
+            </div>
+
             <!-- CTA -->
-            <button onclick="upgradeToPro('yearly')" style="width:100%; padding:13px; border:none; border-radius:12px; background:linear-gradient(135deg, #00c8c8, #00ffcc); color:#000; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:0.5px; margin-bottom:10px;">
+            <button id="paywall-cta-btn" onclick="upgradeToPro('yearly')" style="width:100%; padding:13px; border:none; border-radius:12px; background:linear-gradient(135deg, #00c8c8, #00ffcc); color:#000; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:0.5px; margin-bottom:10px;">
                 PRO'ya Yükselt
             </button>
 
@@ -6465,6 +6473,19 @@ function showPaywall(reason) {
         subtitle.textContent = 'Akıllı balıkçılığın tüm gücünü açın';
     }
     
+    // Web mi Android mi tespit et
+    const isAndroidApp = /Android/.test(navigator.userAgent) && /meraloji|wv/.test(navigator.userAgent.toLowerCase());
+    const webNotice = document.getElementById('web-upgrade-notice');
+    const ctaBtn = document.getElementById('paywall-cta-btn');
+    if (!isAndroidApp) {
+        // Web kullanıcısı — ödeme butonu gizle, mail notice göster
+        if (webNotice) webNotice.style.display = 'block';
+        if (ctaBtn) ctaBtn.style.display = 'none';
+    } else {
+        if (webNotice) webNotice.style.display = 'none';
+        if (ctaBtn) ctaBtn.style.display = 'block';
+    }
+
     modal.style.display = 'flex';
 }
 
