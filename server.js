@@ -3504,7 +3504,14 @@ app.get('/api/forecast', async (req, res) => {
         // Marine:  past_days=7 → hourly[0-167]=geçmiş 7 gün, [168-191]=bugün, [192+]=gelecek
         // Weather hourlyOffset (past_days=1): bugün = indeks 24
         const hourlyOffset = 24;         // weather için bugünün başlangıcı
-        const marineHourlyOffset = 7 * 24; // marine için bugünün başlangıcı (past_days=7)
+        // Yenisi — güvenli
+        function findTodayIndex(timeArray) {
+            const todayStr = new Date().toISOString().split('T')[0]; // "2026-03-13"
+            const idx = timeArray.findIndex(t => t.startsWith(todayStr));
+            return idx >= 0 ? idx : 7 * 24; // bulamazsa fallback
+        }
+        const marineHourlyOffset = findTodayIndex(marine.hourly.time); //
+
 
         // UTC offset düzeltmesi — sunucu UTC'de çalışır, Open-Meteo yerel saat döner
         // utc_offset_seconds kullanarak gerçek yerel saati hesapla
