@@ -3941,11 +3941,34 @@ app.get('/api/forecast', async (req, res) => {
                 }))
         } : null;
 
+        // API Grid Offset — Marine API'nin kendi grid'ine snap ettiği gerçek koordinat
+        // Open-Meteo her yanıtta latitude/longitude döner; tıklanan noktadan farklı olabilir.
+        // snapInfo zaten aktifse (kıyı snap), o bilgi öne çıkar — apiDataSource eklenmez.
+        let apiDataSource = null;
+        if (!snapInfo && marine.latitude !== undefined && marine.longitude !== undefined) {
+            const aLat = parseFloat(marine.latitude);
+            const aLon = parseFloat(marine.longitude);
+            const cLat = parseFloat(lat);
+            const cLon = parseFloat(lon);
+            const offsetM = haversineM(cLat, cLon, aLat, aLon);
+            if (offsetM > 300) {
+                apiDataSource = {
+                    clickedLat: cLat,
+                    clickedLon: cLon,
+                    actualLat:  aLat,
+                    actualLon:  aLon,
+                    offsetM
+                };
+                console.log(`[API-GRID] Tıklanan: ${cLat},${cLon} → Veri noktası: ${aLat},${aLon} (${offsetM}m)`);
+            }
+        }
+
         const responseData = {
             version: "F.I.S.H. v3.0", region: regionName, isLand, landReason, clickHour: correctedClickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
             depth: depthData,        // EMODnet Bathymetry derinlik verisi
             snapInfo,                // null veya { distanceM, snapLat, snapLon } — kıyı snap bilgisi
+            apiDataSource,           // null veya { clickedLat, clickedLon, actualLat, actualLon, offsetM }
             forecast: sanitizedForecast,
             instant: sanitizedInstant,
             isPro: isProUser         // Frontend'in PRO badge/lock göstermesi için
@@ -5091,6 +5114,17 @@ app.get('/api/scan-usage', async (req, res) => {
     }
 });
 
+
+// İki koordinat arası mesafe (metre) — Haversine formülü
+function haversineM(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) ** 2;
+    return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // IZGARA SNAP — Cache key'leri için koordinat yuvarlama
