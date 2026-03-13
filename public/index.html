@@ -5213,11 +5213,7 @@
                             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">
                                 ${f.reason ? `<div class="fish-reason ${reasonClass}">${reasonIcon} ${f.reason}</div>` : '<div></div>'}
                                 ${f.rawScore != null ? `
-                                <div onclick="event.stopPropagation();showRawScoreInfo(this,${f.score.toFixed(1)},${f.rawScore})"
-                                     style="cursor:pointer;display:flex;align-items:center;gap:3px;white-space:nowrap;user-select:none;flex-shrink:0;">
-                                    <span style="font-size:0.65rem;color:var(--yellow);opacity:0.8;">💡</span>
-                                    <span style="font-size:0.62rem;color:var(--text-muted);opacity:0.6;">ham: ${f.rawScore.toFixed(0)}</span>
-                                </div>` : ''}
+                                <span style="font-size:0.62rem;color:var(--text-muted);opacity:0.5;flex-shrink:0;">ham: ${f.rawScore.toFixed(0)}</span>` : ''}
                             </div>
                             ${peakTimeLine}
                             ${bestHourLine}
@@ -6683,47 +6679,6 @@ function showUserMenu() {
 // ═══════════════════════════════════════════════════════════════
 // 💰 PAYWALL & UPGRADE
 // ═══════════════════════════════════════════════════════════════
-
-function showRawScoreInfo(el, refined, raw) {
-    const existingOverlay = document.getElementById('raw-score-overlay');
-    if (existingOverlay) { existingOverlay.remove(); return; }
-
-    // Karartma overlay
-    const overlay = document.createElement('div');
-    overlay.id = 'raw-score-overlay';
-    overlay.style.cssText = `
-        position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;
-        display:flex;align-items:center;justify-content:center;padding:20px;
-    `;
-    overlay.onclick = () => overlay.remove();
-
-    const tooltip = document.createElement('div');
-    tooltip.style.cssText = `
-        background:var(--card-bg);border:1px solid var(--border);border-radius:16px;
-        padding:20px 22px;width:100%;max-width:320px;
-        box-shadow:0 8px 40px rgba(0,0,0,0.7);
-    `;
-    tooltip.onclick = e => e.stopPropagation();
-    tooltip.innerHTML = `
-        <div style="font-size:0.85rem;font-weight:700;color:var(--cyan);margin-bottom:14px;">💡 Skor Nasıl Hesaplanır?</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <span style="font-size:0.75rem;color:var(--text-muted);">Ham Skor</span>
-            <span style="font-size:1rem;font-weight:700;color:var(--text);">${raw.toFixed(0)}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-            <span style="font-size:0.75rem;color:var(--text-muted);">Rafine Skor</span>
-            <span style="font-size:1rem;font-weight:700;color:var(--cyan);">%${refined.toFixed(0)}</span>
-        </div>
-        <div style="font-size:0.68rem;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border);padding-top:12px;margin-bottom:14px;">
-            Ham skor tüm parametrelerin ham birleşimidir. Rafine skor, yüksek değerleri logaritmik olarak sıkıştırır — balıkçılıkta %100 kesinlik olmadığı için hiçbir skor 99'u geçemez.
-        </div>
-        <button onclick="document.getElementById('raw-score-overlay').remove()"
-                style="width:100%;background:none;border:1px solid var(--border);color:var(--text-muted);
-                       padding:8px;border-radius:10px;font-size:0.75rem;cursor:pointer;">Kapat</button>
-    `;
-    overlay.appendChild(tooltip);
-    document.body.appendChild(overlay);
-}
 
 function showPaywall(reason) {
     loadProSlotsCount(); // Paywall açılırken sayacı tazele
