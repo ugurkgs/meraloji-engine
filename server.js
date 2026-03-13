@@ -248,7 +248,92 @@ async function fetchChlorophyll(lat, lon) {
     }
 }
 
-// Auth middleware & Freemium Limitleri
+// ═══════════════════════════════════════════════════════════════════════════
+// UYDU SST — NOAA CoastWatch ERDDAP (~1km çözünürlük, VIIRS)
+// Klorofil ile aynı sunucu/pattern, auth gerektirmez.
+// Bulutlu günlerde null döner — fallback Open-Meteo SST'ye düşer.
+// ═══════════════════════════════════════════════════════════════════════════
+async function fetchSatelliteSST(lat, lon) {
+    const latMin = (parseFloat(lat) - 0.05).toFixed(4);
+    const latMax = (parseFloat(lat) + 0.05).toFixed(4);
+    const lonMin = (parseFloat(lon) - 0.05).toFixed(4);
+    const lonMax = (parseFloat(lon) + 0.05).toFixed(4);
+
+    // Son 5 gün — bulutlu günlerde en son geçerli değeri al
+    const now = new Date();
+    const end = now.toISOString().split('T')[0] + 'T00:00:00Z';
+    const startDate = new Date(now);
+    startDate.setDate(startDate.getDate() - 5);
+    const start = startDate.toISOString().split('T')[0] + 'T00:00:00Z';
+
+    const url = `https://coastwatch.pfeg.noaa.gov/erddap/griddap/nesdisVHNSQsstDaily.json` +
+        `?sst[(${start}):(${end})][(0)][(${latMin}):(${latMax})][(${lonMin}):(${lonMax})]`;
+
+    try {
+        const res = await fetchWithTimeout(url, 8000);
+        if (!res.ok) return null;
+        const json = await res.json();
+        if (!json?.table?.rows) return null;
+
+        // Null olmayan değerleri filtrele, en son geçerli günü al
+        const rows = json.table.rows.filter(r => r[4] !== null && r[4] > -2 && r[4] < 40);
+        if (rows.length === 0) return null;
+
+        // En son tarihe göre sırala
+        rows.sort((a, b) => new Date(b[0]) - new Date(a[0]));
+        const latestDate = rows[0][0].split('T')[0];
+        const latestRows = rows.filter(r => r[0].startsWith(latestDate));
+        const values = latestRows.map(r => r[4]);
+        const avg = values.reduce((a, b) => a + b, 0) / values.length;
+
+        console.log(`[SST-SAT] ${latestDate}: ${avg.toFixed(2)}°C (${values.length} piksel)`);
+        return parseFloat(avg.toFixed(2));
+    } catch (e) {
+        console.log('[SST-SAT] NOAA fetch failed:', e.message);
+        return null;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SIĞ SU DALGA FİZİĞİ — Shoaling Coefficient (Green's Law + dispersiyon)
+// Balık skoru için etkin dalga yüksekliğini derinliğe göre düzeltir.
+// Derin su (>100m): etki yok. Sığ suda dalga büyür ve sertleşir.
+// wavePeriod [sn], depthM [m] → düzeltilmiş dalga yüksekliği [m]
+// ═══════════════════════════════════════════════════════════════════════════
+function applyShoaling(waveHeight, wavePeriod, depthM) {
+    if (!waveHeight || waveHeight <= 0) return waveHeight;
+    if (!wavePeriod || wavePeriod <= 0) return waveHeight;
+    if (!depthM || depthM <= 0) return waveHeight;
+    if (depthM >= 100) return waveHeight; // derin su — shoaling etkisi ihmal edilir
+
+    const g = 9.81;
+    const omega = (2 * Math.PI) / wavePeriod;
+
+    // Dalgasayısı k için iteratif çözüm — dispersiyon denklemi: ω² = gk·tanh(kd)
+    let k = (omega * omega) / g; // derin su başlangıç tahmini
+    for (let i = 0; i < 8; i++) {
+        k = (omega * omega) / (g * Math.tanh(k * depthM));
+    }
+
+    const kd = k * depthM;
+    const sinh2kd = Math.sinh(2 * kd);
+    // Grup hızı oranı: n = Cg / C = 0.5*(1 + 2kd/sinh(2kd))
+    const n = 0.5 * (1 + (sinh2kd > 1e-6 ? (2 * kd / sinh2kd) : 1));
+    const Cg_shallow = (omega / k) * n;            // grup hızı (sığ)
+    const Cg_deep    = g / (2 * omega);            // grup hızı (derin)
+
+    // Shoaling katsayısı: Ks = sqrt(Cg_deep / Cg_shallow)
+    const Ks = Math.sqrt(Cg_deep / Cg_shallow);
+    const Ks_clamped = Math.max(0.7, Math.min(2.5, Ks)); // fiziksel sınır
+
+    const result = parseFloat((waveHeight * Ks_clamped).toFixed(3));
+    if (depthM < 20) {
+        console.log(`[SHOALING] d=${depthM}m T=${wavePeriod}s H=${waveHeight}→${result}m (Ks=${Ks_clamped.toFixed(2)})`);
+    }
+    return result;
+}
+
+
 const FREE_DAILY_CLICKS = 5;    // Ücretsiz kullanıcı günde 5 tıklama
 const FREE_DAILY_SCANS = 1;     // Ücretsiz kullanıcı günde 1 tarama
 const GRACE_PERIOD_DAYS = 14;   // Yeni kullanıcıya 14 gün tam erişim
@@ -3418,8 +3503,13 @@ app.get('/api/forecast', async (req, res) => {
             console.log('[FORECAST] Chlorophyll fetch skipped:', e.message);
         }
         const chlorophyll = chlorophyllData?.chlorophyll ?? null;
-        
-        // Derinlik verisini işle
+
+        // ── UYDU SST — NOAA CoastWatch (~1km) ────────────────────────────────
+        // Klorofil ile paralel değil — önce bathymetry/kara kontrolü bitsin.
+        // Kara tespitinden önce çekmeye gerek yok; async olarak başlatıp
+        // skor döngüsünden önce await ederiz (toplam gecikme ~0ms eğer paralel).
+        const sstSatPromise = fetchSatelliteSST(lat, lon).catch(() => null);
+        // ─────────────────────────────────────────────────────────────────────
         let depthData = { avg: null, min: null, max: null };
         let bathymetryRaw = null; // Ham değer (negatif=deniz, pozitif=kara)
         try {
@@ -3531,6 +3621,17 @@ app.get('/api/forecast', async (req, res) => {
         }
         // ─────────────────────────────────────────────────────────────────────
 
+        // ── UYDU SST SONUCU: await et (paralel çekildiydi) ───────────────────
+        // Öncelik: NOAA uydu (~1km) → Open-Meteo (~10km) → bölgesel default
+        // sstSat null ise (bulutlu gün / timeout) Open-Meteo SST kullanılır.
+        const sstSat = await sstSatPromise;
+        if (sstSat !== null) {
+            console.log(`[SST] Uydu SST kullanılıyor: ${sstSat}°C`);
+        } else {
+            console.log(`[SST] Uydu SST yok — Open-Meteo SST'ye düşülüyor`);
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         // FIX: Basınç trendi döngü içinde her gün için ayrı hesaplanıyor.
         // Eski kod sadece bugün (i===0) için hesaplıyordu, 6 gün null kalıyordu.
         // hourlyPressure referansı döngüde kullanılmak üzere burada tanımlanıyor.
@@ -3581,9 +3682,15 @@ app.get('/api/forecast', async (req, res) => {
             }
 
             const rawWaterTemp = marine.hourly?.sea_surface_temperature?.[marineHourlyIdx];
-            const tempWater = isLand ? 0 : safeWaterTemp(rawWaterTemp, regionName, targetDate.getMonth());
-            
-            const wave = isLand ? 0 : safeNum(marine.daily?.wave_height_max?.[dailyIdx]);
+            // SST öncelik: NOAA uydu (~1km) → Open-Meteo (~10km) → bölgesel default
+            // sstSat sadece bugün için geçerli — gelecek günler Open-Meteo SST kullanır
+            const tempWater = isLand ? 0 : (
+                (i === 0 && sstSat !== null)
+                    ? sstSat
+                    : safeWaterTemp(rawWaterTemp, regionName, targetDate.getMonth())
+            );
+
+            const waveRaw = isLand ? 0 : safeNum(marine.daily?.wave_height_max?.[dailyIdx]);
             const tempAir = safeNum(weather.hourly?.temperature_2m?.[hourlyIdx]);
             const windSpeed = safeNum(weather.daily?.wind_speed_10m_max?.[dailyIdx]);
             const windDir = safeNum(weather.daily?.wind_direction_10m_dominant?.[dailyIdx]);
@@ -3594,6 +3701,8 @@ app.get('/api/forecast', async (req, res) => {
             
             // Marine hourly veriler (marine indeksi)
             const wavePeriod = isLand ? 0 : safeNum(marine.hourly?.wave_period?.[marineHourlyIdx]);
+            // Sığ su shoaling — derinliğe göre etkin dalga yüksekliğini düzelt
+            const wave = isLand ? 0 : applyShoaling(waveRaw, wavePeriod, depthData.avg);
             const swellHeight = isLand ? 0 : safeNum(marine.hourly?.swell_wave_height?.[marineHourlyIdx]);
             const oceanCurrent = isLand ? null : (marine.hourly?.ocean_current_velocity?.[marineHourlyIdx] ?? null);
             
@@ -3776,8 +3885,11 @@ app.get('/api/forecast', async (req, res) => {
             const marineStartIdx = marineHourlyOffset;                 // marine bugün başlangıcı (168)
             const instantDate = new Date();
             const rawInstantTemp = marine.hourly?.sea_surface_temperature?.[marineInstantIdx];
-            const i_tempWater = safeWaterTemp(rawInstantTemp, regionName, currentMonth);
-            const i_wave = safeNum(marine.hourly?.wave_height?.[marineInstantIdx]);
+            // SST öncelik: NOAA uydu → Open-Meteo → default (instant her zaman bugün)
+            const i_tempWater = (sstSat !== null)
+                ? sstSat
+                : safeWaterTemp(rawInstantTemp, regionName, currentMonth);
+            const i_waveRaw = safeNum(marine.hourly?.wave_height?.[marineInstantIdx]);
             const i_wind = safeNum(weather.hourly?.wind_speed_10m?.[instantIdx]);
             const i_rain = safeNum(weather.hourly?.rain?.[instantIdx]);
             const i_cloud = safeNum(weather.hourly?.cloud_cover?.[instantIdx]);
@@ -3794,6 +3906,8 @@ app.get('/api/forecast', async (req, res) => {
             
             // [YENİ] Marine hourly veriler (instant) — marine indeksi kullan
             const i_wavePeriod = safeNum(marine.hourly?.wave_period?.[marineInstantIdx]);
+            // Sığ su shoaling — instant için de uygula
+            const i_wave = applyShoaling(i_waveRaw, i_wavePeriod, depthData.avg);
             const i_swellHeight = safeNum(marine.hourly?.swell_wave_height?.[marineInstantIdx]);
             const i_oceanCurrent = marine.hourly?.ocean_current_velocity?.[marineInstantIdx] ?? null;
             const i_tempShock = calculateTempShock(marine, marineStartIdx);
@@ -3941,34 +4055,11 @@ app.get('/api/forecast', async (req, res) => {
                 }))
         } : null;
 
-        // API Grid Offset — Marine API'nin kendi grid'ine snap ettiği gerçek koordinat
-        // Open-Meteo her yanıtta latitude/longitude döner; tıklanan noktadan farklı olabilir.
-        // snapInfo zaten aktifse (kıyı snap), o bilgi öne çıkar — apiDataSource eklenmez.
-        let apiDataSource = null;
-        if (!snapInfo && marine.latitude !== undefined && marine.longitude !== undefined) {
-            const aLat = parseFloat(marine.latitude);
-            const aLon = parseFloat(marine.longitude);
-            const cLat = parseFloat(lat);
-            const cLon = parseFloat(lon);
-            const offsetM = haversineM(cLat, cLon, aLat, aLon);
-            if (offsetM > 300) {
-                apiDataSource = {
-                    clickedLat: cLat,
-                    clickedLon: cLon,
-                    actualLat:  aLat,
-                    actualLon:  aLon,
-                    offsetM
-                };
-                console.log(`[API-GRID] Tıklanan: ${cLat},${cLon} → Veri noktası: ${aLat},${aLon} (${offsetM}m)`);
-            }
-        }
-
         const responseData = {
             version: "F.I.S.H. v3.0", region: regionName, isLand, landReason, clickHour: correctedClickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
             depth: depthData,        // EMODnet Bathymetry derinlik verisi
             snapInfo,                // null veya { distanceM, snapLat, snapLon } — kıyı snap bilgisi
-            apiDataSource,           // null veya { clickedLat, clickedLon, actualLat, actualLon, offsetM }
             forecast: sanitizedForecast,
             instant: sanitizedInstant,
             isPro: isProUser         // Frontend'in PRO badge/lock göstermesi için
@@ -5114,17 +5205,6 @@ app.get('/api/scan-usage', async (req, res) => {
     }
 });
 
-
-// İki koordinat arası mesafe (metre) — Haversine formülü
-function haversineM(lat1, lon1, lat2, lon2) {
-    const R = 6371000;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) ** 2 +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon / 2) ** 2;
-    return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // IZGARA SNAP — Cache key'leri için koordinat yuvarlama
