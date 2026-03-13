@@ -5210,13 +5210,13 @@
                             <div class="fish-score" style="color:${isProtected ? '#cc0000' : getScoreColor(f.score)}">${isProtected ? 'YASAK' : '%'+f.score.toFixed(1)}</div>
                         </div>
                         <div class="fish-details">
-                            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">
                                 ${f.reason ? `<div class="fish-reason ${reasonClass}">${reasonIcon} ${f.reason}</div>` : '<div></div>'}
                                 ${f.rawScore != null ? `
                                 <div onclick="event.stopPropagation();showRawScoreInfo(this,${f.score.toFixed(1)},${f.rawScore})"
-                                     style="cursor:pointer;font-size:0.65rem;color:var(--text-muted);opacity:0.55;white-space:nowrap;user-select:none;"
-                                     title="Ham skor">
-                                    ham: ${f.rawScore.toFixed(0)}
+                                     style="cursor:pointer;display:flex;align-items:center;gap:3px;white-space:nowrap;user-select:none;flex-shrink:0;">
+                                    <span style="font-size:0.65rem;color:var(--yellow);opacity:0.8;">💡</span>
+                                    <span style="font-size:0.62rem;color:var(--text-muted);opacity:0.6;">ham: ${f.rawScore.toFixed(0)}</span>
                                 </div>` : ''}
                             </div>
                             ${peakTimeLine}
