@@ -4652,6 +4652,17 @@
                     const distStr = dm < 1000 ? `${dm}m` : `${(dm / 1000).toFixed(1)}km`;
                     snapNote = ` <span style="color:var(--cyan);font-size:0.68rem;">📍 ${distStr} açığın verisi</span>`;
                 }
+                // API Grid Offset: marine API kendi grid noktasından veri döndürdüyse göster + pin taşı
+                if (global.apiDataSource) {
+                    const ds = global.apiDataSource;
+                    const distStr = ds.offsetM < 1000 ? `~${ds.offsetM}m` : `~${(ds.offsetM / 1000).toFixed(1)}km`;
+                    snapNote = ` <span style="color:var(--orange);font-size:0.68rem;">📡 ${distStr} uzaktaki veri noktası</span>`;
+                    // Marker'ı gerçek veri noktasına taşı
+                    if (markerLayer) map.removeLayer(markerLayer);
+                    markerLayer = L.marker([ds.actualLat, ds.actualLon], {
+                        icon: L.divIcon({ className: 'radar-marker', iconSize: [28, 28], iconAnchor: [14, 14] })
+                    }).addTo(map);
+                }
                 depthDisplay.innerHTML = `⚓ ${depthLabel}: <strong>${fmtDepth(global.depth.avg)}</strong>${shallowNote}${snapNote}`;
                 depthDisplay.style.display = 'block';
             } else {
