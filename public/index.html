@@ -3477,7 +3477,7 @@
                 source2: "EMODnet Bathymetry (Derinlik)",
                 source3: "SunCalc (Astronomi Hesaplamaları)",
                 source4: "FAO FishBase (Tür Verileri)",
-                confidenceNote: "Güven skoru uzak günlerde azalır (günde -%6)."
+                confidenceNote: "API veri kalitesine göre hesaplanır. Eksik veri varsa düşer."
             },
             en: {
                 // General
@@ -3710,7 +3710,7 @@
                 source2: "EMODnet Bathymetry (Depth)",
                 source3: "SunCalc (Astronomy Calculations)",
                 source4: "FAO FishBase (Species Data)",
-                confidenceNote: "Confidence decreases for distant days (-6% per day)."
+                confidenceNote: "Calculated based on API data quality. Drops if data is missing."
             }
         };
         
@@ -5210,10 +5210,9 @@
                             <div class="fish-score" style="color:${isProtected ? '#cc0000' : getScoreColor(f.score)}">${isProtected ? 'YASAK' : '%'+f.score.toFixed(1)}</div>
                         </div>
                         <div class="fish-details">
-                            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">
+                            <div style="margin-bottom:4px;">
                                 ${f.reason ? `<div class="fish-reason ${reasonClass}">${reasonIcon} ${f.reason}</div>` : '<div></div>'}
-                                ${f.rawScore != null ? `
-                                <span style="font-size:0.62rem;color:var(--text-muted);opacity:0.5;flex-shrink:0;">ham: ${f.rawScore.toFixed(0)}</span>` : ''}
+                                
                             </div>
                             ${peakTimeLine}
                             ${bestHourLine}
