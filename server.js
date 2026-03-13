@@ -3898,16 +3898,16 @@ app.get('/api/forecast', async (req, res) => {
             const i_sunTimes = SunCalc.getTimes(instantDate, lat, lon);
             const i_timeMode = getTimeOfDay(correctedClickHour, i_sunTimes);
             const i_solunar = getSolunarWindow(instantDate, lat, lon);
+            // [YENİ] Marine hourly veriler (instant) — marine indeksi kullan
+            const i_wavePeriod = safeNum(marine.hourly?.wave_period?.[marineInstantIdx]);
+            // Sığ su shoaling — instant için de uygula (i_clarity/i_current'tan önce tanımlanmalı)
+            const i_wave = applyShoaling(i_waveRaw, i_wavePeriod, depthData.avg);
             const i_clarity = calculateClarity(i_wave, i_wind, i_rain);
             const i_current = estimateCurrent(i_wave, i_wind, regionName);
             const i_moon = SunCalc.getMoonIllumination(instantDate);
             // daily[1] = bugün (past_days=1)
             const i_windDir = safeNum(weather.daily?.wind_direction_10m_dominant?.[1]);
             
-            // [YENİ] Marine hourly veriler (instant) — marine indeksi kullan
-            const i_wavePeriod = safeNum(marine.hourly?.wave_period?.[marineInstantIdx]);
-            // Sığ su shoaling — instant için de uygula
-            const i_wave = applyShoaling(i_waveRaw, i_wavePeriod, depthData.avg);
             const i_swellHeight = safeNum(marine.hourly?.swell_wave_height?.[marineInstantIdx]);
             const i_oceanCurrent = marine.hourly?.ocean_current_velocity?.[marineInstantIdx] ?? null;
             const i_tempShock = calculateTempShock(marine, marineStartIdx);
