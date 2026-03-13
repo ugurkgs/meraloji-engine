@@ -391,6 +391,22 @@ function getGaussianScore(val, min, opt, max, optMin, optMax) {
 // Balık biyolojik olarak o sıcaklıkta var olamıyorsa diğer tüm koşullar anlamsız.
 // min'in %20 altı veya max'ın %20 üstü = letal bölge → skor katmerli çöker.
 // Bu fonksiyon calculateFishScore içinde rawScore'a çarpan olarak uygulanır.
+// Güven Skoru — API veri kalitesine göre hesaplanır
+// Eksik veya bayat veri varsa skor düşer
+function calculateConfidence(params) {
+    let score = 100;
+
+    if (!params.tempWater || params.tempWater === 0)          score -= 20; // Su sıcaklığı yok — en kritik
+    if (params.wave === null || params.wave === undefined)     score -= 10; // Dalga verisi yok
+    if (!params.wavePeriod || params.wavePeriod === 0)        score -= 5;  // Dalga periyodu yok
+    if (!params.chlorophyll)                                  score -= 10; // Klorofil yok
+    if (params.chlorophyllStale)                              score -= 5;  // Klorofil bayat (7+ gün)
+    if (!params.oceanCurrent)                                 score -= 5;  // Akıntı tahmini kullanıldı
+    if (!params.depth || params.depth === null)               score -= 5;  // Derinlik yok
+
+    return Math.max(40, Math.round(score)); // Minimum 40 — hiçbir zaman sıfır değil
+}
+
 function getTempGateMultiplier(tempWater, tempRange) {
     const { min, max } = tempRange;
     // Sabit 2°C tolerans — tüm türler için aynı, daha sert düşüş
@@ -3273,7 +3289,7 @@ function calculateFishScore(fish, key, params) {
     else if (finalScore >= 65) reason = activeTriggers.length > 0 ? activeTriggers[0] : "İyi Koşullar";
     else reason = "Orta Aktivite";
 
-    return { finalScore, rawScore: Math.round(rawScore * 10) / 10, activeTriggers, reason, scoreDetails };
+    return { finalScore, activeTriggers, reason, scoreDetails };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -3651,8 +3667,7 @@ app.get('/api/forecast', async (req, res) => {
                             lure: fish.advice.lure, rig: fish.advice.rig, note: fish.note,
                             legalSize: fish.legalSize, reason: result.reason,
                             activation: result.activeTriggers.join(", "),
-                            scoreDetails: result.scoreDetails, // Yıldız sistemi için
-                            rawScore: result.rawScore // Ham skor (sıkıştırma öncesi)
+                            scoreDetails: result.scoreDetails // Yıldız sistemi için
                         });
                     }
                 }
@@ -3729,7 +3744,15 @@ app.get('/api/forecast', async (req, res) => {
                     stale: chlorophyllData.stale || false
                 } : null,
                 score: parseFloat(topScore.toFixed(1)),
-                confidence: 92 - (i * 6), tacticKey, tacticData, weatherSummary,
+                confidence: calculateConfidence({
+                    tempWater,
+                    wave,
+                    wavePeriod,
+                    chlorophyll: chlorophyllData ? chlorophyllData.chlorophyll : null,
+                    chlorophyllStale: chlorophyllData ? chlorophyllData.stale : true,
+                    oceanCurrent,
+                    depth: depthData ? depthData.avg : null
+                }), tacticKey, tacticData, weatherSummary,
                 fishList: fishList.slice(0, 10), moonPhase: moon.phase,
                 moonPhaseName: getMoonPhaseName(moon.phase), airTemp: tempAir, timeMode,
                 activityWindows: activityWindows
@@ -3822,8 +3845,7 @@ app.get('/api/forecast', async (req, res) => {
                         bait: fish.advice.bait, method: fish.advice.hook,
                         lure: fish.advice.lure, rig: fish.advice.rig,
                         note: fish.note, legalSize: fish.legalSize, reason: result.reason,
-                        scoreDetails: result.scoreDetails, // Yıldız sistemi
-                        rawScore: result.rawScore // Ham skor
+                        scoreDetails: result.scoreDetails // Yıldız sistemi
                     });
                 }
             }
