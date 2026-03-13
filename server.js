@@ -393,16 +393,13 @@ function getGaussianScore(val, min, opt, max, optMin, optMax) {
 // Bu fonksiyon calculateFishScore içinde rawScore'a çarpan olarak uygulanır.
 function getTempGateMultiplier(tempWater, tempRange) {
     const { min, max } = tempRange;
-    const range = max - min;
-    // Letal alt sınır: min'in 20%'si altına inince lineer 0'a düşer
+    // Sabit 2°C tolerans — tüm türler için aynı, daha sert düşüş
+    const lethalMargin = 2.0;
     if (tempWater < min) {
-        const lethalMargin = range * 0.20;
         const overshoot = min - tempWater;
         return Math.max(0.0, 1.0 - (overshoot / lethalMargin));
     }
-    // Letal üst sınır: max'ın 20%'si üstüne çıkınca lineer 0'a düşer
     if (tempWater > max) {
-        const lethalMargin = range * 0.20;
         const overshoot = tempWater - max;
         return Math.max(0.0, 1.0 - (overshoot / lethalMargin));
     }
