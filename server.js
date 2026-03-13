@@ -256,6 +256,7 @@ const VALID_SUBSCRIPTIONS = ['meraloji_pro_monthly', 'meraloji_pro_yearly'];
 
 // Firebase Auth createdAt cache — her kullanıcı için 24 saat cache'le
 const userCreationCache = new NodeCache({ stdTTL: 86400 });
+const subscriptionCache = new NodeCache({ stdTTL: 180 }); // 3 dakika TTL
 
 async function verifyAuth(req, res, next) {
     const authHeader = req.headers.authorization;
@@ -275,14 +276,20 @@ async function verifyAuth(req, res, next) {
         req.graceDaysLeft = 0;
 
         if (db) {
-            // Abonelik kontrol
-            const subDoc = await db.collection('subscriptions').doc(decoded.uid).get();
-            if (subDoc.exists) {
-                const sub = subDoc.data();
-                if (sub.status === 'active' && sub.expiresAt > Date.now()) {
-                    req.isPremium = true;
+            // Abonelik kontrol — 3 dakika cache
+            let isPremiumCached = subscriptionCache.get(decoded.uid);
+            if (isPremiumCached === undefined) {
+                const subDoc = await db.collection('subscriptions').doc(decoded.uid).get();
+                isPremiumCached = false;
+                if (subDoc.exists) {
+                    const sub = subDoc.data();
+                    if (sub.status === 'active' && sub.expiresAt > Date.now()) {
+                        isPremiumCached = true;
+                    }
                 }
+                subscriptionCache.set(decoded.uid, isPremiumCached);
             }
+            req.isPremium = isPremiumCached;
         }
 
         // Grace period: PRO değilse, Firebase Auth hesap oluşturma tarihine bak
@@ -4579,6 +4586,10 @@ app.post('/api/verify-subscription', async (req, res) => {
                 await statsRef.set({ count: (await statsRef.get()).data()?.count + 1 || 1 }, { merge: true });
             }
         }
+        // Cache'i temizle — bir sonraki istekte taze veri çekilsin
+        subscriptionCache.del(req.user.uid);
+        console.log(`[VERIFY] ✅ Subscription cache temizlendi — uid:${req.user.uid}`);
+
         res.json({ success: true, isPremium: true, subscriptionId: subId });
     } catch (error) {
         console.error('[VERIFY] Firestore hatası:', error.message);
