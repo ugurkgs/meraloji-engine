@@ -6724,7 +6724,9 @@ function showRawScoreInfo(el, refined, raw) {
                        padding:8px;border-radius:10px;font-size:0.75rem;cursor:pointer;">Kapat</button>
     `;
     overlay.appendChild(tooltip);
-    document.body.appendChild(overlay);
+    // HUD içine ekle ki z-index stack'i doğru çalışsın
+    const hud = document.getElementById('hud-wrapper');
+    (hud || document.body).appendChild(overlay);
 }
 
 function showPaywall(reason) {
