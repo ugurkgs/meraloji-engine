@@ -3814,7 +3814,8 @@ app.get('/api/forecast', async (req, res) => {
                         bait: fish.advice.bait, method: fish.advice.hook,
                         lure: fish.advice.lure, rig: fish.advice.rig,
                         note: fish.note, legalSize: fish.legalSize, reason: result.reason,
-                        scoreDetails: result.scoreDetails // Yıldız sistemi
+                        scoreDetails: result.scoreDetails, // Yıldız sistemi
+                        rawScore: result.rawScore // Ham skor
                     });
                 }
             }
