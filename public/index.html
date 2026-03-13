@@ -6687,39 +6687,44 @@ function showUserMenu() {
 // ═══════════════════════════════════════════════════════════════
 
 function showRawScoreInfo(el, refined, raw) {
-    const existing = document.getElementById('raw-score-tooltip');
-    if (existing) { existing.remove(); return; }
+    const existingOverlay = document.getElementById('raw-score-overlay');
+    if (existingOverlay) { existingOverlay.remove(); return; }
+
+    // Karartma overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'raw-score-overlay';
+    overlay.style.cssText = `
+        position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9998;
+        display:flex;align-items:center;justify-content:center;padding:20px;
+    `;
+    overlay.onclick = () => overlay.remove();
 
     const tooltip = document.createElement('div');
-    tooltip.id = 'raw-score-tooltip';
     tooltip.style.cssText = `
-        position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
-        background:var(--card-bg);border:1px solid var(--border);border-radius:12px;
-        padding:14px 18px;z-index:9999;max-width:300px;width:90%;
-        box-shadow:0 8px 32px rgba(0,0,0,0.5);
+        background:var(--card-bg);border:1px solid var(--border);border-radius:16px;
+        padding:20px 22px;width:100%;max-width:320px;
+        box-shadow:0 8px 40px rgba(0,0,0,0.7);
     `;
+    tooltip.onclick = e => e.stopPropagation();
     tooltip.innerHTML = `
-        <div style="font-size:0.8rem;font-weight:700;color:var(--cyan);margin-bottom:10px;">Skor Nasıl Hesaplanır?</div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:0.85rem;font-weight:700;color:var(--cyan);margin-bottom:14px;">💡 Skor Nasıl Hesaplanır?</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
             <span style="font-size:0.75rem;color:var(--text-muted);">Ham Skor</span>
-            <span style="font-size:0.85rem;font-weight:600;color:var(--text);">${raw.toFixed(0)}</span>
+            <span style="font-size:1rem;font-weight:700;color:var(--text);">${raw.toFixed(0)}</span>
         </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
             <span style="font-size:0.75rem;color:var(--text-muted);">Rafine Skor</span>
-            <span style="font-size:0.85rem;font-weight:600;color:var(--cyan);">%${refined.toFixed(0)}</span>
+            <span style="font-size:1rem;font-weight:700;color:var(--cyan);">%${refined.toFixed(0)}</span>
         </div>
-        <div style="font-size:0.68rem;color:var(--text-muted);line-height:1.5;border-top:1px solid var(--border);padding-top:10px;">
-            Ham skor tüm parametrelerin birleşimidir. Rafine skor, yüksek değerleri logaritmik olarak sıkıştırır — 
-            balıkçılıkta %100 kesinlik olmadığı için hiçbir skor 99'u geçemez.
+        <div style="font-size:0.68rem;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border);padding-top:12px;margin-bottom:14px;">
+            Ham skor tüm parametrelerin ham birleşimidir. Rafine skor, yüksek değerleri logaritmik olarak sıkıştırır — balıkçılıkta %100 kesinlik olmadığı için hiçbir skor 99'u geçemez.
         </div>
-        <div style="text-align:center;margin-top:10px;">
-            <button onclick="document.getElementById('raw-score-tooltip').remove()" 
-                    style="background:none;border:1px solid var(--border);color:var(--text-muted);
-                           padding:4px 16px;border-radius:8px;font-size:0.72rem;cursor:pointer;">Kapat</button>
-        </div>
+        <button onclick="document.getElementById('raw-score-overlay').remove()"
+                style="width:100%;background:none;border:1px solid var(--border);color:var(--text-muted);
+                       padding:8px;border-radius:10px;font-size:0.75rem;cursor:pointer;">Kapat</button>
     `;
-    document.body.appendChild(tooltip);
-    setTimeout(() => { if (document.getElementById('raw-score-tooltip')) document.getElementById('raw-score-tooltip').remove(); }, 6000);
+    overlay.appendChild(tooltip);
+    document.body.appendChild(overlay);
 }
 
 function showPaywall(reason) {
