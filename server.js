@@ -2885,12 +2885,25 @@ function calculateFishScore(fish, key, params) {
     
     // [YENİ] Dalga Periyodu — Uzun periyot (swell) sakin, kısa periyot (rüzgar dalgası) huzursuz
     if (wavePeriod > 0) {
+        // s_trigger bonusu (mevcut)
         if (wavePeriod >= 8) {
             s_trigger += 2;
             activeTriggers.push("Uygun Swell");
         } else if (wavePeriod <= 4 && wave > 0.5) {
-            s_trigger -= 1; // Kısa periyotlu rüzgar dalgası
+            s_trigger -= 1;
         }
+
+        // rawScore çarpanı — kısa dalga cezası, uzun dalga bonusu
+        // ≤3s: çamurlu, kısa rüzgar dalgası → %30 ceza
+        // 4-6s: orta → nötr
+        // ≥10s: temiz swell → %10 bonus
+        let wavePeriodMult = 1.0;
+        if (wavePeriod <= 3 && wave > 0.3)       wavePeriodMult = 0.70;
+        else if (wavePeriod <= 5 && wave > 0.5)  wavePeriodMult = 0.85;
+        else if (wavePeriod >= 10)               wavePeriodMult = 1.10;
+        else if (wavePeriod >= 8)                wavePeriodMult = 1.05;
+        rawScore *= wavePeriodMult;
+
         scoreDetails.wavePeriod = {
             value: parseFloat(wavePeriod.toFixed(1)),
             stars: wavePeriod >= 8 ? 5 : wavePeriod >= 6 ? 4 : wavePeriod >= 4 ? 3 : 2,
