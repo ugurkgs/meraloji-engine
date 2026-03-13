@@ -3265,7 +3265,7 @@ function calculateFishScore(fish, key, params) {
     else if (finalScore >= 65) reason = activeTriggers.length > 0 ? activeTriggers[0] : "İyi Koşullar";
     else reason = "Orta Aktivite";
 
-    return { finalScore, activeTriggers, reason, scoreDetails };
+    return { finalScore, rawScore: Math.round(rawScore * 10) / 10, activeTriggers, reason, scoreDetails };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -3643,7 +3643,8 @@ app.get('/api/forecast', async (req, res) => {
                             lure: fish.advice.lure, rig: fish.advice.rig, note: fish.note,
                             legalSize: fish.legalSize, reason: result.reason,
                             activation: result.activeTriggers.join(", "),
-                            scoreDetails: result.scoreDetails // Yıldız sistemi için
+                            scoreDetails: result.scoreDetails, // Yıldız sistemi için
+                            rawScore: result.rawScore // Ham skor (sıkıştırma öncesi)
                         });
                     }
                 }
