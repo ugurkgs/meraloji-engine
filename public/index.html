@@ -6492,7 +6492,7 @@
             }
             container.innerHTML = favs.map(f => `
                 <div style="display: flex; gap: 8px; margin-bottom: 6px;">
-                    <button class="menu-btn" style="flex: 1;" onclick="goToFavorite('${f.id}',${f.lat},${f.lon})">📍 ${f.name}</button>
+                    <button class="menu-btn" style="flex: 1;" onclick="goToFavorite('${f.id}',${f.lat},${f.lon},'${f.name.replace(/'/g, "&#39;")}')">📍 ${f.name}</button>
                     <button onclick="deleteFavorite('${f.id}')" style="background: var(--red); color: white; border: none; border-radius: 4px; width: 28px; height: 28px; font-size: 12px; cursor: pointer; flex-shrink: 0;">✕</button>
                 </div>
             `).join('');
@@ -6509,11 +6509,37 @@
             renderFavList(favs);
         }
 
-        function goToFavorite(favId, lat, lon) {
+        let _favMarker = null;
+
+        function goToFavorite(favId, lat, lon, name) {
             if (lat && lon) {
                 toggleMenu();
                 map.flyTo([lat, lon], 14);
-                // Sadece konuma git — skoru kullanıcı kendisi tetikler
+
+                // Önceki favori markerını kaldır
+                if (_favMarker) { map.removeLayer(_favMarker); _favMarker = null; }
+
+                // Yeni marker ekle — isimli tooltip
+                const favIcon = L.divIcon({
+                    className: '',
+                    html: \`<div style="
+                        background:linear-gradient(135deg,#00c8c8,#00ffcc);
+                        color:#040d1a; font-size:11px; font-weight:700;
+                        padding:3px 8px; border-radius:8px; white-space:nowrap;
+                        box-shadow:0 2px 8px rgba(0,0,0,0.4);
+                        border:2px solid rgba(255,255,255,0.3);
+                    ">\${name || '⭐ Favori'}</div>
+                    <div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #00ffcc;margin:0 auto;"></div>\`,
+                    iconAnchor: [0, 0]
+                });
+
+                _favMarker = L.marker([lat, lon], { icon: favIcon, zIndexOffset: 1000 })
+                    .addTo(map);
+
+                // Haritaya tıklayınca markeri kaldır
+                map.once('click', () => {
+                    if (_favMarker) { map.removeLayer(_favMarker); _favMarker = null; }
+                });
             }
         }
 
