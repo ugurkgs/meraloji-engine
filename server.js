@@ -3219,12 +3219,12 @@ function calculateFishScore(fish, key, params) {
     
     // === FAZ 1: DERİNLİK SOFT GATE ===
     // Pelajik ve aktif avcı türler su kolonunda dikey göç yapar —
-    // derinlik onlar için habitat değil, ceza uygulanmaz.
+    // minimum derinlik cezasından muaf, ancak çok derin suda hâlâ ceza alır.
     const PELAGIC_CATEGORIES = ['PELAJIK', 'KIYI_AVCI', 'AVCI', 'SÜRÜ'];
     const isPelagicType = PELAGIC_CATEGORIES.includes(fish.category);
 
     let depthScore = 1.0;
-    if (!isPelagicType && depthAvg !== undefined && depthAvg !== null && fish.depth) {
+    if (depthAvg !== undefined && depthAvg !== null && fish.depth) {
         const d = depthAvg;
         const fMin = fish.depth.min;
         const fOpt = fish.depth.opt;
@@ -3235,12 +3235,12 @@ function calculateFishScore(fish, key, params) {
         // effectiveMin: kıyı türleri için minimum 0.5m eşik.
         const effectiveMin = Math.max(fMin, 0.5);
         
-        if (d < effectiveMin * 0.5) {
-            // İmkansız derinlik — neredeyse kuru zemin
+        if (!isPelagicType && d < effectiveMin * 0.5) {
+            // İmkansız derinlik — neredeyse kuru zemin (pelajikler muaf)
             depthScore = 0.05;
             penalties.push("Derinlik uyumsuz (çok sığ)");
-        } else if (fMin > 0 && d < fMin) {
-            // Sınır bölgesi — sadece fMin>0 olan türler için (kıyı türleri zaten 0m'den avlanabilir)
+        } else if (!isPelagicType && fMin > 0 && d < fMin) {
+            // Sınır bölgesi — pelajikler sığa iner, muaf
             depthScore = 0.2 + 0.6 * (d / fMin);
             penalties.push("Sığ mera");
         } else if (d >= fMin && d <= fMax) {
@@ -3410,11 +3410,36 @@ app.get('/api/forecast', async (req, res) => {
         const clickHour = now.getHours();
         const currentMonth = now.getMonth();
 
-        // Izgara snap — 0.1° ≈ 11km hücre, cache hit oranını dramatik artırır
+        // Izgara snap — 0.01° ≈ 1.1km hücre, derinlik hassasiyeti artırıldı
         const { gLat, gLon } = snapToGrid(lat, lon);
         const cacheKey = `forecast_v24_${gLat}_${gLon}_h${clickHour}`;
         const cachedData = cache.get(cacheKey);
-        if (cachedData) return res.json(cachedData);
+
+        // Cache varsa hava/deniz verisini oradan al, ama derinliği taze çek
+        if (cachedData) {
+            // EMODnet'i taze çek (koordinatlar cache key'e dahil değil)
+            const bathymetryUrl2 = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lon} ${lat})`;
+            const freshBathy = await fetchWithTimeout(bathymetryUrl2).catch(() => null);
+            if (freshBathy && freshBathy.ok) {
+                try {
+                    const b = await freshBathy.json();
+                    if (b && b.avg !== undefined && b.avg < 0) {
+                        const freshDepth = (b.smoothed !== undefined && b.smoothed < 0)
+                            ? Math.abs(b.smoothed)
+                            : Math.abs(b.avg);
+                        // Cache'deki veriyi taze derinlikle birleştir
+                        const merged = JSON.parse(JSON.stringify(cachedData));
+                        if (merged.depth) merged.depth.avg = freshDepth;
+                        // fishList'teki depthAvg'yi de güncelle
+                        if (merged.fishList) {
+                            merged.fishList = merged.fishList.map(f => ({ ...f }));
+                        }
+                        return res.json(merged);
+                    }
+                } catch(e) {}
+            }
+            return res.json(cachedData);
+        }
 
         // ── OFFLİNE KONUM ANALİZİ ─────────────────────────────────────────
         // API'lere gitmeden önce şehir sınırı kontrolü
@@ -5226,7 +5251,7 @@ app.get('/api/scan-usage', async (req, res) => {
 // Kullanıcı 38.4187'ye tıklasa da 38.4952'ye tıklasa da aynı key → cache hit.
 // API çağrısı için tam koordinat (latF/lonF) kullanılmaya devam eder.
 // ═══════════════════════════════════════════════════════════════════════════
-function snapToGrid(lat, lon, precision = 1) {
+function snapToGrid(lat, lon, precision = 2) {
     const factor = Math.pow(10, precision);
     const gLat = (Math.round(parseFloat(lat) * factor) / factor).toFixed(precision);
     const gLon = (Math.round(parseFloat(lon) * factor) / factor).toFixed(precision);
