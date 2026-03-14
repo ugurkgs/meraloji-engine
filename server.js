@@ -1338,7 +1338,7 @@ const SPECIES_DB = {
     "trakun": {
     name: "Trakun (Tral)", nameEn: "Blue Runner", icon: "🐟", scientificName: "Caranx crysos",
     photoId: 73,
-    category: "PELAGIC",
+    category: "PELAJIK",
     peakHours: "DAY", peakHoursDesc: "Sabah ve öğleden sonra sürü halinde aktif",
     tempRange: { min: 17, opt: 25, max: 28 },
     seasons: { winter: 0.20, spring: 0.55, summer: 0.95, autumn: 0.70 },
@@ -1647,7 +1647,7 @@ const SPECIES_DB = {
     "tranca": {
         name: "Trança", nameEn: "Pink Dentex", icon: "🐟", scientificName: "Dentex gibbosus",
         photoId: 49,
-        category: "DERİN",
+        category: "DIP_DERIN",
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin su",
         tempRange: { min: 16, opt: 21, max: 26 },
         seasons: { winter: 0.40, spring: 0.70, summer: 0.85, autumn: 0.75 },
@@ -1816,7 +1816,7 @@ const SPECIES_DB = {
     "iskatarya": {
         name: "İskatarya", nameEn: "Atlantic Chub Mackerel", icon: "🐟", scientificName: "Scomber colias",
         photoId: 73,
-        category: "PELAJİK",
+        category: "PELAJIK",
         peakHours: "DAY", peakHoursDesc: "Sabah erken ve akşamüstü, yüzey",
         tempRange: { min: 15, opt: 20, max: 26 },
         seasons: { winter: 0.20, spring: 0.75, summer: 0.90, autumn: 0.80 },
@@ -1873,7 +1873,7 @@ const SPECIES_DB = {
     "migri": {
         name: "Mığrı (Deniz Yılanı)", nameEn: "European Conger", icon: "🐍", scientificName: "Conger conger",
         photoId: 53,
-        category: "DERİN",
+        category: "DIP_DERIN",
         peakHours: "NIGHT", peakHoursDesc: "Gece, kayalık dip",
         tempRange: { min: 12, opt: 17, max: 24 },
         seasons: { winter: 0.55, spring: 0.65, summer: 0.70, autumn: 0.75 },
@@ -1933,7 +1933,7 @@ const SPECIES_DB = {
     "kirlangic": {
         name: "Kırlangıç", nameEn: "Tub Gurnard", icon: "🐟", scientificName: "Chelidonichthys lucerna",
         photoId: 59,
-        category: "DİP",
+        category: "DIP_KIYI",
         peakHours: "DAY", peakHoursDesc: "Gündüz, kumlu dip",
         tempRange: { min: 12, opt: 17, max: 22 },
         seasons: { winter: 0.60, spring: 0.75, summer: 0.65, autumn: 0.70 },
@@ -1952,7 +1952,7 @@ const SPECIES_DB = {
     "dil_baligi": {
         name: "Dil Balığı", nameEn: "Common Sole", icon: "🐟", scientificName: "Solea solea",
         photoId: 42,
-        category: "DİP",
+        category: "DIP_KIYI",
         peakHours: "NIGHT", peakHoursDesc: "Gece, kumlu dip",
         tempRange: { min: 12, opt: 18, max: 26 },
         seasons: { winter: 0.55, spring: 0.70, summer: 0.75, autumn: 0.80 },
@@ -1990,7 +1990,7 @@ const SPECIES_DB = {
     "vatoz": {
         name: "Vatoz", nameEn: "Common Stingray", icon: "🦈", scientificName: "Dasyatis pastinaca",
         photoId: 58,
-        category: "DİP",
+        category: "DIP_KIYI",
         peakHours: "NIGHT", peakHoursDesc: "Gece, kumlu dip",
         tempRange: { min: 12, opt: 18, max: 26 },
         seasons: { winter: 0.40, spring: 0.65, summer: 0.80, autumn: 0.70 },
@@ -2028,7 +2028,7 @@ const SPECIES_DB = {
     "kurbaga": {
         name: "Kurbağa Balığı (Trakonya)", nameEn: "Atlantic Stargazer", icon: "🐟", scientificName: "Uranoscopus scaber",
         photoId: 79,
-        category: "DİP",
+        category: "DIP_KIYI",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık ve gündüz — kuma gömülü puskuru avcısı",
         tempRange: { min: 12, opt: 18, max: 26 },
         seasons: { winter: 0.50, spring: 0.65, summer: 0.75, autumn: 0.70 },
@@ -2047,7 +2047,7 @@ const SPECIES_DB = {
     "fener": {
         name: "Fener Balığı", nameEn: "Anglerfish", icon: "🐟", scientificName: "Lophius piscatorius",
         photoId: 80,
-        category: "DERİN",
+        category: "DIP_DERIN",
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin dip",
         tempRange: { min: 10, opt: 14, max: 20 },
         seasons: { winter: 0.70, spring: 0.75, summer: 0.55, autumn: 0.65 },
@@ -3218,8 +3218,13 @@ function calculateFishScore(fish, key, params) {
     }
     
     // === FAZ 1: DERİNLİK SOFT GATE ===
+    // Pelajik ve aktif avcı türler su kolonunda dikey göç yapar —
+    // derinlik onlar için habitat değil, ceza uygulanmaz.
+    const PELAGIC_CATEGORIES = ['PELAJIK', 'KIYI_AVCI', 'AVCI', 'SÜRÜ'];
+    const isPelagicType = PELAGIC_CATEGORIES.includes(fish.category);
+
     let depthScore = 1.0;
-    if (depthAvg !== undefined && depthAvg !== null && fish.depth) {
+    if (!isPelagicType && depthAvg !== undefined && depthAvg !== null && fish.depth) {
         const d = depthAvg;
         const fMin = fish.depth.min;
         const fOpt = fish.depth.opt;
@@ -3253,6 +3258,15 @@ function calculateFishScore(fish, key, params) {
         depthScore = Math.max(0.05, Math.min(1.0, depthScore));
         rawScore *= depthScore;
         scoreDetails.depth = { score: depthScore * 5, max: 5, stars: Math.round(depthScore * 5), value: depthAvg, fishMin: fMin, fishOpt: fOpt, fishMax: fMax };
+
+        // Frontend HUD uyarısı için depthGate objesi
+        if (depthScore < 0.7) {
+            scoreDetails.depthGate = {
+                multiplier: parseFloat(depthScore.toFixed(2)),
+                actualDepth: depthAvg,
+                fishDepthMin: fish.depth.min
+            };
+        }
     }
     
     // === FAZ 3: ÖĞLEN BASTIRMASI (Tür Bazlı) ===
