@@ -2646,21 +2646,27 @@
                     <button class="mode-tab" id="tab-instant" onclick="setMode('instant')">ANLIK</button>
                 </div>
                 <div style="display:flex;flex-direction:column;align-items:center;">
-                  <svg id="gauge-svg" width="240" height="150" viewBox="0 0 240 150" style="overflow:visible;">
-                    <defs><clipPath id="gauge-clip"><rect x="0" y="0" width="240" height="140"/></clipPath></defs>
+                  <svg id="gauge-svg" width="260" height="158" viewBox="0 0 260 158" style="overflow:visible;">
+                    <defs><clipPath id="gauge-clip"><rect x="0" y="0" width="260" height="148"/></clipPath></defs>
                     <g clip-path="url(#gauge-clip)">
-                      <path id="gauge-bg" fill="none" stroke-width="18" stroke-linecap="round"/>
-                      <path id="gauge-fill" fill="none" stroke-width="18" stroke-linecap="round"/>
-                      <path id="gauge-shine" fill="none" stroke-width="6" stroke-linecap="round" opacity=".28"/>
+                      <path id="gauge-bg" fill="none" stroke-width="16" stroke-linecap="round"/>
+                      <path id="gauge-fill" fill="none" stroke-width="16" stroke-linecap="round"/>
+                      <path id="gauge-shine" fill="none" stroke-width="5" stroke-linecap="round" opacity=".28"/>
                     </g>
-                    <text id="gauge-pct" x="78" y="100" font-size="13" font-weight="700" fill="#8892a3">%</text>
-                    <text id="score-display" x="134" y="114" text-anchor="middle" font-size="52" font-weight="900" fill="#00ffcc">--</text>
-                    <text id="weather-display" x="120" y="132" text-anchor="middle" font-size="10" fill="#8892a3" letter-spacing="1">--</text>
-                    <text x="14" y="144" font-size="8" fill="#556">0</text>
-                    <text x="216" y="144" font-size="8" fill="#556">100</text>
+                    <text id="gauge-pct" x="80" y="97" font-size="18" font-weight="700" fill="#8892a3">%</text>
+                    <text id="score-display" x="148" y="122" text-anchor="middle" font-size="68" font-weight="900" fill="#00ffcc">--</text>
+                    <text id="weather-display" x="130" y="142" text-anchor="middle" font-size="10" fill="#8892a3" letter-spacing="1">--</text>
+                    <text x="16" y="152" font-size="8" fill="#556">0</text>
+                    <text x="234" y="152" font-size="8" fill="#556">100</text>
                   </svg>
                   <div id="confidence-display" style="margin-top:2px;padding:4px 12px;background:rgba(0,0,0,0.25);border-radius:20px;font-size:0.7rem;color:var(--text-secondary);">Veri Kalitesi: --%</div>
                 </div>
+            </div>
+
+            <!-- 7 Günlük Mini Forecast Grafiği -->
+            <div id="forecast-mini-wrap" style="display:none;margin-bottom:12px;background:var(--bg-card);border-radius:var(--radius-md);border:1px solid var(--border-subtle);padding:10px 12px 6px;">
+              <div style="font-size:0.62rem;color:var(--cyan);letter-spacing:1px;margin-bottom:4px;">📅 7 GÜNLÜK TAHMİN</div>
+              <svg id="forecast-mini-svg" width="100%" viewBox="0 0 320 88" preserveAspectRatio="xMidYMid meet" style="overflow:visible;display:block;"></svg>
             </div>
 
             <!-- Aktivite Saatleri Kartı -->
@@ -2707,9 +2713,6 @@
             
             <div id="fish-list"></div>
 
-            <div id="forecast-mini-wrap" style="display:none;margin-bottom:8px;">
-              <svg id="forecast-mini-svg" width="100%" viewBox="0 0 320 80" preserveAspectRatio="xMidYMid meet" style="overflow:visible;display:block;"></svg>
-            </div>
             <button class="btn-primary" onclick="showWeeklyModal(event)" id="weekly-btn">📅 7 Günlük Tahmin</button>
             
             <button class="btn-secondary" style="width: 100%; margin-top: 12px;" onclick="saveFavorite()" id="favorite-btn">⭐ Favorilere Kaydet</button>
@@ -4430,10 +4433,8 @@
                 
                 GLOBAL_DATA = data;
                 runLoadingAnimation(data);
-                // 7 günlük mini forecast grafiği
-                if (data.forecast && data.forecast.length > 1) {
-                    buildForecastMini(data.forecast);
-                }
+                // Mini chart — mevcut moda göre göster
+                updateMiniChart(CURRENT_MODE);
             } catch (err) {
                 hideLoading();
                 alert("Bağlantı hatası: " + err.message);
@@ -4714,6 +4715,61 @@
 
             const targetData = mode === 'daily' ? GLOBAL_DATA.forecast[0] : GLOBAL_DATA.instant;
             renderPanel(GLOBAL_DATA, targetData);
+
+            // Mini chart: GÜN → 7 günlük, ANLIK → bugün saatlik
+            updateMiniChart(mode);
+        }
+
+        function updateMiniChart(mode) {
+            const wrap = document.getElementById('forecast-mini-wrap');
+            const svg = document.getElementById('forecast-mini-svg');
+            const title = wrap ? wrap.querySelector('div') : null;
+            if (!wrap || !svg) return;
+
+            if (mode === 'daily' && GLOBAL_DATA && GLOBAL_DATA.forecast && GLOBAL_DATA.forecast.length > 1) {
+                if (title) title.textContent = '📅 7 GÜNLÜK TAHMİN';
+                svg.setAttribute('viewBox', '0 0 320 88');
+                buildForecastMini(GLOBAL_DATA.forecast);
+            } else if (mode === 'instant' && GLOBAL_DATA) {
+                // Anlık modda — bugünün saatlik skorunu göster
+                const todayScores = GLOBAL_DATA.forecast && GLOBAL_DATA.forecast[0] && GLOBAL_DATA.forecast[0].fishList
+                    ? null // fishList bazlı değil, genel saatlik skor lazım
+                    : null;
+                // instant veriden genel hourly skor çek
+                const instantFish = GLOBAL_DATA.instant && GLOBAL_DATA.instant.fishList;
+                if (instantFish && instantFish.length > 0 && instantFish[0].hourlyScores) {
+                    if (title) title.textContent = '📈 SAATLİK SKOR';
+                    svg.setAttribute('viewBox', '0 0 560 110');
+                    const bestFish = instantFish[0];
+                    svg.innerHTML = '';
+                    const curveHtml = buildHourlyCurve(bestFish.hourlyScores, bestFish.bestHour);
+                    // SVG içeriğini parse edip ekle
+                    const tmp = document.createElement('div');
+                    tmp.innerHTML = curveHtml;
+                    const innerSvg = tmp.querySelector('svg');
+                    if (innerSvg) {
+                        svg.setAttribute('viewBox', innerSvg.getAttribute('viewBox') || '0 0 560 110');
+                        svg.innerHTML = innerSvg.innerHTML;
+                        wrap.style.display = 'block';
+                    }
+                } else if (GLOBAL_DATA.forecast && GLOBAL_DATA.forecast[0] && GLOBAL_DATA.forecast[0].fishList) {
+                    // forecast[0] fishList'ten en iyi balığın saatlik skorunu al
+                    const fl = GLOBAL_DATA.forecast[0].fishList;
+                    const fish = fl.find(f => f.hourlyScores && f.hourlyScores.length === 24);
+                    if (fish) {
+                        if (title) title.textContent = '📈 SAATLİK SKOR';
+                        const curveHtml = buildHourlyCurve(fish.hourlyScores, fish.bestHour);
+                        const tmp = document.createElement('div');
+                        tmp.innerHTML = curveHtml;
+                        const innerSvg = tmp.querySelector('svg');
+                        if (innerSvg) {
+                            svg.setAttribute('viewBox', innerSvg.getAttribute('viewBox') || '0 0 560 110');
+                            svg.innerHTML = innerSvg.innerHTML;
+                            wrap.style.display = 'block';
+                        }
+                    }
+                }
+            }
         }
 
         // ═══════════════════════════════════════════════════════════════════
@@ -6942,7 +6998,7 @@ window.addEventListener('popstate', function(e) {
 
     // ── GAUGE + EĞRİ GRAFİKLERİ ─────────────────────────────────────────
     (function(){
-        const CX=120,CY=132,R=104;
+        const CX=130,CY=140,R=112;
         const SA=Math.PI*1.1,EA=Math.PI*1.9,SW=EA-SA;
         const ns='http://www.w3.org/2000/svg';
 
@@ -6996,7 +7052,7 @@ window.addEventListener('popstate', function(e) {
         }
 
         window.buildHourlyCurve=function(scores,bestHourRaw){
-            const W=560,H=72,PL=8,PR=8,PT=18,PB=14;
+            const W=560,H=110,PL=8,PR=8,PT=22,PB=18;
             const uw=W-PL-PR,uh=H-PT-PB;
             const pts=scores.map((s,i)=>({x:PL+(i/23)*uw,y:PT+(1-Math.min(s,100)/100)*uh}));
             const bestH=bestHourRaw?parseInt(bestHourRaw):-1;
@@ -7018,7 +7074,7 @@ window.addEventListener('popstate', function(e) {
             html+='<stop offset="100%" stop-color="#1D9E75" stop-opacity="0.02"/>';
             html+='</linearGradient></defs>';
             html+='<path d="'+ap+'" fill="url(#'+uid+')"/>';
-            html+='<path d="'+lp+'" fill="none" stroke="#1D9E75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+            html+='<path d="'+lp+'" fill="none" stroke="#1D9E75" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
 
             // Şimdi çizgisi
             const nX=(PL+(nowH/23)*uw).toFixed(1);
@@ -7036,7 +7092,7 @@ window.addEventListener('popstate', function(e) {
                 const dy=p.peak?-2:2,ty=(p.peak?pt.y-10:pt.y+14).toFixed(1);
                 html+='<circle cx="'+pt.x.toFixed(1)+'" cy="'+(pt.y+dy).toFixed(1)+'" r="3.5" fill="'+c+'"/>';
                 html+='<circle cx="'+pt.x.toFixed(1)+'" cy="'+(pt.y+dy).toFixed(1)+'" r="1.5" fill="white"/>';
-                html+='<text x="'+pt.x.toFixed(1)+'" y="'+ty+'" font-size="8" text-anchor="middle" fill="'+c+'" font-weight="600">%'+Math.round(p.s)+'</text>';
+                html+='<text x="'+pt.x.toFixed(1)+'" y="'+ty+'" font-size="10" text-anchor="middle" fill="'+c+'" font-weight="700">%'+Math.round(p.s)+'</text>';
             });
 
             // En iyi nokta
@@ -7049,7 +7105,7 @@ window.addEventListener('popstate', function(e) {
             // Saat etiketleri
             [0,6,12,18,23].forEach(h=>{
                 const x=(PL+(h/23)*uw).toFixed(1);
-                html+='<text x="'+x+'" y="'+(H-1)+'" font-size="7.5" text-anchor="middle" fill="rgba(255,255,255,0.3)">'+String(h).padStart(2,'0')+'</text>';
+                html+='<text x="'+x+'" y="'+(H-2)+'" font-size="9" text-anchor="middle" fill="rgba(255,255,255,0.45)">'+String(h).padStart(2,'0')+'</text>';
             });
             html+='</svg>';
 
@@ -7066,7 +7122,7 @@ window.addEventListener('popstate', function(e) {
             svg.innerHTML='';
             wrap.style.display='block';
 
-            const W=320,H=80,PL=10,PR=10,PT=20,PB=18;
+            const W=320,H=88,PL=10,PR=10,PT=22,PB=20;
             const uw=W-PL-PR,uh=H-PT-PB;
             const n=forecastData.length;
             const scores=forecastData.map(d=>d.score||0);
