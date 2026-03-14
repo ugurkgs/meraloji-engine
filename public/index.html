@@ -5146,6 +5146,7 @@
                             ${sd.season ? starLine(t('starSeason'), sd.season.stars, sd.season.score, sd.season.max, seasonNote) : ''}
                             ${sd.temp ? starLine(t('starTemp') + ` (${sd.temp.value}°C)`, sd.temp.stars, sd.temp.score, sd.temp.max, tempNote) : ''}
                             ${sd.depth ? starLine((CURRENT_LANG === 'tr' ? 'Derinlik' : 'Depth') + ' (' + fmtDepth(sd.depth.value) + ' / opt:' + fmtDepth(sd.depth.fishOpt) + ')', sd.depth.stars, sd.depth.score, sd.depth.max, '') : ''}
+                            ${sd.depthGate ? `<div style="font-size:0.68rem; color:var(--yellow); margin:2px 0 4px 0; padding-left:4px;">⚠️ Bu tür için min. ${sd.depthGate.fishDepthMin}m derinlik önerilir (şu an ${fmtDepth(sd.depthGate.actualDepth)})</div>` : ''}
                             ${sd.wave ? starLine(t('starWave') + ` (${sd.wave.value}m)`, sd.wave.stars, sd.wave.score, sd.wave.max, '') : ''}
                             ${sd.wavePeriod ? starLine(t('starWavePeriod') + ` (${sd.wavePeriod.value}s${sd.wavePeriod.swell ? ' / swell:' + sd.wavePeriod.swell.toFixed(1) + 'm' : ''})`, sd.wavePeriod.stars, '', '', sd.wavePeriod.value <= 4 ? (CURRENT_LANG === 'tr' ? 'Kısa periyot — rüzgar dalgası' : 'Short period — wind waves') : '') : ''}
                             ${sd.clarity ? starLine(t('starClarity') + ` (${sd.clarity.value}%)`, sd.clarity.stars, sd.clarity.score, sd.clarity.max, clarNote) : ''}
