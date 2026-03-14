@@ -2142,6 +2142,14 @@
             transition: transform 0.15s, box-shadow 0.15s;
         }
         .onboard-btn:active { transform: scale(0.98); }
+        .onboard-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: rgba(255,255,255,0.2); transition: background 0.3s;
+        }
+        .onboard-dot.active { background: #00d4ff; }
+        .onboard-slide { animation: onboardFadeIn 0.3s ease; }
+        @keyframes onboardFadeIn { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:translateX(0); } }
+        .onboard-card { position: relative; }
         .onboard-skip {
             text-align: center; margin-top: 12px;
             font-family: 'JetBrains Mono', monospace;
@@ -2159,52 +2167,107 @@
     ════════════════════════════════════ -->
     <div id="onboarding-overlay">
         <div class="onboard-card">
-            <div class="onboard-logo">
-                <div class="onboard-logo-title">🐟 MERALOJİ F.I.S.H.</div>
-                <div class="onboard-logo-sub">FISHING INTELLIGENCE SYSTEM</div>
-            </div>
+            <!-- Sağ üst X -->
+            <div onclick="closeOnboarding()" style="position:absolute;top:12px;right:14px;font-size:20px;color:rgba(255,255,255,0.35);cursor:pointer;line-height:1;padding:4px;">✕</div>
 
-            <div class="onboard-steps">
-                <div class="onboard-step">
-                    <div class="onboard-step-icon">🗺️</div>
-                    <div class="onboard-step-text">
-                        <div class="onboard-step-title">Haritada denize tıkla</div>
-                        <div class="onboard-step-desc">Ege, Akdeniz, Marmara veya Karadeniz'de herhangi bir noktayı seç</div>
+            <!-- Slaytlar -->
+            <div id="onboard-slides">
+
+                <!-- Slayt 1 -->
+                <div class="onboard-slide" id="onboard-slide-1">
+                    <div class="onboard-logo">
+                        <div class="onboard-logo-title">🐟 MERALOJİ F.I.S.H.</div>
+                        <div class="onboard-logo-sub">FISHING INTELLIGENCE SYSTEM</div>
                     </div>
-                </div>
-                <div class="onboard-step">
-                    <div class="onboard-step-icon">📊</div>
-                    <div class="onboard-step-text">
-                        <div class="onboard-step-title">Günlük veya Anlık skoru gör</div>
-                        <div class="onboard-step-desc">7 günlük tahmin veya şu anki koşullar için detaylı balık listesi</div>
-                    </div>
-                </div>
-                <div class="onboard-step">
-                    <div class="onboard-step-icon">🎯</div>
-                    <div class="onboard-step-text">
-                        <div class="onboard-step-title">Skoru yorumla</div>
-                        <div class="onboard-step-desc">
-                            <span class="score-hi">85+</span> Balık için güzel bir an&nbsp;&nbsp;
-                            <span class="score-mid">70+</span> Koşullar iyi
+                    <div class="onboard-steps">
+                        <div class="onboard-step">
+                            <div class="onboard-step-icon">🗺️</div>
+                            <div class="onboard-step-text">
+                                <div class="onboard-step-title">Haritada denize tıkla</div>
+                                <div class="onboard-step-desc">Ege, Akdeniz, Marmara veya Karadeniz'de herhangi bir noktayı seç</div>
+                            </div>
+                        </div>
+                        <div class="onboard-step">
+                            <div class="onboard-step-icon">📊</div>
+                            <div class="onboard-step-text">
+                                <div class="onboard-step-title">Günlük veya Anlık skoru gör</div>
+                                <div class="onboard-step-desc">7 günlük tahmin veya şu anki koşullar için detaylı balık listesi</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="onboard-step">
-                    <div class="onboard-step-icon">🔬</div>
-                    <div class="onboard-step-text">
-                        <div class="onboard-step-title">Bilimsel veri, garanti değil</div>
-                        <div class="onboard-step-desc">Skorlar oşinografik ve balık biyolojisi verilerine göre hesaplanır. Yüksek skor avı kolaylaştırır, garantilemez.</div>
+
+                <!-- Slayt 2 -->
+                <div class="onboard-slide" id="onboard-slide-2" style="display:none;">
+                    <div class="onboard-logo">
+                        <div class="onboard-logo-title">🎯 Skoru Yorumla</div>
+                        <div class="onboard-logo-sub">NASIL OKUNUR?</div>
+                    </div>
+                    <div class="onboard-steps">
+                        <div class="onboard-step">
+                            <div class="onboard-step-icon">🟢</div>
+                            <div class="onboard-step-text">
+                                <div class="onboard-step-title"><span class="score-hi">85+</span> — Mükemmel Koşullar</div>
+                                <div class="onboard-step-desc">Balık için güzel bir an, suya girin!</div>
+                            </div>
+                        </div>
+                        <div class="onboard-step">
+                            <div class="onboard-step-icon">🔵</div>
+                            <div class="onboard-step-text">
+                                <div class="onboard-step-title"><span class="score-mid">70+</span> — İyi Koşullar</div>
+                                <div class="onboard-step-desc">Avlanma koşulları elverişli</div>
+                            </div>
+                        </div>
+                        <div class="onboard-step">
+                            <div class="onboard-step-icon">🟡</div>
+                            <div class="onboard-step-text">
+                                <div class="onboard-step-title">40–70 — Orta</div>
+                                <div class="onboard-step-desc">Şartlar karışık, sabır gerekebilir</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Slayt 3 -->
+                <div class="onboard-slide" id="onboard-slide-3" style="display:none;">
+                    <div class="onboard-logo">
+                        <div class="onboard-logo-title">🔬 Bilimsel Veri</div>
+                        <div class="onboard-logo-sub">GARANTI DEĞİL</div>
+                    </div>
+                    <div class="onboard-steps">
+                        <div class="onboard-step">
+                            <div class="onboard-step-icon">🌊</div>
+                            <div class="onboard-step-text">
+                                <div class="onboard-step-title">Çok değişkenli tahmin</div>
+                                <div class="onboard-step-desc">Dalga · Sıcaklık · Solunar · Bathymetri · Mevsim verilerini birleştiren analiz sistemi</div>
+                            </div>
+                        </div>
+                        <div class="onboard-step">
+                            <div class="onboard-step-icon">⚠️</div>
+                            <div class="onboard-step-text">
+                                <div class="onboard-step-title">Yüksek skor = Yüksek ihtimal</div>
+                                <div class="onboard-step-desc">Skorlar avı kolaylaştırır, garantilemez. Doğa her zaman sürpriz yaratabilir.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.4);cursor:pointer;margin-top:8px;">
+                        <input type="checkbox" id="onboard-dont-show" style="width:16px;height:16px;accent-color:#00d4ff;">
+                        Bir daha gösterme
+                    </label>
+                </div>
+
             </div>
 
-            <div class="onboard-disclaimer">
-                Dalga · Sıcaklık · Solunar · Bathymetri · Mevsim<br>
-                verilerini birleştiren çok değişkenli bir tahmin sistemi
+            <!-- Nokta göstergesi -->
+            <div style="display:flex;justify-content:center;gap:6px;margin:16px 0 12px;">
+                <div class="onboard-dot active" id="dot-1"></div>
+                <div class="onboard-dot" id="dot-2"></div>
+                <div class="onboard-dot" id="dot-3"></div>
             </div>
 
-            <button class="onboard-btn" onclick="closeOnboarding()">Haritaya Git 🗺️</button>
-            <div class="onboard-skip" onclick="closeOnboarding()">Bir daha gösterme</div>
+            <!-- Butonlar -->
+            <button class="onboard-btn" id="onboard-next-btn" onclick="onboardNext()">Devam →</button>
+            <div class="onboard-skip" onclick="closeOnboarding()">Atla</div>
         </div>
     </div>
 
@@ -6879,12 +6942,35 @@ window.addEventListener('popstate', function(e) {
 })();
 
 
-    // ── ONBOARDING ──────────────────────────────────────────────────────
+    // ── ONBOARDING SLAYT SİSTEMİ ────────────────────────────────────────
+    let _onboardStep = 1;
+
+    window.onboardNext = function() {
+        const total = 3;
+        if (_onboardStep < total) {
+            document.getElementById('onboard-slide-' + _onboardStep).style.display = 'none';
+            document.getElementById('dot-' + _onboardStep).classList.remove('active');
+            _onboardStep++;
+            document.getElementById('onboard-slide-' + _onboardStep).style.display = 'block';
+            document.getElementById('dot-' + _onboardStep).classList.add('active');
+            if (_onboardStep === total) {
+                const btn = document.getElementById('onboard-next-btn');
+                if (btn) { btn.textContent = 'Haritaya Git 🗺️'; btn.onclick = closeOnboarding; }
+            }
+        } else {
+            closeOnboarding();
+        }
+    };
+
     function closeOnboarding() {
+        // "Bir daha gösterme" checkbox kontrolü
+        const cb = document.getElementById('onboard-dont-show');
+        if (cb && cb.checked) {
+            localStorage.setItem('meraloji_onboarding_seen', '1');
+        }
         const overlay = document.getElementById('onboarding-overlay');
         if (!overlay) return;
         overlay.classList.add('hiding');
-        localStorage.setItem('meraloji_onboarding_seen', '1');
         setTimeout(() => overlay.remove(), 400);
     }
 
@@ -6893,7 +6979,11 @@ window.addEventListener('popstate', function(e) {
         if (seen) {
             const overlay = document.getElementById('onboarding-overlay');
             if (overlay) overlay.remove();
+            return;
         }
+        // İlk kez — göster
+        const overlay = document.getElementById('onboarding-overlay');
+        if (overlay) overlay.style.display = 'flex';
     })();
 
 
