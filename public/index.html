@@ -2646,19 +2646,23 @@
                     <button class="mode-tab" id="tab-instant" onclick="setMode('instant')">ANLIK</button>
                 </div>
                 <div style="display:flex;flex-direction:column;align-items:center;">
-                  <svg id="gauge-svg" width="260" height="158" viewBox="0 0 260 158" style="overflow:visible;">
-                    <defs><clipPath id="gauge-clip"><rect x="0" y="0" width="260" height="148"/></clipPath></defs>
-                    <g clip-path="url(#gauge-clip)">
-                      <path id="gauge-bg" fill="none" stroke-width="16" stroke-linecap="round"/>
-                      <path id="gauge-fill" fill="none" stroke-width="16" stroke-linecap="round"/>
-                      <path id="gauge-shine" fill="none" stroke-width="5" stroke-linecap="round" opacity=".28"/>
-                    </g>
-                    <text id="gauge-pct" x="86" y="104" font-size="27" font-weight="700" fill="#8892a3">%</text>
-                    <text id="score-display" x="154" y="122" text-anchor="middle" font-size="54" font-weight="900" fill="#00ffcc">--</text>
-                    <text id="weather-display" x="130" y="142" text-anchor="middle" font-size="10" fill="#8892a3" letter-spacing="1">--</text>
-                    <text x="16" y="152" font-size="8" fill="#556">0</text>
-                    <text x="234" y="152" font-size="8" fill="#556">100</text>
-                  </svg>
+                  <div style="position:relative;display:inline-block;">
+                    <svg id="gauge-svg" width="260" height="158" viewBox="0 0 260 158" style="overflow:visible;display:block;">
+                      <defs><clipPath id="gauge-clip"><rect x="0" y="0" width="260" height="148"/></clipPath></defs>
+                      <g clip-path="url(#gauge-clip)">
+                        <path id="gauge-bg" fill="none" stroke-width="16" stroke-linecap="round"/>
+                        <path id="gauge-fill" fill="none" stroke-width="16" stroke-linecap="round"/>
+                        <path id="gauge-shine" fill="none" stroke-width="5" stroke-linecap="round" opacity=".28"/>
+                      </g>
+                      <text id="weather-display" x="130" y="146" text-anchor="middle" font-size="10" fill="#8892a3" letter-spacing="1">--</text>
+                      <text x="16" y="154" font-size="8" fill="#556">0</text>
+                      <text x="234" y="154" font-size="8" fill="#556">100</text>
+                    </svg>
+                    <div style="position:absolute;top:52px;left:50%;transform:translateX(-50%);display:flex;align-items:flex-start;line-height:1;">
+                      <span id="gauge-pct" style="font-size:22px;font-weight:700;color:#8892a3;margin-top:6px;margin-right:2px;">%</span>
+                      <span id="score-display" style="font-size:56px;font-weight:900;color:#00ffcc;letter-spacing:-1px;">--</span>
+                    </div>
+                  </div>
                   <div id="confidence-display" style="margin-top:2px;padding:4px 12px;background:rgba(0,0,0,0.25);border-radius:20px;font-size:0.7rem;color:var(--text-secondary);">Veri Kalitesi: --%</div>
                 </div>
             </div>
@@ -4818,7 +4822,7 @@
                 // Kara/kıyı — gauge sıfırla, metin göster
                 if (window.animateGauge) animateGauge(0);
                 document.getElementById('score-display').textContent = isCertainLand ? '~' : '--';
-                document.getElementById('score-display').setAttribute('fill', isCertainLand ? '#BA7517' : '#556');
+                document.getElementById('score-display').style.color = isCertainLand ? '#BA7517' : '#556';
                 document.getElementById('weather-display').textContent = isCertainLand ? 'KIYI NOKTASI' : 'KARA BÖLGE';
                 document.getElementById('confidence-display').innerText = '';
                 document.getElementById('activity-windows').style.display = 'none';
@@ -7026,10 +7030,10 @@ window.addEventListener('popstate', function(e) {
             gf.setAttribute('stroke',c);
             gs.setAttribute('d',arcPath(SA,fe,R));
             gs.setAttribute('stroke','white');
-            gsc.textContent=s>0?s.toFixed(1):'--';
-            gsc.setAttribute('fill',c);
-            gpc.setAttribute('fill',c);
-            if(gw && !gw._manualSet) gw.setAttribute('fill',c);
+            // HTML span — style değiştir, attribute değil
+            if(gsc){gsc.textContent=s>0?s.toFixed(1):'--';gsc.style.color=c;}
+            if(gpc){gpc.style.color=c;}
+            if(gw) gw.setAttribute('fill',c);
         }
 
         window.animateGauge=function(target){
@@ -7052,7 +7056,7 @@ window.addEventListener('popstate', function(e) {
         }
 
         window.buildHourlyCurve=function(scores,bestHourRaw){
-            const W=560,H=110,PL=8,PR=8,PT=22,PB=18;
+            const W=560,H=140,PL=8,PR=8,PT=28,PB=22;
             const uw=W-PL-PR,uh=H-PT-PB;
             const pts=scores.map((s,i)=>({x:PL+(i/23)*uw,y:PT+(1-Math.min(s,100)/100)*uh}));
             const bestH=bestHourRaw?parseInt(bestHourRaw):-1;
@@ -7089,7 +7093,7 @@ window.addEventListener('popstate', function(e) {
             }
             found.forEach(p=>{
                 const pt=pts[p.i],c=p.peak?'#1D9E75':'#ff6b6b';
-                const dy=p.peak?-2:2,ty=(p.peak?pt.y-10:pt.y+14).toFixed(1);
+                const dy=p.peak?-3:3,ty=(p.peak?pt.y-14:pt.y+18).toFixed(1);
                 html+='<circle cx="'+pt.x.toFixed(1)+'" cy="'+(pt.y+dy).toFixed(1)+'" r="5" fill="'+c+'"/>';
                 html+='<circle cx="'+pt.x.toFixed(1)+'" cy="'+(pt.y+dy).toFixed(1)+'" r="2.5" fill="white"/>';
                 html+='<text x="'+pt.x.toFixed(1)+'" y="'+ty+'" font-size="13" text-anchor="middle" fill="'+c+'" font-weight="700">%'+Math.round(p.s)+'</text>';
@@ -7110,7 +7114,7 @@ window.addEventListener('popstate', function(e) {
             html+='</svg>';
 
             const chartTitle=typeof CURRENT_LANG!=='undefined'&&CURRENT_LANG==='en'?'HOURLY SCORE':'SAATLİK SKOR';
-            return '<div style="margin-top:8px;padding:8px 8px 4px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px solid rgba(255,255,255,0.06);">'
+            return '<div style="margin-top:8px;padding:10px 8px 6px;background:rgba(0,0,0,0.25);border-radius:8px;border:1px solid rgba(255,255,255,0.08);">'
                 +'<div style="font-size:0.62rem;color:var(--cyan);margin-bottom:2px;">📈 '+chartTitle+'</div>'
                 +html+'</div>';
         };
