@@ -3849,7 +3849,8 @@ app.get('/api/forecast', async (req, res) => {
             } else if (windSpeed > 35) {
                 tacticKey = "TACTIC_STRONG_WIND";
                 tacticData = { warning: true, wind: windSpeed };
-            } else if (pressureTrend.trend === 'FALLING_FAST') {
+            } else if (pressureTrend.trend === 'FALLING_FAST' && topScore >= 40) {
+                // Basınç düşüyor VE yeterli skor var — çılgın beslenme anlamlı
                 tacticKey = "TACTIC_FEEDING_FRENZY";
                 tacticData = { bonus: true };
             } else if (highScoreFish.length > 0) {
@@ -4025,7 +4026,8 @@ app.get('/api/forecast', async (req, res) => {
             } else if (i_wind > 35) {
                 instantTacticKey = "TACTIC_STRONG_WIND";
                 instantTacticData = { warning: true };
-            } else if (i_pressureTrend.trend === 'FALLING_FAST') {
+            } else if (i_pressureTrend.trend === 'FALLING_FAST' && i_topScore >= 40) {
+                // Basınç düşüyor VE yeterli skor var — çılgın beslenme anlamlı
                 instantTacticKey = "TACTIC_FEEDING_FRENZY";
                 instantTacticData = { bonus: true };
             } else if (i_highScoreFish.length > 0) {
