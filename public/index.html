@@ -678,14 +678,14 @@
             background: var(--bg-card);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
-            margin-bottom: 16px;
+            margin-bottom: 10px;
             overflow: hidden;
         }
         
         .activity-row {
             display: flex;
             align-items: center;
-            padding: 12px 14px;
+            padding: 6px 10px;
             cursor: pointer;
             transition: background 0.2s;
             border-bottom: 1px solid var(--border-subtle);
@@ -700,13 +700,13 @@
         }
         
         .activity-icon {
-            font-size: 1.2rem;
-            margin-right: 12px;
+            font-size: 0.85rem;
+            margin-right: 8px;
         }
         
         .activity-label {
             flex: 1;
-            font-size: 0.8rem;
+            font-size: 0.62rem;
             font-weight: 600;
             color: var(--text-secondary);
             letter-spacing: 0.5px;
@@ -714,7 +714,7 @@
         
         .activity-time {
             font-family: var(--font-mono);
-            font-size: 0.85rem;
+            font-size: 0.62rem;
             color: var(--cyan);
             font-weight: 500;
         }
@@ -2653,8 +2653,8 @@
                       <path id="gauge-fill" fill="none" stroke-width="16" stroke-linecap="round"/>
                       <path id="gauge-shine" fill="none" stroke-width="5" stroke-linecap="round" opacity=".28"/>
                     </g>
-                    <text id="gauge-pct" x="80" y="97" font-size="18" font-weight="700" fill="#8892a3">%</text>
-                    <text id="score-display" x="148" y="122" text-anchor="middle" font-size="68" font-weight="900" fill="#00ffcc">--</text>
+                    <text id="gauge-pct" x="86" y="104" font-size="27" font-weight="700" fill="#8892a3">%</text>
+                    <text id="score-display" x="154" y="122" text-anchor="middle" font-size="54" font-weight="900" fill="#00ffcc">--</text>
                     <text id="weather-display" x="130" y="142" text-anchor="middle" font-size="10" fill="#8892a3" letter-spacing="1">--</text>
                     <text x="16" y="152" font-size="8" fill="#556">0</text>
                     <text x="234" y="152" font-size="8" fill="#556">100</text>
@@ -7090,22 +7090,22 @@ window.addEventListener('popstate', function(e) {
             found.forEach(p=>{
                 const pt=pts[p.i],c=p.peak?'#1D9E75':'#ff6b6b';
                 const dy=p.peak?-2:2,ty=(p.peak?pt.y-10:pt.y+14).toFixed(1);
-                html+='<circle cx="'+pt.x.toFixed(1)+'" cy="'+(pt.y+dy).toFixed(1)+'" r="3.5" fill="'+c+'"/>';
-                html+='<circle cx="'+pt.x.toFixed(1)+'" cy="'+(pt.y+dy).toFixed(1)+'" r="1.5" fill="white"/>';
-                html+='<text x="'+pt.x.toFixed(1)+'" y="'+ty+'" font-size="10" text-anchor="middle" fill="'+c+'" font-weight="700">%'+Math.round(p.s)+'</text>';
+                html+='<circle cx="'+pt.x.toFixed(1)+'" cy="'+(pt.y+dy).toFixed(1)+'" r="5" fill="'+c+'"/>';
+                html+='<circle cx="'+pt.x.toFixed(1)+'" cy="'+(pt.y+dy).toFixed(1)+'" r="2.5" fill="white"/>';
+                html+='<text x="'+pt.x.toFixed(1)+'" y="'+ty+'" font-size="13" text-anchor="middle" fill="'+c+'" font-weight="700">%'+Math.round(p.s)+'</text>';
             });
 
             // En iyi nokta
             if(bestH>=0&&bestH<24){
                 const bp=pts[bestH];
-                html+='<circle cx="'+bp.x.toFixed(1)+'" cy="'+bp.y.toFixed(1)+'" r="5.5" fill="#1D9E75"/>';
-                html+='<circle cx="'+bp.x.toFixed(1)+'" cy="'+bp.y.toFixed(1)+'" r="2.5" fill="white"/>';
+                html+='<circle cx="'+bp.x.toFixed(1)+'" cy="'+bp.y.toFixed(1)+'" r="7" fill="#1D9E75"/>';
+                html+='<circle cx="'+bp.x.toFixed(1)+'" cy="'+bp.y.toFixed(1)+'" r="3" fill="white"/>';
             }
 
             // Saat etiketleri
             [0,6,12,18,23].forEach(h=>{
                 const x=(PL+(h/23)*uw).toFixed(1);
-                html+='<text x="'+x+'" y="'+(H-2)+'" font-size="9" text-anchor="middle" fill="rgba(255,255,255,0.45)">'+String(h).padStart(2,'0')+'</text>';
+                html+='<text x="'+x+'" y="'+(H-2)+'" font-size="11" text-anchor="middle" fill="rgba(255,255,255,0.55)">'+String(h).padStart(2,'0')+'</text>';
             });
             html+='</svg>';
 
