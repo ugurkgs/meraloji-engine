@@ -2646,7 +2646,10 @@
                     <button class="mode-tab active" id="tab-daily" onclick="setMode('daily')">GÜN</button>
                     <button class="mode-tab" id="tab-instant" onclick="setMode('instant')">ANLIK</button>
                 </div>
-                <div class="main-score" id="score-display">--</div>
+                <!-- Gauge (deniz modu) -->
+                <div id="score-gauge-wrap"></div>
+                <!-- Kara / hata metni -->
+                <div class="main-score" id="score-display" style="display:none;">--</div>
                 <div class="weather-label" id="weather-display">--</div>
                 <div class="confidence-badge" id="confidence-display">Güven: --%</div>
             </div>
@@ -4724,9 +4727,11 @@
 
             if (global.isLand) {
                 const isCertainLand = global.landReason === 'CERTAIN_LAND';
-                const isInland     = global.landReason !== 'CERTAIN_LAND'; // dalga verisi yok = gerçek iç bölge
+                const isInland     = global.landReason !== 'CERTAIN_LAND';
 
-                // Skor alanı
+                // Gauge gizle, metin göster
+                document.getElementById('score-gauge-wrap').innerHTML = '';
+                document.getElementById('score-display').style.display = 'block';
                 document.getElementById('score-display').innerHTML =
                     `<span style="font-size:1.1rem;">${isCertainLand ? '🏖️' : '🏔️'} ${isCertainLand ? 'Kıyı Noktası' : 'Kara Bölge'}</span>`;
                 document.getElementById('score-display').style.color = isCertainLand ? 'var(--yellow)' : 'var(--red)';
@@ -4780,10 +4785,10 @@
                 return;
             }
 
-            // Score
+            // Score — gauge ile göster
             const score = data.score || 0;
-            document.getElementById('score-display').innerHTML = `<sup>%</sup>${score.toFixed(1)}`;
-            document.getElementById('score-display').style.color = getScoreColor(score);
+            document.getElementById('score-gauge-wrap').innerHTML = buildScoreGauge(score);
+            document.getElementById('score-display').style.display = 'none';
             
             // Weather - çevir
             const weatherKey = data.weatherSummary || '';
@@ -5105,34 +5110,83 @@
                 const nowH = new Date().getHours();
                 const bestH = f.bestHour ? parseInt(f.bestHour) : -1;
                     
-                    const bars = scores.map((s, h) => {
-                        const pct = Math.max(2, (s / maxS) * 100);
-                        const isBest = h === bestH;
-                        const isNow = h === nowH;
-                        const color = isBest ? 'var(--green)' : s >= 70 ? 'rgba(0,220,130,0.75)' : s >= 50 ? 'rgba(255,200,0,0.7)' : 'rgba(255,80,80,0.5)';
-                        const border = isNow ? 'border:1px solid var(--cyan);' : '';
-                        const title = `${String(h).padStart(2,'0')}:00 → %${s.toFixed(0)}`;
-                        const scoreLabel = (isBest || isNow) ? `<div style="font-size:0.42rem;color:${isBest ? 'var(--green)' : 'var(--cyan)'};line-height:1;margin-bottom:1px;font-weight:700;">${s.toFixed(0)}</div>` : '';
-                        return `<div title="${title}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;">
-                            ${scoreLabel}
-                            <div style="width:100%;min-width:3px;height:${pct}%;background:${color};border-radius:2px 2px 0 0;${border}${isBest?'box-shadow:0 0 4px var(--green);':''}"></div>
-                        </div>`;
+                    // SVG eğri grafik — 24 saatlik skor
+                    const W = 260, H = 64, padL = 4, padR = 4, padT = 10, padB = 16;
+                    const plotW = W - padL - padR;
+                    const plotH = H - padT - padB;
+
+                    // Noktalar
+                    const pts = scores.map((sv, h) => ({
+                        x: padL + (h / 23) * plotW,
+                        y: padT + plotH - (sv / 100) * plotH,
+                        s: sv, h
+                    }));
+
+                    // Smooth bezier (Catmull-Rom → cubic bezier)
+                    function smoothPath(points) {
+                        if (points.length < 2) return '';
+                        let d = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+                        for (let i = 0; i < points.length - 1; i++) {
+                            const p0 = points[Math.max(0, i - 1)];
+                            const p1 = points[i];
+                            const p2 = points[i + 1];
+                            const p3 = points[Math.min(points.length - 1, i + 2)];
+                            const cp1x = p1.x + (p2.x - p0.x) / 6;
+                            const cp1y = p1.y + (p2.y - p0.y) / 6;
+                            const cp2x = p2.x - (p3.x - p1.x) / 6;
+                            const cp2y = p2.y - (p3.y - p1.y) / 6;
+                            d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+                        }
+                        return d;
+                    }
+
+                    const linePath = smoothPath(pts);
+
+                    // Dolgu alanı (area fill)
+                    const areaPath = linePath + ` L${pts[pts.length-1].x.toFixed(1)},${(padT+plotH).toFixed(1)} L${pts[0].x.toFixed(1)},${(padT+plotH).toFixed(1)} Z`;
+
+                    // Saat etiketleri
+                    const hourLabels = [0,3,6,9,12,15,18,21].map(h => {
+                        const x = (padL + (h/23)*plotW).toFixed(1);
+                        return `<text x="${x}" y="${H-2}" text-anchor="middle" font-size="5.5" fill="#5a7193" font-family="JetBrains Mono,monospace">${String(h).padStart(2,'0')}</text>`;
                     }).join('');
-                    
-                    const labels = [0,3,6,9,12,15,18,21].map(h => 
-                        `<span style="position:absolute;left:${(h/24)*100}%;font-size:0.5rem;color:var(--text-muted);transform:translateX(-50%);">${String(h).padStart(2,'0')}</span>`
-                    ).join('');
-                    
+
+                    // En iyi saat işareti
+                    const bestPt  = bestH >= 0 ? pts[bestH]  : null;
+                    const nowPt   = pts[nowH];
+                    const bestMark = bestPt ? `
+                        <circle cx="${bestPt.x.toFixed(1)}" cy="${bestPt.y.toFixed(1)}" r="4" fill="#00ff88" filter="url(#lglow)"/>
+                        <text x="${bestPt.x.toFixed(1)}" y="${(bestPt.y - 7).toFixed(1)}" text-anchor="middle" font-size="6" fill="#00ff88" font-family="JetBrains Mono,monospace" font-weight="700">${bestPt.s.toFixed(0)}</text>` : '';
+                    const nowMark = `
+                        <line x1="${nowPt.x.toFixed(1)}" y1="${padT}" x2="${nowPt.x.toFixed(1)}" y2="${(padT+plotH).toFixed(1)}" stroke="rgba(0,212,255,0.4)" stroke-width="1" stroke-dasharray="2 2"/>
+                        <circle cx="${nowPt.x.toFixed(1)}" cy="${nowPt.y.toFixed(1)}" r="3" fill="var(--cyan)" filter="url(#lglow)"/>
+                        <text x="${nowPt.x.toFixed(1)}" y="${(nowPt.y - 7).toFixed(1)}" text-anchor="middle" font-size="6" fill="var(--cyan)" font-family="JetBrains Mono,monospace" font-weight="700">${nowPt.s.toFixed(0)}</text>`;
+
                     const chartTitle = CURRENT_LANG === 'tr' ? 'SAATLİK SKOR' : 'HOURLY SCORE';
                     hourlyChartHtml = `
-                        <div style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px solid var(--border-subtle);">
-                            <div style="font-size:0.65rem;color:var(--cyan);margin-bottom:6px;">📈 ${chartTitle}</div>
-                            <div style="display:flex;gap:1px;height:64px;align-items:flex-end;">
-                                ${bars}
-                            </div>
-                            <div style="position:relative;height:12px;margin-top:2px;">
-                                ${labels}
-                            </div>
+                        <div style="margin-top:8px;padding:8px 6px 4px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px solid var(--border-subtle);">
+                            <div style="font-size:0.65rem;color:var(--cyan);margin-bottom:4px;">📈 ${chartTitle}</div>
+                            <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+                                <defs>
+                                    <linearGradient id="lagrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="rgba(0,212,255,0.35)"/>
+                                        <stop offset="100%" stop-color="rgba(0,212,255,0)"/>
+                                    </linearGradient>
+                                    <filter id="lglow" x="-50%" y="-50%" width="200%" height="200%">
+                                        <feGaussianBlur stdDeviation="1.5" result="b"/>
+                                        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                    </filter>
+                                </defs>
+                                <!-- Alan dolgusu -->
+                                <path d="${areaPath}" fill="url(#lagrad)" opacity="0.6"/>
+                                <!-- Eğri çizgi -->
+                                <path d="${linePath}" fill="none" stroke="var(--cyan)" stroke-width="1.8" stroke-linejoin="round" filter="url(#lglow)"/>
+                                <!-- En iyi ve şimdiki saat işaretleri -->
+                                ${bestMark}
+                                ${nowMark}
+                                <!-- Saat etiketleri -->
+                                ${hourLabels}
+                            </svg>
                         </div>`;
                 } // close else if (hourlyScores)
                 
@@ -5279,9 +5333,7 @@
                         <div class="fish-details">
                             <div style="margin-bottom:4px;">
                                 ${f.reason ? `<div class="fish-reason ${reasonClass}">${reasonIcon} ${f.reason}</div>` : '<div></div>'}
-                                
                             </div>
-                            ${buildScoreGauge(f.score)}
                             ${peakTimeLine}
                             ${bestHourLine}
                             ${hourlyChartHtml}
@@ -5505,28 +5557,66 @@
                     const maxS = Math.max(...scores, 1);
                     const nowH = new Date().getHours();
                     const bestH = bestHour ? parseInt(bestHour) : -1;
-                    const bars = scores.map((s, h) => {
-                        const pct = Math.max(2, (s / maxS) * 100);
-                        const isBest = h === bestH;
-                        const isNow = h === nowH;
-                        const color = isBest ? 'var(--green)' : s >= 70 ? 'rgba(0,220,130,0.75)' : s >= 50 ? 'rgba(255,200,0,0.7)' : 'rgba(255,80,80,0.5)';
-                        const border = isNow ? 'border:1px solid var(--cyan);' : '';
-                        const title = `${String(h).padStart(2,'0')}:00 → %${s.toFixed(0)}`;
-                        const scoreLabel = (isBest || isNow) ? `<div style="font-size:0.42rem;color:${isBest ? 'var(--green)' : 'var(--cyan)'};line-height:1;margin-bottom:1px;font-weight:700;">${s.toFixed(0)}</div>` : '';
-                        return `<div title="${title}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;">
-                            ${scoreLabel}
-                            <div style="width:100%;min-width:3px;height:${pct}%;background:${color};border-radius:2px 2px 0 0;${border}${isBest ? 'box-shadow:0 0 4px var(--green);' : ''}"></div>
-                        </div>`;
+                    const W2 = 260, H2 = 64, padL2 = 4, padR2 = 4, padT2 = 10, padB2 = 16;
+                    const plotW2 = W2 - padL2 - padR2;
+                    const plotH2 = H2 - padT2 - padB2;
+                    const pts2 = scores.map((sv, h) => ({
+                        x: padL2 + (h / 23) * plotW2,
+                        y: padT2 + plotH2 - (sv / 100) * plotH2,
+                        s: sv, h
+                    }));
+                    function smoothPath2(points) {
+                        if (points.length < 2) return '';
+                        let d = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+                        for (let i = 0; i < points.length - 1; i++) {
+                            const p0 = points[Math.max(0, i - 1)];
+                            const p1 = points[i];
+                            const p2 = points[i + 1];
+                            const p3 = points[Math.min(points.length - 1, i + 2)];
+                            const cp1x = p1.x + (p2.x - p0.x) / 6;
+                            const cp1y = p1.y + (p2.y - p0.y) / 6;
+                            const cp2x = p2.x - (p3.x - p1.x) / 6;
+                            const cp2y = p2.y - (p3.y - p1.y) / 6;
+                            d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+                        }
+                        return d;
+                    }
+                    const linePath2  = smoothPath2(pts2);
+                    const areaPath2  = linePath2 + ` L${pts2[pts2.length-1].x.toFixed(1)},${(padT2+plotH2).toFixed(1)} L${pts2[0].x.toFixed(1)},${(padT2+plotH2).toFixed(1)} Z`;
+                    const hourLabels2 = [0,3,6,9,12,15,18,21].map(h => {
+                        const x = (padL2 + (h/23)*plotW2).toFixed(1);
+                        return `<text x="${x}" y="${H2-2}" text-anchor="middle" font-size="5.5" fill="#5a7193" font-family="JetBrains Mono,monospace">${String(h).padStart(2,'0')}</text>`;
                     }).join('');
-                    const labels = [0,3,6,9,12,15,18,21].map(h =>
-                        `<span style="position:absolute;left:${(h/24)*100}%;font-size:0.5rem;color:var(--text-muted);transform:translateX(-50%);">${String(h).padStart(2,'0')}</span>`
-                    ).join('');
+                    const bestPt2  = bestH >= 0 ? pts2[bestH] : null;
+                    const nowPt2   = pts2[nowH];
+                    const bestMark2 = bestPt2 ? `
+                        <circle cx="${bestPt2.x.toFixed(1)}" cy="${bestPt2.y.toFixed(1)}" r="4" fill="#00ff88" filter="url(#lglow2)"/>
+                        <text x="${bestPt2.x.toFixed(1)}" y="${(bestPt2.y-7).toFixed(1)}" text-anchor="middle" font-size="6" fill="#00ff88" font-family="JetBrains Mono,monospace" font-weight="700">${bestPt2.s.toFixed(0)}</text>` : '';
+                    const nowMark2 = `
+                        <line x1="${nowPt2.x.toFixed(1)}" y1="${padT2}" x2="${nowPt2.x.toFixed(1)}" y2="${(padT2+plotH2).toFixed(1)}" stroke="rgba(0,212,255,0.4)" stroke-width="1" stroke-dasharray="2 2"/>
+                        <circle cx="${nowPt2.x.toFixed(1)}" cy="${nowPt2.y.toFixed(1)}" r="3" fill="var(--cyan)" filter="url(#lglow2)"/>
+                        <text x="${nowPt2.x.toFixed(1)}" y="${(nowPt2.y-7).toFixed(1)}" text-anchor="middle" font-size="6" fill="var(--cyan)" font-family="JetBrains Mono,monospace" font-weight="700">${nowPt2.s.toFixed(0)}</text>`;
                     const chartTitle = CURRENT_LANG === 'tr' ? 'SAATLİK SKOR' : 'HOURLY SCORE';
                     hourlyChartHtml = `
-                        <div style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px solid var(--border-subtle);">
-                            <div style="font-size:0.65rem;color:var(--cyan);margin-bottom:6px;">📈 ${chartTitle}</div>
-                            <div style="display:flex;gap:1px;height:64px;align-items:flex-end;">${bars}</div>
-                            <div style="position:relative;height:12px;margin-top:2px;">${labels}</div>
+                        <div style="margin-top:8px;padding:8px 6px 4px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px solid var(--border-subtle);">
+                            <div style="font-size:0.65rem;color:var(--cyan);margin-bottom:4px;">📈 ${chartTitle}</div>
+                            <svg viewBox="0 0 ${W2} ${H2}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+                                <defs>
+                                    <linearGradient id="lagrad2" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="rgba(0,212,255,0.35)"/>
+                                        <stop offset="100%" stop-color="rgba(0,212,255,0)"/>
+                                    </linearGradient>
+                                    <filter id="lglow2" x="-50%" y="-50%" width="200%" height="200%">
+                                        <feGaussianBlur stdDeviation="1.5" result="b"/>
+                                        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                    </filter>
+                                </defs>
+                                <path d="${areaPath2}" fill="url(#lagrad2)" opacity="0.6"/>
+                                <path d="${linePath2}" fill="none" stroke="var(--cyan)" stroke-width="1.8" stroke-linejoin="round" filter="url(#lglow2)"/>
+                                ${bestMark2}
+                                ${nowMark2}
+                                ${hourLabels2}
+                            </svg>
                         </div>`;
                 }
 
@@ -5716,11 +5806,10 @@
                         <div class="fsr-name">${f.icon} ${f.name}${photoBtn}</div>
                     </div>
                     <div style="font-size:0.72rem; color:var(--text-muted); font-style:italic; margin-bottom:8px;">${f.scientificName || ''} — ${f.category}</div>
-                    ${buildScoreGauge(instantScore)}
                     ${dailyScoreHtml}
                     ${listStatusHtml}
                     ${infoHtml}
-                    ${hourlyChartHtml}   <!-- BU SATIR EKLENDİ -->
+                    ${hourlyChartHtml}
                     ${reasonsHtml}
                     ${starsHtml}
                     ${condHtml}
