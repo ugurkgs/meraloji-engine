@@ -2665,7 +2665,7 @@
                       <g clip-path="url(#gauge-clip)">
                         <path id="gauge-bg" fill="none" stroke-width="16" stroke-linecap="round"/>
                         <path id="gauge-fill" fill="none" stroke-width="16" stroke-linecap="round" stroke="url(#gauge-grad)"/>
-                        <path id="gauge-fill-glow" fill="none" stroke-width="16" stroke-linecap="round" filter="url(#gauge-glow)" opacity="0.45"/>
+                        <path id="gauge-fill-glow" fill="none" stroke-width="16" stroke-linecap="round" opacity="0"/>
                         <path id="gauge-shine" fill="none" stroke-width="5" stroke-linecap="round" opacity=".22"/>
                       </g>
                       <g id="gauge-ticks"></g>
@@ -7076,9 +7076,9 @@ window.addEventListener('popstate', function(e) {
             if(gsc){
                 gsc.textContent=s>0?s.toFixed(1):'--';
                 gsc.style.color=c;
-                gsc.style.textShadow='0 0 20px '+c+', 0 0 40px '+c+'88';
+                gsc.style.textShadow='0 0 12px '+c+'99';
             }
-            if(gpc){gpc.style.color=c;gpc.style.textShadow='0 0 12px '+c;}
+            if(gpc){gpc.style.color=c;gpc.style.textShadow='0 0 8px '+c+'88';}
             if(gw) gw.setAttribute('fill',c);
         }
 
