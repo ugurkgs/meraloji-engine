@@ -615,6 +615,21 @@ function estimateCurrent(wave, windSpeed, region) {
 }
 
 // [DÜZELTME 4] Basınç Trendi Hesaplama
+// ── TOP 3 ORTALAMA SKOR (İSTİLACI ve KORUMA hariç) ──────────────────────
+function calcAvgScore(fishList) {
+    const EXCLUDED = ['İSTİLACI', 'KORUMA'];
+    const eligible = fishList.filter(f => !EXCLUDED.includes(f.category));
+    const top3 = eligible.slice(0, 3);
+    if (top3.length === 0) return { score: 0, dominant: false };
+    const avg = top3.reduce((sum, f) => sum + f.score, 0) / top3.length;
+    let dominant = false;
+    if (top3.length >= 2 && !EXCLUDED.includes(top3[0].category)) {
+        const restAvg = top3.slice(1).reduce((sum, f) => sum + f.score, 0) / top3.slice(1).length;
+        dominant = (top3[0].score - restAvg) / restAvg >= 0.10;
+    }
+    return { score: parseFloat(avg.toFixed(1)), dominant };
+}
+
 function calculatePressureTrend(pressureHistory) {
     if (!pressureHistory || pressureHistory.length < 2) {
         return { trend: 'STABLE', change: 0 };
@@ -3836,7 +3851,7 @@ app.get('/api/forecast', async (req, res) => {
             // 85+ skor alan balıkları bul
             const highScoreFish = fishList.filter(f => f.score >= 75 && f.category !== "TİCARİ");
             const mediumScoreFish = fishList.filter(f => f.score >= 55 && f.score < 75 && f.category !== "TİCARİ");
-            const topScore = fishList.length > 0 ? fishList[0].score : 0;
+            const { score: topScore, dominant: isDominant } = calcAvgScore(fishList);
             
             if (isLand) {
                 tacticKey = "TACTIC_LAND";
@@ -3876,6 +3891,11 @@ app.get('/api/forecast', async (req, res) => {
                 tacticData = { suggest: "change_spot" };
             } else {
                 tacticKey = "TACTIC_STANDARD";
+            }
+
+            if (isDominant) {
+                tacticData = tacticData || {};
+                tacticData.dominantNote = "⭐ Baskın tür tespit edildi — ticari değeri olan bir balık ise, av için ideal koşullar.";
             }
 
             forecast.push({
@@ -4018,7 +4038,7 @@ app.get('/api/forecast', async (req, res) => {
             
             const i_highScoreFish = instantFishList.filter(f => f.score >= 75 && f.category !== "TİCARİ");
             const i_mediumScoreFish = instantFishList.filter(f => f.score >= 55 && f.score < 75 && f.category !== "TİCARİ");
-            const i_topScore = instantFishList.length > 0 ? instantFishList[0].score : 0;
+            const { score: i_topScore, dominant: i_isDominant } = calcAvgScore(instantFishList);
             
             if (i_wave > 2.0) {
                 instantTacticKey = "TACTIC_HIGH_WAVE";
@@ -4050,6 +4070,11 @@ app.get('/api/forecast', async (req, res) => {
                 instantTacticData = { suggest: "change_spot" };
             } else {
                 instantTacticKey = "TACTIC_STANDARD";
+            }
+
+            if (i_isDominant) {
+                instantTacticData = instantTacticData || {};
+                instantTacticData.dominantNote = "⭐ Baskın tür tespit edildi — ticari değeri olan bir balık ise, av için ideal koşullar.";
             }
 
             instantData = {
