@@ -2654,17 +2654,21 @@
                           <feGaussianBlur stdDeviation="3" result="b"/>
                           <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
                         </filter>
-                        <!-- Gauge gradient: arc boyunca soldan sağa kırmızı → sarı → cyan → yeşil -->
-                        <linearGradient id="gauge-grad" gradientUnits="userSpaceOnUse" x1="14" y1="0" x2="246" y2="0">
-                          <stop offset="0%"   stop-color="#ff4444"/>
-                          <stop offset="33%"  stop-color="#f1c40f"/>
-                          <stop offset="66%"  stop-color="#00d4ff"/>
-                          <stop offset="100%" stop-color="#00ff88"/>
-                        </linearGradient>
                       </defs>
                       <g clip-path="url(#gauge-clip)">
                         <path id="gauge-bg" fill="none" stroke-width="16" stroke-linecap="round"/>
-                        <path id="gauge-fill" fill="none" stroke-width="16" stroke-linecap="round" stroke="url(#gauge-grad)"/>
+                        <!-- 4 renkli segment arka plan (sönük) -->
+                        <path id="gauge-seg4" fill="none" stroke="#ff444433" stroke-width="16" stroke-linecap="butt"/>
+                        <path id="gauge-seg5" fill="none" stroke="#f1c40f33" stroke-width="16" stroke-linecap="butt"/>
+                        <path id="gauge-seg6" fill="none" stroke="#00d4ff33" stroke-width="16" stroke-linecap="butt"/>
+                        <path id="gauge-seg7" fill="none" stroke="#00ff8833" stroke-width="16" stroke-linecap="butt"/>
+                        <!-- 4 renkli segment aktif -->
+                        <path id="gauge-seg0" fill="none" stroke="#ff4444" stroke-width="16" stroke-linecap="butt"/>
+                        <path id="gauge-seg1" fill="none" stroke="#f1c40f" stroke-width="16" stroke-linecap="butt"/>
+                        <path id="gauge-seg2" fill="none" stroke="#00d4ff" stroke-width="16" stroke-linecap="butt"/>
+                        <path id="gauge-seg3" fill="none" stroke="#00ff88" stroke-width="16" stroke-linecap="butt"/>
+                        <!-- Aktif dolgu — üstüne biner, skor kadar görünür -->
+                        <path id="gauge-fill" fill="none" stroke-width="16" stroke-linecap="round" opacity="0"/>
                         <path id="gauge-fill-glow" fill="none" stroke-width="16" stroke-linecap="round" opacity="0"/>
                         <path id="gauge-shine" fill="none" stroke-width="5" stroke-linecap="round" opacity=".22"/>
                       </g>
@@ -7054,6 +7058,18 @@ window.addEventListener('popstate', function(e) {
         }
         buildTicks();
 
+        // Arka plan segment yaylarını başlangıçta çiz
+        function buildBgSegs(){
+            const segColors=['#ff4444','#f1c40f','#00d4ff','#00ff88'];
+            for(let i=0;i<4;i++){
+                const el=document.getElementById('gauge-seg'+(i+4));
+                if(!el) continue;
+                const from=SA+SW*(i/4),to=SA+SW*((i+1)/4);
+                el.setAttribute('d',arcPath(from,to,R));
+            }
+        }
+        buildBgSegs();
+
         let gDisp=0,gRaf=null;
         function renderGauge(s){
             const gb=document.getElementById('gauge-bg');
@@ -7067,9 +7083,38 @@ window.addEventListener('popstate', function(e) {
             const fe=SA+SW*(Math.min(s,100)/100),c=gaugeColor(s);
             gb.setAttribute('d',arcPath(SA,EA,R));
             gb.setAttribute('stroke','rgba(255,255,255,0.07)');
-            gf.setAttribute('d',arcPath(SA,fe,R));
-            // stroke gradient SVG'de tanımlı, JS'den override etme
-            if(gfg){gfg.setAttribute('d',arcPath(SA,fe,R));gfg.setAttribute('stroke',c);}
+
+            // 4 renkli segment — her biri çeyrek yay, arka plan olarak
+            const segColors=['#ff4444','#f1c40f','#00d4ff','#00ff88'];
+            const segIds=['gauge-seg0','gauge-seg1','gauge-seg2','gauge-seg3'];
+            segIds.forEach((id,i)=>{
+                const el=document.getElementById(id);
+                if(!el) return;
+                const from=SA+SW*(i/4);
+                const to=SA+SW*((i+1)/4);
+                const pct=Math.min(s,100)/100;
+                const fillTo=SA+SW*pct;
+                if(fillTo<=from){
+                    // Bu segment henüz dolmadı — sönük arka plan
+                    el.setAttribute('d',arcPath(from,to,R));
+                    el.setAttribute('stroke',segColors[i]+'33');
+                    el.setAttribute('stroke-linecap','butt');
+                } else if(fillTo>=to){
+                    // Bu segment tamamen doldu
+                    el.setAttribute('d',arcPath(from,to,R));
+                    el.setAttribute('stroke',segColors[i]);
+                    el.setAttribute('stroke-linecap',i===0?'round':'butt');
+                } else {
+                    // Kısmen doldu — iki ayrı path
+                    el.setAttribute('d',arcPath(from,fillTo,R));
+                    el.setAttribute('stroke',segColors[i]);
+                    el.setAttribute('stroke-linecap',i===0?'round':'butt');
+                    // Kalan kısım sönük — shine ile halledelim
+                    const bgEl=document.getElementById('gauge-seg'+(i+4));
+                    if(bgEl){bgEl.setAttribute('d',arcPath(fillTo,to,R));bgEl.setAttribute('stroke',segColors[i]+'33');}
+                }
+            });
+
             gs.setAttribute('d',arcPath(SA,fe,R));
             gs.setAttribute('stroke','white');
             // Skor yazısı — renk + glow text-shadow
