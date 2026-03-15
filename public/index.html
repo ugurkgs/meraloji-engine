@@ -7056,66 +7056,81 @@ window.addEventListener('popstate', function(e) {
         }
 
         window.buildHourlyCurve=function(scores,bestHourRaw){
-            const W=320,H=120,PL=6,PR=6,PT=24,PB=20;
-            const uw=W-PL-PR,uh=H-PT-PB;
-            const pts=scores.map((s,i)=>({x:PL+(i/23)*uw,y:PT+(1-Math.min(s,100)/100)*uh}));
+            const W=260,H=64,padL=4,padR=4,padT=10,padB=16;
+            const plotW=W-padL-padR,plotH=H-padT-padB;
             const bestH=bestHourRaw?parseInt(bestHourRaw):-1;
             const nowH=new Date().getHours();
 
-            let lp='M '+pts[0].x.toFixed(1)+' '+pts[0].y.toFixed(1);
-            let ap='M '+pts[0].x.toFixed(1)+' '+(PT+uh).toFixed(1)+' L '+pts[0].x.toFixed(1)+' '+pts[0].y.toFixed(1);
-            for(let i=1;i<pts.length;i++){
-                const p=pts[i-1],c=pts[i],cx=((p.x+c.x)/2).toFixed(1);
-                const seg=' C '+cx+' '+p.y.toFixed(1)+' '+cx+' '+c.y.toFixed(1)+' '+c.x.toFixed(1)+' '+c.y.toFixed(1);
-                lp+=seg;ap+=seg;
+            const pts=scores.map((sv,h)=>({
+                x:padL+(h/23)*plotW,
+                y:padT+plotH-(Math.min(sv,100)/100)*plotH,
+                s:sv,h
+            }));
+
+            // Catmull-Rom → cubic bezier (매우 부드러운 곡선)
+            function smoothPath(points){
+                if(points.length<2) return '';
+                let d='M'+points[0].x.toFixed(1)+','+points[0].y.toFixed(1);
+                for(let i=0;i<points.length-1;i++){
+                    const p0=points[Math.max(0,i-1)];
+                    const p1=points[i];
+                    const p2=points[i+1];
+                    const p3=points[Math.min(points.length-1,i+2)];
+                    const cp1x=p1.x+(p2.x-p0.x)/6;
+                    const cp1y=p1.y+(p2.y-p0.y)/6;
+                    const cp2x=p2.x-(p3.x-p1.x)/6;
+                    const cp2y=p2.y-(p3.y-p1.y)/6;
+                    d+=' C'+cp1x.toFixed(1)+','+cp1y.toFixed(1)+' '+cp2x.toFixed(1)+','+cp2y.toFixed(1)+' '+p2.x.toFixed(1)+','+p2.y.toFixed(1);
+                }
+                return d;
             }
-            ap+=' L '+pts[pts.length-1].x.toFixed(1)+' '+(PT+uh).toFixed(1)+' Z';
+
+            const linePath=smoothPath(pts);
+            const areaPath=linePath
+                +' L'+pts[pts.length-1].x.toFixed(1)+','+(padT+plotH).toFixed(1)
+                +' L'+pts[0].x.toFixed(1)+','+(padT+plotH).toFixed(1)+' Z';
 
             const uid='hc'+Date.now();
-            let html='<svg width="100%" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" style="overflow:visible;display:block;margin-top:6px;">';
-            html+='<defs><linearGradient id="'+uid+'" x1="0" y1="0" x2="0" y2="1">';
-            html+='<stop offset="0%" stop-color="#1D9E75" stop-opacity="0.25"/>';
-            html+='<stop offset="100%" stop-color="#1D9E75" stop-opacity="0.02"/>';
-            html+='</linearGradient></defs>';
-            html+='<path d="'+ap+'" fill="url(#'+uid+')"/>';
-            html+='<path d="'+lp+'" fill="none" stroke="#1D9E75" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+            let html='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">';
+            html+='<defs>';
+            html+='<linearGradient id="'+uid+'g" x1="0" y1="0" x2="0" y2="1">';
+            html+='<stop offset="0%" stop-color="rgba(0,212,255,0.35)"/>';
+            html+='<stop offset="100%" stop-color="rgba(0,212,255,0)"/>';
+            html+='</linearGradient>';
+            html+='<filter id="'+uid+'f" x="-50%" y="-50%" width="200%" height="200%">';
+            html+='<feGaussianBlur stdDeviation="1.5" result="b"/>';
+            html+='<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>';
+            html+='</filter>';
+            html+='</defs>';
+
+            // Alan dolgusu
+            html+='<path d="'+areaPath+'" fill="url(#'+uid+'g)" opacity="0.6"/>';
+            // Eğri çizgi — cyan, glow filter
+            html+='<path d="'+linePath+'" fill="none" stroke="var(--cyan)" stroke-width="1.8" stroke-linejoin="round" filter="url(#'+uid+'f)"/>';
 
             // Şimdi çizgisi
-            const nX=(PL+(nowH/23)*uw).toFixed(1);
-            html+='<line x1="'+nX+'" x2="'+nX+'" y1="'+PT+'" y2="'+(PT+uh)+'" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="2,2"/>';
+            const nowPt=pts[nowH];
+            html+='<line x1="'+nowPt.x.toFixed(1)+'" y1="'+padT+'" x2="'+nowPt.x.toFixed(1)+'" y2="'+(padT+plotH).toFixed(1)+'" stroke="rgba(0,212,255,0.4)" stroke-width="1" stroke-dasharray="2 2"/>';
+            html+='<circle cx="'+nowPt.x.toFixed(1)+'" cy="'+nowPt.y.toFixed(1)+'" r="3" fill="var(--cyan)" filter="url(#'+uid+'f)"/>';
+            html+='<text x="'+nowPt.x.toFixed(1)+'" y="'+(nowPt.y-7).toFixed(1)+'" text-anchor="middle" font-size="6" fill="var(--cyan)" font-family="monospace" font-weight="700">'+nowPt.s.toFixed(0)+'</text>';
 
-            // Pik/dip etiketleri
-            const found=[];
-            for(let i=1;i<scores.length-1;i++){
-                const isPk=scores[i]>scores[i-1]&&scores[i]>scores[i+1]&&scores[i]>=60;
-                const isDp=scores[i]<scores[i-1]&&scores[i]<scores[i+1]&&scores[i]<=40;
-                if((isPk||isDp)&&!found.some(f=>Math.abs(f.i-i)<3)) found.push({i,peak:isPk,s:scores[i]});
-            }
-            found.forEach(p=>{
-                const pt=pts[p.i],c=p.peak?'#1D9E75':'#ff6b6b';
-                const dy=p.peak?-3:3,ty=(p.peak?pt.y-14:pt.y+18).toFixed(1);
-                html+='<circle cx="'+pt.x.toFixed(1)+'" cy="'+(pt.y+dy).toFixed(1)+'" r="6" fill="'+c+'"/>';
-                html+='<circle cx="'+pt.x.toFixed(1)+'" cy="'+(pt.y+dy).toFixed(1)+'" r="3" fill="white"/>';
-                html+='<text x="'+pt.x.toFixed(1)+'" y="'+ty+'" font-size="15" text-anchor="middle" fill="'+c+'" font-weight="700">%'+Math.round(p.s)+'</text>';
-            });
-
-            // En iyi nokta
+            // En iyi saat
             if(bestH>=0&&bestH<24){
                 const bp=pts[bestH];
-                html+='<circle cx="'+bp.x.toFixed(1)+'" cy="'+bp.y.toFixed(1)+'" r="8" fill="#1D9E75"/>';
-                html+='<circle cx="'+bp.x.toFixed(1)+'" cy="'+bp.y.toFixed(1)+'" r="3" fill="white"/>';
+                html+='<circle cx="'+bp.x.toFixed(1)+'" cy="'+bp.y.toFixed(1)+'" r="4" fill="#00ff88" filter="url(#'+uid+'f)"/>';
+                html+='<text x="'+bp.x.toFixed(1)+'" y="'+(bp.y-7).toFixed(1)+'" text-anchor="middle" font-size="6" fill="#00ff88" font-family="monospace" font-weight="700">'+bp.s.toFixed(0)+'</text>';
             }
 
             // Saat etiketleri
-            [0,6,12,18,23].forEach(h=>{
-                const x=(PL+(h/23)*uw).toFixed(1);
-                html+='<text x="'+x+'" y="'+(H-2)+'" font-size="13" text-anchor="middle" fill="rgba(255,255,255,0.6)">'+String(h).padStart(2,'0')+'</text>';
+            [0,3,6,9,12,15,18,21].forEach(h=>{
+                const x=(padL+(h/23)*plotW).toFixed(1);
+                html+='<text x="'+x+'" y="'+(H-2)+'" text-anchor="middle" font-size="5.5" fill="#5a7193" font-family="monospace">'+String(h).padStart(2,'0')+'</text>';
             });
             html+='</svg>';
 
             const chartTitle=typeof CURRENT_LANG!=='undefined'&&CURRENT_LANG==='en'?'HOURLY SCORE':'SAATLİK SKOR';
-            return '<div style="margin-top:8px;padding:10px 8px 6px;background:rgba(0,0,0,0.25);border-radius:8px;border:1px solid rgba(255,255,255,0.08);">'
-                +'<div style="font-size:0.62rem;color:var(--cyan);margin-bottom:2px;">📈 '+chartTitle+'</div>'
+            return '<div style="margin-top:8px;padding:8px 6px 4px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px solid var(--border-subtle);">'
+                +'<div style="font-size:0.65rem;color:var(--cyan);margin-bottom:4px;">📈 '+chartTitle+'</div>'
                 +html+'</div>';
         };
 
