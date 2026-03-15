@@ -678,14 +678,14 @@
             background: var(--bg-card);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
-            margin-bottom: 16px;
+            margin-bottom: 10px;
             overflow: hidden;
         }
         
         .activity-row {
             display: flex;
             align-items: center;
-            padding: 12px 14px;
+            padding: 6px 10px;
             cursor: pointer;
             transition: background 0.2s;
             border-bottom: 1px solid var(--border-subtle);
@@ -700,13 +700,13 @@
         }
         
         .activity-icon {
-            font-size: 1.2rem;
-            margin-right: 12px;
+            font-size: 0.85rem;
+            margin-right: 8px;
         }
         
         .activity-label {
             flex: 1;
-            font-size: 0.8rem;
+            font-size: 0.62rem;
             font-weight: 600;
             color: var(--text-secondary);
             letter-spacing: 0.5px;
@@ -714,7 +714,7 @@
         
         .activity-time {
             font-family: var(--font-mono);
-            font-size: 0.85rem;
+            font-size: 0.62rem;
             color: var(--cyan);
             font-weight: 500;
         }
@@ -753,18 +753,17 @@
         .tactic-box {
             background: linear-gradient(90deg, var(--cyan-glow) 0%, transparent 100%);
             border-left: 3px solid var(--cyan);
-            padding: 9px 12px;
+            padding: 16px;
             border-radius: 0 var(--radius-md) var(--radius-md) 0;
-            margin-bottom: 14px;
-            font-size: 0.76rem;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
             color: var(--text-primary);
-            line-height: 1.45;
+            line-height: 1.5;
         }
 
         .tactic-box::before {
             content: '💡';
-            margin-right: 7px;
-            font-size: 0.8rem;
+            margin-right: 10px;
         }
 
         /* Metrics Grid */
@@ -2641,17 +2640,37 @@
             <button class="hud-close" onclick="closeHud()">✕</button>
         </div>
         <div class="hud-content">
-            <div class="score-box">
+            <div class="score-box" style="padding:16px 24px 12px;">
                 <div class="mode-tabs">
                     <button class="mode-tab active" id="tab-daily" onclick="setMode('daily')">GÜN</button>
                     <button class="mode-tab" id="tab-instant" onclick="setMode('instant')">ANLIK</button>
                 </div>
-                <!-- Gauge (deniz modu) -->
-                <div id="score-gauge-wrap"></div>
-                <!-- Kara / hata metni -->
-                <div class="main-score" id="score-display" style="display:none;">--</div>
-                <div class="weather-label" id="weather-display">--</div>
-                <div class="confidence-badge" id="confidence-display">Güven: --%</div>
+                <div style="display:flex;flex-direction:column;align-items:center;">
+                  <div style="position:relative;display:inline-block;">
+                    <svg id="gauge-svg" width="260" height="158" viewBox="0 0 260 158" style="overflow:visible;display:block;">
+                      <defs><clipPath id="gauge-clip"><rect x="0" y="0" width="260" height="148"/></clipPath></defs>
+                      <g clip-path="url(#gauge-clip)">
+                        <path id="gauge-bg" fill="none" stroke-width="16" stroke-linecap="round"/>
+                        <path id="gauge-fill" fill="none" stroke-width="16" stroke-linecap="round"/>
+                        <path id="gauge-shine" fill="none" stroke-width="5" stroke-linecap="round" opacity=".28"/>
+                      </g>
+                      <text id="weather-display" x="130" y="146" text-anchor="middle" font-size="10" fill="#8892a3" letter-spacing="1">--</text>
+                      <text x="16" y="154" font-size="8" fill="#556">0</text>
+                      <text x="234" y="154" font-size="8" fill="#556">100</text>
+                    </svg>
+                    <div style="position:absolute;top:52px;left:50%;transform:translateX(-50%);display:flex;align-items:flex-start;line-height:1;">
+                      <span id="gauge-pct" style="font-size:22px;font-weight:700;color:#8892a3;margin-top:6px;margin-right:2px;">%</span>
+                      <span id="score-display" style="font-size:56px;font-weight:900;color:#00ffcc;letter-spacing:-1px;">--</span>
+                    </div>
+                  </div>
+                  <div id="confidence-display" style="margin-top:2px;padding:4px 12px;background:rgba(0,0,0,0.25);border-radius:20px;font-size:0.7rem;color:var(--text-secondary);">Veri Kalitesi: --%</div>
+                </div>
+            </div>
+
+            <!-- 7 Günlük Mini Forecast Grafiği -->
+            <div id="forecast-mini-wrap" style="display:none;margin-bottom:12px;background:var(--bg-card);border-radius:var(--radius-md);border:1px solid var(--border-subtle);padding:10px 12px 6px;">
+              <div style="font-size:0.62rem;color:var(--cyan);letter-spacing:1px;margin-bottom:4px;">📅 7 GÜNLÜK TAHMİN</div>
+              <svg id="forecast-mini-svg" width="100%" viewBox="0 0 320 88" preserveAspectRatio="xMidYMid meet" style="overflow:visible;display:block;"></svg>
             </div>
 
             <!-- Aktivite Saatleri Kartı -->
@@ -3302,10 +3321,17 @@
                 name: 'Uydu',
                 url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                 options: { maxZoom: 19, attribution: '© Esri' }
+            },
+            {
+                name: 'Deniz',
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
+                options: { maxZoom: 13, attribution: '© Esri, OpenSeaMap' },
+                overlay: 'https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png'
             }
         ];
 
         let currentTileLayer = null;
+        let currentOverlayLayer = null;
 
         // ═══════════════════════════════════════════════════════════════════
         // DİL SİSTEMİ - TR/EN Toggle
@@ -4218,9 +4244,8 @@
 
         function changeMapLayer() {
             // Mevcut katmanı kaldır
-            if (currentTileLayer) {
-                map.removeLayer(currentTileLayer);
-            }
+            if (currentTileLayer) map.removeLayer(currentTileLayer);
+            if (currentOverlayLayer) { map.removeLayer(currentOverlayLayer); currentOverlayLayer = null; }
 
             // Sonraki katmana geç (döngüsel)
             currentLayerIndex = (currentLayerIndex + 1) % MAP_LAYERS.length;
@@ -4228,6 +4253,13 @@
             // Yeni katmanı ekle
             const layer = MAP_LAYERS[currentLayerIndex];
             currentTileLayer = L.tileLayer(layer.url, layer.options).addTo(map);
+
+            // Deniz katmanı için OpenSeaMap overlay
+            if (layer.overlay) {
+                currentOverlayLayer = L.tileLayer(layer.overlay, {
+                    maxZoom: 18, opacity: 0.9, attribution: '© OpenSeaMap'
+                }).addTo(map);
+            }
 
             updateMapLayerIndicator();
             toggleMenu();
@@ -4405,6 +4437,8 @@
                 
                 GLOBAL_DATA = data;
                 runLoadingAnimation(data);
+                // Mini chart — mevcut moda göre göster
+                updateMiniChart(CURRENT_MODE);
             } catch (err) {
                 hideLoading();
                 alert("Bağlantı hatası: " + err.message);
@@ -4685,6 +4719,61 @@
 
             const targetData = mode === 'daily' ? GLOBAL_DATA.forecast[0] : GLOBAL_DATA.instant;
             renderPanel(GLOBAL_DATA, targetData);
+
+            // Mini chart: GÜN → 7 günlük, ANLIK → bugün saatlik
+            updateMiniChart(mode);
+        }
+
+        function updateMiniChart(mode) {
+            const wrap = document.getElementById('forecast-mini-wrap');
+            const svg = document.getElementById('forecast-mini-svg');
+            const title = wrap ? wrap.querySelector('div') : null;
+            if (!wrap || !svg) return;
+
+            if (mode === 'daily' && GLOBAL_DATA && GLOBAL_DATA.forecast && GLOBAL_DATA.forecast.length > 1) {
+                if (title) title.textContent = '📅 7 GÜNLÜK TAHMİN';
+                svg.setAttribute('viewBox', '0 0 320 88');
+                buildForecastMini(GLOBAL_DATA.forecast);
+            } else if (mode === 'instant' && GLOBAL_DATA) {
+                // Anlık modda — bugünün saatlik skorunu göster
+                const todayScores = GLOBAL_DATA.forecast && GLOBAL_DATA.forecast[0] && GLOBAL_DATA.forecast[0].fishList
+                    ? null // fishList bazlı değil, genel saatlik skor lazım
+                    : null;
+                // instant veriden genel hourly skor çek
+                const instantFish = GLOBAL_DATA.instant && GLOBAL_DATA.instant.fishList;
+                if (instantFish && instantFish.length > 0 && instantFish[0].hourlyScores) {
+                    if (title) title.textContent = '📈 SAATLİK SKOR';
+                    svg.setAttribute('viewBox', '0 0 560 110');
+                    const bestFish = instantFish[0];
+                    svg.innerHTML = '';
+                    const curveHtml = buildHourlyCurve(bestFish.hourlyScores, bestFish.bestHour);
+                    // SVG içeriğini parse edip ekle
+                    const tmp = document.createElement('div');
+                    tmp.innerHTML = curveHtml;
+                    const innerSvg = tmp.querySelector('svg');
+                    if (innerSvg) {
+                        svg.setAttribute('viewBox', innerSvg.getAttribute('viewBox') || '0 0 320 120');
+                        svg.innerHTML = innerSvg.innerHTML;
+                        wrap.style.display = 'block';
+                    }
+                } else if (GLOBAL_DATA.forecast && GLOBAL_DATA.forecast[0] && GLOBAL_DATA.forecast[0].fishList) {
+                    // forecast[0] fishList'ten en iyi balığın saatlik skorunu al
+                    const fl = GLOBAL_DATA.forecast[0].fishList;
+                    const fish = fl.find(f => f.hourlyScores && f.hourlyScores.length === 24);
+                    if (fish) {
+                        if (title) title.textContent = '📈 SAATLİK SKOR';
+                        const curveHtml = buildHourlyCurve(fish.hourlyScores, fish.bestHour);
+                        const tmp = document.createElement('div');
+                        tmp.innerHTML = curveHtml;
+                        const innerSvg = tmp.querySelector('svg');
+                        if (innerSvg) {
+                            svg.setAttribute('viewBox', innerSvg.getAttribute('viewBox') || '0 0 320 120');
+                            svg.innerHTML = innerSvg.innerHTML;
+                            wrap.style.display = 'block';
+                        }
+                    }
+                }
+            }
         }
 
         // ═══════════════════════════════════════════════════════════════════
@@ -4727,14 +4816,14 @@
 
             if (global.isLand) {
                 const isCertainLand = global.landReason === 'CERTAIN_LAND';
-                const isInland     = global.landReason !== 'CERTAIN_LAND';
+                const isInland     = global.landReason !== 'CERTAIN_LAND'; // dalga verisi yok = gerçek iç bölge
 
-                // Gauge gizle, metin göster
-                document.getElementById('score-gauge-wrap').innerHTML = '';
-                document.getElementById('score-display').style.display = 'block';
-                document.getElementById('score-display').innerHTML =
-                    `<span style="font-size:1.1rem;">${isCertainLand ? '🏖️' : '🏔️'} ${isCertainLand ? 'Kıyı Noktası' : 'Kara Bölge'}</span>`;
-                document.getElementById('score-display').style.color = isCertainLand ? 'var(--yellow)' : 'var(--red)';
+                // Skor alanı
+                // Kara/kıyı — gauge sıfırla, metin göster
+                if (window.animateGauge) animateGauge(0);
+                document.getElementById('score-display').textContent = isCertainLand ? '~' : '--';
+                document.getElementById('score-display').style.color = isCertainLand ? '#BA7517' : '#556';
+                document.getElementById('weather-display').textContent = isCertainLand ? 'KIYI NOKTASI' : 'KARA BÖLGE';
                 document.getElementById('confidence-display').innerText = '';
                 document.getElementById('activity-windows').style.display = 'none';
                 document.getElementById('fish-list').innerHTML =
@@ -4785,10 +4874,9 @@
                 return;
             }
 
-            // Score — gauge ile göster
+            // Score — gauge
             const score = data.score || 0;
-            document.getElementById('score-gauge-wrap').innerHTML = buildScoreGauge(score);
-            document.getElementById('score-display').style.display = 'none';
+            animateGauge(score);
             
             // Weather - çevir
             const weatherKey = data.weatherSummary || '';
@@ -4839,7 +4927,7 @@
 
             // Confidence
             const conf = CURRENT_MODE === 'daily' ? (global.forecast[0]?.confidence || 90) : 95;
-            document.getElementById('confidence-display').innerText = `${t('confidence')}: %${conf}`;
+            document.getElementById('confidence-display').innerText = `Veri Kalitesi: %${conf}`;
 
             // Aktivite Saatleri (sadece günlük modda göster)
             const activityCard = document.getElementById('activity-windows');
@@ -5105,89 +5193,7 @@
                             <div style="font-size:0.65rem;color:#8892a3;margin-top:4px;">🔒 PRO ile açılır</div>
                         </div>`;
                 } else if (f.hourlyScores && f.hourlyScores.length === 24) {
-                const scores = f.hourlyScores; 
-                const maxS = Math.max(...scores, 1);
-                const nowH = new Date().getHours();
-                const bestH = f.bestHour ? parseInt(f.bestHour) : -1;
-                    
-                    // SVG eğri grafik — 24 saatlik skor
-                    const W = 260, H = 64, padL = 4, padR = 4, padT = 10, padB = 16;
-                    const plotW = W - padL - padR;
-                    const plotH = H - padT - padB;
-
-                    // Noktalar
-                    const pts = scores.map((sv, h) => ({
-                        x: padL + (h / 23) * plotW,
-                        y: padT + plotH - (sv / 100) * plotH,
-                        s: sv, h
-                    }));
-
-                    // Smooth bezier (Catmull-Rom → cubic bezier)
-                    function smoothPath(points) {
-                        if (points.length < 2) return '';
-                        let d = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
-                        for (let i = 0; i < points.length - 1; i++) {
-                            const p0 = points[Math.max(0, i - 1)];
-                            const p1 = points[i];
-                            const p2 = points[i + 1];
-                            const p3 = points[Math.min(points.length - 1, i + 2)];
-                            const cp1x = p1.x + (p2.x - p0.x) / 6;
-                            const cp1y = p1.y + (p2.y - p0.y) / 6;
-                            const cp2x = p2.x - (p3.x - p1.x) / 6;
-                            const cp2y = p2.y - (p3.y - p1.y) / 6;
-                            d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
-                        }
-                        return d;
-                    }
-
-                    const linePath = smoothPath(pts);
-
-                    // Dolgu alanı (area fill)
-                    const areaPath = linePath + ` L${pts[pts.length-1].x.toFixed(1)},${(padT+plotH).toFixed(1)} L${pts[0].x.toFixed(1)},${(padT+plotH).toFixed(1)} Z`;
-
-                    // Saat etiketleri
-                    const hourLabels = [0,3,6,9,12,15,18,21].map(h => {
-                        const x = (padL + (h/23)*plotW).toFixed(1);
-                        return `<text x="${x}" y="${H-2}" text-anchor="middle" font-size="5.5" fill="#5a7193" font-family="JetBrains Mono,monospace">${String(h).padStart(2,'0')}</text>`;
-                    }).join('');
-
-                    // En iyi saat işareti
-                    const bestPt  = bestH >= 0 ? pts[bestH]  : null;
-                    const nowPt   = pts[nowH];
-                    const bestMark = bestPt ? `
-                        <circle cx="${bestPt.x.toFixed(1)}" cy="${bestPt.y.toFixed(1)}" r="4" fill="#00ff88" filter="url(#lglow)"/>
-                        <text x="${bestPt.x.toFixed(1)}" y="${(bestPt.y - 7).toFixed(1)}" text-anchor="middle" font-size="6" fill="#00ff88" font-family="JetBrains Mono,monospace" font-weight="700">${bestPt.s.toFixed(0)}</text>` : '';
-                    const nowMark = `
-                        <line x1="${nowPt.x.toFixed(1)}" y1="${padT}" x2="${nowPt.x.toFixed(1)}" y2="${(padT+plotH).toFixed(1)}" stroke="rgba(0,212,255,0.4)" stroke-width="1" stroke-dasharray="2 2"/>
-                        <circle cx="${nowPt.x.toFixed(1)}" cy="${nowPt.y.toFixed(1)}" r="3" fill="var(--cyan)" filter="url(#lglow)"/>
-                        <text x="${nowPt.x.toFixed(1)}" y="${(nowPt.y - 7).toFixed(1)}" text-anchor="middle" font-size="6" fill="var(--cyan)" font-family="JetBrains Mono,monospace" font-weight="700">${nowPt.s.toFixed(0)}</text>`;
-
-                    const chartTitle = CURRENT_LANG === 'tr' ? 'SAATLİK SKOR' : 'HOURLY SCORE';
-                    hourlyChartHtml = `
-                        <div style="margin-top:8px;padding:8px 6px 4px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px solid var(--border-subtle);">
-                            <div style="font-size:0.65rem;color:var(--cyan);margin-bottom:4px;">📈 ${chartTitle}</div>
-                            <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-                                <defs>
-                                    <linearGradient id="lagrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stop-color="rgba(0,212,255,0.35)"/>
-                                        <stop offset="100%" stop-color="rgba(0,212,255,0)"/>
-                                    </linearGradient>
-                                    <filter id="lglow" x="-50%" y="-50%" width="200%" height="200%">
-                                        <feGaussianBlur stdDeviation="1.5" result="b"/>
-                                        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                                    </filter>
-                                </defs>
-                                <!-- Alan dolgusu -->
-                                <path d="${areaPath}" fill="url(#lagrad)" opacity="0.6"/>
-                                <!-- Eğri çizgi -->
-                                <path d="${linePath}" fill="none" stroke="var(--cyan)" stroke-width="1.8" stroke-linejoin="round" filter="url(#lglow)"/>
-                                <!-- En iyi ve şimdiki saat işaretleri -->
-                                ${bestMark}
-                                ${nowMark}
-                                <!-- Saat etiketleri -->
-                                ${hourLabels}
-                            </svg>
-                        </div>`;
+                    hourlyChartHtml = buildHourlyCurve(f.hourlyScores, f.bestHour);
                 } // close else if (hourlyScores)
                 
                 // Yıldız sistemi — önce premium kontrolü, veri yokluğu kilit göstermeyi engellemesin
@@ -5333,6 +5339,7 @@
                         <div class="fish-details">
                             <div style="margin-bottom:4px;">
                                 ${f.reason ? `<div class="fish-reason ${reasonClass}">${reasonIcon} ${f.reason}</div>` : '<div></div>'}
+                                
                             </div>
                             ${peakTimeLine}
                             ${bestHourLine}
@@ -5553,71 +5560,7 @@
                             <div style="font-size:0.65rem;color:#8892a3;margin-top:4px;">🔒 PRO ile açılır</div>
                         </div>`;
                 } else if (f.hourlyScores && f.hourlyScores.length === 24) {
-                    const scores = f.hourlyScores;
-                    const maxS = Math.max(...scores, 1);
-                    const nowH = new Date().getHours();
-                    const bestH = bestHour ? parseInt(bestHour) : -1;
-                    const W2 = 260, H2 = 64, padL2 = 4, padR2 = 4, padT2 = 10, padB2 = 16;
-                    const plotW2 = W2 - padL2 - padR2;
-                    const plotH2 = H2 - padT2 - padB2;
-                    const pts2 = scores.map((sv, h) => ({
-                        x: padL2 + (h / 23) * plotW2,
-                        y: padT2 + plotH2 - (sv / 100) * plotH2,
-                        s: sv, h
-                    }));
-                    function smoothPath2(points) {
-                        if (points.length < 2) return '';
-                        let d = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
-                        for (let i = 0; i < points.length - 1; i++) {
-                            const p0 = points[Math.max(0, i - 1)];
-                            const p1 = points[i];
-                            const p2 = points[i + 1];
-                            const p3 = points[Math.min(points.length - 1, i + 2)];
-                            const cp1x = p1.x + (p2.x - p0.x) / 6;
-                            const cp1y = p1.y + (p2.y - p0.y) / 6;
-                            const cp2x = p2.x - (p3.x - p1.x) / 6;
-                            const cp2y = p2.y - (p3.y - p1.y) / 6;
-                            d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
-                        }
-                        return d;
-                    }
-                    const linePath2  = smoothPath2(pts2);
-                    const areaPath2  = linePath2 + ` L${pts2[pts2.length-1].x.toFixed(1)},${(padT2+plotH2).toFixed(1)} L${pts2[0].x.toFixed(1)},${(padT2+plotH2).toFixed(1)} Z`;
-                    const hourLabels2 = [0,3,6,9,12,15,18,21].map(h => {
-                        const x = (padL2 + (h/23)*plotW2).toFixed(1);
-                        return `<text x="${x}" y="${H2-2}" text-anchor="middle" font-size="5.5" fill="#5a7193" font-family="JetBrains Mono,monospace">${String(h).padStart(2,'0')}</text>`;
-                    }).join('');
-                    const bestPt2  = bestH >= 0 ? pts2[bestH] : null;
-                    const nowPt2   = pts2[nowH];
-                    const bestMark2 = bestPt2 ? `
-                        <circle cx="${bestPt2.x.toFixed(1)}" cy="${bestPt2.y.toFixed(1)}" r="4" fill="#00ff88" filter="url(#lglow2)"/>
-                        <text x="${bestPt2.x.toFixed(1)}" y="${(bestPt2.y-7).toFixed(1)}" text-anchor="middle" font-size="6" fill="#00ff88" font-family="JetBrains Mono,monospace" font-weight="700">${bestPt2.s.toFixed(0)}</text>` : '';
-                    const nowMark2 = `
-                        <line x1="${nowPt2.x.toFixed(1)}" y1="${padT2}" x2="${nowPt2.x.toFixed(1)}" y2="${(padT2+plotH2).toFixed(1)}" stroke="rgba(0,212,255,0.4)" stroke-width="1" stroke-dasharray="2 2"/>
-                        <circle cx="${nowPt2.x.toFixed(1)}" cy="${nowPt2.y.toFixed(1)}" r="3" fill="var(--cyan)" filter="url(#lglow2)"/>
-                        <text x="${nowPt2.x.toFixed(1)}" y="${(nowPt2.y-7).toFixed(1)}" text-anchor="middle" font-size="6" fill="var(--cyan)" font-family="JetBrains Mono,monospace" font-weight="700">${nowPt2.s.toFixed(0)}</text>`;
-                    const chartTitle = CURRENT_LANG === 'tr' ? 'SAATLİK SKOR' : 'HOURLY SCORE';
-                    hourlyChartHtml = `
-                        <div style="margin-top:8px;padding:8px 6px 4px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px solid var(--border-subtle);">
-                            <div style="font-size:0.65rem;color:var(--cyan);margin-bottom:4px;">📈 ${chartTitle}</div>
-                            <svg viewBox="0 0 ${W2} ${H2}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-                                <defs>
-                                    <linearGradient id="lagrad2" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stop-color="rgba(0,212,255,0.35)"/>
-                                        <stop offset="100%" stop-color="rgba(0,212,255,0)"/>
-                                    </linearGradient>
-                                    <filter id="lglow2" x="-50%" y="-50%" width="200%" height="200%">
-                                        <feGaussianBlur stdDeviation="1.5" result="b"/>
-                                        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                                    </filter>
-                                </defs>
-                                <path d="${areaPath2}" fill="url(#lagrad2)" opacity="0.6"/>
-                                <path d="${linePath2}" fill="none" stroke="var(--cyan)" stroke-width="1.8" stroke-linejoin="round" filter="url(#lglow2)"/>
-                                ${bestMark2}
-                                ${nowMark2}
-                                ${hourLabels2}
-                            </svg>
-                        </div>`;
+                    hourlyChartHtml = buildHourlyCurve(f.hourlyScores, f.bestHour || bestHour);
                 }
 
                 // === NEDEN LİSTELENMEDİ (sadece listede yoksa) ===
@@ -5809,7 +5752,7 @@
                     ${dailyScoreHtml}
                     ${listStatusHtml}
                     ${infoHtml}
-                    ${hourlyChartHtml}
+                    ${hourlyChartHtml}   <!-- BU SATIR EKLENDİ -->
                     ${reasonsHtml}
                     ${starsHtml}
                     ${condHtml}
@@ -5886,119 +5829,6 @@
             if (score >= 70) return 'var(--green)';
             if (score >= 50) return 'var(--yellow)';
             return 'var(--red)';
-        }
-
-        /* ── GAUGE SVG BUILDER ─────────────────────────────────────────────
-           Geniş iç track + ince dış yay (indicator) + 0/25/50/75/100 etiketi
-           SVG koordinat sistemi: y aşağı artar.
-           Yarım daire YUKARI açılır: sol uç (180°) → tepe (90°) → sağ uç (0°)
-           Doğru formül: x = cx + r*cos(deg), y = cy - r*sin(deg)  ← y'yi çıkar!
-           sweep-flag = 0 (SVG'de CCW = yukarı)
-        ─────────────────────────────────────────────────────────────────── */
-        function buildScoreGauge(score) {
-            const s = Math.max(0, Math.min(100, score));
-
-            // Layout — merkez nokta yeterince aşağıda ki yay içeride kalsın
-            const cx = 100, cy = 100;
-            const rTrack = 58, swTrack = 14;   // geniş arka plan yayı
-            const rInd   = 74, swInd   = 8;    // ince dış gösterge yayı
-            const rLabel = 87;                  // etiket mesafesi
-
-            // Renk
-            let color, glow;
-            if (s >= 70)      { color = '#00ff88'; glow = 'rgba(0,255,136,0.5)'; }
-            else if (s >= 50) { color = '#ffd500'; glow = 'rgba(255,213,0,0.45)'; }
-            else if (s >= 30) { color = '#ff9f43'; glow = 'rgba(255,159,67,0.4)'; }
-            else              { color = '#ff4757'; glow = 'rgba(255,71,87,0.4)'; }
-
-            const toRad = d => d * Math.PI / 180;
-
-            // Arc path — YUKARI açılan yarım daire (sweep=0, CCW)
-            // startDeg..endDeg : matematikte +x ekseninden CCW derece
-            function arc(r, startDeg, endDeg) {
-                const x1 = (cx + r * Math.cos(toRad(startDeg))).toFixed(2);
-                const y1 = (cy - r * Math.sin(toRad(startDeg))).toFixed(2); // ← eksi!
-                const x2 = (cx + r * Math.cos(toRad(endDeg))).toFixed(2);
-                const y2 = (cy - r * Math.sin(toRad(endDeg))).toFixed(2);
-                const large = Math.abs(startDeg - endDeg) > 180 ? 1 : 0;
-                return `M${x1} ${y1} A${r} ${r} 0 ${large} 0 ${x2} ${y2}`;
-            }
-
-            // Tam track (180° → 0°)
-            const trackFull = arc(rTrack, 180, 0);
-            const indFull   = arc(rInd,   180, 0);
-
-            // Dolum: 180° → fillEnd (skor 0 → sol, skor 100 → sağ)
-            const fillEnd = 180 - (s / 100) * 180;
-            const trackFill = s > 1 ? arc(rTrack, 180, fillEnd) : null;
-            const indFill   = s > 1 ? arc(rInd,   180, fillEnd) : null;
-
-            // İbre noktası (rInd yayının ucunda)
-            const ndX = (cx + rInd * Math.cos(toRad(fillEnd))).toFixed(2);
-            const ndY = (cy - rInd * Math.sin(toRad(fillEnd))).toFixed(2);
-
-            // Etiketler — yay üzerinde, skora göre renklenir
-            const labelData = [
-                { v: '0',   deg: 180 },
-                { v: '25',  deg: 135 },
-                { v: '50',  deg: 90  },
-                { v: '75',  deg: 45  },
-                { v: '100', deg: 0   },
-            ];
-            const labels = labelData.map(({ v, deg }) => {
-                const lx = (cx + rLabel * Math.cos(toRad(deg))).toFixed(1);
-                const ly = (cy - rLabel * Math.sin(toRad(deg))).toFixed(1);
-                const active = parseInt(v) <= s;
-                return `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle"
-                    font-size="7.5" fill="${active ? color : '#3d5470'}"
-                    font-family="JetBrains Mono,monospace" font-weight="700">${v}</text>`;
-            }).join('');
-
-            // uid: filter ID çakışmasını önler
-            const uid = (s * 100 | 0);
-
-            return `<div style="text-align:center;margin:8px 0 2px;">
-                <svg viewBox="0 0 200 108" xmlns="http://www.w3.org/2000/svg"
-                     style="width:100%;max-width:220px;display:block;margin:0 auto;overflow:hidden;">
-                    <defs>
-                        <filter id="gf${uid}" x="-60%" y="-60%" width="220%" height="220%">
-                            <feGaussianBlur stdDeviation="3" result="b"/>
-                            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                        </filter>
-                    </defs>
-
-                    <!-- Track arka plan (gri, geniş) -->
-                    <path d="${trackFull}" fill="none" stroke="rgba(255,255,255,0.08)"
-                          stroke-width="${swTrack}" stroke-linecap="round"/>
-                    <!-- Track dolum (hafif renk tonu) -->
-                    ${trackFill ? `<path d="${trackFill}" fill="none" stroke="${color}"
-                          stroke-width="${swTrack}" stroke-linecap="round" opacity="0.18"/>` : ''}
-
-                    <!-- Gösterge yayı arka plan (ince, dış) -->
-                    <path d="${indFull}" fill="none" stroke="rgba(255,255,255,0.05)"
-                          stroke-width="${swInd}" stroke-linecap="round"/>
-                    <!-- Gösterge yayı aktif dolum -->
-                    ${indFill ? `<path d="${indFill}" fill="none" stroke="${color}"
-                          stroke-width="${swInd}" stroke-linecap="round"
-                          filter="url(#gf${uid})"/>` : ''}
-
-                    <!-- İbre noktası -->
-                    ${s > 1 ? `<circle cx="${ndX}" cy="${ndY}" r="5"
-                          fill="${color}" filter="url(#gf${uid})"/>` : ''}
-
-                    <!-- Etiketler: 0 / 25 / 50 / 75 / 100 -->
-                    ${labels}
-
-                    <!-- Skor rakamı -->
-                    <text x="${cx}" y="${cy - 24}" text-anchor="middle" dominant-baseline="middle"
-                        font-size="30" font-weight="900" fill="${color}"
-                        font-family="Outfit,sans-serif">${s.toFixed(0)}</text>
-                    <!-- SKOR yazısı -->
-                    <text x="${cx}" y="${cy - 6}" text-anchor="middle" dominant-baseline="middle"
-                        font-size="7" fill="#6a84a7"
-                        font-family="Outfit,sans-serif" letter-spacing="2">SKOR</text>
-                </svg>
-            </div>`;
         }
 
         function formatDate(dateStr) {
@@ -7169,6 +6999,172 @@ window.addEventListener('popstate', function(e) {
     });
 })();
 
+
+    // ── GAUGE + EĞRİ GRAFİKLERİ ─────────────────────────────────────────
+    (function(){
+        const CX=130,CY=140,R=112;
+        const SA=Math.PI*1.1,EA=Math.PI*1.9,SW=EA-SA;
+        const ns='http://www.w3.org/2000/svg';
+
+        function pxy(a,r){return{x:CX+r*Math.cos(a),y:CY+r*Math.sin(a)}}
+        function arcPath(a1,a2,r){
+            const s=pxy(a1,r),e=pxy(a2,r),lg=a2-a1>Math.PI?1:0;
+            return 'M '+s.x.toFixed(2)+' '+s.y.toFixed(2)+' A '+r+' '+r+' 0 '+lg+' 1 '+e.x.toFixed(2)+' '+e.y.toFixed(2);
+        }
+        function gaugeColor(s){return s>=80?'#1D9E75':s>=60?'#00d4ff':s>=40?'#BA7517':'#E24B4A'}
+        function gaugeLabel(s){return s>=85?'Mükemmel Koşullar':s>=70?'İyi Koşullar':s>=50?'Orta Koşullar':'Düşük Aktivite'}
+
+        let gDisp=0,gRaf=null;
+        function renderGauge(s){
+            const gb=document.getElementById('gauge-bg');
+            const gf=document.getElementById('gauge-fill');
+            const gs=document.getElementById('gauge-shine');
+            const gsc=document.getElementById('score-display');
+            const gpc=document.getElementById('gauge-pct');
+            const gw=document.getElementById('weather-display');
+            if(!gb||!gf) return;
+            const fe=SA+SW*(Math.min(s,100)/100),c=gaugeColor(s);
+            gb.setAttribute('d',arcPath(SA,EA,R));
+            gb.setAttribute('stroke','rgba(255,255,255,0.08)');
+            gf.setAttribute('d',arcPath(SA,fe,R));
+            gf.setAttribute('stroke',c);
+            gs.setAttribute('d',arcPath(SA,fe,R));
+            gs.setAttribute('stroke','white');
+            // HTML span — style değiştir, attribute değil
+            if(gsc){gsc.textContent=s>0?s.toFixed(1):'--';gsc.style.color=c;}
+            if(gpc){gpc.style.color=c;}
+            if(gw) gw.setAttribute('fill',c);
+        }
+
+        window.animateGauge=function(target){
+            if(gRaf) cancelAnimationFrame(gRaf);
+            const st=gDisp,df=target-st,t0=performance.now();
+            function step(now){
+                const p=Math.min((now-t0)/700,1),e=1-Math.pow(1-p,3);
+                gDisp=st+df*e;renderGauge(gDisp);
+                if(p<1) gRaf=requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        };
+        renderGauge(0);
+
+        function svgEl(tag,attrs,txt){
+            const e=document.createElementNS(ns,tag);
+            Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));
+            if(txt!==undefined) e.textContent=txt;
+            return e;
+        }
+
+        window.buildHourlyCurve=function(scores,bestHourRaw){
+            const W=320,H=120,PL=6,PR=6,PT=24,PB=20;
+            const uw=W-PL-PR,uh=H-PT-PB;
+            const pts=scores.map((s,i)=>({x:PL+(i/23)*uw,y:PT+(1-Math.min(s,100)/100)*uh}));
+            const bestH=bestHourRaw?parseInt(bestHourRaw):-1;
+            const nowH=new Date().getHours();
+
+            let lp='M '+pts[0].x.toFixed(1)+' '+pts[0].y.toFixed(1);
+            let ap='M '+pts[0].x.toFixed(1)+' '+(PT+uh).toFixed(1)+' L '+pts[0].x.toFixed(1)+' '+pts[0].y.toFixed(1);
+            for(let i=1;i<pts.length;i++){
+                const p=pts[i-1],c=pts[i],cx=((p.x+c.x)/2).toFixed(1);
+                const seg=' C '+cx+' '+p.y.toFixed(1)+' '+cx+' '+c.y.toFixed(1)+' '+c.x.toFixed(1)+' '+c.y.toFixed(1);
+                lp+=seg;ap+=seg;
+            }
+            ap+=' L '+pts[pts.length-1].x.toFixed(1)+' '+(PT+uh).toFixed(1)+' Z';
+
+            const uid='hc'+Date.now();
+            let html='<svg width="100%" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" style="overflow:visible;display:block;margin-top:6px;">';
+            html+='<defs><linearGradient id="'+uid+'" x1="0" y1="0" x2="0" y2="1">';
+            html+='<stop offset="0%" stop-color="#1D9E75" stop-opacity="0.25"/>';
+            html+='<stop offset="100%" stop-color="#1D9E75" stop-opacity="0.02"/>';
+            html+='</linearGradient></defs>';
+            html+='<path d="'+ap+'" fill="url(#'+uid+')"/>';
+            html+='<path d="'+lp+'" fill="none" stroke="#1D9E75" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+
+            // Şimdi çizgisi
+            const nX=(PL+(nowH/23)*uw).toFixed(1);
+            html+='<line x1="'+nX+'" x2="'+nX+'" y1="'+PT+'" y2="'+(PT+uh)+'" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="2,2"/>';
+
+            // Pik/dip etiketleri
+            const found=[];
+            for(let i=1;i<scores.length-1;i++){
+                const isPk=scores[i]>scores[i-1]&&scores[i]>scores[i+1]&&scores[i]>=60;
+                const isDp=scores[i]<scores[i-1]&&scores[i]<scores[i+1]&&scores[i]<=40;
+                if((isPk||isDp)&&!found.some(f=>Math.abs(f.i-i)<3)) found.push({i,peak:isPk,s:scores[i]});
+            }
+            found.forEach(p=>{
+                const pt=pts[p.i],c=p.peak?'#1D9E75':'#ff6b6b';
+                const dy=p.peak?-3:3,ty=(p.peak?pt.y-14:pt.y+18).toFixed(1);
+                html+='<circle cx="'+pt.x.toFixed(1)+'" cy="'+(pt.y+dy).toFixed(1)+'" r="6" fill="'+c+'"/>';
+                html+='<circle cx="'+pt.x.toFixed(1)+'" cy="'+(pt.y+dy).toFixed(1)+'" r="3" fill="white"/>';
+                html+='<text x="'+pt.x.toFixed(1)+'" y="'+ty+'" font-size="15" text-anchor="middle" fill="'+c+'" font-weight="700">%'+Math.round(p.s)+'</text>';
+            });
+
+            // En iyi nokta
+            if(bestH>=0&&bestH<24){
+                const bp=pts[bestH];
+                html+='<circle cx="'+bp.x.toFixed(1)+'" cy="'+bp.y.toFixed(1)+'" r="8" fill="#1D9E75"/>';
+                html+='<circle cx="'+bp.x.toFixed(1)+'" cy="'+bp.y.toFixed(1)+'" r="3" fill="white"/>';
+            }
+
+            // Saat etiketleri
+            [0,6,12,18,23].forEach(h=>{
+                const x=(PL+(h/23)*uw).toFixed(1);
+                html+='<text x="'+x+'" y="'+(H-2)+'" font-size="13" text-anchor="middle" fill="rgba(255,255,255,0.6)">'+String(h).padStart(2,'0')+'</text>';
+            });
+            html+='</svg>';
+
+            const chartTitle=typeof CURRENT_LANG!=='undefined'&&CURRENT_LANG==='en'?'HOURLY SCORE':'SAATLİK SKOR';
+            return '<div style="margin-top:8px;padding:10px 8px 6px;background:rgba(0,0,0,0.25);border-radius:8px;border:1px solid rgba(255,255,255,0.08);">'
+                +'<div style="font-size:0.62rem;color:var(--cyan);margin-bottom:2px;">📈 '+chartTitle+'</div>'
+                +html+'</div>';
+        };
+
+        window.buildForecastMini=function(forecastData){
+            const wrap=document.getElementById('forecast-mini-wrap');
+            const svg=document.getElementById('forecast-mini-svg');
+            if(!wrap||!svg||!forecastData||forecastData.length<2) return;
+            svg.innerHTML='';
+            wrap.style.display='block';
+
+            const W=320,H=88,PL=10,PR=10,PT=22,PB=20;
+            const uw=W-PL-PR,uh=H-PT-PB;
+            const n=forecastData.length;
+            const scores=forecastData.map(d=>d.score||0);
+            const pts=scores.map((s,i)=>({x:PL+(i/(n-1))*uw,y:PT+(1-Math.min(s,100)/100)*uh}));
+
+            const uid='fm'+Date.now();
+            const defs=svgEl('defs',{});
+            const gr=svgEl('linearGradient',{id:uid,x1:'0',y1:'0',x2:'0',y2:'1'});
+            gr.appendChild(svgEl('stop',{offset:'0%','stop-color':'#378ADD','stop-opacity':'0.2'}));
+            gr.appendChild(svgEl('stop',{offset:'100%','stop-color':'#378ADD','stop-opacity':'0.01'}));
+            defs.appendChild(gr);svg.appendChild(defs);
+
+            let lp='M '+pts[0].x.toFixed(1)+' '+pts[0].y.toFixed(1);
+            let ap='M '+pts[0].x.toFixed(1)+' '+(PT+uh).toFixed(1)+' L '+pts[0].x.toFixed(1)+' '+pts[0].y.toFixed(1);
+            for(let i=1;i<pts.length;i++){
+                const p=pts[i-1],c=pts[i],cx=((p.x+c.x)/2).toFixed(1);
+                const seg=' C '+cx+' '+p.y.toFixed(1)+' '+cx+' '+c.y.toFixed(1)+' '+c.x.toFixed(1)+' '+c.y.toFixed(1);
+                lp+=seg;ap+=seg;
+            }
+            ap+=' L '+pts[pts.length-1].x.toFixed(1)+' '+(PT+uh).toFixed(1)+' Z';
+
+            svg.appendChild(svgEl('path',{d:ap,fill:'url(#'+uid+')'}));
+            svg.appendChild(svgEl('path',{d:lp,fill:'none',stroke:'#378ADD','stroke-width':'2','stroke-linecap':'round','stroke-linejoin':'round'}));
+
+            pts.forEach((p,i)=>{
+                const s=scores[i];
+                const c=s>=80?'#1D9E75':s>=60?'#378ADD':s>=40?'#BA7517':'#E24B4A';
+                const isToday=i===0;
+                svg.appendChild(svgEl('circle',{cx:p.x.toFixed(1),cy:p.y.toFixed(1),r:isToday?'5':'3.5',fill:c}));
+                svg.appendChild(svgEl('circle',{cx:p.x.toFixed(1),cy:p.y.toFixed(1),r:isToday?'2.5':'1.5',fill:'white'}));
+                svg.appendChild(svgEl('text',{x:p.x.toFixed(1),y:(p.y-9).toFixed(1),'font-size':'8','text-anchor':'middle',fill:c,'font-weight':'600'},'%'+Math.round(s)));
+                const days=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
+                const d=forecastData[i].date?new Date(forecastData[i].date):null;
+                const dayLbl=d?days[d.getDay()]:(i===0?'Bugün':'G+'+(i));
+                svg.appendChild(svgEl('text',{x:p.x.toFixed(1),y:(PT+uh+12).toFixed(1),'font-size':'8','text-anchor':'middle',fill:i===0?'rgba(255,255,255,0.7)':'rgba(255,255,255,0.3)'},dayLbl));
+            });
+        };
+    })();
 
     // ── ONBOARDING SLAYT SİSTEMİ ────────────────────────────────────────
     let _onboardStep = 1;
