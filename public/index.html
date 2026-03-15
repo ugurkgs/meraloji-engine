@@ -2647,20 +2647,26 @@
                 </div>
                 <div style="display:flex;flex-direction:column;align-items:center;">
                   <div style="position:relative;display:inline-block;">
-                    <svg id="gauge-svg" width="260" height="158" viewBox="0 0 260 158" style="overflow:visible;display:block;">
-                      <defs><clipPath id="gauge-clip"><rect x="0" y="0" width="260" height="148"/></clipPath></defs>
+                    <svg id="gauge-svg" width="260" height="162" viewBox="0 0 260 162" style="overflow:visible;display:block;">
+                      <defs>
+                        <clipPath id="gauge-clip"><rect x="0" y="0" width="260" height="150"/></clipPath>
+                        <filter id="gauge-glow" x="-30%" y="-30%" width="160%" height="160%">
+                          <feGaussianBlur stdDeviation="3" result="b"/>
+                          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                      </defs>
                       <g clip-path="url(#gauge-clip)">
                         <path id="gauge-bg" fill="none" stroke-width="16" stroke-linecap="round"/>
                         <path id="gauge-fill" fill="none" stroke-width="16" stroke-linecap="round"/>
+                        <path id="gauge-fill-glow" fill="none" stroke-width="16" stroke-linecap="round" filter="url(#gauge-glow)" opacity="0.5"/>
                         <path id="gauge-shine" fill="none" stroke-width="5" stroke-linecap="round" opacity=".28"/>
                       </g>
-                      <text id="weather-display" x="130" y="146" text-anchor="middle" font-size="10" fill="#8892a3" letter-spacing="1">--</text>
-                      <text x="16" y="154" font-size="8" fill="#556">0</text>
-                      <text x="234" y="154" font-size="8" fill="#556">100</text>
+                      <g id="gauge-ticks"></g>
+                      <text id="weather-display" x="130" y="150" text-anchor="middle" font-size="10" fill="#8892a3" letter-spacing="1">--</text>
                     </svg>
                     <div style="position:absolute;top:52px;left:50%;transform:translateX(-50%);display:flex;align-items:flex-start;line-height:1;">
                       <span id="gauge-pct" style="font-size:22px;font-weight:700;color:#8892a3;margin-top:6px;margin-right:2px;">%</span>
-                      <span id="score-display" style="font-size:56px;font-weight:900;color:#00ffcc;letter-spacing:-1px;">--</span>
+                      <span id="score-display" style="font-size:56px;font-weight:900;color:#00ffcc;letter-spacing:-1px;transition:text-shadow 0.5s,color 0.5s;">--</span>
                     </div>
                   </div>
                   <div id="confidence-display" style="margin-top:2px;padding:4px 12px;background:rgba(0,0,0,0.25);border-radius:20px;font-size:0.7rem;color:var(--text-secondary);">Veri Kalitesi: --%</div>
@@ -7002,7 +7008,7 @@ window.addEventListener('popstate', function(e) {
 
     // ── GAUGE + EĞRİ GRAFİKLERİ ─────────────────────────────────────────
     (function(){
-        const CX=130,CY=140,R=112;
+        const CX=130,CY=142,R=112;
         const SA=Math.PI*1.1,EA=Math.PI*1.9,SW=EA-SA;
         const ns='http://www.w3.org/2000/svg';
 
@@ -7011,13 +7017,41 @@ window.addEventListener('popstate', function(e) {
             const s=pxy(a1,r),e=pxy(a2,r),lg=a2-a1>Math.PI?1:0;
             return 'M '+s.x.toFixed(2)+' '+s.y.toFixed(2)+' A '+r+' '+r+' 0 '+lg+' 1 '+e.x.toFixed(2)+' '+e.y.toFixed(2);
         }
-        function gaugeColor(s){return s>=80?'#1D9E75':s>=60?'#00d4ff':s>=40?'#BA7517':'#E24B4A'}
+        function gaugeColor(s){return s>=80?'#00ff88':s>=60?'#00d4ff':s>=40?'#f1c40f':'#ff4444'}
         function gaugeLabel(s){return s>=85?'Mükemmel Koşullar':s>=70?'İyi Koşullar':s>=50?'Orta Koşullar':'Düşük Aktivite'}
+
+        function tickColor(val){return val>=75?'#00ff88':val>=50?'#00d4ff':val>=25?'#f1c40f':'#ff4444'}
+
+        function buildTicks(){
+            const g=document.getElementById('gauge-ticks');
+            if(!g) return;
+            g.innerHTML='';
+            [0,15,30,45,60,75,90,100].forEach(v=>{
+                const pct=v/100;
+                const a=SA+SW*pct;
+                const p1=pxy(a,R+4),p2=pxy(a,R+13);
+                const pt=pxy(a,R+22);
+                const tick=document.createElementNS(ns,'line');
+                tick.setAttribute('x1',p1.x.toFixed(1));tick.setAttribute('y1',p1.y.toFixed(1));
+                tick.setAttribute('x2',p2.x.toFixed(1));tick.setAttribute('y2',p2.y.toFixed(1));
+                tick.setAttribute('stroke',tickColor(v));tick.setAttribute('stroke-width','1.5');
+                g.appendChild(tick);
+                const txt=document.createElementNS(ns,'text');
+                txt.setAttribute('x',pt.x.toFixed(1));txt.setAttribute('y',pt.y.toFixed(1));
+                txt.setAttribute('text-anchor','middle');txt.setAttribute('dominant-baseline','middle');
+                txt.setAttribute('font-size','7');txt.setAttribute('font-weight','600');
+                txt.setAttribute('fill',tickColor(v));
+                txt.textContent=v;
+                g.appendChild(txt);
+            });
+        }
+        buildTicks();
 
         let gDisp=0,gRaf=null;
         function renderGauge(s){
             const gb=document.getElementById('gauge-bg');
             const gf=document.getElementById('gauge-fill');
+            const gfg=document.getElementById('gauge-fill-glow');
             const gs=document.getElementById('gauge-shine');
             const gsc=document.getElementById('score-display');
             const gpc=document.getElementById('gauge-pct');
@@ -7025,14 +7059,19 @@ window.addEventListener('popstate', function(e) {
             if(!gb||!gf) return;
             const fe=SA+SW*(Math.min(s,100)/100),c=gaugeColor(s);
             gb.setAttribute('d',arcPath(SA,EA,R));
-            gb.setAttribute('stroke','rgba(255,255,255,0.08)');
+            gb.setAttribute('stroke','rgba(255,255,255,0.07)');
             gf.setAttribute('d',arcPath(SA,fe,R));
             gf.setAttribute('stroke',c);
+            if(gfg){gfg.setAttribute('d',arcPath(SA,fe,R));gfg.setAttribute('stroke',c);}
             gs.setAttribute('d',arcPath(SA,fe,R));
             gs.setAttribute('stroke','white');
-            // HTML span — style değiştir, attribute değil
-            if(gsc){gsc.textContent=s>0?s.toFixed(1):'--';gsc.style.color=c;}
-            if(gpc){gpc.style.color=c;}
+            // Skor yazısı — renk + glow text-shadow
+            if(gsc){
+                gsc.textContent=s>0?s.toFixed(1):'--';
+                gsc.style.color=c;
+                gsc.style.textShadow='0 0 20px '+c+', 0 0 40px '+c+'88';
+            }
+            if(gpc){gpc.style.color=c;gpc.style.textShadow='0 0 12px '+c;}
             if(gw) gw.setAttribute('fill',c);
         }
 
