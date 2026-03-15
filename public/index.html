@@ -243,6 +243,54 @@
         }
 
 
+        /* ── HEADLINE CARD ──────────────────────────────────────────── */
+        #headline-card {
+            padding: 14px 24px 10px;
+            text-align: center;
+            font-size: 1.05rem;
+            font-weight: 700;
+            line-height: 1.4;
+            letter-spacing: 0.1px;
+            min-height: 44px;
+            display: none; /* JS açar */
+        }
+        #headline-card strong {
+            color: inherit;
+        }
+
+        /* ── NEDEN SATIRI — tek tıkla detaya açılır ─────────────────── */
+        #why-row {
+            margin: 0 0 10px;
+            padding: 9px 16px;
+            background: rgba(0,0,0,0.2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: none; /* JS açar */
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+            user-select: none;
+        }
+        #why-row:hover { background: rgba(0,212,255,0.07); }
+        #why-row .why-main  { flex: 1; font-weight: 600; }
+        #why-row .why-chevron { font-size: 0.7rem; color: var(--text-muted); transition: transform 0.2s; }
+        #why-row.open .why-chevron { transform: rotate(180deg); }
+        #why-detail {
+            display: none;
+            margin: -6px 0 10px;
+            padding: 8px 16px 10px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+            border: 1px solid var(--border-subtle);
+            border-top: none;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
         /* Custom Marker */
         .radar-marker {
             width: 28px;
@@ -2640,6 +2688,15 @@
             <button class="hud-close" onclick="closeHud()">✕</button>
         </div>
         <div class="hud-content">
+            <!-- BİRİNCİL MESAJ: Kullanıcının görmesi gereken ilk şey -->
+            <div id="headline-card"></div>
+            <!-- NEDEN: Tek cümle özet, tıklanınca tam tactic açılır -->
+            <div id="why-row" onclick="toggleWhyDetail()">
+                <span class="why-main" id="why-main-text"></span>
+                <span class="why-chevron">▼</span>
+            </div>
+            <div id="why-detail" id="why-detail"></div>
+
             <div class="score-box" style="padding:16px 24px 12px;">
                 <div class="mode-tabs">
                     <button class="mode-tab active" id="tab-daily" onclick="setMode('daily')">GÜN</button>
@@ -2709,7 +2766,7 @@
                 </div>
             </div>
 
-            <div class="tactic-box" id="tactic-display">Analiz bekleniyor...</div>
+            <div class="tactic-box" id="tactic-display" style="display:none;">Analiz bekleniyor...</div>
 
             <div id="metrics-section">
                 <div class="metrics-grid" id="metrics-grid-top"></div>
@@ -4235,49 +4292,29 @@
             setTimeout(() => {
                 document.getElementById('splash').classList.add('hidden');
                 document.getElementById('controls').classList.add('visible');
-                // Sıcak başlangıç — kullanıcı hiçbir şey yapmadan değer görür
                 autoLoadNearestSpot();
             }, 2500);
         });
 
-        // ═══════════════════════════════════════════════════════════════════
-        // SICAK BAŞLANGIÇ — İlk açılışta yakın hot spot otomatik yüklenir
-        // Kullanıcı tıklama yapmadan değer görür. Click sayacı yakılmaz.
-        // ═══════════════════════════════════════════════════════════════════
         let _autoLoadActive = false;
 
         async function autoLoadNearestSpot() {
-            // Daha önce kullanıcı bir yere tıklamışsa atla
             if (lastLatLon) return;
-
             _autoLoadActive = true;
-
-            // Sunucudan mevsimsel hot spot'u al (hardcode değil, server'dan dinamik)
             let spot;
             try {
                 const r = await fetch('/api/hotspot');
                 spot = await r.json();
             } catch(e) {
-                // Sunucu erişilemezse İstanbul fallback
                 spot = { name: 'İstanbul Boğazı', lat: 41.0420, lon: 29.0050 };
             }
-
-            // Haritayı o noktaya uçur
             if (map) map.flyTo([spot.lat, spot.lon], 10, { duration: 1.8 });
-
-            // Kısa gecikme — flyTo animasyonu başlasın
             await new Promise(r => setTimeout(r, 1200));
-
-            // Hâlâ kullanıcı tıklamamışsa devam et
             if (!_autoLoadActive) return;
-
-            // Welcome overlay'e "örnek" mesajı yaz
             const wTitle = document.getElementById('welcome-title');
             const wSub   = document.getElementById('welcome-subtitle');
             if (wTitle) wTitle.textContent = '📍 ' + spot.name;
             if (wSub)   wSub.textContent   = 'Başka bir noktaya tıklayarak analiz al';
-
-            // handleMapClick'i isAutoLoad=true ile çağır
             await handleMapClick({ latlng: { lat: spot.lat, lng: spot.lon } }, true);
         }
 
@@ -4418,15 +4455,13 @@
             const lat = parseFloat(e.latlng.lat.toFixed(4));
             const lon = parseFloat(e.latlng.lng.toFixed(4));
 
-            // Auto-load ise örnek bayrağını kaldır
-            if (!isAutoLoad) _autoLoadActive = false;
-
             // 📏 Mesafe ölçme modundaysa normal click'i engelle
             if (measureMode && measureStep > 0) {
                 handleMeasureClick(lat, lon);
                 return;
             }
 
+            if (!isAutoLoad) _autoLoadActive = false;
             // 🔒 Tıklama limiti kontrolü (isAutoLoad için atla)
             if (!isAutoLoad && !isPremium && !isGracePeriod) {
                 try {
@@ -4503,34 +4538,6 @@
                 runLoadingAnimation(data);
                 // Mini chart — mevcut moda göre göster
                 updateMiniChart(CURRENT_MODE);
-                // Sıcak başlangıç rozeti — kullanıcıya "bu otomatik yüklendi" mesajı
-                if (_autoLoadActive) {
-                    setTimeout(() => {
-                        const hud = document.getElementById('hud');
-                        if (!hud || hud.style.display === 'none') return;
-                        // Mevcut rozet varsa ekleme
-                        if (document.getElementById('autoload-badge')) return;
-                        const badge = document.createElement('div');
-                        badge.id = 'autoload-badge';
-                        badge.innerHTML = '🗺️ Yakınındaki örnek nokta — haritaya tıklayarak kendi meranı analiz et';
-                        badge.style.cssText = [
-                            'margin: 0 24px 12px',
-                            'padding: 8px 12px',
-                            'background: rgba(0,212,255,0.08)',
-                            'border: 1px solid rgba(0,212,255,0.25)',
-                            'border-radius: 10px',
-                            'font-size: 0.72rem',
-                            'color: var(--cyan)',
-                            'line-height: 1.4',
-                            'cursor: pointer',
-                            'transition: opacity 0.4s'
-                        ].join(';');
-                        badge.onclick = () => badge.style.opacity = '0';
-                        // hud-content'in başına ekle
-                        const hudContent = document.getElementById('hud-content') || hud.querySelector('.hud-content');
-                        if (hudContent) hudContent.insertBefore(badge, hudContent.firstChild);
-                    }, 600);
-                }
             } catch (err) {
                 hideLoading();
                 alert("Bağlantı hatası: " + err.message);
@@ -4918,6 +4925,13 @@
                 document.getElementById('weather-display').textContent = isCertainLand ? 'KIYI NOKTASI' : 'KARA BÖLGE';
                 document.getElementById('confidence-display').innerText = '';
                 document.getElementById('activity-windows').style.display = 'none';
+                // Headline ve why-row gizle — kara noktasında anlamsız
+                const hc = document.getElementById('headline-card');
+                const wr = document.getElementById('why-row');
+                const wd = document.getElementById('why-detail');
+                if (hc) hc.style.display = 'none';
+                if (wr) wr.style.display = 'none';
+                if (wd) wd.style.display = 'none';
                 document.getElementById('fish-list').innerHTML =
                     `<div style="text-align:center;padding:24px;color:var(--text-muted);">🎣 Balık skoru için deniz kesimine tıklayın</div>`;
 
@@ -4970,24 +4984,42 @@
             const score = data.score || 0;
             animateGauge(score);
             
-            // Weather - çevir
+            // Weather - çevir (gauge SVG içindeki küçük etiket)
             const weatherKey = data.weatherSummary || '';
             document.getElementById('weather-display').innerText = t(weatherKey) || weatherKey;
-            
-            // GELİŞMİŞ TAKTİK GÖSTERİMİ
+
+            // ── HEDEFİ BİRİNCİL MESAJ ─────────────────────────────────────
+            const headlineEl = document.getElementById('headline-card');
+            const whyRow     = document.getElementById('why-row');
+            const whyMain    = document.getElementById('why-main-text');
+            const whyDetail  = document.getElementById('why-detail');
+
+            // Headline: "Bugün levrek için mükemmel koşullar"
+            const headlineTxt = buildHeadline(data.fishList, score, CURRENT_LANG);
+            if (headlineTxt && headlineEl) {
+                headlineEl.innerHTML = headlineTxt;
+                headlineEl.style.color = headlineColor(score);
+                headlineEl.style.display = 'block';
+            }
+
+            // Why-row: tek cümle özet
             const tacticKey = data.tacticKey || '';
             const tacticData = data.tacticData;
+            const triggers   = data.triggers || [];
+            const whySummary = buildWhySummary(tacticKey, triggers, CURRENT_LANG);
+            if (whySummary && whyRow) {
+                whyMain.textContent = whySummary;
+                whyRow.style.display = 'flex';
+                // why-row açık değilse kapat
+                whyRow.classList.remove('open');
+                if (whyDetail) whyDetail.style.display = 'none';
+            }
+
+            // GELİŞMİŞ TAKTİK (tactic-box) — why-detail içine taşındı
             let tacticText = t(tacticKey) || tacticKey;
-            
             if (tacticKey === 'TACTIC_HOT_SPOT' && tacticData?.fish) {
-                // 85+ skor - detaylı taktik
-                const fishInfo = tacticData.fish.map(f => {
-                    const baitHint = f.bait ? f.bait.split(',')[0] : '';
-                    return `${f.name} (%${f.score.toFixed(0)})`;
-                }).join(', ');
+                const fishInfo = tacticData.fish.map(f => `${f.name} (%${f.score.toFixed(0)})`).join(', ');
                 tacticText = t('TACTIC_HOT_SPOT') + fishInfo;
-                
-                // İlk balık için yem önerisi
                 if (tacticData.fish[0]?.bait) {
                     const firstBait = translateBaitInfo(tacticData.fish[0].bait.split(',')[0]);
                     tacticText += ` | Yem: ${firstBait}`;
@@ -4995,12 +5027,12 @@
             } else if (tacticKey === 'TACTIC_MODERATE' && tacticData?.fish) {
                 tacticText = t('TACTIC_MODERATE') + tacticData.fish.join(', ');
             }
-            
-            // Baskın tür notu
             let fullTacticText = tacticText;
-            if (tacticData?.dominantNote) {
-                fullTacticText += ' ' + tacticData.dominantNote;
-            }
+            if (tacticData?.dominantNote) fullTacticText += ' ' + tacticData.dominantNote;
+
+            // Tam taktik metni why-detail'e yerleştir
+            if (whyDetail) whyDetail.textContent = fullTacticText;
+            // tactic-display gizli ama içeriğini güncelle (diğer kodlar okuyabilir)
             document.getElementById('tactic-display').innerText = fullTacticText;
             
             // [YENİ] Sıcaklık Şoku Göstergesi
@@ -5238,6 +5270,118 @@
             }
             return result;
         }
+
+
+        // ═══════════════════════════════════════════════════════════════════
+        // HEADLINE SİSTEMİ — Önce sonuç, sonra neden
+        // ═══════════════════════════════════════════════════════════════════
+
+        function buildHeadline(fishList, score, lang) {
+            // İstilacı ve koruma dışındaki ilk balığı al
+            const EXCLUDED = ['İSTİLACI', 'KORUMA'];
+            const top = (fishList || []).find(f => !EXCLUDED.includes(f.category));
+            if (!top) return '';
+
+            const name = lang === 'en' ? (top.nameEn || top.name) : top.name;
+
+            if (score >= 85) {
+                return lang === 'tr'
+                    ? `🔥 Bugün <strong>${name}</strong> için mükemmel koşullar`
+                    : `🔥 Excellent conditions for <strong>${name}</strong> today`;
+            } else if (score >= 70) {
+                return lang === 'tr'
+                    ? `✅ Bugün <strong>${name}</strong> için iyi bir gün`
+                    : `✅ Good day for <strong>${name}</strong> today`;
+            } else if (score >= 50) {
+                return lang === 'tr'
+                    ? `⚠️ <strong>${name}</strong> tutulabilir — sabır gerekli`
+                    : `⚠️ <strong>${name}</strong> possible — patience needed`;
+            } else if (score >= 30) {
+                return lang === 'tr'
+                    ? `😴 Bugün zor koşullar — başka nokta veya yarın dene`
+                    : `😴 Tough conditions today — try nearby or tomorrow`;
+            } else {
+                return lang === 'tr'
+                    ? `🚫 Çok düşük aktivite — bu nokta şu an uygun değil`
+                    : `🚫 Very low activity — this spot isn't ideal right now`;
+            }
+        }
+
+        // Skor rengini headline'a uygula
+        function headlineColor(score) {
+            if (score >= 85) return 'var(--green)';
+            if (score >= 70) return 'var(--cyan)';
+            if (score >= 50) return 'var(--yellow)';
+            if (score >= 30) return 'var(--orange)';
+            return 'var(--red)';
+        }
+
+        // Why-row için tek cümle özet
+        function buildWhySummary(tacticKey, triggers, lang) {
+            // En önemli tetikleyiciyi önce göster
+            const priority = [
+                'TACTIC_STORM', 'TACTIC_HIGH_WAVE',
+                'TACTIC_FEEDING_FRENZY', 'TACTIC_HOT_SPOT',
+                'TACTIC_DAWN', 'TACTIC_DUSK', 'TACTIC_GOLDEN_HOURS',
+                'TACTIC_NIGHT', 'TACTIC_WAVY_MURKY', 'TACTIC_PRESSURE_DROP',
+                'TACTIC_DAY', 'TACTIC_MODERATE', 'TACTIC_LOW_ACTIVITY', 'TACTIC_STANDARD'
+            ];
+            const SHORT_TR = {
+                TACTIC_STORM:           '⛈️ Fırtına — av yapılmaz',
+                TACTIC_HIGH_WAVE:       '⚠️ Dalga 2m üzeri — tehlikeli',
+                TACTIC_FEEDING_FRENZY:  '⚡ Basınç düşüyor — balıklar çok aktif',
+                TACTIC_HOT_SPOT:        '🔥 Bu nokta şu an çok aktif',
+                TACTIC_DAWN:            '🌅 Şafak saati — en iyi zaman',
+                TACTIC_DUSK:            '🌆 Akşam suyu — altın saat',
+                TACTIC_GOLDEN_HOURS:    '✨ Hem sabah hem akşam suyu aktif',
+                TACTIC_NIGHT:           '🌙 Gece avcıları aktif',
+                TACTIC_WAVY_MURKY:      '🌊 Dalgalı & bulanık — levrek ve karagöz coştu',
+                TACTIC_PRESSURE_DROP:   '📉 Basınç düşüyor — avcılar aktifleşiyor',
+                TACTIC_DAY:             '☀️ Gündüz aktivitesi — çipura ve kefal için iyi',
+                TACTIC_MODERATE:        '📊 Orta aktivite — doğru yerde sabırla güzel av',
+                TACTIC_LOW_ACTIVITY:    '😴 Düşük aktivite — farklı derinlik dene',
+                TACTIC_STRONG_WIND:     '💨 Rüzgarlı — korunaklı koyları tercih et',
+                TACTIC_STANDARD:        '🌤️ Normal koşullar',
+            };
+            const SHORT_EN = {
+                TACTIC_STORM:           '⛈️ Storm — no fishing today',
+                TACTIC_HIGH_WAVE:       '⚠️ Waves over 2m — dangerous',
+                TACTIC_FEEDING_FRENZY:  '⚡ Pressure dropping — fish very aggressive',
+                TACTIC_HOT_SPOT:        '🔥 This spot is very active right now',
+                TACTIC_DAWN:            '🌅 Golden dawn — best time of day',
+                TACTIC_DUSK:            '🌆 Evening bite — golden hour',
+                TACTIC_GOLDEN_HOURS:    '✨ Both morning & evening windows active',
+                TACTIC_NIGHT:           '🌙 Night hunters are active',
+                TACTIC_WAVY_MURKY:      '🌊 Choppy & murky — predators active',
+                TACTIC_PRESSURE_DROP:   '📉 Pressure falling — predators activating',
+                TACTIC_DAY:             '☀️ Daytime activity — gilthead & mullet',
+                TACTIC_MODERATE:        '📊 Moderate activity — right bait pays off',
+                TACTIC_LOW_ACTIVITY:    '😴 Low activity — try a different depth',
+                TACTIC_STRONG_WIND:     '💨 Windy — find a sheltered cove',
+                TACTIC_STANDARD:        '🌤️ Standard conditions',
+            };
+            const map = lang === 'en' ? SHORT_EN : SHORT_TR;
+            // tacticKey direkt eşleşme
+            if (map[tacticKey]) return map[tacticKey];
+            // priority sırasında ara
+            for (const k of priority) {
+                if (map[k] && tacticKey && tacticKey.includes(k.replace('TACTIC_',''))) return map[k];
+            }
+            // Triggers dizisinden ilk anlamlı olanı al
+            if (triggers && triggers.length > 0) {
+                return triggers[0];
+            }
+            return lang === 'tr' ? '🌤️ Normal koşullar' : '🌤️ Standard conditions';
+        }
+
+        // Why toggle
+        window.toggleWhyDetail = function() {
+            const row = document.getElementById('why-row');
+            const detail = document.getElementById('why-detail');
+            if (!row || !detail) return;
+            const isOpen = row.classList.toggle('open');
+            detail.style.display = isOpen ? 'block' : 'none';
+        };
 
         function renderFishList(list, containerId) {
             const container = document.getElementById(containerId);
@@ -6090,9 +6234,7 @@
 
         function locateMe() {
             if (!navigator.geolocation) {
-                alert(CURRENT_LANG === 'tr'
-                    ? '📍 Bu cihaz konum desteklemiyor.'
-                    : '📍 Geolocation not supported.');
+                alert(CURRENT_LANG === 'tr' ? '📍 Bu cihaz konum desteklemiyor.' : '📍 Geolocation not supported.');
                 return;
             }
             const btnText = document.getElementById('locate-btn-text');
@@ -7408,8 +7550,6 @@ window.addEventListener('popstate', function(e) {
     };
 
     function closeOnboarding() {
-        // Varsayılan: her kapatma "görüldü" olarak kaydedilir.
-        // Checkbox işaretliyse "Her açılışta tekrar göster" → kayıt yapma.
         const cb = document.getElementById('onboard-dont-show');
         const skipSave = cb && cb.checked;
         if (!skipSave) {
