@@ -2654,12 +2654,19 @@
                           <feGaussianBlur stdDeviation="3" result="b"/>
                           <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
                         </filter>
+                        <!-- Gauge gradient: kırmızı → sarı → cyan → yeşil boyunca arc -->
+                        <linearGradient id="gauge-grad" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="userSpaceOnUse" x1="14" y1="0" x2="246" y2="0">
+                          <stop offset="0%"   stop-color="#ff4444"/>
+                          <stop offset="33%"  stop-color="#f1c40f"/>
+                          <stop offset="66%"  stop-color="#00d4ff"/>
+                          <stop offset="100%" stop-color="#00ff88"/>
+                        </linearGradient>
                       </defs>
                       <g clip-path="url(#gauge-clip)">
                         <path id="gauge-bg" fill="none" stroke-width="16" stroke-linecap="round"/>
-                        <path id="gauge-fill" fill="none" stroke-width="16" stroke-linecap="round"/>
-                        <path id="gauge-fill-glow" fill="none" stroke-width="16" stroke-linecap="round" filter="url(#gauge-glow)" opacity="0.5"/>
-                        <path id="gauge-shine" fill="none" stroke-width="5" stroke-linecap="round" opacity=".28"/>
+                        <path id="gauge-fill" fill="none" stroke-width="16" stroke-linecap="round" stroke="url(#gauge-grad)"/>
+                        <path id="gauge-fill-glow" fill="none" stroke-width="16" stroke-linecap="round" filter="url(#gauge-glow)" opacity="0.45"/>
+                        <path id="gauge-shine" fill="none" stroke-width="5" stroke-linecap="round" opacity=".22"/>
                       </g>
                       <g id="gauge-ticks"></g>
                       <text id="weather-display" x="130" y="150" text-anchor="middle" font-size="10" fill="#8892a3" letter-spacing="1">--</text>
@@ -7026,7 +7033,7 @@ window.addEventListener('popstate', function(e) {
             const g=document.getElementById('gauge-ticks');
             if(!g) return;
             g.innerHTML='';
-            [0,15,30,45,60,75,90,100].forEach(v=>{
+            [0,25,50,75,100].forEach(v=>{
                 const pct=v/100;
                 const a=SA+SW*pct;
                 const p1=pxy(a,R+4),p2=pxy(a,R+13);
@@ -7061,7 +7068,7 @@ window.addEventListener('popstate', function(e) {
             gb.setAttribute('d',arcPath(SA,EA,R));
             gb.setAttribute('stroke','rgba(255,255,255,0.07)');
             gf.setAttribute('d',arcPath(SA,fe,R));
-            gf.setAttribute('stroke',c);
+            // stroke gradient SVG'de tanımlı, JS'den override etme
             if(gfg){gfg.setAttribute('d',arcPath(SA,fe,R));gfg.setAttribute('stroke',c);}
             gs.setAttribute('d',arcPath(SA,fe,R));
             gs.setAttribute('stroke','white');
