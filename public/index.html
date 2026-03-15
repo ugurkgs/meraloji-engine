@@ -753,12 +753,12 @@
         .tactic-box {
             background: linear-gradient(90deg, var(--cyan-glow) 0%, transparent 100%);
             border-left: 3px solid var(--cyan);
-            padding: 16px;
+            padding: 10px 12px;
             border-radius: 0 var(--radius-md) var(--radius-md) 0;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
+            margin-bottom: 14px;
+            font-size: 0.75rem;
             color: var(--text-primary);
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
         .tactic-box::before {
@@ -7090,29 +7090,35 @@ window.addEventListener('popstate', function(e) {
                 +' L'+pts[pts.length-1].x.toFixed(1)+','+(padT+plotH).toFixed(1)
                 +' L'+pts[0].x.toFixed(1)+','+(padT+plotH).toFixed(1)+' Z';
 
+            // Skor ortalamasına göre çizgi rengi
+            const avgScore=scores.reduce((a,b)=>a+b,0)/scores.length;
+            const lineColor=avgScore>=70?'#00ff88':avgScore>=50?'#00d4ff':avgScore>=35?'#f1c40f':'#ff4444';
+            const glowColor=avgScore>=70?'rgba(0,255,136,0.4)':avgScore>=50?'rgba(0,212,255,0.4)':avgScore>=35?'rgba(241,196,15,0.4)':'rgba(255,68,68,0.4)';
+            const fillColor=avgScore>=70?'rgba(0,255,136,0.2)':avgScore>=50?'rgba(0,212,255,0.2)':avgScore>=35?'rgba(241,196,15,0.15)':'rgba(255,68,68,0.15)';
+
             const uid='hc'+Date.now();
             let html='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">';
             html+='<defs>';
             html+='<linearGradient id="'+uid+'g" x1="0" y1="0" x2="0" y2="1">';
-            html+='<stop offset="0%" stop-color="rgba(0,212,255,0.35)"/>';
-            html+='<stop offset="100%" stop-color="rgba(0,212,255,0)"/>';
+            html+='<stop offset="0%" stop-color="'+fillColor+'"/>';
+            html+='<stop offset="100%" stop-color="rgba(0,0,0,0)"/>';
             html+='</linearGradient>';
             html+='<filter id="'+uid+'f" x="-50%" y="-50%" width="200%" height="200%">';
-            html+='<feGaussianBlur stdDeviation="1.5" result="b"/>';
+            html+='<feGaussianBlur stdDeviation="2" result="b"/>';
             html+='<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>';
             html+='</filter>';
             html+='</defs>';
 
             // Alan dolgusu
-            html+='<path d="'+areaPath+'" fill="url(#'+uid+'g)" opacity="0.6"/>';
-            // Eğri çizgi — cyan, glow filter
-            html+='<path d="'+linePath+'" fill="none" stroke="var(--cyan)" stroke-width="1.8" stroke-linejoin="round" filter="url(#'+uid+'f)"/>';
+            html+='<path d="'+areaPath+'" fill="url(#'+uid+'g)" opacity="0.7"/>';
+            // Eğri çizgi — skora göre renk + glow
+            html+='<path d="'+linePath+'" fill="none" stroke="'+lineColor+'" stroke-width="2" stroke-linejoin="round" filter="url(#'+uid+'f)"/>';
 
             // Şimdi çizgisi
             const nowPt=pts[nowH];
-            html+='<line x1="'+nowPt.x.toFixed(1)+'" y1="'+padT+'" x2="'+nowPt.x.toFixed(1)+'" y2="'+(padT+plotH).toFixed(1)+'" stroke="rgba(0,212,255,0.4)" stroke-width="1" stroke-dasharray="2 2"/>';
-            html+='<circle cx="'+nowPt.x.toFixed(1)+'" cy="'+nowPt.y.toFixed(1)+'" r="3" fill="var(--cyan)" filter="url(#'+uid+'f)"/>';
-            html+='<text x="'+nowPt.x.toFixed(1)+'" y="'+(nowPt.y-7).toFixed(1)+'" text-anchor="middle" font-size="6" fill="var(--cyan)" font-family="monospace" font-weight="700">'+nowPt.s.toFixed(0)+'</text>';
+            html+='<line x1="'+nowPt.x.toFixed(1)+'" y1="'+padT+'" x2="'+nowPt.x.toFixed(1)+'" y2="'+(padT+plotH).toFixed(1)+'" stroke="'+glowColor+'" stroke-width="1" stroke-dasharray="2 2"/>';
+            html+='<circle cx="'+nowPt.x.toFixed(1)+'" cy="'+nowPt.y.toFixed(1)+'" r="3" fill="'+lineColor+'" filter="url(#'+uid+'f)"/>';
+            html+='<text x="'+nowPt.x.toFixed(1)+'" y="'+(nowPt.y-7).toFixed(1)+'" text-anchor="middle" font-size="6" fill="'+lineColor+'" font-family="monospace" font-weight="700">'+nowPt.s.toFixed(0)+'</text>';
 
             // En iyi saat
             if(bestH>=0&&bestH<24){
@@ -7176,7 +7182,7 @@ window.addEventListener('popstate', function(e) {
                 const days=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
                 const d=forecastData[i].date?new Date(forecastData[i].date):null;
                 const dayLbl=d?days[d.getDay()]:(i===0?'Bugün':'G+'+(i));
-                svg.appendChild(svgEl('text',{x:p.x.toFixed(1),y:(PT+uh+12).toFixed(1),'font-size':'8','text-anchor':'middle',fill:i===0?'rgba(255,255,255,0.7)':'rgba(255,255,255,0.3)'},dayLbl));
+                svg.appendChild(svgEl('text',{x:p.x.toFixed(1),y:(PT+uh+12).toFixed(1),'font-size':'8','text-anchor':'middle',fill:i===0?'#f1c40f':'rgba(241,196,15,0.5)','font-weight':i===0?'700':'400'},dayLbl));
             });
         };
     })();
