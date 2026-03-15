@@ -5800,105 +5800,114 @@
         }
 
         /* ── GAUGE SVG BUILDER ─────────────────────────────────────────────
-           İç yarım daire (track) + dış ince gösterge yayı + 0/25/50/75/100
-           etiketleri. score = 0-100 arası sayı.
+           Geniş iç track + ince dış yay (indicator) + 0/25/50/75/100 etiketi
+           SVG koordinat sistemi: y aşağı artar.
+           Yarım daire YUKARI açılır: sol uç (180°) → tepe (90°) → sağ uç (0°)
+           Doğru formül: x = cx + r*cos(deg), y = cy - r*sin(deg)  ← y'yi çıkar!
+           sweep-flag = 0 (SVG'de CCW = yukarı)
         ─────────────────────────────────────────────────────────────────── */
         function buildScoreGauge(score) {
             const s = Math.max(0, Math.min(100, score));
-            // SVG viewBox: 0 0 200 115  (yarım daire merkezi 100,105)
-            const cx = 100, cy = 105;
-            // Track (geniş, gri arka plan): r=62, stroke-width=16
-            const rTrack = 62, swTrack = 16;
-            // Gösterge yayı (ince, renkli): r=78, stroke-width=8
-            const rInd = 78, swInd = 8;
 
-            // SVG arc helper — yarım daire (sol alt → sağ alt, 180° yay)
-            // startAngle = 180°, endAngle = 0° (saat yönünde)
-            function arcPath(cx, cy, r, startDeg, endDeg) {
-                const toRad = d => (d * Math.PI) / 180;
-                const x1 = cx + r * Math.cos(toRad(startDeg));
-                const y1 = cy + r * Math.sin(toRad(startDeg));
-                const x2 = cx + r * Math.cos(toRad(endDeg));
-                const y2 = cy + r * Math.sin(toRad(endDeg));
-                const large = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
-                return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
-            }
+            // Layout — merkez nokta yeterince aşağıda ki yay içeride kalsın
+            const cx = 100, cy = 100;
+            const rTrack = 58, swTrack = 14;   // geniş arka plan yayı
+            const rInd   = 74, swInd   = 8;    // ince dış gösterge yayı
+            const rLabel = 87;                  // etiket mesafesi
 
-            // Track yayı: 180° → 0° (yarım daire, soldan sağa)
-            const trackPath = arcPath(cx, cy, rTrack, 180, 0);
-
-            // Gösterge yayı aktif kısmı: 0 → s/100 * 180° (sol uçtan sağa)
-            // s=0 → 180°→180° (görünmez), s=100 → 180°→0°
-            const indEnd = 180 - (s / 100) * 180;
-            const indPath = arcPath(cx, cy, rInd, 180, indEnd);
-
-            // Renk: kırmızı→sarı→yeşil gradyan
+            // Renk
             let color, glow;
-            if (s >= 70)      { color = '#00ff88'; glow = 'rgba(0,255,136,0.55)'; }
+            if (s >= 70)      { color = '#00ff88'; glow = 'rgba(0,255,136,0.5)'; }
             else if (s >= 50) { color = '#ffd500'; glow = 'rgba(255,213,0,0.45)'; }
             else if (s >= 30) { color = '#ff9f43'; glow = 'rgba(255,159,67,0.4)'; }
             else              { color = '#ff4757'; glow = 'rgba(255,71,87,0.4)'; }
 
-            // İbre (iğne) ucu: rInd üzerinde, indEnd açısında
-            const toRad = d => (d * Math.PI) / 180;
-            const needleX = (cx + rInd * Math.cos(toRad(indEnd))).toFixed(2);
-            const needleY = (cy + rInd * Math.sin(toRad(indEnd))).toFixed(2);
+            const toRad = d => d * Math.PI / 180;
 
-            // Etiketler: 0, 25, 50, 75, 100 — rTrack'in dışına (r=82 noktaları)
-            const rLabel = 82;
+            // Arc path — YUKARI açılan yarım daire (sweep=0, CCW)
+            // startDeg..endDeg : matematikte +x ekseninden CCW derece
+            function arc(r, startDeg, endDeg) {
+                const x1 = (cx + r * Math.cos(toRad(startDeg))).toFixed(2);
+                const y1 = (cy - r * Math.sin(toRad(startDeg))).toFixed(2); // ← eksi!
+                const x2 = (cx + r * Math.cos(toRad(endDeg))).toFixed(2);
+                const y2 = (cy - r * Math.sin(toRad(endDeg))).toFixed(2);
+                const large = Math.abs(startDeg - endDeg) > 180 ? 1 : 0;
+                return `M${x1} ${y1} A${r} ${r} 0 ${large} 0 ${x2} ${y2}`;
+            }
+
+            // Tam track (180° → 0°)
+            const trackFull = arc(rTrack, 180, 0);
+            const indFull   = arc(rInd,   180, 0);
+
+            // Dolum: 180° → fillEnd (skor 0 → sol, skor 100 → sağ)
+            const fillEnd = 180 - (s / 100) * 180;
+            const trackFill = s > 1 ? arc(rTrack, 180, fillEnd) : null;
+            const indFill   = s > 1 ? arc(rInd,   180, fillEnd) : null;
+
+            // İbre noktası (rInd yayının ucunda)
+            const ndX = (cx + rInd * Math.cos(toRad(fillEnd))).toFixed(2);
+            const ndY = (cy - rInd * Math.sin(toRad(fillEnd))).toFixed(2);
+
+            // Etiketler — yay üzerinde, skora göre renklenir
             const labelData = [
-                { v: 0,   deg: 180 },
-                { v: 25,  deg: 135 },
-                { v: 50,  deg: 90  },
-                { v: 75,  deg: 45  },
-                { v: 100, deg: 0   },
+                { v: '0',   deg: 180 },
+                { v: '25',  deg: 135 },
+                { v: '50',  deg: 90  },
+                { v: '75',  deg: 45  },
+                { v: '100', deg: 0   },
             ];
             const labels = labelData.map(({ v, deg }) => {
                 const lx = (cx + rLabel * Math.cos(toRad(deg))).toFixed(1);
-                const ly = (cy + rLabel * Math.sin(toRad(deg))).toFixed(1);
-                // Uç etiketler biraz içe alınsın
-                const anchor = deg === 180 ? 'start' : deg === 0 ? 'end' : 'middle';
-                const col = v <= s ? color : '#5a7193';
-                return `<text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle"
-                    font-size="7.5" fill="${col}" font-family="JetBrains Mono,monospace" font-weight="700">${v}</text>`;
+                const ly = (cy - rLabel * Math.sin(toRad(deg))).toFixed(1);
+                const active = parseInt(v) <= s;
+                return `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle"
+                    font-size="7.5" fill="${active ? color : '#3d5470'}"
+                    font-family="JetBrains Mono,monospace" font-weight="700">${v}</text>`;
             }).join('');
 
-            // Skor metni ortada
-            const scoreLabel = `<text x="${cx}" y="${cy - 4}" text-anchor="middle"
-                font-size="26" font-weight="900" fill="${color}"
-                font-family="Outfit,sans-serif">${s.toFixed(0)}</text>
-                <text x="${cx}" y="${cy + 14}" text-anchor="middle"
-                font-size="7" fill="#8ba4c7" font-family="Outfit,sans-serif" letter-spacing="1">SKOR</text>`;
+            // uid: filter ID çakışmasını önler
+            const uid = (s * 100 | 0);
 
-            return `<div style="text-align:center; margin: 6px 0 4px;">
-                <svg viewBox="0 0 200 115" xmlns="http://www.w3.org/2000/svg"
-                     style="width:100%; max-width:220px; overflow:visible; filter:drop-shadow(0 0 8px ${glow});">
+            return `<div style="text-align:center;margin:8px 0 2px;">
+                <svg viewBox="0 0 200 108" xmlns="http://www.w3.org/2000/svg"
+                     style="width:100%;max-width:220px;display:block;margin:0 auto;overflow:hidden;">
                     <defs>
-                        <filter id="glow-${Math.round(s)}" x="-40%" y="-40%" width="180%" height="180%">
-                            <feGaussianBlur stdDeviation="2.5" result="blur"/>
-                            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        <filter id="gf${uid}" x="-60%" y="-60%" width="220%" height="220%">
+                            <feGaussianBlur stdDeviation="3" result="b"/>
+                            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
                         </filter>
                     </defs>
-                    <!-- Track arka plan -->
-                    <path d="${trackPath}" fill="none" stroke="rgba(255,255,255,0.06)"
+
+                    <!-- Track arka plan (gri, geniş) -->
+                    <path d="${trackFull}" fill="none" stroke="rgba(255,255,255,0.08)"
                           stroke-width="${swTrack}" stroke-linecap="round"/>
-                    <!-- Track dolgu rengi (skora kadar) -->
-                    <path d="${arcPath(cx, cy, rTrack, 180, Math.max(179.9, indEnd))}"
-                          fill="none" stroke="rgba(255,255,255,0.04)"
-                          stroke-width="${swTrack}" stroke-linecap="round"/>
-                    <!-- Gösterge ince yayı (track dışında) -->
-                    <path d="${trackPath}" fill="none" stroke="rgba(255,255,255,0.07)"
+                    <!-- Track dolum (hafif renk tonu) -->
+                    ${trackFill ? `<path d="${trackFill}" fill="none" stroke="${color}"
+                          stroke-width="${swTrack}" stroke-linecap="round" opacity="0.18"/>` : ''}
+
+                    <!-- Gösterge yayı arka plan (ince, dış) -->
+                    <path d="${indFull}" fill="none" stroke="rgba(255,255,255,0.05)"
                           stroke-width="${swInd}" stroke-linecap="round"/>
-                    ${s > 0 ? `<path d="${indPath}" fill="none" stroke="${color}"
+                    <!-- Gösterge yayı aktif dolum -->
+                    ${indFill ? `<path d="${indFill}" fill="none" stroke="${color}"
                           stroke-width="${swInd}" stroke-linecap="round"
-                          filter="url(#glow-${Math.round(s)})"/>` : ''}
+                          filter="url(#gf${uid})"/>` : ''}
+
                     <!-- İbre noktası -->
-                    ${s > 0 ? `<circle cx="${needleX}" cy="${needleY}" r="4.5"
-                          fill="${color}" filter="url(#glow-${Math.round(s)})"/>` : ''}
-                    <!-- Etiketler -->
+                    ${s > 1 ? `<circle cx="${ndX}" cy="${ndY}" r="5"
+                          fill="${color}" filter="url(#gf${uid})"/>` : ''}
+
+                    <!-- Etiketler: 0 / 25 / 50 / 75 / 100 -->
                     ${labels}
-                    <!-- Merkez skor -->
-                    ${scoreLabel}
+
+                    <!-- Skor rakamı -->
+                    <text x="${cx}" y="${cy - 24}" text-anchor="middle" dominant-baseline="middle"
+                        font-size="30" font-weight="900" fill="${color}"
+                        font-family="Outfit,sans-serif">${s.toFixed(0)}</text>
+                    <!-- SKOR yazısı -->
+                    <text x="${cx}" y="${cy - 6}" text-anchor="middle" dominant-baseline="middle"
+                        font-size="7" fill="#6a84a7"
+                        font-family="Outfit,sans-serif" letter-spacing="2">SKOR</text>
                 </svg>
             </div>`;
         }
