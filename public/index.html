@@ -4235,8 +4235,68 @@
             setTimeout(() => {
                 document.getElementById('splash').classList.add('hidden');
                 document.getElementById('controls').classList.add('visible');
+                // Sıcak başlangıç — kullanıcı hiçbir şey yapmadan değer görür
+                autoLoadNearestSpot();
             }, 2500);
         });
+
+        // ═══════════════════════════════════════════════════════════════════
+        // SICAK BAŞLANGIÇ — İlk açılışta yakın hot spot otomatik yüklenir
+        // Kullanıcı tıklama yapmadan değer görür. Click sayacı yakılmaz.
+        // ═══════════════════════════════════════════════════════════════════
+        let _autoLoadActive = false;
+
+        // Timezone offset'e ve aya göre en uygun hot spot'u seç
+        function pickNearestHotSpot() {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+            const month = new Date().getMonth(); // 0=Ocak
+
+            // Türkiye timezone'larına göre seçim
+            if (tz.includes('Istanbul') || tz.includes('Turkey') || tz.includes('Europe/Istanbul')) {
+                // Mevsime göre farklı başlangıç noktası
+                if (month >= 5 && month <= 8) {
+                    // Yaz — Ege/Akdeniz popüler
+                    return { name: "Bodrum Açıkları", lat: 37.0344, lon: 27.4305 };
+                } else if (month >= 9 && month <= 11) {
+                    // Sonbahar — Lüfer sezonu, Marmara/Boğaz
+                    return { name: "İstanbul Boğazı", lat: 41.0420, lon: 29.0050 };
+                } else if (month >= 2 && month <= 4) {
+                    // İlkbahar — İzmir Körfezi
+                    return { name: "İzmir Körfezi", lat: 38.4192, lon: 26.9160 };
+                } else {
+                    // Kış — Marmara
+                    return { name: "Marmara Adaları", lat: 40.8800, lon: 29.1300 };
+                }
+            }
+            // Yabancı timezone — İstanbul default
+            return { name: "İstanbul Boğazı", lat: 41.0420, lon: 29.0050 };
+        }
+
+        async function autoLoadNearestSpot() {
+            // Daha önce kullanıcı bir yere tıklamışsa atla
+            if (lastLatLon) return;
+
+            _autoLoadActive = true;
+            const spot = pickNearestHotSpot();
+
+            // Haritayı o noktaya uçur
+            if (map) map.flyTo([spot.lat, spot.lon], 10, { duration: 1.8 });
+
+            // Kısa gecikme — flyTo animasyonu başlasın
+            await new Promise(r => setTimeout(r, 1200));
+
+            // Hâlâ kullanıcı tıklamamışsa devam et
+            if (!_autoLoadActive) return;
+
+            // Welcome overlay'e "örnek" mesajı yaz
+            const wTitle = document.getElementById('welcome-title');
+            const wSub   = document.getElementById('welcome-subtitle');
+            if (wTitle) wTitle.textContent = '📍 ' + spot.name;
+            if (wSub)   wSub.textContent   = 'Başka bir noktaya tıklayarak analiz al';
+
+            // handleMapClick'i isAutoLoad=true ile çağır
+            await handleMapClick({ latlng: { lat: spot.lat, lng: spot.lon } }, true);
+        }
 
         function initMap() {
             try {
@@ -4371,9 +4431,12 @@
         // MAP CLICK HANDLER
         // ═══════════════════════════════════════════════════════════════════
 
-        async function handleMapClick(e) {
+        async function handleMapClick(e, isAutoLoad = false) {
             const lat = parseFloat(e.latlng.lat.toFixed(4));
             const lon = parseFloat(e.latlng.lng.toFixed(4));
+
+            // Auto-load ise örnek bayrağını kaldır
+            if (!isAutoLoad) _autoLoadActive = false;
 
             // 📏 Mesafe ölçme modundaysa normal click'i engelle
             if (measureMode && measureStep > 0) {
@@ -4381,8 +4444,8 @@
                 return;
             }
 
-            // 🔒 Tıklama limiti kontrolü (PRO ve grace period = sınırsız)
-            if (!isPremium && !isGracePeriod) {
+            // 🔒 Tıklama limiti kontrolü (isAutoLoad için atla)
+            if (!isAutoLoad && !isPremium && !isGracePeriod) {
                 try {
                     const clickRes = await apiFetch('/api/use-click', { 
                         method: 'POST', 
@@ -4456,6 +4519,34 @@
                 runLoadingAnimation(data);
                 // Mini chart — mevcut moda göre göster
                 updateMiniChart(CURRENT_MODE);
+                // Sıcak başlangıç rozeti — kullanıcıya "bu otomatik yüklendi" mesajı
+                if (_autoLoadActive) {
+                    setTimeout(() => {
+                        const hud = document.getElementById('hud');
+                        if (!hud || hud.style.display === 'none') return;
+                        // Mevcut rozet varsa ekleme
+                        if (document.getElementById('autoload-badge')) return;
+                        const badge = document.createElement('div');
+                        badge.id = 'autoload-badge';
+                        badge.innerHTML = '🗺️ Yakınındaki örnek nokta — haritaya tıklayarak kendi meranı analiz et';
+                        badge.style.cssText = [
+                            'margin: 0 24px 12px',
+                            'padding: 8px 12px',
+                            'background: rgba(0,212,255,0.08)',
+                            'border: 1px solid rgba(0,212,255,0.25)',
+                            'border-radius: 10px',
+                            'font-size: 0.72rem',
+                            'color: var(--cyan)',
+                            'line-height: 1.4',
+                            'cursor: pointer',
+                            'transition: opacity 0.4s'
+                        ].join(';');
+                        badge.onclick = () => badge.style.opacity = '0';
+                        // hud-content'in başına ekle
+                        const hudContent = document.getElementById('hud-content') || hud.querySelector('.hud-content');
+                        if (hudContent) hudContent.insertBefore(badge, hudContent.firstChild);
+                    }, 600);
+                }
             } catch (err) {
                 hideLoading();
                 alert("Bağlantı hatası: " + err.message);
@@ -6020,17 +6111,13 @@
                     : '📍 Geolocation not supported.');
                 return;
             }
-
-            // Buton geri bildirimi
             const btnText = document.getElementById('locate-btn-text');
             if (btnText) btnText.innerText = CURRENT_LANG === 'tr' ? '📍 Bulunuyor…' : '📍 Locating…';
-
             navigator.geolocation.getCurrentPosition(
                 pos => {
                     if (btnText) btnText.innerText = CURRENT_LANG === 'tr' ? 'Konumumu Bul' : 'My Location';
                     const { latitude, longitude } = pos.coords;
                     map.flyTo([latitude, longitude], 14);
-                    // Konum alınınca forecast otomatik tetikle
                     setTimeout(() => {
                         if (typeof handleMapClick === 'function') {
                             handleMapClick({ latlng: { lat: latitude, lng: longitude } });
@@ -6051,11 +6138,7 @@
                     }
                     alert(msg);
                 },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 12000,
-                    maximumAge: 60000
-                }
+                { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
             );
         }
 
@@ -7341,10 +7424,10 @@ window.addEventListener('popstate', function(e) {
     };
 
     function closeOnboarding() {
-        // Her kapama aksiyonu "görüldü" olarak işaretler.
-        // Checkbox işaretli DEĞİLSE kayıt yapılmaz → bir sonraki açılışta tekrar gösterilir.
+        // Varsayılan: her kapatma "görüldü" olarak kaydedilir.
+        // Checkbox işaretliyse "Her açılışta tekrar göster" → kayıt yapma.
         const cb = document.getElementById('onboard-dont-show');
-        const skipSave = cb && !cb.checked; // işaretsizse kaydetme
+        const skipSave = cb && cb.checked;
         if (!skipSave) {
             localStorage.setItem('meraloji_onboarding_seen', '1');
         }
