@@ -3421,9 +3421,15 @@ app.get('/api/forecast', async (req, res) => {
     try {
         const lat = parseFloat(req.query.lat).toFixed(4);
         const lon = parseFloat(req.query.lon).toFixed(4);
+        const isAutoLoad = req.query.source === 'autoload'; // Sıcak başlangıç isteği
         const now = new Date();
         const clickHour = now.getHours();
         const currentMonth = now.getMonth();
+
+        // AutoLoad isteğini logla — click sayacı istemci tarafında zaten atlanıyor
+        if (isAutoLoad) {
+            console.log(`[AUTOLOAD] ${lat},${lon} — sıcak başlangıç, click sayılmıyor`);
+        }
 
         // Izgara snap — 0.01° ≈ 1.1km hücre, derinlik hassasiyeti artırıldı
         const { gLat, gLon } = snapToGrid(lat, lon);
@@ -5388,6 +5394,33 @@ setTimeout(() => {
 //     warmAllHotSpots();
 //     setInterval(warmAllHotSpots, 55 * 60 * 1000);
 // }, 60_000);
+
+// ═══════════════════════════════════════════════════════════════
+// 🎯 SICAK BAŞLANGIÇ HOT SPOT
+// İlk açılış için mevsimsel en iyi başlangıç noktasını döner.
+// Auth gerektirmez. Client hardcode yerine burada tutulur →
+// deploy gerektirmeden güncellenebilir.
+// ═══════════════════════════════════════════════════════════════
+
+const HOT_SPOT_SEASONAL = {
+    winter: { name: 'Marmara Adaları',  lat: 40.8800, lon: 29.1300 },
+    spring: { name: 'İzmir Körfezi',    lat: 38.4192, lon: 26.9160 },
+    summer: { name: 'Bodrum Açıkları',  lat: 37.0344, lon: 27.4305 },
+    autumn: { name: 'İstanbul Boğazı',  lat: 41.0420, lon: 29.0050 },
+};
+
+app.get('/api/hotspot', (req, res) => {
+    const month = new Date().getMonth(); // 0=Ocak
+    let season;
+    if (month >= 2 && month <= 4)       season = 'spring';
+    else if (month >= 5 && month <= 8)  season = 'summer';
+    else if (month >= 9 && month <= 10) season = 'autumn';
+    else                                season = 'winter';
+
+    const spot = HOT_SPOT_SEASONAL[season];
+    console.log(`[HOTSPOT] Mevsim:${season} → ${spot.name} (${spot.lat},${spot.lon})`);
+    res.json({ ...spot, season, month, source: 'autoload' });
+});
 
 // ═══════════════════════════════════════════════════════════════
 // ⭐ FAVORİLER
