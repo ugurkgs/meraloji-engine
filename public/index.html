@@ -4921,7 +4921,12 @@
                 tacticText = t('TACTIC_MODERATE') + tacticData.fish.join(', ');
             }
             
-            document.getElementById('tactic-display').innerText = tacticText;
+            // Baskın tür notu
+            let fullTacticText = tacticText;
+            if (tacticData?.dominantNote) {
+                fullTacticText += ' ' + tacticData.dominantNote;
+            }
+            document.getElementById('tactic-display').innerText = fullTacticText;
             
             // [YENİ] Sıcaklık Şoku Göstergesi
             let shockEl = document.getElementById('temp-shock-display');
