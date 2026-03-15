@@ -4246,38 +4246,21 @@
         // ═══════════════════════════════════════════════════════════════════
         let _autoLoadActive = false;
 
-        // Timezone offset'e ve aya göre en uygun hot spot'u seç
-        function pickNearestHotSpot() {
-            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-            const month = new Date().getMonth(); // 0=Ocak
-
-            // Türkiye timezone'larına göre seçim
-            if (tz.includes('Istanbul') || tz.includes('Turkey') || tz.includes('Europe/Istanbul')) {
-                // Mevsime göre farklı başlangıç noktası
-                if (month >= 5 && month <= 8) {
-                    // Yaz — Ege/Akdeniz popüler
-                    return { name: "Bodrum Açıkları", lat: 37.0344, lon: 27.4305 };
-                } else if (month >= 9 && month <= 11) {
-                    // Sonbahar — Lüfer sezonu, Marmara/Boğaz
-                    return { name: "İstanbul Boğazı", lat: 41.0420, lon: 29.0050 };
-                } else if (month >= 2 && month <= 4) {
-                    // İlkbahar — İzmir Körfezi
-                    return { name: "İzmir Körfezi", lat: 38.4192, lon: 26.9160 };
-                } else {
-                    // Kış — Marmara
-                    return { name: "Marmara Adaları", lat: 40.8800, lon: 29.1300 };
-                }
-            }
-            // Yabancı timezone — İstanbul default
-            return { name: "İstanbul Boğazı", lat: 41.0420, lon: 29.0050 };
-        }
-
         async function autoLoadNearestSpot() {
             // Daha önce kullanıcı bir yere tıklamışsa atla
             if (lastLatLon) return;
 
             _autoLoadActive = true;
-            const spot = pickNearestHotSpot();
+
+            // Sunucudan mevsimsel hot spot'u al (hardcode değil, server'dan dinamik)
+            let spot;
+            try {
+                const r = await fetch('/api/hotspot');
+                spot = await r.json();
+            } catch(e) {
+                // Sunucu erişilemezse İstanbul fallback
+                spot = { name: 'İstanbul Boğazı', lat: 41.0420, lon: 29.0050 };
+            }
 
             // Haritayı o noktaya uçur
             if (map) map.flyTo([spot.lat, spot.lon], 10, { duration: 1.8 });
@@ -4497,7 +4480,8 @@
             showLoading();
 
             try {
-                const res = await apiFetch(`/api/forecast?lat=${lat}&lon=${lon}`);
+                const forecastUrl = `/api/forecast?lat=${lat}&lon=${lon}` + (isAutoLoad ? '&source=autoload' : '');
+                const res = await apiFetch(forecastUrl);
                 const data = await res.json();
                 
                 // API hatası kontrolü
