@@ -2654,8 +2654,8 @@
                           <feGaussianBlur stdDeviation="3" result="b"/>
                           <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
                         </filter>
-                        <!-- Gauge gradient: kırmızı → sarı → cyan → yeşil boyunca arc -->
-                        <linearGradient id="gauge-grad" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="userSpaceOnUse" x1="14" y1="0" x2="246" y2="0">
+                        <!-- Gauge gradient: arc boyunca soldan sağa kırmızı → sarı → cyan → yeşil -->
+                        <linearGradient id="gauge-grad" gradientUnits="userSpaceOnUse" x1="14" y1="0" x2="246" y2="0">
                           <stop offset="0%"   stop-color="#ff4444"/>
                           <stop offset="33%"  stop-color="#f1c40f"/>
                           <stop offset="66%"  stop-color="#00d4ff"/>
