@@ -2252,7 +2252,7 @@
                     </div>
                     <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.4);cursor:pointer;margin-top:8px;">
                         <input type="checkbox" id="onboard-dont-show" style="width:16px;height:16px;accent-color:#00d4ff;">
-                        Bir daha gösterme
+                        Her açılışta tekrar göster
                     </label>
                 </div>
 
@@ -6014,12 +6014,49 @@
         }
 
         function locateMe() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    pos => map.flyTo([pos.coords.latitude, pos.coords.longitude], 14),
-                    () => alert(CURRENT_LANG === 'tr' ? "Konum alınamadı." : "Location unavailable.")
-                );
+            if (!navigator.geolocation) {
+                alert(CURRENT_LANG === 'tr'
+                    ? '📍 Bu cihaz konum desteklemiyor.'
+                    : '📍 Geolocation not supported.');
+                return;
             }
+
+            // Buton geri bildirimi
+            const btnText = document.getElementById('locate-btn-text');
+            if (btnText) btnText.innerText = CURRENT_LANG === 'tr' ? '📍 Bulunuyor…' : '📍 Locating…';
+
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    if (btnText) btnText.innerText = CURRENT_LANG === 'tr' ? 'Konumumu Bul' : 'My Location';
+                    const { latitude, longitude } = pos.coords;
+                    map.flyTo([latitude, longitude], 14);
+                    // Konum alınınca forecast otomatik tetikle
+                    setTimeout(() => {
+                        if (typeof handleMapClick === 'function') {
+                            handleMapClick({ latlng: { lat: latitude, lng: longitude } });
+                        }
+                    }, 900);
+                },
+                err => {
+                    if (btnText) btnText.innerText = CURRENT_LANG === 'tr' ? 'Konumumu Bul' : 'My Location';
+                    let msg;
+                    if (CURRENT_LANG === 'tr') {
+                        if (err.code === 1)      msg = '📍 Konum izni reddedildi.\nTarayıcı/uygulama ayarlarından izin ver.';
+                        else if (err.code === 2) msg = '📍 Konum sinyali alınamadı. GPS açık mı?';
+                        else                     msg = '📍 Konum zaman aşımı. Tekrar dene.';
+                    } else {
+                        if (err.code === 1)      msg = '📍 Permission denied. Allow in settings.';
+                        else if (err.code === 2) msg = '📍 Location unavailable. Is GPS on?';
+                        else                     msg = '📍 Location timed out. Try again.';
+                    }
+                    alert(msg);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 12000,
+                    maximumAge: 60000
+                }
+            );
         }
 
         // ═══════════════════════════════════════════════════════════════════
@@ -7304,9 +7341,11 @@ window.addEventListener('popstate', function(e) {
     };
 
     function closeOnboarding() {
-        // "Bir daha gösterme" checkbox kontrolü
+        // Her kapama aksiyonu "görüldü" olarak işaretler.
+        // Checkbox işaretli DEĞİLSE kayıt yapılmaz → bir sonraki açılışta tekrar gösterilir.
         const cb = document.getElementById('onboard-dont-show');
-        if (cb && cb.checked) {
+        const skipSave = cb && !cb.checked; // işaretsizse kaydetme
+        if (!skipSave) {
             localStorage.setItem('meraloji_onboarding_seen', '1');
         }
         const overlay = document.getElementById('onboarding-overlay');
