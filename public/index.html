@@ -2918,7 +2918,7 @@
         <div class="menu-footer">
             <span id="dev-label">Geliştirici</span>: Uğur Kögüs<br>
             <a href="/cdn-cgi/l/email-protection#8affedfff8e1e5edfff9caede7ebe3e6a4e9e5e7" style="color: var(--cyan); font-size: 0.8rem;">📧 <span class="__cf_email__" data-cfemail="76031103041d1911030536111b171f1a5815191b">[email&#160;protected]</span></a><br>
-            <span style="font-size: 0.75rem; opacity: 0.7;">F.I.S.H. System v2.7</span>
+            <span style="font-size: 0.75rem; opacity: 0.7;">F.I.S.H. System v3.0</span>
         </div>
     </div>
 
@@ -6287,11 +6287,6 @@
                     if (btnText) btnText.innerText = CURRENT_LANG === 'tr' ? 'Konumumu Bul' : 'My Location';
                     const { latitude, longitude } = pos.coords;
                     map.flyTo([latitude, longitude], 14);
-                    setTimeout(() => {
-                        if (typeof handleMapClick === 'function') {
-                            handleMapClick({ latlng: { lat: latitude, lng: longitude } });
-                        }
-                    }, 900);
                 },
                 err => {
                     if (btnText) btnText.innerText = CURRENT_LANG === 'tr' ? 'Konumumu Bul' : 'My Location';
@@ -6870,10 +6865,13 @@
                 if (_favMarker) { map.removeLayer(_favMarker); _favMarker = null; }
 
                 // Yeni marker ekle — isimli tooltip
+                const favLabel = name || '⭐ Favori';
+                // Her karakter ~7px genişlik, padding 16px — badge yarı genişliği = anchor X
+                const favW = Math.round(favLabel.length * 7 + 16);
                 const favIcon = L.divIcon({
                     className: '',
-                    html: `<div style="background:linear-gradient(135deg,#00c8c8,#00ffcc);color:#040d1a;font-size:11px;font-weight:700;padding:3px 8px;border-radius:8px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.3);">${name || '⭐ Favori'}</div><div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #00ffcc;margin:0 auto;"></div>`,
-                    iconAnchor: [0, 0]
+                    html: `<div style="background:linear-gradient(135deg,#00c8c8,#00ffcc);color:#040d1a;font-size:12px;font-weight:700;padding:4px 8px;border-radius:8px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.3);line-height:1.4;">${favLabel}</div><div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #00ffcc;margin:0 auto;"></div>`,
+                    iconAnchor: [favW / 2, 30]
                 });
 
                 _favMarker = L.marker([lat, lon], { icon: favIcon, zIndexOffset: 1000 })
