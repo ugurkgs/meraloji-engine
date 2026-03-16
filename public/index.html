@@ -5276,35 +5276,78 @@
         // HEADLINE SİSTEMİ — Önce sonuç, sonra neden
         // ═══════════════════════════════════════════════════════════════════
 
+        const HEADLINE_VARIANTS = {
+            s85: [
+                "🔥Bugün {name} avı için koşullar harika!",
+                "🔥{name} için harika bir gün, oltanı kap gel!",
+                "🔥Şartlar çok iyi, {name} oldukça aktif.",
+                "🔥 Bugün {name} avlamak için ideal bir gün.",
+                "🔥 Tam {name} yakalama zamanı!",
+                "🔥Oltaları hazırla, {name} seni bekliyor.",
+                "🔥{name} peşindeysen bugün avlak kesinlikle senden yana.",
+                "🔥Kovayı doldurma vakti! {name} için sular çok uygun.",
+                "🔥Bugün {name} bereketi var, şimdiden rastgele!",
+                "🔥Meralar hareketli, fırsatı kaçırma ve {name} için oltanı at!",
+            ],
+            s70: [
+                "✅ Bugün {name} avı için oldukça iyi bir gün.",
+                "✅ Şartlar yerinde, {name} için meraya inmeye değer.",
+                "✅ Bugün {name} yakalamak için güzel bir fırsat var, değerlendirmelisin.",
+                "✅ Su ve hava durumu güzel, {name} şu an aktif görünüyor.",
+                "✅ Oltayı suya indirmek için {name} koşulları gayet elverişli.",
+                "✅ Denemek istersen {name} için sular hiç fena değil.",
+                "✅ Oltanı alıp sahile inmek için {name} şartları gayet uygun.",
+                "✅ Bugün merada {name} hareketliliği bekliyoruz, şimdiden rastgele!",
+                "✅ Keyifli bir {name} avı için koşullar hazır.",
+                "✅ Bugün {name} için koşullar güçlü sayılır.",
+            ],
+            s50: [
+                "⚠️ {name} avlamak mümkün ama bugün biraz sabır gerekecek.",
+                "⚠️ {name} için koşullar tam oturmamış ama denemekten zarar gelmez.",
+                "⚠️ Merada {name} ihtimali var ama beklentiyi çok yüksek tutmamakta fayda var.",
+                "⚠️ Merayı doğru seçersen tek tük de olsa {name} alman sürpriz olmaz.",
+                "⚠️ {name} buralarda dolanıyor olabilir ama bugün biraz nazlı davranacaktır.",
+                "⚠️ Zoru sevenler için {name} yoklamak adına fena bir gün değil.",
+                "⚠️ Bugün oltana {name} vurabilir.",
+                "⚠️ Doğru yem ve iyi bir sabırla {name} kandırma şansın var.",
+                "⚠️ Sular biraz kararsız; {name} için bugün ustalık ve sabır konuşacak.",
+                "⚠️ Koşullar biraz belirsiz olsa da iyi bir taktikle {name} alabilirsin.",
+            ],
+            s30: [
+                "😴 Koşullar oldukça zorlayıcı, başka bir mera denemeyi ya da yarını beklemeyi düşünebilirsin.",
+                "😴 Bugün {name} avı maalesef pek verimli geçmeyebilir.",
+                "😴 Hava ve su şartları şu an {name} için pek iç açıcı durmuyor.",
+                "😴 Vuruş alma ihtimalin oldukça düşük, farklı bir mera arayışına girmekte fayda var.",
+                "😴 Bugün deniz havası almak güzel olabilir ama {name} için beklentiyi düşük tut.",
+                "😴 Bugün {name} çok nazlı olur, oltanı boşa yorma ihtimalin yüksek.",
+                "😴 Veriler pek parlak değil, bugün {name} peşinde koşmak epey yorucu ve sonuçsuz olabilir.",
+                "😴 Sular durgun veya hava ters; bugün {name} için boşuna enerji harcama derim.",
+                "😴 Merada vuruş alma ihtimalin zayıf, {name} bugün saklanmayı tercih ediyor.",
+                "😴 Gidip merayı yoklayabilirsin ama {name} için evde kalıp takımları bağlamak daha mantıklı bir gün gibi duruyor.",
+            ],
+            s0: [
+                "🚫 Mera maalesef çok durgun, şu an bu nokta av için pek uygun değil.",
+                "🚫 Bugün şartlar {name} için maalesef oldukça olumsuz görünüyor.",
+                "🚫 Bu merada şu an avlanmak sadece vakit kaybı olacaktır.",
+                "🚫 Bugün burada beklemeye değmez, sular çok sessiz.",
+                "🚫 Suda hiç hareket yok, farklı bir yer denemeli ya da farklı bir gün tercih etmelisin.",
+                "🚫 En iyisi evde kalıp takımları bağlamak, {name} bugün hiç oralı değil.",
+                "🚫 Bugün {name} için boşuna yorulma, sıcak çayını demleyip dinlenme vakti.",
+                "🚫 {name} bugün tamamen saklanmış durumda, oltanı hiç ıslatma derim.",
+                "🚫 Mera adeta uykuda; deniz kenarına inip de moral bozmaya gerek yok.",
+                "🚫 Gitmek istersen sen bilirsin ama bugün {name} için eli boş dönme ihtimalin çok yüksek.",
+            ],
+        };
+
         function buildHeadline(fishList, score, lang) {
-            // İstilacı ve koruma dışındaki ilk balığı al
             const EXCLUDED = ['İSTİLACI', 'KORUMA'];
             const top = (fishList || []).find(f => !EXCLUDED.includes(f.category));
+            const name = top ? (lang === 'en' ? (top.nameEn || top.name) : top.name) : '';
             if (!top) return '';
-
-            const name = lang === 'en' ? (top.nameEn || top.name) : top.name;
-
-            if (score >= 85) {
-                return lang === 'tr'
-                    ? `🔥 Bugün <strong>${name}</strong> için mükemmel koşullar`
-                    : `🔥 Excellent conditions for <strong>${name}</strong> today`;
-            } else if (score >= 70) {
-                return lang === 'tr'
-                    ? `✅ Bugün <strong>${name}</strong> için iyi bir gün`
-                    : `✅ Good day for <strong>${name}</strong> today`;
-            } else if (score >= 50) {
-                return lang === 'tr'
-                    ? `⚠️ <strong>${name}</strong> tutulabilir — sabır gerekli`
-                    : `⚠️ <strong>${name}</strong> possible — patience needed`;
-            } else if (score >= 30) {
-                return lang === 'tr'
-                    ? `😴 Bugün zor koşullar — başka nokta veya yarın dene`
-                    : `😴 Tough conditions today — try nearby or tomorrow`;
-            } else {
-                return lang === 'tr'
-                    ? `🚫 Çok düşük aktivite — bu nokta şu an uygun değil`
-                    : `🚫 Very low activity — this spot isn't ideal right now`;
-            }
+            const key = score >= 85 ? 's85' : score >= 70 ? 's70' : score >= 50 ? 's50' : score >= 30 ? 's30' : 's0';
+            const pool = HEADLINE_VARIANTS[key];
+            const tpl = pool[Math.floor(Math.random() * pool.length)];
+            return tpl.replace(/\{name\}/g, '<strong>' + name + '</strong>');
         }
 
         // Skor rengini headline'a uygula
