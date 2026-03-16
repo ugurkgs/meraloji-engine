@@ -7441,88 +7441,104 @@ window.addEventListener('popstate', function(e) {
         }
 
         window.buildHourlyCurve=function(scores,bestHourRaw){
-            const W=260,H=64,padL=4,padR=4,padT=10,padB=16;
-            const plotW=W-padL-padR,plotH=H-padT-padB;
-            const bestH=bestHourRaw?parseInt(bestHourRaw):-1;
+            const W=300,H=110,pL=10,pR=10,pT=18,pB=22;
+            const pw=W-pL-pR,ph=H-pT-pB;
+            const bestH=bestHourRaw!=null?parseInt(bestHourRaw):-1;
             const nowH=new Date().getHours();
+            const ns='http://www.w3.org/2000/svg';
 
-            const pts=scores.map((sv,h)=>({
-                x:padL+(h/23)*plotW,
-                y:padT+plotH-(Math.min(sv,100)/100)*plotH,
-                s:sv,h
+            const pts=scores.map((s,h)=>({
+                x:pL+(h/23)*pw,
+                y:pT+ph-(Math.min(s,100)/100)*ph,
+                s:s
             }));
 
-            // Catmull-Rom → cubic bezier (매우 부드러운 곡선)
-            function smoothPath(points){
-                if(points.length<2) return '';
-                let d='M'+points[0].x.toFixed(1)+','+points[0].y.toFixed(1);
-                for(let i=0;i<points.length-1;i++){
-                    const p0=points[Math.max(0,i-1)];
-                    const p1=points[i];
-                    const p2=points[i+1];
-                    const p3=points[Math.min(points.length-1,i+2)];
-                    const cp1x=p1.x+(p2.x-p0.x)/6;
-                    const cp1y=p1.y+(p2.y-p0.y)/6;
-                    const cp2x=p2.x-(p3.x-p1.x)/6;
-                    const cp2y=p2.y-(p3.y-p1.y)/6;
-                    d+=' C'+cp1x.toFixed(1)+','+cp1y.toFixed(1)+' '+cp2x.toFixed(1)+','+cp2y.toFixed(1)+' '+p2.x.toFixed(1)+','+p2.y.toFixed(1);
+            // Catmull-Rom → cubic bezier
+            function crPath(p){
+                if(p.length<2) return '';
+                let d='M'+p[0].x.toFixed(1)+','+p[0].y.toFixed(1);
+                for(let i=0;i<p.length-1;i++){
+                    const p0=p[Math.max(0,i-1)],p1=p[i],p2=p[i+1],p3=p[Math.min(p.length-1,i+2)];
+                    const c1x=p1.x+(p2.x-p0.x)/6,c1y=p1.y+(p2.y-p0.y)/6;
+                    const c2x=p2.x-(p3.x-p1.x)/6,c2y=p2.y-(p3.y-p1.y)/6;
+                    d+=' C'+c1x.toFixed(1)+','+c1y.toFixed(1)+' '+c2x.toFixed(1)+','+c2y.toFixed(1)+' '+p2.x.toFixed(1)+','+p2.y.toFixed(1);
                 }
                 return d;
             }
 
-            const linePath=smoothPath(pts);
-            const areaPath=linePath
-                +' L'+pts[pts.length-1].x.toFixed(1)+','+(padT+plotH).toFixed(1)
-                +' L'+pts[0].x.toFixed(1)+','+(padT+plotH).toFixed(1)+' Z';
-
-            // Skor ortalamasına göre çizgi rengi
             const avgScore=scores.reduce((a,b)=>a+b,0)/scores.length;
             const lineColor=avgScore>=70?'#00ff88':avgScore>=50?'#00d4ff':avgScore>=35?'#f1c40f':'#ff4444';
-            const glowColor=avgScore>=70?'rgba(0,255,136,0.4)':avgScore>=50?'rgba(0,212,255,0.4)':avgScore>=35?'rgba(241,196,15,0.4)':'rgba(255,68,68,0.4)';
-            const fillColor=avgScore>=70?'rgba(0,255,136,0.2)':avgScore>=50?'rgba(0,212,255,0.2)':avgScore>=35?'rgba(241,196,15,0.15)':'rgba(255,68,68,0.15)';
+            const fillStop =avgScore>=70?'rgba(0,255,136,0.25)':avgScore>=50?'rgba(0,212,255,0.25)':avgScore>=35?'rgba(241,196,15,0.2)':'rgba(255,68,68,0.2)';
 
             const uid='hc'+Date.now();
-            let html='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">';
-            html+='<defs>';
-            html+='<linearGradient id="'+uid+'g" x1="0" y1="0" x2="0" y2="1">';
-            html+='<stop offset="0%" stop-color="'+fillColor+'"/>';
-            html+='<stop offset="100%" stop-color="rgba(0,0,0,0)"/>';
-            html+='</linearGradient>';
-            html+='<filter id="'+uid+'f" x="-50%" y="-50%" width="200%" height="200%">';
-            html+='<feGaussianBlur stdDeviation="2" result="b"/>';
-            html+='<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>';
-            html+='</filter>';
-            html+='</defs>';
 
-            // Alan dolgusu
-            html+='<path d="'+areaPath+'" fill="url(#'+uid+'g)" opacity="0.7"/>';
-            // Eğri çizgi — skora göre renk + glow
-            html+='<path d="'+linePath+'" fill="none" stroke="'+lineColor+'" stroke-width="2" stroke-linejoin="round" filter="url(#'+uid+'f)"/>';
+            // SVG string builder
+            let s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="'+ns+'" style="width:100%;display:block;">';
+            // defs
+            s+='<defs><linearGradient id="'+uid+'g" x1="0" y1="0" x2="0" y2="1">';
+            s+='<stop offset="0%" stop-color="'+fillStop+'"/>';
+            s+='<stop offset="100%" stop-color="rgba(0,0,0,0)"/>';
+            s+='</linearGradient></defs>';
 
-            // Şimdi çizgisi
-            const nowPt=pts[nowH];
-            html+='<line x1="'+nowPt.x.toFixed(1)+'" y1="'+padT+'" x2="'+nowPt.x.toFixed(1)+'" y2="'+(padT+plotH).toFixed(1)+'" stroke="'+glowColor+'" stroke-width="1" stroke-dasharray="2 2"/>';
-            html+='<circle cx="'+nowPt.x.toFixed(1)+'" cy="'+nowPt.y.toFixed(1)+'" r="3" fill="'+lineColor+'" filter="url(#'+uid+'f)"/>';
-            html+='<text x="'+nowPt.x.toFixed(1)+'" y="'+(nowPt.y-7).toFixed(1)+'" text-anchor="middle" font-size="6" fill="'+lineColor+'" font-family="monospace" font-weight="700">'+nowPt.s.toFixed(0)+'</text>';
+            // 70 eşik çizgisi
+            const refY=(pT+ph-(70/100)*ph).toFixed(1);
+            s+='<line x1="'+pL+'" x2="'+(W-pR)+'" y1="'+refY+'" y2="'+refY+'" stroke="rgba(0,255,136,0.2)" stroke-dasharray="4 3" stroke-width="1"/>';
+            s+='<text x="'+(W-pR-2)+'" y="'+(parseFloat(refY)-3)+'" text-anchor="end" font-size="8" fill="rgba(0,255,136,0.4)" font-family="monospace">70</text>';
 
-            // En iyi saat
+            // Saat kılavuz çizgileri + etiketler
+            [0,6,12,18,23].forEach(function(h){
+                const x=(pL+(h/23)*pw).toFixed(1);
+                s+='<line x1="'+x+'" x2="'+x+'" y1="'+pT+'" y2="'+(pT+ph)+'" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>';
+                const lbl=h===23?'23:00':(String(h).padStart(2,'0')+':00');
+                s+='<text x="'+x+'" y="'+(H-4)+'" text-anchor="middle" font-size="9" fill="#3d5470" font-family="monospace">'+lbl+'</text>';
+            });
+
+            // Alan + eğri
+            const lp=crPath(pts);
+            const ap=lp+' L'+pts[23].x.toFixed(1)+','+(pT+ph).toFixed(1)+' L'+pts[0].x.toFixed(1)+','+(pT+ph).toFixed(1)+' Z';
+            s+='<path d="'+ap+'" fill="url(#'+uid+'g)"/>';
+            s+='<path d="'+lp+'" fill="none" stroke="'+lineColor+'" stroke-width="2" stroke-linecap="round"/>';
+
+            // En iyi saat — yeşil nokta + badge
             if(bestH>=0&&bestH<24){
                 const bp=pts[bestH];
-                html+='<circle cx="'+bp.x.toFixed(1)+'" cy="'+bp.y.toFixed(1)+'" r="4" fill="#00ff88" filter="url(#'+uid+'f)"/>';
-                html+='<text x="'+bp.x.toFixed(1)+'" y="'+(bp.y-7).toFixed(1)+'" text-anchor="middle" font-size="6" fill="#00ff88" font-family="monospace" font-weight="700">'+bp.s.toFixed(0)+'</text>';
+                const bx=Math.min(Math.max(bp.x,28),W-28);
+                const by=Math.max(bp.y-14,pT+2);
+                s+='<line x1="'+bp.x.toFixed(1)+'" x2="'+bp.x.toFixed(1)+'" y1="'+pT+'" y2="'+(pT+ph)+'" stroke="rgba(0,255,136,0.25)" stroke-width="1"/>';
+                s+='<circle cx="'+bp.x.toFixed(1)+'" cy="'+bp.y.toFixed(1)+'" r="5" fill="#00ff88"/>';
+                s+='<circle cx="'+bp.x.toFixed(1)+'" cy="'+bp.y.toFixed(1)+'" r="2.5" fill="var(--bg-deep,#040d1a)"/>';
+                s+='<rect x="'+(bx-22)+'" y="'+(by-9)+'" width="44" height="14" rx="4" fill="rgba(0,255,136,0.15)" stroke="rgba(0,255,136,0.4)" stroke-width="0.5"/>';
+                s+='<text x="'+bx+'" y="'+by+'" text-anchor="middle" font-size="9" font-weight="700" fill="#00ff88" font-family="monospace">★ '+String(bestH).padStart(2,'0')+':00</text>';
             }
 
-            // Saat etiketleri
-            [0,3,6,9,12,15,18,21].forEach(h=>{
-                const x=(padL+(h/23)*plotW).toFixed(1);
-                html+='<text x="'+x+'" y="'+(H-2)+'" text-anchor="middle" font-size="5.5" fill="#5a7193" font-family="monospace">'+String(h).padStart(2,'0')+'</text>';
-            });
-            html+='</svg>';
+            // Şimdi — nokta + koşullu badge
+            const np=pts[nowH];
+            s+='<line x1="'+np.x.toFixed(1)+'" x2="'+np.x.toFixed(1)+'" y1="'+pT+'" y2="'+(pT+ph)+'" stroke="rgba(255,255,255,0.15)" stroke-dasharray="2 2" stroke-width="1"/>';
+            s+='<circle cx="'+np.x.toFixed(1)+'" cy="'+np.y.toFixed(1)+'" r="5" fill="'+lineColor+'"/>';
+            s+='<circle cx="'+np.x.toFixed(1)+'" cy="'+np.y.toFixed(1)+'" r="2.5" fill="var(--bg-deep,#040d1a)"/>';
+            if(Math.abs(nowH-bestH)>2){
+                const nx=Math.min(Math.max(np.x,24),W-24);
+                const ny=Math.max(np.y-14,pT+2);
+                s+='<rect x="'+(nx-20)+'" y="'+(ny-9)+'" width="40" height="14" rx="4" fill="rgba(0,212,255,0.12)" stroke="rgba(0,212,255,0.35)" stroke-width="0.5"/>';
+                s+='<text x="'+nx+'" y="'+ny+'" text-anchor="middle" font-size="9" font-weight="700" fill="#00d4ff" font-family="monospace">'+String(nowH).padStart(2,'0')+':00</text>';
+            }
+            s+='</svg>';
 
+            // Alt özet satırı
+            const nowScore=pts[nowH].s.toFixed(0);
+            const bestLabel=bestH>=0?String(bestH).padStart(2,'0')+':00 — %'+pts[bestH].s.toFixed(0):'--';
+            const nowLbl =typeof CURRENT_LANG!=='undefined'&&CURRENT_LANG==='en'?'Now':'Şimdi';
+            const bestLbl=typeof CURRENT_LANG!=='undefined'&&CURRENT_LANG==='en'?'Best':'En iyi';
             const chartTitle=typeof CURRENT_LANG!=='undefined'&&CURRENT_LANG==='en'?'HOURLY SCORE':'SAATLİK SKOR';
-            return '<div style="margin-top:8px;padding:8px 6px 4px;background:rgba(0,0,0,0.25);border-radius:6px;border:1px solid var(--border-subtle);">'
-                +'<div style="font-size:0.65rem;color:var(--cyan);margin-bottom:4px;">📈 '+chartTitle+'</div>'
-                +html+'</div>';
+
+            return '<div style="margin-top:8px;padding:10px 10px 8px;background:rgba(0,0,0,0.25);border-radius:8px;border:1px solid var(--border-subtle);">'
+                +'<div style="font-size:0.65rem;color:var(--cyan);margin-bottom:6px;letter-spacing:0.5px;">📈 '+chartTitle+'</div>'
+                +s
+                +'<div style="display:flex;justify-content:space-between;margin-top:6px;">'
+                +'<span style="font-size:0.7rem;color:var(--text-muted);">'+nowLbl+': <strong style="color:'+lineColor+';">%'+nowScore+'</strong></span>'
+                +'<span style="font-size:0.7rem;color:var(--text-muted);">★ '+bestLbl+': <strong style="color:#00ff88;">'+bestLabel+'</strong></span>'
+                +'</div>'
+                +'</div>';
         };
 
         window.buildForecastMini=function(forecastData){
