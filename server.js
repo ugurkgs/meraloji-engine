@@ -2851,7 +2851,8 @@ function calculateFishScore(fish, key, params) {
         currentSpeed, pressureTrend, moonPhase,
         depthAvg, hour, salinity,
         cloudCover, wavePeriod, swellHeight, oceanCurrent, tempShock, uvIndex,
-        chlorophyll, thermoclineDepth, moonlightIntensity
+        chlorophyll, thermoclineDepth, moonlightIntensity,
+        isBoat
     } = params;
 
     const season = getSeason(targetDate.getMonth());
@@ -3330,7 +3331,6 @@ function calculateFishScore(fish, key, params) {
     }
 
     // === FAZ 1.5: KIYI / TEKNE FİLTRESİ ===
-    const isBoat = params.isBoat || false;
     if (!isBoat && depthAvg !== undefined && depthAvg !== null) {
         const strictOffshoreCategories = ['PELAJIK', 'AVCI', 'DIP_DERIN'];
         if (strictOffshoreCategories.includes(fish.category)) {
