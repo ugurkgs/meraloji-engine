@@ -3954,9 +3954,12 @@ app.get('/api/forecast', async (req, res) => {
                     chlorophyllStale: chlorophyllData ? chlorophyllData.stale : true,
                     oceanCurrent,
                     depth: depthData ? depthData.avg : null,
-                    gridDistance: (marine.latitude && marine.longitude)
-                        ? haversineKm(parseFloat(lat), parseFloat(lon), marine.latitude, marine.longitude)
-                        : 0
+                    gridDistance: (() => {
+                        if (!marine.latitude || !marine.longitude) return 0;
+                        const d = haversineKm(parseFloat(lat), parseFloat(lon), parseFloat(marine.latitude), parseFloat(marine.longitude));
+                        console.log(`[GRID] tıklanan:(${lat},${lon}) apiGrid:(${marine.latitude},${marine.longitude}) mesafe:${d.toFixed(2)}km`);
+                        return d;
+                    })()
                 }), tacticKey, tacticData, weatherSummary,
                 fishList: fishList.slice(0, 10), moonPhase: moon.phase,
                 moonPhaseName: getMoonPhaseName(moon.phase), airTemp: tempAir, timeMode,
