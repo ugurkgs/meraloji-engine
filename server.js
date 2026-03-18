@@ -2538,7 +2538,7 @@ const SPECIES_DB = {
     wavePref: 0.2,
     clarityPref: "CLEAR",
     currentPref: 0.3,
-    salinityPref: "LOW",
+    salinityPref: "ANY",
     planktonPref: "HIGH",
     moonPref: "bright",
     sstTrendPref: "warming",
