@@ -1373,6 +1373,7 @@ const SPECIES_DB = {
     name: "Trakun (Tral)", nameEn: "Blue Runner", icon: "🐟", scientificName: "Caranx crysos",
     photoId: 73,
     category: "PELAJIK",
+        shoreMonths: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // kıyıya yaklaşma ayları (0=Ocak)
     peakHours: "DAY", peakHoursDesc: "Sabah ve öğleden sonra sürü halinde aktif",
     tempRange: { min: 17, opt: 25, max: 28 },
     seasons: { winter: 0.20, spring: 0.55, summer: 0.95, autumn: 0.70 },
@@ -1523,6 +1524,7 @@ const SPECIES_DB = {
         name: "Antenli Mercan", nameEn: "Blackspot Seabream", icon: "🐟", scientificName: "Pagellus bogaraveo",
         photoId: 36,
         category: "DIP_DERIN",
+        shoreMonths: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin kayalık dipte",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.70, spring: 0.60, summer: 0.40, autumn: 0.65 },
@@ -1683,6 +1685,7 @@ const SPECIES_DB = {
         name: "Trança", nameEn: "Pink Dentex", icon: "🐟", scientificName: "Dentex gibbosus",
         photoId: 49,
         category: "DIP_DERIN",
+        shoreMonths: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin su",
         tempRange: { min: 16, opt: 21, max: 26 },
         seasons: { winter: 0.40, spring: 0.70, summer: 0.85, autumn: 0.75 },
@@ -1745,6 +1748,7 @@ const SPECIES_DB = {
         name: "Granyoz (Sarıağız)", nameEn: "Meagre", icon: "🐟", scientificName: "Argyrosomus regius",
         photoId: 10,
         category: "AVCI",
+        shoreMonths: [5, 6, 7, 8, 9], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "NIGHT", peakHoursDesc: "Gece ve alacakaranlık",
         tempRange: { min: 16, opt: 21, max: 26 },
         seasons: { winter: 0.35, spring: 0.65, summer: 0.80, autumn: 0.70 },
@@ -1856,6 +1860,7 @@ const SPECIES_DB = {
         name: "İskatarya", nameEn: "Atlantic Chub Mackerel", icon: "🐟", scientificName: "Scomber colias",
         photoId: 73,
         category: "PELAJIK",
+        shoreMonths: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "DAY", peakHoursDesc: "Sabah erken ve akşamüstü, yüzey",
         tempRange: { min: 15, opt: 20, max: 26 },
         seasons: { winter: 0.20, spring: 0.75, summer: 0.90, autumn: 0.80 },
@@ -1914,6 +1919,7 @@ const SPECIES_DB = {
         name: "Mığrı (Deniz Yılanı)", nameEn: "European Conger", icon: "🐍", scientificName: "Conger conger",
         photoId: 53,
         category: "DIP_DERIN",
+        shoreMonths: [], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "NIGHT", peakHoursDesc: "Gece, kayalık dip",
         tempRange: { min: 12, opt: 17, max: 24 },
         seasons: { winter: 0.55, spring: 0.65, summer: 0.70, autumn: 0.75 },
@@ -2434,6 +2440,7 @@ const SPECIES_DB = {
         name: "Fangri", nameEn: "Common Pandora", icon: "🐟", scientificName: "Pagellus erythrinus",
         photoId: 14,
         category: "DIP_DERIN",
+        shoreMonths: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin kayalık ve çamurlu dip",
         tempRange: { min: 14, opt: 18, max: 20 },
         seasons: { winter: 0.50, spring: 0.70, summer: 0.85, autumn: 0.70 },
@@ -2521,6 +2528,7 @@ const SPECIES_DB = {
     name: "Aterin-Gümüş", nameEn: "Big-scale Sand Smelt", icon: "🐟", scientificName: "Atherina boyeri",
     photoId: 30,
     category: "PELAJIK",
+        shoreMonths: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // kıyıya yaklaşma ayları (0=Ocak)
     peakHours: "DAY", peakHoursDesc: "Gündüz sürü halinde yüzeye yakın gezer",
     tempRange: { min: 12, opt: 20, max: 27 },
     seasons: { winter: 0.40, spring: 0.70, summer: 0.90, autumn: 0.70 },
@@ -2724,6 +2732,7 @@ const SPECIES_DB = {
     name: "Kızıl Kırlangıç", nameEn: "Red Gurnard", icon: "🐟", scientificName: "Chelidonichthys cuculus",
     photoId: 66,
     category: "DIP_DERIN",
+        shoreMonths: [], // kıyıya yaklaşma ayları (0=Ocak)
     peakHours: "DAY", peakHoursDesc: "Gündüz dipte",
     tempRange: { min: 12, opt: 18, max: 24 },
     seasons: { winter: 0.60, spring: 0.70, summer: 0.50, autumn: 0.75 },
@@ -3336,13 +3345,11 @@ function calculateFishScore(fish, key, params) {
         if (strictOffshoreCategories.includes(fish.category)) {
             const currentMonth = new Date().getMonth();
             const comesToShore = fish.shoreMonths && fish.shoreMonths.includes(currentMonth);
-            console.log(`[SHORE] ${key} cat:${fish.category} depth:${depthAvg} month:${currentMonth} comesToShore:${comesToShore} shoreMonths:${JSON.stringify(fish.shoreMonths)}`);
             if (!comesToShore && depthAvg < 25) {
                 const shorePenalty = depthAvg < 10 ? 0.25 : 0.60;
                 rawScore *= shorePenalty;
                 penalties.push("Kıyıdan erişim zor");
                 scoreDetails.shore = { multiplier: shorePenalty, msg: "Açık su / Tekne türü", depthAvg };
-                console.log(`[SHORE] ✂️ ${key} ceza:${shorePenalty} rawScore yeni:${rawScore.toFixed(1)}`);
             }
         }
     }
