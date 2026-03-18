@@ -496,7 +496,23 @@ function calculateConfidence(params) {
     if (!params.oceanCurrent)                                 score -= 5;  // Akıntı tahmini kullanıldı
     if (!params.depth || params.depth === null)               score -= 5;  // Derinlik yok
 
+    // Grid mesafesi cezası — API verisi farklı noktadan geliyorsa deniz verisi sapabilir
+    const d = params.gridDistance || 0;
+    if (d > 9)      score -= 15;
+    else if (d > 6) score -= 10;
+    else if (d > 3) score -= 5;
+
     return Math.max(40, Math.round(score)); // Minimum 40 — hiçbir zaman sıfır değil
+}
+
+// İki koordinat arası mesafe (Haversine, km)
+function haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 +
+              Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
 function getTempGateMultiplier(tempWater, tempRange) {
@@ -3926,6 +3942,10 @@ app.get('/api/forecast', async (req, res) => {
                     stale: chlorophyllData.stale || false
                 } : null,
                 score: parseFloat(topScore.toFixed(1)),
+                apiGrid: (marine.latitude && marine.longitude) ? {
+                    lat: parseFloat(marine.latitude.toFixed(4)),
+                    lon: parseFloat(marine.longitude.toFixed(4))
+                } : null,
                 confidence: calculateConfidence({
                     tempWater,
                     wave,
@@ -3933,7 +3953,10 @@ app.get('/api/forecast', async (req, res) => {
                     chlorophyll: chlorophyllData ? chlorophyllData.chlorophyll : null,
                     chlorophyllStale: chlorophyllData ? chlorophyllData.stale : true,
                     oceanCurrent,
-                    depth: depthData ? depthData.avg : null
+                    depth: depthData ? depthData.avg : null,
+                    gridDistance: (marine.latitude && marine.longitude)
+                        ? haversineKm(parseFloat(lat), parseFloat(lon), marine.latitude, marine.longitude)
+                        : 0
                 }), tacticKey, tacticData, weatherSummary,
                 fishList: fishList.slice(0, 10), moonPhase: moon.phase,
                 moonPhaseName: getMoonPhaseName(moon.phase), airTemp: tempAir, timeMode,
