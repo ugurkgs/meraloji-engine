@@ -7124,13 +7124,42 @@ function showUserMenu() {
 // 💰 PAYWALL & UPGRADE
 // ═══════════════════════════════════════════════════════════════
 
+let _apiGridMarker = null;
+
 function flyToApiGrid() {
     const btn = document.getElementById('api-grid-btn');
     if (!btn) return;
     const lat = parseFloat(btn.dataset.lat);
     const lon = parseFloat(btn.dataset.lon);
     if (isNaN(lat) || isNaN(lon)) return;
+
+    // Önceki marker varsa kaldır
+    if (_apiGridMarker) { map.removeLayer(_apiGridMarker); _apiGridMarker = null; }
+
+    // Küçük kırmızı pin
+    const pinIcon = L.divIcon({
+        className: '',
+        html: `<div style="
+            width:10px;height:10px;
+            background:#ff4444;
+            border:2px solid #fff;
+            border-radius:50%;
+            box-shadow:0 0 6px rgba(255,68,68,0.8);
+        "></div>`,
+        iconSize: [10, 10],
+        iconAnchor: [5, 5]
+    });
+
+    _apiGridMarker = L.marker([lat, lon], { icon: pinIcon, interactive: false })
+        .addTo(map)
+        .bindTooltip('📡 Veri noktası', { permanent: false, direction: 'top', offset: [0, -8] });
+
     map.flyTo([lat, lon], 12, { duration: 1.2 });
+
+    // 30 saniye sonra otomatik kaldır
+    setTimeout(() => {
+        if (_apiGridMarker) { map.removeLayer(_apiGridMarker); _apiGridMarker = null; }
+    }, 30000);
 }
 
 function showPaywall(reason) {
