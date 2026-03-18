@@ -3336,11 +3336,13 @@ function calculateFishScore(fish, key, params) {
         if (strictOffshoreCategories.includes(fish.category)) {
             const currentMonth = new Date().getMonth();
             const comesToShore = fish.shoreMonths && fish.shoreMonths.includes(currentMonth);
+            console.log(`[SHORE] ${key} cat:${fish.category} depth:${depthAvg} month:${currentMonth} comesToShore:${comesToShore} shoreMonths:${JSON.stringify(fish.shoreMonths)}`);
             if (!comesToShore && depthAvg < 25) {
                 const shorePenalty = depthAvg < 10 ? 0.25 : 0.60;
                 rawScore *= shorePenalty;
                 penalties.push("Kıyıdan erişim zor");
                 scoreDetails.shore = { multiplier: shorePenalty, msg: "Açık su / Tekne türü", depthAvg };
+                console.log(`[SHORE] ✂️ ${key} ceza:${shorePenalty} rawScore yeni:${rawScore.toFixed(1)}`);
             }
         }
     }
