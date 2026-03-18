@@ -2737,7 +2737,10 @@
                       <span id="score-display" style="font-size:56px;font-weight:900;color:#00ffcc;letter-spacing:-1px;transition:text-shadow 0.5s,color 0.5s;">--</span>
                     </div>
                   </div>
-                  <div id="confidence-display" style="margin-top:2px;padding:4px 12px;background:rgba(0,0,0,0.25);border-radius:20px;font-size:0.7rem;color:var(--text-secondary);">Veri Kalitesi: --%</div>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:2px;justify-content:center;">
+                    <div id="confidence-display" style="padding:4px 12px;background:rgba(0,0,0,0.25);border-radius:20px;font-size:0.7rem;color:var(--text-secondary);">Veri Kalitesi: --%</div>
+                    <div id="api-grid-btn" onclick="flyToApiGrid()" style="display:none;cursor:pointer;padding:4px 10px;background:rgba(0,200,200,0.1);border:1px solid rgba(0,200,200,0.3);border-radius:20px;font-size:0.65rem;color:var(--cyan);">📡 Veri Noktası</div>
+                  </div>
                 </div>
             </div>
 
@@ -5058,6 +5061,17 @@
             const conf = CURRENT_MODE === 'daily' ? (global.forecast[0]?.confidence || 90) : 95;
             document.getElementById('confidence-display').innerText = `Veri Kalitesi: %${conf}`;
 
+            // Veri noktası butonu
+            const apiGrid = global.forecast[0]?.apiGrid;
+            const gridBtn = document.getElementById('api-grid-btn');
+            if (apiGrid && gridBtn) {
+                gridBtn.style.display = 'block';
+                gridBtn.dataset.lat = apiGrid.lat;
+                gridBtn.dataset.lon = apiGrid.lon;
+            } else if (gridBtn) {
+                gridBtn.style.display = 'none';
+            }
+
             // Aktivite Saatleri (sadece günlük modda göster)
             const activityCard = document.getElementById('activity-windows');
             if (CURRENT_MODE === 'daily' && global.forecast[0]?.activityWindows) {
@@ -7109,6 +7123,15 @@ function showUserMenu() {
 // ═══════════════════════════════════════════════════════════════
 // 💰 PAYWALL & UPGRADE
 // ═══════════════════════════════════════════════════════════════
+
+function flyToApiGrid() {
+    const btn = document.getElementById('api-grid-btn');
+    if (!btn) return;
+    const lat = parseFloat(btn.dataset.lat);
+    const lon = parseFloat(btn.dataset.lon);
+    if (isNaN(lat) || isNaN(lon)) return;
+    map.flyTo([lat, lon], 12, { duration: 1.2 });
+}
 
 function showPaywall(reason) {
     loadProSlotsCount(); // Paywall açılırken sayacı tazele
