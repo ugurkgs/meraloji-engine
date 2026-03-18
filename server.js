@@ -21,13 +21,28 @@ function fetchWithTimeout(url, timeoutMs = 8000) {
     ]);
 }
 
+// Open-Meteo 429 backoff — 429 alındığında 2 dakika tüm OM isteklerini durdur
+const _OM_BACKOFF_KEY = 'backoff_openmeteo';
+function _isOpenMeteo(url) {
+    return url.includes('open-meteo.com');
+}
+
 // Güvenli JSON fetch — hata durumunda null döner, crash etmez
-// 429 gelirse retry YOK — daha fazla istek atmak yasak
+// 429 gelirse retry YOK + 2 dk backoff başlatılır
 async function safeFetchJSON(url, timeoutMs = 12000) {
+    // Open-Meteo backoff aktifse istek atma
+    if (_isOpenMeteo(url) && cache && cache.get(_OM_BACKOFF_KEY)) {
+        console.log(`[FETCH] OM backoff aktif, atlanıyor: ${url.split('?')[0]}`);
+        return null;
+    }
     try {
         const res = await fetchWithTimeout(url, timeoutMs);
         if (res.status === 429) {
             console.log(`[FETCH] 429 rate limit: ${url.split('?')[0]}`);
+            if (_isOpenMeteo(url) && cache) {
+                cache.set(_OM_BACKOFF_KEY, true, 120);
+                console.log(`[FETCH] Open-Meteo backoff başlatıldı — 120 saniye`);
+            }
             return null;
         }
         if (!res.ok) {
@@ -1814,13 +1829,22 @@ app.get('/api/forecast', async (req, res) => {
         ]);
         
         // Fallback: gelişmiş URL başarısızsa basit URL dene
+        // 429 backoff aktifse fallback da deneme — aynı sunucuya ikinci istek boşuna
         if (!weather || weather.error) {
-            console.log('[FALLBACK] Weather enhanced failed, trying basic URL');
-            weather = await queuedFetch(weatherUrlFallback);
+            if (cache && cache.get(_OM_BACKOFF_KEY)) {
+                console.log('[FALLBACK] Weather backoff aktif, fallback atlanıyor');
+            } else {
+                console.log('[FALLBACK] Weather enhanced failed, trying basic URL');
+                weather = await queuedFetch(weatherUrlFallback);
+            }
         }
         if (!marine || marine.error) {
-            console.log('[FALLBACK] Marine enhanced failed, trying basic URL');
-            marine = await queuedFetch(marineUrlFallback);
+            if (cache && cache.get(_OM_BACKOFF_KEY)) {
+                console.log('[FALLBACK] Marine backoff aktif, fallback atlanıyor');
+            } else {
+                console.log('[FALLBACK] Marine enhanced failed, trying basic URL');
+                marine = await queuedFetch(marineUrlFallback);
+            }
         }
         
         // Weather kesin gerekli, marine olmadan varsayılan değerlerle devam et
