@@ -3332,7 +3332,7 @@ function calculateFishScore(fish, key, params) {
 
     // === FAZ 1.5: KIYI / TEKNE FİLTRESİ ===
     if (!isBoat && depthAvg !== undefined && depthAvg !== null) {
-        const strictOffshoreCategories = ['PELAJIK', 'AVCI', 'DIP_DERIN'];
+        const strictOffshoreCategories = ['PELAJIK', 'AVCI', 'DIP_DERIN', 'SÜRÜ'];
         if (strictOffshoreCategories.includes(fish.category)) {
             const currentMonth = new Date().getMonth();
             const comesToShore = fish.shoreMonths && fish.shoreMonths.includes(currentMonth);
