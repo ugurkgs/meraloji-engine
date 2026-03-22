@@ -6568,6 +6568,11 @@
                         `${evt.done}/${evt.total} nokta tarandı — %${evt.lastPoint.score?.toFixed(1) ?? '—'}${fishHint}`;
                     if (evt.lastPoint.score > 35) {
                         addScanPinToGroup(activeGroupId, evt.lastPoint.lat, evt.lastPoint.lon, evt.lastPoint.score, evt.lastPoint.fishName, false);
+                        // grp.results'ı da güncelle ki "en iyi şu an" çalışsın
+                        const grpLive = scanGroups.find(g => g.id === activeGroupId);
+                        if (grpLive) {
+                            grpLive.results.push({ lat: evt.lastPoint.lat, lon: evt.lastPoint.lon, score: evt.lastPoint.score, fishName: evt.lastPoint.fishName });
+                        }
                     }
                 }
                 // Şimdiye kadar bulunan en iyi skoru göster
@@ -6598,18 +6603,31 @@
                     grp.layers.forEach(l => map.removeLayer(l));
                     grp.layers = [];
 
-                    // Heatmap: score'a göre renkli, yarı-saydam daireler
-                    evt.all.forEach(pt => {
+                    // Heatmap blob radius: tarama yarıçapına göre ölçekle
+                    // Noktalar arası mesafe ~radiusKm/3 km → blob'ların örtüşmesi için en az yarısı kadar radius
+                    const heatR = Math.round((evt.radiusKm / 3) * 1000 * 0.85); // metre cinsinden
+
+                    // Heatmap: score'a göre renkli, birbirine geçen yarı-saydam daireler
+                    // Önce düşük skorluları çiz (alta), sonra yüksek skorluları (üste)
+                    const sorted = [...evt.all].sort((a, b) => a.score - b.score);
+                    sorted.forEach(pt => {
                         const s = pt.score;
-                        const col = s >= 70 ? '#00ff88' : s >= 50 ? '#7fff00' : s >= 35 ? '#ffd500' : '#ff9f43';
-                        const op  = s >= 60 ? 0.55 : s >= 40 ? 0.38 : 0.22;
-                        const r   = s >= 60 ? 420  : s >= 40 ? 320  : 240;
+                        const col  = s >= 70 ? '#00ff88'
+                                   : s >= 55 ? '#7fff00'
+                                   : s >= 40 ? '#ffd500'
+                                   : '#ff9f43';
+                        const op   = s >= 65 ? 0.42
+                                   : s >= 50 ? 0.30
+                                   : s >= 35 ? 0.20
+                                   : 0.10;
+                        const r    = s >= 60 ? heatR * 1.15 : s >= 40 ? heatR : heatR * 0.8;
                         const circle = L.circle([pt.lat, pt.lon], {
                             radius: r,
                             color: 'transparent',
                             fillColor: col,
                             fillOpacity: op,
-                            interactive: false
+                            interactive: false,
+                            pane: 'overlayPane'
                         }).addTo(map);
                         grp.layers.push(circle);
                     });
