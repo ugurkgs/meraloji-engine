@@ -3428,7 +3428,8 @@ app.get('/api/scan', async (req, res) => {
 
         // ── 3 saatlik cache kontrolü ──
         const fishTag = fishKey || 'all';
-        const cacheKey = `scan_${centerLat.toFixed(2)}_${centerLon.toFixed(2)}_${radiusKm}_${fishTag}`;
+        // v2: topFish/depth/zone/tempWater eklendi — eski cache otomatik bypass
+        const cacheKey = `scan_v2_${centerLat.toFixed(2)}_${centerLon.toFixed(2)}_${radiusKm}_${fishTag}`;
         
         if (db) {
             const cacheRef = db.collection('scanCache').doc(cacheKey);
