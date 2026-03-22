@@ -6603,9 +6603,10 @@
                     grp.layers.forEach(l => map.removeLayer(l));
                     grp.layers = [];
 
-                    // Heatmap blob radius: tarama yarıçapına göre ölçekle
-                    // Noktalar arası mesafe ~radiusKm/3 km → blob'ların örtüşmesi için en az yarısı kadar radius
-                    const heatR = Math.round((evt.radiusKm / 3) * 1000 * 0.85); // metre cinsinden
+                    // Heatmap blob radius: nokta arası mesafenin ~yarısı kadar — hafif ısı izi
+                    // 3km → ~300m, 5km → ~500m, 10km → ~900m
+                    const gridStep = (evt.radiusKm / (evt.radiusKm <= 3 ? 2 : evt.radiusKm <= 5 ? 3 : 4)) * 1000;
+                    const heatR = Math.round(gridStep * 0.38);
 
                     // Heatmap: score'a göre renkli, birbirine geçen yarı-saydam daireler
                     // Önce düşük skorluları çiz (alta), sonra yüksek skorluları (üste)
@@ -6616,11 +6617,11 @@
                                    : s >= 55 ? '#7fff00'
                                    : s >= 40 ? '#ffd500'
                                    : '#ff9f43';
-                        const op   = s >= 65 ? 0.42
-                                   : s >= 50 ? 0.30
-                                   : s >= 35 ? 0.20
-                                   : 0.10;
-                        const r    = s >= 60 ? heatR * 1.15 : s >= 40 ? heatR : heatR * 0.8;
+                        const op   = s >= 65 ? 0.22
+                                   : s >= 50 ? 0.15
+                                   : s >= 35 ? 0.10
+                                   : 0.06;
+                        const r    = s >= 60 ? heatR * 1.1 : s >= 40 ? heatR : heatR * 0.85;
                         const circle = L.circle([pt.lat, pt.lon], {
                             radius: r,
                             color: 'transparent',
