@@ -123,6 +123,9 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 3000;
 const cache = new NodeCache({ stdTTL: 3600, checkperiod: 600 });
 
+// Bathymetry sonuçlarını 24 saat cache'le — aynı bölgede tekrar taramada API çağrısı yok
+const bathyCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
+
 // ═══════════════════════════════════════════════════════════════════════
 // OFFLİNE KONUM ANALİZİ — Türkiye + KKTC Şehir Sınırları (turf.js yok)
 // ═══════════════════════════════════════════════════════════════════════
@@ -3174,14 +3177,21 @@ async function fetchCenterWeather(lat, lon) {
 }
 
 // Sadece bathymetry çek - her nokta için (kara tespiti + derinlik)
+// 24 saatlik NodeCache ile — aynı bölgede tekrar taramada API çağrısı sıfır
 async function fetchBathymetry(lat, lon) {
     const latF = parseFloat(lat).toFixed(4);
     const lonF = parseFloat(lon).toFixed(4);
+    // 3 ondalık hassasiyetle cache key — ~100m grid'e denk gelir, scan için yeterli
+    const ck = `b_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`;
+    const hit = bathyCache.get(ck);
+    if (hit !== undefined) return hit;
     try {
         const res = await fetch(`https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`);
         if (!res.ok) return null;
         const b = await res.json();
-        return b && b.avg !== undefined ? b.avg : null;
+        const val = (b && b.avg !== undefined) ? b.avg : null;
+        bathyCache.set(ck, val);
+        return val;
     } catch(e) { return null; }
 }
 
@@ -3348,28 +3358,36 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
         if (!fishKey) {
             let topScore = 0;
             let topFishName = '';
+            const allFishScores = [];
             for (const [key, fish] of Object.entries(SPECIES_DB)) {
                 if (!fish.regions.includes(regionName) && regionName !== 'AÇIK DENİZ') continue;
                 try {
                     const dailyResult = calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx);
                     const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
-                    if (score > topScore) {
-                        topScore = score;
-                        topFishName = fish.name;
-                    }
+                    if (score > 0) allFishScores.push({ name: fish.name, score });
+                    if (score > topScore) { topScore = score; topFishName = fish.name; }
                 } catch (e) {}
             }
-            return { score: topScore, fishName: topFishName };
+            allFishScores.sort((a, b) => b.score - a.score);
+            const topFish = allFishScores.slice(0, 3).map(f => f.name);
+            const depthVal = depthAvg ? Math.round(depthAvg) : null;
+            const zone = !depthVal ? null : depthVal < 5 ? 'Sığ Kum' : depthVal < 15 ? 'Sığ Kaya' : depthVal < 40 ? 'Orta Su' : 'Derin Su';
+            return { score: topScore, fishName: topFishName, topFish, depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)) };
         } else {
             const fish = SPECIES_DB[fishKey];
             if (!fish) return null;
             if (!fish.regions.includes(regionName) && regionName !== 'AÇIK DENİZ') return null;
             try {
                 const dailyResult = calculateWeightedDailyScore(fish, fishKey, params, weather, marine, activityWindows, hourlyStartIdx);
-                return { score: (dailyResult && dailyResult.score) ? dailyResult.score : 0, fishName: fish.name };
+                const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
+                const depthVal = depthAvg ? Math.round(depthAvg) : null;
+                const zone = !depthVal ? null : depthVal < 5 ? 'Sığ Kum' : depthVal < 15 ? 'Sığ Kaya' : depthVal < 40 ? 'Orta Su' : 'Derin Su';
+                return { score, fishName: fish.name, topFish: [fish.name], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)) };
             } catch(e) {
                 const r = calculateFishScore(fish, fishKey, params);
-                return { score: r.finalScore, fishName: fish.name };
+                const depthVal = depthAvg ? Math.round(depthAvg) : null;
+                const zone = !depthVal ? null : depthVal < 5 ? 'Sığ Kum' : depthVal < 15 ? 'Sığ Kaya' : depthVal < 40 ? 'Orta Su' : 'Derin Su';
+                return { score: r.finalScore, fishName: fish.name, topFish: [fish.name], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)) };
             }
         }
     } catch(e) {
@@ -3460,8 +3478,11 @@ app.get('/api/scan', async (req, res) => {
         const gridPoints = generateGridPoints(centerLat, centerLon, radiusKm);
         const total = gridPoints.length;
         const results = [];
-        // Gecikme: bathymetry API'si için nokta başına ~2 sn yeterli
-        const DELAY_MS = 2000;
+
+        // Batch paralel: 5 nokta aynı anda, aralarında 350ms — EMODnet rate-limit'e güvenli
+        // 5km (29 nokta): ~6 batch × ~1.2s = ~7s | 10km (45 nokta): ~9 batch = ~11s
+        const BATCH_SIZE = 5;
+        const BATCH_DELAY_MS = 350;
 
         sendEvent({ type: 'start', total, radiusKm, fishKey: fishKey || null });
         if (res.flush) res.flush();
@@ -3480,35 +3501,55 @@ app.get('/api/scan', async (req, res) => {
             return;
         }
 
-        for (let i = 0; i < gridPoints.length; i++) {
-            const pt = gridPoints[i];
-            if (clientDisconnected) break; // İstemci kapattı — işlemi sonlandır
+        for (let i = 0; i < gridPoints.length; i += BATCH_SIZE) {
+            if (clientDisconnected) break;
 
-            // Bathymetry: her nokta için ayrı çek (kara tespiti)
-            let bathyRaw = null;
-            try {
-                bathyRaw = await fetchBathymetry(pt.lat, pt.lon);
-            } catch(e) {}
+            const batch = gridPoints.slice(i, i + BATCH_SIZE);
 
-            await new Promise(r => setTimeout(r, DELAY_MS));
+            // Batch içindeki bathymetry'leri paralel çek (cache'de varsa sıfır gecikme)
+            const batchResults = await Promise.all(batch.map(async (pt) => {
+                let bathyRaw = null;
+                try { bathyRaw = await fetchBathymetry(pt.lat, pt.lon); } catch(e) {}
+                let result = null;
+                try {
+                    result = calcPointScoreFromWeather(pt.lat, pt.lon, centerWeather, centerMarine, bathyRaw, fishKey || null);
+                } catch(e) {
+                    console.log('[SCAN] Point error:', pt.lat, pt.lon, e.message);
+                }
+                return { pt, result };
+            }));
 
-            let result = null;
-            try {
-                result = calcPointScoreFromWeather(pt.lat, pt.lon, centerWeather, centerMarine, bathyRaw, fishKey || null);
-            } catch(e) {
-                console.log('[SCAN] Point error:', pt.lat, pt.lon, e.message);
+            // Sonuçları işle
+            let lastValid = null;
+            for (const { pt, result } of batchResults) {
+                const score = result ? result.score : null;
+                if (score !== null && score > 5) {
+                    results.push({
+                        lat: pt.lat, lon: pt.lon,
+                        score: parseFloat(score.toFixed(1)),
+                        fishName: result.fishName,
+                        topFish: result.topFish || [],
+                        depth: result.depth || null,
+                        zone: result.zone || null,
+                        tempWater: result.tempWater || null
+                    });
+                    lastValid = { lat: pt.lat, lon: pt.lon, score, fishName: result.fishName };
+                }
             }
 
-            const score = result ? result.score : null;
-            const fishName = result ? result.fishName : null;
-
-            if (score !== null && score > 5) {
-                results.push({ lat: pt.lat, lon: pt.lon, score: parseFloat(score.toFixed(1)), fishName });
-            }
-
-            const pct = Math.round(((i + 1) / total) * 100);
-            sendEvent({ type: 'progress', pct, done: i + 1, total, lastPoint: { lat: pt.lat, lon: pt.lon, score, fishName } });
+            const done = Math.min(i + BATCH_SIZE, total);
+            const pct = Math.round((done / total) * 100);
+            const lastPt = batchResults[batchResults.length - 1];
+            sendEvent({
+                type: 'progress', pct, done, total,
+                lastPoint: lastValid || { lat: lastPt.pt.lat, lon: lastPt.pt.lon, score: lastPt.result?.score ?? null, fishName: lastPt.result?.fishName ?? null }
+            });
             if (res.flush) res.flush();
+
+            // Batches arası bekleme (son batch hariç)
+            if (i + BATCH_SIZE < gridPoints.length) {
+                await new Promise(r => setTimeout(r, BATCH_DELAY_MS));
+            }
         }
 
         // En yüksek 5 nokta
