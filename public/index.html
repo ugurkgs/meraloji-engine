@@ -6570,6 +6570,15 @@
                         addScanPinToGroup(activeGroupId, evt.lastPoint.lat, evt.lastPoint.lon, evt.lastPoint.score, evt.lastPoint.fishName, false);
                     }
                 }
+                // Şimdiye kadar bulunan en iyi skoru göster
+                const grp = scanGroups.find(g => g.id === activeGroupId);
+                if (grp && grp.results && grp.results.length > 0) {
+                    const best = grp.results.reduce((a, b) => a.score > b.score ? a : b, grp.results[0]);
+                    document.getElementById('scan-progress-sub').textContent =
+                        `🔥 En iyi şu an: %${best.score.toFixed(0)} — ${best.fishName || '?'} · ${best.lat.toFixed(3)},${best.lon.toFixed(3)}`;
+                } else {
+                    document.getElementById('scan-progress-sub').textContent = 'Lütfen uygulamayı açık tutun...';
+                }
             }
 
             if (evt.type === 'complete') {
@@ -6582,9 +6591,35 @@
                     return;
                 }
 
-                // Aktif gruba top5 pin'lerini ekle (geçici progress pin'lerini temizle)
+                // ── HEATMAP: tüm taranmış noktaları renk gradyanıyla göster ──
                 const grp = scanGroups.find(g => g.id === activeGroupId);
-                if (grp) {
+                if (grp && evt.all && evt.all.length > 0) {
+                    // Önceki progress pinleri + heatmap temizle
+                    grp.layers.forEach(l => map.removeLayer(l));
+                    grp.layers = [];
+
+                    // Heatmap: score'a göre renkli, yarı-saydam daireler
+                    evt.all.forEach(pt => {
+                        const s = pt.score;
+                        const col = s >= 70 ? '#00ff88' : s >= 50 ? '#7fff00' : s >= 35 ? '#ffd500' : '#ff9f43';
+                        const op  = s >= 60 ? 0.55 : s >= 40 ? 0.38 : 0.22;
+                        const r   = s >= 60 ? 420  : s >= 40 ? 320  : 240;
+                        const circle = L.circle([pt.lat, pt.lon], {
+                            radius: r,
+                            color: 'transparent',
+                            fillColor: col,
+                            fillOpacity: op,
+                            interactive: false
+                        }).addTo(map);
+                        grp.layers.push(circle);
+                    });
+
+                    // Top5 pinlerini heatmap'in üstüne koy
+                    grp.results = evt.top5;
+                    evt.top5.forEach((pt) => {
+                        addScanPinToGroup(activeGroupId, pt.lat, pt.lon, pt.score, pt.fishName, true);
+                    });
+                } else if (grp) {
                     grp.layers.forEach(l => map.removeLayer(l));
                     grp.layers = [];
                     grp.results = evt.top5;
@@ -6638,29 +6673,76 @@
 
             const listEl = document.getElementById('scan-result-list');
             listEl.innerHTML = evt.top5.map((pt, i) => {
-                const color = pt.score >= 55 ? 'var(--green)' : pt.score >= 35 ? 'var(--yellow)' : 'var(--red)';
-                const fishLabel = pt.fishName || '—';
+                const s = pt.score;
+                const color = s >= 70 ? 'var(--green)' : s >= 50 ? '#7fff00' : s >= 35 ? 'var(--yellow)' : 'var(--orange)';
+                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
+
+                // Balık listesi
+                const topFishHtml = (pt.topFish && pt.topFish.length > 0)
+                    ? pt.topFish.slice(0, 3).map((f, fi) => `<span style="
+                        background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);
+                        border-radius:6px;padding:2px 7px;font-size:0.68rem;color:var(--cyan);
+                        white-space:nowrap;">${f}</span>`).join('')
+                    : `<span style="font-size:0.75rem;color:var(--text-muted);">${pt.fishName || '—'}</span>`;
+
+                // Derinlik + zon rozeti
+                const depthHtml = pt.depth
+                    ? `<span style="font-size:0.7rem;color:var(--text-secondary);">🌊 ${pt.depth}m</span>
+                       <span style="font-size:0.68rem;color:var(--text-muted);margin-left:4px;">${pt.zone || ''}</span>`
+                    : '';
+
+                // Su sıcaklığı
+                const tempHtml = pt.tempWater
+                    ? `<span style="font-size:0.7rem;color:#ff9f43;">🌡️ ${pt.tempWater}°C</span>`
+                    : '';
+
+                // Google Maps linki
+                const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${pt.lat},${pt.lon}`;
+
                 return `
-                <div onclick="scanPinClick(${pt.lat}, ${pt.lon})" style="
-                    display:flex; align-items:center; gap:14px;
-                    background:var(--bg-card); border:1px solid var(--border-subtle);
-                    border-radius:var(--radius-md); padding:14px 16px;
-                    cursor:pointer; transition:all 0.2s;
+                <div style="
+                    background:var(--bg-card);border:1px solid var(--border-subtle);
+                    border-radius:var(--radius-md);padding:13px 14px;
+                    transition:border-color 0.2s;
                 " onmouseover="this.style.borderColor='${color}'" onmouseout="this.style.borderColor='var(--border-subtle)'">
-                    <div style="
-                        width:50px; height:50px; min-width:50px;
-                        background:${color}22; border:2px solid ${color};
-                        border-radius:50%; display:flex; flex-direction:column;
-                        align-items:center; justify-content:center;
-                    ">
-                        <div style="font-family:var(--font-mono);font-size:0.9rem;font-weight:800;color:${color};line-height:1;">${pt.score.toFixed(1)}</div>
-                        <div style="font-size:0.5rem;color:${color};opacity:0.7;">%</div>
+                    <!-- Üst satır: sıra + skor + derinlik + nav -->
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                        <div style="
+                            width:52px;height:52px;min-width:52px;
+                            background:${color}18;border:2px solid ${color};
+                            border-radius:50%;display:flex;flex-direction:column;
+                            align-items:center;justify-content:center;flex-shrink:0;
+                        ">
+                            <div style="font-size:0.72rem;margin-bottom:-2px;">${medal}</div>
+                            <div style="font-family:var(--font-mono);font-size:0.88rem;font-weight:800;color:${color};line-height:1;">${s.toFixed(0)}</div>
+                            <div style="font-size:0.5rem;color:${color};opacity:0.7;">%</div>
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px;">${topFishHtml}</div>
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">${depthHtml}${pt.depth && pt.tempWater ? '<span style="color:var(--border-subtle);">·</span>' : ''}${tempHtml}</div>
+                        </div>
+                        <!-- Navigasyon butonu -->
+                        <a href="${mapsUrl}" target="_blank" onclick="event.stopPropagation()" style="
+                            display:flex;flex-direction:column;align-items:center;justify-content:center;
+                            background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.3);
+                            border-radius:10px;padding:7px 9px;text-decoration:none;
+                            color:var(--cyan);flex-shrink:0;gap:2px;
+                            transition:background 0.15s;
+                        " onmouseover="this.style.background='rgba(0,212,255,0.18)'" onmouseout="this.style.background='rgba(0,212,255,0.08)'"
+                           title="Google Maps'te aç">
+                            <span style="font-size:1.1rem;">🧭</span>
+                            <span style="font-size:0.55rem;font-weight:700;letter-spacing:0.3px;">GİT</span>
+                        </a>
                     </div>
-                    <div style="flex:1;">
-                        <div style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">${fishLabel}</div>
-                        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">📍 ${pt.lat.toFixed(4)}, ${pt.lon.toFixed(4)}</div>
+                    <!-- Alt satır: koordinat + detay linki -->
+                    <div style="display:flex;align-items:center;justify-content:space-between;" onclick="scanPinClick(${pt.lat}, ${pt.lon})">
+                        <div style="font-size:0.68rem;color:var(--text-muted);font-family:var(--font-mono);">
+                            📍 ${pt.lat.toFixed(4)}, ${pt.lon.toFixed(4)}
+                        </div>
+                        <div style="font-size:0.7rem;color:var(--cyan);font-weight:600;cursor:pointer;">
+                            Tam analiz →
+                        </div>
                     </div>
-                    <div style="color:var(--text-muted);font-size:1rem;">›</div>
                 </div>`;
             }).join('');
 
