@@ -4301,8 +4301,15 @@
 
         let _autoLoadActive = false;
 
+        // Hotspot otomatik yükleme — sadece uygulamayı ilk kez açan kullanıcılar için,
+        // tek seferlik çalışır. localStorage'a kaydedilir; sonraki açılışlarda (oturum
+        // kapatsa bile) API çağrısı yapılmaz ve 429 hatası oluşmaz.
         async function autoLoadNearestSpot() {
             if (lastLatLon) return;
+
+            // Daha önce hotspot gösterilmişse — hiç çalışma
+            if (localStorage.getItem('meraloji_hotspot_shown')) return;
+
             _autoLoadActive = true;
             let spot;
             try {
@@ -4311,6 +4318,10 @@
             } catch(e) {
                 spot = { name: 'İstanbul Boğazı', lat: 41.0420, lon: 29.0050 };
             }
+
+            // Gösterildi olarak işaretle — bundan sonra bir daha çalışmaz
+            localStorage.setItem('meraloji_hotspot_shown', '1');
+
             if (map) map.flyTo([spot.lat, spot.lon], 10, { duration: 1.8 });
             await new Promise(r => setTimeout(r, 1200));
             if (!_autoLoadActive) return;
