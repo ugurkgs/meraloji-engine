@@ -7077,7 +7077,7 @@ async function loadProSlotsCount() {
         const el  = document.getElementById('paywall-slots');
         const bar = document.getElementById('paywall-slots-bar');
         if (el)  { el.textContent = remaining; el.style.color = remaining < 100 ? '#ff2222' : remaining < 300 ? '#ff851b' : '#ff4444'; }
-        if (bar) bar.style.width = Math.round((count / 500) * 100) + '%';
+        if (bar) bar.style.width = Math.round((count / 200) * 100) + '%';
     } catch(e) { window._proSlotsRemaining = '...'; }
 }
 
