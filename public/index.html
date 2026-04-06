@@ -123,19 +123,39 @@
         }
 
         /* ── Fav-notify checkbox — custom checked style ─────────────────── */
-        #fav-notify:checked {
+        /* input::after mobilde çalışmaz; sibling span kullanıyoruz        */
+        #fav-notify {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            margin: 0;
+            pointer-events: none;
+        }
+        #fav-notify-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            min-width: 22px;
+            border: 2px solid var(--orange);
+            border-radius: 6px;
+            background: transparent;
+            cursor: pointer;
+            margin-top: 1px;
+            transition: background 0.2s, border-color 0.2s;
+            font-size: 13px;
+            font-weight: 900;
+            color: #000;
+            line-height: 1;
+        }
+        #fav-notify:checked + #fav-notify-visual {
             background: var(--orange);
             border-color: var(--orange);
         }
-        #fav-notify:checked::after {
+        #fav-notify:checked + #fav-notify-visual::after {
             content: '✓';
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            color: #000;
-            font-size: 13px;
-            font-weight: 900;
-            line-height: 1;
         }
 
         /* ═══════════════════════════════════════════════════════════════════
@@ -2523,17 +2543,8 @@
 
             <!-- Bildirim checkbox satırı -->
             <label id="fav-notify-label" for="fav-notify" style="display:flex; align-items:flex-start; gap:10px; padding:12px 14px; background:rgba(255,165,0,0.07); border:1px solid rgba(255,165,0,0.25); border-radius:12px; cursor:pointer; margin-bottom:16px; user-select:none;">
-                <input type="checkbox" id="fav-notify" style="
-                    appearance:none; -webkit-appearance:none;
-                    width:20px; height:20px; min-width:20px;
-                    border:2px solid var(--orange);
-                    border-radius:6px;
-                    background:transparent;
-                    cursor:pointer;
-                    margin-top:1px;
-                    position:relative;
-                    transition:background 0.2s, border-color 0.2s;
-                ">
+                <input type="checkbox" id="fav-notify">
+                <span id="fav-notify-visual"></span>
                 <span style="font-size:0.82rem; color:var(--text-secondary); line-height:1.45;">
                     🔔 <strong style="color:var(--orange);">Fırtına &amp; Feeding Frenzy Bildirimi</strong><br>
                     <span id="fav-notify-desc" style="font-size:0.75rem; opacity:0.75;">Bu meradan ani basınç düşüşü tespit edilirse bildirim al</span>
