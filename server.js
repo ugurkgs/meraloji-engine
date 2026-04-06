@@ -3783,77 +3783,168 @@ setTimeout(() => {
 //     warmAllHotSpots();
 //     setInterval(warmAllHotSpots, 55 * 60 * 1000);
 // }, 60_000);
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
 // 🌪️ FIRTINA ÖNCESİ (FEEDING FRENZY) BİLDİRİM SİSTEMİ
-// ═══════════════════════════════════════════════════════════════
+// Her saat başı çalışır. notify:true olan favorilerin koordinatlarını
+// Open-Meteo'dan çeker, basınç trendi hesaplar, FALLING_FAST ise
+// ilgili kullanıcılara FCM bildirimi gönderir.
+// ═══════════════════════════════════════════════════════════════════════
 
-// Her saatin 00. dakikasında çalışır ('0 * * * *')
 cron.schedule('0 * * * *', async () => {
-    console.log("[CRON] Fırtına/Basınç kontrolü başlatılıyor...");
-    if (!db || !admin) return;
 
+    // ── 1. UYKU MODU: Türkiye saati 22:00 – 07:00 arası çalışma ─────────
+    const nowTR  = new Date(Date.now() + 3 * 60 * 60 * 1000); // UTC+3
+    const hourTR = nowTR.getUTCHours();
+    if (hourTR >= 22 || hourTR < 7) {
+        console.log(`[NOTIFY CRON] Uyku modu (TR ${hourTR}:00). Atlanıyor.`);
+        return;
+    }
+    console.log(`[NOTIFY CRON] Başlıyor — TR saati: ${hourTR}:00`);
+
+    if (!db || !admin) {
+        console.log('[NOTIFY CRON] Firestore/Admin hazır değil, atlanıyor.');
+        return;
+    }
+
+    // ── 2. Bildirim isteyen tüm favorileri çek ───────────────────────────
+    let snapshot;
     try {
-        // Şimdilik Marmara/İstanbul'u referans alıyoruz (İleride kullanıcıların konumuna göre ayırabiliriz)
-        const lat = 41.0420;
-        const lon = 29.0050;
-        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=surface_pressure&past_days=1&timezone=auto`;
-        
-        // Zaten dosyanda var olan güvenli fetch fonksiyonunu kullanıyoruz
-        const weather = await safeFetchJSON(weatherUrl);
-        if (!weather || !weather.hourly || !weather.hourly.surface_pressure) return;
+        snapshot = await db.collectionGroup('favorites')
+            .where('notify', '==', true)
+            .get();
+    } catch (err) {
+        console.error('[NOTIFY CRON] Firestore sorgu hatası:', err.message);
+        return;
+    }
 
-        const hourlyPressure = weather.hourly.surface_pressure;
-        const currentHour = new Date().getHours();
-        const currentIndex = 24 + currentHour; // past_days=1 kullandığımız için bugün indeksi
-        
-        // Son 24 saatin basınç trendini hesapla (Dosyandaki kendi fonksiyonunu kullanıyoruz)
-        const pressureHistory = hourlyPressure.slice(Math.max(0, currentIndex - 24), currentIndex + 1);
-        const pressureTrend = calculatePressureTrend(pressureHistory);
+    if (snapshot.empty) {
+        console.log('[NOTIFY CRON] Bildirim isteyen favori yok.');
+        return;
+    }
 
-        if (pressureTrend.trend === 'FALLING_FAST') {
-            console.log(`[CRON] Ani basınç düşüşü (${pressureTrend.change} hPa) tespit edildi! Bildirim fırlatılıyor...`);
-            await sendFeedingFrenzyNotification();
-        } else {
-            console.log(`[CRON] Basınç stabil veya yükseliyor. (Trend: ${pressureTrend.trend})`);
+    // ── 3. Koordinat deduplication — 10km grid-snap (~0.09°) ─────────────
+    const NOTIFY_GRID = 0.09;
+    function snapNotifyCoord(lat, lon) {
+        return `${(Math.round(lat / NOTIFY_GRID) * NOTIFY_GRID).toFixed(2)}_${(Math.round(lon / NOTIFY_GRID) * NOTIFY_GRID).toFixed(2)}`;
+    }
+
+    // gridKey → { lat, lon, spots: [{ uid, favName }] }
+    const gridMap = {};
+    snapshot.forEach(doc => {
+        const d   = doc.data();
+        const uid = doc.ref.parent.parent.id; // users/{uid}/favorites/{favId}
+        if (d.lat == null || d.lon == null) return;
+
+        const key = snapNotifyCoord(d.lat, d.lon);
+        if (!gridMap[key]) {
+            gridMap[key] = { lat: d.lat, lon: d.lon, spots: [] };
+        }
+        gridMap[key].spots.push({ uid, favName: d.name || 'Mera' });
+    });
+
+    const groups = Object.values(gridMap);
+    console.log(`[NOTIFY CRON] ${snapshot.size} favori → ${groups.length} benzersiz koordinat grubu`);
+
+    // ── 4. Her benzersiz koordinat için basınç trendi kontrolü ────────────
+    for (const group of groups) {
+        const { lat, lon, spots } = group;
+
+        // Open-Meteo: son 24 saatlik yüzey basıncı — safeFetchJSON kullan (backoff dahil)
+        const omUrl = `https://api.open-meteo.com/v1/forecast` +
+            `?latitude=${lat}&longitude=${lon}` +
+            `&hourly=surface_pressure&past_days=1&forecast_days=1&timezone=auto`;
+
+        const omData = await safeFetchJSON(omUrl, 12000);
+        const pressureHistory = omData?.hourly?.surface_pressure;
+
+        if (!pressureHistory || pressureHistory.length < 6) {
+            console.warn(`[NOTIFY CRON] Yetersiz basınç verisi: ${lat},${lon}`);
+            continue;
         }
 
-    } catch (error) {
-        console.error("[CRON] Hava durumu kontrolünde hata:", error.message);
-    }
-});
+        // calculatePressureTrend — server.js içindeki mevcut fonksiyon
+        const trendResult = calculatePressureTrend(pressureHistory);
+        console.log(`[NOTIFY CRON] (${lat},${lon}) trend: ${trendResult.trend} / ${trendResult.change} hPa`);
 
-async function sendFeedingFrenzyNotification() {
-    try {
-        // Firestore'dan fcmToken'ı olan tüm kullanıcıları getir
-        const usersSnapshot = await db.collection('users').where('fcmToken', '!=', null).get();
-        
+        if (trendResult.trend !== 'FALLING_FAST') continue;
+
+        // ── 5. Etkilenen kullanıcıların FCM tokenlarını topla ─────────────
+        const spotNames     = [...new Set(spots.map(s => s.favName))];
+        const notifSpotName = spotNames.slice(0, 2).join(' & ');
+        const uniqueUids    = [...new Set(spots.map(s => s.uid))];
+
         const tokens = [];
-        usersSnapshot.forEach(doc => {
-            const data = doc.data();
-            if (data.fcmToken) tokens.push(data.fcmToken);
-        });
+        await Promise.all(uniqueUids.map(async (uid) => {
+            try {
+                const userDoc = await db.collection('users').doc(uid).get();
+                const token   = userDoc.data()?.fcmToken;
+                if (token) tokens.push({ uid, token });
+            } catch (e) {
+                console.warn(`[NOTIFY CRON] Token alınamadı uid=${uid}:`, e.message);
+            }
+        }));
 
         if (tokens.length === 0) {
-            console.log("[CRON] Bildirim gönderilecek cihaz bulunamadı.");
-            return;
+            console.log(`[NOTIFY CRON] Bu grup için geçerli FCM token yok.`);
+            continue;
         }
 
-        // Firebase Admin ile Çoklu Bildirim Fırlat
+        // ── 6. FCM Multicast bildirimi gönder ─────────────────────────────
         const message = {
+            tokens: tokens.map(t => t.token),
             notification: {
                 title: '🌪️ Fırtına Öncesi Fırsatı!',
-                body: 'Basınç hızla düşüyor, balıklar agresif beslenmeye başladı. Oltalar suya!'
+                body:  `${notifSpotName} bölgesinde basınç hızla düşüyor, balıklar aktifleşebilir!`
             },
-            tokens: tokens
+            data: {
+                type:     'pressure_alert',
+                spotName: notifSpotName,
+                trend:    trendResult.trend,
+                change:   String(trendResult.change),
+                lat:      String(lat),
+                lon:      String(lon)
+            },
+            android: {
+                priority: 'high',
+                notification: { sound: 'default', channelId: 'pressure_alerts' }
+            },
+            apns: {
+                payload: { aps: { sound: 'default', badge: 1 } }
+            }
         };
 
-        const response = await admin.messaging().sendEachForMulticast(message);
-        console.log(`[CRON] ${response.successCount} adet bildirim başarıyla gönderildi. Başarısız: ${response.failureCount}`);
-        
-    } catch (error) {
-        console.error("[CRON] Bildirim gönderme hatası:", error.message);
+        try {
+            const fcmResponse = await admin.messaging().sendEachForMulticast(message);
+            console.log(`[NOTIFY CRON] ✅ ${fcmResponse.successCount}/${tokens.length} bildirim gönderildi — ${notifSpotName}`);
+
+            // Geçersiz tokenları Firestore'dan temizle
+            fcmResponse.responses.forEach((resp, idx) => {
+                if (!resp.success) {
+                    const errCode = resp.error?.code;
+                    if (
+                        errCode === 'messaging/invalid-registration-token' ||
+                        errCode === 'messaging/registration-token-not-registered'
+                    ) {
+                        const { uid } = tokens[idx];
+                        if (uid) {
+                            db.collection('users').doc(uid)
+                              .update({ fcmToken: admin.firestore.FieldValue.delete() })
+                              .catch(() => {});
+                            console.log(`[NOTIFY CRON] Geçersiz token temizlendi — uid:${uid}`);
+                        }
+                    }
+                }
+            });
+        } catch (err) {
+            console.error(`[NOTIFY CRON] FCM gönderim hatası:`, err.message);
+        }
+
+        // API limitine saygı: gruplar arası kısa bekleme
+        await new Promise(r => setTimeout(r, 500));
     }
-}
+
+    console.log('[NOTIFY CRON] Tamamlandı.');
+});
 // ═══════════════════════════════════════════════════════════════
 // 🎯 SICAK BAŞLANGIÇ HOT SPOT
 // İlk açılış için mevsimsel en iyi başlangıç noktasını döner.
@@ -3903,15 +3994,16 @@ app.get('/api/favorites', async (req, res) => {
 app.post('/api/favorites', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
     if (!db) return res.status(503).json({ error: 'Veritabanı hazır değil' });
-    const { name, lat, lon } = req.body;
+    const { name, lat, lon, notify } = req.body;
     if (!name || lat === undefined || lon === undefined)
         return res.status(400).json({ error: 'name, lat, lon gerekli' });
     try {
         const ref = await db.collection('users').doc(req.user.uid)
             .collection('favorites').add({
-                name: String(name).slice(0, 60),
-                lat: parseFloat(lat),
-                lon: parseFloat(lon),
+                name:   String(name).slice(0, 60),
+                lat:    parseFloat(lat),
+                lon:    parseFloat(lon),
+                notify: notify === true || notify === 'true' ? true : false, // Fırtına bildirimi — default false
                 createdAt: Date.now()
             });
         res.json({ success: true, id: ref.id });
