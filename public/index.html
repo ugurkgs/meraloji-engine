@@ -122,6 +122,22 @@
             --radius-xl: 28px;
         }
 
+        /* ── Fav-notify checkbox — custom checked style ─────────────────── */
+        #fav-notify:checked {
+            background: var(--orange);
+            border-color: var(--orange);
+        }
+        #fav-notify:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #000;
+            font-size: 13px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
         /* ═══════════════════════════════════════════════════════════════════
            BASE STYLES
            ═══════════════════════════════════════════════════════════════════ */
@@ -2485,6 +2501,49 @@
             <div style="display:flex; gap:10px;">
                 <button onclick="closeCustomInput()" style="flex:1; padding:12px; border:1px solid var(--border-subtle); border-radius:12px; background:transparent; color:var(--text-secondary); font-size:0.9rem; cursor:pointer;">İptal</button>
                 <button onclick="submitCustomInput()" style="flex:1; padding:12px; border:none; border-radius:12px; background:linear-gradient(135deg,var(--cyan),var(--green)); color:#000; font-size:0.9rem; font-weight:700; cursor:pointer;">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         FAVORİ KAYDETME MODAL (isim + bildirim seçeneği)
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="fav-save-modal" style="display:none; position:fixed; inset:0; z-index:200000; background:rgba(0,0,0,0.78); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:24px;">
+        <div style="background:var(--bg-panel); border:1px solid var(--border-glow); border-radius:20px; padding:24px; max-width:320px; width:100%; box-shadow:0 8px 40px rgba(0,0,0,0.6);">
+
+            <!-- Başlık -->
+            <div style="font-size:1rem; font-weight:700; color:var(--text-primary); margin-bottom:14px; text-align:center;">
+                📍 <span id="fav-modal-title">Mera Adı</span>
+            </div>
+
+            <!-- İsim input -->
+            <input id="fav-save-name" type="text" maxlength="40"
+                style="width:100%; padding:12px 14px; background:rgba(255,255,255,0.06); border:1px solid var(--border-glow); border-radius:12px; color:var(--text-primary); font-size:0.95rem; font-family:var(--font-display); outline:none; margin-bottom:14px;"
+                placeholder="örn. Ege Kabuğu">
+
+            <!-- Bildirim checkbox satırı -->
+            <label id="fav-notify-label" for="fav-notify" style="display:flex; align-items:flex-start; gap:10px; padding:12px 14px; background:rgba(255,165,0,0.07); border:1px solid rgba(255,165,0,0.25); border-radius:12px; cursor:pointer; margin-bottom:16px; user-select:none;">
+                <input type="checkbox" id="fav-notify" style="
+                    appearance:none; -webkit-appearance:none;
+                    width:20px; height:20px; min-width:20px;
+                    border:2px solid var(--orange);
+                    border-radius:6px;
+                    background:transparent;
+                    cursor:pointer;
+                    margin-top:1px;
+                    position:relative;
+                    transition:background 0.2s, border-color 0.2s;
+                ">
+                <span style="font-size:0.82rem; color:var(--text-secondary); line-height:1.45;">
+                    🔔 <strong style="color:var(--orange);">Fırtına &amp; Feeding Frenzy Bildirimi</strong><br>
+                    <span id="fav-notify-desc" style="font-size:0.75rem; opacity:0.75;">Bu meradan ani basınç düşüşü tespit edilirse bildirim al</span>
+                </span>
+            </label>
+
+            <!-- Butonlar -->
+            <div style="display:flex; gap:10px;">
+                <button onclick="closeFavSaveModal()" style="flex:1; padding:12px; border:1px solid var(--border-subtle); border-radius:12px; background:transparent; color:var(--text-secondary); font-size:0.9rem; cursor:pointer; font-family:var(--font-display);">İptal</button>
+                <button onclick="submitFavSaveModal()" style="flex:1; padding:12px; border:none; border-radius:12px; background:linear-gradient(135deg,var(--cyan),var(--green)); color:#000; font-size:0.9rem; font-weight:700; cursor:pointer; font-family:var(--font-display);">⭐ Kaydet</button>
             </div>
         </div>
     </div>
@@ -6912,36 +6971,74 @@
             setTimeout(() => { if (t.parentNode) t.remove(); }, 2500);
         }
 
+        // ── Favori KAYDETME MODAL — yeni dedicated modal ──────────────────────
+        let _favSaveCallback = null;
+
+        function openFavSaveModal() {
+            const isEn = typeof CURRENT_LANG !== 'undefined' && CURRENT_LANG === 'en';
+            document.getElementById('fav-modal-title').textContent  = isEn ? 'Spot Name' : 'Mera Adı';
+            document.getElementById('fav-save-name').placeholder    = isEn ? 'e.g. Rocky Cape' : 'örn. Ege Kabuğu';
+            document.getElementById('fav-notify-desc').textContent  = isEn
+                ? 'Get notified if rapid pressure drop detected at this spot'
+                : 'Bu meradan ani basınç düşüşü tespit edilirse bildirim al';
+
+            // Her açılışta sıfırla
+            document.getElementById('fav-notify').checked = false;
+            document.getElementById('fav-save-name').value = '';
+
+            const modal = document.getElementById('fav-save-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => document.getElementById('fav-save-name').focus(), 100);
+            document.getElementById('fav-save-name').onkeydown = (e) => {
+                if (e.key === 'Enter') submitFavSaveModal();
+            };
+        }
+
+        function closeFavSaveModal() {
+            document.getElementById('fav-save-modal').style.display = 'none';
+            _favSaveCallback = null;
+        }
+
+        function submitFavSaveModal() {
+            const name   = document.getElementById('fav-save-name').value.trim();
+            const notify = document.getElementById('fav-notify').checked;
+            const cb     = _favSaveCallback;
+            closeFavSaveModal();
+            if (name && cb) cb(name, notify);
+        }
+
         function saveFavorite() {
             if (!lastLatLon) return;
-            const titleText = CURRENT_LANG === 'tr' ? '📍 Mera Adı' : '📍 Spot Name';
-            const placeholderText = CURRENT_LANG === 'tr' ? 'örn. Ege Kabuğu' : 'e.g. Rocky Cape';
-            showCustomInput({
-                title: titleText,
-                placeholder: placeholderText,
-                onSubmit: async (name) => {
-                    try {
-                        const res = await apiFetch('/api/favorites', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ name, lat: lastLatLon.lat, lon: lastLatLon.lon })
-                        });
-                        const data = await res.json();
-                        if (data.success) {
-                            // localStorage cache'i de güncelle
-                            const favs = JSON.parse(localStorage.getItem(_favsKey()) || '[]');
-                            favs.push({ id: data.id, name, lat: lastLatLon.lat, lon: lastLatLon.lon, createdAt: Date.now() });
-                            localStorage.setItem(_favsKey(), JSON.stringify(favs));
-                            _showFavToast('⭐ ' + (CURRENT_LANG === 'tr' ? 'Kaydedildi!' : 'Saved!'), 'var(--green)');
-                            renderFavList(favs);
-                        } else {
-                            _showFavToast('❌ Kaydedilemedi', 'var(--red)');
-                        }
-                    } catch(e) {
-                        _showFavToast('❌ Bağlantı hatası', 'var(--red)');
+            openFavSaveModal();
+            _favSaveCallback = async (name, notify) => {
+                try {
+                    const res = await apiFetch('/api/favorites', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name,
+                            lat:    lastLatLon.lat,
+                            lon:    lastLatLon.lon,
+                            notify: !!notify
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        const favs = JSON.parse(localStorage.getItem(_favsKey()) || '[]');
+                        favs.push({ id: data.id, name, lat: lastLatLon.lat, lon: lastLatLon.lon, notify: !!notify, createdAt: Date.now() });
+                        localStorage.setItem(_favsKey(), JSON.stringify(favs));
+                        const msg = notify
+                            ? (CURRENT_LANG === 'tr' ? '⭐ Kaydedildi! 🔔 Bildirim aktif' : '⭐ Saved! 🔔 Alerts on')
+                            : (CURRENT_LANG === 'tr' ? '⭐ Kaydedildi!' : '⭐ Saved!');
+                        _showFavToast(msg, 'var(--green)');
+                        renderFavList(favs);
+                    } else {
+                        _showFavToast('❌ Kaydedilemedi', 'var(--red)');
                     }
+                } catch(e) {
+                    _showFavToast('❌ Bağlantı hatası', 'var(--red)');
                 }
-            });
+            };
         }
 
         async function loadFavorites() {
@@ -6967,13 +7064,15 @@
             const container = document.getElementById('fav-list');
             if (!container) return;
             if (favs.length === 0) {
-                container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem;">Henüz kayıt yok</div>';
+                container.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:8px;">Henüz kayıt yok</div>';
                 return;
             }
             container.innerHTML = favs.map(f => `
-                <div style="display: flex; gap: 8px; margin-bottom: 6px;">
-                    <button class="menu-btn" style="flex: 1;" onclick="goToFavorite('${f.id}',${f.lat},${f.lon},'${f.name.replace(/'/g, "&#39;")}')">📍 ${f.name}</button>
-                    <button onclick="deleteFavorite('${f.id}')" style="background: var(--red); color: white; border: none; border-radius: 4px; width: 28px; height: 28px; font-size: 12px; cursor: pointer; flex-shrink: 0;">✕</button>
+                <div style="display:flex;gap:8px;margin-bottom:6px;">
+                    <button class="menu-btn" style="flex:1;" onclick="goToFavorite('${f.id}',${f.lat},${f.lon},'${f.name.replace(/'/g, "&#39;")}')">
+                        📍 ${f.name}${f.notify ? ' <span style="font-size:0.72rem;opacity:0.85;" title="Fırtına bildirimi aktif">🔔</span>' : ''}
+                    </button>
+                    <button onclick="deleteFavorite('${f.id}')" style="background:var(--red);color:white;border:none;border-radius:4px;width:28px;height:28px;font-size:12px;cursor:pointer;flex-shrink:0;">✕</button>
                 </div>
             `).join('');
         }
@@ -7420,6 +7519,8 @@ function handleBackButton() {
     if (customConfirm && customConfirm.style.display === 'flex') { closeCustomConfirm(); return true; }
     const customInput = document.getElementById('custom-input-modal');
     if (customInput && customInput.style.display === 'flex') { closeCustomInput(); return true; }
+    const favSaveModal = document.getElementById('fav-save-modal');
+    if (favSaveModal && favSaveModal.style.display === 'flex') { closeFavSaveModal(); return true; }
 
     // 1. Paywall
     const paywall = document.getElementById('paywall-modal');
