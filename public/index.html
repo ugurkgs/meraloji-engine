@@ -2409,7 +2409,7 @@
                 <!-- Monthly -->
                 <div style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(0,200,200,0.15); border-radius:12px; padding:12px 10px; cursor:pointer;" onclick="upgradeToPro('monthly')">
                     <div style="font-size:11px; color:#8892a3; margin-bottom:4px;">AYLIK</div>
-                    <div style="font-size:22px; font-weight:700; color:#00ffcc;">₺29</div>
+                    <div style="font-size:22px; font-weight:700; color:#00ffcc;">₺29,99</div>
                     <div style="font-size:10px; color:#ff851b;">⏳ 60 Güne Özel Lansman Fiyatı</div>
                     <div style="font-size:10px; color:#8892a3; text-decoration:line-through;">Sonra ₺59/ay</div>
                 </div>
@@ -2417,7 +2417,7 @@
                 <div style="flex:1; background:rgba(0,200,200,0.08); border:2px solid rgba(0,200,200,0.4); border-radius:12px; padding:12px 10px; padding-top:20px; position:relative; cursor:pointer;" onclick="upgradeToPro('yearly')">
                     <div style="position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:linear-gradient(90deg,#00c8c8,#00ffcc); color:#000; font-size:9px; font-weight:700; padding:3px 12px; border-radius:10px; white-space:nowrap;">EN AVANTAJLI</div>
                     <div style="font-size:11px; color:#8892a3; margin-bottom:4px;">YILLIK</div>
-                    <div style="font-size:22px; font-weight:700; color:#00ffcc;">₺199</div>
+                    <div style="font-size:22px; font-weight:700; color:#00ffcc;">₺199,99</div>
                     <div style="font-size:10px; color:#8892a3;">~₺16/ay · %73 tasarruf</div>
                     <div style="font-size:10px; color:#ff851b;">🎯 İlk 200 kişiye özel</div>
                     <div style="font-size:10px; color:#8892a3; text-decoration:line-through;">Sonra ₺449/yıl</div>
@@ -2773,7 +2773,7 @@
             <div id="metrics-section">
                 <div class="metrics-grid" id="metrics-grid-top"></div>
                 <div id="metrics-toggle" onclick="toggleMetrics()" style="text-align:center;padding:6px 0;cursor:pointer;font-size:0.72rem;color:var(--cyan);user-select:none;display:none;">
-                    <span id="metrics-toggle-text">Oşinografik Bilgiler ▼</span>
+                    <span id="metrics-toggle-text">Teknik Bilgiler ▼</span>
                 </div>
                 <div class="metrics-grid" id="metrics-grid-bottom" style="display:none;"></div>
             </div>
@@ -5242,10 +5242,10 @@
             const text = document.getElementById('metrics-toggle-text');
             if (metricsExpanded) {
                 bottom.style.display = 'grid';
-                text.textContent = 'Oşinografik Bilgiler ▲';
+                text.textContent = 'Teknik Bilgiler ▲';
             } else {
                 bottom.style.display = 'none';
-                text.textContent = 'Oşinografik Bilgiler ▼';
+                text.textContent = 'Teknik Bilgiler ▼';
             }
         }
 
@@ -5674,8 +5674,8 @@
                         <p>İlk 3 sonucun skorunu, yem/olta detaylarını ve tüm ${list.length} türü gör</p>
                         <div style="background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.3);border-radius:8px;padding:8px 12px;margin-bottom:10px;">
                             <div style="font-size:0.7rem;color:#ff851b;margin-bottom:2px;">🎯 İLK 500 KİŞİYE ÖZEL FİYAT</div>
-                            <div style="font-size:1.1rem;font-weight:700;color:#00ffcc;">₺29/ay</div>
-                            <div style="font-size:0.68rem;color:var(--text-muted);">Yıllık: ₺199 (~₺16/ay)</div>
+                            <div style="font-size:1.1rem;font-weight:700;color:#00ffcc;">₺29,99/ay</div>
+                            <div style="font-size:0.68rem;color:var(--text-muted);">Yıllık: ₺199,99 (~₺16/ay)</div>
                             <div style="margin-top:6px;font-size:0.72rem;">
                                 Kalan kontenjan: <span style="font-weight:700;color:${remainingColor};">${remaining}</span> kişi
                             </div>
@@ -6195,8 +6195,8 @@
                         return `<div class="premium-gate">
                             <h3>🔒 7 Günlük Tahmin</h3>
                             <p>Önümüzdeki 7 günün tahminini görmek için PRO'ya yükseltin</p>
-                            <div class="price" style="margin-bottom:4px;">🎉 Lansmana Özel: ₺29/ay</div>
-                            <div style="font-size:0.7rem;color:#8892a3;margin-bottom:6px;">Yıllık: ₺199 (~₺16/ay)</div>
+                            <div class="price" style="margin-bottom:4px;">🎉 Lansmana Özel: ₺29,99/ay</div>
+                            <div style="font-size:0.7rem;color:#8892a3;margin-bottom:6px;">Yıllık: ₺199,99 (~₺16/ay)</div>
                             <div style="font-size:0.65rem;color:#ff851b;margin-bottom:10px;">⏰ Lansman fiyatı sınırlı sürelidir</div>
                             <button class="upgrade-btn" onclick="showPaywall('forecast')">PRO'ya Yükselt</button>
                         </div>`;
