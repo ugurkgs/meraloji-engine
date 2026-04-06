@@ -7028,6 +7028,15 @@ let graceDaysLeft = 0;
 let authToken = null;
 let usageData = { clicksRemaining: 5, scansRemaining: 1, clickLimit: 5, scanLimit: 1 };
 
+// ── PLATFORM TESPİTİ ─────────────────────────────────────────────────────
+// Android TWA: defaultUrl'e ?source=android_app eklendi (build.gradle)
+// Bu flag tüm uygulama boyunca ödeme yönlendirmesini kontrol eder.
+const _urlParams = new URLSearchParams(window.location.search);
+const isAndroidApp = _urlParams.get('source') === 'android_app'
+    || window.matchMedia('(display-mode: standalone)').matches;
+console.log('[PLATFORM]', isAndroidApp ? 'Android TWA / PWA' : 'Web tarayıcısı');
+// ─────────────────────────────────────────────────────────────────────────
+
 function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).catch((error) => {
@@ -7308,8 +7317,8 @@ function closePaywall() {
 async function upgradeToPro(plan) {
     closePaywall();
 
-    // PWA modunda Android intent dene
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    // ── ANDROID TWA / PWA → Google Play Billing ──────────────────────────
+    if (isAndroidApp) {
         const user = firebase.auth().currentUser;
         if (user) {
             const idToken = await user.getIdToken(true);
@@ -7317,9 +7326,14 @@ async function upgradeToPro(plan) {
             window.location.href = `intent://satin-al?uid=${user.uid}&plan=${subId}&token=${idToken}#Intent;scheme=meraloji;package=com.meraloji.fish;end`;
             return;
         }
+        // Giriş yapılmamışsa login ekranına yönlendir
+        showLoginModal();
+        return;
     }
 
-    // Web kullanıcısı → "Yakında" toastı göster
+    // ── WEB TARAYICISI → Iyzico ───────────────────────────────────────────
+    // TODO: Iyzico entegrasyonu hazır olduğunda bu bölüm aktif edilecek.
+    // window.location.href = `/odeme?plan=${plan}`;
     const toast = document.createElement('div');
     toast.style.cssText = `
         position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
