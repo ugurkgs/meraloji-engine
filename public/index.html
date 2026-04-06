@@ -3374,6 +3374,21 @@
     <!-- ═══════════════════════════════════════════════════════════════════
          JAVASCRIPT
          ═══════════════════════════════════════════════════════════════════ -->
+</div>
+    </div>
+
+    <div id="review-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center; backdrop-filter:blur(5px);">
+        <div style="background:#1c1c1e; padding:25px; border-radius:16px; text-align:center; width:85%; max-width:340px; border:1px solid #333; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+            <div style="font-size:40px; margin-bottom:10px;">⭐</div>
+            <h3 style="color:#fff; margin-top:0; font-size:18px;">Meraloji'yi Nasıl Buldun?</h3>
+            <p style="color:#aaa; font-size:14px; margin-bottom:20px; line-height:1.4;">Balık avı tahminlerimizi beğendiysen bize Google Play'de 5 yıldız vererek destek olabilirsin.</p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button onclick="goToPlayStore()" style="background:linear-gradient(135deg, #007AFF, #0056b3); color:white; border:none; padding:14px; border-radius:10px; font-weight:bold; font-size:15px; cursor:pointer;">Hemen Puan Ver</button>
+                <button onclick="closeReviewModal()" style="background:transparent; color:#888; border:1px solid #444; padding:12px; border-radius:10px; font-size:14px; cursor:pointer;">Daha Sonra Hatırlat</button>
+            </div>
+        </div>
+    </div>
+    
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         // ═══════════════════════════════════════════════════════════════════
         // DATA & STATE
@@ -7804,6 +7819,38 @@ window.addEventListener('popstate', function(e) {
     window.addEventListener('load', function() {
     history.pushState(null, document.title, window.location.href);
 });
+
+function checkAndShowReviewPrompt() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAndroidApp = urlParams.get('source') === 'android_app' || window.matchMedia('(display-mode: standalone)').matches;
+
+    if (!isAndroidApp) return;
+
+    if (localStorage.getItem('meraloji_has_rated')) return;
+
+    let appOpenCount = parseInt(localStorage.getItem('meraloji_open_count') || '0');
+    appOpenCount++;
+    localStorage.setItem('meraloji_open_count', appOpenCount);
+
+    if (appOpenCount === 3 || appOpenCount === 8) {
+        setTimeout(() => {
+            const modal = document.getElementById('review-modal');
+            if (modal) modal.style.display = 'flex';
+        }, 4000);
+    }
+}
+
+function goToPlayStore() {
+    localStorage.setItem('meraloji_has_rated', 'true');
+    document.getElementById('review-modal').style.display = 'none';
+    window.location.href = "market://details?id=com.meraloji.fish";
+}
+
+function closeReviewModal() {
+    document.getElementById('review-modal').style.display = 'none';
+}
+
+window.addEventListener('load', checkAndShowReviewPrompt);
 
 </script>
 </body>
