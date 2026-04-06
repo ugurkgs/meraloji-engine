@@ -1725,8 +1725,7 @@ const SPECIES_DB = {
 },
 
 "lidaki": {
-    name: "Lidaki", nameEn: "Young Gilthead Seabream", 
-    scientificName: "Sparus aurata",  // ← Diplodus annularis değil
+    name: "Lidaki", nameEn: "Young Gilthead Seabream", icon: "🐟", scientificName: "Sparus aurata",  // ← Diplodus annularis değil
     note: "Çipuranın 180-200g altındaki genci. Çok lezzetli, yüksek ekonomik değer.",
     photoId: 69,
     category: "KIYI",
