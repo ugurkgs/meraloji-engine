@@ -123,39 +123,19 @@
         }
 
         /* ── Fav-notify checkbox — custom checked style ─────────────────── */
-        /* input::after mobilde çalışmaz; sibling span kullanıyoruz        */
-        #fav-notify {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
-            margin: 0;
-            pointer-events: none;
-        }
-        #fav-notify-visual {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 22px;
-            height: 22px;
-            min-width: 22px;
-            border: 2px solid var(--orange);
-            border-radius: 6px;
-            background: transparent;
-            cursor: pointer;
-            margin-top: 1px;
-            transition: background 0.2s, border-color 0.2s;
-            font-size: 13px;
-            font-weight: 900;
-            color: #000;
-            line-height: 1;
-        }
-        #fav-notify:checked + #fav-notify-visual {
+        #fav-notify:checked {
             background: var(--orange);
             border-color: var(--orange);
         }
-        #fav-notify:checked + #fav-notify-visual::after {
+        #fav-notify:checked::after {
             content: '✓';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #000;
+            font-size: 13px;
+            font-weight: 900;
+            line-height: 1;
         }
 
         /* ═══════════════════════════════════════════════════════════════════
@@ -2543,8 +2523,17 @@
 
             <!-- Bildirim checkbox satırı -->
             <label id="fav-notify-label" for="fav-notify" style="display:flex; align-items:flex-start; gap:10px; padding:12px 14px; background:rgba(255,165,0,0.07); border:1px solid rgba(255,165,0,0.25); border-radius:12px; cursor:pointer; margin-bottom:16px; user-select:none;">
-                <input type="checkbox" id="fav-notify">
-                <span id="fav-notify-visual"></span>
+                <input type="checkbox" id="fav-notify" style="
+                    appearance:none; -webkit-appearance:none;
+                    width:20px; height:20px; min-width:20px;
+                    border:2px solid var(--orange);
+                    border-radius:6px;
+                    background:transparent;
+                    cursor:pointer;
+                    margin-top:1px;
+                    position:relative;
+                    transition:background 0.2s, border-color 0.2s;
+                ">
                 <span style="font-size:0.82rem; color:var(--text-secondary); line-height:1.45;">
                     🔔 <strong style="color:var(--orange);">Fırtına &amp; Feeding Frenzy Bildirimi</strong><br>
                     <span id="fav-notify-desc" style="font-size:0.75rem; opacity:0.75;">Bu meradan ani basınç düşüşü tespit edilirse bildirim al</span>
@@ -2562,6 +2551,20 @@
     <!-- ═══════════════════════════════════════════════════════════════════
          SPLASH SCREEN
          ═══════════════════════════════════════════════════════════════════ -->
+    <!-- FAVORİ HUB MODAL -->
+    <div id="fav-hub-modal" style="display:none; position:fixed; inset:0; z-index:190000; background:rgba(0,0,0,0.72); backdrop-filter:blur(6px); align-items:flex-end; justify-content:center; padding:0;">
+        <div style="background:var(--bg-panel); border:1px solid var(--border-glow); border-top-left-radius:24px; border-top-right-radius:24px; width:100%; max-width:480px; max-height:78vh; display:flex; flex-direction:column; box-shadow:0 -8px 40px rgba(0,0,0,0.6);">
+            <div style="display:flex; justify-content:center; padding:10px 0 4px;">
+                <div style="width:40px; height:4px; border-radius:4px; background:rgba(255,255,255,0.15);"></div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 20px 14px;">
+                <div style="font-size:1rem; font-weight:700; color:var(--text-primary);">&#128205; <span id="fav-hub-modal-title">Favori Meralarım</span></div>
+                <button onclick="closeFavHubModal()" style="background:rgba(255,255,255,0.07); border:none; border-radius:50%; width:32px; height:32px; color:var(--text-secondary); font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">&#10005;</button>
+            </div>
+            <div id="fav-hub-list" style="overflow-y:auto; padding:0 16px 32px; flex:1;"></div>
+        </div>
+    </div>
+
     <div id="splash">
         <img src="logo.png" alt="Meraloji" class="splash-logo" onerror="this.style.display='none'">
         <div class="splash-title">MERALOJİ</div>
@@ -2969,8 +2972,9 @@
         </div>
         
         <div class="menu-section">
-            <h3 id="fav-section-title">Favori Meralarım</h3>
-            <div id="fav-list"></div>
+            <button class="menu-btn" id="fav-hub-btn" onclick="openFavHubModal()">
+                📍 <span id="fav-hub-btn-text">Favori Meralarım</span><span id="fav-hub-count" style="margin-left:6px;background:rgba(0,212,255,0.18);color:var(--cyan);font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:20px;display:none;"></span>
+            </button>
         </div>
 
         <div class="menu-section">
@@ -4040,8 +4044,10 @@
             const menuTitle = document.getElementById('menu-title');
             if (menuTitle) menuTitle.innerText = t('menu');
             
-            const favSectionTitle = document.getElementById('fav-section-title');
-            if (favSectionTitle) favSectionTitle.innerText = t('favorites');
+            const favHubBtnText = document.getElementById('fav-hub-btn-text');
+            if (favHubBtnText) favHubBtnText.innerText = t('favorites');
+            const favHubModalTitle = document.getElementById('fav-hub-modal-title');
+            if (favHubModalTitle) favHubModalTitle.innerText = t('favorites');
             
             const mapLayerBtnText = document.getElementById('map-layer-btn-text');
             if (mapLayerBtnText) mapLayerBtnText.innerText = t('mapLayer');
@@ -7053,8 +7059,6 @@
         }
 
         async function loadFavorites() {
-            const container = document.getElementById('fav-list');
-            if (!container) return;
             // Önce localStorage cache'den hızlıca göster
             const cached = JSON.parse(localStorage.getItem(_favsKey()) || '[]');
             if (cached.length > 0) renderFavList(cached);
@@ -7072,20 +7076,42 @@
         }
 
         function renderFavList(favs) {
-            const container = document.getElementById('fav-list');
-            if (!container) return;
+            // Badge sayaci
+            const badge = document.getElementById('fav-hub-count');
+            if (badge) {
+                if (favs.length > 0) { badge.textContent = favs.length; badge.style.display = 'inline'; }
+                else { badge.style.display = 'none'; }
+            }
+            // Hub modal listesi
+            const hub = document.getElementById('fav-hub-list');
+            if (!hub) return;
             if (favs.length === 0) {
-                container.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:8px;">Henüz kayıt yok</div>';
+                hub.innerHTML = '<div style="color:var(--text-muted);font-size:0.88rem;text-align:center;padding:24px 8px;">Henüz favori mera eklenmedi</div>';
                 return;
             }
-            container.innerHTML = favs.map(f => `
-                <div style="display:flex;gap:8px;margin-bottom:6px;">
-                    <button class="menu-btn" style="flex:1;" onclick="goToFavorite('${f.id}',${f.lat},${f.lon},'${f.name.replace(/'/g, "&#39;")}')">
-                        📍 ${f.name}${f.notify ? ' <span style="font-size:0.72rem;opacity:0.85;" title="Fırtına bildirimi aktif">🔔</span>' : ''}
+            hub.innerHTML = favs.map(f => `
+                <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
+                    <button style="flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);border-radius:12px;color:var(--text-primary);font-family:var(--font-display);font-size:0.88rem;font-weight:600;padding:12px 14px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:6px;"
+                        onclick="goToFavorite('${f.id}',${f.lat},${f.lon},'${f.name.replace(/'/g, "&#39;")}')">
+                        \u{1F4CD} <span style="flex:1;">${f.name}</span>${f.notify ? ' <span style="font-size:0.75rem;opacity:0.85;">\u{1F514}</span>' : ''}
                     </button>
-                    <button onclick="deleteFavorite('${f.id}')" style="background:var(--red);color:white;border:none;border-radius:4px;width:28px;height:28px;font-size:12px;cursor:pointer;flex-shrink:0;">✕</button>
+                    <button onclick="deleteFavorite('${f.id}')" style="background:rgba(255,60,60,0.15);border:1px solid rgba(255,60,60,0.3);border-radius:10px;color:var(--red);width:36px;height:36px;font-size:13px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">&times;</button>
                 </div>
             `).join('');
+        }
+
+        function openFavHubModal() {
+            const cached = JSON.parse(localStorage.getItem(_favsKey()) || '[]');
+            renderFavList(cached);
+            const modal = document.getElementById('fav-hub-modal');
+            if (modal) modal.style.display = 'flex';
+            const sideMenu = document.getElementById('side-menu');
+            if (sideMenu && sideMenu.classList.contains('active')) toggleMenu();
+        }
+
+        function closeFavHubModal() {
+            const modal = document.getElementById('fav-hub-modal');
+            if (modal) modal.style.display = 'none';
         }
 
         async function deleteFavorite(favId) {
@@ -7102,6 +7128,7 @@
         let _favMarker = null;
 
         function goToFavorite(favId, lat, lon, name) {
+            closeFavHubModal();
             if (lat && lon) {
                 toggleMenu();
                 map.flyTo([lat, lon], 14);
@@ -7532,6 +7559,8 @@ function handleBackButton() {
     if (customInput && customInput.style.display === 'flex') { closeCustomInput(); return true; }
     const favSaveModal = document.getElementById('fav-save-modal');
     if (favSaveModal && favSaveModal.style.display === 'flex') { closeFavSaveModal(); return true; }
+    const favHubModal = document.getElementById('fav-hub-modal');
+    if (favHubModal && favHubModal.style.display === 'flex') { closeFavHubModal(); return true; }
 
     // 1. Paywall
     const paywall = document.getElementById('paywall-modal');
