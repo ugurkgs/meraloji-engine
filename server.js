@@ -11,6 +11,7 @@ const fs = require('fs');
 const SunCalc = require('suncalc');
 const rateLimit = require('express-rate-limit');
 const NodeCache = require('node-cache');
+const cron = require('node-cron'); // BİLDİRİMLER İÇİN EKLENDİ
 const fetch = globalThis.fetch || require('node-fetch');
 
 // Timeout'lu fetch — API yavaş yanıtlarında Promise.all'ın asılmasını önler
@@ -3782,7 +3783,77 @@ setTimeout(() => {
 //     warmAllHotSpots();
 //     setInterval(warmAllHotSpots, 55 * 60 * 1000);
 // }, 60_000);
+// ═══════════════════════════════════════════════════════════════
+// 🌪️ FIRTINA ÖNCESİ (FEEDING FRENZY) BİLDİRİM SİSTEMİ
+// ═══════════════════════════════════════════════════════════════
 
+// Her saatin 00. dakikasında çalışır ('0 * * * *')
+cron.schedule('0 * * * *', async () => {
+    console.log("[CRON] Fırtına/Basınç kontrolü başlatılıyor...");
+    if (!db || !admin) return;
+
+    try {
+        // Şimdilik Marmara/İstanbul'u referans alıyoruz (İleride kullanıcıların konumuna göre ayırabiliriz)
+        const lat = 41.0420;
+        const lon = 29.0050;
+        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=surface_pressure&past_days=1&timezone=auto`;
+        
+        // Zaten dosyanda var olan güvenli fetch fonksiyonunu kullanıyoruz
+        const weather = await safeFetchJSON(weatherUrl);
+        if (!weather || !weather.hourly || !weather.hourly.surface_pressure) return;
+
+        const hourlyPressure = weather.hourly.surface_pressure;
+        const currentHour = new Date().getHours();
+        const currentIndex = 24 + currentHour; // past_days=1 kullandığımız için bugün indeksi
+        
+        // Son 24 saatin basınç trendini hesapla (Dosyandaki kendi fonksiyonunu kullanıyoruz)
+        const pressureHistory = hourlyPressure.slice(Math.max(0, currentIndex - 24), currentIndex + 1);
+        const pressureTrend = calculatePressureTrend(pressureHistory);
+
+        if (pressureTrend.trend === 'FALLING_FAST') {
+            console.log(`[CRON] Ani basınç düşüşü (${pressureTrend.change} hPa) tespit edildi! Bildirim fırlatılıyor...`);
+            await sendFeedingFrenzyNotification();
+        } else {
+            console.log(`[CRON] Basınç stabil veya yükseliyor. (Trend: ${pressureTrend.trend})`);
+        }
+
+    } catch (error) {
+        console.error("[CRON] Hava durumu kontrolünde hata:", error.message);
+    }
+});
+
+async function sendFeedingFrenzyNotification() {
+    try {
+        // Firestore'dan fcmToken'ı olan tüm kullanıcıları getir
+        const usersSnapshot = await db.collection('users').where('fcmToken', '!=', null).get();
+        
+        const tokens = [];
+        usersSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.fcmToken) tokens.push(data.fcmToken);
+        });
+
+        if (tokens.length === 0) {
+            console.log("[CRON] Bildirim gönderilecek cihaz bulunamadı.");
+            return;
+        }
+
+        // Firebase Admin ile Çoklu Bildirim Fırlat
+        const message = {
+            notification: {
+                title: '🌪️ Fırtına Öncesi Fırsatı!',
+                body: 'Basınç hızla düşüyor, balıklar agresif beslenmeye başladı. Oltalar suya!'
+            },
+            tokens: tokens
+        };
+
+        const response = await admin.messaging().sendEachForMulticast(message);
+        console.log(`[CRON] ${response.successCount} adet bildirim başarıyla gönderildi. Başarısız: ${response.failureCount}`);
+        
+    } catch (error) {
+        console.error("[CRON] Bildirim gönderme hatası:", error.message);
+    }
+}
 // ═══════════════════════════════════════════════════════════════
 // 🎯 SICAK BAŞLANGIÇ HOT SPOT
 // İlk açılış için mevsimsel en iyi başlangıç noktasını döner.
