@@ -7220,7 +7220,7 @@ auth.onAuthStateChanged(async (user) => {
         try { await loadScanUsage(); } catch(e) {}
         try { await loadFavorites(); } catch(e) {}
         
-        requestAndSaveNotificationToken(); // BİLDİRİM İZNİ VE TOKEN KAYDI EKLENDİ
+        saveTokenToFirestore(user.uid); // FCM token Firestore'a kaydedilir
         
     } else {
         currentUser = null;
@@ -7968,28 +7968,30 @@ window.addEventListener('popstate', function(e) {
     history.pushState(null, document.title, window.location.href);
 });
 
-async function requestAndSaveNotificationToken() {
-    if (!currentUser) return; // Sadece giriş yapmış kullanıcılar
-
+async function saveTokenToFirestore(uid) {
     try {
+        // Önce bildirim izni iste
         const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            
-            const currentToken = await messaging.getToken({ 
-                vapidKey: 'BL77o8i68xuOe0NkDMjvjPTZr9F4JnLpPqLqrE81PwFtLgNzNXgDuEI_sCJ8qDMzPvAU67-8py-MHkwjkCr-iSY' 
-            });
+        if (permission !== 'granted') {
+            console.log('[FCM] Bildirim izni reddedildi.');
+            return;
+        }
 
-            if (currentToken) {
-                await db.collection('users').doc(currentUser.uid).set({
-                    fcmToken: currentToken,
-                    lastTokenUpdate: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-                
-                console.log("Bildirim token'ı Firestore'a kaydedildi!");
-            }
+        const currentToken = await messaging.getToken({
+            vapidKey: 'BL77o8i68xuOe0NkDMjvjPTZr9F4JnLpPqLqrE81PwFtLgNzNXgDuEI_sCJ8qDMzPvAU67-8py-MHkwjkCr-iSY'
+        });
+
+        if (currentToken) {
+            await db.collection('users').doc(uid).set({
+                fcmToken: currentToken,
+                lastTokenUpdate: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            console.log('[FCM] Token Firestore'a kaydedildi.');
+        } else {
+            console.log('[FCM] Token alınamadı — bildirim izni eksik olabilir.');
         }
     } catch (error) {
-        console.error('Bildirim izni alınamadı:', error);
+        console.error('[FCM] Token kaydında hata:', error);
     }
 }
     
