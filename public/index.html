@@ -7376,7 +7376,11 @@ function showCustomConfirm({ icon = '❓', title, subtitle, okLabel, okColor = '
     okBtn.textContent = okLabel;
     okBtn.style.background = okColor;
     _confirmCallback = onOk;
-    okBtn.onclick = () => { closeCustomConfirm(); if (_confirmCallback) _confirmCallback(); };
+    okBtn.onclick = () => { 
+        const cb = _confirmCallback;
+        closeCustomConfirm(); 
+        if (cb) cb(); 
+    };
     const modal = document.getElementById('custom-confirm-modal');
     modal.style.display = 'flex';
 }
