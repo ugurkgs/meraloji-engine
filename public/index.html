@@ -2872,7 +2872,7 @@
             
             <button class="btn-secondary" style="width: 100%; margin-top: 12px;" onclick="saveFavorite()" id="favorite-btn">⭐ Favorilere Kaydet</button>
 
-            <!-- BÖLGE TARAMA BUTONU - HUD içinde -->
+            <!-- BÖLGE TARAMA BUTONU - HUD içinde (sadece Android TWA'da görünür, JS ile kontrol edilir) -->
             <button id="hud-scan-btn" onclick="openScanFlow()" style="
                 width: 100%; margin-top: 12px; padding: 12px;
                 background: rgba(0,255,136,0.08);
@@ -2880,7 +2880,7 @@
                 border-radius: var(--radius-md);
                 color: var(--green); font-family: var(--font-display);
                 font-size: 0.85rem; font-weight: 700; cursor: pointer;
-                display: flex; align-items: center; justify-content: center; gap: 8px;
+                display: none; align-items: center; justify-content: center; gap: 8px;
                 transition: all 0.2s;
             " onmouseover="this.style.background='rgba(0,255,136,0.15)'" onmouseout="this.style.background='rgba(0,255,136,0.08)'">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 2"/></svg> Bölgeyi Tara <span id="hud-scan-badge" style="background:rgba(0,255,136,0.2);padding:2px 8px;border-radius:10px;font-size:0.75rem;">1 hak</span>
@@ -4389,6 +4389,17 @@
                 document.getElementById('controls').classList.add('visible');
                 autoLoadNearestSpot();
             }, 2500);
+
+            // ── Platform bazlı UI ayarları ────────────────────────────────
+            // HUD "Bölgeyi Tara" butonu sadece Android TWA'da gösterilir.
+            // Web/iOS kullanıcıları üst bardaki scan butonunu kullanabilir.
+            const _scanHudBtn = document.getElementById('hud-scan-btn');
+            if (_scanHudBtn) {
+                const _isAndroid = new URLSearchParams(window.location.search).get('source') === 'android_app';
+                if (_isAndroid) {
+                    _scanHudBtn.style.display = 'flex';
+                }
+            }
         });
 
         let _autoLoadActive = false;
@@ -7188,9 +7199,14 @@ let usageData = { clicksRemaining: 5, scansRemaining: 1, clickLimit: 5, scanLimi
 // Android TWA: defaultUrl'e ?source=android_app eklendi (build.gradle)
 // Bu flag tüm uygulama boyunca ödeme yönlendirmesini kontrol eder.
 const _urlParams = new URLSearchParams(window.location.search);
-const isAndroidApp = _urlParams.get('source') === 'android_app'
-    || window.matchMedia('(display-mode: standalone)').matches;
-console.log('[PLATFORM]', isAndroidApp ? 'Android TWA / PWA' : 'Web tarayıcısı');
+const isAndroidApp = _urlParams.get('source') === 'android_app';
+console.log('[PLATFORM]', isAndroidApp ? 'Android TWA' : 'Web / iOS tarayıcısı');
+// ─────────────────────────────────────────────────────────────────────────
+
+// ── İYZİCO ÖDEME ENTEGRASYONU ────────────────────────────────────────────
+// Hesap aktif olduğunda bu bayrağı true yapın — tüm Web/iOS kullanıcıları
+// otomatik olarak /odeme sayfasına yönlendirilir.
+const IYZICO_ACTIVE = false;
 // ─────────────────────────────────────────────────────────────────────────
 
 function signInWithGoogle() {
@@ -7476,7 +7492,7 @@ function closePaywall() {
 async function upgradeToPro(plan) {
     closePaywall();
 
-    // ── ANDROID TWA / PWA → Google Play Billing ──────────────────────────
+    // ── ANDROID TWA → Google Play Billing ─────────────────────────────────
     if (isAndroidApp) {
         const user = firebase.auth().currentUser;
         if (user) {
@@ -7490,35 +7506,95 @@ async function upgradeToPro(plan) {
         return;
     }
 
-    // ── WEB TARAYICISI → Iyzico ───────────────────────────────────────────
-    // TODO: Iyzico entegrasyonu hazır olduğunda bu bölüm aktif edilecek.
-    // window.location.href = `/odeme?plan=${plan}`;
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-        position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
-        background:linear-gradient(135deg,#0d1a2a,#0a1f1f);
-        border:1px solid rgba(0,212,255,0.35);
-        color:#fff; padding:18px 22px; border-radius:18px;
-        font-size:13px; z-index:99999; max-width:310px; width:90%;
-        text-align:center; box-shadow:0 6px 32px rgba(0,0,0,0.55);
-        animation: fadeInUp 0.3s ease;
+    // ── WEB / iOS → İyzico Ödeme ──────────────────────────────────────────
+    if (IYZICO_ACTIVE) {
+        // İyzico aktif — ödeme sayfasına yönlendir
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            // Giriş yapılmamışsa login ekranına yönlendir
+            document.getElementById('login-overlay').classList.remove('hidden');
+            return;
+        }
+        const idToken = await user.getIdToken(true);
+        window.location.href = `/odeme?plan=${plan}&token=${idToken}`;
+        return;
+    }
+
+    // ── İyzico henüz aktif değil — bilgilendirme modalı ───────────────────
+    showWebPaymentComingSoon();
+}
+
+// Web kullanıcıları için "yakında" bilgilendirme modalı
+function showWebPaymentComingSoon() {
+    // Önceki varsa kaldır
+    const existing = document.getElementById('web-payment-soon-modal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'web-payment-soon-modal';
+    modal.style.cssText = `
+        position:fixed; inset:0; z-index:300000;
+        background:rgba(0,0,0,0.82); backdrop-filter:blur(10px);
+        display:flex; align-items:center; justify-content:center;
+        padding:20px; animation:fadeIn 0.25s ease;
     `;
-    toast.innerHTML = `
-        <div style="font-size:1.8rem; margin-bottom:8px;">🚀</div>
-        <div style="font-weight:700; color:var(--cyan); font-size:0.95rem; margin-bottom:6px;">Çok Yakında Google Play'de!</div>
-        <div style="color:#c8d0dc; font-size:0.78rem; line-height:1.5; margin-bottom:12px;">
-            MERALOJİ PRO şu an kapalı test sürecinde.<br>
-            Yayına girdiğinde ilk haberdar olmak için<br>
-            test mail grubuna katılabilirsiniz.
+    modal.innerHTML = `
+        <div style="
+            background:linear-gradient(145deg, #0d1a2a 0%, #0a1f2f 50%, #0d1520 100%);
+            border:1px solid rgba(0,200,200,0.25);
+            border-radius:24px; max-width:360px; width:100%;
+            padding:28px 24px; text-align:center;
+            box-shadow:0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(0,200,200,0.08);
+        ">
+            <div style="font-size:3rem; margin-bottom:12px;">🌊</div>
+            <div style="font-size:1.2rem; font-weight:800; color:#fff; margin-bottom:6px; letter-spacing:0.3px;">
+                Web Ödemesi Çok Yakında!
+            </div>
+            <div style="font-size:0.82rem; color:#8892a3; line-height:1.6; margin-bottom:20px;">
+                MERALOJİ PRO web üzerinden ödeme altyapısı
+                hazırlanıyor. Çok kısa süre içinde kredi kartı
+                ile doğrudan abone olabileceksiniz.
+            </div>
+
+            <div style="
+                background:rgba(0,255,136,0.06); border:1px solid rgba(0,255,136,0.2);
+                border-radius:14px; padding:14px 16px; margin-bottom:16px; text-align:left;
+            ">
+                <div style="font-size:0.78rem; font-weight:700; color:#00ffcc; margin-bottom:8px;">✨ PRO ile neler kazanırsınız?</div>
+                <div style="font-size:0.75rem; color:#c8d0dc; line-height:1.8;">
+                    ✓ Sınırsız mera analizi ve bölge tarama<br>
+                    ✓ 83+ balık türü — tam liste ve av taktikleri<br>
+                    ✓ Saatlik skor grafiği + 7 günlük tahmin<br>
+                    ✓ Detaylı skor analizi (22 çevresel parametre)
+                </div>
+            </div>
+
+            <a href="mailto:meraloji-test@googlegroups.com?subject=PRO%20Web%20Bildirimi&body=Merhaba%2C%20Web%20%C3%B6demesi%20aktif%20oldu%C4%9Funda%20haberdar%20olmak%20istiyorum."
+               style="
+                    display:inline-block; width:100%; padding:13px;
+                    background:linear-gradient(135deg, #00c8c8, #00ffcc);
+                    color:#000; font-weight:700; font-size:0.9rem;
+                    border-radius:14px; text-decoration:none;
+                    letter-spacing:0.3px; margin-bottom:10px;
+                    box-shadow:0 4px 16px rgba(0,200,200,0.3);
+                    box-sizing:border-box;
+               ">
+                📧 Hazır Olunca Haber Ver
+            </a>
+
+            <button onclick="document.getElementById('web-payment-soon-modal').remove()" style="
+                width:100%; padding:11px; border:1px solid rgba(255,255,255,0.12);
+                border-radius:14px; background:transparent; color:#8892a3;
+                font-size:0.85rem; cursor:pointer; font-family:var(--font-display);
+            ">Kapat</button>
         </div>
-        <a href="mailto:meraloji-test@googlegroups.com?subject=PRO%20Bildirimi%20%7C%20MERALOJİ&body=Merhaba%2C%20MERALOJİ%20PRO%20yay%C4%B1na%20girdi%C4%9Finde%20haberdar%20olmak%20istiyorum."
-           style="display:inline-block; background:linear-gradient(135deg,var(--cyan),var(--green)); color:#000; font-weight:700; font-size:0.8rem; padding:8px 18px; border-radius:10px; text-decoration:none; margin-bottom:10px;">
-            📧 Beni Haberdar Et
-        </a>
-        <div onclick="this.closest('div[style]').remove()" style="color:var(--text-muted); font-size:0.72rem; cursor:pointer; margin-top:2px;">Kapat</div>
     `;
-    document.body.appendChild(toast);
-    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 12000);
+    document.body.appendChild(modal);
+
+    // Backdrop tıklamayla kapat
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
 }
 
 // Tüm /api/ çağrıları için güvenli wrapper — global window.fetch ezilmez
@@ -7996,9 +8072,7 @@ async function saveTokenToFirestore(uid) {
 }
     
 function checkAndShowReviewPrompt() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const isAndroidApp = urlParams.get('source') === 'android_app' || window.matchMedia('(display-mode: standalone)').matches;
-
+    // Global isAndroidApp değişkenini kullan (sadece ?source=android_app parametresiyle tespit)
     if (!isAndroidApp) return;
 
     if (localStorage.getItem('meraloji_has_rated')) return;
