@@ -16,11 +16,11 @@ const fetch = globalThis.fetch || require('node-fetch');
 
 // ═══════════════════════════════════════════════════════════════════════════
 // OPEN-METEO ENDPOINT KONFİGÜRASYONU
-// Ücretsiz → ücretli geçişi tek env variable ile — kod değişikliği gerekmez.
+// ÜCRETLİ PLAN AKTİF — 1.000.000 API istek / gün
 //
-//   Render Dashboard → Environment Variables:
-//     Ücretli : OM_PAID = true   → customer-api kullanılır
-//     Ücretsiz: OM_PAID sil      → api kullanılır (default)
+//   Render Dashboard Environment Variables:
+//     OM_PAID    = true
+//     OM_API_KEY = (Open-Meteo API key)
 //
 // ═══════════════════════════════════════════════════════════════════════════
 const OM_PAID        = process.env.OM_PAID === 'true';
@@ -36,7 +36,8 @@ function omKey(url) {
     return url + (url.includes('?') ? '&' : '?') + 'apikey=' + OM_API_KEY;
 }
 
-console.log(`[CONFIG] Open-Meteo: ${OM_PAID ? '💳 ÜCRETLI (customer-api)' : '🆓 ÜCRETSIZ (api)'}`);
+console.log(`[CONFIG] Open-Meteo: ${OM_PAID ? '💳 ÜCRETLİ (customer-api) — 1M/gün limit' : '🆓 ÜCRETSIZ (api)'}`);
+if (OM_PAID && !OM_API_KEY) console.warn('⚠️  OM_PAID=true ama OM_API_KEY boş! customer-api auth hatası verecektir.');
 
 // Timeout'lu fetch — API yavaş yanıtlarında Promise.all'ın asılmasını önler
 function fetchWithTimeout(url, timeoutMs = 8000) {
@@ -46,7 +47,7 @@ function fetchWithTimeout(url, timeoutMs = 8000) {
     ]);
 }
 
-// Open-Meteo 429 backoff — 429 alındığında 2 dakika tüm OM isteklerini durdur
+// Open-Meteo 429 backoff — 429 alındığında 10 dakika (600s) tüm OM isteklerini durdur
 const _OM_BACKOFF_KEY = 'backoff_openmeteo';
 function _isOpenMeteo(url) {
     return url.includes('open-meteo.com');
@@ -1667,8 +1668,7 @@ function calculateFishScore(fish, key, params) {
     if (!isBoat && depthAvg !== undefined && depthAvg !== null) {
         const strictOffshoreCategories = ['PELAJIK', 'AVCI', 'DIP_DERIN', 'SÜRÜ'];
         if (strictOffshoreCategories.includes(fish.category)) {
-            const currentMonth = new Date().getMonth();
-            const comesToShore = fish.shoreMonths && fish.shoreMonths.includes(currentMonth);
+            const comesToShore = fish.shoreMonths && fish.shoreMonths.includes(targetDate.getMonth());
             if (!comesToShore && depthAvg < 25) {
                 const shorePenalty = depthAvg < 10 ? 0.25 : 0.60;
                 rawScore *= shorePenalty;
@@ -1814,8 +1814,13 @@ function calculateFishScore(fish, key, params) {
 
 app.get('/api/forecast', async (req, res) => {
     try {
-        const lat = parseFloat(req.query.lat).toFixed(4);
-        const lon = parseFloat(req.query.lon).toFixed(4);
+        const latRaw = parseFloat(req.query.lat);
+        const lonRaw = parseFloat(req.query.lon);
+        if (isNaN(latRaw) || isNaN(lonRaw)) {
+            return res.status(400).json({ error: 'Geçersiz koordinat: lat ve lon sayısal olmalı' });
+        }
+        const lat = latRaw.toFixed(4);
+        const lon = lonRaw.toFixed(4);
         const isBoat = req.query.mode === 'boat'; // tekne modu
         const isAutoLoad = req.query.source === 'autoload'; // Sıcak başlangıç isteği
         const now = new Date();
@@ -2881,8 +2886,8 @@ app.get('/api/fish-search', async (req, res) => {
             return dirs[Math.round(dir / 22.5) % 16];
         };
 
-        // Koruma altında mı
-        const isProtected = (fish.note && (fish.note.includes('KORUMA ALTINDA') || fish.note.includes('NADİR TÜR') || fish.note.includes('Serbest bırakın')));
+        // Koruma altında mı — protected boolean alanını kullan (string eşleştirme yerine)
+        const isProtected = fish.protected === true;
 
         res.json({
             fish: {
@@ -3031,7 +3036,12 @@ app.post('/api/use-click', async (req, res) => {
             });
         }
         
-        await usageRef.set({ count: count + 1, date: today, uid, updatedAt: Date.now() }, { merge: true });
+        await usageRef.set({
+            count: admin.firestore.FieldValue.increment(1),
+            date: today,
+            uid,
+            updatedAt: Date.now()
+        }, { merge: true });
         
         res.json({ 
             allowed: true, 
@@ -3209,7 +3219,7 @@ app.post('/api/verify-subscription', async (req, res) => {
 
             if (isNewPro && isYearly) {
                 const statsRef = db.collection('stats').doc('pro_count');
-                await statsRef.set({ count: (await statsRef.get()).data()?.count + 1 || 1 }, { merge: true });
+                await statsRef.set({ count: admin.firestore.FieldValue.increment(1) }, { merge: true });
             }
         }
         // Cache'i temizle — bir sonraki istekte taze veri çekilsin
@@ -3439,7 +3449,11 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
             wavePeriod,
             swellHeight,
             oceanCurrent,
-            tempShock
+            tempShock,
+            thermoclineDepth: estimateThermoclineDepth(tempWater, now.getMonth(), regionName),
+            moonlightIntensity: calculateMoonlightIntensity(now, parseFloat(latF), parseFloat(lonF), cloud),
+            chlorophyll: null,
+            isBoat: false
         };
 
         // Günlük ağırlıklı skor için activityWindows ve hourlyStartIdx
@@ -3543,9 +3557,11 @@ app.get('/api/scan', async (req, res) => {
 
         // ── Kullanım sayacını artır (sadece free — PRO ve grace period hariç) ──
         if (!req.isPremium && !req.isGracePeriod && usageRef) {
-            const currentDoc = await usageRef.get();
-            const currentCount = currentDoc.exists ? (currentDoc.data().count || 0) : 0;
-            await usageRef.set({ count: currentCount + 1, uid, date: today }, { merge: true });
+            await usageRef.set({
+                count: admin.firestore.FieldValue.increment(1),
+                uid,
+                date: today
+            }, { merge: true });
         }
 
         // ── SSE ile streaming yanıt ──
