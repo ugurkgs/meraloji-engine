@@ -123,6 +123,21 @@ async function queuedFetch(url, timeoutMs = 12000) {
     }
 }
 
+// ── IN-FLIGHT DEDUPLICATION ────────────────────────────────────────────────
+// Aynı koordinata aynı anda N kullanıcı gelirse yalnızca 1 OM isteği açılır.
+// Diğerleri aynı Promise'i bekler → backoff sonrası "thundering herd" önlenir.
+// ─────────────────────────────────────────────────────────────────────────────
+const _inFlightFetches = new Map(); // key → Promise
+
+function deduplicatedFetch(key, fetchFn) {
+    if (_inFlightFetches.has(key)) {
+        return _inFlightFetches.get(key);
+    }
+    const promise = fetchFn().finally(() => _inFlightFetches.delete(key));
+    _inFlightFetches.set(key, promise);
+    return promise;
+}
+
 // Firebase Admin SDK
 let admin, db;
 try {
@@ -1877,10 +1892,14 @@ app.get('/api/forecast', async (req, res) => {
 
         // Paralel fetch — hata durumunda fallback URL'ye düş
         // [CRON CACHE] — background cron daha önce çektiyse direk kullan, API'ye gitme
-        // [OFFLİNE OPT] — SEA ise EMODnet çağrısı atlanır (~400ms tasarruf)
+        // [DEDUP]      — aynı koordinata eş zamanlı N istek gelirse tek OM çağrısı açılır
         let [weather, marine, bathymetryRes] = await Promise.all([
-            (cache.get(`raw_weather_${gLat}_${gLon}`) ? Promise.resolve(cache.get(`raw_weather_${gLat}_${gLon}`)) : queuedFetch(weatherUrl)),
-            (cache.get(`raw_marine_${gLat}_${gLon}`)  ? Promise.resolve(cache.get(`raw_marine_${gLat}_${gLon}`))  : queuedFetch(marineUrl)),
+            cache.get(`raw_weather_${gLat}_${gLon}`)
+                ? Promise.resolve(cache.get(`raw_weather_${gLat}_${gLon}`))
+                : deduplicatedFetch(`w_${gLat}_${gLon}`, () => queuedFetch(weatherUrl)),
+            cache.get(`raw_marine_${gLat}_${gLon}`)
+                ? Promise.resolve(cache.get(`raw_marine_${gLat}_${gLon}`))
+                : deduplicatedFetch(`m_${gLat}_${gLon}`, () => queuedFetch(marineUrl)),
             skipBathymetry ? Promise.resolve(null) : fetchWithTimeout(bathymetryUrl).catch(() => null)
         ]);
         
@@ -3850,10 +3869,22 @@ setTimeout(() => {
 }, nextCleanup - now);
 
 // HOT SPOT CACHE ISITMA — Her 55 dakikada bir popüler noktaları önceden cache'le
-// Yoğun saatlerde kullanıcılar cache'ten okur, OM'a hiç gitmez
+// Backoff aktifse bitmesini bekler, sonra ısıtır — "cron boşa gitti" sorunu çözülür.
+async function warmWhenReady() {
+    const backoffTTL = cache.getTtl(_OM_BACKOFF_KEY);
+    if (backoffTTL) {
+        const waitMs = backoffTTL - Date.now() + 2000; // +2s buffer
+        if (waitMs > 0) {
+            console.log(`[CRON] OM backoff aktif — ${Math.ceil(waitMs / 1000)}s sonra ısıtma başlayacak`);
+            await new Promise(r => setTimeout(r, waitMs));
+        }
+    }
+    await warmAllHotSpots();
+}
+
 setTimeout(() => {
-    warmAllHotSpots();
-    setInterval(warmAllHotSpots, 55 * 60 * 1000);
+    warmWhenReady();
+    setInterval(warmWhenReady, 55 * 60 * 1000);
 }, 60_000);
 // ═══════════════════════════════════════════════════════════════════════
 // 🌪️ FIRTINA ÖNCESİ (FEEDING FRENZY) BİLDİRİM SİSTEMİ
