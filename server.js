@@ -28,33 +28,64 @@ function _isOpenMeteo(url) {
     return url.includes('open-meteo.com');
 }
 
+
 // Güvenli JSON fetch — hata durumunda null döner, crash etmez
 // 429 gelirse retry YOK + 2 dk backoff başlatılır
+// 502/503/504 gelirse 2 kez retry yapılır (2s + 4s bekleme)
 async function safeFetchJSON(url, timeoutMs = 12000) {
     // Open-Meteo backoff aktifse istek atma
     if (_isOpenMeteo(url) && cache && cache.get(_OM_BACKOFF_KEY)) {
         console.log(`[FETCH] OM backoff aktif, atlanıyor: ${url.split('?')[0]}`);
         return null;
     }
-    try {
-        const res = await fetchWithTimeout(url, timeoutMs);
-        if (res.status === 429) {
-            console.log(`[FETCH] 429 rate limit: ${url.split('?')[0]}`);
-            if (_isOpenMeteo(url) && cache) {
-                cache.set(_OM_BACKOFF_KEY, true, 120);
-                console.log(`[FETCH] Open-Meteo backoff başlatıldı — 120 saniye`);
+
+    const RETRY_STATUSES = new Set([502, 503, 504]);
+    const MAX_RETRIES = 2;
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const res = await fetchWithTimeout(url, timeoutMs);
+
+            if (res.status === 429) {
+                console.log(`[FETCH] 429 rate limit: ${url.split('?')[0]}`);
+                if (_isOpenMeteo(url) && cache) {
+                    cache.set(_OM_BACKOFF_KEY, true, 120);
+                    console.log(`[FETCH] Open-Meteo backoff başlatıldı — 120 saniye`);
+                }
+                return null; // 429'da retry yok
             }
+
+            if (RETRY_STATUSES.has(res.status)) {
+                if (attempt < MAX_RETRIES) {
+                    const waitMs = Math.pow(2, attempt + 1) * 1000; // 2s, 4s
+                    console.log(`[FETCH] ${res.status} gateway hatası, ${waitMs/1000}s sonra retry (${attempt+1}/${MAX_RETRIES}): ${url.split('?')[0]}`);
+                    await new Promise(r => setTimeout(r, waitMs));
+                    continue;
+                }
+                console.log(`[FETCH] ${res.status} — ${MAX_RETRIES} retry tükendi: ${url.split('?')[0]}`);
+                return null;
+            }
+
+            if (!res.ok) {
+                console.log(`[FETCH] ${url.split('?')[0]} HTTP ${res.status}`);
+                return null;
+            }
+
+            return await res.json();
+
+        } catch (e) {
+            if (attempt < MAX_RETRIES && e.message === 'API_TIMEOUT') {
+                const waitMs = Math.pow(2, attempt + 1) * 1000;
+                console.log(`[FETCH] Timeout, ${waitMs/1000}s sonra retry (${attempt+1}/${MAX_RETRIES}): ${url.split('?')[0]}`);
+                await new Promise(r => setTimeout(r, waitMs));
+                continue;
+            }
+            console.log(`[FETCH] ${url.split('?')[0]} failed: ${e.message}`);
             return null;
         }
-        if (!res.ok) {
-            console.log(`[FETCH] ${url.split('?')[0]} HTTP ${res.status}`);
-            return null;
-        }
-        return await res.json();
-    } catch (e) {
-        console.log(`[FETCH] ${url.split('?')[0]} failed: ${e.message}`);
-        return null;
     }
+
+    return null;
 }
 
 // Open-Meteo istek kuyruğu — aynı anda max 2 istek, aralarında 500ms
