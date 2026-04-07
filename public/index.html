@@ -6250,6 +6250,61 @@
         }
 
         // ═══════════════════════════════════════════════════════════════════
+        // ONBOARDING (KARŞILAMA EKRANI)
+        // ═══════════════════════════════════════════════════════════════════
+
+        let currentOnboardSlide = 1;
+        const totalOnboardSlides = 3;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sadece ilk defa girenler veya "tekrar göster" diyenler için aç
+            const onboardDone = localStorage.getItem('meraloji_onboard_done');
+            if (!onboardDone) {
+                document.getElementById('onboarding-overlay').style.display = 'flex';
+            } else {
+                document.getElementById('onboarding-overlay').style.display = 'none';
+            }
+        });
+
+        function onboardNext() {
+            if (currentOnboardSlide < totalOnboardSlides) {
+                // Eski slaytı gizle
+                document.getElementById(`onboard-slide-${currentOnboardSlide}`).style.display = 'none';
+                document.getElementById(`dot-${currentOnboardSlide}`).classList.remove('active');
+                
+                // Yeni slaytı göster
+                currentOnboardSlide++;
+                document.getElementById(`onboard-slide-${currentOnboardSlide}`).style.display = 'block';
+                document.getElementById(`dot-${currentOnboardSlide}`).classList.add('active');
+
+                // Son slayta gelindiyse butonu değiştir
+                if (currentOnboardSlide === totalOnboardSlides) {
+                    document.getElementById('onboard-next-btn').innerText = 'Başla 🎣';
+                }
+            } else {
+                // Son slayttayken basıldıysa kapat
+                closeOnboarding();
+            }
+        }
+
+        function closeOnboarding() {
+            const overlay = document.getElementById('onboarding-overlay');
+            overlay.classList.add('hiding');
+            
+            // Eğer "Her açılışta tekrar göster" işaretli DEĞİLSE localStorage'a yaz
+            const dontShowCheckbox = document.getElementById('onboard-dont-show');
+            if (dontShowCheckbox && !dontShowCheckbox.checked) {
+                localStorage.setItem('meraloji_onboard_done', 'true');
+            }
+
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                overlay.classList.remove('hiding');
+            }, 400); // 0.4s fade out animasyonu
+        }
+
+
+        // ═══════════════════════════════════════════════════════════════════
         // MODALS & UI ACTIONS
         // ═══════════════════════════════════════════════════════════════════
 
