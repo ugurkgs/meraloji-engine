@@ -70,8 +70,8 @@ async function safeFetchJSON(url, timeoutMs = 12000) {
             if (res.status === 429) {
                 console.log(`[FETCH] 429 rate limit: ${url.split('?')[0]}`);
                 if (_isOpenMeteo(url) && cache) {
-                    cache.set(_OM_BACKOFF_KEY, true, 120);
-                    console.log(`[FETCH] Open-Meteo backoff başlatıldı — 120 saniye`);
+                    cache.set(_OM_BACKOFF_KEY, true, 600);
+                    console.log(`[FETCH] Open-Meteo backoff başlatıldı — 600 saniye (OM rate limit)`);  
                 }
                 return null;
             }
@@ -1905,7 +1905,11 @@ app.get('/api/forecast', async (req, res) => {
         
         // Weather kesin gerekli, marine olmadan varsayılan değerlerle devam et
         if (!weather) {
-            return res.status(503).json({ error: 'API_UNAVAILABLE', message: 'Hava/deniz verisi alınamadı, lütfen tekrar deneyin' });
+            const isBackoff = cache && cache.get(_OM_BACKOFF_KEY);
+            const errMsg = isBackoff
+                ? 'Hava durumu API geçici olarak meşgul. 5-10 dakika sonra tekrar deneyin.'
+                : 'Hava/deniz verisi alınamadı, lütfen tekrar deneyin';
+            return res.status(503).json({ error: 'API_UNAVAILABLE', message: errMsg, backoff: !!isBackoff });
         }
         if (!marine) {
             console.log('[FALLBACK] Marine API failed, using default marine values');
@@ -3865,7 +3869,14 @@ cron.schedule('0 * * * *', async () => {
             .where('notify', '==', true)
             .get();
     } catch (err) {
-        console.error('[NOTIFY CRON] Firestore sorgu hatası:', err.message);
+        if (err.code === 9 || (err.message && err.message.includes('FAILED_PRECONDITION'))) {
+            console.error('[NOTIFY CRON] ❌ Firestore INDEX EKSİK!');
+            console.error('[NOTIFY CRON] Firebase Console -> Firestore -> Indexes -> Composite Index oluştur:');
+            console.error('[NOTIFY CRON]   Collection group: favorites  |  Field: notify (Ascending)  |  Query scope: Collection group');
+            console.error('[NOTIFY CRON] Veya Render logundaki Firebase linkine tıkla (varsa).');
+        } else {
+            console.error('[NOTIFY CRON] Firestore sorgu hatası:', err.message);
+        }
         return;
     }
 
