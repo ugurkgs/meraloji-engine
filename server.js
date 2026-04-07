@@ -174,7 +174,7 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-const cache = new NodeCache({ stdTTL: 3600, checkperiod: 600 });
+const cache = new NodeCache({ stdTTL: 10800, checkperiod: 600 }); // 3 saat — OM isteğini 3x azaltır
 
 // Bathymetry sonuçlarını 24 saat cache'le — aynı bölgede tekrar taramada API çağrısı yok
 const bathyCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
@@ -1903,9 +1903,19 @@ app.get('/api/forecast', async (req, res) => {
             }
         }
         
-        // Weather kesin gerekli, marine olmadan varsayılan değerlerle devam et
+        // Weather kesin gerekli — yoksa önce eski cache dene, o da yoksa 503
         if (!weather) {
             const isBackoff = cache && cache.get(_OM_BACKOFF_KEY);
+            // Aynı grid noktası için önceki saatlerden kalmış forecast var mı?
+            let staleData = null;
+            for (let h = 0; h < 24; h++) {
+                staleData = cache.get(`forecast_v24_${gLat}_${gLon}_h${h}`);
+                if (staleData) break;
+            }
+            if (staleData) {
+                console.log(`[BACKOFF] Eski cache verisi döndürülüyor: ${gLat},${gLon}`);
+                return res.json({ ...staleData, _stale: true });
+            }
             const errMsg = isBackoff
                 ? 'Hava durumu API geçici olarak meşgul. 5-10 dakika sonra tekrar deneyin.'
                 : 'Hava/deniz verisi alınamadı, lütfen tekrar deneyin';
@@ -2544,6 +2554,11 @@ app.get('/api/forecast', async (req, res) => {
         };
 
         cache.set(cacheKey, responseData);
+        // Ham API verisini de sakla — bir sonraki kullanıcı OM'a gitmesin
+        if (weather) cache.set(`raw_weather_${gLat}_${gLon}`, weather, 10800);
+        if (marine && marine.hourly?.sea_surface_temperature) {
+            cache.set(`raw_marine_${gLat}_${gLon}`, marine, 10800);
+        }
         res.json(responseData);
 
     } catch (error) {
@@ -3834,11 +3849,12 @@ setTimeout(() => {
     setInterval(cleanOldUsageDocs, 24 * 60 * 60 * 1000);
 }, nextCleanup - now);
 
-// CRON DEVRE DIŞI — İleride dinamik hotspot sistemiyle (kullanıcı konumuna göre) aktif edilecek
-// setTimeout(() => {
-//     warmAllHotSpots();
-//     setInterval(warmAllHotSpots, 55 * 60 * 1000);
-// }, 60_000);
+// HOT SPOT CACHE ISITMA — Her 55 dakikada bir popüler noktaları önceden cache'le
+// Yoğun saatlerde kullanıcılar cache'ten okur, OM'a hiç gitmez
+setTimeout(() => {
+    warmAllHotSpots();
+    setInterval(warmAllHotSpots, 55 * 60 * 1000);
+}, 60_000);
 // ═══════════════════════════════════════════════════════════════════════
 // 🌪️ FIRTINA ÖNCESİ (FEEDING FRENZY) BİLDİRİM SİSTEMİ
 // Her saat başı çalışır. notify:true olan favorilerin koordinatlarını
