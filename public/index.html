@@ -7208,17 +7208,59 @@ let authToken = null;
 let usageData = { clicksRemaining: 5, scansRemaining: 1, clickLimit: 5, scanLimit: 1 };
 
 // ── PLATFORM TESPİTİ ─────────────────────────────────────────────────────
-// Android TWA: defaultUrl'e ?source=android_app eklendi (build.gradle)
-// Bu flag tüm uygulama boyunca ödeme yönlendirmesini kontrol eder.
+// Google Play politikası gereği: Google Billing YALNIZCA gerçek TWA/Android
+// uygulaması içinde gösterilmeli. Web/iOS kullanıcılarına asla gösterilmemeli.
+//
+// Tespit hiyerarşisi (güvenilirlik sırasıyla):
+//   1. ?source=android_app URL parametresi (build.gradle defaultUrl'de sabit)
+//   2. display-mode: standalone (TWA ve PWA için geçerli)
+//   3. getInstalledRelatedApps() — en güvenilir TWA tespiti (async, sonradan set edilir)
+//
+// ⚠️ localStorage KULLANILMIYOR — web kullanıcısı android sanılmasını önler.
+// ⚠️ Sadece AYNI SESSION içinde geçerli, sayfa yenilenince yeniden tespit yapılır.
+
 let isAndroidApp = false;
 const _urlParams = new URLSearchParams(window.location.search);
+
+// Yöntem 1: Build.gradle'dan gelen URL parametresi (en güvenilir sinyal)
 if (_urlParams.get('source') === 'android_app') {
     isAndroidApp = true;
-    localStorage.setItem('meraloji_is_android', 'true');
-} else if (localStorage.getItem('meraloji_is_android') === 'true') {
-    isAndroidApp = true;
+    // ⚠️ localStorage'a YAZILMIYOR — sadece bu session için geçerli
 }
-console.log('[PLATFORM]', isAndroidApp ? 'Android TWA' : 'Web / iOS tarayıcısı');
+
+// Yöntem 2: display-mode standalone (TWA veya Add to Home Screen)
+// Sadece URL parametresi yoksa yedek olarak kullanılır
+if (!isAndroidApp && window.matchMedia('(display-mode: standalone)').matches) {
+    // Standalone modda — TWA veya PWA olabilir
+    // User Agent Android içeriyorsa Android TWA olarak kabul et
+    const ua = navigator.userAgent || '';
+    const isAndroidUA = /Android/i.test(ua);
+    const isIOSUA = /iPad|iPhone|iPod/i.test(ua);
+    if (isAndroidUA && !isIOSUA) {
+        isAndroidApp = true;
+    }
+}
+
+// Yöntem 3: getInstalledRelatedApps() — async, kesin TWA tespiti
+// Destekleyen tarayıcılarda (Chrome Android) sonucu override eder
+if ('getInstalledRelatedApps' in navigator) {
+    navigator.getInstalledRelatedApps().then(function(relatedApps) {
+        const isTWA = relatedApps.some(function(app) {
+            return app.platform === 'play' || (app.id && app.id.indexOf('meraloji') !== -1);
+        });
+        if (isTWA && !isAndroidApp) {
+            isAndroidApp = true;
+            console.log('[PLATFORM] getInstalledRelatedApps → Android TWA doğrulandı');
+        } else if (!isTWA && isAndroidApp && !(_urlParams.get('source') === 'android_app')) {
+            // URL parametresi yokken standalone+Android UA ile set edilmişti ama app yüklü değil
+            // Bu durumda PWA olabilir, Google Billing gösterme
+            isAndroidApp = false;
+            console.log('[PLATFORM] getInstalledRelatedApps → TWA değil, Web/PWA olarak güncellendi');
+        }
+    }).catch(function() { /* API desteklenmiyor, mevcut tespit geçerli */ });
+}
+
+console.log('[PLATFORM]', isAndroidApp ? 'Android TWA (Google Billing)' : 'Web / iOS (Iyzico)');
 // ─────────────────────────────────────────────────────────────────────────
 
 // ── İYZİCO ÖDEME ENTEGRASYONU ────────────────────────────────────────────
@@ -7515,7 +7557,12 @@ async function upgradeToPro(plan) {
     closePaywall();
 
     // ── ANDROID TWA → Google Play Billing ─────────────────────────────────
-    if (isAndroidApp) {
+    // ⚠️ GÜVENLİK KONTROLÜ: Google Billing sadece gerçek Android TWA'da açılır.
+    // URL parametresi OLMADAN sadece UA/standalone ile tespit edildiyse
+    // getInstalledRelatedApps sonucu henüz gelmemiş olabilir — güvenli taraf
+    // olarak Iyzico'ya düş.
+    const hasUrlParam = _urlParams.get('source') === 'android_app';
+    if (isAndroidApp && hasUrlParam) {
         const user = firebase.auth().currentUser;
         if (user) {
             const idToken = await user.getIdToken(true);
@@ -8094,8 +8141,8 @@ async function saveTokenToFirestore(uid) {
 }
     
 function checkAndShowReviewPrompt() {
-    // Global isAndroidApp değişkenini kullan (sadece ?source=android_app parametresiyle tespit)
-    if (!isAndroidApp) return;
+    // Sadece URL parametresiyle kesin doğrulanmış Android TWA'da göster
+    if (!isAndroidApp || !(_urlParams.get('source') === 'android_app')) return;
 
     if (localStorage.getItem('meraloji_has_rated')) return;
 
