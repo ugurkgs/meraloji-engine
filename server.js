@@ -14,6 +14,30 @@ const NodeCache = require('node-cache');
 const cron = require('node-cron'); // BİLDİRİMLER İÇİN EKLENDİ
 const fetch = globalThis.fetch || require('node-fetch');
 
+// ═══════════════════════════════════════════════════════════════════════════
+// OPEN-METEO ENDPOINT KONFİGÜRASYONU
+// Ücretsiz → ücretli geçişi tek env variable ile — kod değişikliği gerekmez.
+//
+//   Render Dashboard → Environment Variables:
+//     Ücretli : OM_PAID = true   → customer-api kullanılır
+//     Ücretsiz: OM_PAID sil      → api kullanılır (default)
+//
+// ═══════════════════════════════════════════════════════════════════════════
+const OM_PAID        = process.env.OM_PAID === 'true';
+const OM_HOST        = OM_PAID ? 'customer-api.open-meteo.com'        : 'api.open-meteo.com';
+const OM_MARINE_HOST = OM_PAID ? 'customer-marine-api.open-meteo.com' : 'marine-api.open-meteo.com';
+
+// Render → Environment: OM_API_KEY = (Open-Meteo key)  — ücretsizde boş bırak
+const OM_API_KEY = process.env.OM_API_KEY || '';
+
+// Tüm Open-Meteo URL'lerine API key'i otomatik ekler — ücretsizde hiçbir şey yapmaz
+function omKey(url) {
+    if (!OM_API_KEY) return url;
+    return url + (url.includes('?') ? '&' : '?') + 'apikey=' + OM_API_KEY;
+}
+
+console.log(`[CONFIG] Open-Meteo: ${OM_PAID ? '💳 ÜCRETLI (customer-api)' : '🆓 ÜCRETSIZ (api)'}`);
+
 // Timeout'lu fetch — API yavaş yanıtlarında Promise.all'ın asılmasını önler
 function fetchWithTimeout(url, timeoutMs = 8000) {
     return Promise.race([
@@ -28,19 +52,16 @@ function _isOpenMeteo(url) {
     return url.includes('open-meteo.com');
 }
 
-
 // Güvenli JSON fetch — hata durumunda null döner, crash etmez
-// 429 gelirse retry YOK + 2 dk backoff başlatılır
-// 502/503/504 gelirse 2 kez retry yapılır (2s + 4s bekleme)
+// 429 → retry yok, 2dk backoff | 502/503/504 → 2s+4s retry | Timeout → retry
 async function safeFetchJSON(url, timeoutMs = 12000) {
-    // Open-Meteo backoff aktifse istek atma
     if (_isOpenMeteo(url) && cache && cache.get(_OM_BACKOFF_KEY)) {
         console.log(`[FETCH] OM backoff aktif, atlanıyor: ${url.split('?')[0]}`);
         return null;
     }
 
     const RETRY_STATUSES = new Set([502, 503, 504]);
-    const MAX_RETRIES = 2;
+    const MAX_RETRIES    = 2;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         try {
@@ -52,17 +73,17 @@ async function safeFetchJSON(url, timeoutMs = 12000) {
                     cache.set(_OM_BACKOFF_KEY, true, 120);
                     console.log(`[FETCH] Open-Meteo backoff başlatıldı — 120 saniye`);
                 }
-                return null; // 429'da retry yok
+                return null;
             }
 
             if (RETRY_STATUSES.has(res.status)) {
                 if (attempt < MAX_RETRIES) {
-                    const waitMs = Math.pow(2, attempt + 1) * 1000; // 2s, 4s
-                    console.log(`[FETCH] ${res.status} gateway hatası, ${waitMs/1000}s sonra retry (${attempt+1}/${MAX_RETRIES}): ${url.split('?')[0]}`);
+                    const waitMs = Math.pow(2, attempt + 1) * 1000;
+                    console.log(`[FETCH] ${res.status} — ${waitMs / 1000}s sonra retry (${attempt + 1}/${MAX_RETRIES}): ${url.split('?')[0]}`);
                     await new Promise(r => setTimeout(r, waitMs));
                     continue;
                 }
-                console.log(`[FETCH] ${res.status} — ${MAX_RETRIES} retry tükendi: ${url.split('?')[0]}`);
+                console.log(`[FETCH] ${res.status} — retry tükendi: ${url.split('?')[0]}`);
                 return null;
             }
 
@@ -74,9 +95,9 @@ async function safeFetchJSON(url, timeoutMs = 12000) {
             return await res.json();
 
         } catch (e) {
-            if (attempt < MAX_RETRIES && e.message === 'API_TIMEOUT') {
+            if (attempt < MAX_RETRIES && (e.message === 'API_TIMEOUT' || e.message.includes('fetch'))) {
                 const waitMs = Math.pow(2, attempt + 1) * 1000;
-                console.log(`[FETCH] Timeout, ${waitMs/1000}s sonra retry (${attempt+1}/${MAX_RETRIES}): ${url.split('?')[0]}`);
+                console.log(`[FETCH] ${e.message} — ${waitMs / 1000}s sonra retry (${attempt + 1}/${MAX_RETRIES}): ${url.split('?')[0]}`);
                 await new Promise(r => setTimeout(r, waitMs));
                 continue;
             }
@@ -1846,10 +1867,10 @@ app.get('/api/forecast', async (req, res) => {
         const regionName = getRegion(lat, lon);
         const salinity = getSalinity(regionName);
 
-        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`;
-        const weatherUrlFallback = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain&past_days=1&timezone=auto`;
-        const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`;
-        const marineUrlFallback = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`;
+        const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`);
+        const weatherUrlFallback = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain&past_days=1&timezone=auto`);
+        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
+        const marineUrlFallback = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
         
         // EMODnet Bathymetry API - Derinlik verisi (SEA ise atlanır)
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lon} ${lat})`;
@@ -2017,7 +2038,7 @@ app.get('/api/forecast', async (req, res) => {
                 const snap = await findNearestSeaPoint(lat, lon);
                 if (snap) {
                     // Snap noktasının marine verisini çek — past_days=7 (tempShock için)
-                    const snapMarineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`;
+                    const snapMarineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
                     const snapMarine = await safeFetchJSON(snapMarineUrl, 10000);
 
                     // Marine verisi geçerliyse snap'i uygula
@@ -2577,8 +2598,8 @@ app.get('/api/fish-search', async (req, res) => {
 
         const regionName = getRegion(latF, lonF);
 
-        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`;
-        const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`;
+        const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`);
+        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`);
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`;
 
         let [weather, marine, bathymetryRes] = await Promise.all([
@@ -2588,10 +2609,10 @@ app.get('/api/fish-search', async (req, res) => {
         ]);
         
         if (!weather || weather.error) {
-            weather = await safeFetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain&past_days=1&timezone=auto`);
+            weather = await safeFetchJSON(omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain&past_days=1&timezone=auto`));
         }
         if (!marine || marine.error) {
-            marine = await safeFetchJSON(`https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=1&timezone=auto`);
+            marine = await safeFetchJSON(omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=1&timezone=auto`));
         }
         if (!weather) return res.status(503).json({ error: 'API_UNAVAILABLE' });
         if (!marine) {
@@ -2652,7 +2673,7 @@ app.get('/api/fish-search', async (req, res) => {
             try {
                 const snap = await findNearestSeaPoint(latF, lonF);
                 if (snap) {
-                    const snapMarineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`;
+                    const snapMarineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`);
                     const snapMarine = await safeFetchJSON(snapMarineUrl, 10000);
                     const snapWaves = snapMarine?.hourly?.wave_height?.filter(v => v !== null && v !== undefined) || [];
                     if (snapMarine && !snapMarine.error && snapWaves.some(v => v > 0)) {
@@ -3192,16 +3213,16 @@ function generateGridPoints(centerLat, centerLon, radiusKm) {
 async function fetchCenterWeather(lat, lon) {
     const latF = parseFloat(lat).toFixed(4);
     const lonF = parseFloat(lon).toFixed(4);
-    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`;
-    const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`;
+    const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`);
+    const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`);
     
     let [weather, marine] = await Promise.all([queuedFetch(weatherUrl), queuedFetch(marineUrl)]);
     
     if (!weather || weather.error) {
-        weather = await safeFetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain&past_days=1&timezone=auto`);
+        weather = await safeFetchJSON(omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain&past_days=1&timezone=auto`));
     }
     if (!marine || marine.error) {
-        marine = await safeFetchJSON(`https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=1&timezone=auto`);
+        marine = await safeFetchJSON(omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=1&timezone=auto`));
     }
     
     if (!weather || !marine) throw new Error('API_UNAVAILABLE');
@@ -3743,8 +3764,8 @@ async function warmCacheForSpot(lat, lon) {
     if (cache.get(cacheKey)) return;
 
     try {
-        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`;
-        const marineUrl  = `https://marine-api.open-meteo.com/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`;
+        const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`);
+        const marineUrl  = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
 
         const [weather, marine] = await Promise.all([
             queuedFetch(weatherUrl, 12000),
@@ -3881,11 +3902,11 @@ cron.schedule('0 * * * *', async () => {
         const { lat, lon, spots } = group;
 
         // Open-Meteo: son 24 saatlik yüzey basıncı — safeFetchJSON kullan (backoff dahil)
-        const omUrl = `https://api.open-meteo.com/v1/forecast` +
+        const omUrl = `https://${OM_HOST}/v1/forecast` +
             `?latitude=${lat}&longitude=${lon}` +
             `&hourly=surface_pressure&past_days=1&forecast_days=1&timezone=auto`;
 
-        const omData = await safeFetchJSON(omUrl, 12000);
+        const omData = await safeFetchJSON(omKey(omUrl), 12000);
         const pressureHistory = omData?.hourly?.surface_pressure;
 
         if (!pressureHistory || pressureHistory.length < 6) {
