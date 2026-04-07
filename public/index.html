@@ -2350,49 +2350,6 @@
             Google ile Giriş Yap
         </button>
 
-        <div style="
-            margin-top: 18px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(0, 212, 255, 0.07);
-            border: 1px solid rgba(0, 212, 255, 0.25);
-            border-radius: 14px;
-            padding: 10px 16px;
-            max-width: 280px;
-        ">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
-                <path d="M3.18 23c-.36 0-.7-.1-1-.28a2 2 0 0 1-1-1.74V3.02c0-.72.38-1.38 1-1.74a2 2 0 0 1 2 0l17 9c.62.36 1 1.02 1 1.74s-.38 1.38-1 1.74l-17 9c-.3.18-.64.28-1 .28z" fill="#00d4ff" opacity=".15"/>
-                <path d="M4 2.74L20.5 12 4 21.26V2.74z" fill="#00d4ff" opacity=".6"/>
-                <path d="M4 12l7.5 4.33V7.67L4 12z" fill="#00ffcc"/>
-            </svg>
-            <div>
-                <div style="font-size: 0.7rem; color: var(--cyan); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Yakında</div>
-                <div style="font-size: 0.82rem; color: var(--text-primary); font-weight: 600;">Google Play'de</div>
-            </div>
-        </div>
-
-        <a href="https://groups.google.com/g/meraloji-test"
-           target="_blank"
-           rel="noopener"
-           style="
-               display: flex; align-items: center; gap: 10px;
-               margin-top: 20px;
-               background: rgba(255, 213, 0, 0.06);
-               border: 1px solid rgba(255, 213, 0, 0.25);
-               border-radius: 14px;
-               padding: 11px 16px;
-               max-width: 280px;
-               text-decoration: none;
-               transition: background 0.2s;
-           ">
-            <span style="font-size:1.4rem; flex-shrink:0;">🎣</span>
-            <div style="text-align:left;">
-                <div style="font-size:0.7rem; color:var(--yellow); font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:2px;">Erken Erişim</div>
-                <div style="font-size:0.78rem; color:var(--text-primary); line-height:1.4;">Google Play'e ilk girenlerden olmak için test grubuna katılın</div>
-            </div>
-        </a>
-
         <div class="login-footer">© 2025 MERALOJİ — Uğur Kögüs</div>
     </div>
 
@@ -8117,7 +8074,7 @@ async function saveTokenToFirestore(uid) {
                 fcmToken: currentToken,
                 lastTokenUpdate: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
-            console.log('[FCM] Token Firestore'a kaydedildi.');
+            console.log("[FCM] Token Firestore'a kaydedildi.");
         } else {
             console.log('[FCM] Token alınamadı — bildirim izni eksik olabilir.');
         }
