@@ -7210,8 +7210,14 @@ let usageData = { clicksRemaining: 5, scansRemaining: 1, clickLimit: 5, scanLimi
 // ── PLATFORM TESPİTİ ─────────────────────────────────────────────────────
 // Android TWA: defaultUrl'e ?source=android_app eklendi (build.gradle)
 // Bu flag tüm uygulama boyunca ödeme yönlendirmesini kontrol eder.
+let isAndroidApp = false;
 const _urlParams = new URLSearchParams(window.location.search);
-const isAndroidApp = _urlParams.get('source') === 'android_app';
+if (_urlParams.get('source') === 'android_app') {
+    isAndroidApp = true;
+    localStorage.setItem('meraloji_is_android', 'true');
+} else if (localStorage.getItem('meraloji_is_android') === 'true') {
+    isAndroidApp = true;
+}
 console.log('[PLATFORM]', isAndroidApp ? 'Android TWA' : 'Web / iOS tarayıcısı');
 // ─────────────────────────────────────────────────────────────────────────
 
