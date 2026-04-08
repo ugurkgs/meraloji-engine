@@ -7918,21 +7918,32 @@
                             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">${depthHtml}${pt.depth && pt.tempWater ? '<span style="color:var(--border-subtle);">·</span>' : ''}${tempHtml}</div>
                         </div>
                     </div>
-                    <!-- Alt satır: koordinat + Tam Analiz butonu -->
-                    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-                        <div style="font-size:0.68rem;color:var(--text-muted);font-family:var(--font-mono);">
+                    <!-- Alt satır: koordinat + butonlar -->
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                        <div style="font-size:0.68rem;color:var(--text-muted);font-family:var(--font-mono);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
                             📍 ${pt.lat.toFixed(4)}, ${pt.lon.toFixed(4)}
                         </div>
-                        <button onclick="scanPinClick(${pt.lat}, ${pt.lon})" style="
-                            background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.35);
-                            border-radius:8px;padding:6px 14px;
-                            color:var(--cyan);font-family:var(--font-display);
-                            font-size:0.72rem;font-weight:700;cursor:pointer;
-                            white-space:nowrap;letter-spacing:0.3px;
-                            transition:background 0.15s;flex-shrink:0;
-                        " onmouseover="this.style.background='rgba(0,212,255,0.22)'" onmouseout="this.style.background='rgba(0,212,255,0.1)'">
-                            Tam Analiz →
-                        </button>
+                        <div style="display:flex;gap:6px;flex-shrink:0;">
+                            <button onclick="scanAddToFavorite(${pt.lat}, ${pt.lon})" style="
+                                background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.35);
+                                border-radius:8px;padding:6px 10px;
+                                color:#ffd500;font-family:var(--font-display);
+                                font-size:0.72rem;font-weight:700;cursor:pointer;
+                                white-space:nowrap;transition:background 0.15s;
+                            " onmouseover="this.style.background='rgba(255,215,0,0.22)'" onmouseout="this.style.background='rgba(255,215,0,0.1)'">
+                                ⭐
+                            </button>
+                            <button onclick="scanPinClick(${pt.lat}, ${pt.lon})" style="
+                                background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.35);
+                                border-radius:8px;padding:6px 14px;
+                                color:var(--cyan);font-family:var(--font-display);
+                                font-size:0.72rem;font-weight:700;cursor:pointer;
+                                white-space:nowrap;letter-spacing:0.3px;
+                                transition:background 0.15s;
+                            " onmouseover="this.style.background='rgba(0,212,255,0.22)'" onmouseout="this.style.background='rgba(0,212,255,0.1)'">
+                                Tam Analiz →
+                            </button>
+                        </div>
                     </div>
                 </div>`;
             }).join('');
@@ -7943,6 +7954,40 @@
         function scanPinClick(lat, lon) {
             closeModal('scan-result-modal');
             handleMapClick({ latlng: { lat, lng: lon } });
+        }
+
+        // BLOK 7C: Scan sonucundan direkt favori ekleme
+        function scanAddToFavorite(lat, lon) {
+            // lastLatLon'u geçici olarak ayarla ki saveFavorite doğru konumu kullansın
+            const prevLatLon = lastLatLon;
+            lastLatLon = { lat: lat.toFixed(4), lon: lon.toFixed(4) };
+            openFavSaveModal();
+            _favSaveCallback = async (name, notify) => {
+                try {
+                    const res = await apiFetch('/api/favorites', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, lat, lon, notify: !!notify })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        const favs = JSON.parse(localStorage.getItem(_favsKey()) || '[]');
+                        favs.push({ id: data.id, name, lat, lon, notify: !!notify, createdAt: Date.now() });
+                        localStorage.setItem(_favsKey(), JSON.stringify(favs));
+                        const msg = notify
+                            ? (CURRENT_LANG === 'tr' ? '⭐ Kaydedildi! 🔔 Bildirim aktif' : '⭐ Saved! 🔔 Alerts on')
+                            : (CURRENT_LANG === 'tr' ? '⭐ Mera favorilere eklendi!' : '⭐ Spot saved!');
+                        _showFavToast(msg, 'var(--green)');
+                    } else {
+                        _showFavToast('❌ Kaydedilemedi', 'var(--red)');
+                    }
+                } catch(e) {
+                    _showFavToast('❌ Bağlantı hatası', 'var(--red)');
+                } finally {
+                    // lastLatLon'u eski haline döndür (analiz paneli için)
+                    if (prevLatLon) lastLatLon = prevLatLon;
+                }
+            };
         }
 
         function addScanPinToGroup(groupId, lat, lon, score, fishName, depth, isTop) {
@@ -8262,14 +8307,12 @@
             closeFavHubModal();
             if (lat && lon) {
                 toggleMenu();
-                map.flyTo([lat, lon], 14);
 
                 // Önceki favori markerını kaldır
                 if (_favMarker) { map.removeLayer(_favMarker); _favMarker = null; }
 
                 // Yeni marker ekle — isimli tooltip
                 const favLabel = name || '⭐ Favori';
-                // Her karakter ~7px genişlik, padding 16px — badge yarı genişliği = anchor X
                 const favW = Math.round(favLabel.length * 7 + 16);
                 const favIcon = L.divIcon({
                     className: '',
@@ -8283,6 +8326,13 @@
                 // Haritaya tıklayınca markeri kaldır
                 map.once('click', () => {
                     if (_favMarker) { map.removeLayer(_favMarker); _favMarker = null; }
+                });
+
+                // ── FIX BLOK 6: Analizi tetikle ─────────────────────────────
+                // flyTo animasyonu bitince handleMapClick çağır — önce harita gitsin
+                map.flyTo([lat, lon], 14);
+                map.once('moveend', () => {
+                    handleMapClick({ latlng: { lat: parseFloat(lat), lng: parseFloat(lon) } });
                 });
             }
         }
