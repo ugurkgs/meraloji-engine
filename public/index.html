@@ -8263,10 +8263,11 @@
                 try {
                     const favsWithScores = await Promise.all(cached.map(async (f) => {
                         try {
-                            const res = await apiFetch(`/api/forecast?lat=${f.lat}&lon=${f.lon}&forecast_days=1&past_days=0&no_cache=false`);
+                            const res = await apiFetch(`/api/forecast?lat=${f.lat}&lon=${f.lon}`);
                             if (res.ok) {
                                 const fd = await res.json();
-                                f.currentScore = fd.score || 0;
+                                // instant = anlık skor, forecast[0] = bugünün günlük skoru
+                                f.currentScore = fd.instant?.score || fd.forecast?.[0]?.score || 0;
                             } else {
                                 f.currentScore = 0;
                             }
