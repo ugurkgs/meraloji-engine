@@ -40,7 +40,7 @@ console.log(`[CONFIG] Open-Meteo: ${OM_PAID ? '💳 ÜCRETLİ (customer-api) —
 if (OM_PAID && !OM_API_KEY) console.warn('⚠️  OM_PAID=true ama OM_API_KEY boş! customer-api auth hatası verecektir.');
 
 // Timeout'lu fetch — API yavaş yanıtlarında Promise.all'ın asılmasını önler
-function fetchWithTimeout(url, timeoutMs = 8000) {
+function fetchWithTimeout(url, timeoutMs = 5000) { // Ücretli API — timeout kısaltıldı
     return Promise.race([
         fetch(url),
         new Promise((_, reject) => setTimeout(() => reject(new Error('API_TIMEOUT')), timeoutMs))
@@ -111,10 +111,10 @@ async function safeFetchJSON(url, timeoutMs = 12000) {
 }
 
 // Open-Meteo istek kuyruğu — aynı anda max 2 istek, aralarında 500ms
-const _omQueue = { active: 0, max: 2 };
+const _omQueue = { active: 0, max: 5 }; // Ücretli API — paralel limit artırıldı
 async function queuedFetch(url, timeoutMs = 12000) {
     while (_omQueue.active >= _omQueue.max) {
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise(r => setTimeout(r, 50)); // Ücretli API — polling hızlandırıldı
     }
     _omQueue.active++;
     try {
@@ -299,7 +299,7 @@ async function fetchChlorophyll(lat, lon) {
 
     try {
         // NOAA bazen 302 redirect yapıyor — follow: 'follow' ile çöz
-        const res = await fetchWithTimeout(url, 12000);
+        const res = await fetchWithTimeout(url, 5000); // Paralel çalışıyor, kısa timeout yeterli
         if (!res.ok) return null;
         const json = await res.json();
 
@@ -357,7 +357,7 @@ async function fetchSatelliteSST(lat, lon) {
         `?sst[(${start}):(${end})][(0)][(${latMin}):(${latMax})][(${lonMin}):(${lonMax})]`;
 
     try {
-        const res = await fetchWithTimeout(url, 8000);
+        const res = await fetchWithTimeout(url, 4000) // NOAA yavaşsa beklemesini kısalt;
         if (!res.ok) return null;
         const json = await res.json();
         if (!json?.table?.rows) return null;
@@ -2033,14 +2033,22 @@ app.get('/api/forecast', async (req, res) => {
         // Paralel fetch — hata durumunda fallback URL'ye düş
         // [CRON CACHE] — background cron daha önce çektiyse direk kullan, API'ye gitme
         // [DEDUP]      — aynı koordinata eş zamanlı N istek gelirse tek OM çağrısı açılır
-        let [weather, marine, bathymetryRes] = await Promise.all([
+        // [PERF]       — Klorofil + SST de paralel başlatılıyor (eskiden sıralıydı → +3-12s gecikme)
+        const chlCacheKeyPre = `plankton_${parseFloat(lat).toFixed(2)}_${parseFloat(lon).toFixed(2)}`;
+        const chlCachedPre = db ? await db.collection('planktonCache').doc(chlCacheKeyPre).get().catch(() => null) : null;
+        const chlFromCache = chlCachedPre?.exists && (Date.now() - chlCachedPre.data().savedAt < 6 * 60 * 60 * 1000)
+            ? chlCachedPre.data().result : null;
+
+        let [weather, marine, bathymetryRes, chlorophyllDataPre, sstSatPre] = await Promise.all([
             cache.get(`raw_weather_${gLat}_${gLon}`)
                 ? Promise.resolve(cache.get(`raw_weather_${gLat}_${gLon}`))
                 : deduplicatedFetch(`w_${gLat}_${gLon}`, () => queuedFetch(weatherUrl)),
             cache.get(`raw_marine_${gLat}_${gLon}`)
                 ? Promise.resolve(cache.get(`raw_marine_${gLat}_${gLon}`))
                 : deduplicatedFetch(`m_${gLat}_${gLon}`, () => queuedFetch(marineUrl)),
-            skipBathymetry ? Promise.resolve(null) : fetchWithTimeout(bathymetryUrl).catch(() => null)
+            skipBathymetry ? Promise.resolve(null) : fetchWithTimeout(bathymetryUrl).catch(() => null),
+            chlFromCache ? Promise.resolve(chlFromCache) : fetchChlorophyll(lat, lon).catch(() => null),
+            fetchSatelliteSST(lat, lon).catch(() => null)
         ]);
 
         // Fallback: gelişmiş URL başarısızsa basit URL dene
@@ -2100,38 +2108,17 @@ app.get('/api/forecast', async (req, res) => {
             };
         }
 
-        // Klorofil-a verisi — bağımsız çek (başarısız olsa forecast devam eder)
-        let chlorophyllData = null;
-        try {
+        // Klorofil + SST — artık yukarıda paralel Promise.all içinde çekildi
+        let chlorophyllData = chlorophyllDataPre || null;
+        if (chlorophyllData && db && !chlFromCache) {
+            // Yeni çekildi — Firestore'a kaydet (fire-and-forget)
             const chlCacheKey = `plankton_${parseFloat(lat).toFixed(2)}_${parseFloat(lon).toFixed(2)}`;
-            if (db) {
-                const chlRef = db.collection('planktonCache').doc(chlCacheKey);
-                const cached = await chlRef.get();
-                if (cached.exists) {
-                    const d = cached.data();
-                    if (Date.now() - d.savedAt < 6 * 60 * 60 * 1000) {
-                        chlorophyllData = d.result;
-                    }
-                }
-            }
-            if (!chlorophyllData) {
-                chlorophyllData = await fetchChlorophyll(lat, lon);
-                if (chlorophyllData && db) {
-                    const chlCacheKey2 = `plankton_${parseFloat(lat).toFixed(2)}_${parseFloat(lon).toFixed(2)}`;
-                    db.collection('planktonCache').doc(chlCacheKey2)
-                        .set({ result: chlorophyllData, savedAt: Date.now() }).catch(() => { });
-                }
-            }
-        } catch (e) {
-            console.log('[FORECAST] Chlorophyll fetch skipped:', e.message);
+            db.collection('planktonCache').doc(chlCacheKey)
+                .set({ result: chlorophyllData, savedAt: Date.now() }).catch(() => {});
         }
         const chlorophyll = chlorophyllData?.chlorophyll ?? null;
 
-        // ── UYDU SST — NOAA CoastWatch (~1km) ────────────────────────────────
-        // Klorofil ile paralel değil — önce bathymetry/kara kontrolü bitsin.
-        // Kara tespitinden önce çekmeye gerek yok; async olarak başlatıp
-        // skor döngüsünden önce await ederiz (toplam gecikme ~0ms eğer paralel).
-        const sstSatPromise = fetchSatelliteSST(lat, lon).catch(() => null);
+        // SST — paralel fetch sonucu (sstSatPre)
         // ─────────────────────────────────────────────────────────────────────
         let depthData = { avg: null, min: null, max: null };
         let bathymetryRaw = null; // Ham değer (negatif=deniz, pozitif=kara)
@@ -2247,7 +2234,7 @@ app.get('/api/forecast', async (req, res) => {
         // ── UYDU SST SONUCU: await et (paralel çekildiydi) ───────────────────
         // Öncelik: NOAA uydu (~1km) → Open-Meteo (~10km) → bölgesel default
         // sstSat null ise (bulutlu gün / timeout) Open-Meteo SST kullanılır.
-        const sstSat = await sstSatPromise;
+        const sstSat = sstSatPre; // Artık yukarıda paralel çekildi — await gerekmez
         if (sstSat !== null) {
             console.log(`[SST] Uydu SST kullanılıyor: ${sstSat}°C`);
         } else {
@@ -3786,8 +3773,8 @@ app.get('/api/scan', async (req, res) => {
 
         // Batch paralel: 5 nokta aynı anda, aralarında 350ms — EMODnet rate-limit'e güvenli
         // 5km (29 nokta): ~6 batch × ~1.2s = ~7s | 10km (45 nokta): ~9 batch = ~11s
-        const BATCH_SIZE = 5;
-        const BATCH_DELAY_MS = 350;
+        const BATCH_SIZE = 8; // Ücretli API — batch büyütüldü
+        const BATCH_DELAY_MS = 100; // Ücretli API — batch delay kısaltıldı
 
         sendEvent({ type: 'start', total, radiusKm, fishKey: fishKey || null });
         if (res.flush) res.flush();
@@ -4382,7 +4369,7 @@ cron.schedule('0 * * * *', async () => {
         }
 
         // API limitine saygı: gruplar arası kısa bekleme
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 200)); // Ücretli API
     }
 
     console.log('[NOTIFY CRON] Tamamlandı.');
