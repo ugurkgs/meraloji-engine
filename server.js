@@ -23,8 +23,8 @@ const fetch = globalThis.fetch || require('node-fetch');
 //     OM_API_KEY = (Open-Meteo API key)
 //
 // ═══════════════════════════════════════════════════════════════════════════
-const OM_PAID        = process.env.OM_PAID === 'true';
-const OM_HOST        = OM_PAID ? 'customer-api.open-meteo.com'        : 'api.open-meteo.com';
+const OM_PAID = process.env.OM_PAID === 'true';
+const OM_HOST = OM_PAID ? 'customer-api.open-meteo.com' : 'api.open-meteo.com';
 const OM_MARINE_HOST = OM_PAID ? 'customer-marine-api.open-meteo.com' : 'marine-api.open-meteo.com';
 
 // Render → Environment: OM_API_KEY = (Open-Meteo key)  — ücretsizde boş bırak
@@ -62,7 +62,7 @@ async function safeFetchJSON(url, timeoutMs = 12000) {
     }
 
     const RETRY_STATUSES = new Set([502, 503, 504]);
-    const MAX_RETRIES    = 2;
+    const MAX_RETRIES = 2;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         try {
@@ -72,7 +72,7 @@ async function safeFetchJSON(url, timeoutMs = 12000) {
                 console.log(`[FETCH] 429 rate limit: ${url.split('?')[0]}`);
                 if (_isOpenMeteo(url) && cache) {
                     cache.set(_OM_BACKOFF_KEY, true, 600);
-                    console.log(`[FETCH] Open-Meteo backoff başlatıldı — 600 saniye (OM rate limit)`);  
+                    console.log(`[FETCH] Open-Meteo backoff başlatıldı — 600 saniye (OM rate limit)`);
                 }
                 return null;
             }
@@ -267,7 +267,7 @@ function analyzeLocationOffline(lat, lon) {
             const city = feature.properties.name;
             return COASTAL_PROVINCES.has(city)
                 ? { status: 'COASTAL_LAND', city }
-                : { status: 'INLAND',       city };
+                : { status: 'INLAND', city };
         }
     }
     return { status: 'SEA' };
@@ -407,7 +407,7 @@ function applyShoaling(waveHeight, wavePeriod, depthM) {
     // Grup hızı oranı: n = Cg / C = 0.5*(1 + 2kd/sinh(2kd))
     const n = 0.5 * (1 + (sinh2kd > 1e-6 ? (2 * kd / sinh2kd) : 1));
     const Cg_shallow = (omega / k) * n;            // grup hızı (sığ)
-    const Cg_deep    = g / (2 * omega);            // grup hızı (derin)
+    const Cg_deep = g / (2 * omega);            // grup hızı (derin)
 
     // Shoaling katsayısı: Ks = sqrt(Cg_deep / Cg_shallow)
     const Ks = Math.sqrt(Cg_deep / Cg_shallow);
@@ -430,22 +430,59 @@ const VALID_SUBSCRIPTIONS = ['meraloji_pro_monthly', 'meraloji_pro_yearly'];
 const userCreationCache = new NodeCache({ stdTTL: 86400 });
 const subscriptionCache = new NodeCache({ stdTTL: 180 }); // 3 dakika TTL
 
+// ── GELİŞTİRİCİ BYPASS LİSTESİ ───────────────────────────────────────────
+const DEVELOPER_UIDS = ['zhCzPS20wneS2njZKVGFAwOvc5m2'];
+
 async function verifyAuth(req, res, next) {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ') || !admin) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
         req.user = null;
         req.isPremium = false;
         req.isGracePeriod = false;
         req.graceDaysLeft = 0;
         return next();
     }
+
+    const token = authHeader.split('Bearer ')[1];
+
+    // [Bypass] Admin SDK yüklenememişse (local ortam) ama token varsa
+    if (!admin && (!process.env.PORT || req.hostname === 'localhost')) {
+        try {
+            const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+            const uid = payload.user_id || payload.sub || payload.uid;
+            if (DEVELOPER_UIDS.includes(uid)) {
+                req.user = { ...payload, uid };
+                req.isPremium = true;
+                req.isGracePeriod = false;
+                req.graceDaysLeft = 0;
+                console.log(`[LOCAL-BYPASS] 🔓 Dev access granted: ${uid}`);
+                return next();
+            }
+        } catch (e) {
+            console.log('[LOCAL-BYPASS] Token decode failed');
+        }
+    }
+
+    if (!admin) {
+        req.user = null;
+        req.isPremium = false;
+        req.isGracePeriod = false;
+        req.graceDaysLeft = 0;
+        return next();
+    }
+
     try {
-        const token = authHeader.split('Bearer ')[1];
         const decoded = await admin.auth().verifyIdToken(token);
         req.user = decoded;
         req.isPremium = false;
         req.isGracePeriod = false;
         req.graceDaysLeft = 0;
+
+        // Bypass check: Admin SDK aktif olsa bile geliştirici ise direkt premium yap
+        if (DEVELOPER_UIDS.includes(decoded.uid)) {
+            req.isPremium = true;
+            return next();
+        }
 
         if (db) {
             // Abonelik kontrol — 3 dakika cache
@@ -493,6 +530,23 @@ async function verifyAuth(req, res, next) {
     next();
 }
 app.use('/api/', verifyAuth);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BLOK 8: API PERFORMANS LOGLAMASI
+// ═══════════════════════════════════════════════════════════════════════════
+app.use('/api/', (req, res, next) => {
+    const start = process.hrtime();
+    res.on('finish', () => {
+        const diff = process.hrtime(start);
+        const timeMs = (diff[0] * 1e3 + diff[1] * 1e-6).toFixed(2);
+        // Çok sık çalışan scan stream, hotspot veya monthly-trend gibi ufak verileri sessize alabiliriz (isteğe bağlı) 
+        // ancak genel performans analizi için hepsi şimdilik loglanıyor.
+        if (!req.url.includes('progress') && !req.url.includes('/hotspot?')) {
+             console.log(`[API-PERF] ${req.method} ${req.originalUrl} - ${timeMs}ms`);
+        }
+    });
+    next();
+});
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MATH KERNEL - Hesaplama Fonksiyonları
@@ -575,17 +629,21 @@ function getGaussianScore(val, min, opt, max, optMin, optMax) {
 function calculateConfidence(params) {
     let score = 100;
 
-    if (!params.tempWater || params.tempWater === 0)          score -= 20; // Su sıcaklığı yok — en kritik
-    if (params.wave === null || params.wave === undefined)     score -= 10; // Dalga verisi yok
-    if (!params.wavePeriod || params.wavePeriod === 0)        score -= 5;  // Dalga periyodu yok
-    if (!params.chlorophyll)                                  score -= 10; // Klorofil yok
-    if (params.chlorophyllStale)                              score -= 5;  // Klorofil bayat (7+ gün)
-    if (!params.oceanCurrent)                                 score -= 5;  // Akıntı tahmini kullanıldı
-    if (!params.depth || params.depth === null)               score -= 5;  // Derinlik yok
+    if (!params.tempWater || params.tempWater === 0) score -= 20; // Su sıcaklığı yok — en kritik
+    if (params.wave === null || params.wave === undefined) score -= 10; // Dalga verisi yok
+    if (!params.wavePeriod || params.wavePeriod === 0) score -= 5;  // Dalga periyodu yok
+    if (!params.chlorophyll) score -= 10; // Klorofil yok
+    if (params.chlorophyllStale) score -= 5;  // Klorofil bayat (7+ gün)
+    if (!params.oceanCurrent) score -= 5;  // Akıntı tahmini kullanıldı
+    if (!params.depth || params.depth === null) score -= 5;  // Derinlik yok
+
+    // YENİ (1E)
+    if (!params.waveDirection) score -= 3;  // Dalga yönü yok
+    if (params.visibility === undefined) score -= 2;  // Görüş verisi yok
 
     // Grid mesafesi cezası — API verisi farklı noktadan geliyorsa deniz verisi sapabilir
     const d = params.gridDistance || 0;
-    if (d > 9)      score -= 15;
+    if (d > 9) score -= 15;
     else if (d > 6) score -= 10;
     else if (d > 3) score -= 5;
 
@@ -597,9 +655,9 @@ function haversineKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2)**2 +
-              Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLon/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 function getTempGateMultiplier(tempWater, tempRange) {
@@ -621,9 +679,9 @@ function getTempGateMultiplier(tempWater, tempRange) {
 function calculateWindScore(direction, speed, region) {
     if (speed > 45) return 0.05;  // Fırtına - tehlikeli
     if (speed > 35) return 0.2;   // Çok kuvvetli
-    
+
     let score = 0.5;
-    
+
     // MARMARA: Poyraz (Kuzey/Kuzeydoğu) denizi yatırır = İYİ
     //          Lodos (Güneybatı) denizi kaldırır = KÖTÜ
     if (region === 'MARMARA') {
@@ -631,7 +689,7 @@ function calculateWindScore(direction, speed, region) {
         else if (direction > 180 && direction < 270) score = 0.3;  // Lodos/Güneybatı - KÖTÜ
         else if (direction >= 60 && direction <= 120) score = 0.6; // Doğu - ORTA
         else score = 0.5;
-    } 
+    }
     // EGE: Poyraz (Kuzey) berraklık getirir = İYİ
     //      Lodos (Güney) bulanıklık getirir = KÖTÜ  
     else if (region === 'EGE') {
@@ -639,7 +697,7 @@ function calculateWindScore(direction, speed, region) {
         else if (direction > 135 && direction < 225) score = 0.35; // Güney/Lodos - KÖTÜ
         else if (direction >= 45 && direction <= 135) score = 0.6; // Doğu - ORTA
         else score = 0.55;
-    } 
+    }
     // KARADENİZ: Güney rüzgarları kıyıya vuruyor = İYİ (balığı kıyıya iter)
     //            Kuzey rüzgarları açığa iter = KÖTÜ
     else if (region === 'KARADENİZ') {
@@ -656,11 +714,11 @@ function calculateWindScore(direction, speed, region) {
     else {
         score = 0.6; // AÇIK DENİZ
     }
-    
+
     // FIX: Rüzgar hızı cezası KALDIRILDI — çift ceza sorunu.
     // Hız cezası artık SADECE calculateFishScore() içinde uygulanıyor.
     // Bu fonksiyon artık sadece rüzgar YÖN etkisini döndürüyor.
-    
+
     return score;
 }
 
@@ -681,7 +739,7 @@ function calculateClarity(wave, windSpeed, rain) {
 function calculateMoonlightIntensity(date, lat, lon, cloudCover) {
     try {
         const illum = SunCalc.getMoonIllumination(date);
-        const pos   = SunCalc.getMoonPosition(date, lat, lon);
+        const pos = SunCalc.getMoonPosition(date, lat, lon);
 
         // Ay ufkun altındaysa karanlık
         if (pos.altitude <= 0) return 0;
@@ -696,7 +754,7 @@ function calculateMoonlightIntensity(date, lat, lon, cloudCover) {
         const cloudFactor = 1 - (cloudCover / 100);
 
         return parseFloat((brightness * altitudeFactor * cloudFactor).toFixed(3));
-    } catch(e) {
+    } catch (e) {
         return 0;
     }
 }
@@ -737,16 +795,16 @@ function calculatePressureTrend(pressureHistory) {
     if (!pressureHistory || pressureHistory.length < 2) {
         return { trend: 'STABLE', change: 0 };
     }
-    
+
     const validPressures = pressureHistory.filter(p => p !== null && p !== undefined);
     if (validPressures.length < 2) {
         return { trend: 'STABLE', change: 0 };
     }
-    
+
     const oldest = validPressures[0];
     const newest = validPressures[validPressures.length - 1];
     const change = newest - oldest;
-    
+
     if (change < -4) return { trend: 'FALLING_FAST', change };
     if (change < -2) return { trend: 'FALLING', change };
     if (change > 4) return { trend: 'RISING_FAST', change };
@@ -803,11 +861,11 @@ function calculateTempShock(marine, hourlyStartIdx) {
         const den = xs.reduce((sum, x) => sum + (x - xMean) ** 2, 0);
         trend = den > 0 ? parseFloat((num / den).toFixed(3)) : 0;
 
-        if (trend >= 0.3)       trendDirection = 'WARMING_FAST';
-        else if (trend >= 0.1)  trendDirection = 'WARMING';
+        if (trend >= 0.3) trendDirection = 'WARMING_FAST';
+        else if (trend >= 0.1) trendDirection = 'WARMING';
         else if (trend <= -0.3) trendDirection = 'COOLING_FAST';
         else if (trend <= -0.1) trendDirection = 'COOLING';
-        else                    trendDirection = 'STABLE';
+        else trendDirection = 'STABLE';
     }
 
     return { shock, change, direction, trend, trendDirection, dailyAvgs };
@@ -931,29 +989,29 @@ function getMoonPhaseName(phase) {
 
 function calculateActivityWindows(date, lat, lon) {
     const sunTimes = SunCalc.getTimes(date, lat, lon);
-    
+
     // Gün doğumu ve batımı saatlerini al
     const sunrise = sunTimes.sunrise;
     const sunset = sunTimes.sunset;
-    
+
     // Saat formatla (HH:MM)
     const formatTime = (d) => {
         if (!d || isNaN(d.getTime())) return "--:--";
         return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
     };
-    
+
     // Sabah Suyu: Sunrise - 1 saat → Sunrise + 2 saat
     const morningStart = new Date(sunrise.getTime() - 60 * 60 * 1000);
     const morningEnd = new Date(sunrise.getTime() + 2 * 60 * 60 * 1000);
-    
+
     // Akşam Suyu: Sunset - 2 saat → Sunset + 1 saat
     const eveningStart = new Date(sunset.getTime() - 2 * 60 * 60 * 1000);
     const eveningEnd = new Date(sunset.getTime() + 60 * 60 * 1000);
-    
+
     // Gece Avı: 22:00 - 03:00 (sabit, gece balıkları için)
     const nightStart = "22:00";
     const nightEnd = "03:00";
-    
+
     return {
         morning: {
             start: formatTime(morningStart),
@@ -983,7 +1041,7 @@ function getHourWeight(hour, activityWindows, fishActivity) {
     const m = activityWindows.morning;
     const e = activityWindows.evening;
     const n = activityWindows.night;
-    
+
     // Gece balıkları için farklı ağırlık
     if (fishActivity === "NIGHT") {
         // Gece saatleri (22-03): x3
@@ -993,7 +1051,7 @@ function getHourWeight(hour, activityWindows, fishActivity) {
         // Gündüz: x0.5
         return 0.5;
     }
-    
+
     // Alacakaranlık balıkları için (Levrek, Lüfer/Kofana, Karagöz)
     if (fishActivity === "DAWN_DUSK") {
         // Sabah suyu: x3
@@ -1005,7 +1063,7 @@ function getHourWeight(hour, activityWindows, fishActivity) {
         // Gündüz: x1
         return 1.0;
     }
-    
+
     // Gündüz balıkları için (Çipura, Kefal)
     if (fishActivity === "DAY") {
         // Sabah aktivitesi (08-11): x2
@@ -1017,7 +1075,7 @@ function getHourWeight(hour, activityWindows, fishActivity) {
         // Diğer: x1
         return 1.0;
     }
-    
+
     // ALL için eşit ağırlık
     return 1.0;
 }
@@ -1031,15 +1089,15 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
     let bestHour = -1;
     let bestHourScore = -1;
     const hourlyScores = new Array(24); // [YENİ] 24 saatlik skor dizisi
-    
+
     // SunCalc'ı döngü dışında bir kez hesapla (performans)
     const sunTimes = SunCalc.getTimes(baseParams.targetDate, baseParams.lat, baseParams.lon);
-    
+
     // 24 saat için hesapla
     for (let h = 0; h < 24; h++) {
         const wIdx = hourlyStartIdx + h;    // weather indeksi
         const mIdx = mStartIdx + h;         // marine indeksi
-        
+
         // Bu saat için verileri al — marine ve weather ayrı offset'lerle
         const hourlyTemp = safeNum(marine.hourly?.sea_surface_temperature?.[mIdx], baseParams.tempWater);
         const hourlyWave = safeNum(marine.hourly?.wave_height?.[mIdx], baseParams.wave);
@@ -1051,10 +1109,10 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
         const hourlySwell = safeNum(marine.hourly?.swell_wave_height?.[mIdx], 0);
         const hourlyOceanCurrent = marine.hourly?.ocean_current_velocity?.[mIdx];
         const hourlyClear = calculateClarity(hourlyWave, hourlyWind, hourlyRain);
-        
+
         // Bu saat için timeMode (SunCalc tekrar çağrılmıyor)
         const timeMode = getTimeOfDay(h, sunTimes);
-        
+
         // Parametreleri güncelle
         const hourParams = {
             ...baseParams,
@@ -1071,26 +1129,26 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
             timeMode: timeMode,
             hour: h
         };
-        
+
         // Skor hesapla
         const result = calculateFishScore(fish, key, hourParams);
-        
+
         // [YENİ] Saatlik skoru kaydet
         hourlyScores[h] = Math.round(result.finalScore * 10) / 10;
-        
+
         // En iyi saati takip et
         if (result.finalScore > bestHourScore) {
             bestHourScore = result.finalScore;
             bestHour = h;
         }
-        
+
         // Ağırlık al
         const weight = getHourWeight(h, activityWindows, fish.activity);
-        
+
         totalScore += result.finalScore * weight;
         totalWeight += weight;
     }
-    
+
     const avgScore = totalWeight > 0 ? totalScore / totalWeight : 0;
     return { score: avgScore, bestHour, bestHourScore, hourlyScores };
 }
@@ -1100,16 +1158,16 @@ function calculate3HourWindowScore(fish, key, baseParams, weather, marine, cente
     const mStartIdx = marineHourlyStartIdx !== undefined ? marineHourlyStartIdx : hourlyStartIdx;
     let totalScore = 0;
     let count = 0;
-    
+
     // centerHour - 1, centerHour, centerHour + 1
     for (let offset = -1; offset <= 1; offset++) {
         let h = centerHour + offset;
         if (h < 0) h += 24;
         if (h >= 24) h -= 24;
-        
+
         const wIdx = hourlyStartIdx + h;    // weather indeksi
         const mIdx = mStartIdx + h;         // marine indeksi
-        
+
         const hourlyTemp = safeNum(marine.hourly?.sea_surface_temperature?.[mIdx], baseParams.tempWater);
         const hourlyWave = safeNum(marine.hourly?.wave_height?.[mIdx], baseParams.wave);
         const hourlyWind = safeNum(weather.hourly?.wind_speed_10m?.[wIdx], baseParams.windSpeed);
@@ -1120,12 +1178,12 @@ function calculate3HourWindowScore(fish, key, baseParams, weather, marine, cente
         const hourlySwell = safeNum(marine.hourly?.swell_wave_height?.[mIdx], 0);
         const hourlyOceanCurrent = marine.hourly?.ocean_current_velocity?.[mIdx];
         const hourlyClear = calculateClarity(hourlyWave, hourlyWind, hourlyRain);
-        
+
         const hourDate = new Date(baseParams.targetDate);
         hourDate.setHours(h, 0, 0, 0);
         const sunTimes = SunCalc.getTimes(hourDate, baseParams.lat, baseParams.lon);
         const timeMode = getTimeOfDay(h, sunTimes);
-        
+
         const hourParams = {
             ...baseParams,
             tempWater: hourlyTemp,
@@ -1141,12 +1199,12 @@ function calculate3HourWindowScore(fish, key, baseParams, weather, marine, cente
             timeMode: timeMode,
             hour: h
         };
-        
+
         const result = calculateFishScore(fish, key, hourParams);
         totalScore += result.finalScore;
         count++;
     }
-    
+
     return count > 0 ? totalScore / count : 0;
 }
 
@@ -1186,16 +1244,23 @@ function calculateFishScore(fish, key, params) {
         depthAvg, hour, salinity,
         cloudCover, wavePeriod, swellHeight, oceanCurrent, tempShock, uvIndex,
         chlorophyll, thermoclineDepth, moonlightIntensity,
-        isBoat
+        isBoat,
+        // YENİ (1D)
+        windGust = 0, precipProb = 0, weatherCode = 0, visibility = 20000,
+        waveDirection = 0, windWaveHeight = 0, swellPeriod = 0
     } = params;
 
     const season = getSeason(targetDate.getMonth());
     const currentMonth = targetDate.getMonth(); // 0=Ocak, 11=Aralık
     let activeTriggers = [];
-    
+
+    // Habitat duyarlılığı — dip/derin türler yüzey koşullarından az etkilenir
+    const DEEP_BOTTOM_CATS = ['DIP_DERIN', 'DIP_KIYI', 'KAYALIK', 'DİP', 'DERİN'];
+    const isDeepBottom = DEEP_BOTTOM_CATS.includes(fish.category);
+
     // SKOR DETAYLARI (Yıldız Sistemi)
     const scoreDetails = {};
-    
+
     // 1. MEVSİMSEL (Max 25)
     // monthlyActivity varsa 12 aylık hassas sistem, yoksa 4 mevsim kaba sistem
     let seasonalEff;
@@ -1215,7 +1280,7 @@ function calculateFishScore(fish, key, params) {
     }
     let s_season = seasonalEff * 25;
     scoreDetails.season = { score: s_season, max: 25, stars: Math.round(seasonalEff * 5) };
-    
+
     // 2. SICAKLIK (Max 25)
     // [DÜZELTME: Trapezoid] — optMin/optMax varsa trapezoid, yoksa gaussian kullan.
     // optMin/optMax SPECIES_DB'ye girmeden dinamik olarak türetiliyor:
@@ -1228,14 +1293,14 @@ function calculateFishScore(fish, key, params) {
     const tempScore = getGaussianScore(tempWater, tMin, tOpt, tMax, tOptMin, tOptMax);
     let s_temp = tempScore * 25;
     scoreDetails.temp = { score: s_temp, max: 25, stars: Math.round(tempScore * 5), value: tempWater };
-    
+
     // 3. ÇEVRESEL (Max 20)
     let s_env = 0;
-    
+
     const waveScore = fish.wavePref > 0.6 ? Math.min(1, wave / 1.0) : Math.max(0, 1 - wave / 1.5);
     s_env += waveScore * 5;
     scoreDetails.wave = { score: waveScore * 5, max: 5, stars: Math.round(waveScore * 5), value: wave };
-    
+
     // === FAZ 2: CAM DENİZ — Clarity cezası tür bazlı güçlendirme ===
     let clarityScore = 0.5;
     if (fish.clarityPref === "CLEAR" && clarity > 70) clarityScore = 1.0;
@@ -1244,7 +1309,7 @@ function calculateFishScore(fish, key, params) {
     else if (fish.clarityPref === "TURBID" && clarity > 80) clarityScore = 0.3;
     else if (fish.clarityPref === "MODERATE") clarityScore = clarity > 40 && clarity < 80 ? 0.9 : 0.5;
     else if (fish.clarityPref === "ANY") clarityScore = 0.7;
-    
+
     // Cam deniz güçlendirilmiş ceza (wave < 0.3 = durgun deniz)
     if (wave < 0.3 && clarity > 80) {
         if (fish.clarityPref === "TURBID") {
@@ -1255,22 +1320,22 @@ function calculateFishScore(fish, key, params) {
         }
         // CLEAR ve ANY seven türler cam denizden az etkilenir
     }
-    
+
     s_env += clarityScore * 5;
     scoreDetails.clarity = { score: clarityScore * 5, max: 5, stars: Math.round(clarityScore * 5), value: Math.round(clarity) };
-    
+
     const windScore = calculateWindScore(windDir, windSpeed, region);
     s_env += windScore * 5;
     scoreDetails.wind = { score: windScore * 5, max: 5, stars: Math.round(windScore * 5), value: windSpeed, dir: windDir };
-    
+
     const regionMatch = fish.regions.includes(region) || region === 'AÇIK DENİZ' ? 1.0 : 0.3;
     s_env += regionMatch * 5;
     scoreDetails.region = { score: regionMatch * 5, max: 5, stars: Math.round(regionMatch * 5) };
-    
+
     // 4. AKTİVİTE (Max 20)
     let s_activity = 5;
     let activityScore = 0.25;
-    
+
     if (fish.activity === "NIGHT") {
         if (timeMode === "NIGHT") { s_activity = 20; activityScore = 1.0; }
         else if (timeMode === "DUSK" || timeMode === "DAWN") { s_activity = 10; activityScore = 0.5; }
@@ -1288,13 +1353,13 @@ function calculateFishScore(fish, key, params) {
         s_activity = 12; activityScore = 0.6;
     }
     scoreDetails.activity = { score: s_activity, max: 20, stars: Math.round(activityScore * 5), timeMode };
-    
+
     // 5. TETİKLEYİCİLER (Max 10)
     let s_trigger = 0;
-    
+
     if (solunar.isMajor) { s_trigger += 4; activeTriggers.push("Major Solunar"); }
     else if (solunar.isMinor) { s_trigger += 2; activeTriggers.push("Minor Solunar"); }
-    
+
     // Basınç TRENDİ
     if (pressureTrend) {
         if (pressureTrend.trend === 'FALLING_FAST' && fish.pressureSensitivity > 0.6) {
@@ -1309,8 +1374,8 @@ function calculateFishScore(fish, key, params) {
         // Basınç scoreDetails
         const pressureStars = pressureTrend.trend === 'FALLING_FAST' ? 5
             : pressureTrend.trend === 'FALLING' ? 4
-            : pressureTrend.trend === 'STABLE' ? 3
-            : pressureTrend.trend === 'RISING' ? 2 : 1;
+                : pressureTrend.trend === 'STABLE' ? 3
+                    : pressureTrend.trend === 'RISING' ? 2 : 1;
         scoreDetails.pressure = {
             stars: pressureStars,
             trend: pressureTrend.trend,
@@ -1318,13 +1383,13 @@ function calculateFishScore(fish, key, params) {
             value: pressure
         };
     }
-    
+
     // Akıntı — gerçek okyanus akıntısı verisi varsa kullan, yoksa tahmin
     {
         const effectiveCurrent = (oceanCurrent !== null && oceanCurrent !== undefined && !isNaN(oceanCurrent))
             ? oceanCurrent   // m/s — gerçek veri
             : currentSpeed;  // tahmin (estimateCurrent)
-        
+
         const idealCurrent = fish.currentPref * 1.5;
         const currentDiff = Math.abs(effectiveCurrent - idealCurrent);
         const currentScore = Math.max(0, 1 - currentDiff / 1.5);
@@ -1343,7 +1408,7 @@ function calculateFishScore(fish, key, params) {
             pref: fish.currentPref
         };
     }
-    
+
     // [YENİ] Bulutluluk Etkisi — Işık seviyesi balık davranışını etkiler
     if (cloudCover !== undefined && cloudCover !== null) {
         if (cloudCover > 70) {
@@ -1362,7 +1427,7 @@ function calculateFishScore(fish, key, params) {
                 : 3;
         scoreDetails.cloud = { value: Math.round(cloudCover), stars: cloudStars };
     }
-    
+
     // [YENİ] UV İndeks — Sığ su + yüksek UV = balık derine kaçar
     if (uvIndex !== undefined && uvIndex !== null && uvIndex > 0) {
         if (uvIndex >= 8 && timeMode === 'DAY') {
@@ -1380,12 +1445,12 @@ function calculateFishScore(fish, key, params) {
                 s_trigger += 1;
             }
         }
-        scoreDetails.uv = { 
-            value: uvIndex, 
-            stars: uvIndex <= 3 ? 5 : uvIndex <= 5 ? 4 : uvIndex <= 7 ? 3 : uvIndex <= 9 ? 2 : 1 
+        scoreDetails.uv = {
+            value: uvIndex,
+            stars: uvIndex <= 3 ? 5 : uvIndex <= 5 ? 4 : uvIndex <= 7 ? 3 : uvIndex <= 9 ? 2 : 1
         };
     }
-    
+
     // [YENİ] Dalga Periyodu — Uzun periyot (swell) sakin, kısa periyot (rüzgar dalgası) huzursuz
     if (wavePeriod > 0) {
         // s_trigger bonusu
@@ -1401,7 +1466,7 @@ function calculateFishScore(fish, key, params) {
             swell: swellHeight || 0
         };
     }
-    
+
     // Sıcaklık Şoku — 24 saat içinde ≥1.5°C SST değişimi
     // BİYOLOJİK DÜZELTİ: Ani soğuma tüm balıklar için bonus değil!
     // Pelagik göçmenler (Lüfer, Palamut, vb.) soğuma sinyalini göç/beslenme tetikleyicisi
@@ -1455,7 +1520,7 @@ function calculateFishScore(fish, key, params) {
         // sstTrendPref tanımsız türler için stabil su genel bonusu
         s_trigger += 1;
     }
-    
+
     if (key === "levrek" && wave > 0.7 && clarity < 60) { s_trigger += 2; activeTriggers.push("Köpüklü Su"); }
     if (key === "lufer" && windSpeed > 15 && windSpeed < 35) { s_trigger += 2; activeTriggers.push("Rüzgarlı"); }
 
@@ -1472,16 +1537,16 @@ function calculateFishScore(fish, key, params) {
             scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'AT', stars: 5 };
         } else if (diff > 6) {
             // Balık termoklinin altında — dip türler için normal, yüzey türler için ceza
-            if (['DIP_KIYI','DIP_DERIN','KAYALIK','DİP','DERİN'].includes(fish.category)) {
+            if (['DIP_KIYI', 'DIP_DERIN', 'KAYALIK', 'DİP', 'DERİN'].includes(fish.category)) {
                 s_trigger += 1.5; // Dip türü termoklin altında — doğal habitat
                 scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'BELOW', stars: 4 };
-            } else if (['PELAJIK','KIYI_AVCI','KIYI','SÜRÜ'].includes(fish.category)) {
+            } else if (['PELAJIK', 'KIYI_AVCI', 'KIYI', 'SÜRÜ'].includes(fish.category)) {
                 s_trigger -= Math.min(3, diff / 10); // Yüzey türü çok derinlerde
                 scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'BELOW', stars: 2 };
             }
         } else {
             // Balık termoklinin üstünde — yüzey türler normal, dip türler için hafif ceza
-            if (['DIP_DERIN','DERİN'].includes(fish.category)) {
+            if (['DIP_DERIN', 'DERİN'].includes(fish.category)) {
                 s_trigger -= 1.5;
                 scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'ABOVE', stars: 2 };
             } else {
@@ -1498,7 +1563,7 @@ function calculateFishScore(fish, key, params) {
         if (pref === 'bright') {
             // Aydınlık sever: kalamar, bazı dip türleri — dolunayda av kolaylaşır
             const bonus = Math.round(intensity * 8 * 10) / 10;
-            if (bonus > 0) { s_trigger += bonus; activeTriggers.push(`🌕 Ay Işığı (${(intensity*100).toFixed(0)}%)`); }
+            if (bonus > 0) { s_trigger += bonus; activeTriggers.push(`🌕 Ay Işığı (${(intensity * 100).toFixed(0)}%)`); }
             scoreDetails.moonlight = { intensity, pref, bonus, stars: Math.round(intensity * 5) };
         } else if (pref === 'dark') {
             // Karanlık sever: lüfer, çinekop, torik — dolunayda sürü dağılır
@@ -1520,17 +1585,17 @@ function calculateFishScore(fish, key, params) {
         if (!isNaN(chl)) {
             if (fish.planktonPref === 'HIGH') {
                 // Yüksek klorofil sevenler: Lüfer, Palamut, İstavrit, Hamsi vb.
-                if (chl >= 1.5)      { s_trigger += 3; activeTriggers.push(`🌿 Zengin Plankton (${chl.toFixed(2)} mg/m³)`); }
+                if (chl >= 1.5) { s_trigger += 3; activeTriggers.push(`🌿 Zengin Plankton (${chl.toFixed(2)} mg/m³)`); }
                 else if (chl >= 0.5) { s_trigger += 1.5; activeTriggers.push(`🌿 Aktif Plankton`); }
-                else if (chl < 0.1)  { s_trigger -= 1.5; } // Çok düşük — yem azalmış
+                else if (chl < 0.1) { s_trigger -= 1.5; } // Çok düşük — yem azalmış
             } else if (fish.planktonPref === 'MEDIUM') {
                 // Orta tercih: Levrek, Çipura, Kefal vb.
                 if (chl >= 0.5 && chl <= 3.0) { s_trigger += 1.5; activeTriggers.push(`🌿 Uygun Plankton`); }
-                else if (chl > 5.0)            { s_trigger -= 1; } // Bloom = oksijen sorunu
+                else if (chl > 5.0) { s_trigger -= 1; } // Bloom = oksijen sorunu
             } else if (fish.planktonPref === 'LOW') {
                 // Düşük klorofil sevenler: Kalamar, derin dip türleri
-                if (chl < 0.3)       { s_trigger += 1.5; activeTriggers.push(`🌿 Temiz Su`); }
-                else if (chl > 2.0)  { s_trigger -= 1; }
+                if (chl < 0.3) { s_trigger += 1.5; activeTriggers.push(`🌿 Temiz Su`); }
+                else if (chl > 2.0) { s_trigger -= 1; }
             }
             scoreDetails.chlorophyll = {
                 value: chl,
@@ -1543,7 +1608,7 @@ function calculateFishScore(fish, key, params) {
             };
         }
     }
-    
+
     // TUZLULUK UYUMU — bölge tuzluluğu ile tür tercihini karşılaştır
     // Etki: -2 (zıt) / 0 (nötr) / +1.5 (uyumlu) — s_trigger üzerinden
     if (salinity !== undefined && fish.salinityPref) {
@@ -1557,7 +1622,7 @@ function calculateFishScore(fish, key, params) {
         } else if (
             (pref === 'HIGH' && salCat === 'MEDIUM') ||
             (pref === 'MEDIUM' && salCat === 'HIGH') ||
-            (pref === 'LOW'  && salCat === 'MEDIUM') ||
+            (pref === 'LOW' && salCat === 'MEDIUM') ||
             (pref === 'MEDIUM' && salCat === 'LOW')
         ) {
             scoreDetails.salinity = { match: 'TOLERABLE', value: salinity, pref };
@@ -1568,19 +1633,89 @@ function calculateFishScore(fish, key, params) {
         }
     }
 
+    // === YENİ BLOKLAR (1D) ===
+
+    // Rüzgar Gustu — Dip balıkları yüzeydeki ani rüzgar hamlesinden etkilenmez
+    if (windGust > 0) {
+        if (windGust > windSpeed * 1.5 && windGust > 25 && !isDeepBottom) {
+            s_trigger -= 1.5;
+            activeTriggers.push('💨 Ani Rüzgar');
+        }
+        scoreDetails.windGust = { value: windGust, diff: windGust - windSpeed };
+    }
+
+    // Yağış Olasılığı — Dip türleri yağıştan minimal etkilenir
+    if (precipProb > 0) {
+        const precipMod = isDeepBottom ? 0.3 : 1.0;
+        if (precipProb >= 70) { s_trigger -= 1 * precipMod; }
+        else if (precipProb >= 40) { s_trigger -= 0.5 * precipMod; }
+        scoreDetails.precipProb = { value: precipProb };
+    }
+
+    // Dalga Yönü — Bölgeye göre korunaklılık
+    if (waveDirection > 0) {
+        const protectedDirs = {
+            'EGE': { favorable: [45, 135], label: 'Korunaklı Yön' },
+            'AKDENİZ': { favorable: [315, 45], label: 'Korunaklı Yön' },
+            'KARADENİZ': { favorable: [135, 225], label: 'Korunaklı Yön' },
+            'MARMARA': { favorable: [0, 90], label: 'Korunaklı Yön' }
+        };
+        const pref = protectedDirs[region];
+        if (pref) {
+            const [lo, hi] = pref.favorable;
+            const isFavorable = lo < hi
+                ? (waveDirection >= lo && waveDirection <= hi)
+                : (waveDirection >= lo || waveDirection <= hi);
+            if (isFavorable) { s_trigger += 1.5; activeTriggers.push('🌊 ' + pref.label); }
+            else if (wave > 0.8 && !isDeepBottom) { s_trigger -= 1; }
+        }
+        scoreDetails.waveDirection = { value: waveDirection, deg: Math.round(waveDirection) };
+    }
+
+    // Swell vs Rüzgar Dalgası Ayrımı
+    if (windWaveHeight > 0 && swellPeriod > 0) {
+        const swellDominated = swellPeriod >= 10 && windWaveHeight < wave * 0.4;
+        if (swellDominated) {
+            s_trigger += 2;
+            activeTriggers.push('🌊 Swell Dominant — Temiz Su');
+        }
+        scoreDetails.swellAnalysis = { windWave: windWaveHeight, swellPeriod, swellDominated };
+    }
+
+    // Görüş Mesafesi — Atmosferik görüş: dip/derin türler etkilenmez
+    // Yüzey avcıları ve berrak su seven türler tam ceza alır
+    if (visibility < 20000) {
+        const visMod = isDeepBottom ? 0 : (fish.clarityPref === 'CLEAR' ? 1.0 : 0.5);
+        if (visibility < 1000) {
+            s_trigger -= 3 * visMod;
+            if (visMod > 0) activeTriggers.push('🌫️ Yoğun Sis — TEHLİKELİ');
+        } else if (visibility < 5000) {
+            s_trigger -= 1.5 * visMod;
+            if (visMod > 0) activeTriggers.push('🌫️ Azalan Görüş');
+        }
+        scoreDetails.visibility = { value: visibility, km: parseFloat((visibility / 1000).toFixed(1)) };
+    }
+
     s_trigger = Math.min(12, Math.max(-5, s_trigger));
     scoreDetails.trigger = { score: s_trigger, max: 12, triggers: activeTriggers };
-    
+
     // TOPLAM
     let rawScore = s_season + s_temp + s_env + s_activity + s_trigger;
 
-    // wavePeriod rawScore çarpanı — rawScore tanımlandıktan sonra uygulanmalı
+    // wavePeriod rawScore çarpanı — dip türleri yüzey dalga periyodundan az etkilenir
     if (wavePeriod > 0) {
         let wavePeriodMult = 1.0;
-        if (wavePeriod <= 3 && wave > 0.3)       wavePeriodMult = 0.70;
-        else if (wavePeriod <= 5 && wave > 0.5)  wavePeriodMult = 0.85;
-        else if (wavePeriod >= 10)               wavePeriodMult = 1.10;
-        else if (wavePeriod >= 8)                wavePeriodMult = 1.05;
+        if (isDeepBottom) {
+            // Dip türleri: periyot etkisi çok hafif (yüzey olayı)
+            if (wavePeriod <= 3 && wave > 0.5) wavePeriodMult = 0.95;
+            else if (wavePeriod >= 10) wavePeriodMult = 1.03;
+        } else {
+            // Yüzey/kıyı türleri: yumuşatılmış çarpanlar (eski: 0.70→0.85, 0.85→0.92)
+            if (wavePeriod <= 3 && wave > 0.3) wavePeriodMult = 0.85;
+            else if (wavePeriod <= 5 && wave > 0.5) wavePeriodMult = 0.92;
+            else if (wavePeriod >= 10) wavePeriodMult = 1.08;
+            else if (wavePeriod >= 8) wavePeriodMult = 1.04;
+        }
         rawScore *= wavePeriodMult;
     }
 
@@ -1589,7 +1724,7 @@ function calculateFishScore(fish, key, params) {
         rawScore *= moonMult;
         scoreDetails.moon = { multiplier: moonMult, phase: moonPhase };
     }
-    
+
     // CEZALAR
     let penalties = [];
 
@@ -1611,7 +1746,7 @@ function calculateFishScore(fish, key, params) {
     if (scoreDetails.salinity && scoreDetails.salinity.match === 'MISMATCH') {
         penalties.push('Tuzluluk uyumsuz');
     }
-    
+
     // === FAZ 1: DERİNLİK SOFT GATE ===
     // Pelajik ve aktif avcı türler su kolonunda dikey göç yapar —
     // minimum derinlik cezasından muaf, ancak çok derin suda hâlâ ceza alır.
@@ -1624,12 +1759,12 @@ function calculateFishScore(fish, key, params) {
         const fMin = fish.depth.min;
         const fOpt = fish.depth.opt;
         const fMax = fish.depth.max;
-        
+
         // FIX: fMin=0 olan kıyı türleri (Karagöz, Mırmır vb.) için
         // d < fMin*0.5 = d < 0 asla tetiklenmiyordu.
         // effectiveMin: kıyı türleri için minimum 0.5m eşik.
         const effectiveMin = Math.max(fMin, 0.5);
-        
+
         if (!isPelagicType && d < effectiveMin * 0.5) {
             // İmkansız derinlik — neredeyse kuru zemin (pelajikler muaf)
             depthScore = 0.05;
@@ -1678,7 +1813,7 @@ function calculateFishScore(fish, key, params) {
         }
     }
 
-    
+
     // === FAZ 3: ÖĞLEN BASTIRMASI (Tür Bazlı) ===
     const currentHour = hour !== undefined ? hour : (targetDate ? targetDate.getHours() : 12);
     let middayPenalty = 1.0;
@@ -1703,7 +1838,7 @@ function calculateFishScore(fish, key, params) {
         if (middayPenalty < 0.85) penalties.push("Öğlen bastırması");
         scoreDetails.midday = { penalty: middayPenalty, hour: currentHour };
     }
-    
+
     // Cam Deniz — Artık SADECE clarityScore'da cezalandırılıyor (çift ceza düzeltmesi).
     // Eski kod hem clarityScore'da (×0.45) hem rawScore'da (×0.60) ceza veriyordu.
     // Toplam etki: ×0.27 — bu çok ağırdı. Şimdi sadece clarityScore cezası aktif.
@@ -1715,20 +1850,20 @@ function calculateFishScore(fish, key, params) {
         // NOT: rawScore çarpanı kaldırıldı. Ceza zaten clarityScore hesabında var.
         scoreDetails.camDeniz = { penalty: 1.0, note: "Ceza clarityScore içinde", isInfo: true };
     }
-    
+
     // Dalga TEHLİKE
     if (wave > 2.5) { rawScore *= 0.15; penalties.push("TEHLİKE: Dalga"); activeTriggers = ["⚠️ TEHLİKE: Çok yüksek dalga!"]; }
     else if (wave > 2.0) { rawScore *= 0.35; penalties.push("Yüksek dalga"); activeTriggers.push("⚠️ Yüksek dalga"); }
     else if (wave > 1.5) { rawScore *= 0.6; penalties.push("Dalgalı"); }
-    
+
     if (windSpeed > 40) { rawScore *= 0.2; penalties.push("FIRTINA"); activeTriggers = ["⚠️ FIRTINA!"]; }
     else if (windSpeed > 35) { rawScore *= 0.35; penalties.push("Çok rüzgarlı"); }
     else if (windSpeed > 25) { rawScore *= 0.7; penalties.push("Rüzgarlı"); }
-    
+
     if (rain > 10) { rawScore *= 0.4; penalties.push("Şiddetli yağmur"); }
     else if (rain > 5) { rawScore *= 0.6; penalties.push("Yağmurlu"); }
     else if (rain > 2) { rawScore *= 0.85; penalties.push("Hafif yağmur"); }
-    
+
     // DİP BALIKLARI KIYI CEZASI — Artık derinlik tabanlı (DIP_DERIN sabit ceza kaldırıldı)
     if (fish.category === "DIP_DERIN") {
         // Eğer derinlik verisi yoksa veya sığ ise, eski ceza mantığı
@@ -1741,12 +1876,12 @@ function calculateFishScore(fish, key, params) {
             if (!activeTriggers.includes("Tekne gerektirir")) activeTriggers.push("Tekne gerektirir");
         }
     }
-    
+
     if (key === "kalamar") {
         if (clarity < 60) { rawScore *= 0.3; penalties.push("Bulanık su"); }
         if (wave > 0.8) { rawScore *= 0.4; penalties.push("Dalgalı"); }
     }
-    
+
     // === FAZ 3: PELAJİK VOLATİLİTE (Günlük seed) ===
     if (fish.category === "PELAJIK" || fish.category === "SÜRÜ") {
         // Günlük seed: aynı gün aynı tür için aynı volatilite
@@ -1758,7 +1893,7 @@ function calculateFishScore(fish, key, params) {
             hash |= 0;
         }
         const pseudoRand = (Math.abs(hash) % 1000) / 1000; // 0-1 arası deterministik
-        
+
         // Yüksek göçmen türler: 0.75-1.20 (daraltıldı — eski: 0.65-1.35)
         // Normal pelagik/sürü türler: 0.85-1.15 (daraltıldı — eski: 0.80-1.20)
         // Sebep: Geniş band 75 puanlık balığı 95'e çıkarıyordu, kullanıcıyı yanıltıyordu
@@ -1766,18 +1901,18 @@ function calculateFishScore(fish, key, params) {
         const volMin = isHighMigratory ? 0.75 : 0.85;
         const volRange = isHighMigratory ? 0.45 : 0.30;
         const volatility = volMin + (pseudoRand * volRange);
-        
+
         rawScore *= volatility;
         scoreDetails.volatility = { multiplier: volatility.toFixed(2), migratory: isHighMigratory };
         if (volatility < 0.85) { penalties.push("Sürü yok"); }
         else if (volatility > 1.10) { activeTriggers.push("Sürü aktif!"); }
     }
-    
+
     scoreDetails.penalties = penalties;
-    
+
     // === FAZ 2: OVER-STACKING KORUMA — Minimum taban ===
     rawScore = Math.max(3, rawScore);
-    
+
     // === MATEMATİKSEL OLARAK KUSURSUZ ASİMPTOTİK SIKIŞTIRMA ===
     // Skor 75'e kadar normal artar. 75'ten sonra 99'a doğru eksponansiyel
     // olarak sönümlenir (yumuşak kavis). Grafikte kırılma/zıplama olmaz.
@@ -1798,7 +1933,7 @@ function calculateFishScore(fish, key, params) {
 
     // Güvenlik amaçlı yuvarlama ve cap
     finalScore = Math.min(99, finalScore);
-    
+
     let reason = "";
     if (finalScore < 25) reason = activeTriggers.length > 0 ? activeTriggers[0] : "Koşullar Uygun Değil";
     else if (finalScore < 40) reason = "Düşük Aktivite";
@@ -1858,7 +1993,7 @@ app.get('/api/forecast', async (req, res) => {
                         }
                         return res.json(merged);
                     }
-                } catch(e) {}
+                } catch (e) { }
             }
             return res.json(cachedData);
         }
@@ -1866,7 +2001,7 @@ app.get('/api/forecast', async (req, res) => {
         // ── OFFLİNE KONUM ANALİZİ ─────────────────────────────────────────
         // API'lere gitmeden önce şehir sınırı kontrolü
         const offlineAnalysis = analyzeLocationOffline(lat, lon);
-        console.log(`[OFFLINE] lat:${lat} lon:${lon} → ${offlineAnalysis.status}${offlineAnalysis.city ? ' ('+offlineAnalysis.city+')' : ''}`);
+        console.log(`[OFFLINE] lat:${lat} lon:${lon} → ${offlineAnalysis.status}${offlineAnalysis.city ? ' (' + offlineAnalysis.city + ')' : ''}`);
 
         if (offlineAnalysis.status === 'INLAND') {
             // İç bölge: sıfır API, anında reddet
@@ -1887,11 +2022,11 @@ app.get('/api/forecast', async (req, res) => {
         const regionName = getRegion(lat, lon);
         const salinity = getSalinity(regionName);
 
-        const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`);
+        const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_gusts_10m,surface_pressure,cloud_cover,rain,precipitation_probability,weather_code,visibility,uv_index&past_days=1&timezone=auto`);
         const weatherUrlFallback = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain&past_days=1&timezone=auto`);
-        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
+        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
         const marineUrlFallback = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
-        
+
         // EMODnet Bathymetry API - Derinlik verisi (SEA ise atlanır)
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lon} ${lat})`;
 
@@ -1907,7 +2042,7 @@ app.get('/api/forecast', async (req, res) => {
                 : deduplicatedFetch(`m_${gLat}_${gLon}`, () => queuedFetch(marineUrl)),
             skipBathymetry ? Promise.resolve(null) : fetchWithTimeout(bathymetryUrl).catch(() => null)
         ]);
-        
+
         // Fallback: gelişmiş URL başarısızsa basit URL dene
         // 429 backoff aktifse fallback da deneme — aynı sunucuya ikinci istek boşuna
         if (!weather || weather.error) {
@@ -1926,7 +2061,7 @@ app.get('/api/forecast', async (req, res) => {
                 marine = await queuedFetch(marineUrlFallback);
             }
         }
-        
+
         // Weather kesin gerekli — yoksa önce eski cache dene, o da yoksa 503
         if (!weather) {
             const isBackoff = cache && cache.get(_OM_BACKOFF_KEY);
@@ -1984,7 +2119,7 @@ app.get('/api/forecast', async (req, res) => {
                 if (chlorophyllData && db) {
                     const chlCacheKey2 = `plankton_${parseFloat(lat).toFixed(2)}_${parseFloat(lon).toFixed(2)}`;
                     db.collection('planktonCache').doc(chlCacheKey2)
-                        .set({ result: chlorophyllData, savedAt: Date.now() }).catch(() => {});
+                        .set({ result: chlorophyllData, savedAt: Date.now() }).catch(() => { });
                 }
             }
         } catch (e) {
@@ -2026,7 +2161,7 @@ app.get('/api/forecast', async (req, res) => {
         // 2. Batimetri kontrolü (kıyıya yakın kara noktaları)
         let isLand = false;
         let landReason = '';
-        
+
         if (!marine.hourly || !marine.hourly.wave_height) {
             isLand = true;
             landReason = 'Deniz verisi alınamadı';
@@ -2038,7 +2173,7 @@ app.get('/api/forecast', async (req, res) => {
                 landReason = 'Dalga verisi yok — iç bölge';
             }
         }
-        
+
         // Batimetri ile hassas kara tespiti
         // bathymetryRaw: negatif = deniz tabanı (derinlik), pozitif = kara (yükseklik), null = belirsiz
         // Çok sığ eşiği: 0.5m ve altı = kara veya sığ uyarısı
@@ -2076,7 +2211,7 @@ app.get('/api/forecast', async (req, res) => {
                 const snap = await findNearestSeaPoint(lat, lon);
                 if (snap) {
                     // Snap noktasının marine verisini çek — past_days=7 (tempShock için)
-                    const snapMarineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
+                    const snapMarineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
                     const snapMarine = await safeFetchJSON(snapMarineUrl, 10000);
 
                     // Marine verisi geçerliyse snap'i uygula
@@ -2092,8 +2227,8 @@ app.get('/api/forecast', async (req, res) => {
                         landReason = '';
                         snapInfo = {
                             distanceM: snap.distanceM,
-                            snapLat:   parseFloat(snap.lat),
-                            snapLon:   parseFloat(snap.lon)
+                            snapLat: parseFloat(snap.lat),
+                            snapLon: parseFloat(snap.lon)
                         };
                         console.log(`[SNAP] ✅ Kıyı→Deniz: ${snap.distanceM}m açık (${snap.lat},${snap.lon}), derinlik: ${Math.abs(snap.depthRaw).toFixed(1)}m`);
                     } else {
@@ -2126,7 +2261,7 @@ app.get('/api/forecast', async (req, res) => {
         const hourlyPressureData = weather.hourly?.surface_pressure || null;
 
         const forecast = [];
-        
+
         // Weather: past_days=1 → hourly[0-23]=dün, [24-47]=bugün, [48-71]=yarın...
         // Marine:  past_days=7 → hourly[0-167]=geçmiş 7 gün, [168-191]=bugün, [192+]=gelecek
         // Weather hourlyOffset (past_days=1): bugün = indeks 24
@@ -2149,7 +2284,7 @@ app.get('/api/forecast', async (req, res) => {
         for (let i = 0; i < 7; i++) {
             const targetDate = new Date();
             targetDate.setDate(targetDate.getDate() + i);
-            
+
             // Doğru indeksler
             // weather: past_days=1, marine: past_days=7
             const dailyIdx = i + 1;  // weather daily[1] = bugün
@@ -2186,14 +2321,22 @@ app.get('/api/forecast', async (req, res) => {
             const cloud = safeNum(weather.hourly?.cloud_cover?.[hourlyIdx]);
             const rain = safeNum(weather.hourly?.rain?.[hourlyIdx]);
             const uvIdx = safeNum(weather.hourly?.uv_index?.[hourlyIdx], 0);
-            
+
             // Marine hourly veriler (marine indeksi)
             const wavePeriod = isLand ? 0 : safeNum(marine.hourly?.wave_period?.[marineHourlyIdx]);
             // Sığ su shoaling — derinliğe göre etkin dalga yüksekliğini düzelt
             const wave = isLand ? 0 : applyShoaling(waveRaw, wavePeriod, depthData.avg);
             const swellHeight = isLand ? 0 : safeNum(marine.hourly?.swell_wave_height?.[marineHourlyIdx]);
             const oceanCurrent = isLand ? null : (marine.hourly?.ocean_current_velocity?.[marineHourlyIdx] ?? null);
-            
+            // YENİ parametreler (1C)
+            const windGust = safeNum(weather.hourly?.wind_gusts_10m?.[hourlyIdx]);
+            const precipProb = safeNum(weather.hourly?.precipitation_probability?.[hourlyIdx]);
+            const weatherCode = safeNum(weather.hourly?.weather_code?.[hourlyIdx]);
+            const visibility = safeNum(weather.hourly?.visibility?.[hourlyIdx], 20000);
+            const waveDirection = isLand ? 0 : safeNum(marine.hourly?.wave_direction?.[marineHourlyIdx]);
+            const windWaveHeight = isLand ? 0 : safeNum(marine.hourly?.wind_wave_height?.[marineHourlyIdx]);
+            const swellPeriod = isLand ? 0 : safeNum(marine.hourly?.swell_wave_period?.[marineHourlyIdx]);
+
             // SST analizi: şok + 7 günlük trend (marine indeksi kullanır)
             const tempShock = isLand ? { shock: false, change: 0, direction: 'STABLE', trend: 0, trendDirection: 'STABLE' } : calculateTempShock(marine, marineHourlyStartIdx);
             const thermoclineDepth = isLand ? null : estimateThermoclineDepth(tempWater, targetDate.getMonth(), regionName);
@@ -2203,7 +2346,7 @@ app.get('/api/forecast', async (req, res) => {
             const timeMode = getTimeOfDay(correctedClickHour, sunTimes);
             const moon = SunCalc.getMoonIllumination(targetDate);
             const solunar = getSolunarWindow(targetDate, lat, lon);
-            
+
             // Aktivite pencerelerini hesapla (calculateWeightedDailyScore için gerekli)
             const activityWindows = calculateActivityWindows(targetDate, lat, lon);
 
@@ -2238,27 +2381,30 @@ app.get('/api/forecast', async (req, res) => {
                     chlorophyll,
                     thermoclineDepth,
                     moonlightIntensity,
-                isBoat
+                    isBoat,
+                    // YENİ (1C)
+                    windGust, precipProb, weatherCode, visibility,
+                    waveDirection, windWaveHeight, swellPeriod
                 };
 
                 for (const [key, fish] of Object.entries(SPECIES_DB)) {
                     if (!fish.regions.includes(regionName) && regionName !== 'AÇIK DENİZ') continue;
-                    
+
                     // Ağırlıklı günlük skor hesapla (24 saatlik ortalama)
                     const dailyResult = calculateWeightedDailyScore(
                         fish, key, baseParams, weather, marine, activityWindows, hourlyStartIdx, marineHourlyStartIdx
                     );
                     const dailyScore = dailyResult.score;
-                    
+
                     if (dailyScore > 15) {
                         // Detaylar için anlık hesaplama
                         const result = calculateFishScore(fish, key, baseParams);
-                        
+
                         // En iyi saat bilgisi
-                        const bestHourStr = dailyResult.bestHour >= 0 
-                            ? `${String(dailyResult.bestHour).padStart(2,'0')}:00` 
+                        const bestHourStr = dailyResult.bestHour >= 0
+                            ? `${String(dailyResult.bestHour).padStart(2, '0')}:00`
                             : null;
-                        
+
                         fishList.push({
                             key, name: fish.name, nameEn: fish.nameEn || fish.name,
                             scientificName: fish.scientificName, photoId: fish.photoId,
@@ -2282,12 +2428,12 @@ app.get('/api/forecast', async (req, res) => {
             // GELİŞMİŞ TAKTİK SİSTEMİ
             let tacticKey = "";
             let tacticData = null;
-            
+
             // 85+ skor alan balıkları bul
             const highScoreFish = fishList.filter(f => f.score >= 75 && f.category !== "TİCARİ");
             const mediumScoreFish = fishList.filter(f => f.score >= 55 && f.score < 75 && f.category !== "TİCARİ");
             const { score: topScore, dominant: isDominant } = calcAvgScore(fishList);
-            
+
             if (isLand) {
                 tacticKey = "TACTIC_LAND";
             } else if (wave > 2.0) {
@@ -2336,7 +2482,7 @@ app.get('/api/forecast', async (req, res) => {
             forecast.push({
                 date: targetDate.toISOString(),
                 temp: Math.round(tempWater * 10) / 10,
-                wave, wind: Math.round(windSpeed), 
+                wave, wind: Math.round(windSpeed),
                 windDirection: safeNum(weather.daily?.wind_direction_10m_dominant?.[dailyIdx]),
                 clarity: Math.round(clarity),
                 pressure: Math.round(pressure), pressureTrend: pressureTrend.trend,
@@ -2354,6 +2500,14 @@ app.get('/api/forecast', async (req, res) => {
                     daysAgo: chlorophyllData.daysAgo,
                     stale: chlorophyllData.stale || false
                 } : null,
+                // YENİ (1F)
+                windGust: Math.round(windGust),
+                precipProb: precipProb,
+                waveDirection: waveDirection,
+                windWaveHeight: parseFloat(windWaveHeight.toFixed(2)),
+                swellPeriod: parseFloat(swellPeriod.toFixed(1)),
+                visibility: visibility,
+                weatherCode: weatherCode,
                 score: parseFloat(topScore.toFixed(1)),
                 apiGrid: (marine.latitude && marine.longitude) ? {
                     lat: parseFloat(marine.latitude.toFixed(4)),
@@ -2412,12 +2566,20 @@ app.get('/api/forecast', async (req, res) => {
             const i_moon = SunCalc.getMoonIllumination(instantDate);
             // daily[1] = bugün (past_days=1)
             const i_windDir = safeNum(weather.daily?.wind_direction_10m_dominant?.[1]);
-            
+
             const i_swellHeight = safeNum(marine.hourly?.swell_wave_height?.[marineInstantIdx]);
             const i_oceanCurrent = marine.hourly?.ocean_current_velocity?.[marineInstantIdx] ?? null;
             const i_tempShock = calculateTempShock(marine, marineStartIdx);
             const i_thermoclineDepth = estimateThermoclineDepth(i_tempWater, now.getMonth(), regionName);
             const i_moonlightIntensity = calculateMoonlightIntensity(now, parseFloat(lat), parseFloat(lon), i_cloud);
+            // YENİ (1C)
+            const i_windGust = safeNum(weather.hourly?.wind_gusts_10m?.[instantIdx]);
+            const i_precipProb = safeNum(weather.hourly?.precipitation_probability?.[instantIdx]);
+            const i_weatherCode = safeNum(weather.hourly?.weather_code?.[instantIdx]);
+            const i_visibility = safeNum(weather.hourly?.visibility?.[instantIdx], 20000);
+            const i_waveDirection = safeNum(marine.hourly?.wave_direction?.[marineInstantIdx]);
+            const i_windWaveHeight = safeNum(marine.hourly?.wind_wave_height?.[marineInstantIdx]);
+            const i_swellPeriod = safeNum(marine.hourly?.swell_wave_period?.[marineInstantIdx]);
 
             // FIX: Anlık blok için basınç trendi — forecast döngüsü scope'undan bağımsız
             let i_pressureTrend = { trend: 'STABLE', change: 0 };
@@ -2447,21 +2609,25 @@ app.get('/api/forecast', async (req, res) => {
                 chlorophyll,
                 thermoclineDepth: i_thermoclineDepth,
                 moonlightIntensity: i_moonlightIntensity,
-                isBoat
+                isBoat,
+                // YENİ (1C)
+                windGust: i_windGust, precipProb: i_precipProb, weatherCode: i_weatherCode,
+                visibility: i_visibility, waveDirection: i_waveDirection,
+                windWaveHeight: i_windWaveHeight, swellPeriod: i_swellPeriod
             };
 
             let instantFishList = [];
             for (const [key, fish] of Object.entries(SPECIES_DB)) {
                 if (!fish.regions.includes(regionName) && regionName !== 'AÇIK DENİZ') continue;
-                
+
                 // 3 saatlik pencere ortalaması ile daha stabil skor (gürültü filtreleme)
                 const smoothedScore = calculate3HourWindowScore(
                     fish, key, baseParams, weather, marine, correctedClickHour, hourlyStartIdx, marineStartIdx
                 );
-                
+
                 // Reason ve trigger bilgileri için tek anlık hesaplama
                 const result = calculateFishScore(fish, key, baseParams);
-                
+
                 if (smoothedScore > 15) {
                     instantFishList.push({
                         key, name: fish.name, nameEn: fish.nameEn || fish.name,
@@ -2481,11 +2647,11 @@ app.get('/api/forecast', async (req, res) => {
             // GELİŞMİŞ TAKTİK SİSTEMİ - ANLIK
             let instantTacticKey = "";
             let instantTacticData = null;
-            
+
             const i_highScoreFish = instantFishList.filter(f => f.score >= 75 && f.category !== "TİCARİ");
             const i_mediumScoreFish = instantFishList.filter(f => f.score >= 55 && f.score < 75 && f.category !== "TİCARİ");
             const { score: i_topScore, dominant: i_isDominant } = calcAvgScore(instantFishList);
-            
+
             if (i_wave > 2.0) {
                 instantTacticKey = "TACTIC_HIGH_WAVE";
                 instantTacticData = { warning: true };
@@ -2528,7 +2694,7 @@ app.get('/api/forecast', async (req, res) => {
                 weatherSummary: getWeatherCondition(i_rain, i_wind, i_cloud, i_clarity, i_timeMode),
                 tacticKey: instantTacticKey, tacticData: instantTacticData,
                 fishList: instantFishList.slice(0, 10),
-                temp: i_tempWater, wind: i_wind, 
+                temp: i_tempWater, wind: i_wind,
                 windDirection: i_windDir,
                 pressure: i_pressure,
                 pressureTrend: i_pressureTrend.trend, clarity: i_clarity,
@@ -2537,7 +2703,15 @@ app.get('/api/forecast', async (req, res) => {
                 wavePeriod: parseFloat(i_wavePeriod.toFixed(1)),
                 swellHeight: parseFloat(i_swellHeight.toFixed(2)),
                 tempShock: i_tempShock.shock ? i_tempShock : null,
-                timeMode: i_timeMode
+                timeMode: i_timeMode,
+                // YENİ (1F)
+                windGust: Math.round(i_windGust),
+                precipProb: i_precipProb,
+                waveDirection: i_waveDirection,
+                windWaveHeight: parseFloat(i_windWaveHeight.toFixed(2)),
+                swellPeriod: parseFloat(i_swellPeriod.toFixed(1)),
+                visibility: i_visibility,
+                weatherCode: i_weatherCode
             };
         }
 
@@ -2641,8 +2815,8 @@ app.get('/api/fish-search', async (req, res) => {
 
         const regionName = getRegion(latF, lonF);
 
-        const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`);
-        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`);
+        const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_gusts_10m,surface_pressure,cloud_cover,rain,precipitation_probability,weather_code,visibility,uv_index&past_days=1&timezone=auto`);
+        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`);
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`;
 
         let [weather, marine, bathymetryRes] = await Promise.all([
@@ -2650,7 +2824,7 @@ app.get('/api/fish-search', async (req, res) => {
             queuedFetch(marineUrl),
             skipBathymetry ? Promise.resolve(null) : fetchWithTimeout(bathymetryUrl).catch(() => null)
         ]);
-        
+
         if (!weather || weather.error) {
             weather = await safeFetchJSON(omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain&past_days=1&timezone=auto`));
         }
@@ -2691,7 +2865,7 @@ app.get('/api/fish-search', async (req, res) => {
                         : Math.abs(bathymetry.avg);
                 }
             }
-        } catch (e) {}
+        } catch (e) { }
 
         // Gelişmiş kara tespiti
         let isLand = false;
@@ -2716,7 +2890,7 @@ app.get('/api/fish-search', async (req, res) => {
             try {
                 const snap = await findNearestSeaPoint(latF, lonF);
                 if (snap) {
-                    const snapMarineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`);
+                    const snapMarineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`);
                     const snapMarine = await safeFetchJSON(snapMarineUrl, 10000);
                     const snapWaves = snapMarine?.hourly?.wave_height?.filter(v => v !== null && v !== undefined) || [];
                     if (snapMarine && !snapMarine.error && snapWaves.some(v => v > 0)) {
@@ -2752,12 +2926,20 @@ app.get('/api/fish-search', async (req, res) => {
         const uv = safeNum(weather.hourly?.uv_index?.[hourlyIdx], 0);
         const clarity = calculateClarity(wave, windSpeed, rain);
         const currentEst = estimateCurrent(wave, windSpeed, regionName);
-        
+
         // [YENİ] Marine hourly
         const wavePeriod = safeNum(marine.hourly?.wave_period?.[hourlyIdx]);
         const swellHeight = safeNum(marine.hourly?.swell_wave_height?.[hourlyIdx]);
         const oceanCurrent = marine.hourly?.ocean_current_velocity?.[hourlyIdx] ?? null;
         const tempShock = calculateTempShock(marine, hourlyOffset);
+        // YENİ (1C)
+        const windGust = safeNum(weather.hourly?.wind_gusts_10m?.[hourlyIdx]);
+        const precipProb = safeNum(weather.hourly?.precipitation_probability?.[hourlyIdx]);
+        const weatherCode = safeNum(weather.hourly?.weather_code?.[hourlyIdx]);
+        const visibility = safeNum(weather.hourly?.visibility?.[hourlyIdx], 20000);
+        const waveDirection = safeNum(marine.hourly?.wave_direction?.[hourlyIdx]);
+        const windWaveHeight = safeNum(marine.hourly?.wind_wave_height?.[hourlyIdx]);
+        const swellPeriod = safeNum(marine.hourly?.swell_wave_period?.[hourlyIdx]);
 
         const sunTimes = SunCalc.getTimes(now, latF, lonF);
         const timeMode = getTimeOfDay(clickHour, sunTimes);
@@ -2788,6 +2970,9 @@ app.get('/api/fish-search', async (req, res) => {
             swellHeight,
             oceanCurrent,
             tempShock,
+            // YENİ (1C)
+            windGust, precipProb, weatherCode, visibility,
+            waveDirection, windWaveHeight, swellPeriod,
             chlorophyll: await (async () => {
                 try {
                     const chlCacheKey = `plankton_${parseFloat(lat).toFixed(2)}_${parseFloat(lon).toFixed(2)}`;
@@ -2803,7 +2988,7 @@ app.get('/api/fish-search', async (req, res) => {
                     }
                     const freshChl = await fetchChlorophyll(lat, lon);
                     return freshChl?.chlorophyll ?? null;
-                } catch(e) { return null; }
+                } catch (e) { return null; }
             })()
         };
 
@@ -2820,10 +3005,10 @@ app.get('/api/fish-search', async (req, res) => {
                 fish, fishKey, baseParams, weather, marine, activityWindows, hourlyOffset
             );
             dailyScore = dailyResult.score;
-            bestHour = dailyResult.bestHour >= 0 ? `${String(dailyResult.bestHour).padStart(2,'0')}:00` : null;
+            bestHour = dailyResult.bestHour >= 0 ? `${String(dailyResult.bestHour).padStart(2, '0')}:00` : null;
             bestHourScore = dailyResult.bestHourScore;
             hourlyScores = dailyResult.hourlyScores;
-        } catch(e) { console.log('Daily score calc error:', e.message); }
+        } catch (e) { console.log('Daily score calc error:', e.message); }
 
         // === LİSTEDE VAR MI KONTROL ===
         const isInDailyList = dailyScore !== null && dailyScore > 15;
@@ -2840,9 +3025,9 @@ app.get('/api/fish-search', async (req, res) => {
 
         // Mevsim kontrolü
         if (seasonEff < 0.3) {
-            reasons.push({ type: 'HIGH', text: `Bu mevsimde (${season}) aktivite çok düşük (%${(seasonEff*100).toFixed(0)})` });
+            reasons.push({ type: 'HIGH', text: `Bu mevsimde (${season}) aktivite çok düşük (%${(seasonEff * 100).toFixed(0)})` });
         } else if (seasonEff < 0.5) {
-            reasons.push({ type: 'MEDIUM', text: `Bu mevsimde (${season}) aktivite düşük (%${(seasonEff*100).toFixed(0)})` });
+            reasons.push({ type: 'MEDIUM', text: `Bu mevsimde (${season}) aktivite düşük (%${(seasonEff * 100).toFixed(0)})` });
         }
 
         // Sıcaklık kontrolü
@@ -2882,7 +3067,7 @@ app.get('/api/fish-search', async (req, res) => {
         // Rüzgar yön adı
         const windDirName = (dir) => {
             if (dir === null || dir === undefined) return '';
-            const dirs = ['K','KKD','KD','DKD','D','DGD','GD','GGD','G','GGB','GB','BGB','B','BKB','KB','KKB'];
+            const dirs = ['K', 'KKD', 'KD', 'DKD', 'D', 'DGD', 'GD', 'GGD', 'G', 'GGB', 'GB', 'BGB', 'B', 'BKB', 'KB', 'KKB'];
             return dirs[Math.round(dir / 22.5) % 16];
         };
 
@@ -2962,7 +3147,7 @@ app.get('/api/pro-slots', async (req, res) => {
         const snap = await db.collection('stats').doc('pro_count').get();
         const count = snap.exists ? (snap.data().count || 0) : 0;
         res.json({ count, remaining: Math.max(0, 200 - count) });
-    } catch(e) {
+    } catch (e) {
         res.json({ count: 0, remaining: 200 });
     }
 });
@@ -2971,21 +3156,21 @@ app.get('/api/subscription-status', async (req, res) => {
     if (!req.user) {
         return res.json({ isLoggedIn: false, isPremium: false });
     }
-    
+
     // Günlük kullanım bilgisini de döndür
     const today = new Date().toISOString().split('T')[0];
     let clicksUsed = 0, scansUsed = 0;
-    
+
     if (db) {
         try {
             const clickDoc = await db.collection('clickUsage').doc(`${req.user.uid}_${today}`).get();
             clicksUsed = clickDoc.exists ? (clickDoc.data().count || 0) : 0;
-            
+
             const scanDoc = await db.collection('scanUsage').doc(`${req.user.uid}_${today}`).get();
             scansUsed = scanDoc.exists ? (scanDoc.data().count || 0) : 0;
-        } catch(e) {}
+        } catch (e) { }
     }
-    
+
     res.json({
         isLoggedIn: true,
         isPremium: req.isPremium,
@@ -3010,45 +3195,45 @@ app.get('/api/subscription-status', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 app.post('/api/use-click', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
-    
+
     // PRO veya grace period = sınırsız
     if (req.isPremium || req.isGracePeriod) {
         return res.json({ allowed: true, remaining: -1, isGracePeriod: req.isGracePeriod });
     }
-    
+
     const uid = req.user.uid;
     const today = new Date().toISOString().split('T')[0];
     const docId = `${uid}_${today}`;
-    
+
     try {
         if (!db) return res.json({ allowed: true, remaining: FREE_DAILY_CLICKS });
-        
+
         const usageRef = db.collection('clickUsage').doc(docId);
         const usageDoc = await usageRef.get();
         const count = usageDoc.exists ? (usageDoc.data().count || 0) : 0;
-        
+
         if (count >= FREE_DAILY_CLICKS) {
-            return res.json({ 
-                allowed: false, 
-                remaining: 0, 
+            return res.json({
+                allowed: false,
+                remaining: 0,
                 limit: FREE_DAILY_CLICKS,
-                message: 'Günlük ücretsiz tahmin hakkınız doldu' 
+                message: 'Günlük ücretsiz tahmin hakkınız doldu'
             });
         }
-        
+
         await usageRef.set({
             count: admin.firestore.FieldValue.increment(1),
             date: today,
             uid,
             updatedAt: Date.now()
         }, { merge: true });
-        
-        res.json({ 
-            allowed: true, 
+
+        res.json({
+            allowed: true,
             remaining: FREE_DAILY_CLICKS - count - 1,
             limit: FREE_DAILY_CLICKS
         });
-    } catch(e) {
+    } catch (e) {
         console.error('[CLICK-USAGE]', e.message);
         res.json({ allowed: true, remaining: FREE_DAILY_CLICKS });
     }
@@ -3077,7 +3262,7 @@ async function getPlayAuthClient() {
     if (_playAuthClient) return _playAuthClient;
     try {
         const { GoogleAuth } = require('google-auth-library');
-        
+
         const authOpts = { scopes: ['https://www.googleapis.com/auth/androidpublisher'] };
 
         // 1. Önce GOOGLE_PLAY_KEY_JSON'a bak
@@ -3116,21 +3301,21 @@ async function getPlayAuthClient() {
 
 // Başlangıçta client'ı hazırla (VERIFY açıksa)
 if (GOOGLE_PLAY_VERIFY) {
-    getPlayAuthClient().catch(() => {});
+    getPlayAuthClient().catch(() => { });
 }
 
 app.post('/api/verify-subscription', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
     const { purchaseToken, subscriptionId } = req.body;
     if (!purchaseToken) return res.status(400).json({ error: 'purchaseToken gerekli' });
-    
+
     const subId = subscriptionId || 'meraloji_pro_monthly';
-    
+
     // ── Geçerli abonelik ID kontrolü ──
     if (!VALID_SUBSCRIPTIONS.includes(subId)) {
         return res.status(400).json({ error: 'Geçersiz abonelik planı' });
     }
-    
+
     // ── Google Play Doğrulaması ──
     if (GOOGLE_PLAY_VERIFY) {
         try {
@@ -3139,17 +3324,17 @@ app.post('/api/verify-subscription', async (req, res) => {
                 console.error('[VERIFY] Play auth client yok — doğrulama yapılamıyor');
                 return res.status(503).json({ error: 'Doğrulama servisi hazır değil, lütfen tekrar deneyin' });
             }
-            
+
             const verifyUrl = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${GOOGLE_PACKAGE_NAME}/purchases/subscriptionsv2/tokens/${purchaseToken}`;
-            
+
             const response = await client.request({ url: verifyUrl });
             const purchase = response.data;
-            
+
             if (!purchase) {
-                console.log(`[VERIFY] ❌ Boş yanıt — uid:${req.user.uid} token:${purchaseToken.slice(0,20)}...`);
+                console.log(`[VERIFY] ❌ Boş yanıt — uid:${req.user.uid} token:${purchaseToken.slice(0, 20)}...`);
                 return res.status(403).json({ error: 'Geçersiz satın alma' });
             }
-            
+
             // subscriptionState: aktif abonelik durumları
             // Ref: https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.subscriptionsv2
             const state = purchase.subscriptionState;
@@ -3157,21 +3342,21 @@ app.post('/api/verify-subscription', async (req, res) => {
                 'SUBSCRIPTION_STATE_ACTIVE',
                 'SUBSCRIPTION_STATE_IN_GRACE_PERIOD'
             ];
-            
+
             if (!validStates.includes(state)) {
                 console.log(`[VERIFY] ❌ Geçersiz durum: ${state} — uid:${req.user.uid}`);
                 return res.status(403).json({ error: 'Abonelik aktif değil', state });
             }
-            
+
             // Paket adı kontrolü (opsiyonel ama ekstra güvenlik)
             const linkedToken = purchase.lineItems?.[0]?.productId;
             if (linkedToken && !VALID_SUBSCRIPTIONS.includes(linkedToken)) {
                 console.log(`[VERIFY] ❌ Ürün ID uyuşmuyor: ${linkedToken} — uid:${req.user.uid}`);
                 return res.status(403).json({ error: 'Ürün eşleşmedi' });
             }
-            
+
             console.log(`[VERIFY] ✅ Google Play doğrulandı — uid:${req.user.uid} sub:${subId} state:${state}`);
-            
+
         } catch (verifyError) {
             const status = verifyError?.response?.status;
             if (status === 404) {
@@ -3190,11 +3375,11 @@ app.post('/api/verify-subscription', async (req, res) => {
         // Production'da GOOGLE_PLAY_VERIFY=true env variable'ı ekleyin.
         console.warn(`[VERIFY] ⚠️ DOĞRULAMA KAPALI — uid:${req.user.uid} token kabul ediliyor`);
     }
-    
+
     // ── Firestore'a Kaydet ──
     const isYearly = subId.includes('yearly');
     const durationMs = isYearly ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
-    
+
     try {
         if (db) {
             const userSubRef = db.collection('subscriptions').doc(req.user.uid);
@@ -3261,18 +3446,18 @@ function generateGridPoints(centerLat, centerLon, radiusKm) {
 async function fetchCenterWeather(lat, lon) {
     const latF = parseFloat(lat).toFixed(4);
     const lonF = parseFloat(lon).toFixed(4);
-    const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`);
-    const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`);
-    
+    const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_gusts_10m,surface_pressure,cloud_cover,rain,precipitation_probability,weather_code,visibility,uv_index&past_days=1&timezone=auto`);
+    const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`);
+
     let [weather, marine] = await Promise.all([queuedFetch(weatherUrl), queuedFetch(marineUrl)]);
-    
+
     if (!weather || weather.error) {
         weather = await safeFetchJSON(omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain&past_days=1&timezone=auto`));
     }
     if (!marine || marine.error) {
         marine = await safeFetchJSON(omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=1&timezone=auto`));
     }
-    
+
     if (!weather || !marine) throw new Error('API_UNAVAILABLE');
     return { weather, marine };
 }
@@ -3293,7 +3478,7 @@ async function fetchBathymetry(lat, lon) {
         const val = (b && b.avg !== undefined) ? b.avg : null;
         bathyCache.set(ck, val);
         return val;
-    } catch(e) { return null; }
+    } catch (e) { return null; }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -3345,7 +3530,7 @@ async function findNearestSeaPoint(lat, lon) {
 
     // 3 halka: ~300m, ~700m, ~1200m
     const RINGS = [
-        { dLat: BASE_LAT * 1,   dLon: BASE_LON * 1   },
+        { dLat: BASE_LAT * 1, dLon: BASE_LON * 1 },
         { dLat: BASE_LAT * 2.5, dLon: BASE_LON * 2.5 },
         { dLat: BASE_LAT * 4.5, dLon: BASE_LON * 4.5 },
     ];
@@ -3377,9 +3562,9 @@ async function findNearestSeaPoint(lat, lon) {
             seaPoints.sort((a, b) => a.distM - b.distM);
             const best = seaPoints[0];
             return {
-                lat:       best.lat,
-                lon:       best.lon,
-                depthRaw:  best.bathyRaw,
+                lat: best.lat,
+                lon: best.lon,
+                depthRaw: best.bathyRaw,
                 distanceM: best.distM
             };
         }
@@ -3421,12 +3606,20 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
         const timeMode = getTimeOfDay(clickHour, sunTimes);
         const solunar = getSolunarWindow(now, latF, lonF);
         const moon = SunCalc.getMoonIllumination(now);
-        
+
         // [YENİ] Marine hourly
         const wavePeriod = safeNum(marine.hourly?.wave_period?.[hourlyIdx]);
         const swellHeight = safeNum(marine.hourly?.swell_wave_height?.[hourlyIdx]);
         const oceanCurrent = marine.hourly?.ocean_current_velocity?.[hourlyIdx] ?? null;
         const tempShock = calculateTempShock(marine, hourlyOffset);
+        // YENİ (1C)
+        const windGust_s = safeNum(weather.hourly?.wind_gusts_10m?.[hourlyIdx]);
+        const precipProb_s = safeNum(weather.hourly?.precipitation_probability?.[hourlyIdx]);
+        const weatherCode_s = safeNum(weather.hourly?.weather_code?.[hourlyIdx]);
+        const visibility_s = safeNum(weather.hourly?.visibility?.[hourlyIdx], 20000);
+        const waveDirection_s = safeNum(marine.hourly?.wave_direction?.[hourlyIdx]);
+        const windWaveHeight_s = safeNum(marine.hourly?.wind_wave_height?.[hourlyIdx]);
+        const swellPeriod_s = safeNum(marine.hourly?.swell_wave_period?.[hourlyIdx]);
 
         const params = {
             tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
@@ -3453,7 +3646,11 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
             thermoclineDepth: estimateThermoclineDepth(tempWater, now.getMonth(), regionName),
             moonlightIntensity: calculateMoonlightIntensity(now, parseFloat(latF), parseFloat(lonF), cloud),
             chlorophyll: null,
-            isBoat: false
+            isBoat: false,
+            // YENİ (1C)
+            windGust: windGust_s, precipProb: precipProb_s, weatherCode: weatherCode_s,
+            visibility: visibility_s, waveDirection: waveDirection_s,
+            windWaveHeight: windWaveHeight_s, swellPeriod: swellPeriod_s
         };
 
         // Günlük ağırlıklı skor için activityWindows ve hourlyStartIdx
@@ -3471,7 +3668,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
                     const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
                     if (score > 0) allFishScores.push({ name: fish.name, score });
                     if (score > topScore) { topScore = score; topFishName = fish.name; }
-                } catch (e) {}
+                } catch (e) { }
             }
             allFishScores.sort((a, b) => b.score - a.score);
             const topFish = allFishScores.slice(0, 3).map(f => f.name);
@@ -3488,14 +3685,14 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
                 const depthVal = depthAvg ? Math.round(depthAvg) : null;
                 const zone = !depthVal ? null : depthVal < 5 ? 'Sığ Kum' : depthVal < 15 ? 'Sığ Kaya' : depthVal < 40 ? 'Orta Su' : 'Derin Su';
                 return { score, fishName: fish.name, topFish: [fish.name], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)) };
-            } catch(e) {
+            } catch (e) {
                 const r = calculateFishScore(fish, fishKey, params);
                 const depthVal = depthAvg ? Math.round(depthAvg) : null;
                 const zone = !depthVal ? null : depthVal < 5 ? 'Sığ Kum' : depthVal < 15 ? 'Sığ Kaya' : depthVal < 40 ? 'Orta Su' : 'Derin Su';
                 return { score: r.finalScore, fishName: fish.name, topFish: [fish.name], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)) };
             }
         }
-    } catch(e) {
+    } catch (e) {
         console.log('[SCAN-SCORE] Error:', e.message);
         return null;
     }
@@ -3535,7 +3732,7 @@ app.get('/api/scan', async (req, res) => {
         const fishTag = fishKey || 'all';
         // v2: topFish/depth/zone/tempWater eklendi — eski cache otomatik bypass
         const cacheKey = `scan_v2_${centerLat.toFixed(2)}_${centerLon.toFixed(2)}_${radiusKm}_${fishTag}`;
-        
+
         if (db) {
             const cacheRef = db.collection('scanCache').doc(cacheKey);
             const cached = await cacheRef.get();
@@ -3603,7 +3800,7 @@ app.get('/api/scan', async (req, res) => {
             const wd = await fetchCenterWeather(centerLat, centerLon);
             centerWeather = wd.weather;
             centerMarine = wd.marine;
-        } catch(e) {
+        } catch (e) {
             sendEvent({ type: 'error', message: 'Hava verisi alınamadı: ' + e.message });
             res.end();
             return;
@@ -3617,11 +3814,11 @@ app.get('/api/scan', async (req, res) => {
             // Batch içindeki bathymetry'leri paralel çek (cache'de varsa sıfır gecikme)
             const batchResults = await Promise.all(batch.map(async (pt) => {
                 let bathyRaw = null;
-                try { bathyRaw = await fetchBathymetry(pt.lat, pt.lon); } catch(e) {}
+                try { bathyRaw = await fetchBathymetry(pt.lat, pt.lon); } catch (e) { }
                 let result = null;
                 try {
                     result = calcPointScoreFromWeather(pt.lat, pt.lon, centerWeather, centerMarine, bathyRaw, fishKey || null);
-                } catch(e) {
+                } catch (e) {
                     console.log('[SCAN] Point error:', pt.lat, pt.lon, e.message);
                 }
                 return { pt, result };
@@ -3693,7 +3890,7 @@ app.get('/api/scan', async (req, res) => {
 
     } catch (error) {
         console.error('[SCAN] Error:', error.message);
-        try { res.write(`data: ${JSON.stringify({ type: 'error', message: error.message })}\n\n`); res.end(); } catch (e) {}
+        try { res.write(`data: ${JSON.stringify({ type: 'error', message: error.message })}\n\n`); res.end(); } catch (e) { }
     }
 });
 
@@ -3729,7 +3926,7 @@ app.get('/api/plankton', async (req, res) => {
             // Başarılı — Firestore'a kaydet
             if (db) {
                 const cacheRef = db.collection('planktonCache').doc(cacheKey);
-                await cacheRef.set({ result, savedAt: Date.now() }).catch(() => {});
+                await cacheRef.set({ result, savedAt: Date.now() }).catch(() => { });
             }
             return res.json(result);
         }
@@ -3754,12 +3951,12 @@ app.get('/api/plankton', async (req, res) => {
 
 app.get('/api/scan-usage', async (req, res) => {
     if (!req.user) return res.json({ remainingScans: 0 });
-    
+
     // PRO veya grace period = sınırsız
     if (req.isPremium || req.isGracePeriod) {
         return res.json({ remainingScans: 999, usedToday: 0, isPremium: req.isPremium, isGracePeriod: req.isGracePeriod });
     }
-    
+
     const uid = req.user.uid;
     const today = new Date().toISOString().split('T')[0];
     try {
@@ -3795,15 +3992,15 @@ function snapToGrid(lat, lon, precision = 2) {
 // Türkiye'nin en yoğun balıkçılık noktaları (lat, lon)
 const HOT_SPOTS = [
     { name: "Boğaz-İstanbul", lat: 41.0420, lon: 29.0050 },
-    { name: "Marmara-Adalar",  lat: 40.8800, lon: 29.1300 },
-    { name: "Çanakkale Boğazı",lat: 40.1553, lon: 26.4142 },
-    { name: "İzmir Körfezi",   lat: 38.4192, lon: 26.9160 },
-    { name: "Antalya",         lat: 36.8969, lon: 30.7133 },
-    { name: "Trabzon",         lat: 41.0015, lon: 39.7178 },
-    { name: "Samsun",          lat: 41.2867, lon: 36.3300 },
-    { name: "Bodrum",          lat: 37.0344, lon: 27.4305 },
-    { name: "Fethiye",         lat: 36.6558, lon: 29.1165 },
-    { name: "Sinop",           lat: 42.0231, lon: 35.1553 },
+    { name: "Marmara-Adalar", lat: 40.8800, lon: 29.1300 },
+    { name: "Çanakkale Boğazı", lat: 40.1553, lon: 26.4142 },
+    { name: "İzmir Körfezi", lat: 38.4192, lon: 26.9160 },
+    { name: "Antalya", lat: 36.8969, lon: 30.7133 },
+    { name: "Trabzon", lat: 41.0015, lon: 39.7178 },
+    { name: "Samsun", lat: 41.2867, lon: 36.3300 },
+    { name: "Bodrum", lat: 37.0344, lon: 27.4305 },
+    { name: "Fethiye", lat: 36.6558, lon: 29.1165 },
+    { name: "Sinop", lat: 42.0231, lon: 35.1553 },
 ];
 
 // Tek bir nokta için hava + deniz verisini çekip cache'e yaz
@@ -3819,7 +4016,7 @@ async function warmCacheForSpot(lat, lon) {
 
     try {
         const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain,uv_index&past_days=1&timezone=auto`);
-        const marineUrl  = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
+        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
 
         const [weather, marine] = await Promise.all([
             queuedFetch(weatherUrl, 12000),
@@ -3829,7 +4026,7 @@ async function warmCacheForSpot(lat, lon) {
         if (weather && marine) {
             // Ham API verisini snap key ile sakla — /api/forecast bunu okuyacak
             cache.set(`raw_weather_${gLat}_${gLon}`, weather, 3900);
-            cache.set(`raw_marine_${gLat}_${gLon}`,  marine,  3900);
+            cache.set(`raw_marine_${gLat}_${gLon}`, marine, 3900);
             console.log(`[CRON] ✅ Cache ısındı: ${gLat},${gLon} (${lat},${lon})`);
         }
     } catch (e) {
@@ -3903,16 +4100,135 @@ setTimeout(() => {
     setInterval(warmWhenReady, 55 * 60 * 1000);
 }, 60_000);
 // ═══════════════════════════════════════════════════════════════════════
-// 🌪️ FIRTINA ÖNCESİ (FEEDING FRENZY) BİLDİRİM SİSTEMİ
-// Her saat başı çalışır. notify:true olan favorilerin koordinatlarını
-// Open-Meteo'dan çeker, basınç trendi hesaplar, FALLING_FAST ise
-// ilgili kullanıcılara FCM bildirimi gönderir.
+// 🐟 BUGÜN EN İYİ MERAM BİLDİRİMİ (BLOK 6C)
+// Günde 1 kez (Sabah 07:00'de) çalışır.
 // ═══════════════════════════════════════════════════════════════════════
+cron.schedule('0 7 * * *', async () => {
+    console.log(`[DAILY BEST CRON] Başlıyor...`);
+    if (!db || !admin) return;
+
+    try {
+        const snapshot = await db.collectionGroup('favorites').where('notify', '==', true).get();
+        if (snapshot.empty) return;
+
+        // Kullanıcılara göre favorileri grupla
+        const userFavs = {};
+        snapshot.forEach(doc => {
+            const uid = doc.ref.parent.parent.id;
+            if (!userFavs[uid]) userFavs[uid] = [];
+            userFavs[uid].push(doc.data());
+        });
+
+        for (const [uid, favs] of Object.entries(userFavs)) {
+            try {
+                const userDoc = await db.collection('users').doc(uid).get();
+                const token = userDoc.data()?.fcmToken;
+                if (!token) continue; // Token yoksa geç
+
+                let bestFav = null;
+                let bestScore = 0;
+
+                // Her favori için anlık 1 günlük forecast çek
+                for (const f of favs) {
+                    if (!f.lat || !f.lon) continue;
+                    try {
+                        const port = process.env.PORT || 8080;
+                        const localUrl = `http://localhost:${port}/api/forecast?lat=${f.lat}&lon=${f.lon}&forecast_days=1&past_days=0`;
+                        const res = await safeFetchJSON(localUrl, 15000);
+                        if (res && res.forecast && res.forecast.length > 0) {
+                            const todayScore = res.forecast[0].score || 0;
+                            if (todayScore > bestScore) {
+                                bestScore = todayScore;
+                                bestFav = f;
+                            }
+                        }
+                    } catch(e) {
+                        console.error(`[DAILY BEST CRON] Favori puanı alınamadı ${f.name}:`, e.message);
+                    }
+                }
+
+                // En az %60 skor varsa kullanıcıya bildir
+                if (bestFav && bestScore >= 60) {
+                    const message = {
+                        token: token,
+                        notification: {
+                            title: '🌟 Bugün En İyi Meran',
+                            body: `Bugün ${bestFav.name} merasında balık aktivitesi %${Math.round(bestScore)} seviyesinde! Fırsatı kaçırma.`
+                        },
+                        data: {
+                            type: 'daily_best',
+                            spotName: bestFav.name,
+                            score: String(bestScore),
+                            lat: String(bestFav.lat),
+                            lon: String(bestFav.lon)
+                        },
+                        android: { priority: 'high' }
+                    };
+                    await admin.messaging().send(message);
+                    console.log(`[DAILY BEST CRON] ✅ Bildirim gönderildi -> uid:${uid}, mera:${bestFav.name}, skor:%${Math.round(bestScore)}`);
+                    await new Promise(r => setTimeout(r, 200)); // Rate limit
+                }
+            } catch(e) {
+                console.error(`[DAILY BEST CRON] Kullanıcı hatası uid:${uid}`, e.message);
+            }
+        }
+    } catch (e) {
+        console.error('[DAILY BEST CRON] Hata:', e.message);
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// BLOK 8: CACHE TEMİZLEME CRON (Performans Yönetimi)
+// Her gece saat 03:00'te çalışır. 24 saatten eski scanCache ve planktonCache
+// koleksiyonlarındaki belgeleri Firestore'dan silerek veritabanı şişkinliğini önler.
+// ═══════════════════════════════════════════════════════════════════════
+cron.schedule('0 3 * * *', async () => {
+    console.log('[CACHE-CLEAN CRON] Başlıyor...');
+    if (!db) return;
+
+    try {
+        const now = Date.now();
+        const batch = db.batch();
+        let deletedScans = 0;
+        let deletedPlankton = 0;
+
+        // scanCache temizliği (> 24 saat), limit 100 belge (Firestore batch safe limiti gözeterek)
+        const staleScans = await db.collection('scanCache')
+            .where('createdAt', '<', now - 24 * 60 * 60 * 1000)
+            .limit(200).get();
+        
+        staleScans.forEach(doc => {
+            batch.delete(doc.ref);
+            deletedScans++;
+        });
+
+        // planktonCache temizliği (> 24 saat), limit 100 belge
+        const stalePlankton = await db.collection('planktonCache')
+            .where('savedAt', '<', now - 24 * 60 * 60 * 1000)
+            .limit(200).get();
+        
+        stalePlankton.forEach(doc => {
+            batch.delete(doc.ref);
+            deletedPlankton++;
+        });
+
+        if (deletedScans > 0 || deletedPlankton > 0) {
+            await batch.commit();
+        }
+
+        console.log(`[CACHE-CLEAN CRON] Sonuç: ${deletedScans} eski scan, ${deletedPlankton} eski plankton kaydı temizlendi.`);
+    } catch (err) {
+        console.error('[CACHE-CLEAN CRON] Hata:', err.message);
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// 🌪️ FIRTINA ÖNCESİ (FEEDING FRENZY) BİLDİRİM SİSTEMİ
 
 cron.schedule('0 * * * *', async () => {
 
     // ── 1. UYKU MODU: Türkiye saati 22:00 – 07:00 arası çalışma ─────────
-    const nowTR  = new Date(Date.now() + 3 * 60 * 60 * 1000); // UTC+3
+    const nowTR = new Date(Date.now() + 3 * 60 * 60 * 1000); // UTC+3
     const hourTR = nowTR.getUTCHours();
     if (hourTR >= 22 || hourTR < 7) {
         console.log(`[NOTIFY CRON] Uyku modu (TR ${hourTR}:00). Atlanıyor.`);
@@ -3957,7 +4273,7 @@ cron.schedule('0 * * * *', async () => {
     // gridKey → { lat, lon, spots: [{ uid, favName }] }
     const gridMap = {};
     snapshot.forEach(doc => {
-        const d   = doc.data();
+        const d = doc.data();
         const uid = doc.ref.parent.parent.id; // users/{uid}/favorites/{favId}
         if (d.lat == null || d.lon == null) return;
 
@@ -3995,15 +4311,15 @@ cron.schedule('0 * * * *', async () => {
         if (trendResult.trend !== 'FALLING_FAST') continue;
 
         // ── 5. Etkilenen kullanıcıların FCM tokenlarını topla ─────────────
-        const spotNames     = [...new Set(spots.map(s => s.favName))];
+        const spotNames = [...new Set(spots.map(s => s.favName))];
         const notifSpotName = spotNames.slice(0, 2).join(' & ');
-        const uniqueUids    = [...new Set(spots.map(s => s.uid))];
+        const uniqueUids = [...new Set(spots.map(s => s.uid))];
 
         const tokens = [];
         await Promise.all(uniqueUids.map(async (uid) => {
             try {
                 const userDoc = await db.collection('users').doc(uid).get();
-                const token   = userDoc.data()?.fcmToken;
+                const token = userDoc.data()?.fcmToken;
                 if (token) tokens.push({ uid, token });
             } catch (e) {
                 console.warn(`[NOTIFY CRON] Token alınamadı uid=${uid}:`, e.message);
@@ -4020,15 +4336,15 @@ cron.schedule('0 * * * *', async () => {
             tokens: tokens.map(t => t.token),
             notification: {
                 title: '🌪️ Fırtına Öncesi Fırsatı!',
-                body:  `${notifSpotName} bölgesinde basınç hızla düşüyor, balıklar aktifleşebilir!`
+                body: `${notifSpotName} bölgesinde basınç hızla düşüyor, balıklar aktifleşebilir!`
             },
             data: {
-                type:     'pressure_alert',
+                type: 'pressure_alert',
                 spotName: notifSpotName,
-                trend:    trendResult.trend,
-                change:   String(trendResult.change),
-                lat:      String(lat),
-                lon:      String(lon)
+                trend: trendResult.trend,
+                change: String(trendResult.change),
+                lat: String(lat),
+                lon: String(lon)
             },
             android: {
                 priority: 'high',
@@ -4054,8 +4370,8 @@ cron.schedule('0 * * * *', async () => {
                         const { uid } = tokens[idx];
                         if (uid) {
                             db.collection('users').doc(uid)
-                              .update({ fcmToken: admin.firestore.FieldValue.delete() })
-                              .catch(() => {});
+                                .update({ fcmToken: admin.firestore.FieldValue.delete() })
+                                .catch(() => { });
                             console.log(`[NOTIFY CRON] Geçersiz token temizlendi — uid:${uid}`);
                         }
                     }
@@ -4079,19 +4395,19 @@ cron.schedule('0 * * * *', async () => {
 // ═══════════════════════════════════════════════════════════════
 
 const HOT_SPOT_SEASONAL = {
-    winter: { name: 'Marmara Adaları',  lat: 40.8800, lon: 29.1300 },
-    spring: { name: 'İzmir Körfezi',    lat: 38.4192, lon: 26.9160 },
-    summer: { name: 'Bodrum Açıkları',  lat: 37.0344, lon: 27.4305 },
-    autumn: { name: 'İstanbul Boğazı',  lat: 41.0420, lon: 29.0050 },
+    winter: { name: 'Marmara Adaları', lat: 40.8800, lon: 29.1300 },
+    spring: { name: 'İzmir Körfezi', lat: 38.4192, lon: 26.9160 },
+    summer: { name: 'Bodrum Açıkları', lat: 37.0344, lon: 27.4305 },
+    autumn: { name: 'İstanbul Boğazı', lat: 41.0420, lon: 29.0050 },
 };
 
 app.get('/api/hotspot', (req, res) => {
     const month = new Date().getMonth(); // 0=Ocak
     let season;
-    if (month >= 2 && month <= 4)       season = 'spring';
-    else if (month >= 5 && month <= 8)  season = 'summer';
+    if (month >= 2 && month <= 4) season = 'spring';
+    else if (month >= 5 && month <= 8) season = 'summer';
     else if (month >= 9 && month <= 10) season = 'autumn';
-    else                                season = 'winter';
+    else season = 'winter';
 
     const spot = HOT_SPOT_SEASONAL[season];
     console.log(`[HOTSPOT] Mevsim:${season} → ${spot.name} (${spot.lat},${spot.lon})`);
@@ -4111,7 +4427,7 @@ app.get('/api/favorites', async (req, res) => {
         const favorites = [];
         snap.forEach(doc => favorites.push({ id: doc.id, ...doc.data() }));
         res.json({ favorites });
-    } catch(e) {
+    } catch (e) {
         console.error('[FAV-GET]', e.message);
         res.status(500).json({ error: 'Favoriler alınamadı' });
     }
@@ -4126,14 +4442,14 @@ app.post('/api/favorites', async (req, res) => {
     try {
         const ref = await db.collection('users').doc(req.user.uid)
             .collection('favorites').add({
-                name:   String(name).slice(0, 60),
-                lat:    parseFloat(lat),
-                lon:    parseFloat(lon),
+                name: String(name).slice(0, 60),
+                lat: parseFloat(lat),
+                lon: parseFloat(lon),
                 notify: notify === true || notify === 'true' ? true : false, // Fırtına bildirimi — default false
                 createdAt: Date.now()
             });
         res.json({ success: true, id: ref.id });
-    } catch(e) {
+    } catch (e) {
         console.error('[FAV-POST]', e.message);
         res.status(500).json({ error: 'Favori kaydedilemedi' });
     }
@@ -4146,7 +4462,7 @@ app.delete('/api/favorites/:id', async (req, res) => {
         await db.collection('users').doc(req.user.uid)
             .collection('favorites').doc(req.params.id).delete();
         res.json({ success: true });
-    } catch(e) {
+    } catch (e) {
         console.error('[FAV-DELETE]', e.message);
         res.status(500).json({ error: 'Favori silinemedi' });
     }
