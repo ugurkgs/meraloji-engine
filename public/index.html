@@ -2047,6 +2047,82 @@
             text-align: center;
         }
 
+        /* E-posta doğrulama bekliyor ekranı */
+        .verify-card {
+            background: rgba(15, 30, 55, 0.9);
+            border: 1px solid rgba(0, 200, 200, 0.2);
+            border-radius: 16px;
+            padding: 28px 20px 20px;
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .verify-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .verify-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #00c8c8;
+            margin-bottom: 8px;
+        }
+
+        .verify-desc {
+            font-size: 0.82rem;
+            color: #8892a3;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .verify-desc strong {
+            color: #fff;
+        }
+
+        .verify-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #00c8c8, #00ff88);
+            color: #0a0e1a;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: opacity 0.2s;
+        }
+
+        .verify-btn:hover { opacity: 0.9; }
+        .verify-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .verify-secondary-btn {
+            width: 100%;
+            background: transparent;
+            color: #8892a3;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: var(--font-display);
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+            margin-bottom: 8px;
+        }
+
+        .verify-secondary-btn:hover {
+            color: #00c8c8;
+            border-color: rgba(0, 200, 200, 0.4);
+        }
+
+        .verify-error { font-size: 0.78rem; color: #ff4757; margin-top: 6px; min-height: 18px; }
+        .verify-success { font-size: 0.78rem; color: #00ff88; margin-top: 6px; min-height: 18px; }
+
         .user-badge {
             display: none;
             align-items: center;
@@ -3064,6 +3140,29 @@
                 <button class="auth-primary-btn" id="register-submit-btn" onclick="registerWithEmail()">Kayıt Ol</button>
                 <div class="auth-error" id="register-error"></div>
                 <div class="auth-switch">Zaten hesabın var mı? <a onclick="switchAuthTab('login')">Giriş Yap</a></div>
+            </div>
+        </div>
+
+        <!-- E-POSTA DOĞRULAMA BEKLİYOR EKRANI -->
+        <div id="auth-verify-screen" style="display:none; width:100%; max-width:340px;">
+            <div class="verify-card">
+                <span class="verify-icon">📬</span>
+                <div class="verify-title">E-postanı Doğrula</div>
+                <div class="verify-desc">
+                    <strong id="verify-email-display"></strong> adresine doğrulama maili gönderdik.<br><br>
+                    Maildeki bağlantıya tıkladıktan sonra aşağıdaki butona bas.
+                </div>
+                <button class="verify-btn" id="verify-check-btn" onclick="checkEmailVerified()">
+                    ✅ Doğruladım, Giriş Yap
+                </button>
+                <button class="verify-secondary-btn" id="verify-resend-btn" onclick="resendVerificationEmail()">
+                    📨 Maili Tekrar Gönder
+                </button>
+                <button class="verify-secondary-btn" onclick="cancelVerification()">
+                    ← Geri Dön
+                </button>
+                <div class="verify-error" id="verify-error"></div>
+                <div class="verify-success" id="verify-success"></div>
             </div>
         </div>
 
@@ -8671,14 +8770,106 @@
             btn.disabled = true;
             btn.textContent = 'Kaydediliyor...';
             try {
-                await auth.createUserWithEmailAndPassword(email, password);
-                // onAuthStateChanged devreye girer, overlay kapanır
+                const result = await auth.createUserWithEmailAndPassword(email, password);
+                // Doğrulama maili gönder
+                await result.user.sendEmailVerification();
+                // Doğrulama ekranını göster (onAuthStateChanged'i bypass et)
+                _showVerifyScreen(result.user);
             } catch (e) {
                 errEl.textContent = _authErrMsg(e.code);
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Kayıt Ol';
             }
+        }
+
+        // Doğrulama ekranını göster
+        function _showVerifyScreen(user) {
+            document.getElementById('auth-card') && (document.getElementById('auth-card').style.display = 'none');
+            // auth-card class'lı div'i gizle
+            const card = document.querySelector('.auth-card');
+            if (card) card.style.display = 'none';
+            document.getElementById('verify-email-display').textContent = user.email;
+            document.getElementById('auth-verify-screen').style.display = 'block';
+            document.getElementById('verify-error').textContent = '';
+            document.getElementById('verify-success').textContent = '';
+        }
+
+        // Doğrulama durumunu kontrol et
+        async function checkEmailVerified() {
+            const btn = document.getElementById('verify-check-btn');
+            const errEl = document.getElementById('verify-error');
+            const succEl = document.getElementById('verify-success');
+            errEl.textContent = '';
+            succEl.textContent = '';
+            btn.disabled = true;
+            btn.textContent = 'Kontrol ediliyor...';
+            try {
+                // Token'ı Firebase sunucusundan yenile — emailVerified güncel olsun
+                await auth.currentUser.reload();
+                if (auth.currentUser.emailVerified) {
+                    succEl.textContent = '✅ Doğrulandı! Yükleniyor...';
+                    // onAuthStateChanged tetiklenmeyebilir, manuel tetikle
+                    setTimeout(() => {
+                        document.getElementById('login-overlay').classList.add('hidden');
+                        checkSubscriptionStatus().then(() => {
+                            loadProSlotsCount();
+                            updateUserUI();
+                        });
+                    }, 800);
+                } else {
+                    errEl.textContent = 'Henüz doğrulanmamış. Maili kontrol et ve bağlantıya tıkla.';
+                    btn.disabled = false;
+                    btn.textContent = '✅ Doğruladım, Giriş Yap';
+                }
+            } catch (e) {
+                errEl.textContent = 'Kontrol edilemedi. İnternet bağlantını kontrol et.';
+                btn.disabled = false;
+                btn.textContent = '✅ Doğruladım, Giriş Yap';
+            }
+        }
+
+        // Doğrulama mailini tekrar gönder
+        let _resendCooldown = false;
+        async function resendVerificationEmail() {
+            const btn = document.getElementById('verify-resend-btn');
+            const errEl = document.getElementById('verify-error');
+            const succEl = document.getElementById('verify-success');
+            if (_resendCooldown) { errEl.textContent = 'Lütfen 60 saniye bekle.'; return; }
+            errEl.textContent = '';
+            succEl.textContent = '';
+            btn.disabled = true;
+            try {
+                await auth.currentUser.sendEmailVerification();
+                succEl.textContent = '📨 Mail tekrar gönderildi!';
+                _resendCooldown = true;
+                // 60 saniye cooldown
+                let secs = 60;
+                const timer = setInterval(() => {
+                    secs--;
+                    btn.textContent = `📨 Tekrar Gönder (${secs}s)`;
+                    if (secs <= 0) {
+                        clearInterval(timer);
+                        _resendCooldown = false;
+                        btn.disabled = false;
+                        btn.textContent = '📨 Maili Tekrar Gönder';
+                    }
+                }, 1000);
+            } catch (e) {
+                errEl.textContent = 'Mail gönderilemedi. Lütfen tekrar dene.';
+                btn.disabled = false;
+            }
+        }
+
+        // Geri dön — hesabı sil, login formuna dön
+        async function cancelVerification() {
+            try {
+                if (auth.currentUser) await auth.currentUser.delete();
+            } catch (e) { /* ignore */ }
+            document.getElementById('auth-verify-screen').style.display = 'none';
+            const card = document.querySelector('.auth-card');
+            if (card) card.style.display = 'block';
+            switchAuthTab('register');
         }
 
         // Enter tuşu desteği — login/register form'larında Enter çalışsın
@@ -8693,9 +8884,19 @@
 
         auth.onAuthStateChanged(async (user) => {
             if (user) {
+                // Email/şifre ile giriş yapıldıysa ve mail doğrulanmamışsa içeri alma
+                if (!user.emailVerified && user.providerData[0]?.providerId === 'password') {
+                    // Doğrulama ekranını göster, uygulamaya geçme
+                    document.getElementById('login-overlay').classList.remove('hidden');
+                    _showVerifyScreen(user);
+                    return;
+                }
+
                 currentUser = user;
                 authToken = await user.getIdToken();
                 document.getElementById('login-overlay').classList.add('hidden');
+                // Doğrulama ekranı açıksa kapat
+                document.getElementById('auth-verify-screen').style.display = 'none';
                 await checkSubscriptionStatus();
                 loadProSlotsCount(); // fire-and-forget
                 updateUserUI();
@@ -8712,6 +8913,10 @@
                 graceDaysLeft = 0;
                 authToken = null;
                 document.getElementById('login-overlay').classList.remove('hidden');
+                // Doğrulama ekranını da sıfırla
+                document.getElementById('auth-verify-screen').style.display = 'none';
+                const card = document.querySelector('.auth-card');
+                if (card) card.style.display = 'block';
                 if (document.getElementById('menu-user-info')) {
                     document.getElementById('menu-user-info').style.display = 'none';
                 }
