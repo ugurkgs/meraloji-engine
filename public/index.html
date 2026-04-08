@@ -8805,17 +8805,24 @@
             btn.disabled = true;
             btn.textContent = 'Kontrol ediliyor...';
             try {
-                // Token'ı Firebase sunucusundan yenile — emailVerified güncel olsun
+                // Firebase'den güncel profili çek (force refresh)
                 await auth.currentUser.reload();
-                if (auth.currentUser.emailVerified) {
+                const freshUser = auth.currentUser;
+                if (freshUser && freshUser.emailVerified) {
                     succEl.textContent = '✅ Doğrulandı! Yükleniyor...';
-                    // onAuthStateChanged tetiklenmeyebilir, manuel tetikle
-                    setTimeout(() => {
+                    // Artık onAuthStateChanged yeniden tetiklenir ve emailVerified=true ile içeri alır
+                    // Ama bazı durumlarda tetiklenmez — manuel set edelim
+                    currentUser = freshUser;
+                    authToken = await freshUser.getIdToken(true);
+                    setTimeout(async () => {
                         document.getElementById('login-overlay').classList.add('hidden');
-                        checkSubscriptionStatus().then(() => {
-                            loadProSlotsCount();
-                            updateUserUI();
-                        });
+                        document.getElementById('auth-verify-screen').style.display = 'none';
+                        await checkSubscriptionStatus();
+                        loadProSlotsCount();
+                        updateUserUI();
+                        try { await loadScanUsage(); } catch (e) { }
+                        try { await loadFavorites(); } catch (e) { }
+                        saveTokenToFirestore(freshUser.uid);
                     }, 800);
                 } else {
                     errEl.textContent = 'Henüz doğrulanmamış. Maili kontrol et ve bağlantıya tıkla.';
@@ -8884,9 +8891,9 @@
 
         auth.onAuthStateChanged(async (user) => {
             if (user) {
-                // Email/şifre ile giriş yapıldıysa ve mail doğrulanmamışsa içeri alma
-                if (!user.emailVerified && user.providerData[0]?.providerId === 'password') {
-                    // Doğrulama ekranını göster, uygulamaya geçme
+                // Mail doğrulanmamış kullanıcıyı içeri alma
+                // (Google kullanıcıları zaten emailVerified=true gelir, bu kontrol onları etkilemez)
+                if (!user.emailVerified) {
                     document.getElementById('login-overlay').classList.remove('hidden');
                     _showVerifyScreen(user);
                     return;
