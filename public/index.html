@@ -2040,6 +2040,46 @@
             text-decoration: underline;
         }
 
+        /* Şifre göster/gizle wrapper */
+        .auth-password-wrap {
+            position: relative;
+            width: 100%;
+        }
+        .auth-password-wrap .auth-field {
+            width: 100%;
+            padding-right: 44px;
+        }
+        .auth-password-toggle {
+            position: absolute;
+            right: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #5a7193;
+            font-size: 1rem;
+            padding: 0;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+        .auth-password-toggle:hover { color: #00c8c8; }
+
+        /* Şifremi unuttum linki */
+        .auth-forgot {
+            text-align: right;
+            margin-top: -6px;
+            margin-bottom: 8px;
+            font-size: 0.75rem;
+        }
+        .auth-forgot a {
+            color: #5a7193;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .auth-forgot a:hover { color: #00c8c8; }
+
         .login-footer {
             margin-top: 20px;
             color: #4a5568;
@@ -3126,7 +3166,11 @@
             <!-- GİRİŞ FORMU -->
             <div id="auth-login-form">
                 <input type="email" id="login-email" class="auth-field" placeholder="E-posta adresi" autocomplete="email" inputmode="email">
-                <input type="password" id="login-password" class="auth-field" placeholder="Şifre" autocomplete="current-password">
+                <div class="auth-password-wrap">
+                    <input type="password" id="login-password" class="auth-field" placeholder="Şifre" autocomplete="current-password">
+                    <button type="button" class="auth-password-toggle" onclick="togglePasswordVisibility('login-password', this)" title="Şifreyi göster/gizle">👁</button>
+                </div>
+                <div class="auth-forgot"><a onclick="sendPasswordReset()">Şifremi Unuttum</a></div>
                 <button class="auth-primary-btn" id="login-submit-btn" onclick="signInWithEmail()">Giriş Yap</button>
                 <div class="auth-error" id="login-error"></div>
                 <div class="auth-switch">Hesabın yok mu? <a onclick="switchAuthTab('register')">Kayıt Ol</a></div>
@@ -3135,8 +3179,14 @@
             <!-- KAYIT FORMU -->
             <div id="auth-register-form" style="display:none;">
                 <input type="email" id="reg-email" class="auth-field" placeholder="E-posta adresi" autocomplete="email" inputmode="email">
-                <input type="password" id="reg-password" class="auth-field" placeholder="Şifre (min. 6 karakter)" autocomplete="new-password">
-                <input type="password" id="reg-password2" class="auth-field" placeholder="Şifreyi tekrarla" autocomplete="new-password">
+                <div class="auth-password-wrap">
+                    <input type="password" id="reg-password" class="auth-field" placeholder="Şifre (min. 6 karakter)" autocomplete="new-password">
+                    <button type="button" class="auth-password-toggle" onclick="togglePasswordVisibility('reg-password', this)" title="Şifreyi göster/gizle">👁</button>
+                </div>
+                <div class="auth-password-wrap">
+                    <input type="password" id="reg-password2" class="auth-field" placeholder="Şifreyi tekrarla" autocomplete="new-password">
+                    <button type="button" class="auth-password-toggle" onclick="togglePasswordVisibility('reg-password2', this)" title="Şifreyi göster/gizle">👁</button>
+                </div>
                 <button class="auth-primary-btn" id="register-submit-btn" onclick="registerWithEmail()">Kayıt Ol</button>
                 <div class="auth-error" id="register-error"></div>
                 <div class="auth-switch">Zaten hesabın var mı? <a onclick="switchAuthTab('login')">Giriş Yap</a></div>
@@ -3150,7 +3200,10 @@
                 <div class="verify-title">E-postanı Doğrula</div>
                 <div class="verify-desc">
                     <strong id="verify-email-display"></strong> adresine doğrulama maili gönderdik.<br><br>
-                    Maildeki bağlantıya tıkladıktan sonra aşağıdaki butona bas.
+                    Maildeki bağlantıya tıkladıktan sonra aşağıdaki butona bas.<br>
+                    <span style="font-size:0.78rem; color:#ff9f43; opacity:0.9;">
+                        📂 Mail gelmediyse <strong>spam / gereksiz posta</strong> klasörünü kontrol et.
+                    </span>
                 </div>
                 <button class="verify-btn" id="verify-check-btn" onclick="checkEmailVerified()">
                     ✅ Doğruladım, Giriş Yap
@@ -8729,6 +8782,9 @@
                 'auth/too-many-requests': 'Çok fazla başarısız deneme. Lütfen bekleyin.',
                 'auth/network-request-failed': 'İnternet bağlantınızı kontrol edin.',
                 'auth/invalid-credential': 'E-posta veya şifre hatalı.',
+                'auth/operation-not-allowed': 'E-posta girişi şu an aktif değil. Lütfen Google ile giriş yapın.',
+                'auth/requires-recent-login': 'Bu işlem için tekrar giriş yapmanız gerekiyor.',
+                'auth/user-disabled': 'Bu hesap devre dışı bırakılmış.',
             };
             return map[code] || 'Bir hata oluştu. Lütfen tekrar deneyin.';
         }
@@ -8739,6 +8795,7 @@
             const errEl = document.getElementById('login-error');
             const btn = document.getElementById('login-submit-btn');
             errEl.textContent = '';
+            errEl.style.color = '#ff4757'; // Reset (şifre sıfırlama sonrası yeşil kalabilir)
 
             if (!email || !password) { errEl.textContent = 'E-posta ve şifre gerekli.'; return; }
 
@@ -8805,6 +8862,13 @@
             btn.disabled = true;
             btn.textContent = 'Kontrol ediliyor...';
             try {
+                // Null guard — oturum düşmüşse güvenli hata ver
+                if (!auth.currentUser) {
+                    errEl.textContent = 'Oturum süresi doldu. Sayfayı yenileyip tekrar kayıt ol.';
+                    btn.disabled = false;
+                    btn.textContent = '✅ Doğruladım, Giriş Yap';
+                    return;
+                }
                 // Firebase'den güncel profili çek (force refresh)
                 await auth.currentUser.reload();
                 const freshUser = auth.currentUser;
@@ -8813,17 +8877,21 @@
                     // Artık onAuthStateChanged yeniden tetiklenir ve emailVerified=true ile içeri alır
                     // Ama bazı durumlarda tetiklenmez — manuel set edelim
                     currentUser = freshUser;
+                    // Force-refresh token — emailVerified:true içeren taze token
                     authToken = await freshUser.getIdToken(true);
-                    setTimeout(async () => {
-                        document.getElementById('login-overlay').classList.add('hidden');
-                        document.getElementById('auth-verify-screen').style.display = 'none';
-                        await checkSubscriptionStatus();
-                        loadProSlotsCount();
-                        updateUserUI();
-                        try { await loadScanUsage(); } catch (e) { }
-                        try { await loadFavorites(); } catch (e) { }
-                        saveTokenToFirestore(freshUser.uid);
-                    }, 800);
+
+                    // UI'yı hemen aç, sonra subscription'ı çek
+                    document.getElementById('login-overlay').classList.add('hidden');
+                    document.getElementById('auth-verify-screen').style.display = 'none';
+
+                    // Grace period'un doğru gelmesi için taze token ile subscription'ı çek
+                    await checkSubscriptionStatus();
+                    loadProSlotsCount();
+                    updateUserUI(); // isPremium/isGracePeriod set edildikten SONRA çağır
+                    if (isGracePeriod) setTimeout(showGraceWelcome, 800);
+                    try { await loadScanUsage(); } catch (e) { }
+                    try { await loadFavorites(); } catch (e) { }
+                    saveTokenToFirestore(freshUser.uid);
                 } else {
                     errEl.textContent = 'Henüz doğrulanmamış. Maili kontrol et ve bağlantıya tıkla.';
                     btn.disabled = false;
@@ -8868,15 +8936,53 @@
             }
         }
 
-        // Geri dön — hesabı sil, login formuna dön
+        // Geri dön — hesabı sil (başarısızsa çıkış yap), login formuna dön
         async function cancelVerification() {
             try {
                 if (auth.currentUser) await auth.currentUser.delete();
-            } catch (e) { /* ignore */ }
+            } catch (e) {
+                // delete() requires-recent-login fırlatabilir — en azından signOut yap
+                try { await auth.signOut(); } catch (_) {}
+            }
             document.getElementById('auth-verify-screen').style.display = 'none';
             const card = document.querySelector('.auth-card');
             if (card) card.style.display = 'block';
             switchAuthTab('register');
+        }
+
+        // Şifre göster/gizle toggle
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';
+                btn.title = 'Şifreyi gizle';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁';
+                btn.title = 'Şifreyi göster';
+            }
+        }
+
+        // Şifre sıfırlama maili gönder
+        async function sendPasswordReset() {
+            const errEl = document.getElementById('login-error');
+            const email = document.getElementById('login-email').value.trim();
+            if (!email) {
+                errEl.style.color = '#ff4757';
+                errEl.textContent = 'Önce e-posta adresinizi girin.';
+                document.getElementById('login-email').focus();
+                return;
+            }
+            try {
+                await auth.sendPasswordResetEmail(email);
+                errEl.style.color = '#00ff88';
+                errEl.textContent = '📨 Şifre sıfırlama maili gönderildi. Gelen kutunu kontrol et.';
+            } catch (e) {
+                errEl.style.color = '#ff4757';
+                errEl.textContent = _authErrMsg(e.code);
+            }
         }
 
         // Enter tuşu desteği — login/register form'larında Enter çalışsın
@@ -8900,13 +9006,17 @@
                 }
 
                 currentUser = user;
-                authToken = await user.getIdToken();
+                // Yeni e-posta kullanıcıları (son 60s içinde kayıt) için force-refresh token al
+                // Bu sayede grace period server tarafında doğru hesaplanır
+                const _isNewEmailUser = user.providerData.some(p => p.providerId === 'password')
+                    && (Date.now() - new Date(user.metadata.creationTime).getTime() < 60000);
+                authToken = await user.getIdToken(_isNewEmailUser);
                 document.getElementById('login-overlay').classList.add('hidden');
                 // Doğrulama ekranı açıksa kapat
                 document.getElementById('auth-verify-screen').style.display = 'none';
-                await checkSubscriptionStatus();
+                await checkSubscriptionStatus(); // isPremium/isGracePeriod burada set edilir
                 loadProSlotsCount(); // fire-and-forget
-                updateUserUI();
+                updateUserUI(); // checkSubscriptionStatus'tan SONRA çağır
                 if (isGracePeriod) setTimeout(showGraceWelcome, 1500);
                 try { await loadScanUsage(); } catch (e) { }
                 try { await loadFavorites(); } catch (e) { }
