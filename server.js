@@ -2473,7 +2473,7 @@ app.get('/api/forecast', async (req, res) => {
                 windDirection: safeNum(weather.daily?.wind_direction_10m_dominant?.[dailyIdx]),
                 clarity: Math.round(clarity),
                 pressure: Math.round(pressure), pressureTrend: pressureTrend.trend,
-                cloud: cloud + "%", rain: rain + "mm", salinity, tide: tideFlow.toFixed(1),
+                cloud: cloud + "%", rain: rain, salinity, tide: tideFlow.toFixed(1),
                 current: oceanCurrent !== null ? oceanCurrent.toFixed(3) : currentEst.toFixed(2),
                 currentIsReal: oceanCurrent !== null,
                 wavePeriod: parseFloat(wavePeriod.toFixed(1)),
