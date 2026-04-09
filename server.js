@@ -2442,13 +2442,7 @@ app.get('/api/forecast', async (req, res) => {
         // Marine:  past_days=7 → hourly[0-167]=geçmiş 7 gün, [168-191]=bugün, [192+]=gelecek
         // Weather hourlyOffset (past_days=1): bugün = indeks 24
         const hourlyOffset = 24;         // weather için bugünün başlangıcı
-        // Yenisi — güvenli
-        function findTodayIndex(timeArray) {
-            const todayStr = new Date().toISOString().split('T')[0]; // "2026-03-13"
-            const idx = timeArray.findIndex(t => t.startsWith(todayStr));
-            return idx >= 0 ? idx : 7 * 24; // bulamazsa fallback
-        }
-        const marineHourlyOffset = findTodayIndex(marine.hourly.time); //
+        const marineHourlyOffset = findTodayIndex(marine.hourly.time); // global fonksiyon
 
 
         // UTC offset düzeltmesi — sunucu UTC'de çalışır, Open-Meteo yerel saat döner
@@ -3762,6 +3756,15 @@ async function findNearestSeaPoint(lat, lon) {
     return null; // Yakın çevrede deniz bulunamadı
 }
 
+// ─── Marine time dizisinden bugünün başlangıç indeksini bul ──────────────────
+// past_days=7 ile gelen dizide bugün genellikle 168. indekste başlar, ama
+// gün sınırları UTC'ye göre kayabilir — string eşleşmesi kesin çözüm.
+function findTodayIndex(timeArray) {
+    const todayStr = new Date().toISOString().split('T')[0]; // "2026-04-10"
+    const idx = timeArray.findIndex(t => t.startsWith(todayStr));
+    return idx >= 0 ? idx : 7 * 24; // bulamazsa fallback: 168
+}
+
 // Paylaşılan hava verisiyle tek nokta skoru hesapla (API çağrısı yok)
 function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey) {
     const latF = parseFloat(lat).toFixed(4);
@@ -3869,7 +3872,8 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
             const topFish = allFishScores.slice(0, 3).map(f => f.name);
             const depthVal = depthAvg ? Math.round(depthAvg) : null;
             const zone = !depthVal ? null : depthVal < 5 ? 'Sığ Kum' : depthVal < 15 ? 'Sığ Kaya' : depthVal < 40 ? 'Orta Su' : 'Derin Su';
-            return { score: topScore, fishName: topFishName, topFish, depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)) };
+            const substrateVal = params.substrate || null;
+            return { score: topScore, fishName: topFishName, topFish, depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
         } else {
             const fish = SPECIES_DB[fishKey];
             if (!fish) return null;
@@ -3879,12 +3883,14 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
                 const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
                 const depthVal = depthAvg ? Math.round(depthAvg) : null;
                 const zone = !depthVal ? null : depthVal < 5 ? 'Sığ Kum' : depthVal < 15 ? 'Sığ Kaya' : depthVal < 40 ? 'Orta Su' : 'Derin Su';
-                return { score, fishName: fish.name, topFish: [fish.name], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)) };
+                const substrateVal = params.substrate || null;
+                return { score, fishName: fish.name, topFish: [fish.name], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
             } catch (e) {
                 const r = calculateFishScore(fish, fishKey, params);
                 const depthVal = depthAvg ? Math.round(depthAvg) : null;
                 const zone = !depthVal ? null : depthVal < 5 ? 'Sığ Kum' : depthVal < 15 ? 'Sığ Kaya' : depthVal < 40 ? 'Orta Su' : 'Derin Su';
-                return { score: r.finalScore, fishName: fish.name, topFish: [fish.name], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)) };
+                const substrateVal = params.substrate || null;
+                return { score: r.finalScore, fishName: fish.name, topFish: [fish.name], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
             }
         }
     } catch (e) {
@@ -4013,6 +4019,8 @@ app.get('/api/scan', async (req, res) => {
             const batchResults = await Promise.all(batch.map(async (pt) => {
                 let bathyRaw = null;
                 try { bathyRaw = await fetchBathymetry(pt.lat, pt.lon); } catch (e) { }
+                // Substrate'yi de paralel çek — cache'e yazar, calcPointScoreFromWeather cache'den okur
+                fetchSubstrate(pt.lat, pt.lon).catch(() => null); // fire-and-forget, cache doldursun
                 let result = null;
                 try {
                     result = calcPointScoreFromWeather(pt.lat, pt.lon, centerWeather, centerMarine, bathyRaw, fishKey || null);
@@ -4034,7 +4042,8 @@ app.get('/api/scan', async (req, res) => {
                         topFish: result.topFish || [],
                         depth: result.depth || null,
                         zone: result.zone || null,
-                        tempWater: result.tempWater || null
+                        tempWater: result.tempWater || null,
+                        substrate: result.substrate || null
                     });
                     lastValid = { lat: pt.lat, lon: pt.lon, score, fishName: result.fishName };
                 }
