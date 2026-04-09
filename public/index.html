@@ -8472,6 +8472,15 @@
                        <span style="font-size:0.68rem;color:var(--text-muted);margin-left:4px;">${pt.zone || ''}</span>`
                     : '';
 
+                // Dip yapısı (EMODnet substrat)
+                const _subEmoji = { ROCK:'🪨', SAND:'🏖️', MUD:'🟫', SEAGRASS:'🌿', MIXED:'⬛' };
+                const _subTr    = { ROCK:'Kayalık', SAND:'Kumlu', MUD:'Çamurlu', SEAGRASS:'Deniz çayırı', MIXED:'Karışık' };
+                const substrateHtml = pt.substrate
+                    ? `<span style="font-size:0.68rem;color:var(--text-secondary);background:rgba(255,255,255,0.05);
+                        border:1px solid var(--border-subtle);border-radius:5px;padding:1px 6px;">
+                        ${_subEmoji[pt.substrate] || ''}  ${_subTr[pt.substrate] || pt.substrate}</span>`
+                    : '';
+
                 // Su sıcaklığı
                 const tempHtml = pt.tempWater
                     ? `<span style="font-size:0.7rem;color:#ff9f43;">🌡️ ${pt.tempWater}°C</span>`
@@ -8496,7 +8505,13 @@
                         </div>
                         <div style="flex:1;min-width:0;">
                             <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px;">${topFishHtml}</div>
-                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">${depthHtml}${pt.depth && pt.tempWater ? '<span style="color:var(--border-subtle);">·</span>' : ''}${tempHtml}</div>
+                            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                ${depthHtml}
+                                ${pt.depth && (pt.tempWater || pt.substrate) ? '<span style="color:var(--border-subtle);">·</span>' : ''}
+                                ${tempHtml}
+                                ${(pt.tempWater && pt.substrate) ? '<span style="color:var(--border-subtle);">·</span>' : ''}
+                                ${substrateHtml}
+                            </div>
                         </div>
                     </div>
                     <!-- Alt satır: koordinat + butonlar -->
