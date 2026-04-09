@@ -3800,35 +3800,78 @@
                                     style="font-size:0.72rem; color:var(--text-primary); font-weight:600;">--</span>
                             </div>
                         </div>
-                        <!-- Rüzgar Dalgası Çubuğu -->
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="font-size:0.68rem; color:var(--text-secondary); min-width:90px;">💨 Rüzgar
-                                Dalgası</span>
-                            <div
-                                style="flex:1; height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;">
-                                <div id="wind-wave-bar"
-                                    style="height:100%; background:linear-gradient(90deg, #ff9f43, #ff6b35); width:0%; transition:width 0.4s; border-radius:3px;">
-                                </div>
-                            </div>
-                            <span id="wind-wave-val"
-                                style="font-size:0.7rem; color:#ff9f43; min-width:36px; text-align:right; font-weight:600;">--m</span>
+
+                        <!-- Sinüs Dalga Görselleştirme -->
+                        <div style="position:relative; width:100%;">
+                            <svg id="swell-sine-svg" width="100%" height="92" viewBox="0 0 280 92"
+                                preserveAspectRatio="none"
+                                style="display:block; overflow:visible;">
+                                <defs>
+                                    <linearGradient id="windWaveGrad" x1="0" y1="0" x2="1" y2="0">
+                                        <stop offset="0%" stop-color="#ff9f43" stop-opacity="0.7"/>
+                                        <stop offset="100%" stop-color="#ff6b35" stop-opacity="0.7"/>
+                                    </linearGradient>
+                                    <linearGradient id="swellGrad" x1="0" y1="0" x2="1" y2="0">
+                                        <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.9"/>
+                                        <stop offset="100%" stop-color="#00ff88" stop-opacity="0.85"/>
+                                    </linearGradient>
+                                    <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
+                                        <feGaussianBlur stdDeviation="2" result="blur"/>
+                                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                    </filter>
+                                    <filter id="glowOrange" x="-20%" y="-20%" width="140%" height="140%">
+                                        <feGaussianBlur stdDeviation="1.5" result="blur"/>
+                                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                    </filter>
+                                </defs>
+                                <!-- Merkez çizgi -->
+                                <line x1="0" y1="48" x2="280" y2="48"
+                                    stroke="rgba(255,255,255,0.07)" stroke-width="1" stroke-dasharray="3,5"/>
+                                <!-- Rüzgar Dalgası fill alanı -->
+                                <path id="wind-wave-fill" fill="rgba(255,159,67,0.06)"/>
+                                <!-- Swell fill alanı -->
+                                <path id="swell-wave-fill" fill="rgba(0,212,255,0.06)"/>
+                                <!-- Rüzgar Dalgası çizgisi -->
+                                <path id="wind-wave-path" fill="none" stroke="url(#windWaveGrad)"
+                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                                    filter="url(#glowOrange)" opacity="0.9"/>
+                                <!-- Swell çizgisi -->
+                                <path id="swell-wave-path" fill="none" stroke="url(#swellGrad)"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                    filter="url(#glowCyan)"/>
+                                <!-- Periyot etiketleri -->
+                                <g id="swell-period-ticks"></g>
+                                <g id="wind-period-ticks"></g>
+                                <!-- Yükseklik etiketleri -->
+                                <g id="wave-height-labels"></g>
+                            </svg>
                         </div>
-                        <!-- Okyanus Dalgası Çubuğu -->
-                        <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                            <span style="font-size:0.68rem; color:var(--text-secondary); min-width:90px;">🌊 Okyanus
-                                Dalgası</span>
-                            <div
-                                style="flex:1; height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;">
-                                <div id="swell-bar"
-                                    style="height:100%; background:linear-gradient(90deg, #00d4ff, #00b894); width:0%; transition:width 0.4s; border-radius:3px;">
-                                </div>
+
+                        <!-- Alt etiket satırı -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                            <div style="display:flex; align-items:center; gap:5px;">
+                                <svg width="20" height="8" viewBox="0 0 20 8">
+                                    <path d="M0,4 C3,0 7,0 10,4 C13,8 17,8 20,4" fill="none"
+                                        stroke="url(#windWaveGrad)" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                <span style="font-size:0.63rem; color:var(--text-secondary);">💨 Rüzgar</span>
+                                <span id="wind-wave-val"
+                                    style="font-size:0.68rem; color:#ff9f43; font-weight:700;">--</span>
                             </div>
-                            <span id="swell-val"
-                                style="font-size:0.7rem; color:var(--cyan); min-width:36px; text-align:right; font-weight:600;">--m</span>
+                            <div style="display:flex; align-items:center; gap:5px;">
+                                <svg width="20" height="8" viewBox="0 0 20 8">
+                                    <path d="M0,4 C5,0 15,0 20,4" fill="none"
+                                        stroke="url(#swellGrad)" stroke-width="2.5" stroke-linecap="round"/>
+                                </svg>
+                                <span style="font-size:0.63rem; color:var(--text-secondary);">🌊 Swell</span>
+                                <span id="swell-val"
+                                    style="font-size:0.68rem; color:var(--cyan); font-weight:700;">--</span>
+                            </div>
                         </div>
+
                         <!-- Okyanus Dalgası Dominant Rozeti -->
                         <div id="swell-dominant-badge"
-                            style="display:none; margin-top:8px; font-size:0.68rem; color:var(--green); text-align:center; padding:4px 8px; background:rgba(0,255,136,0.08); border-radius:6px;">
+                            style="display:none; margin-top:6px; font-size:0.68rem; color:var(--green); text-align:center; padding:4px 8px; background:rgba(0,255,136,0.08); border-radius:6px;">
                             ✨ Düzenli okyanus dalgası baskın — sakin ve berrak su altı
                         </div>
                     </div>
@@ -6558,24 +6601,17 @@
                     label.textContent = `${dirName} ${Math.round(waveDir)}°`;
                 }
 
-                // 2E: Swell vs Wind Wave
+                // 2E: Swell vs Wind Wave — Sinüs Dalga Görselleştirmesi
                 if (windWaveSize !== undefined && swellPer !== undefined) {
                     document.getElementById('swell-analysis-wrap').style.display = 'block';
-                    const windWaveBar = document.getElementById('wind-wave-bar');
-                    const swellBar = document.getElementById('swell-bar');
-
-                    const maxWave = Math.max(windWaveSize, waveSize);
-                    let wwPct = maxWave > 0 ? (windWaveSize / maxWave) * 100 : 0;
-                    const swHeight = waveSize; // Toplam dalgayı veya tahmin edilen swell'i baz alıyoruz
-                    let swPct = maxWave > 0 ? (swHeight / maxWave) * 100 : 0;
-                    if (wwPct > 100) wwPct = 100; if (swPct > 100) swPct = 100;
-
-                    if (windWaveBar) windWaveBar.style.width = wwPct + '%';
-                    if (swellBar) swellBar.style.width = swPct + '%';
+                    const swHeight = waveSize;
 
                     document.getElementById('wind-wave-val').textContent = windWaveSize.toFixed(1) + 'm';
                     document.getElementById('swell-val').textContent = swHeight.toFixed(1) + 'm' + (swellPer ? ` (${Math.round(swellPer)}s)` : '');
                     document.getElementById('swell-dominant-badge').style.display = swellDominated ? 'block' : 'none';
+
+                    // Sinüs dalga çizimi
+                    drawSwellSineWave(windWaveSize, swHeight, swellPer || 8);
                 } else {
                     document.getElementById('swell-analysis-wrap').style.display = 'none';
                 }
@@ -9803,6 +9839,177 @@
                 });
             };
         })();
+
+        // ── DALGA SİNÜS GÖRSELLEŞTİRME ────────────────────────────────────────
+        function drawSwellSineWave(windWaveH, swellH, swellPeriod) {
+            const svg = document.getElementById('swell-sine-svg');
+            if (!svg) return;
+
+            const W = 280, H = 92, cy = 48;
+            // Rüzgar dalgası kısa periyot — varsayılan ~4s
+            const windPeriod = 4;
+            // Gösterim zaman penceresi: swell'in 2 tam döngüsü
+            const totalT = Math.max(swellPeriod * 2, windPeriod * 4);
+            const maxH = Math.max(swellH, windWaveH, 0.1);
+            // Maksimum genlik cy - 14 px ile sınırlı
+            const ampScale = (cy - 14) / maxH;
+
+            function sinePath(height, period, filled) {
+                const amp = Math.min(height * ampScale, cy - 12);
+                const pts = [];
+                for (let x = 0; x <= W; x += 1) {
+                    const t = (x / W) * totalT;
+                    const y = cy - amp * Math.sin(2 * Math.PI * t / period);
+                    pts.push(x.toFixed(1) + ',' + y.toFixed(1));
+                }
+                const linePath = 'M ' + pts.join(' L ');
+                if (!filled) return linePath;
+                // fill: close path to center
+                return linePath + ' L ' + W + ',' + cy + ' L 0,' + cy + ' Z';
+            }
+
+            const windFill = document.getElementById('wind-wave-fill');
+            const swellFill = document.getElementById('swell-wave-fill');
+            const windPath = document.getElementById('wind-wave-path');
+            const swellPath = document.getElementById('swell-wave-path');
+            const swellTicks = document.getElementById('swell-period-ticks');
+            const windTicks = document.getElementById('wind-period-ticks');
+            const heightLabels = document.getElementById('wave-height-labels');
+
+            if (windFill) windFill.setAttribute('d', sinePath(windWaveH, windPeriod, true));
+            if (swellFill) swellFill.setAttribute('d', sinePath(swellH, swellPeriod, true));
+            if (windPath) windPath.setAttribute('d', sinePath(windWaveH, windPeriod, false));
+            if (swellPath) swellPath.setAttribute('d', sinePath(swellH, swellPeriod, false));
+
+            const svgNS = 'http://www.w3.org/2000/svg';
+
+            // Swell periyot çentikleri — tepeler arası mesafe göstergesi
+            if (swellTicks) {
+                swellTicks.innerHTML = '';
+                const amp = Math.min(swellH * ampScale, cy - 12);
+                // İlk dalga tepesi t=period/4 konumunda
+                const crestTimes = [];
+                for (let t = swellPeriod / 4; t < totalT; t += swellPeriod) crestTimes.push(t);
+
+                // İlk iki tepe arası parantez + etiket
+                if (crestTimes.length >= 2) {
+                    const x1 = (crestTimes[0] / totalT) * W;
+                    const x2 = (crestTimes[1] / totalT) * W;
+                    const yTop = cy - amp - 8;
+
+                    // Sol dikey çizgi
+                    const l1 = document.createElementNS(svgNS, 'line');
+                    l1.setAttribute('x1', x1.toFixed(1)); l1.setAttribute('y1', (cy - amp).toFixed(1));
+                    l1.setAttribute('x2', x1.toFixed(1)); l1.setAttribute('y2', yTop.toFixed(1));
+                    l1.setAttribute('stroke', 'rgba(0,212,255,0.35)'); l1.setAttribute('stroke-width', '1');
+                    l1.setAttribute('stroke-dasharray', '2,2');
+                    swellTicks.appendChild(l1);
+
+                    // Sağ dikey çizgi
+                    const l2 = document.createElementNS(svgNS, 'line');
+                    l2.setAttribute('x1', x2.toFixed(1)); l2.setAttribute('y1', (cy - amp).toFixed(1));
+                    l2.setAttribute('x2', x2.toFixed(1)); l2.setAttribute('y2', yTop.toFixed(1));
+                    l2.setAttribute('stroke', 'rgba(0,212,255,0.35)'); l2.setAttribute('stroke-width', '1');
+                    l2.setAttribute('stroke-dasharray', '2,2');
+                    swellTicks.appendChild(l2);
+
+                    // Yatay ok çizgisi
+                    const arr = document.createElementNS(svgNS, 'line');
+                    arr.setAttribute('x1', x1.toFixed(1)); arr.setAttribute('y1', yTop.toFixed(1));
+                    arr.setAttribute('x2', x2.toFixed(1)); arr.setAttribute('y2', yTop.toFixed(1));
+                    arr.setAttribute('stroke', 'rgba(0,212,255,0.5)'); arr.setAttribute('stroke-width', '1');
+                    swellTicks.appendChild(arr);
+
+                    // Periyot etiketi
+                    const midX = ((x1 + x2) / 2).toFixed(1);
+                    const lbl = document.createElementNS(svgNS, 'text');
+                    lbl.setAttribute('x', midX); lbl.setAttribute('y', (yTop - 2).toFixed(1));
+                    lbl.setAttribute('text-anchor', 'middle'); lbl.setAttribute('font-size', '7.5');
+                    lbl.setAttribute('fill', 'rgba(0,212,255,0.7)'); lbl.setAttribute('font-weight', '600');
+                    lbl.setAttribute('font-family', 'JetBrains Mono, monospace');
+                    lbl.textContent = Math.round(swellPeriod) + 's';
+                    swellTicks.appendChild(lbl);
+                }
+
+                // Kalan tepelere küçük nokta
+                crestTimes.forEach(function(t, i) {
+                    if (i < 2) return; // ilk ikisini zaten işaretledik
+                    const x = (t / totalT) * W;
+                    const dot = document.createElementNS(svgNS, 'circle');
+                    dot.setAttribute('cx', x.toFixed(1)); dot.setAttribute('cy', (cy - amp).toFixed(1));
+                    dot.setAttribute('r', '2'); dot.setAttribute('fill', 'rgba(0,212,255,0.4)');
+                    swellTicks.appendChild(dot);
+                });
+            }
+
+            // Rüzgar dalgası periyot işaretleri
+            if (windTicks) {
+                windTicks.innerHTML = '';
+                const amp = Math.min(windWaveH * ampScale, cy - 12);
+                const crestTimes = [];
+                for (let t = windPeriod / 4; t < totalT; t += windPeriod) crestTimes.push(t);
+
+                if (crestTimes.length >= 2) {
+                    const x1 = (crestTimes[0] / totalT) * W;
+                    const x2 = (crestTimes[1] / totalT) * W;
+                    const yBot = cy + amp + 8;
+
+                    const l1 = document.createElementNS(svgNS, 'line');
+                    l1.setAttribute('x1', x1.toFixed(1)); l1.setAttribute('y1', (cy + amp).toFixed(1));
+                    l1.setAttribute('x2', x1.toFixed(1)); l1.setAttribute('y2', yBot.toFixed(1));
+                    l1.setAttribute('stroke', 'rgba(255,159,67,0.35)'); l1.setAttribute('stroke-width', '1');
+                    l1.setAttribute('stroke-dasharray', '2,2');
+                    windTicks.appendChild(l1);
+
+                    const l2 = document.createElementNS(svgNS, 'line');
+                    l2.setAttribute('x1', x2.toFixed(1)); l2.setAttribute('y1', (cy + amp).toFixed(1));
+                    l2.setAttribute('x2', x2.toFixed(1)); l2.setAttribute('y2', yBot.toFixed(1));
+                    l2.setAttribute('stroke', 'rgba(255,159,67,0.35)'); l2.setAttribute('stroke-width', '1');
+                    l2.setAttribute('stroke-dasharray', '2,2');
+                    windTicks.appendChild(l2);
+
+                    const arr = document.createElementNS(svgNS, 'line');
+                    arr.setAttribute('x1', x1.toFixed(1)); arr.setAttribute('y1', yBot.toFixed(1));
+                    arr.setAttribute('x2', x2.toFixed(1)); arr.setAttribute('y2', yBot.toFixed(1));
+                    arr.setAttribute('stroke', 'rgba(255,159,67,0.5)'); arr.setAttribute('stroke-width', '1');
+                    windTicks.appendChild(arr);
+
+                    const midX = ((x1 + x2) / 2).toFixed(1);
+                    const lbl = document.createElementNS(svgNS, 'text');
+                    lbl.setAttribute('x', midX); lbl.setAttribute('y', (yBot + 8).toFixed(1));
+                    lbl.setAttribute('text-anchor', 'middle'); lbl.setAttribute('font-size', '7.5');
+                    lbl.setAttribute('fill', 'rgba(255,159,67,0.7)'); lbl.setAttribute('font-weight', '600');
+                    lbl.setAttribute('font-family', 'JetBrains Mono, monospace');
+                    lbl.textContent = windPeriod + 's';
+                    windTicks.appendChild(lbl);
+                }
+            }
+
+            // Dalga yükseklik etiketleri — sağ kenarda
+            if (heightLabels) {
+                heightLabels.innerHTML = '';
+                const swAmp = Math.min(swellH * ampScale, cy - 12);
+                const wwAmp = Math.min(windWaveH * ampScale, cy - 12);
+
+                // Swell yükseklik çift-başlıklı ok (sol kenar)
+                const yTop = cy - swAmp, yBot = cy + swAmp;
+                if (yTop + 6 < yBot - 6) {
+                    const vLine = document.createElementNS(svgNS, 'line');
+                    vLine.setAttribute('x1', '6'); vLine.setAttribute('y1', yTop.toFixed(1));
+                    vLine.setAttribute('x2', '6'); vLine.setAttribute('y2', yBot.toFixed(1));
+                    vLine.setAttribute('stroke', 'rgba(0,212,255,0.25)'); vLine.setAttribute('stroke-width', '1');
+                    heightLabels.appendChild(vLine);
+
+                    const hLbl = document.createElementNS(svgNS, 'text');
+                    hLbl.setAttribute('x', '9'); hLbl.setAttribute('y', cy.toFixed(1));
+                    hLbl.setAttribute('dominant-baseline', 'middle');
+                    hLbl.setAttribute('font-size', '7'); hLbl.setAttribute('fill', 'rgba(0,212,255,0.5)');
+                    hLbl.setAttribute('font-family', 'JetBrains Mono, monospace');
+                    hLbl.textContent = swellH.toFixed(1) + 'm';
+                    heightLabels.appendChild(hLbl);
+                }
+            }
+        }
 
         // ── ONBOARDING SLAYT SİSTEMİ ────────────────────────────────────────
         let _onboardStep = 1;
