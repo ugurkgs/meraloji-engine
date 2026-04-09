@@ -3738,7 +3738,12 @@
                             style="display:none;margin-left:8px;padding:4px 10px;background:linear-gradient(135deg,#00d4ff,#00ff88);border:none;border-radius:20px;font-family:'Outfit',sans-serif;font-size:10px;font-weight:700;color:#040d1a;cursor:pointer;letter-spacing:0.5px;white-space:nowrap;box-shadow:0 0 10px rgba(0,212,255,0.3);">PRO'ya
                             Geç ✦</button>
                     </div>
-                    <span class="hud-depth" id="depth-display">⚓ --m</span>
+                    <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px;">
+                        <span class="hud-depth" id="depth-display" style="flex:1;">⚓ --m</span>
+                        <span id="substrate-display" style="font-size:0.7rem;color:var(--text-secondary);white-space:nowrap;flex-shrink:0;">
+                            <span style="color:var(--text-muted);">Dip yapısı:</span> <span id="substrate-value">—</span>
+                        </span>
+                    </div>
                 </div>
                 <button class="hud-close" onclick="closeHud()">✕</button>
             </div>
@@ -6382,6 +6387,20 @@
                 depthDisplay.style.display = 'none';
             }
 
+            // Dip yapısı (EMODnet substrat)
+            const substrateValueEl = document.getElementById('substrate-value');
+            if (substrateValueEl) {
+                const _subEmoji = { ROCK:'🪨', SAND:'🏖️', MUD:'🟫', SEAGRASS:'🌿', MIXED:'⬛' };
+                const _subTr    = { ROCK:'Kayalık', SAND:'Kumlu', MUD:'Çamurlu', SEAGRASS:'Deniz çayırı', MIXED:'Karışık' };
+                const sub = global.substrate;
+                if (sub && _subTr[sub]) {
+                    substrateValueEl.innerHTML = `${_subEmoji[sub]} ${_subTr[sub]}`;
+                    substrateValueEl.style.color = 'var(--text-secondary)';
+                } else {
+                    substrateValueEl.innerHTML = '<span style="color:var(--text-muted);font-size:0.65rem;">veri yok</span>';
+                }
+            }
+
             if (global.isLand) {
                 const isCertainLand = global.landReason === 'CERTAIN_LAND';
                 const isInland = global.landReason !== 'CERTAIN_LAND'; // dalga verisi yok = gerçek iç bölge
@@ -6447,6 +6466,8 @@
                     document.getElementById('metrics-toggle').style.display = 'none';
                 }
                 depthDisplay.style.display = 'none';
+                const _svEl = document.getElementById('substrate-value');
+                if (_svEl) _svEl.innerHTML = '<span style="color:var(--text-muted);font-size:0.65rem;">veri yok</span>';
                 // BLOK 2+3: Kara noktasında gelişmiş panel ve güvenlik uyarılarını gizle
                 const awp = document.getElementById('advanced-weather-panel');
                 const sal = document.getElementById('safety-alerts');
