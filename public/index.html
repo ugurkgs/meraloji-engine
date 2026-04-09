@@ -1687,6 +1687,99 @@
             font-size: 0.85rem;
         }
 
+        /* Wave Info Modal */
+        #wave-info-modal {
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(6px);
+        }
+
+        .wave-info-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-lg);
+            padding: 0;
+            width: 92%;
+            max-width: 420px;
+            max-height: 88vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow: 0 0 40px rgba(0,212,255,0.12);
+        }
+
+        .wave-info-top {
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .wave-info-dir-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,212,255,0.07);
+            border: 1px solid rgba(0,212,255,0.25);
+            border-radius: 10px;
+            padding: 6px 12px;
+            margin-top: 6px;
+        }
+
+        .wave-info-section {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .wave-info-section:last-child { border-bottom: none; }
+
+        .wave-info-section-title {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .wave-info-svg-wrap {
+            background: rgba(0,0,0,0.3);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+            padding: 10px 10px 6px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .wave-info-desc {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .wave-info-pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .wave-pill {
+            font-size: 0.68rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            border: 1px solid;
+        }
+
+        .wave-pill.good  { color: #00ff88; border-color: rgba(0,255,136,0.35); background: rgba(0,255,136,0.07); }
+        .wave-pill.ok    { color: #ffd500; border-color: rgba(255,213,0,0.35);  background: rgba(255,213,0,0.07); }
+        .wave-pill.bad   { color: #ff4757; border-color: rgba(255,71,87,0.35);  background: rgba(255,71,87,0.07); }
+
         .metric-range-bar {
             height: 8px;
             background: linear-gradient(90deg, var(--red) 0%, var(--yellow) 50%, var(--green) 100%);
@@ -3802,7 +3895,11 @@
                         </div>
 
                         <!-- Sinüs Dalga Görselleştirme -->
-                        <div style="position:relative; width:100%;">
+                        <div style="position:relative; width:100%; cursor:pointer;" onclick="openWaveInfoModal()" title="Detaylı bilgi için dokun">
+                            <div style="position:absolute; top:2px; right:2px; z-index:2; display:flex; align-items:center; gap:3px; opacity:0.55;">
+                                <span style="font-size:0.58rem; color:var(--text-muted); font-style:italic;">detay</span>
+                                <span style="font-size:0.72rem; color:var(--cyan);">ⓘ</span>
+                            </div>
                             <svg id="swell-sine-svg" width="100%" height="74" viewBox="0 0 280 74"
                                 preserveAspectRatio="none"
                                 style="display:block; overflow:visible;">
@@ -3833,11 +3930,11 @@
                                 <path id="swell-wave-fill" fill="rgba(0,212,255,0.06)"/>
                                 <!-- Rüzgar Dalgası çizgisi -->
                                 <path id="wind-wave-path" fill="none" stroke="url(#windWaveGrad)"
-                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
                                     filter="url(#glowOrange)" opacity="0.9"/>
                                 <!-- Swell çizgisi -->
                                 <path id="swell-wave-path" fill="none" stroke="url(#swellGrad)"
-                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
                                     filter="url(#glowCyan)"/>
                                 <!-- Periyot etiketleri -->
                                 <g id="swell-period-ticks"></g>
@@ -4568,6 +4665,136 @@
                     style="background:transparent; color:#888; border:1px solid #444; padding:12px; border-radius:10px; font-size:14px; cursor:pointer;">Daha
                     Sonra Hatırlat</button>
             </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         WAVE INFO MODAL — Dalga Analizi Bilgi Kartı
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div class="modal" id="wave-info-modal" style="z-index:4500;">
+        <div class="wave-info-card">
+
+            <!-- BAŞLIK: Dalga Yönü -->
+            <div class="wave-info-top">
+                <div>
+                    <div style="font-size:0.62rem; color:var(--text-muted); letter-spacing:1px; margin-bottom:5px;">🧭 DALGA GELİŞ YÖNÜ</div>
+                    <div id="wave-info-dir-abbr" style="font-size:1.05rem; font-weight:900; color:var(--cyan); letter-spacing:1px;">--</div>
+                    <div class="wave-info-dir-badge">
+                        <span style="font-size:1.1rem;">🌐</span>
+                        <span id="wave-info-dir-full" style="font-size:0.88rem; font-weight:600; color:var(--text-primary);">--</span>
+                        <span id="wave-info-dir-deg" style="font-size:0.78rem; color:var(--text-muted);">--°</span>
+                    </div>
+                </div>
+                <button class="modal-close-float" style="position:relative; top:0; right:0; flex-shrink:0;" onclick="closeModal('wave-info-modal')">✕</button>
+            </div>
+
+            <!-- BÖLÜM 1: Rüzgar Dalgası -->
+            <div class="wave-info-section">
+                <div class="wave-info-section-title" style="color:#ff9f43;">
+                    <svg width="18" height="10" viewBox="0 0 80 30" style="flex-shrink:0;">
+                        <path id="wim-wind-mini" fill="none" stroke="#ff9f43" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    💨 RÜZGAR DALGASI
+                    <span id="wim-wind-val" style="margin-left:auto; font-size:0.75rem; color:#ff9f43; font-weight:700; letter-spacing:0;"></span>
+                </div>
+
+                <!-- Statik grafik -->
+                <div class="wave-info-svg-wrap">
+                    <svg width="100%" height="56" viewBox="0 0 260 56" preserveAspectRatio="none" style="display:block; overflow:visible;">
+                        <defs>
+                            <linearGradient id="wim-og" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stop-color="#ff9f43"/>
+                                <stop offset="100%" stop-color="#ff6b35"/>
+                            </linearGradient>
+                        </defs>
+                        <line x1="0" y1="28" x2="260" y2="28" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="3,4"/>
+                        <path id="wim-wind-path" fill="rgba(255,159,67,0.08)"/>
+                        <path id="wim-wind-line" fill="none" stroke="url(#wim-og)" stroke-width="1.5" stroke-linecap="round"/>
+                        <!-- Periyot oku -->
+                        <g id="wim-wind-period-g"></g>
+                        <!-- Yükseklik oku -->
+                        <g id="wim-wind-height-g"></g>
+                    </svg>
+                    <div style="display:flex; justify-content:space-between; margin-top:4px;">
+                        <span style="font-size:0.6rem; color:var(--text-muted);">← zaman →</span>
+                        <span id="wim-wind-period-lbl" style="font-size:0.6rem; color:rgba(255,159,67,0.6); font-family:var(--font-mono);">~4s periyot</span>
+                    </div>
+                </div>
+
+                <div class="wave-info-desc">
+                    Yerel rüzgârın su yüzeyini sürtünmeyle iterek oluşturduğu dalgalardır. <strong style="color:var(--text-primary);">Kaynağı yakın, periyodu kısa</strong> (3–6 saniye), formu düzensiz ve köpüklüdür. Okyanus dalgasından bağımsız gelişir.
+                </div>
+
+                <div style="font-size:0.7rem; color:var(--cyan); font-weight:700; letter-spacing:0.5px; margin-bottom:6px;">🎣 AV ETKİSİ</div>
+                <div class="wave-info-pill-row">
+                    <span class="wave-pill good">0.2–0.6m ✓ Levrek &amp; Kefal ideal</span>
+                    <span class="wave-pill ok">0.6–1.2m ⚡ Dikkatli</span>
+                    <span class="wave-pill bad">&gt;1.5m ✗ Görüş sıfır, balık stres</span>
+                </div>
+                <div style="margin-top:8px; font-size:0.78rem; color:var(--text-secondary); line-height:1.5;">
+                    Köpüklü su Levrek için avantaj yaratır — kıyıya yakın pusu kurar. Ancak çok yüksek rüzgar dalgası suyun berraklığını tamamen bozar, olta işe yaramaz.
+                </div>
+            </div>
+
+            <!-- BÖLÜM 2: Okyanus Dalgası -->
+            <div class="wave-info-section">
+                <div class="wave-info-section-title" style="color:var(--cyan);">
+                    <svg width="18" height="10" viewBox="0 0 80 30" style="flex-shrink:0;">
+                        <path id="wim-swell-mini" fill="none" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    🌊 OKYANUS DALGASI (SWELL)
+                    <span id="wim-swell-val" style="margin-left:auto; font-size:0.75rem; color:var(--cyan); font-weight:700; letter-spacing:0;"></span>
+                </div>
+
+                <!-- Statik grafik -->
+                <div class="wave-info-svg-wrap">
+                    <svg width="100%" height="66" viewBox="0 0 260 66" preserveAspectRatio="none" style="display:block; overflow:visible;">
+                        <defs>
+                            <linearGradient id="wim-cg" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stop-color="#00d4ff"/>
+                                <stop offset="100%" stop-color="#00ff88"/>
+                            </linearGradient>
+                        </defs>
+                        <line x1="0" y1="33" x2="260" y2="33" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="3,4"/>
+                        <path id="wim-swell-path" fill="rgba(0,212,255,0.07)"/>
+                        <path id="wim-swell-line" fill="none" stroke="url(#wim-cg)" stroke-width="1.5" stroke-linecap="round"/>
+                        <!-- Periyot oku -->
+                        <g id="wim-swell-period-g"></g>
+                        <!-- Yükseklik oku -->
+                        <g id="wim-swell-height-g"></g>
+                    </svg>
+                    <div style="display:flex; justify-content:space-between; margin-top:4px;">
+                        <span style="font-size:0.6rem; color:var(--text-muted);">← zaman →</span>
+                        <span id="wim-swell-period-lbl" style="font-size:0.6rem; color:rgba(0,212,255,0.6); font-family:var(--font-mono);">-- s periyot</span>
+                    </div>
+                </div>
+
+                <div class="wave-info-desc">
+                    Yüzlerce kilometre uzaktaki fırtınaların ürettiği uzun periyotlu enerji dalgalarıdır. Kaynak ortadan kalktıktan sonra bile <strong style="color:var(--text-primary);">organize ve düzenli</strong> bir şekilde yayılmaya devam eder. Periyodu 8–16 saniyedir, yüzeyi düzgün ve köpüksüzdür.
+                </div>
+
+                <div style="font-size:0.7rem; color:var(--cyan); font-weight:700; letter-spacing:0.5px; margin-bottom:6px;">🎣 AV ETKİSİ</div>
+                <div class="wave-info-pill-row">
+                    <span class="wave-pill good">≥8s periyot ✓ Su altı sakin &amp; berrak</span>
+                    <span class="wave-pill good">Düzenli hareket ✓ Balık aktif</span>
+                    <span class="wave-pill ok">4–7s ⚡ Karışık dalga tipi</span>
+                    <span class="wave-pill bad">≤4s ✗ Rüzgar etkisi baskın</span>
+                </div>
+                <div style="margin-top:8px; font-size:0.78rem; color:var(--text-secondary); line-height:1.5;">
+                    Swell'in su altında yarattığı ritmik hareket balıkların adaptasyon kurduğu bir ortam oluşturur. Av hayvanları (küçük balık, yengeç) saklanmaya çalışır — yırtıcı balıklar bu anlarda çok aktiftir. <strong style="color:#00ff88;">Uzun periyotlu swell balıkçılık için en ideal koşuldur.</strong>
+                </div>
+
+                <!-- Nasıl oluşur -->
+                <div style="margin-top:12px; background:rgba(0,212,255,0.05); border-radius:8px; border:1px solid rgba(0,212,255,0.12); padding:10px 12px;">
+                    <div style="font-size:0.65rem; color:var(--cyan); font-weight:700; letter-spacing:0.5px; margin-bottom:6px;">🌍 NASIL OLUŞUR?</div>
+                    <div style="font-size:0.78rem; color:var(--text-secondary); line-height:1.6;">
+                        Uzak okyanus fırtınası → Rüzgar yüzey sürtünmesiyle enerji aktarır → Dalgalar büyür, organize olur → Fırtına bölgesinden uzaklaşır, kısa dalgalar söner, uzun periyotlular hayatta kalır → Kıyıya <em style="color:var(--text-primary);">swell</em> olarak ulaşır.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alt boşluk -->
+            <div style="height:8px;"></div>
         </div>
     </div>
 
@@ -9488,7 +9715,7 @@
             if (paywall && paywall.style.display === 'flex') { closePaywall(); return true; }
 
             // 2. Standart modallar
-            const modalsToClose = ['metric-modal', 'scan-result-modal', 'scan-modal', 'day-modal', 'weekly-modal', 'tech-modal', 'help-modal'];
+            const modalsToClose = ['metric-modal', 'scan-result-modal', 'scan-modal', 'day-modal', 'weekly-modal', 'tech-modal', 'help-modal', 'wave-info-modal'];
             for (let id of modalsToClose) {
                 const el = document.getElementById(id);
                 if (el && el.style.display === 'flex') {
@@ -9841,7 +10068,160 @@
         })();
 
         // ── DALGA SİNÜS GÖRSELLEŞTİRME ────────────────────────────────────────
+        window._waveInfoData = {};
+
+        function openWaveInfoModal() {
+            const d = window._waveInfoData || {};
+            const modal = document.getElementById('wave-info-modal');
+            if (!modal) return;
+            modal.style.display = 'flex';
+
+            // Yön bilgisi
+            const dirFull = {
+                'K':'Kuzey','KKD':'Kuzey Kuzeydoğu','KD':'Kuzeydoğu','DKD':'Doğu Kuzeydoğu',
+                'D':'Doğu','DGD':'Doğu Güneydoğu','GD':'Güneydoğu','GGD':'Güney Güneydoğu',
+                'G':'Güney','GGB':'Güney Güneybatı','GB':'Güneybatı','BGB':'Batı Güneybatı',
+                'B':'Batı','BKB':'Batı Kuzeybatı','KB':'Kuzeybatı','KKB':'Kuzey Kuzeybatı'
+            };
+            const abbr = d.dirAbbr || '--';
+            const deg  = d.dirDeg  !== undefined ? d.dirDeg : '--';
+            document.getElementById('wave-info-dir-abbr').textContent = abbr + (deg !== '--' ? '  ' + deg + '°' : '');
+            document.getElementById('wave-info-dir-full').textContent = dirFull[abbr] || abbr;
+            document.getElementById('wave-info-dir-deg').textContent  = deg !== '--' ? deg + '°' : '';
+
+            // Değer etiketleri
+            const ww = d.windWaveH || 0, sw = d.swellH || 0, sp = d.swellPeriod || 8;
+            document.getElementById('wim-wind-val').textContent  = ww > 0 ? ww.toFixed(1) + 'm' : '';
+            document.getElementById('wim-swell-val').textContent = sw > 0 ? sw.toFixed(1) + 'm' + (sp ? ' · ' + Math.round(sp) + 's' : '') : '';
+            document.getElementById('wim-swell-period-lbl').textContent = sp ? Math.round(sp) + 's periyot' : '--';
+
+            // Grafikleri çiz
+            _drawWimChart('wind',  ww > 0 ? ww : 0.5, 4,  260, 56, 28);
+            _drawWimChart('swell', sw > 0 ? sw : 1.2, sp, 260, 66, 33);
+
+            // Mini header SVG'leri
+            _drawMiniSine('wim-wind-mini',  0.5, 4,  80, 30, 15, '#ff9f43');
+            _drawMiniSine('wim-swell-mini', 1.2, sp, 80, 30, 15, '#00d4ff');
+        }
+
+        function _drawMiniSine(pathId, h, period, W, H, cy, color) {
+            const el = document.getElementById(pathId);
+            if (!el) return;
+            const totalT = period * 1.8;
+            const amp = Math.min(h * ((cy - 3) / Math.max(h, 0.1)), cy - 3);
+            let d = '';
+            for (let x = 0; x <= W; x += 2) {
+                const y = cy - amp * Math.sin(2 * Math.PI * (x / W) * totalT / period);
+                d += (x === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+            }
+            el.setAttribute('d', d);
+        }
+
+        function _drawWimChart(type, height, period, W, H, cy) {
+            const isWind = type === 'wind';
+            const totalT  = period * (isWind ? 4.5 : 2.2);
+            const maxAmp  = cy - 10;
+            const amp     = Math.min(height * (maxAmp / Math.max(height, 0.1)), maxAmp);
+            const svgNS   = 'http://www.w3.org/2000/svg';
+
+            // Dalga yolları
+            let linePts = [], fillD = '';
+            for (let x = 0; x <= W; x++) {
+                const y = cy - amp * Math.sin(2 * Math.PI * (x / W) * totalT / period);
+                linePts.push(x.toFixed(1) + ',' + y.toFixed(1));
+            }
+            const lineD = 'M ' + linePts.join(' L ');
+            fillD = lineD + ' L ' + W + ',' + cy + ' L 0,' + cy + ' Z';
+
+            document.getElementById('wim-' + type + '-path').setAttribute('d', fillD);
+            document.getElementById('wim-' + type + '-line').setAttribute('d', lineD);
+
+            // Periyot okları — ilk iki tepe
+            const tg = document.getElementById('wim-' + type + '-period-g');
+            const hg = document.getElementById('wim-' + type + '-height-g');
+            if (!tg || !hg) return;
+            tg.innerHTML = ''; hg.innerHTML = '';
+
+            const crestT1 = period / 4;
+            const crestT2 = period / 4 + period;
+            const x1 = (crestT1 / totalT) * W;
+            const x2 = (crestT2 / totalT) * W;
+
+            if (x2 <= W) {
+                const yTop = cy - amp - 6;
+                const color = isWind ? 'rgba(255,159,67,0.5)' : 'rgba(0,212,255,0.5)';
+
+                [[x1, yTop],[x2, yTop]].forEach(([x, y]) => {
+                    const l = document.createElementNS(svgNS, 'line');
+                    l.setAttribute('x1', x.toFixed(1)); l.setAttribute('y1', (cy - amp).toFixed(1));
+                    l.setAttribute('x2', x.toFixed(1)); l.setAttribute('y2', y.toFixed(1));
+                    l.setAttribute('stroke', color); l.setAttribute('stroke-width', '1');
+                    l.setAttribute('stroke-dasharray', '2,2');
+                    tg.appendChild(l);
+                });
+
+                const arr = document.createElementNS(svgNS, 'line');
+                arr.setAttribute('x1', x1.toFixed(1)); arr.setAttribute('y1', yTop.toFixed(1));
+                arr.setAttribute('x2', x2.toFixed(1)); arr.setAttribute('y2', yTop.toFixed(1));
+                arr.setAttribute('stroke', color); arr.setAttribute('stroke-width', '1');
+                tg.appendChild(arr);
+
+                // Ok uçları
+                ['left','right'].forEach((side, i) => {
+                    const ax = i === 0 ? x1 : x2, dir = i === 0 ? 1 : -1;
+                    const ar = document.createElementNS(svgNS, 'path');
+                    ar.setAttribute('d', `M${ax.toFixed(1)},${yTop.toFixed(1)} l${dir*5},-2.5 l0,5 Z`);
+                    ar.setAttribute('fill', color);
+                    tg.appendChild(ar);
+                });
+
+                const lbl = document.createElementNS(svgNS, 'text');
+                lbl.setAttribute('x', ((x1 + x2) / 2).toFixed(1));
+                lbl.setAttribute('y', (yTop - 2.5).toFixed(1));
+                lbl.setAttribute('text-anchor', 'middle');
+                lbl.setAttribute('font-size', '8');
+                lbl.setAttribute('font-weight', '700');
+                lbl.setAttribute('fill', isWind ? 'rgba(255,159,67,0.8)' : 'rgba(0,212,255,0.8)');
+                lbl.setAttribute('font-family', 'JetBrains Mono, monospace');
+                lbl.textContent = Math.round(period) + 's';
+                tg.appendChild(lbl);
+            }
+
+            // Yükseklik göstergesi — sağ kenar dikey çift başlıklı ok
+            if (amp > 8) {
+                const rx = W - 12;
+                const color = isWind ? 'rgba(255,159,67,0.45)' : 'rgba(0,212,255,0.45)';
+                const vl = document.createElementNS(svgNS, 'line');
+                vl.setAttribute('x1', rx.toFixed(1)); vl.setAttribute('y1', (cy - amp).toFixed(1));
+                vl.setAttribute('x2', rx.toFixed(1)); vl.setAttribute('y2', (cy + amp).toFixed(1));
+                vl.setAttribute('stroke', color); vl.setAttribute('stroke-width', '1');
+                vl.setAttribute('stroke-dasharray', '2,2');
+                hg.appendChild(vl);
+
+                const hl = document.createElementNS(svgNS, 'text');
+                hl.setAttribute('x', (rx - 2).toFixed(1));
+                hl.setAttribute('y', cy.toFixed(1));
+                hl.setAttribute('text-anchor', 'end');
+                hl.setAttribute('dominant-baseline', 'middle');
+                hl.setAttribute('font-size', '8');
+                hl.setAttribute('font-weight', '700');
+                hl.setAttribute('fill', isWind ? 'rgba(255,159,67,0.7)' : 'rgba(0,212,255,0.7)');
+                hl.setAttribute('font-family', 'JetBrains Mono, monospace');
+                hl.textContent = height.toFixed(1) + 'm';
+                hg.appendChild(hl);
+            }
+        }
         function drawSwellSineWave(windWaveH, swellH, swellPeriod) {
+            // Yön bilgisini al ve sakla
+            const compassLabel = document.getElementById('wave-compass-label');
+            if (compassLabel) {
+                const parts = (compassLabel.textContent || '').split(' ');
+                window._waveInfoData.dirAbbr = parts[0] || '--';
+                window._waveInfoData.dirDeg  = parseInt(parts[1]) || undefined;
+            }
+            window._waveInfoData.windWaveH   = windWaveH;
+            window._waveInfoData.swellH      = swellH;
+            window._waveInfoData.swellPeriod = swellPeriod;
             const svg = document.getElementById('swell-sine-svg');
             if (!svg) return;
 
