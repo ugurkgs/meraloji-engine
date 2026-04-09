@@ -195,6 +195,130 @@ const cache = new NodeCache({ stdTTL: 10800, checkperiod: 600 }); // 3 saat — 
 // Bathymetry sonuçlarını 24 saat cache'le — aynı bölgede tekrar taramada API çağrısı yok
 const bathyCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
 
+// Substrat sonuçlarını 24 saat cache'le — dip yapısı değişmez
+const substrateCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// EMODnet SEABED HABITATS — Dip Yapısı (Substrat) Analizi
+// EUNIS habitat kodunu basit kategoriye indirger: ROCK | SAND | MUD | SEAGRASS | MIXED
+// API anahtarı gerektirmez, 24 saat cache'lenir.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// EUNIS kod → substrat kategorisi eşlemesi
+function eunisCategoryToSubstrate(code) {
+    if (!code) return null;
+    const c = String(code).toUpperCase().trim();
+    // A1.x, A2.x = kayalık/sert zemin
+    if (c.startsWith('A1') || c.startsWith('A2')) return 'ROCK';
+    // A3.x = circalittoral kaya / yapısal kayalık
+    if (c.startsWith('A3')) return 'ROCK';
+    // A4.x = derin kaya
+    if (c.startsWith('A4')) return 'ROCK';
+    // A5.1x = kaba sediment (çakıl, kum-çakıl)
+    if (c.startsWith('A5.1') || c.startsWith('A51')) return 'SAND';
+    // A5.2x = kum
+    if (c.startsWith('A5.2') || c.startsWith('A52')) return 'SAND';
+    // A5.3x = karışık sediment
+    if (c.startsWith('A5.3') || c.startsWith('A53')) return 'MIXED';
+    // A5.4x = çamur / silt
+    if (c.startsWith('A5.4') || c.startsWith('A54')) return 'MUD';
+    // A5.5x = deniz çayırı (Posidonia vb.)
+    if (c.startsWith('A5.5') || c.startsWith('A55')) return 'SEAGRASS';
+    // A5 genel → karışık
+    if (c.startsWith('A5')) return 'MIXED';
+    // MA = Akdeniz habitat tipleri
+    if (c.includes('POSIDONIA') || c.includes('SEAGRASS')) return 'SEAGRASS';
+    if (c.includes('ROCK') || c.includes('HARD')) return 'ROCK';
+    if (c.includes('SAND')) return 'SAND';
+    if (c.includes('MUD') || c.includes('SOFT')) return 'MUD';
+    return 'MIXED';
+}
+
+async function fetchSubstrate(lat, lon) {
+    const latR = parseFloat(lat).toFixed(3);
+    const lonR = parseFloat(lon).toFixed(3);
+    const ck = `sub_${latR}_${lonR}`;
+    const hit = substrateCache.get(ck);
+    if (hit !== undefined) return hit;
+
+    try {
+        // EMODnet Seabed Habitats WFS — EUNIS habitat haritası
+        const url = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/wfs` +
+            `?service=WFS&version=2.0.0&request=GetFeature` +
+            `&typeNames=emodnet_view:eunis_2022` +
+            `&outputFormat=application/json&count=1` +
+            `&CQL_FILTER=INTERSECTS(geom,POINT(${lonR}%20${latR}))`;
+
+        const res = await fetchWithTimeout(url, 6000);
+        if (!res.ok) { substrateCache.set(ck, null); return null; }
+        const json = await res.json();
+
+        const feature = json?.features?.[0];
+        if (!feature) { substrateCache.set(ck, null); return null; }
+
+        // EUNIS kodu — alan adı versiyona göre değişebilir
+        const props = feature.properties || {};
+        const code = props.eunis_code || props.EUNIS_CODE || props.code_2022 ||
+                     props.level3_code || props.habitat || props.class_name || null;
+
+        const substrate = eunisCategoryToSubstrate(code);
+        console.log(`[SUBSTRATE] (${latR},${lonR}) EUNIS:${code} → ${substrate}`);
+        substrateCache.set(ck, substrate);
+        return substrate;
+    } catch (e) {
+        console.log(`[SUBSTRATE] fetch failed (${latR},${lonR}): ${e.message}`);
+        substrateCache.set(ck, null);
+        return null;
+    }
+}
+
+// ─── Tür Bazlı Substrat Tercihleri ──────────────────────────────────────────
+// Her balık için tercih ettiği dip yapısı. Çakışma varsa bonus, çakışmazsa ceza.
+// null = ilgisiz (substrat skora etki etmez)
+const SUBSTRATE_PREFS = {
+    // Kayalık / sert zemin sevenler
+    levrek:      ['ROCK', 'MIXED'],
+    karagoz:     ['ROCK', 'SEAGRASS', 'MIXED'],
+    cipura:      ['ROCK', 'SEAGRASS'],
+    mercan:      ['ROCK'],
+    orfoz:       ['ROCK'],
+    lahoz:       ['ROCK'],
+    sinagrit:    ['ROCK'],
+    sinarit:     ['ROCK'],
+    fangri:      ['ROCK', 'MIXED'],
+    isparoz:     ['ROCK', 'SEAGRASS'],
+    yayinbaligi: ['MUD', 'MIXED'],
+    kirlangic:   ['SAND', 'MUD'],
+    // Kum / çayır sevenler
+    tekir:       ['SAND', 'SEAGRASS', 'MIXED'],
+    barbun:      ['SAND', 'MUD'],
+    dil:         ['SAND', 'MUD'],
+    kalkan:      ['SAND', 'MUD', 'MIXED'],
+    pisi:        ['SAND', 'MUD'],
+    kefal:       ['MUD', 'MIXED', 'SEAGRASS'],
+    altinbas:    ['SEAGRASS', 'SAND'],
+    // Pelajik (dip yapısı önemsiz)
+    lufer:       null,
+    palamut:     null,
+    torik:       null,
+    kolyoz:      null,
+    istavrit:    null,
+    sarikanat:   null,
+    lapsari:     null,
+    hamsi:       null,
+    sardalya:    null,
+    // Dip türleri
+    mezgit:      ['SAND', 'MUD'],
+    berlam:      ['SAND', 'MUD'],
+    izmarit:     ['ROCK', 'MIXED'],
+    // Kafadanbacaklılar
+    kalamar:     ['SAND', 'MIXED'],
+    ahtapot:     ['ROCK', 'MIXED'],
+    subye:       ['SAND', 'MUD'],
+    murekkepbal: ['SAND', 'MIXED'],
+};
+
+
 // ═══════════════════════════════════════════════════════════════════════
 // OFFLİNE KONUM ANALİZİ — Türkiye + KKTC Şehir Sınırları (turf.js yok)
 // ═══════════════════════════════════════════════════════════════════════
@@ -662,8 +786,10 @@ function haversineKm(lat1, lon1, lat2, lon2) {
 
 function getTempGateMultiplier(tempWater, tempRange) {
     const { min, max } = tempRange;
-    // Sabit 2°C tolerans — tüm türler için aynı, daha sert düşüş
-    const lethalMargin = 2.0;
+    // [DÜZELTİLDİ] 2°C çok keskin — 8°C'de hayatta olan balık 0 skor alıyordu.
+    // 4.5°C: doğada balıklar sınırın 2-3°C dışında hâlâ aktif (azalmış da olsa).
+    // Mevsim geçişlerinde gerçekçi olmayan sıfır skorların önüne geçer.
+    const lethalMargin = 4.5;
     if (tempWater < min) {
         const overshoot = min - tempWater;
         return Math.max(0.0, 1.0 - (overshoot / lethalMargin));
@@ -760,9 +886,27 @@ function calculateMoonlightIntensity(date, lat, lon, cloudCover) {
 }
 
 function estimateThermoclineDepth(sst, month, region) {
-    // Kasım-Mart arası termoklin yok (month: 0=Ocak, 2=Mart, 10=Kasım)
-    if (month >= 10 || month <= 2) return null;
-    // Nisan-Ekim: kuvvet SST'ye bağlı (15°C altında zayıf)
+    // [DÜZELTİLDİ] Mart (2) ve Kasım (10) için zayıf termoklin tahmini eklendi.
+    // Eski kod bu aylarda null döndürüyor, derinlik analizi tamamen devre dışı kalıyordu.
+    // SST < 12°C → gerçekten termoklin yok → null
+    // SST 12-15°C → zayıf geçiş termokline → derin, diffüz
+    // SST > 15°C → aktif termoklin → mevcut formül
+
+    // Aralık-Şubat: Karadeniz dahil hiçbir bölgede termoklin oluşmaz
+    if (month === 11 || month === 0 || month === 1) return null;
+
+    // Mart ve Kasım: SST'ye bağlı karar
+    if (month === 2 || month === 10) {
+        if (!sst || sst < 12) return null;           // Çok soğuk — yok
+        if (sst < 15) {
+            // Zayıf geçiş termokline — geniş, derin
+            const base = region === 'KARADENİZ' ? 35 : region === 'MARMARA' ? 45 : 55;
+            return base;
+        }
+        // 15°C üstünde → normal hesap (aşağıya düş)
+    }
+
+    // Nisan-Ekim + Mart/Kasım sst≥15: kuvvetli SST'ye bağlı aktif termoklin
     const summerStrength = Math.max(0, Math.min(1.2, (sst - 15) / 10));
     const base = region === 'KARADENİZ' ? 10 : region === 'MARMARA' ? 18 : 25;
     return Math.round(base + summerStrength * 20); // KARADENİZ: 10-34m, EGE/AKDENİZ: 25-49m
@@ -1008,9 +1152,26 @@ function calculateActivityWindows(date, lat, lon) {
     const eveningStart = new Date(sunset.getTime() - 2 * 60 * 60 * 1000);
     const eveningEnd = new Date(sunset.getTime() + 60 * 60 * 1000);
 
-    // Gece Avı: 22:00 - 03:00 (sabit, gece balıkları için)
-    const nightStart = "22:00";
-    const nightEnd = "03:00";
+    // Gece Avı: SunCalc nautical dusk/dawn ile dinamik — sabit 22:00-03:00 yerine
+    // Yaz: gün batımı geç → gece 23:00'da başlayabilir. Kış: 17:00'de kararır → 19:00'da gece.
+    let nightStartHour = 22;
+    let nightEndHour = 3;
+    let nightStartStr = "22:00";
+    let nightEndStr = "03:00";
+    try {
+        const nd = sunTimes.nauticalDusk;   // güneş yatay düzlemin 12° altında
+        const na = sunTimes.nauticalDawn;
+        if (nd && !isNaN(nd.getTime())) {
+            const ns = new Date(nd.getTime() + 30 * 60 * 1000); // +30 dk buffer
+            nightStartHour = ns.getHours() + ns.getMinutes() / 60;
+            nightStartStr = formatTime(ns);
+        }
+        if (na && !isNaN(na.getTime())) {
+            const ne = new Date(na.getTime() - 30 * 60 * 1000); // -30 dk buffer
+            nightEndHour = ne.getHours() + ne.getMinutes() / 60;
+            nightEndStr = formatTime(ne);
+        }
+    } catch (_) { /* fallback sabit değerlere */ }
 
     return {
         morning: {
@@ -1026,10 +1187,10 @@ function calculateActivityWindows(date, lat, lon) {
             endHour: eveningEnd.getHours() + eveningEnd.getMinutes() / 60
         },
         night: {
-            start: nightStart,
-            end: nightEnd,
-            startHour: 22,
-            endHour: 3
+            start: nightStartStr,
+            end: nightEndStr,
+            startHour: nightStartHour,
+            endHour: nightEndHour
         },
         sunrise: formatTime(sunrise),
         sunset: formatTime(sunset)
@@ -1044,11 +1205,13 @@ function getHourWeight(hour, activityWindows, fishActivity) {
 
     // Gece balıkları için farklı ağırlık
     if (fishActivity === "NIGHT") {
-        // Gece saatleri (22-03): x3
-        if (hour >= 22 || hour < 3) return 3.0;
-        // Akşam geçişi (19-22): x2
-        if (hour >= 19 && hour < 22) return 2.0;
-        // Gündüz: x0.5
+        const nStart = n.startHour; // dinamik (SunCalc nautical dusk)
+        const nEnd   = n.endHour;   // dinamik (SunCalc nautical dawn)
+        // Gece penceresi: startHour → (gece yarısını geçip) endHour
+        if (hour >= nStart || hour < nEnd) return 3.0;
+        // Gece öncesi geçiş: 3 saat öncesinden yumuşak artış
+        if (hour >= nStart - 3 && hour < nStart) return 2.0;
+        // Gündüz
         return 0.5;
     }
 
@@ -1245,6 +1408,7 @@ function calculateFishScore(fish, key, params) {
         cloudCover, wavePeriod, swellHeight, oceanCurrent, tempShock, uvIndex,
         chlorophyll, thermoclineDepth, moonlightIntensity,
         isBoat,
+        substrate = null,   // EMODnet dip yapısı: ROCK | SAND | MUD | SEAGRASS | MIXED | null
         // YENİ (1D)
         windGust = 0, precipProb = 0, weatherCode = 0, visibility = 20000,
         waveDirection = 0, windWaveHeight = 0, swellPeriod = 0
@@ -1799,6 +1963,24 @@ function calculateFishScore(fish, key, params) {
         }
     }
 
+    // === DİP YAPISI (SUBSTRAT) SKORU — EMODnet Seabed Habitats ===
+    // Tür tercih ettiği dip yapısındaysa %10 bonus, yanlış zeminindeyse %10 ceza.
+    // Pelajik türler (SUBSTRATE_PREFS[key] === null) etkilenmez.
+    // Substrat verisi yoksa (null) etki uygulanmaz — güvenli fallback.
+    if (substrate) {
+        const prefs = SUBSTRATE_PREFS[key];
+        if (prefs !== undefined && prefs !== null) {
+            if (prefs.includes(substrate)) {
+                rawScore *= 1.10; // Tercih edilen zemin — bonus
+                scoreDetails.substrate = { match: true, substrate, multiplier: 1.10 };
+                activeTriggers.push(`${substrate === 'ROCK' ? '🪨 Kayalık' : substrate === 'SAND' ? '🏖️ Kum' : substrate === 'MUD' ? '🟫 Çamur' : substrate === 'SEAGRASS' ? '🌿 Deniz Çayırı' : '⬛ Karışık'} zemin`);
+            } else {
+                rawScore *= 0.90; // Tercih edilmeyen zemin — ceza
+                scoreDetails.substrate = { match: false, substrate, multiplier: 0.90 };
+            }
+        }
+    }
+
     // === FAZ 1.5: KIYI / TEKNE FİLTRESİ ===
     if (!isBoat && depthAvg !== undefined && depthAvg !== null) {
         const strictOffshoreCategories = ['PELAJIK', 'AVCI', 'DIP_DERIN', 'SÜRÜ'];
@@ -1815,9 +1997,13 @@ function calculateFishScore(fish, key, params) {
 
 
     // === FAZ 3: ÖĞLEN BASTIRMASI (Tür Bazlı) ===
+    // [DÜZELTİLDİ] Gece/alacakaranlık balıklarına öğlen cezası uygulanmaz.
+    // Bu balıklar zaten s_activity üzerinden düşük puan alır — çifte ceza gerçekçi değil.
+    // DERİN kategorisi ışıktan bağımsız çalışır, ceza sembolik tutulur.
     const currentHour = hour !== undefined ? hour : (targetDate ? targetDate.getHours() : 12);
     let middayPenalty = 1.0;
-    if (currentHour >= 11 && currentHour <= 15 && timeMode === 'DAY') {
+    const _isNightOrCrep = fish.activity === 'NIGHT' || fish.activity === 'DAWN_DUSK' || fish.activity === 'CREPUSCULAR';
+    if (currentHour >= 11 && currentHour <= 15 && timeMode === 'DAY' && !_isNightOrCrep) {
         const cat = fish.category;
         if (cat === 'KIYI_AVCI' || cat === 'AVCI') {
             middayPenalty = 0.65;
@@ -1830,7 +2016,7 @@ function calculateFishScore(fish, key, params) {
         } else if (cat === 'KAFADANBACAKLI' || cat === 'KALAMAR') {
             middayPenalty = 0.70; // Işığa hassas
         } else if (cat === 'DERİN') {
-            middayPenalty = 0.90; // Derin türler öğlen ışığından az etkilenir
+            middayPenalty = 0.97; // Derin türler ışıktan neredeyse bağımsız
         } else {
             middayPenalty = 0.80;
         }
@@ -1924,11 +2110,13 @@ function calculateFishScore(fish, key, params) {
     //   rawScore = 200 → 99 - 24 * e^(-125/24)≈ 98.8  (hiçbir zaman 99'u geçemez)
     let finalScore = Math.max(5, rawScore);
 
-    if (finalScore > 75) {
+    // [DÜZELTİLDİ] Eşik 75 → 85: Gerçekte 85 alması gereken balık artık 85 görünür.
+    // 75'te sıkıştırma çok erken başlıyordu — dominant tür tespitini bozuyordu.
+    if (finalScore > 85) {
         const asymptote = 99;        // Teorik maksimum — asla ulaşılamaz
-        const diff = asymptote - 75; // 24 birimlik esneme payı
-        const k = 1 / diff;          // Eğim 75'te kesintisiz eşleşir (k = 1/24)
-        finalScore = asymptote - diff * Math.exp(-k * (finalScore - 75));
+        const diff = asymptote - 85; // 14 birimlik esneme payı
+        const k = 1 / diff;          // Eğim 85'te kesintisiz eşleşir
+        finalScore = asymptote - diff * Math.exp(-k * (finalScore - 85));
     }
 
     // Güvenlik amaçlı yuvarlama ve cap
@@ -2039,7 +2227,7 @@ app.get('/api/forecast', async (req, res) => {
         const chlFromCache = chlCachedPre?.exists && (Date.now() - chlCachedPre.data().savedAt < 6 * 60 * 60 * 1000)
             ? chlCachedPre.data().result : null;
 
-        let [weather, marine, bathymetryRes, chlorophyllDataPre, sstSatPre] = await Promise.all([
+        let [weather, marine, bathymetryRes, chlorophyllDataPre, sstSatPre, substrateData] = await Promise.all([
             cache.get(`raw_weather_${gLat}_${gLon}`)
                 ? Promise.resolve(cache.get(`raw_weather_${gLat}_${gLon}`))
                 : deduplicatedFetch(`w_${gLat}_${gLon}`, () => queuedFetch(weatherUrl)),
@@ -2048,7 +2236,8 @@ app.get('/api/forecast', async (req, res) => {
                 : deduplicatedFetch(`m_${gLat}_${gLon}`, () => queuedFetch(marineUrl)),
             skipBathymetry ? Promise.resolve(null) : fetchWithTimeout(bathymetryUrl).catch(() => null),
             chlFromCache ? Promise.resolve(chlFromCache) : fetchChlorophyll(lat, lon).catch(() => null),
-            fetchSatelliteSST(lat, lon).catch(() => null)
+            fetchSatelliteSST(lat, lon).catch(() => null),
+            fetchSubstrate(lat, lon).catch(() => null)
         ]);
 
         // Fallback: gelişmiş URL başarısızsa basit URL dene
@@ -2369,6 +2558,7 @@ app.get('/api/forecast', async (req, res) => {
                     thermoclineDepth,
                     moonlightIntensity,
                     isBoat,
+                    substrate: substrateData,
                     // YENİ (1C)
                     windGust, precipProb, weatherCode, visibility,
                     waveDirection, windWaveHeight, swellPeriod
@@ -2732,6 +2922,7 @@ app.get('/api/forecast', async (req, res) => {
             version: "F.I.S.H. v3.0", region: regionName, isLand, landReason, clickHour: correctedClickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
             depth: depthData,        // EMODnet Bathymetry derinlik verisi
+            substrate: substrateData, // EMODnet Seabed Habitats dip yapısı
             snapInfo,                // null veya { distanceM, snapLat, snapLon } — kıyı snap bilgisi
             forecast: sanitizedForecast,
             instant: sanitizedInstant,
@@ -2802,13 +2993,16 @@ app.get('/api/fish-search', async (req, res) => {
 
         const regionName = getRegion(latF, lonF);
 
+        const { gLat, gLon } = snapToGrid(latF, lonF);
+
         const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_gusts_10m,surface_pressure,cloud_cover,rain,precipitation_probability,weather_code,visibility,uv_index&past_days=1&timezone=auto`);
-        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`);
+        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`;
 
+        // [CACHE] forecast endpoint daha önce aynı noktayı çektiyse ham veriyi kullan — OM'a gitme
         let [weather, marine, bathymetryRes] = await Promise.all([
-            queuedFetch(weatherUrl),
-            queuedFetch(marineUrl),
+            cache.get(`raw_weather_${gLat}_${gLon}`) ? Promise.resolve(cache.get(`raw_weather_${gLat}_${gLon}`)) : queuedFetch(weatherUrl),
+            cache.get(`raw_marine_${gLat}_${gLon}`)  ? Promise.resolve(cache.get(`raw_marine_${gLat}_${gLon}`))  : queuedFetch(marineUrl),
             skipBathymetry ? Promise.resolve(null) : fetchWithTimeout(bathymetryUrl).catch(() => null)
         ]);
 
@@ -2816,13 +3010,13 @@ app.get('/api/fish-search', async (req, res) => {
             weather = await safeFetchJSON(omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain&past_days=1&timezone=auto`));
         }
         if (!marine || marine.error) {
-            marine = await safeFetchJSON(omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=1&timezone=auto`));
+            marine = await safeFetchJSON(omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=7&timezone=auto`));
         }
         if (!weather) return res.status(503).json({ error: 'API_UNAVAILABLE' });
         if (!marine) {
             console.log('[FALLBACK] fish-search Marine API failed, using defaults');
             const _currentMonth = new Date().getMonth();
-            const _hourCount = 24 * 3;
+            const _hourCount = 24 * 9; // past_days=7 + 2 gün ileriye
             marine = {
                 utc_offset_seconds: weather.utc_offset_seconds || 10800,
                 hourly: {
@@ -2832,7 +3026,7 @@ app.get('/api/fish-search', async (req, res) => {
                     swell_wave_height: new Array(_hourCount).fill(0.2),
                     sea_surface_temperature: new Array(_hourCount).fill(getDefaultWaterTemp(regionName, _currentMonth))
                 },
-                daily: { wave_height_max: new Array(3).fill(0.3) }
+                daily: { wave_height_max: new Array(9).fill(0.3) }
             };
         }
 
@@ -2899,12 +3093,16 @@ app.get('/api/fish-search', async (req, res) => {
             return res.json({ error: 'land', message: landReason === 'CERTAIN_LAND' ? 'Burası kara parçası' : (landReason || 'Burası kara parçası') });
         }
 
-        const hourlyOffset = 24;
+        const hourlyOffset = 24;          // weather: past_days=1 → bugün = indeks 24
         const hourlyIdx = hourlyOffset + clickHour;
 
-        const rawWaterTemp = marine.hourly?.sea_surface_temperature?.[hourlyIdx];
+        // Marine: past_days=7 → bugünün başlangıcını time dizisinden bul (genellikle 168)
+        const marineHourlyOffset = findTodayIndex(marine.hourly.time);
+        const marineHourlyIdx = marineHourlyOffset + clickHour;
+
+        const rawWaterTemp = marine.hourly?.sea_surface_temperature?.[marineHourlyIdx];
         const tempWater = safeWaterTemp(rawWaterTemp, regionName, now.getMonth());
-        const wave = safeNum(marine.hourly?.wave_height?.[hourlyIdx]);
+        const wave = safeNum(marine.hourly?.wave_height?.[marineHourlyIdx]);
         const windSpeed = safeNum(weather.hourly?.wind_speed_10m?.[hourlyIdx]);
         const windDir = safeNum(weather.daily?.wind_direction_10m_dominant?.[1]);
         const pressure = safeNum(weather.hourly?.surface_pressure?.[hourlyIdx], 1013);
@@ -2915,18 +3113,18 @@ app.get('/api/fish-search', async (req, res) => {
         const currentEst = estimateCurrent(wave, windSpeed, regionName);
 
         // [YENİ] Marine hourly
-        const wavePeriod = safeNum(marine.hourly?.wave_period?.[hourlyIdx]);
-        const swellHeight = safeNum(marine.hourly?.swell_wave_height?.[hourlyIdx]);
-        const oceanCurrent = marine.hourly?.ocean_current_velocity?.[hourlyIdx] ?? null;
-        const tempShock = calculateTempShock(marine, hourlyOffset);
+        const wavePeriod = safeNum(marine.hourly?.wave_period?.[marineHourlyIdx]);
+        const swellHeight = safeNum(marine.hourly?.swell_wave_height?.[marineHourlyIdx]);
+        const oceanCurrent = marine.hourly?.ocean_current_velocity?.[marineHourlyIdx] ?? null;
+        const tempShock = calculateTempShock(marine, marineHourlyOffset);
         // YENİ (1C)
         const windGust = safeNum(weather.hourly?.wind_gusts_10m?.[hourlyIdx]);
         const precipProb = safeNum(weather.hourly?.precipitation_probability?.[hourlyIdx]);
         const weatherCode = safeNum(weather.hourly?.weather_code?.[hourlyIdx]);
         const visibility = safeNum(weather.hourly?.visibility?.[hourlyIdx], 20000);
-        const waveDirection = safeNum(marine.hourly?.wave_direction?.[hourlyIdx]);
-        const windWaveHeight = safeNum(marine.hourly?.wind_wave_height?.[hourlyIdx]);
-        const swellPeriod = safeNum(marine.hourly?.swell_wave_period?.[hourlyIdx]);
+        const waveDirection = safeNum(marine.hourly?.wave_direction?.[marineHourlyIdx]);
+        const windWaveHeight = safeNum(marine.hourly?.wind_wave_height?.[marineHourlyIdx]);
+        const swellPeriod = safeNum(marine.hourly?.swell_wave_period?.[marineHourlyIdx]);
 
         const sunTimes = SunCalc.getTimes(now, latF, lonF);
         const timeMode = getTimeOfDay(clickHour, sunTimes);
@@ -2943,6 +3141,9 @@ app.get('/api/fish-search', async (req, res) => {
 
         const salinity = getSalinity(regionName);  // baseParams'tan önce tanımlanmalı
 
+        // Substrat — paralel çek (24h cache'li, yavaş değil)
+        const substrateData = await fetchSubstrate(latF, lonF).catch(() => null);
+
         const baseParams = {
             tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
             timeMode, solunar, region: regionName, targetDate: now, isInstant: true,
@@ -2957,6 +3158,7 @@ app.get('/api/fish-search', async (req, res) => {
             swellHeight,
             oceanCurrent,
             tempShock,
+            substrate: substrateData,
             // YENİ (1C)
             windGust, precipProb, weatherCode, visibility,
             waveDirection, windWaveHeight, swellPeriod,
@@ -2989,7 +3191,7 @@ app.get('/api/fish-search', async (req, res) => {
         try {
             const activityWindows = calculateActivityWindows(now, parseFloat(latF), parseFloat(lonF));
             const dailyResult = calculateWeightedDailyScore(
-                fish, fishKey, baseParams, weather, marine, activityWindows, hourlyOffset
+                fish, fishKey, baseParams, weather, marine, activityWindows, hourlyOffset, marineHourlyOffset
             );
             dailyScore = dailyResult.score;
             bestHour = dailyResult.bestHour >= 0 ? `${String(dailyResult.bestHour).padStart(2, '0')}:00` : null;
@@ -3434,7 +3636,7 @@ async function fetchCenterWeather(lat, lon) {
     const latF = parseFloat(lat).toFixed(4);
     const lonF = parseFloat(lon).toFixed(4);
     const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_gusts_10m,surface_pressure,cloud_cover,rain,precipitation_probability,weather_code,visibility,uv_index&past_days=1&timezone=auto`);
-    const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`);
+    const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
 
     let [weather, marine] = await Promise.all([queuedFetch(weatherUrl), queuedFetch(marineUrl)]);
 
@@ -3442,7 +3644,7 @@ async function fetchCenterWeather(lat, lon) {
         weather = await safeFetchJSON(omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,surface_pressure,cloud_cover,rain&past_days=1&timezone=auto`));
     }
     if (!marine || marine.error) {
-        marine = await safeFetchJSON(omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=1&timezone=auto`));
+        marine = await safeFetchJSON(omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature&past_days=7&timezone=auto`));
     }
 
     if (!weather || !marine) throw new Error('API_UNAVAILABLE');
@@ -3577,9 +3779,14 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
 
         const hourlyOffset = 24;
         const hourlyIdx = hourlyOffset + clickHour;
-        const rawWaterTemp = marine.hourly?.sea_surface_temperature?.[hourlyIdx];
+
+        // Marine: past_days=7 → bugünün başlangıcını time dizisinden bul
+        const marineHourlyOffset = findTodayIndex(marine.hourly.time);
+        const marineHourlyIdx = marineHourlyOffset + clickHour;
+
+        const rawWaterTemp = marine.hourly?.sea_surface_temperature?.[marineHourlyIdx];
         const tempWater = safeWaterTemp(rawWaterTemp, regionName, now.getMonth());
-        const wave = safeNum(marine.hourly?.wave_height?.[hourlyIdx]);
+        const wave = safeNum(marine.hourly?.wave_height?.[marineHourlyIdx]);
         const windSpeed = safeNum(weather.hourly?.wind_speed_10m?.[hourlyIdx]);
         const windDir = safeNum(weather.daily?.wind_direction_10m_dominant?.[1]);
         const pressure = safeNum(weather.hourly?.surface_pressure?.[hourlyIdx], 1013);
@@ -3595,18 +3802,18 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
         const moon = SunCalc.getMoonIllumination(now);
 
         // [YENİ] Marine hourly
-        const wavePeriod = safeNum(marine.hourly?.wave_period?.[hourlyIdx]);
-        const swellHeight = safeNum(marine.hourly?.swell_wave_height?.[hourlyIdx]);
-        const oceanCurrent = marine.hourly?.ocean_current_velocity?.[hourlyIdx] ?? null;
-        const tempShock = calculateTempShock(marine, hourlyOffset);
+        const wavePeriod = safeNum(marine.hourly?.wave_period?.[marineHourlyIdx]);
+        const swellHeight = safeNum(marine.hourly?.swell_wave_height?.[marineHourlyIdx]);
+        const oceanCurrent = marine.hourly?.ocean_current_velocity?.[marineHourlyIdx] ?? null;
+        const tempShock = calculateTempShock(marine, marineHourlyOffset);
         // YENİ (1C)
         const windGust_s = safeNum(weather.hourly?.wind_gusts_10m?.[hourlyIdx]);
         const precipProb_s = safeNum(weather.hourly?.precipitation_probability?.[hourlyIdx]);
         const weatherCode_s = safeNum(weather.hourly?.weather_code?.[hourlyIdx]);
         const visibility_s = safeNum(weather.hourly?.visibility?.[hourlyIdx], 20000);
-        const waveDirection_s = safeNum(marine.hourly?.wave_direction?.[hourlyIdx]);
-        const windWaveHeight_s = safeNum(marine.hourly?.wind_wave_height?.[hourlyIdx]);
-        const swellPeriod_s = safeNum(marine.hourly?.swell_wave_period?.[hourlyIdx]);
+        const waveDirection_s = safeNum(marine.hourly?.wave_direction?.[marineHourlyIdx]);
+        const windWaveHeight_s = safeNum(marine.hourly?.wind_wave_height?.[marineHourlyIdx]);
+        const swellPeriod_s = safeNum(marine.hourly?.swell_wave_period?.[marineHourlyIdx]);
 
         const params = {
             tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
@@ -3634,6 +3841,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
             moonlightIntensity: calculateMoonlightIntensity(now, parseFloat(latF), parseFloat(lonF), cloud),
             chlorophyll: null,
             isBoat: false,
+            substrate: substrateCache.get(`sub_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`) ?? null,
             // YENİ (1C)
             windGust: windGust_s, precipProb: precipProb_s, weatherCode: weatherCode_s,
             visibility: visibility_s, waveDirection: waveDirection_s,
@@ -3642,7 +3850,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
 
         // Günlük ağırlıklı skor için activityWindows ve hourlyStartIdx
         const activityWindows = calculateActivityWindows(now, parseFloat(latF), parseFloat(lonF));
-        const hourlyStartIdx = 24; // today = past_days=1 offset
+        const hourlyStartIdx = 24; // today = past_days=1 offset (weather)
 
         if (!fishKey) {
             let topScore = 0;
@@ -3651,7 +3859,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
             for (const [key, fish] of Object.entries(SPECIES_DB)) {
                 if (!fish.regions.includes(regionName) && regionName !== 'AÇIK DENİZ') continue;
                 try {
-                    const dailyResult = calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx);
+                    const dailyResult = calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset);
                     const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
                     if (score > 0) allFishScores.push({ name: fish.name, score });
                     if (score > topScore) { topScore = score; topFishName = fish.name; }
@@ -3667,7 +3875,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
             if (!fish) return null;
             if (!fish.regions.includes(regionName) && regionName !== 'AÇIK DENİZ') return null;
             try {
-                const dailyResult = calculateWeightedDailyScore(fish, fishKey, params, weather, marine, activityWindows, hourlyStartIdx);
+                const dailyResult = calculateWeightedDailyScore(fish, fishKey, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset);
                 const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
                 const depthVal = depthAvg ? Math.round(depthAvg) : null;
                 const zone = !depthVal ? null : depthVal < 5 ? 'Sığ Kum' : depthVal < 15 ? 'Sığ Kaya' : depthVal < 40 ? 'Orta Su' : 'Derin Su';
@@ -3784,7 +3992,10 @@ app.get('/api/scan', async (req, res) => {
         try {
             sendEvent({ type: 'progress', pct: 0, done: 0, total, lastPoint: null, status: 'Hava verisi alınıyor...' });
             if (res.flush) res.flush();
-            const wd = await fetchCenterWeather(centerLat, centerLon);
+            const [wd] = await Promise.all([
+                fetchCenterWeather(centerLat, centerLon),
+                fetchSubstrate(centerLat, centerLon).catch(() => null) // merkez nokta substratını cache'e yaz
+            ]);
             centerWeather = wd.weather;
             centerMarine = wd.marine;
         } catch (e) {
