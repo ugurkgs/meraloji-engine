@@ -3803,7 +3803,7 @@
 
                         <!-- Sinüs Dalga Görselleştirme -->
                         <div style="position:relative; width:100%;">
-                            <svg id="swell-sine-svg" width="100%" height="92" viewBox="0 0 280 92"
+                            <svg id="swell-sine-svg" width="100%" height="74" viewBox="0 0 280 74"
                                 preserveAspectRatio="none"
                                 style="display:block; overflow:visible;">
                                 <defs>
@@ -3825,7 +3825,7 @@
                                     </filter>
                                 </defs>
                                 <!-- Merkez çizgi -->
-                                <line x1="0" y1="48" x2="280" y2="48"
+                                <line x1="0" y1="37" x2="280" y2="37"
                                     stroke="rgba(255,255,255,0.07)" stroke-width="1" stroke-dasharray="3,5"/>
                                 <!-- Rüzgar Dalgası fill alanı -->
                                 <path id="wind-wave-fill" fill="rgba(255,159,67,0.06)"/>
@@ -3837,7 +3837,7 @@
                                     filter="url(#glowOrange)" opacity="0.9"/>
                                 <!-- Swell çizgisi -->
                                 <path id="swell-wave-path" fill="none" stroke="url(#swellGrad)"
-                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
                                     filter="url(#glowCyan)"/>
                                 <!-- Periyot etiketleri -->
                                 <g id="swell-period-ticks"></g>
@@ -3863,7 +3863,7 @@
                                     <path d="M0,4 C5,0 15,0 20,4" fill="none"
                                         stroke="url(#swellGrad)" stroke-width="2.5" stroke-linecap="round"/>
                                 </svg>
-                                <span style="font-size:0.63rem; color:var(--text-secondary);">🌊 Swell</span>
+                                <span style="font-size:0.63rem; color:var(--text-secondary);">🌊 Okyanus Dalgası</span>
                                 <span id="swell-val"
                                     style="font-size:0.68rem; color:var(--cyan); font-weight:700;">--</span>
                             </div>
@@ -9845,7 +9845,7 @@
             const svg = document.getElementById('swell-sine-svg');
             if (!svg) return;
 
-            const W = 280, H = 92, cy = 48;
+            const W = 280, H = 74, cy = 37;
             // Rüzgar dalgası kısa periyot — varsayılan ~4s
             const windPeriod = 4;
             // Gösterim zaman penceresi: swell'in 2 tam döngüsü
