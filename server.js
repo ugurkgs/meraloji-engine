@@ -260,143 +260,90 @@ async function fetchSubstrate(lat, lon) {
     if (hit !== undefined) return hit;
 
     // ═══════════════════════════════════════════════════════════════════════
-    // Yöntem 1: emodnet_open WFS — eusm2021_subs (EUSeaMap 2021 Substrate)
-    // GetCapabilities'te doğrulanmış katman adı. Folk5 substrat sınıflaması içerir:
-    // "Rock", "Coarse", "Sand", "Mixed", "Muddy sand", "Sandy mud", "Mud", "Biogenic"
-    // 24h cache'li, production'da tekrar sorgu yok.
+    // Yöntem 1: WMS GetFeatureInfo — eusm2025_subs_full (EN GÜNCEL VERİ)
+    // EMODnet Seabed Habitats 2025 Dip Yapısı (Substrate) Katmanı
+    // ═══════════════════════════════════════════════════════════════════════
+    try {
+        // Tıklanan noktanın etrafında çok küçük bir Bounding Box (BBOX) oluşturuyoruz
+        const delta = 0.001; 
+        const minLon = (parseFloat(lon) - delta).toFixed(4);
+        const minLat = (parseFloat(lat) - delta).toFixed(4);
+        const maxLon = (parseFloat(lon) + delta).toFixed(4);
+        const maxLat = (parseFloat(lat) + delta).toFixed(4);
+        const bboxStr = `${minLon},${minLat},${maxLon},${maxLat}`;
+
+        // 101x101 px bir alanın tam ortasına (50, 50) tıklandığını simüle ediyoruz
+        const wmsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/ows` +
+            `?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
+            `&LAYERS=eusm2025_subs_full&QUERY_LAYERS=eusm2025_subs_full` +
+            `&INFO_FORMAT=application/json` +
+            `&I=50&J=50&WIDTH=101&HEIGHT=101&CRS=CRS:84` +
+            `&FEATURE_COUNT=1&BBOX=${bboxStr}`;
+
+        const res = await fetchWithTimeout(wmsUrl, 10000);
+        if (res.ok) {
+            const json = await res.json();
+            const feature = json?.features?.[0];
+            
+            if (feature) {
+                const props = feature.properties || {};
+                
+                // API'den dönen "Substrate" verisini al (Örn: "Mud", "Coarse & mixed sediment", "Rock")
+                const code = props.Substrate || props.Description || props.AllcombD || null;
+                
+                if (code) {
+                    // Meraloji sistemine (ROCK/SAND/MUD/MIXED/SEAGRASS) çevir
+                    const substrate = eunisCategoryToSubstrate(code);
+                    if (substrate) {
+                        console.log(`[SUBSTRATE-2025] (${latR},${lonR}) Ham: "${code}" → İşlenen: ${substrate}`);
+                        substrateCache.set(ck, substrate);
+                        return substrate;
+                    }
+                }
+            }
+        }
+    } catch (e) {
+        console.log(`[SUBSTRATE-2025] WMS fail (${latR},${lonR}): ${e.message}`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Yöntem 2: FALLBACK (Yedek) — WFS emodnet_open:msfd_bbht
+    // Eğer 2025 WMS servisi yanıt vermezse eski WFS'ten veriyi çeker
     // ═══════════════════════════════════════════════════════════════════════
     try {
         const wfsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_open/wfs` +
             `?service=WFS&version=2.0.0&request=GetFeature` +
-            `&typeNames=emodnet_open:eusm2021_subs` +
+            `&typeNames=emodnet_open:msfd_bbht` +
             `&outputFormat=application/json&count=1` +
             `&CQL_FILTER=INTERSECTS(geom,POINT(${lonR}%20${latR}))`;
 
-        const res = await fetchWithTimeout(wfsUrl, 12000);
+        const res = await fetchWithTimeout(wfsUrl, 10000);
         if (res.ok) {
             const json = await res.json();
             const feature = json?.features?.[0];
             if (feature) {
                 const props = feature.properties || {};
-                // eusm2021_subs alan adları: Folk_5, SubClass, substrate, subst_class, Folk5
-                const code = props.Folk_5 || props.SubClass || props.substrate ||
-                             props.subst_class || props.Folk5 || props.subst ||
-                             props.hab_type || props.class_name || null;
-                console.log(`[SUBSTRATE-WFS1] raw props keys: ${Object.keys(props).join(',')}`);
+                const code = props.AllcombD || props.bbht_class || props.substrate ||
+                             props.habitatType || props.MSFD_BBHT || props.hab_type ||
+                             props.class_name || null;
+                             
                 const substrate = eunisCategoryToSubstrate(code);
                 if (substrate) {
-                    console.log(`[SUBSTRATE-WFS1] (${latR},${lonR}) kod:"${code}" → ${substrate}`);
+                    console.log(`[SUBSTRATE-WFS-FALLBACK] (${latR},${lonR}) kod:"${code}" → ${substrate}`);
                     substrateCache.set(ck, substrate);
                     return substrate;
                 }
-                // Eğer bilinen alan bulunamazsa tüm prop'ları tara
-                for (const val of Object.values(props)) {
-                    if (typeof val === 'string' && val.length > 2) {
-                        const s = eunisCategoryToSubstrate(val);
-                        if (s) {
-                            console.log(`[SUBSTRATE-WFS1] (${latR},${lonR}) scan:"${val}" → ${s}`);
-                            substrateCache.set(ck, s);
-                            return s;
-                        }
-                    }
-                }
-            }
-        } else {
-            console.log(`[SUBSTRATE-WFS1] HTTP ${res.status} — (${latR},${lonR})`);
-        }
-    } catch (e) {
-        console.log(`[SUBSTRATE-WFS1] fail (${latR},${lonR}): ${e.message}`);
-    }
-
-    // ── Yöntem 2: WMS GetFeatureInfo — eusm2023_eunis2019_l2_200 ─────────
-    // emodnet_view WMS — EUSeaMap 2023 EUNIS 2019 Seviye 2, 200m simplification
-    // text/plain formatı isteniyor (JSON yerine) — XML ServiceException'ı önler
-    try {
-        const delta = 0.01;
-        const minX = (parseFloat(lonR) - delta).toFixed(4);
-        const minY = (parseFloat(latR) - delta).toFixed(4);
-        const maxX = (parseFloat(lonR) + delta).toFixed(4);
-        const maxY = (parseFloat(latR) + delta).toFixed(4);
-        const wmsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/wms` +
-            `?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
-            `&LAYERS=eusm2023_eunis2019_l2_200&QUERY_LAYERS=eusm2023_eunis2019_l2_200` +
-            `&INFO_FORMAT=text/plain` +
-            `&I=5&J=5&WIDTH=11&HEIGHT=11&CRS=CRS:84` +
-            `&BBOX=${minX},${minY},${maxX},${maxY}`;
-
-        const res = await fetchWithTimeout(wmsUrl, 10000);
-        if (res.ok) {
-            const text = await res.text();
-            // text/plain yanıtı: "GetFeatureInfo results:\n\nLayer: ...\nFeature 0:\n  AllcombD = MA5\n"
-            if (text && !text.includes('<?xml') && !text.includes('no features')) {
-                console.log(`[SUBSTRATE-WMS] raw text: ${text.slice(0, 300)}`);
-                // Alan=değer satırlarını parse et
-                const lines = text.split('\n');
-                for (const line of lines) {
-                    const match = line.match(/^\s*(\w+)\s*=\s*(.+)$/);
-                    if (match) {
-                        const val = match[2].trim();
-                        const s = eunisCategoryToSubstrate(val);
-                        if (s) {
-                            console.log(`[SUBSTRATE-WMS] (${latR},${lonR}) "${match[1]}=${val}" → ${s}`);
-                            substrateCache.set(ck, s);
-                            return s;
-                        }
-                    }
-                }
             }
         }
     } catch (e) {
-        console.log(`[SUBSTRATE-WMS] fail (${latR},${lonR}): ${e.message}`);
+        console.log(`[SUBSTRATE-WFS-FALLBACK] fail (${latR},${lonR}): ${e.message}`);
     }
 
-    // ── Yöntem 3: WFS emodnet_view — eusm2023 (EUSeaMap 2023 tam katman) ─
-    // emodnet_view workspace'i EUSeaMap ana ürünlerini barındırır (R emodnet.wfs belgesi)
-    try {
-        const wfsUrl2 = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/wfs` +
-            `?service=WFS&version=2.0.0&request=GetFeature` +
-            `&typeNames=emodnet_view:eusm2021` +
-            `&outputFormat=application/json&count=1` +
-            `&CQL_FILTER=INTERSECTS(geom,POINT(${lonR}%20${latR}))`;
-
-        const res = await fetchWithTimeout(wfsUrl2, 12000);
-        if (res.ok) {
-            const json = await res.json();
-            const feature = json?.features?.[0];
-            if (feature) {
-                const props = feature.properties || {};
-                console.log(`[SUBSTRATE-WFS3] raw props: ${JSON.stringify(props).slice(0,300)}`);
-                const code = props.AllcombD || props.MSFD_BBHT || props.eunis_l2 ||
-                             props.hab_type || props.substrate || null;
-                const substrate = eunisCategoryToSubstrate(code);
-                if (substrate) {
-                    console.log(`[SUBSTRATE-WFS3] (${latR},${lonR}) kod:"${code}" → ${substrate}`);
-                    substrateCache.set(ck, substrate);
-                    return substrate;
-                }
-                for (const val of Object.values(props)) {
-                    if (typeof val === 'string' && val.length > 2) {
-                        const s = eunisCategoryToSubstrate(val);
-                        if (s) {
-                            console.log(`[SUBSTRATE-WFS3] (${latR},${lonR}) → ${s}`);
-                            substrateCache.set(ck, s);
-                            return s;
-                        }
-                    }
-                }
-            }
-        } else {
-            console.log(`[SUBSTRATE-WFS3] HTTP ${res.status} — (${latR},${lonR})`);
-        }
-    } catch (e) {
-        console.log(`[SUBSTRATE-WFS3] fail (${latR},${lonR}): ${e.message}`);
-    }
-
-    console.log(`[SUBSTRATE] (${latR},${lonR}) tüm yöntemler başarısız — null`);
+    // İki yöntem de başarısız olursa
+    console.log(`[SUBSTRATE] (${latR},${lonR}) tüm yöntemler başarısız — null döndürüldü`);
     substrateCache.set(ck, null);
     return null;
 }
-
 // ─── Tür Bazlı Substrat Tercihleri ──────────────────────────────────────────
 // Her balık için tercih ettiği dip yapısı. Çakışma varsa bonus, çakışmazsa ceza.
 // null = ilgisiz (substrat skora etki etmez)
