@@ -209,6 +209,29 @@ function eunisCategoryToSubstrate(code) {
     if (!code) return null;
     const c = String(code).toUpperCase().trim();
 
+    // ── EUSeaMap 2025 / 2023 Tam Substrate Değerleri (öncelikli eşleşme) ──
+    // Kaynak: eusm2025_subs_full layer, Substrate alanı
+    // Doğrulanmış değerler: "Coarse & mixed sediment", "Rock and biogenic reef", vb.
+    const EXACT = {
+        'ROCK AND BIOGENIC REEF':    'ROCK',
+        'ROCK':                      'ROCK',
+        'HARD SUBSTRATE':            'ROCK',
+        'SAND':                      'SAND',
+        'COARSE SEDIMENT':           'SAND',
+        'COARSE & MIXED SEDIMENT':   'SAND',
+        'COARSE AND MIXED SEDIMENT': 'SAND',
+        'MIXED SEDIMENT':            'MIXED',
+        'MUD':                       'MUD',
+        'MUDDY SAND':                'MUD',
+        'FINE MUD':                  'MUD',
+        'SANDY MUD':                 'MUD',
+        'SEAGRASS':                  'SEAGRASS',
+        'SEAGRASS MEADOW':           'SEAGRASS',
+        'POSIDONIA OCEANICA':        'SEAGRASS',
+        'BIOGENIC':                  'ROCK',
+    };
+    if (EXACT[c]) return EXACT[c];
+
     // ── EUNIS 2019 Seviye 2 kodları (EUSeaMap 2021/2023) ──────────────────
     // MA = Hard substrate (kayalık/sert zemin)
     if (c.startsWith('MA')) return 'ROCK';
@@ -238,112 +261,121 @@ function eunisCategoryToSubstrate(code) {
     if (c.startsWith('A5.5') || c.startsWith('A55')) return 'SEAGRASS';
     if (c.startsWith('A5')) return 'MIXED';
 
-    // ── Folk5 / eusm2021_subs substrat sınıflaması ────────────────────────
-    // eusm2021_subs katmanının Folk_5 alanından gelen değerler
-    if (c === 'ROCK' || c === 'BEDROCK') return 'ROCK';
-    if (c === 'COARSE') return 'SAND';         // Kaba sediman
-    if (c === 'SAND') return 'SAND';
-    if (c === 'MUDDY SAND' || c === 'MUDDYSAND') return 'SAND';
-    if (c === 'SANDY MUD' || c === 'SANDYMUD') return 'MUD';
-    if (c === 'MUD') return 'MUD';
-    if (c === 'BIOGENIC') return 'SEAGRASS';
-    if (c === 'MIXED' || c === 'MIXED SEDIMENT' || c === 'MIXEDSEDIMENT') return 'MIXED';
-
     return null; // bilinmiyor — null dönünce dip yapısı gösterilmez
 }
 
 async function fetchSubstrate(lat, lon) {
-    const latR = parseFloat(lat).toFixed(3);
-    const lonR = parseFloat(lon).toFixed(3);
-    const ck = `sub_${latR}_${lonR}`;
+    const latR = parseFloat(lat).toFixed(4);
+    const lonR = parseFloat(lon).toFixed(4);
+    const ck = `sub_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`;
     const hit = substrateCache.get(ck);
     if (hit !== undefined) return hit;
 
     // ═══════════════════════════════════════════════════════════════════════
-    // Yöntem 1: WMS GetFeatureInfo — eusm2025_subs_full (EN GÜNCEL VERİ)
-    // EMODnet Seabed Habitats 2025 Dip Yapısı (Substrate) Katmanı
+    // EMODnet Seabed Habitats — WMS GetFeatureInfo
+    // Layer: eusm2025_subs_full (EUSeaMap 2025 Substrate — en güncel)
+    // Workspace: emodnet_view/ows
+    // INFO_FORMAT: text/html — JSON yok, HTML table parse ediliyor
+    // Grid: 101x101, I=50 J=50 → merkez piksel = tam koordinat
+    // Doğrulanmış çalışan endpoint: kullanıcı tarafından test edildi
     // ═══════════════════════════════════════════════════════════════════════
+    const delta = 0.001; // ~100m her yönde
+    const minLon = (parseFloat(lonR) - delta).toFixed(4);
+    const minLat = (parseFloat(latR) - delta).toFixed(4);
+    const maxLon = (parseFloat(lonR) + delta).toFixed(4);
+    const maxLat = (parseFloat(latR) + delta).toFixed(4);
+
+    const wmsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/ows` +
+        `?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
+        `&LAYERS=eusm2025_subs_full&QUERY_LAYERS=eusm2025_subs_full` +
+        `&INFO_FORMAT=text/html` +
+        `&CRS=CRS:84` +
+        `&BBOX=${minLon},${minLat},${maxLon},${maxLat}` +
+        `&WIDTH=101&HEIGHT=101&I=50&J=50&FEATURE_COUNT=1`;
+
     try {
-        // Tıklanan noktanın etrafında çok küçük bir Bounding Box (BBOX) oluşturuyoruz
-        const delta = 0.001; 
-        const minLon = (parseFloat(lon) - delta).toFixed(4);
-        const minLat = (parseFloat(lat) - delta).toFixed(4);
-        const maxLon = (parseFloat(lon) + delta).toFixed(4);
-        const maxLat = (parseFloat(lat) + delta).toFixed(4);
-        const bboxStr = `${minLon},${minLat},${maxLon},${maxLat}`;
-
-        // 101x101 px bir alanın tam ortasına (50, 50) tıklandığını simüle ediyoruz
-        const wmsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/ows` +
-            `?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
-            `&LAYERS=eusm2025_subs_full&QUERY_LAYERS=eusm2025_subs_full` +
-            `&INFO_FORMAT=application/json` +
-            `&I=50&J=50&WIDTH=101&HEIGHT=101&CRS=CRS:84` +
-            `&FEATURE_COUNT=1&BBOX=${bboxStr}`;
-
         const res = await fetchWithTimeout(wmsUrl, 10000);
-        if (res.ok) {
-            const json = await res.json();
-            const feature = json?.features?.[0];
-            
-            if (feature) {
-                const props = feature.properties || {};
-                
-                // API'den dönen "Substrate" verisini al (Örn: "Mud", "Coarse & mixed sediment", "Rock")
-                const code = props.Substrate || props.Description || props.AllcombD || null;
-                
-                if (code) {
-                    // Meraloji sistemine (ROCK/SAND/MUD/MIXED/SEAGRASS) çevir
-                    const substrate = eunisCategoryToSubstrate(code);
-                    if (substrate) {
-                        console.log(`[SUBSTRATE-2025] (${latR},${lonR}) Ham: "${code}" → İşlenen: ${substrate}`);
-                        substrateCache.set(ck, substrate);
-                        return substrate;
-                    }
-                }
-            }
+        if (!res.ok) {
+            console.log(`[SUBSTRATE] HTTP ${res.status} — (${latR},${lonR})`);
+            substrateCache.set(ck, null);
+            return null;
         }
+
+        const html = await res.text();
+
+        // HTML'den substrat değerini çıkar
+        // GeoServer HTML tablosunda <td>alan_adı</td><td>değer</td> formatı
+        // Alan adı: substrate, Folk5cl, Folk7cl, AllcombD, substrate_class, subs vb.
+        const substrate = parseSubstrateFromHtml(html);
+        console.log(`[SUBSTRATE] (${latR},${lonR}) → ${substrate || 'null'}`);
+        substrateCache.set(ck, substrate);
+        return substrate;
+
     } catch (e) {
-        console.log(`[SUBSTRATE-2025] WMS fail (${latR},${lonR}): ${e.message}`);
+        console.log(`[SUBSTRATE] fetch fail (${latR},${lonR}): ${e.message}`);
+        substrateCache.set(ck, null);
+        return null;
+    }
+}
+
+// GeoServer HTML GetFeatureInfo çıktısından substrat değerini parse et
+// Doğrulanmış yanıt formatı (EUSeaMap 2025):
+//   <td>Substrate</td><td>Coarse &amp; mixed sediment</td>
+function parseSubstrateFromHtml(html) {
+    if (!html || html.length < 10) return null;
+
+    // HTML entity decode — &amp; → &, &lt; → < vb.
+    const decodeHtml = (s) => s
+        .replace(/&amp;/gi, '&')
+        .replace(/&lt;/gi, '<')
+        .replace(/&gt;/gi, '>')
+        .replace(/&quot;/gi, '"')
+        .replace(/&#39;/gi, "'")
+        .trim();
+
+    // GeoServer HTML: <td>Substrate</td><td>Coarse &amp; mixed sediment</td>
+    // Alan adı TD/TH içinde, değer hemen arkasındaki TD'de
+    // [^<]* ile hem düz hem entity içeren değerleri yakala
+    const fieldPatterns = [
+        /Substrate[^<]*<\/t[dh]>\s*<td[^>]*>([^<]+)<\/td>/i,
+        /Folk5cl[^<]*<\/t[dh]>\s*<td[^>]*>([^<]+)<\/td>/i,
+        /Folk7cl[^<]*<\/t[dh]>\s*<td[^>]*>([^<]+)<\/td>/i,
+        /AllcombD[^<]*<\/t[dh]>\s*<td[^>]*>([^<]+)<\/td>/i,
+        /subs_class[^<]*<\/t[dh]>\s*<td[^>]*>([^<]+)<\/td>/i,
+        /substrate_class[^<]*<\/t[dh]>\s*<td[^>]*>([^<]+)<\/td>/i,
+        /hab_type[^<]*<\/t[dh]>\s*<td[^>]*>([^<]+)<\/td>/i,
+    ];
+
+    for (const pattern of fieldPatterns) {
+        const m = html.match(pattern);
+        if (m && m[1]) {
+            const val = decodeHtml(m[1]);
+            if (!val || val === 'null' || val === 'nodata') continue;
+            const s = eunisCategoryToSubstrate(val);
+            if (s) {
+                console.log(`[SUBSTRATE] field match: "${val}" → ${s}`);
+                return s;
+            }
+            console.log(`[SUBSTRATE] field found but unmapped: "${val}"`);
+        }
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // Yöntem 2: FALLBACK (Yedek) — WFS emodnet_open:msfd_bbht
-    // Eğer 2025 WMS servisi yanıt vermezse eski WFS'ten veriyi çeker
-    // ═══════════════════════════════════════════════════════════════════════
-    try {
-        const wfsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_open/wfs` +
-            `?service=WFS&version=2.0.0&request=GetFeature` +
-            `&typeNames=emodnet_open:msfd_bbht` +
-            `&outputFormat=application/json&count=1` +
-            `&CQL_FILTER=INTERSECTS(geom,POINT(${lonR}%20${latR}))`;
-
-        const res = await fetchWithTimeout(wfsUrl, 10000);
-        if (res.ok) {
-            const json = await res.json();
-            const feature = json?.features?.[0];
-            if (feature) {
-                const props = feature.properties || {};
-                const code = props.AllcombD || props.bbht_class || props.substrate ||
-                             props.habitatType || props.MSFD_BBHT || props.hab_type ||
-                             props.class_name || null;
-                             
-                const substrate = eunisCategoryToSubstrate(code);
-                if (substrate) {
-                    console.log(`[SUBSTRATE-WFS-FALLBACK] (${latR},${lonR}) kod:"${code}" → ${substrate}`);
-                    substrateCache.set(ck, substrate);
-                    return substrate;
-                }
-            }
+    // Fallback: tüm <td> değerlerini tara (entity decode ile)
+    const tdMatches = [...html.matchAll(/<td[^>]*>([^<]{2,100})<\/td>/gi)];
+    for (const m of tdMatches) {
+        const val = decodeHtml(m[1]);
+        if (!val || val === 'null' || /^\d+(\.\d+)?$/.test(val)) continue;
+        const s = eunisCategoryToSubstrate(val);
+        if (s) {
+            console.log(`[SUBSTRATE] scan match: "${val}" → ${s}`);
+            return s;
         }
-    } catch (e) {
-        console.log(`[SUBSTRATE-WFS-FALLBACK] fail (${latR},${lonR}): ${e.message}`);
     }
 
-    // İki yöntem de başarısız olursa
-    console.log(`[SUBSTRATE] (${latR},${lonR}) tüm yöntemler başarısız — null döndürüldü`);
-    substrateCache.set(ck, null);
+    console.log(`[SUBSTRATE] parse failed, raw text: ${html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200)}`);
     return null;
 }
+
 // ─── Tür Bazlı Substrat Tercihleri ──────────────────────────────────────────
 // Her balık için tercih ettiği dip yapısı. Çakışma varsa bonus, çakışmazsa ceza.
 // null = ilgisiz (substrat skora etki etmez)
