@@ -238,6 +238,17 @@ function eunisCategoryToSubstrate(code) {
     if (c.startsWith('A5.5') || c.startsWith('A55')) return 'SEAGRASS';
     if (c.startsWith('A5')) return 'MIXED';
 
+    // ── Folk5 / eusm2021_subs substrat sınıflaması ────────────────────────
+    // eusm2021_subs katmanının Folk_5 alanından gelen değerler
+    if (c === 'ROCK' || c === 'BEDROCK') return 'ROCK';
+    if (c === 'COARSE') return 'SAND';         // Kaba sediman
+    if (c === 'SAND') return 'SAND';
+    if (c === 'MUDDY SAND' || c === 'MUDDYSAND') return 'SAND';
+    if (c === 'SANDY MUD' || c === 'SANDYMUD') return 'MUD';
+    if (c === 'MUD') return 'MUD';
+    if (c === 'BIOGENIC') return 'SEAGRASS';
+    if (c === 'MIXED' || c === 'MIXED SEDIMENT' || c === 'MIXEDSEDIMENT') return 'MIXED';
+
     return null; // bilinmiyor — null dönünce dip yapısı gösterilmez
 }
 
@@ -249,15 +260,15 @@ async function fetchSubstrate(lat, lon) {
     if (hit !== undefined) return hit;
 
     // ═══════════════════════════════════════════════════════════════════════
-    // Yöntem 1: emodnet_open WFS — msfd_bbht (MSFD Benthic Broad Habitat Types)
-    // Base URL: https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_open/wfs
-    // Bu endpoint R emodnet.wfs paketi tarafından doğrulanmış, Akdeniz+Karadeniz dahil
-    // tüm Avrupa denizlerini kapsar. 24h cache'li, production'da tekrar sorgu yok.
+    // Yöntem 1: emodnet_open WFS — eusm2021_subs (EUSeaMap 2021 Substrate)
+    // GetCapabilities'te doğrulanmış katman adı. Folk5 substrat sınıflaması içerir:
+    // "Rock", "Coarse", "Sand", "Mixed", "Muddy sand", "Sandy mud", "Mud", "Biogenic"
+    // 24h cache'li, production'da tekrar sorgu yok.
     // ═══════════════════════════════════════════════════════════════════════
     try {
         const wfsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_open/wfs` +
             `?service=WFS&version=2.0.0&request=GetFeature` +
-            `&typeNames=emodnet_open:msfd_bbht` +
+            `&typeNames=emodnet_open:eusm2021_subs` +
             `&outputFormat=application/json&count=1` +
             `&CQL_FILTER=INTERSECTS(geom,POINT(${lonR}%20${latR}))`;
 
@@ -267,11 +278,10 @@ async function fetchSubstrate(lat, lon) {
             const feature = json?.features?.[0];
             if (feature) {
                 const props = feature.properties || {};
-                // MSFD BBHT alan adları: AllcombD, bbht_class, substrate, habitatType, MSFD_BBHT
-                // Değer örnekleri: "Infralittoral rock", "Circalittoral sand", "Deep-sea mud" vb.
-                const code = props.AllcombD || props.bbht_class || props.substrate ||
-                             props.habitatType || props.MSFD_BBHT || props.hab_type ||
-                             props.class_name || null;
+                // eusm2021_subs alan adları: Folk_5, SubClass, substrate, subst_class, Folk5
+                const code = props.Folk_5 || props.SubClass || props.substrate ||
+                             props.subst_class || props.Folk5 || props.subst ||
+                             props.hab_type || props.class_name || null;
                 console.log(`[SUBSTRATE-WFS1] raw props keys: ${Object.keys(props).join(',')}`);
                 const substrate = eunisCategoryToSubstrate(code);
                 if (substrate) {
@@ -298,32 +308,41 @@ async function fetchSubstrate(lat, lon) {
         console.log(`[SUBSTRATE-WFS1] fail (${latR},${lonR}): ${e.message}`);
     }
 
-    // ── Yöntem 2: WMS GetFeatureInfo — eusm2021 (EUSeaMap 2021) ──────────
-    // emodnet_view workspace'inden WMS sorgusu — GetFeatureInfo WFS'ten daha hızlı
+    // ── Yöntem 2: WMS GetFeatureInfo — eusm2023_eunis2019_l2_200 ─────────
+    // emodnet_view WMS — EUSeaMap 2023 EUNIS 2019 Seviye 2, 200m simplification
+    // text/plain formatı isteniyor (JSON yerine) — XML ServiceException'ı önler
     try {
-        const delta = 0.005; // ~500m bbox — çok küçük bbox boş sonuç verebilir
-        const bboxStr = `${lonR},${latR},${(parseFloat(lonR)+delta).toFixed(3)},${(parseFloat(latR)+delta).toFixed(3)}`;
+        const delta = 0.01;
+        const minX = (parseFloat(lonR) - delta).toFixed(4);
+        const minY = (parseFloat(latR) - delta).toFixed(4);
+        const maxX = (parseFloat(lonR) + delta).toFixed(4);
+        const maxY = (parseFloat(latR) + delta).toFixed(4);
         const wmsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/wms` +
             `?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
-            `&LAYERS=eusm2021&QUERY_LAYERS=eusm2021` +
-            `&INFO_FORMAT=application/json` +
-            `&I=0&J=0&WIDTH=1&HEIGHT=1&CRS=CRS:84` +
-            `&BBOX=${bboxStr}`;
+            `&LAYERS=eusm2023_eunis2019_l2_200&QUERY_LAYERS=eusm2023_eunis2019_l2_200` +
+            `&INFO_FORMAT=text/plain` +
+            `&I=5&J=5&WIDTH=11&HEIGHT=11&CRS=CRS:84` +
+            `&BBOX=${minX},${minY},${maxX},${maxY}`;
 
         const res = await fetchWithTimeout(wmsUrl, 10000);
         if (res.ok) {
-            const json = await res.json();
-            const feature = json?.features?.[0];
-            if (feature) {
-                const props = feature.properties || {};
-                console.log(`[SUBSTRATE-WMS] raw props: ${JSON.stringify(props).slice(0,200)}`);
-                const code = props.AllcombD || props.MSFD_BBHT || props.eunis_l2 ||
-                             props.level2 || props.hab_type || props.substrate || null;
-                const substrate = eunisCategoryToSubstrate(code);
-                if (substrate) {
-                    console.log(`[SUBSTRATE-WMS] (${latR},${lonR}) kod:"${code}" → ${substrate}`);
-                    substrateCache.set(ck, substrate);
-                    return substrate;
+            const text = await res.text();
+            // text/plain yanıtı: "GetFeatureInfo results:\n\nLayer: ...\nFeature 0:\n  AllcombD = MA5\n"
+            if (text && !text.includes('<?xml') && !text.includes('no features')) {
+                console.log(`[SUBSTRATE-WMS] raw text: ${text.slice(0, 300)}`);
+                // Alan=değer satırlarını parse et
+                const lines = text.split('\n');
+                for (const line of lines) {
+                    const match = line.match(/^\s*(\w+)\s*=\s*(.+)$/);
+                    if (match) {
+                        const val = match[2].trim();
+                        const s = eunisCategoryToSubstrate(val);
+                        if (s) {
+                            console.log(`[SUBSTRATE-WMS] (${latR},${lonR}) "${match[1]}=${val}" → ${s}`);
+                            substrateCache.set(ck, s);
+                            return s;
+                        }
+                    }
                 }
             }
         }
@@ -331,11 +350,12 @@ async function fetchSubstrate(lat, lon) {
         console.log(`[SUBSTRATE-WMS] fail (${latR},${lonR}): ${e.message}`);
     }
 
-    // ── Yöntem 3: WFS emodnet_open — eusm2023 layer ──────────────────────
+    // ── Yöntem 3: WFS emodnet_view — eusm2023 (EUSeaMap 2023 tam katman) ─
+    // emodnet_view workspace'i EUSeaMap ana ürünlerini barındırır (R emodnet.wfs belgesi)
     try {
-        const wfsUrl2 = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_open/wfs` +
+        const wfsUrl2 = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/wfs` +
             `?service=WFS&version=2.0.0&request=GetFeature` +
-            `&typeNames=emodnet_open:eusm2023` +
+            `&typeNames=emodnet_view:eusm2021` +
             `&outputFormat=application/json&count=1` +
             `&CQL_FILTER=INTERSECTS(geom,POINT(${lonR}%20${latR}))`;
 
@@ -345,7 +365,15 @@ async function fetchSubstrate(lat, lon) {
             const feature = json?.features?.[0];
             if (feature) {
                 const props = feature.properties || {};
-                console.log(`[SUBSTRATE-WFS3] raw props: ${JSON.stringify(props).slice(0,200)}`);
+                console.log(`[SUBSTRATE-WFS3] raw props: ${JSON.stringify(props).slice(0,300)}`);
+                const code = props.AllcombD || props.MSFD_BBHT || props.eunis_l2 ||
+                             props.hab_type || props.substrate || null;
+                const substrate = eunisCategoryToSubstrate(code);
+                if (substrate) {
+                    console.log(`[SUBSTRATE-WFS3] (${latR},${lonR}) kod:"${code}" → ${substrate}`);
+                    substrateCache.set(ck, substrate);
+                    return substrate;
+                }
                 for (const val of Object.values(props)) {
                     if (typeof val === 'string' && val.length > 2) {
                         const s = eunisCategoryToSubstrate(val);
@@ -357,6 +385,8 @@ async function fetchSubstrate(lat, lon) {
                     }
                 }
             }
+        } else {
+            console.log(`[SUBSTRATE-WFS3] HTTP ${res.status} — (${latR},${lonR})`);
         }
     } catch (e) {
         console.log(`[SUBSTRATE-WFS3] fail (${latR},${lonR}): ${e.message}`);
