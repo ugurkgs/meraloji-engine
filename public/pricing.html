@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiyatlandırma — MERALOJİ F.I.S.H. System</title>
+<meta name="description" content="MERALOJİ PRO ile sınırsız balıkçılık tahmini. Aylık ₺29,99 veya yıllık ₺199,99.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:    #040d1a;
+  --bg-panel:   rgba(8,24,48,0.95);
+  --bg-card:    rgba(15,35,65,0.8);
+  --cyan:       #00d4ff;
+  --cyan-glow:  rgba(0,212,255,0.3);
+  --green:      #00ff88;
+  --yellow:     #ffd500;
+  --orange:     #ff9f43;
+  --red:        #ff4757;
+  --text-primary:   #ffffff;
+  --text-secondary: #8ba4c7;
+  --text-muted:     #5a7193;
+  --border-subtle:  rgba(0,212,255,0.15);
+  --border-glow:    rgba(0,212,255,0.4);
+  --font-display: 'Outfit', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-display);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 10% 20%, rgba(0,212,255,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 60% at 90% 80%, rgba(0,255,136,0.04) 0%, transparent 60%);
+}
+.wrap { position: relative; z-index: 1; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 0 24px; height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(4,13,26,0.9); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.logo {
+  font-family: var(--font-mono); font-size: 15px; font-weight: 700; letter-spacing: 4px;
+  background: linear-gradient(135deg, var(--cyan), var(--green));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-decoration: none;
+}
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.nav-link { font-size: 13px; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+.nav-link:hover, .nav-link.active { color: var(--cyan); }
+.nav-btn {
+  padding: 8px 18px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--cyan), var(--green));
+  color: var(--bg-deep); font-size: 13px; font-weight: 700;
+  text-decoration: none; transition: opacity 0.2s;
+}
+.nav-btn:hover { opacity: 0.85; }
+
+/* HERO */
+.hero { padding: 120px 24px 56px; text-align: center; max-width: 640px; margin: 0 auto; animation: fadeUp 0.6s both; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 3px; color: var(--cyan); text-transform: uppercase;
+  padding: 6px 14px; border-radius: 20px;
+  border: 1px solid var(--border-subtle); background: rgba(0,212,255,0.06);
+  margin-bottom: 24px;
+}
+.hero h1 { font-size: clamp(32px,6vw,52px); font-weight: 900; line-height: 1.1; margin-bottom: 16px; }
+.hero h1 .grad {
+  background: linear-gradient(135deg, var(--cyan), var(--green));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-sub { font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 40px; }
+
+/* BILLING TOGGLE */
+.billing-wrap { display: flex; justify-content: center; margin-bottom: 52px; }
+.billing-toggle {
+  display: inline-flex; background: rgba(8,24,48,0.9);
+  border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden;
+}
+.bt-btn {
+  padding: 10px 22px; cursor: pointer; border: none; background: transparent;
+  font-family: var(--font-display); font-size: 13px; font-weight: 600;
+  letter-spacing: 0.5px; color: var(--text-muted); transition: all 0.2s;
+}
+.bt-btn.active { background: rgba(0,212,255,0.12); color: var(--cyan); }
+.bt-save {
+  display: inline-block; background: rgba(0,255,136,0.15); color: var(--green);
+  font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+  letter-spacing: 1px; padding: 2px 7px; border-radius: 10px; margin-left: 6px;
+}
+
+/* PLANS */
+.plans {
+  max-width: 880px; margin: 0 auto; padding: 0 20px 80px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  animation: fadeUp 0.6s 0.1s both;
+}
+.card {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: 20px; padding: 32px 28px; position: relative; overflow: hidden;
+  backdrop-filter: blur(20px); transition: border-color 0.3s, box-shadow 0.3s, transform 0.25s;
+}
+.card:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-3px); box-shadow: 0 0 30px rgba(0,212,255,0.08); }
+.card.pro {
+  border-color: var(--border-glow);
+  background: linear-gradient(135deg, rgba(0,212,255,0.05), rgba(0,255,136,0.03)), var(--bg-card);
+  box-shadow: 0 0 40px rgba(0,212,255,0.1), inset 0 1px 0 rgba(0,212,255,0.1);
+}
+.card.pro::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), var(--green), transparent);
+}
+.card.pro::after {
+  content: ''; position: absolute; top: -40%; left: 0; right: 0; height: 40%;
+  background: linear-gradient(180deg, rgba(0,212,255,0.04), transparent);
+  animation: scanLine 4s linear infinite; pointer-events: none;
+}
+@keyframes scanLine { 0% { top: -40%; } 100% { top: 140%; } }
+.card-badge {
+  position: absolute; top: 20px; right: -1px;
+  background: linear-gradient(90deg, var(--cyan), var(--green));
+  color: var(--bg-deep); font-family: var(--font-mono);
+  font-size: 9px; font-weight: 700; letter-spacing: 2px;
+  padding: 5px 14px; border-radius: 8px 0 0 8px; text-transform: uppercase;
+}
+.plan-emoji { font-size: 32px; margin-bottom: 12px; display: block; }
+.plan-name { font-size: 22px; font-weight: 900; letter-spacing: 1px; margin-bottom: 4px; }
+.plan-name.cyan { color: var(--cyan); }
+.plan-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-bottom: 20px; }
+
+/* price */
+.price-main { display: flex; align-items: baseline; gap: 4px; margin-bottom: 6px; }
+.price-cur { font-size: 18px; font-weight: 700; color: var(--text-secondary); }
+.price-amt { font-family: var(--font-mono); font-size: 44px; font-weight: 700; line-height: 1; }
+.price-amt.free-c { color: var(--cyan); font-size: 36px; }
+.price-period { font-size: 13px; color: var(--text-muted); align-self: flex-end; margin-bottom: 4px; }
+.price-note { font-size: 11px; margin-bottom: 3px; }
+.price-note.green { color: var(--green); font-weight: 600; }
+.price-note.orange { color: var(--orange); font-weight: 600; }
+.price-note.strike { color: var(--text-muted); text-decoration: line-through; }
+.price-note.free-note { color: var(--text-muted); }
+
+.divider { height: 1px; background: var(--border-subtle); margin: 20px 0; }
+
+.features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.features li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.4; }
+.fi {
+  width: 18px; height: 18px; flex-shrink: 0; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; margin-top: 1px;
+}
+.fi.c  { background: rgba(0,212,255,0.12); color: var(--cyan); }
+.fi.g  { background: rgba(0,255,136,0.12); color: var(--green); }
+.fi.no { background: rgba(90,113,147,0.12); color: var(--text-muted); }
+.feat-muted { color: var(--text-muted); }
+.feat-tag {
+  font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 1px;
+  padding: 2px 6px; border-radius: 4px; margin-left: 4px;
+  background: rgba(255,159,67,0.15); color: var(--orange);
+}
+
+.cta {
+  display: block; width: 100%; padding: 14px; border-radius: 12px; text-align: center;
+  font-family: var(--font-display); font-size: 14px; font-weight: 700;
+  letter-spacing: 0.5px; text-decoration: none; cursor: pointer;
+  border: none; transition: all 0.2s;
+}
+.cta-outline { background: transparent; border: 1px solid var(--border-subtle); color: var(--text-secondary); }
+.cta-outline:hover { border-color: var(--cyan); color: var(--cyan); }
+.cta-glow { background: linear-gradient(135deg, var(--cyan), var(--green)); color: var(--bg-deep); }
+.cta-glow:hover { box-shadow: 0 8px 30px rgba(0,212,255,0.4); opacity: 0.9; }
+
+/* LAUNCH BANNERS */
+.banners {
+  max-width: 880px; margin: -40px auto 0; padding: 0 20px 80px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  animation: fadeUp 0.6s 0.2s both;
+}
+.banner {
+  padding: 12px 16px; border-radius: 12px; font-size: 11px; line-height: 1.5;
+}
+.banner.orange { background: rgba(255,133,27,0.08); border: 1px solid rgba(255,133,27,0.25); }
+.banner.red    { background: rgba(255,68,68,0.08);  border: 1px solid rgba(255,68,68,0.25); }
+.banner-t { font-weight: 700; margin-bottom: 2px; }
+.banner-t.orange { color: var(--orange); }
+.banner-t.red    { color: #ff6464; }
+.banner-b { color: var(--text-secondary); }
+.banner-b strong { color: var(--text-primary); }
+.slots-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.slots-n { font-size: 18px; font-weight: 700; color: #ff4444; font-family: var(--font-mono); }
+.slots-tot { font-size: 11px; color: var(--text-muted); }
+.slots-bar-w { margin-top: 4px; background: rgba(0,0,0,0.3); border-radius: 3px; height: 3px; overflow: hidden; }
+.slots-bar { height: 100%; background: linear-gradient(90deg,#ff4444,var(--orange)); width: 30%; transition: width 0.8s; }
+
+/* COMPARE TABLE */
+.compare-section { max-width: 780px; margin: 0 auto; padding: 0 20px 100px; animation: fadeUp 0.6s 0.15s both; }
+.sec-hd { text-align: center; margin-bottom: 36px; }
+.sec-hd h2 { font-size: 26px; font-weight: 900; margin-bottom: 6px; }
+.sec-hd p { font-size: 13px; color: var(--text-muted); }
+.tbl-wrap { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 20px; overflow: hidden; backdrop-filter: blur(20px); }
+.tbl-head { display: grid; grid-template-columns: 1fr 100px 100px; padding: 16px 24px; border-bottom: 1px solid var(--border-subtle); background: rgba(0,212,255,0.04); }
+.th { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-align: center; }
+.th:first-child { text-align: left; color: var(--text-muted); }
+.th.cyan { color: var(--cyan); }
+.tbl-grp { padding: 14px 24px 4px; font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--cyan); background: rgba(0,212,255,0.03); border-top: 1px solid var(--border-subtle); }
+.tbl-row { display: grid; grid-template-columns: 1fr 100px 100px; padding: 12px 24px; border-bottom: 1px solid rgba(0,212,255,0.06); align-items: center; transition: background 0.15s; }
+.tbl-row:hover { background: rgba(0,212,255,0.03); }
+.tbl-row:last-child { border-bottom: none; }
+.tbl-lbl { font-size: 13px; color: var(--text-secondary); }
+.tbl-v { text-align: center; font-size: 12px; font-family: var(--font-mono); font-weight: 600; }
+.tbl-v .yc { color: var(--cyan); } .tbl-v .yg { color: var(--green); } .tbl-v .no { color: var(--text-muted); opacity: 0.4; }
+
+/* FAQ */
+.faq-section { max-width: 640px; margin: 0 auto; padding: 0 20px 100px; }
+.faq-item { border-bottom: 1px solid var(--border-subtle); }
+.faq-q {
+  width: 100%; padding: 18px 0; display: flex; justify-content: space-between;
+  align-items: center; gap: 16px; cursor: pointer; background: none; border: none;
+  font-family: var(--font-display); font-size: 14px; font-weight: 600;
+  color: var(--text-primary); text-align: left;
+}
+.faq-ico { color: var(--cyan); font-size: 18px; flex-shrink: 0; transition: transform 0.2s; }
+.faq-item.open .faq-ico { transform: rotate(45deg); }
+.faq-a { font-size: 13px; color: var(--text-secondary); line-height: 1.7; max-height: 0; overflow: hidden; transition: max-height 0.3s, padding-bottom 0.3s; }
+.faq-item.open .faq-a { max-height: 220px; padding-bottom: 16px; }
+
+/* CTA BAND */
+.cta-band { max-width: 600px; margin: 0 auto; padding: 0 20px 100px; text-align: center; }
+.cta-box {
+  background: var(--bg-card); border: 1px solid var(--border-glow);
+  border-radius: 20px; padding: 52px 40px; position: relative; overflow: hidden;
+  backdrop-filter: blur(20px);
+}
+.cta-box::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), var(--green), transparent);
+}
+.cta-box h2 { font-size: 26px; font-weight: 900; margin-bottom: 10px; }
+.cta-box p { font-size: 13px; color: var(--text-secondary); margin-bottom: 28px; line-height: 1.6; }
+.cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.cta-btns a { padding: 13px 28px; border-radius: 12px; font-size: 14px; font-weight: 700; text-decoration: none; letter-spacing: 0.5px; transition: all 0.2s; }
+.btn-p { background: linear-gradient(135deg, var(--cyan), var(--green)); color: var(--bg-deep); }
+.btn-p:hover { box-shadow: 0 8px 30px rgba(0,212,255,0.35); }
+.btn-s { border: 1px solid var(--border-subtle); color: var(--text-secondary); }
+.btn-s:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* FOOTER */
+footer { border-top: 1px solid var(--border-subtle); padding: 24px; text-align: center; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 1px; }
+footer a { color: var(--text-muted); text-decoration: none; }
+footer a:hover { color: var(--cyan); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 620px) {
+  .nav-link { display: none; }
+  .hero { padding: 100px 16px 44px; }
+  .plans, .banners { grid-template-columns: 1fr; padding: 0 16px 60px; }
+  .banners { margin-top: -20px; }
+  .compare-section, .faq-section, .cta-band { padding-left: 16px; padding-right: 16px; }
+  .tbl-head, .tbl-row { grid-template-columns: 1fr 80px 80px; padding: 10px 14px; }
+  .tbl-grp { padding: 12px 14px 4px; }
+  .cta-box { padding: 36px 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav>
+  <a class="logo" href="https://meraloji.com">⚓ MERALOJİ</a>
+  <div class="nav-right">
+    <a class="nav-link" href="https://meraloji.com">Harita</a>
+    <a class="nav-link active" href="#">Fiyatlar</a>
+    <a class="nav-btn" href="https://meraloji.com">Uygulamayı Aç</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge">⚡ F.I.S.H. SYSTEM — PLANLAR</div>
+  <h1>Balık nerede,<br><span class="grad">şimdi öğren.</span></h1>
+  <p class="hero-sub">83+ balık türü, 22 çevresel parametre, gerçek zamanlı skor.<br>PRO ile sınırsız analiz, bölge tarama ve 7 günlük tahmin.</p>
+  <div class="billing-wrap">
+    <div class="billing-toggle">
+      <button class="bt-btn" id="btn-monthly" onclick="setBilling('monthly')">AYLIK</button>
+      <button class="bt-btn active" id="btn-yearly" onclick="setBilling('yearly')">YILLIK <span class="bt-save">%73 TASARRUF</span></button>
+    </div>
+  </div>
+</section>
+
+<div class="plans">
+  <!-- FREE -->
+  <div class="card">
+    <span class="plan-emoji">🎣</span>
+    <div class="plan-name">ÜCRETSİZ</div>
+    <div class="plan-desc">Denize çıkmadan önce temel koşulları gör</div>
+    <div class="price-main"><span class="price-amt free-c">₺0</span></div>
+    <div class="price-note free-note" style="margin-bottom:20px;">Süresiz ücretsiz — kart gerekmez</div>
+    <div class="divider"></div>
+    <ul class="features">
+      <li><span class="fi c">✓</span><span>Günlük <strong>5 konum</strong> analizi</span></li>
+      <li><span class="fi c">✓</span><span>Günlük <strong>1 bölge taraması</strong></span></li>
+      <li><span class="fi c">✓</span><span>Dalga, rüzgar &amp; basınç tahminleri</span></li>
+      <li><span class="fi c">✓</span><span>Ay fazı &amp; gel-git takvimi</span></li>
+      <li><span class="fi c">✓</span><span>Temel balık türü bilgileri</span></li>
+      <li><span class="fi no">—</span><span class="feat-muted">Saatlik skor grafiği</span></li>
+      <li><span class="fi no">—</span><span class="feat-muted">7 günlük tahmin</span></li>
+      <li><span class="fi no">—</span><span class="feat-muted">22 parametre detaylı analizi</span></li>
+      <li><span class="fi no">—</span><span class="feat-muted">Fırtına &amp; frenzy bildirimleri</span></li>
+    </ul>
+    <a class="cta cta-outline" href="https://meraloji.com">Ücretsiz Başla</a>
+  </div>
+
+  <!-- PRO -->
+  <div class="card pro">
+    <div class="card-badge">EN AVANTAJLI</div>
+    <span class="plan-emoji">🐟</span>
+    <div class="plan-name cyan">MERALOJİ PRO</div>
+    <div class="plan-desc">Sınırsız analiz — tam güç, tam veri</div>
+
+    <div class="price-main">
+      <span class="price-cur">₺</span>
+      <span class="price-amt" id="p-amt">199,99</span>
+      <span class="price-period" id="p-period">/yıl</span>
+    </div>
+    <div id="n-ysave" class="price-note green">~₺16/ay · %73 tasarruf</div>
+    <div id="n-ylaunch" class="price-note orange">🎯 İlk 200 kişiye özel fiyat</div>
+    <div id="n-yafter" class="price-note strike" style="margin-bottom:20px;">Sonra ₺449/yıl</div>
+    <div id="n-mlaunch" class="price-note orange" style="display:none;">⏳ 60 günlük lansman fiyatı</div>
+    <div id="n-mafter" class="price-note strike" style="display:none;margin-bottom:20px;">Sonra ₺59/ay</div>
+
+    <div class="divider"></div>
+    <ul class="features">
+      <li><span class="fi g">✓</span><span><strong>Sınırsız</strong> konum analizi</span></li>
+      <li><span class="fi g">✓</span><span><strong>Sınırsız</strong> bölge taraması</span></li>
+      <li><span class="fi g">✓</span><span>83+ balık türü — tam liste &amp; av taktikleri</span></li>
+      <li><span class="fi g">✓</span><span>Saatlik skor grafiği + 7 günlük tahmin</span></li>
+      <li><span class="fi g">✓</span><span>Detaylı skor analizi <span class="feat-tag">22 PARAMETRE</span></span></li>
+      <li><span class="fi g">✓</span><span>Dip yapısı (substrat) haritası</span></li>
+      <li><span class="fi g">✓</span><span>Uydu su sıcaklığı (SST)</span></li>
+      <li><span class="fi g">✓</span><span>🔔 Fırtına &amp; Feeding Frenzy bildirimleri</span></li>
+    </ul>
+    <a class="cta cta-glow" href="https://meraloji.com">PRO'ya Yükselt</a>
+  </div>
+</div>
+
+<!-- LAUNCH BANNERS -->
+<div class="banners">
+  <div class="banner orange">
+    <div class="banner-t orange">⏳ AYLIK FİYAT — 60 GÜNLÜK LANSMAN KAMPANYASI</div>
+    <div class="banner-b">Kampanya bittikten sonra aylık plan <strong>₺59</strong> olacak.</div>
+  </div>
+  <div class="banner red">
+    <div class="banner-t red">🎯 YILLIK PLAN — İLK 200 KİŞİYE ÖZEL</div>
+    <div class="banner-b">Kontenjan dolunca yıllık plan <strong>₺449</strong> olacak.</div>
+    <div class="slots-row">
+      <div class="slots-n" id="slots-n">...</div>
+      <div class="slots-tot">/ 200 kişi kaldı</div>
+    </div>
+    <div class="slots-bar-w"><div class="slots-bar" id="slots-bar-el"></div></div>
+  </div>
+</div>
+
+<!-- COMPARE -->
+<section class="compare-section">
+  <div class="sec-hd">
+    <h2>Detaylı Karşılaştırma</h2>
+    <p>Hangi planda ne var, tam olarak görün.</p>
+  </div>
+  <div class="tbl-wrap">
+    <div class="tbl-head">
+      <div class="th" style="text-align:left">Özellik</div>
+      <div class="th">Ücretsiz</div>
+      <div class="th cyan">PRO</div>
+    </div>
+    <div class="tbl-grp">🌊 TAHMİN &amp; ANALİZ</div>
+    <div class="tbl-row"><div class="tbl-lbl">Günlük konum analizi</div><div class="tbl-v"><span class="yc">5/gün</span></div><div class="tbl-v"><span class="yg">Sınırsız</span></div></div>
+    <div class="tbl-row"><div class="tbl-lbl">Günlük bölge taraması</div><div class="tbl-v"><span class="yc">1/gün</span></div><div class="tbl-v"><span class="yg">Sınırsız</span></div></div>
+    <div class="tbl-row"><div class="tbl-lbl">Saatlik skor grafiği</div><div class="tbl-v"><span class="no">—</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
+    <div class="tbl-row"><div class="tbl-lbl">7 günlük tahmin</div><div class="tbl-v"><span class="no">—</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
+    <div class="tbl-row"><div class="tbl-lbl">22 çevresel parametre analizi</div><div class="tbl-v"><span class="no">—</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
+    <div class="tbl-row"><div class="tbl-lbl">Dip yapısı (substrat) haritası</div><div class="tbl-v"><span class="no">—</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
+    <div class="tbl-row"><div class="tbl-lbl">Uydu su sıcaklığı (SST)</div><div class="tbl-v"><span class="no">—</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
+    <div class="tbl-grp">🐟 BALIK VERİTABANI</div>
+    <div class="tbl-row"><div class="tbl-lbl">Balık türü sayısı</div><div class="tbl-v"><span class="yc">83+</span></div><div class="tbl-v"><span class="yg">83+</span></div></div>
+    <div class="tbl-row"><div class="tbl-lbl">Tam av taktikleri &amp; mevsim bilgisi</div><div class="tbl-v"><span class="no">—</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
+    <div class="tbl-grp">🔔 BİLDİRİMLER</div>
+    <div class="tbl-row"><div class="tbl-lbl">Fırtına &amp; Feeding Frenzy bildirimi</div><div class="tbl-v"><span class="no">—</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
+    <div class="tbl-row"><div class="tbl-lbl">Ani basınç düşüşü uyarısı</div><div class="tbl-v"><span class="no">—</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="sec-hd"><h2>Sıkça Sorulan Sorular</h2></div>
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">İstediğim zaman iptal edebilir miyim?<span class="faq-ico">+</span></button>
+    <div class="faq-a">Evet, planınızı dilediğiniz zaman iptal edebilirsiniz. İptal sonrası mevcut dönemin sonuna kadar tüm PRO özellikleriniz aktif kalır. Ek ücret veya ceza uygulanmaz.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Lansman kampanyası ne zaman bitiyor?<span class="faq-ico">+</span></button>
+    <div class="faq-a">Aylık plan için 60 günlük lansman kampanyası geçerli; süre dolunca aylık fiyat ₺59'a yükselecek. Yıllık plan içinse ilk 200 kontenjan dolduğunda ₺449'a çıkacak. Şu anki fiyatı kilitlemenin en iyi yolu hemen abone olmak.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Bölge taraması nasıl çalışıyor?<span class="faq-ico">+</span></button>
+    <div class="faq-a">Seçtiğiniz merkez nokta etrafında 1–5 km yarıçapında onlarca noktayı otomatik tarar, anlık balık skorunu hesaplar ve harita üzerinde en yüksek puanlı alanları işaretler. Ücretsizde günlük 1 tarama; PRO'da sınırsız.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Ödeme güvenli mi?<span class="faq-ico">+</span></button>
+    <div class="faq-a">Tüm ödemeler Paddle altyapısı üzerinden işlenir. Kart bilgileriniz MERALOJİ sunucularına asla iletilmez; PCI DSS uyumlu Paddle sistemi tarafından şifreli olarak saklanır.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">22 çevresel parametre neler?<span class="faq-ico">+</span></button>
+    <div class="faq-a">Dalga yüksekliği ve periyot, rüzgar hızı ve yönü, hava ve su sıcaklığı, basınç trendi, görünürlük, bulutluluk, yağış, akıntı, biyolojik bölge, dip substratı, ay fazı, gel-git saatleri, gün doğumu/batımı, termoklin, tuzluluk, oksijen ve enerji sınıfı birleştirilerek bilimsel skor üretilir.</div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-band">
+  <div class="cta-box">
+    <h2>Balığın yerini biliyor musun?</h2>
+    <p>MERALOJİ PRO ile doğru zamanı, doğru noktayı ve doğru balığı bulun.<br>Şu an sadece <strong style="color:var(--cyan)">₺29,99/ay</strong> — lansman fiyatı.</p>
+    <div class="cta-btns">
+      <a class="btn-p" href="https://meraloji.com">PRO'ya Yükselt</a>
+      <a class="btn-s" href="https://meraloji.com">Ücretsiz Dene</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2025 MERALOJİ — Uğur Kögüs &nbsp;·&nbsp;
+  <a href="/privacy">Gizlilik Politikası</a> &nbsp;·&nbsp;
+  <a href="/terms">Kullanım Şartları</a> &nbsp;·&nbsp;
+  meraloji.com
+</footer>
+
+</div>
+<script>
+  function setBilling(type) {
+    document.getElementById('btn-monthly').classList.toggle('active', type === 'monthly');
+    document.getElementById('btn-yearly').classList.toggle('active',  type === 'yearly');
+    const isY = type === 'yearly';
+    document.getElementById('p-amt').textContent    = isY ? '199,99' : '29,99';
+    document.getElementById('p-period').textContent = isY ? '/yıl'   : '/ay';
+    ['n-ysave','n-ylaunch','n-yafter'].forEach(id => document.getElementById(id).style.display = isY ? '' : 'none');
+    ['n-mlaunch','n-mafter'].forEach(id => document.getElementById(id).style.display = isY ? 'none' : '');
+  }
+  setBilling('yearly');
+
+  function toggleFaq(btn) { btn.parentElement.classList.toggle('open'); }
+
+  // Canlı slot sayısı
+  fetch('https://meraloji.com/api/pro-slots')
+    .then(r => r.json())
+    .then(d => {
+      const rem = d.remaining ?? d.slots ?? null;
+      if (rem !== null) {
+        document.getElementById('slots-n').textContent = rem;
+        document.getElementById('slots-n').style.color = rem < 50 ? '#ff2222' : rem < 100 ? '#ff851b' : '#ff4444';
+        const pct = Math.min(100, Math.round((500 - rem) / 5));
+        document.getElementById('slots-bar-el').style.width = pct + '%';
+      }
+    })
+    .catch(() => { document.getElementById('slots-n').textContent = '—'; });
+</script>
+</body>
+</html>
