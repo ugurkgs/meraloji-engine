@@ -4744,24 +4744,7 @@ app.get('/api/favorites', async (req, res) => {
     }
 });
 
-// WIDGET İÇİN E-POSTA İLE FAVORİ ÇEKİMİ (Native TWA bypass)
-app.get('/api/widget/favorites', async (req, res) => {
-    if (!db || !admin) return res.json({ favorites: [] });
-    const { email } = req.query;
-    if (!email) return res.status(400).json({ error: 'E-posta gerekli' });
-    
-    try {
-        const userRecord = await admin.auth().getUserByEmail(email);
-        const snap = await db.collection('users').doc(userRecord.uid)
-            .collection('favorites').orderBy('createdAt', 'asc').get();
-        const favorites = [];
-        snap.forEach(doc => favorites.push({ id: doc.id, ...doc.data() }));
-        res.json({ favorites });
-    } catch (e) {
-        console.error('[WIDGET-FAV-GET]', e.message);
-        res.status(404).json({ error: 'Kullanıcı veya favoriler bulunamadı' });
-    }
-});
+// (Widget bypass endpoint_SILINDI_TALEPE_ISTINADEN)
 
 app.post('/api/favorites', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
