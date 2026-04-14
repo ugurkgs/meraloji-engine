@@ -54,7 +54,7 @@ const SPECIES_DB = {
         legalSize: "20 cm",
         note: "20cm altı (Defne Yaprağı) bırakın. Çelik tel zorunlu — keskin dişler misina keser."
     },
-    "eskina": {
+   "eskina": {
         name: "Eşkina", nameEn: "Brown Meagre", icon: "🐟", scientificName: "Sciaena umbra",
         photoId: 3,
         category: "KIYI_AVCI",
@@ -73,35 +73,34 @@ const SPECIES_DB = {
         legalSize: "Yok (5 adet/gün)",
         note: "Zifiri karanlıkta avlanır. Fosforlu şamandıra şart."
     },
-    
-"ustura_baligi": {
-    "name": "Ustura Balığı/Fare Balığı",
-    "nameEn": "Pearly Razorfish",
-    "icon": "🐟",
-    "scientificName": "Xyrichtys novacula",
-    "photoId": 5,
-    "category": "KUM_TABAN",
-    "peakHours": "DAY",
-    "peakHoursDesc": "Gündüz ve güneşli saatler",
-    "tempRange": { "min": 15, "opt": 20, "max": 26 },
-    "seasons": { "winter": 0.3, "spring": 0.6, "summer": 0.8, "autumn": 0.7 },
-    "activity": "DAY",
-    "pressureSensitivity": 0.8,
-    "wavePref": 0.2,
-    "clarityPref": "CLEAR",
-    "currentPref": 0.3,
-    "salinityPref": "MARINE",
-    "regions": ["EGE", "AKDENİZ", "MARMARA"],
-    "depth": { "min": 1, "opt": 15, "max": 150 },
-    "advice": {
-        "bait": "Karides, Midye, Boru Kurdu, Küçük Kaya Kurdu",
-        "lure": "Micro Jig, Silikon Yemler",
-        "rig": "Hafif Dip Takımı (Hırsızlı), LRF",
-        "hook": "4 - 8"
-    
-    "legalSize": "Yok",
-    "note": "Sadece gündüz av verir; gece kuma gömülür. Çok keskin dişleri vardır, misinayı kesebilir. Eti lezzetlidir. Kışın 150 m derinliğe kadar inebilir."
-},
+    "ustura_baligi": {
+        name: "Ustura Balığı / Fare Balığı", 
+        nameEn: "Pearly Razorfish", 
+        icon: "🐟", 
+        scientificName: "Xyrichtys novacula",
+        photoId: 88,
+        category: "KUM_TABAN",
+        peakHours: "DAY", 
+        peakHoursDesc: "Gündüz ve güneşli saatler",
+        tempRange: { min: 15, opt: 20, max: 26 },
+        seasons: { winter: 0.3, spring: 0.6, summer: 0.8, autumn: 0.7 },
+        activity: "DAY",
+        pressureSensitivity: 0.8,
+        wavePref: 0.2,
+        clarityPref: "CLEAR",
+        currentPref: 0.3,
+        salinityPref: "MARINE",
+        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        depth: { min: 1, opt: 15, max: 150 },
+        advice: { 
+            bait: "Karides, Midye, Boru Kurdu", 
+            lure: "Micro Jig, Silikon Yemler", 
+            rig: "Hafif Dip Takımı (Hırsızlı), LRF", 
+            hook: "4 - 8" 
+        }, // Kapanış parantezi ve virgül eklendi
+        legalSize: "Yok",
+        note: "Sadece gündüz av verir; gece kuma gömülür. Keskin dişleri misinayı kesebilir."
+    },
     "minekop": {
         name: "Minekop", nameEn: "Meagre", icon: "🐟", scientificName: "Argyrosomus regius",
         photoId: 4,
@@ -121,26 +120,25 @@ const SPECIES_DB = {
         legalSize: "Yok (5kg/gün)",
         note: "Gece ve alacakaranlıkta aktif. Çalkantılı suyu sever."
     },
-    "ispendek": {
-    name: "İspendek", nameEn: "Picarel", icon: "🐟", scientificName: "Spicara smaris",
-    photoId: 9,
-    category: "KIYI",
-    peakHours: "DAY", peakHoursDesc: "Gündüz aktif, sabah erken ve akşamüstü zirve",
-    tempRange: { min: 13, opt: 19, max: 25 },
-    seasons: { winter: 0.30, spring: 0.70, summer: 0.90, autumn: 0.60 },
-    activity: "DAY",
-    pressureSensitivity: 0.3,
-    wavePref: 0.3,
-    clarityPref: "CLEAR",
-    currentPref: 0.4,
-    salinityPref: "HIGH",
-    regions: ["EGE", "AKDENİZ", "MARMARA"],
-    depth: { min: 5, opt: 25, max: 100 },
-    advice: { bait: "Ekmek İçi, Küçük Solucan, Midye", lure: "Micro Jig, Küçük Kaşık", rig: "Çoklu İğneli Takım, Şamandıralı", hook: "No:8-12 Olta İğnesi" },
-    legalSize: "11 cm",
-    note: "Sürü halinde gezer. Çoğunlukla tabana yakın dolaşır. Küçük yem ve ince misina verimi artırır. Yazın kıyıya yaklaşır."
-
-},
+    "izmarit": { // İspendek yerine İzmarit olarak düzeltildi
+        name: "İzmarit", nameEn: "Picarel", icon: "🐟", scientificName: "Spicara smaris",
+        photoId: 9,
+        category: "KIYI",
+        peakHours: "DAY", peakHoursDesc: "Gündüz aktif, sabah erken ve akşamüstü zirve",
+        tempRange: { min: 13, opt: 19, max: 25 },
+        seasons: { winter: 0.30, spring: 0.70, summer: 0.90, autumn: 0.60 },
+        activity: "DAY",
+        pressureSensitivity: 0.3,
+        wavePref: 0.3,
+        clarityPref: "CLEAR",
+        currentPref: 0.4,
+        salinityPref: "HIGH",
+        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        depth: { min: 5, opt: 25, max: 100 },
+        advice: { bait: "Ekmek İçi, Küçük Solucan, Midye", lure: "Micro Jig", rig: "Çoklu İğneli Takım, Şamandıralı", hook: "8 - 12" },
+        legalSize: "11 cm",
+        note: "Sürü halinde gezer. Küçük yem ve ince misina şart."
+    },
     "cipura": {
         name: "Çipura", nameEn: "Gilt-head Bream", icon: "🐠", scientificName: "Sparus aurata",
         photoId: 11,
@@ -154,14 +152,12 @@ const SPECIES_DB = {
         clarityPref: "MODERATE",
         currentPref: 0.3,
         salinityPref: "MEDIUM",
-        planktonPref: "MEDIUM",
-        sstTrendPref: "warming",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 0, opt: 10, max: 150 },
-        advice: { bait: "Canlı Mamun, Yengeç, Midye", lure: "Micro Jig, Rubber", rig: "Hırsızlı Dip Takımı", hook: "Chinu No:2-4" },
+        advice: { bait: "Canlı Mamun, Yengeç, Midye", lure: "Micro Jig", rig: "Hırsızlı Dip Takımı", hook: "Chinu No:2-4" },
         legalSize: "20 cm",
-        note: "Yemi önce ezer, hemen tasmalama. Sabırlı ol."
-    },
+        note: "Yemi önce ezer, hemen tasmalama yapma."
+    }
     "karagoz": {
         name: "Karagöz", nameEn: "Common Two-banded Bream", icon: "🐟", scientificName: "Diplodus vulgaris",
         photoId: 12,
