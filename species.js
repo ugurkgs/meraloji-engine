@@ -73,6 +73,35 @@ const SPECIES_DB = {
         legalSize: "Yok (5 adet/gün)",
         note: "Zifiri karanlıkta avlanır. Fosforlu şamandıra şart."
     },
+    
+"ustura_baligi": {
+    "name": "Ustura Balığı/Fare Balığı",
+    "nameEn": "Pearly Razorfish",
+    "icon": "🐟",
+    "scientificName": "Xyrichtys novacula",
+    "photoId": 5,
+    "category": "KUM_TABAN",
+    "peakHours": "DAY",
+    "peakHoursDesc": "Gündüz ve güneşli saatler",
+    "tempRange": { "min": 15, "opt": 20, "max": 26 },
+    "seasons": { "winter": 0.3, "spring": 0.6, "summer": 0.8, "autumn": 0.7 },
+    "activity": "DAY",
+    "pressureSensitivity": 0.8,
+    "wavePref": 0.2,
+    "clarityPref": "CLEAR",
+    "currentPref": 0.3,
+    "salinityPref": "MARINE",
+    "regions": ["EGE", "AKDENİZ", "MARMARA"],
+    "depth": { "min": 1, "opt": 15, "max": 150 },
+    "advice": {
+        "bait": "Karides, Midye, Boru Kurdu, Küçük Kaya Kurdu",
+        "lure": "Micro Jig, Silikon Yemler",
+        "rig": "Hafif Dip Takımı (Hırsızlı), LRF",
+        "hook": "4 - 8"
+    
+    "legalSize": "Yok",
+    "note": "Sadece gündüz av verir; gece kuma gömülür. Çok keskin dişleri vardır, misinayı kesebilir. Eti lezzetlidir. Kışın 150 m derinliğe kadar inebilir."
+},
     "minekop": {
         name: "Minekop", nameEn: "Meagre", icon: "🐟", scientificName: "Argyrosomus regius",
         photoId: 4,
