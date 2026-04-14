@@ -54,8 +54,7 @@ const SPECIES_DB = {
         legalSize: "20 cm",
         note: "20cm altı (Defne Yaprağı) bırakın. Çelik tel zorunlu — keskin dişler misina keser."
     },
-{
-  "eskina": {
+    "eskina": {
     "name": "Eşkina",
     "nameEn": "Brown Meagre",
     "icon": "🐟",
@@ -166,8 +165,7 @@ const SPECIES_DB = {
     },
     "legalSize": "11 cm",
     "note": "Sürü halinde gezer. Küçük yem ve ince misina şart."
-  }
-}
+  },
     "cipura": {
         name: "Çipura", nameEn: "Gilt-head Bream", icon: "🐠", scientificName: "Sparus aurata",
         photoId: 11,
@@ -186,7 +184,7 @@ const SPECIES_DB = {
         advice: { bait: "Canlı Mamun, Yengeç, Midye", lure: "Micro Jig", rig: "Hırsızlı Dip Takımı", hook: "Chinu No:2-4" },
         legalSize: "20 cm",
         note: "Yemi önce ezer, hemen tasmalama yapma."
-    }
+    },
     "karagoz": {
         name: "Karagöz", nameEn: "Common Two-banded Bream", icon: "🐟", scientificName: "Diplodus vulgaris",
         photoId: 12,
@@ -1446,26 +1444,6 @@ const SPECIES_DB = {
         advice: { bait: "Karides, Tavuk Göğsü, Kalamar", lure: "Yok", rig: "Üçlü Dip Takımı", hook: "4 - 8" },
         legalSize: "15 cm",
         note: "Kırma mercan ailesi. Karides ve tavuk göğsü en etkili yemler."
-    },
-    "izmarit": {
-        name: "İzmarit", nameEn: "Picarel", icon: "🐟", scientificName: "Spicara smaris",
-        photoId: 18,
-        category: "DIP_KIYI",
-        peakHours: "DAY", peakHoursDesc: "Gündüz, sürü halinde",
-        tempRange: { min: 12, opt: 18, max: 24 },
-        seasons: { winter: 0.55, spring: 0.70, summer: 0.80, autumn: 0.70 },
-        activity: "DAY",
-        pressureSensitivity: 0.4,
-        wavePref: 0.3,
-        clarityPref: "MODERATE",
-        currentPref: 0.3,
-        salinityPref: "HIGH",
-        planktonPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 5, opt: 30, max: 100 },
-        advice: { bait: "Ekmek, Kurt", lure: "Yok", rig: "Çapari, Dip", hook: "10 - 14" },
-        legalSize: "Yok",
-        note: "Küçük ama lezzetli. Sürü halinde avlanır."
     },
     "lahoz": {
         name: "Grida (Lagos/Lahoz)", nameEn: "Dusky Grouper", icon: "🐟", scientificName: "Epinephelus marginatus",
