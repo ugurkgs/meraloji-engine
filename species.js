@@ -83,7 +83,7 @@ const SPECIES_DB = {
     "note": "Zifiri karanlıkta avlanır. Fosforlu şamandıra şart."
   },
   "ustura_baligi": {
-    "name": "Ustura Balığı",
+    "name": "Fare Balığı/Ustura Balığı",
     "nameEn": "Pearly Razorfish",
     "icon": "🐟",
     "scientificName": "Xyrichtys novacula",
