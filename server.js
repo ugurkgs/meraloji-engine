@@ -99,6 +99,35 @@ const SERVER_i18n = {
         notification: {
             title: '🌪️ Fırtına Öncesi Fırsatı!',
             body: (spot) => `${spot} bölgesinde basınç hızla düşüyor, balıklar aktifleşebilir!`
+        },
+        tactic: {
+            dominantNote: i18n(lang).tactic.dominantNote,
+        },
+        score: {
+            badConditions: 'Koşullar Uygun Değil',
+            lowActivity: 'Düşük Aktivite',
+            goodConditions: 'İyi Koşullar',
+        },
+        penalties: {
+            lethalTemp: 'Letal sıcaklık', criticalTemp: 'Kritik sıcaklık',
+            tooShallowSpot: 'Derinlik uyumsuz (çok sığ)', shallowSpot: 'Sığ mera',
+            tooDeeply: 'Çok derin', hardToReach: 'Kıyıdan erişim zor',
+            openWaterType: 'Açık su / Tekne türü', noonSuppression: 'Öğlen bastırması',
+            murkyWater: 'Bulanık su', wavyWater: 'Dalgalı', noSchool: 'Sürü yok',
+            schoolActive: 'Sürü aktif!', dangerWave: 'TEHLİKE: Dalga',
+            dangerWaveTrigger: '⚠️ TEHLİKE: Çok yüksek dalga!',
+            storm: 'FIRTINA', veryWindy: 'Çok rüzgarlı', windy: 'Rüzgarlı',
+            heavyRain: 'Şiddetli yağmur', rainy: 'Yağmurlu', lightRain: 'Hafif yağmur',
+        },
+        moon: {
+            newMoon: 'Yeni Ay 🌑', crescentWaxing: 'Hilal 🌒',
+            firstQuarter: 'İlk Dördün 🌓', waxingGibbous: "Dolunay'a Gidiş 🌔",
+            fullMoon: 'Dolunay 🌕', waningGibbous: 'Dolunay Sonrası 🌖',
+            lastQuarter: 'Son Dördün 🌗', crescentWaning: 'Hilal (Azalan) 🌘',
+        },
+        protected: {
+            penalties: ['🚫 AVLANMASI YASAKTIR — Koruma Altında Tür'],
+            reason: "🚫 Türkiye'de avlanması kesinlikle yasak — Koruma altında tür (6/2 Tebliğ).",
         }
     },
     en: {
@@ -155,6 +184,35 @@ const SERVER_i18n = {
         notification: {
             title: '🌪️ Pre-Storm Opportunity!',
             body: (spot) => `Pressure dropping fast at ${spot} — fish may be active!`
+        },
+        tactic: {
+            dominantNote: '⭐ Dominant species detected — if commercially valued, ideal conditions for a catch.',
+        },
+        score: {
+            badConditions: 'Poor Conditions',
+            lowActivity: 'Low Activity',
+            goodConditions: 'Good Conditions',
+        },
+        penalties: {
+            lethalTemp: 'Lethal temp', criticalTemp: 'Critical temp',
+            tooShallowSpot: 'Depth mismatch (too shallow)', shallowSpot: 'Shallow spot',
+            tooDeeply: 'Too deep', hardToReach: 'Hard to reach from shore',
+            openWaterType: 'Open water / Boat species', noonSuppression: 'Midday suppression',
+            murkyWater: 'Murky water', wavyWater: 'Choppy', noSchool: 'No school',
+            schoolActive: 'School active!', dangerWave: 'DANGER: Wave',
+            dangerWaveTrigger: '⚠️ DANGER: Very high waves!',
+            storm: 'STORM', veryWindy: 'Very windy', windy: 'Windy',
+            heavyRain: 'Heavy rain', rainy: 'Rainy', lightRain: 'Light rain',
+        },
+        moon: {
+            newMoon: 'New Moon 🌑', crescentWaxing: 'Crescent 🌒',
+            firstQuarter: 'First Quarter 🌓', waxingGibbous: 'Waxing Gibbous 🌔',
+            fullMoon: 'Full Moon 🌕', waningGibbous: 'Waning Gibbous 🌖',
+            lastQuarter: 'Last Quarter 🌗', crescentWaning: 'Waning Crescent 🌘',
+        },
+        protected: {
+            penalties: ['🚫 FISHING PROHIBITED — Protected Species'],
+            reason: '🚫 Fishing strictly prohibited in Turkey — Protected species (Regulation 6/2).',
         }
     }
 };
@@ -1357,15 +1415,16 @@ function getSeason(month) {
 }
 
 // Ay Fazı İsmi
-function getMoonPhaseName(phase) {
-    if (phase < 0.125) return "Yeni Ay 🌑";
-    if (phase < 0.25) return "Hilal 🌒";
-    if (phase < 0.375) return "İlk Dördün 🌓";
-    if (phase < 0.5) return "Dolunay'a Gidiş 🌔";
-    if (phase < 0.625) return "Dolunay 🌕";
-    if (phase < 0.75) return "Dolunay Sonrası 🌖";
-    if (phase < 0.875) return "Son Dördün 🌗";
-    return "Hilal (Azalan) 🌘";
+function getMoonPhaseName(phase, lang = 'tr') {
+    const m = i18n(lang).moon;
+    if (phase < 0.125) return m.newMoon;
+    if (phase < 0.25)  return m.crescentWaxing;
+    if (phase < 0.375) return m.firstQuarter;
+    if (phase < 0.5)   return m.waxingGibbous;
+    if (phase < 0.625) return m.fullMoon;
+    if (phase < 0.75)  return m.waningGibbous;
+    if (phase < 0.875) return m.lastQuarter;
+    return m.crescentWaning;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1636,9 +1695,9 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             note: fish.note,
             bait: "-", lure: "-", rig: "-", hook: "-",
             method: "-",
-            penalties: ["🚫 AVLANMASI YASAKTIR — Koruma Altında Tür"],
+            penalties: i18n(lang).protected.penalties,
             activeTriggers: [], scoreDetails: {},
-            reason: "🚫 Türkiye'de avlanması kesinlikle yasak — Koruma altında tür (6/2 Tebliğ)."
+            reason: i18n(lang).protected.reason
         };
     }
     const {
@@ -2140,9 +2199,9 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     if (tempGate < 1.0) {
         rawScore *= tempGate;
         if (tempGate === 0.0) {
-            penalties.push("Letal sıcaklık");
+            penalties.push(i18n(lang).penalties.lethalTemp);
         } else if (tempGate < 0.5) {
-            penalties.push("Kritik sıcaklık");
+            penalties.push(i18n(lang).penalties.criticalTemp);
         }
         scoreDetails.tempGate = { multiplier: parseFloat(tempGate.toFixed(2)), tempWater, min: fish.tempRange.min, max: fish.tempRange.max };
     }
@@ -2173,11 +2232,11 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         if (!isPelagicType && d < effectiveMin * 0.5) {
             // İmkansız derinlik — neredeyse kuru zemin (pelajikler muaf)
             depthScore = 0.05;
-            penalties.push("Derinlik uyumsuz (çok sığ)");
+            penalties.push(i18n(lang).penalties.tooShallowSpot);
         } else if (!isPelagicType && fMin > 0 && d < fMin) {
             // Sınır bölgesi — pelajikler sığa iner, muaf
             depthScore = 0.2 + 0.6 * (d / fMin);
-            penalties.push("Sığ mera");
+            penalties.push(i18n(lang).penalties.shallowSpot);
         } else if (d >= fMin && d <= fMax) {
             // Normal aralık — optimuma göre Gaussian benzeri
             if (d <= fOpt) {
@@ -2188,7 +2247,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         } else if (d > fMax) {
             // Çok derin
             depthScore = Math.max(0.1, 1.0 - (d - fMax) / fMax);
-            penalties.push("Çok derin");
+            penalties.push(i18n(lang).penalties.tooDeeply);
         }
         depthScore = Math.max(0.05, Math.min(1.0, depthScore));
         rawScore *= depthScore;
@@ -2230,8 +2289,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             if (!comesToShore && depthAvg < 25) {
                 const shorePenalty = depthAvg < 10 ? 0.25 : 0.60;
                 rawScore *= shorePenalty;
-                penalties.push("Kıyıdan erişim zor");
-                scoreDetails.shore = { multiplier: shorePenalty, msg: "Açık su / Tekne türü", depthAvg };
+                penalties.push(i18n(lang).penalties.hardToReach);
+                scoreDetails.shore = { multiplier: shorePenalty, msg: i18n(lang).penalties.openWaterType, depthAvg };
             }
         }
     }
@@ -2262,7 +2321,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             middayPenalty = 0.80;
         }
         rawScore *= middayPenalty;
-        if (middayPenalty < 0.85) penalties.push("Öğlen bastırması");
+        if (middayPenalty < 0.85) penalties.push(i18n(lang).penalties.noonSuppression);
         scoreDetails.midday = { penalty: middayPenalty, hour: currentHour };
     }
 
@@ -2279,17 +2338,17 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     }
 
     // Dalga TEHLİKE
-    if (wave > 2.5) { rawScore *= 0.15; penalties.push("TEHLİKE: Dalga"); activeTriggers = ["⚠️ TEHLİKE: Çok yüksek dalga!"]; }
+    if (wave > 2.5) { rawScore *= 0.15; penalties.push(i18n(lang).penalties.dangerWave); activeTriggers = [i18n(lang).penalties.dangerWaveTrigger]; }
     else if (wave > 2.0) { rawScore *= 0.35; penalties.push("Yüksek dalga"); activeTriggers.push(i18n(lang).triggers.highWave); }
-    else if (wave > 1.5) { rawScore *= 0.6; penalties.push("Dalgalı"); }
+    else if (wave > 1.5) { rawScore *= 0.6; penalties.push(i18n(lang).penalties.wavyWater); }
 
-    if (windSpeed > 40) { rawScore *= 0.2; penalties.push("FIRTINA"); activeTriggers = ["⚠️ FIRTINA!"]; }
-    else if (windSpeed > 35) { rawScore *= 0.35; penalties.push("Çok rüzgarlı"); }
-    else if (windSpeed > 25) { rawScore *= 0.7; penalties.push("Rüzgarlı"); }
+    if (windSpeed > 40) { rawScore *= 0.2; penalties.push(i18n(lang).penalties.storm); activeTriggers = ["⚠️ FIRTINA!"]; }
+    else if (windSpeed > 35) { rawScore *= 0.35; penalties.push(i18n(lang).penalties.veryWindy); }
+    else if (windSpeed > 25) { rawScore *= 0.7; penalties.push(i18n(lang).penalties.windy); }
 
-    if (rain > 10) { rawScore *= 0.4; penalties.push("Şiddetli yağmur"); }
-    else if (rain > 5) { rawScore *= 0.6; penalties.push("Yağmurlu"); }
-    else if (rain > 2) { rawScore *= 0.85; penalties.push("Hafif yağmur"); }
+    if (rain > 10) { rawScore *= 0.4; penalties.push(i18n(lang).penalties.heavyRain); }
+    else if (rain > 5) { rawScore *= 0.6; penalties.push(i18n(lang).penalties.rainy); }
+    else if (rain > 2) { rawScore *= 0.85; penalties.push(i18n(lang).penalties.lightRain); }
 
     // DİP BALIKLARI KIYI CEZASI — Artık derinlik tabanlı (DIP_DERIN sabit ceza kaldırıldı)
     if (fish.category === "DIP_DERIN") {
@@ -2305,8 +2364,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     }
 
     if (key === "kalamar") {
-        if (clarity < 60) { rawScore *= 0.3; penalties.push("Bulanık su"); }
-        if (wave > 0.8) { rawScore *= 0.4; penalties.push("Dalgalı"); }
+        if (clarity < 60) { rawScore *= 0.3; penalties.push(i18n(lang).penalties.murkyWater); }
+        if (wave > 0.8) { rawScore *= 0.4; penalties.push(i18n(lang).penalties.wavyWater); }
     }
 
     // === FAZ 3: PELAJİK VOLATİLİTE (Günlük seed) ===
@@ -2331,8 +2390,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
 
         rawScore *= volatility;
         scoreDetails.volatility = { multiplier: volatility.toFixed(2), migratory: isHighMigratory };
-        if (volatility < 0.85) { penalties.push("Sürü yok"); }
-        else if (volatility > 1.10) { activeTriggers.push("Sürü aktif!"); }
+        if (volatility < 0.85) { penalties.push(i18n(lang).penalties.noSchool); }
+        else if (volatility > 1.10) { activeTriggers.push(i18n(lang).penalties.schoolActive); }
     }
 
     scoreDetails.penalties = penalties;
@@ -2364,9 +2423,9 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     finalScore = Math.min(99, finalScore);
 
     let reason = "";
-    if (finalScore < 25) reason = activeTriggers.length > 0 ? activeTriggers[0] : "Koşullar Uygun Değil";
-    else if (finalScore < 40) reason = "Düşük Aktivite";
-    else if (finalScore >= 65) reason = activeTriggers.length > 0 ? activeTriggers[0] : "İyi Koşullar";
+    if (finalScore < 25) reason = activeTriggers.length > 0 ? activeTriggers[0] : i18n(lang).score.badConditions;
+    else if (finalScore < 40) reason = i18n(lang).score.lowActivity;
+    else if (finalScore >= 65) reason = activeTriggers.length > 0 ? activeTriggers[0] : i18n(lang).score.goodConditions;
     else reason = "Orta Aktivite";
 
     return { finalScore, activeTriggers, reason, scoreDetails };
@@ -2889,7 +2948,7 @@ app.get('/api/forecast', async (req, res) => {
 
             if (isDominant) {
                 tacticData = tacticData || {};
-                tacticData.dominantNote = "⭐ Baskın tür tespit edildi — ticari değeri olan bir balık ise, av için ideal koşullar.";
+                tacticData.dominantNote = i18n(lang).tactic.dominantNote;
             }
 
             forecast.push({
@@ -3099,7 +3158,7 @@ app.get('/api/forecast', async (req, res) => {
 
             if (i_isDominant) {
                 instantTacticData = instantTacticData || {};
-                instantTacticData.dominantNote = "⭐ Baskın tür tespit edildi — ticari değeri olan bir balık ise, av için ideal koşullar.";
+                instantTacticData.dominantNote = i18n(lang).tactic.dominantNote;
             }
 
             instantData = {
