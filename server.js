@@ -101,7 +101,7 @@ const SERVER_i18n = {
             body: (spot) => `${spot} bölgesinde basınç hızla düşüyor, balıklar aktifleşebilir!`
         },
         tactic: {
-            dominantNote: i18n(lang).tactic.dominantNote,
+            dominantNote: '⭐ Baskın tür tespit edildi — ticari değeri olan bir balık ise, av için ideal koşullar.',
         },
         score: {
             badConditions: 'Koşullar Uygun Değil',
