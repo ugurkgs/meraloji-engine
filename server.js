@@ -1687,12 +1687,14 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         return {
             finalScore: 0,          // calculateWeightedDailyScore / 3HourWindow için
             score: 0,               // direkt erişim için
-            name: fish.name, nameEn: fish.nameEn, icon: fish.icon,
+            name: lang === 'en' ? (fish.nameEn || fish.name) : fish.name,
+            nameEn: fish.nameEn, icon: fish.icon,
             scientificName: fish.scientificName, photoId: fish.photoId,
             category: fish.category, regions: fish.regions,
-            peakHours: fish.peakHours, peakHoursDesc: fish.peakHoursDesc,
+            peakHours: fish.peakHours,
+            peakHoursDesc: lang === 'en' ? (fish.peakHoursDescEn || fish.peakHoursDesc) : fish.peakHoursDesc,
             legalSize: fish.legalSize,
-            note: fish.note,
+            note: lang === 'en' ? (fish.noteEn || fish.note) : fish.note,
             bait: "-", lure: "-", rig: "-", hook: "-",
             method: "-",
             penalties: i18n(lang).protected.penalties,
@@ -2877,20 +2879,28 @@ app.get('/api/forecast', async (req, res) => {
                             ? `${String(dailyResult.bestHour).padStart(2, '0')}:00`
                             : null;
 
+                        // lang=en ise İngilizce alanları kullan
+                        const _isEn = lang === 'en';
                         fishList.push({
-                            key, name: fish.name, nameEn: fish.nameEn || fish.name,
+                            key,
+                            name: _isEn ? (fish.nameEn || fish.name) : fish.name,
+                            nameEn: fish.nameEn || fish.name,
                             scientificName: fish.scientificName, photoId: fish.photoId,
                             icon: fish.icon, category: fish.category,
-                            peakHours: fish.peakHours, peakHoursDesc: fish.peakHoursDesc,
-                            score: dailyScore, // Ağırlıklı günlük skor
-                            bestHour: bestHourStr, // En iyi saat
+                            peakHours: fish.peakHours,
+                            peakHoursDesc: _isEn ? (fish.peakHoursDescEn || fish.peakHoursDesc) : fish.peakHoursDesc,
+                            score: dailyScore,
+                            bestHour: bestHourStr,
                             bestHourScore: dailyResult.bestHourScore,
-                            hourlyScores: dailyResult.hourlyScores, // [YENİ] 24 saatlik skor
-                            bait: fish.advice.bait, method: fish.advice.hook,
-                            lure: fish.advice.lure, rig: fish.advice.rig, note: fish.note,
+                            hourlyScores: dailyResult.hourlyScores,
+                            bait: _isEn ? (fish.advice.baitEn || fish.advice.bait) : fish.advice.bait,
+                            method: _isEn ? (fish.advice.hookEn || fish.advice.hook) : fish.advice.hook,
+                            lure: _isEn ? (fish.advice.lureEn || fish.advice.lure) : fish.advice.lure,
+                            rig: _isEn ? (fish.advice.rigEn || fish.advice.rig) : fish.advice.rig,
+                            note: _isEn ? (fish.noteEn || fish.note) : fish.note,
                             legalSize: fish.legalSize, reason: result.reason,
                             activation: result.activeTriggers.join(", "),
-                            scoreDetails: result.scoreDetails // Yıldız sistemi için
+                            scoreDetails: result.scoreDetails
                         });
                     }
                 }
@@ -2926,7 +2936,7 @@ app.get('/api/forecast', async (req, res) => {
                 tacticKey = "TACTIC_HOT_SPOT";
                 tacticData = {
                     fish: highScoreFish.slice(0, 2).map(f => ({
-                        name: f.name,
+                        name: lang === 'en' ? (f.nameEn || f.name) : f.name,
                         score: f.score,
                         bait: f.bait,
                         lure: f.lure
@@ -2936,7 +2946,7 @@ app.get('/api/forecast', async (req, res) => {
                 // 60-85 arası - orta aktivite
                 tacticKey = "TACTIC_MODERATE";
                 tacticData = {
-                    fish: mediumScoreFish.slice(0, 3).map(f => f.name)
+                    fish: mediumScoreFish.slice(0, 3).map(f => lang === 'en' ? (f.nameEn || f.name) : f.name)
                 };
             } else if (topScore < 40) {
                 // Düşük skor - mera değiştir önerisi
@@ -3101,16 +3111,23 @@ app.get('/api/forecast', async (req, res) => {
                 const result = calculateFishScore(fish, key, baseParams, lang);
 
                 if (smoothedScore > 15) {
+                    const _ie = lang === 'en';
                     instantFishList.push({
-                        key, name: fish.name, nameEn: fish.nameEn || fish.name,
+                        key,
+                        name: _ie ? (fish.nameEn || fish.name) : fish.name,
+                        nameEn: fish.nameEn || fish.name,
                         scientificName: fish.scientificName, photoId: fish.photoId,
                         icon: fish.icon, category: fish.category,
-                        peakHours: fish.peakHours, peakHoursDesc: fish.peakHoursDesc,
-                        score: smoothedScore, // 3 saatlik ortalama skor
-                        bait: fish.advice.bait, method: fish.advice.hook,
-                        lure: fish.advice.lure, rig: fish.advice.rig,
-                        note: fish.note, legalSize: fish.legalSize, reason: result.reason,
-                        scoreDetails: result.scoreDetails // Yıldız sistemi
+                        peakHours: fish.peakHours,
+                        peakHoursDesc: _ie ? (fish.peakHoursDescEn || fish.peakHoursDesc) : fish.peakHoursDesc,
+                        score: smoothedScore,
+                        bait:   _ie ? (fish.advice.baitEn || fish.advice.bait)   : fish.advice.bait,
+                        method: _ie ? (fish.advice.hookEn || fish.advice.hook)   : fish.advice.hook,
+                        lure:   _ie ? (fish.advice.lureEn || fish.advice.lure)   : fish.advice.lure,
+                        rig:    _ie ? (fish.advice.rigEn  || fish.advice.rig)    : fish.advice.rig,
+                        note:   _ie ? (fish.noteEn || fish.note) : fish.note,
+                        legalSize: fish.legalSize, reason: result.reason,
+                        scoreDetails: result.scoreDetails
                     });
                 }
             }
@@ -3245,7 +3262,7 @@ app.get('/api/forecast', async (req, res) => {
 app.get('/api/species-list', (req, res) => {
     const list = Object.entries(SPECIES_DB).map(([key, fish]) => ({
         key,
-        name: fish.name,
+        name: lang === 'en' ? (fish.nameEn || fish.name) : fish.name,
         nameEn: fish.nameEn || fish.name,
         icon: fish.icon,
         category: fish.category,
@@ -3562,7 +3579,7 @@ app.get('/api/fish-search', async (req, res) => {
         res.json({
             fish: {
                 key: fishKey,
-                name: fish.name,
+                name: lang === 'en' ? (fish.nameEn || fish.name) : fish.name,
                 nameEn: fish.nameEn || fish.name,
                 scientificName: fish.scientificName,
                 icon: fish.icon,
@@ -3576,10 +3593,16 @@ app.get('/api/fish-search', async (req, res) => {
                 pressureSensitivity: fish.pressureSensitivity,
                 currentPref: fish.currentPref,
                 wavePref: fish.wavePref,
-                advice: fish.advice,
+                advice: lang === 'en' ? {
+                    bait:   fish.advice?.baitEn   || fish.advice?.bait,
+                    lure:   fish.advice?.lureEn   || fish.advice?.lure,
+                    rig:    fish.advice?.rigEn    || fish.advice?.rig,
+                    hook:   fish.advice?.hookEn   || fish.advice?.hook,
+                } : fish.advice,
                 legalSize: isProtected ? null : fish.legalSize,
                 isProtected: isProtected,
-                note: fish.note,
+                note: lang === 'en' ? (fish.noteEn || fish.note) : fish.note,
+                peakHoursDesc: lang === 'en' ? (fish.peakHoursDescEn || fish.peakHoursDesc) : fish.peakHoursDesc,
                 tempRange: fish.tempRange
             },
             score: result.finalScore,
@@ -4166,8 +4189,9 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
                 try {
                     const dailyResult = calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
                     const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
-                    if (score > 0) allFishScores.push({ name: fish.name, score });
-                    if (score > topScore) { topScore = score; topFishName = fish.name; }
+                    const _fn = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
+                    if (score > 0) allFishScores.push({ name: _fn, score });
+                    if (score > topScore) { topScore = score; topFishName = _fn; }
                 } catch (e) { }
             }
             allFishScores.sort((a, b) => b.score - a.score);
@@ -4186,13 +4210,15 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey)
                 const depthVal = depthAvg ? Math.round(depthAvg) : null;
                 const zone = !depthVal ? null : getZoneLabel(depthVal, lang);
                 const substrateVal = params.substrate || null;
-                return { score, fishName: fish.name, topFish: [fish.name], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
+                const _n1 = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
+                return { score, fishName: _n1, topFish: [_n1], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
             } catch (e) {
                 const r = calculateFishScore(fish, fishKey, params, lang);
                 const depthVal = depthAvg ? Math.round(depthAvg) : null;
                 const zone = !depthVal ? null : getZoneLabel(depthVal, lang);
                 const substrateVal = params.substrate || null;
-                return { score: r.finalScore, fishName: fish.name, topFish: [fish.name], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
+                const _n2 = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
+                return { score: r.finalScore, fishName: _n2, topFish: [_n2], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
             }
         }
     } catch (e) {
