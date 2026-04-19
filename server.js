@@ -3260,6 +3260,7 @@ app.get('/api/forecast', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 app.get('/api/species-list', (req, res) => {
+    const lang = req.query.lang || 'tr';
     const list = Object.entries(SPECIES_DB).map(([key, fish]) => ({
         key,
         name: lang === 'en' ? (fish.nameEn || fish.name) : fish.name,
@@ -3272,6 +3273,7 @@ app.get('/api/species-list', (req, res) => {
     }));
     res.json(list);
 });
+
 
 app.get('/api/fish-search', async (req, res) => {
     try {
