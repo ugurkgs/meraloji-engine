@@ -183,7 +183,8 @@ const SPECIES_DB = {
         depth: { min: 0, opt: 10, max: 150 },
         advice: { bait: "Canlı Mamun, Yengeç, Midye", lure: "Micro Jig", rig: "Hırsızlı Dip Takımı", hook: "Chinu No:2-4", baitEn: "Live sand smelt, crab, mussel", lureEn: "Micro jig", rigEn: "Running bottom rig", hookEn: "Chinu No:2-4" },
         legalSize: "20 cm",
-        note: "Yemi önce ezer, hemen tasmalama yapma."
+        note: "Yemi önce ezer, hemen tasmalama yapma.",
+        noteEn: "Crush the bait first; don't strike immediately."
     },
     "karagoz": {
         name: "Karagöz", nameEn: "Common Two-banded Bream", icon: "🐟", scientificName: "Diplodus vulgaris",
@@ -203,7 +204,8 @@ const SPECIES_DB = {
         depth: { min: 0, opt: 10, max: 160 },
         advice: { bait: "Mamun, Yengeç, Madya", lure: "Silikon Karides (Nadir)", rig: "Şeytan Oltası, Tek İğneli Dip", hook: "2 - 5 Sağlam Dövme", baitEn: "Sand smelt, crab, mussel", lureEn: "Soft plastic shrimp (rare)", rigEn: "Paternoster, single bottom hook", hookEn: "2 - 5 forged" },
         legalSize: "18 cm",
-        note: "Kayalık, köpüklü sularda. Misina sürtünmesine dikkat."
+        note: "Kayalık, köpüklü sularda. Misina sürtünmesine dikkat.",
+        noteEn: "Rocky, foamy water. Watch for line friction."
     },
     "mirmir": {
         name: "Mırmır", nameEn: "Striped Seabream", icon: "🦓", scientificName: "Lithognathus mormyrus",
@@ -222,7 +224,8 @@ const SPECIES_DB = {
         depth: { min: 0, opt: 10, max: 150 },
         advice: { bait: "Boru Kurdu (Favori), Mamun, Kum Solucanı", lure: "Kokulu Silikon (Kurt/Yengeç)", rig: "Hafif Gezer Kurşunlu Dip", hook: "4 - 6 İnce Pala", baitEn: "Lugworm (favourite), ragworm", lureEn: "Scented soft plastic", rigEn: "Light running sinker bottom", hookEn: "4 - 6 fine wire" },
         legalSize: "20 cm (Etik)",
-        note: "Gece kıyıya 1m'ye kadar yaklaşır. Işık tutmayın!"
+        note: "Gece kıyıya 1m'ye kadar yaklaşır. Işık tutmayın!",
+        noteEn: "Approaches within 1m of shore at night. No flashlights!"
     },
     "kalamar": {
         name: "Kalamar", nameEn: "European Squid", icon: "🦑", scientificName: "Loligo vulgaris",
@@ -244,7 +247,8 @@ const SPECIES_DB = {
         depth: { min: 2, opt: 20, max: 150 },
         advice: { bait: "Yok", lure: "Kalamar Zokası (Renkli/Fosforlu)", rig: "Zoka At-Çek (Whipping)", hook: "Özel Zoka İğnesi", baitEn: "None", lureEn: "Coloured/phosphorescent squid jig", rigEn: "Eging (cast and retrieve)", hookEn: "Dedicated squid jig" },
         legalSize: "Yok",
-        note: "Berrak su ve ay ışığında. Yaz başı üreme dönemi, avlamayın."
+        note: "Berrak su ve ay ışığında. Yaz başı üreme dönemi, avlamayın.",
+        noteEn: "Clear water and moonlight. Avoid catching during early summer spawning."
     },
     "ahtapot": {
         name: "Ahtapot", nameEn: "Common Octopus", icon: "🐙", scientificName: "Octopus vulgaris",
@@ -264,7 +268,8 @@ const SPECIES_DB = {
         depth: { min: 2, opt: 20, max: 150 },
         advice: { bait: "Yengeç, Tavuk But", lure: "Ahtapot Zokası, Plastik Yengeç", rig: "Çarpmalı Zoka", hook: "Özel Zoka", baitEn: "Crab, chicken leg", lureEn: "Octopus jig, plastic crab", rigEn: "Jigging with bounce", hookEn: "Dedicated jig" },
         legalSize: "1 kg",
-        note: "Yemi sarıp yapışır. Ağırlık hissedince sert tasma."
+        note: "Yemi sarıp yapışır. Ağırlık hissedince sert tasma.",
+        noteEn: "Wraps around bait. Strike firmly when you feel weight."
     },
 
     "kikla": {
@@ -284,7 +289,8 @@ const SPECIES_DB = {
         depth: { min: 1, opt: 10, max: 50 },
         advice: { bait: "Karides, Yengeç, Midye", lure: "LRF Silikon, Micro Jig", rig: "Dip Takımı, LRF", hook: "4 - 1 Güçlü", baitEn: "Shrimp, crab, mussel", lureEn: "LRF soft plastic, micro jig", rigEn: "Bottom rig, LRF", hookEn: "4 - 1 strong" },
         legalSize: "Yasal limit yok",
-        note: "Kayalık ve yosunluk bölgelerde yaşayan güçlü bir dip balığıdır. Kabukluları kırabilecek güçlü çenesi vardır."
+        note: "Kayalık ve yosunluk bölgelerde yaşayan güçlü bir dip balığıdır. Kabukluları kırabilecek güçlü çenesi vardır.",
+        noteEn: "Lives in rocky and weedy areas. Strong jaw can crush crustaceans."
     },
     
     "istavrit": {
@@ -313,7 +319,8 @@ const SPECIES_DB = {
         depth: { min: 5, opt: 20, max: 250 },
         advice: { bait: "Karides Parçası, Tavuk Göğsü", lure: "Çapari, LRF Silikon, Micro Jig", rig: "Çapari, LRF", hook: "9 - 12 İnce", baitEn: "Shrimp piece, chicken breast", lureEn: "Sabiki, LRF soft plastic, micro jig", rigEn: "Sabiki, LRF", hookEn: "9 - 12 fine" },
         legalSize: "13 cm",
-        note: "Sürü halinde. Çapari ile kova doldurulur."
+        note: "Sürü halinde. Çapari ile kova doldurulur.",
+        noteEn: "Schooling fish. Sabiki can fill a bucket quickly."
     },
     "barbun": {
         name: "Barbun", nameEn: "Red Mullet", icon: "🐟", scientificName: "Mullus barbatus",
@@ -334,7 +341,8 @@ const SPECIES_DB = {
         depth: { min: 10, opt: 80, max: 300 },
         advice: { bait: "Karides, Kurt, Midye, Tavuk Göğsü", lure: "Genelde Yok", rig: "Üçlü Dip Oltası", hook: "9 - 11 İnce Telli", baitEn: "Shrimp, worm, mussel, chicken breast", lureEn: "Rarely used", rigEn: "Three-hook bottom rig", hookEn: "9 - 11 fine wire" },
         legalSize: "13 cm",
-        note: "Yumuşak dudak yapısı var — ince telli küçük iğne (9-11 no) şart. Yemi emerek alır."
+        note: "Yumuşak dudak yapısı var — ince telli küçük iğne (9-11 no) şart. Yemi emerek alır.",
+        noteEn: "Soft lips — fine wire small hook (9-11) essential. Sucks bait in gently."
     },
     "iskorpit": {
         name: "İskorpit", nameEn: "Scorpionfish", icon: "🐟", scientificName: "Scorpaena porcus",
@@ -353,7 +361,8 @@ const SPECIES_DB = {
         depth: { min: 0, opt: 20, max: 200 },
         advice: { bait: "İstavrit Fleto, Karides", lure: "Kokulu Silikonlar (LRF)", rig: "Dip Takımı, LRF", hook: "4 - 6 Uzun Pala", baitEn: "Horse mackerel fillet, shrimp", lureEn: "Scented soft plastics (LRF)", rigEn: "Bottom rig, LRF", hookEn: "4 - 6 long shank" },
         legalSize: "Yok",
-        note: "⚠️ DİKENLERİ ZEHİRLİ! Dikkatli olun."
+        note: "⚠️ DİKENLERİ ZEHİRLİ! Dikkatli olun.",
+        noteEn: "WARNING: VENOMOUS SPINES! Handle with extreme caution."
     },
 
     "trakun": {
@@ -376,7 +385,8 @@ const SPECIES_DB = {
     depth: { min: 0, opt: 20, max: 50 },
     advice: { bait: "Hamsi, İstavrit", lure: "Metal Kaşık, Jig", rig: "Paternoster, Trolling", hook: "2 - 4", baitEn: "Anchovy, horse mackerel", lureEn: "Metal spoon, jig", rigEn: "Paternoster, trolling", hookEn: "2 - 4" },
     legalSize: "18 cm",
-    note: "Sürü halinde yüzer. Yaz aylarında Ege ve Akdeniz kıyılarında yoğun."
+    note: "Sürü halinde yüzer. Yaz aylarında Ege ve Akdeniz kıyılarında yoğun.",
+        noteEn: "Schooling fish. Dense in Aegean and Mediterranean shores in summer."
 },
     "kefal": {
         name: "Kefal", nameEn: "Flathead Grey Mullet", icon: "🐟", scientificName: "Mugil cephalus",
@@ -397,7 +407,8 @@ const SPECIES_DB = {
         depth: { min: 0, opt: 5, max: 15 },
         advice: { bait: "Ekmek İçi, Kıbrıs Sarma", lure: "Yok", rig: "Kıbrıs Takımı, Şamandıralı", hook: "6 - 9", baitEn: "Bread dough, Cypriot rig bait", lureEn: "None", rigEn: "Cypriot rig, float rig", hookEn: "6 - 9" },
         legalSize: "20 cm",
-        note: "Lagün ve nehir ağızlarında. Düşük tuzluluğu sever."
+        note: "Lagün ve nehir ağızlarında. Düşük tuzluluğu sever.",
+        noteEn: "Found in lagoons and river mouths. Tolerates low salinity."
     },
     "zargana": {
         name: "Zargana", nameEn: "Garfish", icon: "🐟", scientificName: "Belone belone",
@@ -418,7 +429,8 @@ const SPECIES_DB = {
         depth: { min: 1, opt: 8, max: 40 },
         advice: { bait: "Kurt, Fleto Balık", lure: "İpek (Turuncu)", rig: "Şamandıralı Top, İpek", hook: "6 - 10 İnce", baitEn: "Worm, fish strip", lureEn: "Silk feather (orange)", rigEn: "Float with bobber, silk", hookEn: "6 - 10 fine wire" },
         legalSize: "Yok",
-        note: "Güneşli havalarda yüzeyde. Berrak su sever."
+        note: "Güneşli havalarda yüzeyde. Berrak su sever.",
+        noteEn: "Surface fish on sunny days. Prefers clear water."
     },
     // ═══════════════════════════════════════════════════════════════════════════
     // YENİ TÜRLER - FishBase & FAO Referansları
@@ -442,7 +454,8 @@ const SPECIES_DB = {
         depth: { min: 5, opt: 30, max: 200 },
         advice: { bait: "-", lure: "-", rig: "-", hook: "-", baitEn: "-", lureEn: "-", rigEn: "-", hookEn: "-" },
         legalSize: "YASAK",
-        note: "🚫 AVLANMASI KESİNLİKLE YASAKTIR. IUCN Tehlike Altında (Endangered). 6/2 Numaralı Tebliğ. Görürsen bırak."
+        note: "🚫 AVLANMASI KESİNLİKLE YASAKTIR. IUCN Tehlike Altında (Endangered). 6/2 Numaralı Tebliğ. Görürsen bırak.",
+        noteEn: "STRICTLY PROHIBITED to catch. IUCN Endangered. Regulation 6/2. Release immediately if caught."
     },
     "akya": {
         name: "Akya", nameEn: "Greater Amberjack", icon: "🐟", scientificName: "Seriola dumerili",
@@ -464,7 +477,8 @@ const SPECIES_DB = {
         depth: { min: 10, opt: 50, max: 300 },
         advice: { bait: "Canlı İstavrit, Sardalya", lure: "Popper, Stickbait, Metal Jig", rig: "Trolling, Jigging, Popping", hook: "3/0 - 6/0 + Çelik Tel", baitEn: "Live horse mackerel, sardine", lureEn: "Popper, stickbait, metal jig", rigEn: "Trolling, jigging, popping", hookEn: "3/0 - 6/0 + wire trace" },
         legalSize: "30 cm",
-        note: "Güçlü avcı! Tekne gerektirir. Yaz aylarında açıklarda bollaşır."
+        note: "Güçlü avcı! Tekne gerektirir. Yaz aylarında açıklarda bollaşır.",
+        noteEn: "Powerful predator! Boat required. Abundant offshore in summer."
     },
     "sinarit": {
         name: "Sinarit", nameEn: "Common Dentex", icon: "🐟", scientificName: "Dentex dentex",
@@ -484,7 +498,8 @@ const SPECIES_DB = {
         depth: { min: 15, opt: 30, max: 50 },
         advice: { bait: "Canlı Kalamar, Sübye, Karides", lure: "Metal Jig, Maket Balık", rig: "Jigging, Dip Sırtısı, Trolling", hook: "2/0 - 5/0", baitEn: "Live squid, cuttlefish, shrimp", lureEn: "Metal jig, swim bait", rigEn: "Jigging, deep bottom rig, trolling", hookEn: "2/0 - 5/0" },
         legalSize: "35 cm",
-        note: "Denizlerin padişahı. Kayalık dip sever. legalSize 35cm — bilimsel referans."
+        note: "Denizlerin padişahı. Kayalık dip sever. legalSize 35cm — bilimsel referans.",
+        noteEn: "King of the sea. Prefers rocky bottom. Legal size 35cm — scientific reference."
     },
     "mercan": {
         name: "Mercan", nameEn: "Red Porgy", icon: "🐟", scientificName: "Pagrus pagrus",
@@ -505,7 +520,8 @@ const SPECIES_DB = {
         depth: { min: 10, opt: 60, max: 250 },
         advice: { bait: "Karides, Kalamar, Midye, Sülünez", lure: "Jig, Silikon", rig: "Dip Takımı", hook: "2 - 6", baitEn: "Shrimp, squid, mussel, worm", lureEn: "Jig, soft plastic", rigEn: "Bottom rig", hookEn: "2 - 6" },
         legalSize: "18 cm",
-        note: "Kayalık-kumluk karışık dipte gezer. Yem dibe oturmalı. Hafif akıntıda daha istekli vurur."
+        note: "Kayalık-kumluk karışık dipte gezer. Yem dibe oturmalı. Hafif akıntıda daha istekli vurur.",
+        noteEn: "Roams mixed rocky-sandy bottom. Bait must reach bottom. More active in light current."
     },
     "antenli_mercan": {
         name: "Antenli Mercan", nameEn: "Blackspot Seabream", icon: "🐟", scientificName: "Pagellus bogaraveo",
@@ -525,7 +541,8 @@ const SPECIES_DB = {
         depth: { min: 50, opt: 150, max: 700 },
         advice: { bait: "Karides, Kurt, Kalamar", lure: "Yok", rig: "Derin Su Dip Takımı", hook: "4 - 8", baitEn: "Shrimp, worm, squid", lureEn: "None", rigEn: "Deep water bottom rig", hookEn: "4 - 8" },
         legalSize: "Yok",
-        note: "⚠️ Derin suda (50-700m). Tekne ile parakete avı."
+        note: "⚠️ Derin suda (50-700m). Tekne ile parakete avı.",
+        noteEn: "WARNING: Deep water (50-700m). Longline fishing from boat."
     },
 
     "lipsoz": {
@@ -545,7 +562,8 @@ const SPECIES_DB = {
     depth: { min: 20, opt: 60, max: 150 },
     advice: { bait: "İstavrit Fleto, Karides, Kalamar", lure: "Kokulu Silikon (LRF)", rig: "Dip Takımı", hook: "2/0 - 4/0", baitEn: "Horse mackerel fillet, shrimp, squid", lureEn: "Scented soft plastic (LRF)", rigEn: "Bottom rig", hookEn: "2/0 - 4/0" },
     legalSize: "15 cm",
-    note: "⚠️ DİKENLERİ ZEHİRLİ! Karadeniz'de bulunmaz. Kayalık ve taşlık diplerde pusu kurar. Yazın sığ kıyılara yaklaşır."
+    note: "⚠️ DİKENLERİ ZEHİRLİ! Karadeniz'de bulunmaz. Kayalık ve taşlık diplerde pusu kurar. Yazın sığ kıyılara yaklaşır.",
+        noteEn: "WARNING: VENOMOUS SPINES! Absent in Black Sea. Ambushes in rocky/stony bottoms. Approaches shallow shores in summer."
 },
     "melanur": {
         name: "Melanur", nameEn: "Saddled Seabream", icon: "🐟", scientificName: "Oblada melanura",
@@ -565,7 +583,8 @@ const SPECIES_DB = {
         depth: { min: 1, opt: 15, max: 40 },
         advice: { bait: "Ekmek, Midye, Kurt", lure: "Micro Jig", rig: "Şamandıralı, LRF", hook: "8 - 12", baitEn: "Bread, mussel, worm", lureEn: "Micro jig", rigEn: "Float, LRF", hookEn: "8 - 12" },
         legalSize: "Yok",
-        note: "Kuyruk sapındaki siyah benekle tanınır. Kayalık sever."
+        note: "Kuyruk sapındaki siyah benekle tanınır. Kayalık sever.",
+        noteEn: "Identified by black spot at tail base. Prefers rocky areas."
     },
     "kupes": {
         name: "Kupes/Mandagöz", nameEn: "Bogue", icon: "🐟", scientificName: "Boops boops",
@@ -584,7 +603,8 @@ const SPECIES_DB = {
         depth: { min: 1, opt: 20, max: 100 },
         advice: { bait: "Ekmek, Hamur, Kurt", lure: "Çapari", rig: "Çapari, Şamandıralı", hook: "10 - 14", baitEn: "Bread, dough, worm", lureEn: "Sabiki", rigEn: "Sabiki, float", hookEn: "10 - 14" },
         legalSize: "Yok",
-        note: "Sürü halinde. Çapari ile bol av. Canlı yem olarak kullanılır."
+        note: "Sürü halinde. Çapari ile bol av. Canlı yem olarak kullanılır.",
+        noteEn: "Schooling fish. Abundant with sabiki. Used as live bait."
     },
     "sivriburun": {
         name: "Sivriburun", nameEn: "Sharpsnout Seabream", icon: "🐟", scientificName: "Diplodus puntazzo",
@@ -603,7 +623,8 @@ const SPECIES_DB = {
         depth: { min: 1, opt: 15, max: 60 },
         advice: { bait: "Yengeç, Midye, Mamun", lure: "Silikon Karides", rig: "Şeytan Oltası, Dip Takımı", hook: "2 - 6", baitEn: "Crab, mussel, sand smelt", lureEn: "Soft plastic shrimp", rigEn: "Paternoster, bottom rig", hookEn: "2 - 6" },
         legalSize: "18 cm",
-        note: "Sivri burunlu karagöz. Köpüklü su sever."
+        note: "Sivri burunlu karagöz. Köpüklü su sever.",
+        noteEn: "Sharp-nosed bream. Prefers foamy water."
     },
     "sargoz": {
         name: "Sargoz", nameEn: "White Seabream", icon: "🐟", scientificName: "Diplodus sargus",
@@ -623,7 +644,8 @@ const SPECIES_DB = {
         depth: { min: 1, opt: 15, max: 50 },
         advice: { bait: "Midye, Yengeç, Mamun", lure: "Silikon", rig: "Şeytan Oltası, Dip", hook: "1 - 4", baitEn: "Mussel, crab, sand smelt", lureEn: "Soft plastic", rigEn: "Paternoster, bottom", hookEn: "1 - 4" },
         legalSize: "23 cm",
-        note: "Karagözün büyük akrabası. Köpüklü, dalgalı su sever."
+        note: "Karagözün büyük akrabası. Köpüklü, dalgalı su sever.",
+        noteEn: "Larger relative of two-banded bream. Prefers foamy, choppy water."
     },
     "hani": {
         name: "Hani/Hanos", nameEn: "Comber", icon: "🐟", scientificName: "Serranus cabrilla",
@@ -644,7 +666,8 @@ const SPECIES_DB = {
         adviceEn: { bait: "Shrimp, Worm, Mussel", lure: "LRF Soft Plastic", rig: "LRF, Bottom Rig", hook: "6 - 10" },
         legalSize: "Yok",
         legalSizeEn: "None",
-        note: "Küçük ama lezzetli. Kayalık dip sever. LRF ile eğlenceli."
+        note: "Küçük ama lezzetli. Kayalık dip sever. LRF ile eğlenceli.",
+        noteEn: "Small but tasty. Prefers rocky bottom. Fun with LRF."
     },
     "sarikulak": {
         name: "Sarıkulak Kefal", nameEn: "Golden Grey Mullet", icon: "🐟", scientificName: "Chelon auratus",
@@ -663,7 +686,8 @@ const SPECIES_DB = {
         depth: { min: 0, opt: 5, max: 20 },
         advice: { bait: "Ekmek, Kıbrıs Sarma", lure: "Yok", rig: "Kıbrıs Takımı, Şamandıralı", hook: "6 - 10", baitEn: "Bread, Cypriot rig bait", lureEn: "None", rigEn: "Cypriot rig, float", hookEn: "6 - 10" },
         legalSize: "20 cm",
-        note: "Solungaç kapağındaki sarı lekeyle tanınır. Lagün sever."
+        note: "Solungaç kapağındaki sarı lekeyle tanınır. Lagün sever.",
+        noteEn: "Identified by yellow spot on gill cover. Likes lagoons."
     },
     // ═══════════════════════════════════════════════════════════════════════════
     // YENİ EKLENEN TÜRLER - v2.4
@@ -687,7 +711,8 @@ const SPECIES_DB = {
         depth: { min: 30, opt: 60, max: 100 },
         advice: { bait: "Canlı Kalamar, Teke", lure: "Jig, Inchiku", rig: "Jig Takımı, Derin Dip", hook: "2/0 - 4/0", baitEn: "Live squid, sand smelt", lureEn: "Jig, inchiku", rigEn: "Jig setup, deep bottom", hookEn: "2/0 - 4/0" },
         legalSize: "25 cm",
-        note: "Derin suyun kralı. Jigging ile efsanevi av. Sert direnç gösterir."
+        note: "Derin suyun kralı. Jigging ile efsanevi av. Sert direnç gösterir.",
+        noteEn: "King of the deep. Legendary catch on jigging. Fights hard."
     },
     "subye": {
         name: "Sübye", nameEn: "Common Cuttlefish", icon: "🦑", scientificName: "Sepia officinalis",
@@ -708,7 +733,8 @@ const SPECIES_DB = {
         depth: { min: 2, opt: 10, max: 25 },
         advice: { bait: "Kalamar Zokası", lure: "Egi 2.5-3.5", rig: "Eging Takımı", hook: "Zoka", baitEn: "Squid jig", lureEn: "Egi 2.5-3.5", rigEn: "Eging setup", hookEn: "Dedicated jig" },
         legalSize: "Yok",
-        note: "Sonbahar favorisi. Eging ile keyifli av. Gece lambası çeker."
+        note: "Sonbahar favorisi. Eging ile keyifli av. Gece lambası çeker.",
+        noteEn: "Autumn favourite. Fun eging. Attracted to light at night."
     },
     "sarikuyruk": {
         name: "Sarıkuyruk", nameEn: "Greater Amberjack", icon: "🐟", scientificName: "Seriola dumerili",
@@ -729,7 +755,8 @@ const SPECIES_DB = {
         depth: { min: 10, opt: 35, max: 70 },
         advice: { bait: "Canlı Zargana", lure: "Jig 60-150g, Popper", rig: "Jigging Setup", hook: "3/0 - 5/0", baitEn: "Live garfish", lureEn: "Jig 60-150g, popper", rigEn: "Jigging setup", hookEn: "3/0 - 5/0" },
         legalSize: "45 cm",
-        note: "Güçlü game fish. Jigging'in yıldızı. Acımasız direnç gösterir."
+        note: "Güçlü game fish. Jigging'in yıldızı. Acımasız direnç gösterir.",
+        noteEn: "Powerful game fish. Star of jigging. Relentless resistance."
     },
     "granyoz": {
         name: "Granyoz (Sarıağız)", nameEn: "Meagre", icon: "🐟", scientificName: "Argyrosomus regius",
@@ -749,7 +776,8 @@ const SPECIES_DB = {
         depth: { min: 5, opt: 25, max: 60 },
         advice: { bait: "Canlı Teke, Sübye", lure: "Silikon 12-18cm", rig: "Dip, Spin", hook: "2/0 - 4/0", baitEn: "Live sand smelt, cuttlefish", lureEn: "Large soft plastic 12-18cm", rigEn: "Bottom, spin", hookEn: "2/0 - 4/0" },
         legalSize: "42 cm",
-        note: "Gece avcısı dev. 50kg'a ulaşabilir. Ses çıkarır (davul balığı)."
+        note: "Gece avcısı dev. 50kg'a ulaşabilir. Ses çıkarır (davul balığı).",
+        noteEn: "Giant night predator. Can reach 50kg. Makes sounds (drumfish)."
     },
     "lambuga": {
         name: "Lambuga (Mahi Mahi)", nameEn: "Common Dolphinfish", icon: "🐟", scientificName: "Coryphaena hippurus",
@@ -772,7 +800,8 @@ const SPECIES_DB = {
         depth: { min: 0, opt: 10, max: 35 },
         advice: { bait: "Küçük balık", lure: "Popper, Sahte Balık", rig: "Trolling, Spin", hook: "2/0 - 4/0", baitEn: "Small fish", lureEn: "Popper, swim bait", rigEn: "Trolling, spin", hookEn: "2/0 - 4/0" },
         legalSize: "Yok",
-        note: "Tropikal güzellik. Yüzen nesnelerin altında bulunur. Hızlı büyür."
+        note: "Tropikal güzellik. Yüzen nesnelerin altında bulunur. Hızlı büyür.",
+        noteEn: "Tropical beauty. Found under floating objects. Fast-growing."
     },
     "uskumru": {
         name: "Uskumru", nameEn: "Atlantic Mackerel", icon: "🐟", scientificName: "Scomber scombrus",
@@ -795,7 +824,8 @@ const SPECIES_DB = {
         depth: { min: 5, opt: 20, max: 50 },
         advice: { bait: "Çapari", lure: "Küçük Kaşık", rig: "Çapari Takımı", hook: "6 - 10", baitEn: "Sabiki feathers", lureEn: "Small metal spoon", rigEn: "Sabiki rig", hookEn: "6 - 10" },
         legalSize: "18 cm",
-        note: "Serin su sever. Sürü halinde. Lezzetli ve bereketli av."
+        note: "Serin su sever. Sürü halinde. Lezzetli ve bereketli av.",
+        noteEn: "Prefers cool water. Schooling fish. Tasty and plentiful catch."
     },
     "kolyoz": {
         name: "Kolyoz", nameEn: "Chub Mackerel", icon: "🐟", scientificName: "Scomber japonicus",
@@ -822,7 +852,8 @@ const SPECIES_DB = {
         depth: { min: 5, opt: 25, max: 50 },
         advice: { bait: "Çapari", lure: "Kaşık", rig: "Çapari Takımı, Spin", hook: "6 - 10", baitEn: "Sabiki feathers", lureEn: "Metal spoon", rigEn: "Sabiki rig, spin", hookEn: "6 - 10" },
         legalSize: "18 cm",
-        note: "Uskumruya benzer ama daha sıcak su sever. Yaz mevsimi balığı."
+        note: "Uskumruya benzer ama daha sıcak su sever. Yaz mevsimi balığı.",
+        noteEn: "Similar to mackerel but prefers warmer water. Summer species."
     },
     "sarpa": {
         name: "Sarpa (Salpa)", nameEn: "Salema", icon: "🐟", scientificName: "Sarpa salpa",
@@ -841,7 +872,8 @@ const SPECIES_DB = {
         depth: { min: 1, opt: 5, max: 15 },
         advice: { bait: "Ekmek, Yosun", lure: "Yok", rig: "Şamandıralı", hook: "10 - 14", baitEn: "Bread, seaweed", lureEn: "None", rigEn: "Float rig", hookEn: "10 - 14" },
         legalSize: "Yok",
-        note: "Otobur balık. Ekmekle kolay avlanır. Halüsinasyon yapabilir (dikkat!)."
+        note: "Otobur balık. Ekmekle kolay avlanır. Halüsinasyon yapabilir (dikkat!).",
+        noteEn: "Herbivore fish. Easily caught with bread. Can cause hallucinations (caution!)."
     },
     "iskatarya": {
         name: "İskatarya", nameEn: "Atlantic Chub Mackerel", icon: "🐟", scientificName: "Scomber colias",
@@ -861,7 +893,8 @@ const SPECIES_DB = {
         depth: { min: 0, opt: 25, max: 200 },
         advice: { bait: "Çapari, Küçük balık", lure: "Tüylü iğne, Kaşık", rig: "Çoklu iğneli", hook: "8 - 12", baitEn: "Sabiki, small fish", lureEn: "Feathered hook, spoon", rigEn: "Multi-hook rig", hookEn: "8 - 12" },
         legalSize: "18 cm",
-        note: "Kolyoza benzer ama karnında noktalı desen ayırt eder. Sürü halinde göç eder, sabah erken yüzeyde aktif."
+        note: "Kolyoza benzer ama karnında noktalı desen ayırt eder. Sürü halinde göç eder, sabah erken yüzeyde aktif.",
+        noteEn: "Similar to chub mackerel but spotted belly. Migrates in schools; active at surface early morning."
     },
     "lokum": {
         name: "Lokum Balığı", nameEn: "Silver Biddy", icon: "🐟", scientificName: "Sillago sihama",
@@ -881,7 +914,8 @@ const SPECIES_DB = {
         depth: { min: 0, opt: 10, max: 70 },
         advice: { bait: "Karides, Solucan, Deniz kurdu", lure: "Küçük jig", rig: "Hafif dip", hook: "8 - 12", baitEn: "Shrimp, ragworm, lugworm", lureEn: "Small jig", rigEn: "Light bottom", hookEn: "8 - 12" },
         legalSize: "15 cm",
-        note: "Lesepsiyen istilacı tür. Kumlu ve çamurlu sığ sularda sürü halinde. Yaz aylarında Akdeniz ve Ege kıyılarında çok yaygın. Dipte karides ve solucanla kolayca avlanır."
+        note: "Lesepsiyen istilacı tür. Kumlu ve çamurlu sığ sularda sürü halinde. Yaz aylarında Akdeniz ve Ege kıyılarında çok yaygın. Dipte karides ve solucanla kolayca avlanır.",
+        noteEn: "Lessepsian invasive species. Sandy and muddy shallow waters in schools. Very common in Aegean and Mediterranean shores in summer. Easily caught with shrimp and worm on bottom."
     },
     "muren": {
         name: "Müren", nameEn: "Mediterranean Moray", icon: "🐍", scientificName: "Muraena helena",
@@ -900,7 +934,8 @@ const SPECIES_DB = {
         depth: { min: 2, opt: 15, max: 40 },
         advice: { bait: "Balık Kafası, Kalamar", lure: "Yok", rig: "Ağır Dip", hook: "4/0 - 6/0", baitEn: "Fish head, squid", lureEn: "None", rigEn: "Heavy bottom", hookEn: "4/0 - 6/0" },
         legalSize: "Yok",
-        note: "Keskin dişli! Dikkatli tutun. Gece avcısı. Kayalık kovuklarda yaşar."
+        note: "Keskin dişli! Dikkatli tutun. Gece avcısı. Kayalık kovuklarda yaşar.",
+        noteEn: "Sharp teeth! Handle carefully. Night predator. Lives in rocky crevices."
     },
     "migri": {
         name: "Mığrı (Deniz Yılanı)", nameEn: "European Conger", icon: "🐍", scientificName: "Conger conger",
@@ -920,7 +955,8 @@ const SPECIES_DB = {
         depth: { min: 5, opt: 25, max: 60 },
         advice: { bait: "Balık Eti, Kalamar", lure: "Yok", rig: "Ağır Dip", hook: "4/0 - 8/0", baitEn: "Fish strip, squid", lureEn: "None", rigEn: "Heavy bottom", hookEn: "4/0 - 8/0" },
         legalSize: "Yok",
-        note: "Dev olabilir (2m+). Gece avcısı. Kayalık kovukları sever."
+        note: "Dev olabilir (2m+). Gece avcısı. Kayalık kovukları sever.",
+        noteEn: "Can grow huge (2m+). Night predator. Prefers rocky crevices."
     },
     "zurna": {
         name: "Zurna", nameEn: "European Barracuda", icon: "🐟", scientificName: "Sphyraena sphyraena",
@@ -940,7 +976,8 @@ const SPECIES_DB = {
         depth: { min: 0, opt: 5, max: 20 },
         advice: { bait: "İpek", lure: "Küçük Sahte Balık", rig: "Spin, LRF", hook: "6 - 2", baitEn: "Silk feather", lureEn: "Small swim bait", rigEn: "Spin, LRF", hookEn: "6 - 2" },
         legalSize: "Yok",
-        note: "Hızlı avcı. Yüzeyde sürü halinde. Lüfer/Kofana yemi olarak kullanılır."
+        note: "Hızlı avcı. Yüzeyde sürü halinde. Lüfer/Kofana yemi olarak kullanılır.",
+        noteEn: "Fast predator. Schools at surface. Used as lure fish."
     },
     "barakuda": {
         name: "Baraküda", nameEn: "Yellowmouth Barracuda", icon: "🐟", scientificName: "Sphyraena viridensis",
@@ -963,7 +1000,8 @@ const SPECIES_DB = {
         depth: { min: 2, opt: 15, max: 40 },
         advice: { bait: "Yapay tercih", lure: "Uzun Sahte Balık", rig: "Spin", hook: "2/0 - 4/0", baitEn: "Artificial preferred", lureEn: "Long swim bait", rigEn: "Spin", hookEn: "2/0 - 4/0" },
         legalSize: "Yok",
-        note: "Keskin dişli! Çelik tel şart. Alacakaranlıkta agresif avlanır."
+        note: "Keskin dişli! Çelik tel şart. Alacakaranlıkta agresif avlanır.",
+        noteEn: "Sharp teeth! Wire trace essential. Aggressively hunts at dusk."
     },
     "kirlangic": {
         name: "Kırlangıç", nameEn: "Tub Gurnard", icon: "🐟", scientificName: "Chelidonichthys lucerna",
@@ -982,7 +1020,8 @@ const SPECIES_DB = {
         depth: { min: 15, opt: 35, max: 80 },
         advice: { bait: "Teke, İstavrit", lure: "Jig", rig: "Dip, Jig", hook: "2 - 2/0", baitEn: "Sand smelt, horse mackerel", lureEn: "Jig", rigEn: "Bottom, jig", hookEn: "2 - 2/0" },
         legalSize: "Yok",
-        note: "Renkli yüzgeçlerle uçar gibi yüzer. Lezzetli eti var."
+        note: "Renkli yüzgeçlerle uçar gibi yüzer. Lezzetli eti var.",
+        noteEn: "Swims as if flying with colourful fins. Tasty flesh."
     },
     "dil_baligi": {
         name: "Dil Balığı", nameEn: "Common Sole", icon: "🐟", scientificName: "Solea solea",
@@ -1001,7 +1040,8 @@ const SPECIES_DB = {
         depth: { min: 3, opt: 15, max: 40 },
         advice: { bait: "Boru Kurdu", lure: "Yok", rig: "Dip", hook: "6 - 10", baitEn: "Lugworm", lureEn: "None", rigEn: "Bottom", hookEn: "6 - 10" },
         legalSize: "20 cm",
-        note: "Gece aktif, gündüz kuma gömülür. Boru kurdu en iyi yem."
+        note: "Gece aktif, gündüz kuma gömülür. Boru kurdu en iyi yem.",
+        noteEn: "Active at night, buries in sand during day. Lugworm is best bait."
     },
     "gelincik": {
         name: "Gelincik", nameEn: "Shore Rockling", icon: "🐟", scientificName: "Gaidropsarus mediterraneus",
@@ -1020,7 +1060,8 @@ const SPECIES_DB = {
         depth: { min: 3, opt: 15, max: 40 },
         advice: { bait: "Karides, Balık eti", lure: "Yok", rig: "Dip", hook: "4 - 8", baitEn: "Shrimp, fish strip", lureEn: "None", rigEn: "Bottom", hookEn: "4 - 8" },
         legalSize: "Yok",
-        note: "Yılan gibi görünür. Gece kayalık aralarında avlanır."
+        note: "Yılan gibi görünür. Gece kayalık aralarında avlanır.",
+        noteEn: "Snake-like appearance. Hunts in rocky crevices at night."
     },
     "vatoz": {
         name: "Vatoz", nameEn: "Common Stingray", icon: "🦈", scientificName: "Dasyatis pastinaca",
@@ -1039,7 +1080,8 @@ const SPECIES_DB = {
         depth: { min: 2, opt: 20, max: 60 },
         advice: { bait: "Balık Eti", lure: "Yok", rig: "Ağır Dip", hook: "4/0 - 6/0", baitEn: "Fish strip", lureEn: "None", rigEn: "Heavy bottom", hookEn: "4/0 - 6/0" },
         legalSize: "Yok",
-        note: "DİKKAT: Zehirli dikeni var! Tutarken çok dikkatli olun."
+        note: "DİKKAT: Zehirli dikeni var! Tutarken çok dikkatli olun.",
+        noteEn: "CAUTION: Venomous spine! Handle with great care."
     },
     "cutre": {
         name: "Çütre (Tetik)", nameEn: "Grey Triggerfish", icon: "🐟", scientificName: "Balistes capriscus",
@@ -1059,7 +1101,8 @@ const SPECIES_DB = {
         depth: { min: 3, opt: 15, max: 40 },
         advice: { bait: "Karides, Midye", lure: "Yok", rig: "Dip", hook: "4 - 8", baitEn: "Shrimp, mussel", lureEn: "None", rigEn: "Bottom", hookEn: "4 - 8" },
         legalSize: "Yok",
-        note: "Sert çeneli, iğneyi koparır. Güçlü bir tetik mekanizması var."
+        note: "Sert çeneli, iğneyi koparır. Güçlü bir tetik mekanizması var.",
+        noteEn: "Hard-jawed; snaps hooks. Has a powerful trigger mechanism."
     },
     "kurbaga": {
         name: "Kurbağa Balığı (Trakonya)", nameEn: "Atlantic Stargazer", icon: "🐟", scientificName: "Uranoscopus scaber",
@@ -1078,7 +1121,8 @@ const SPECIES_DB = {
         depth: { min: 3, opt: 20, max: 50 },
         advice: { bait: "Balık Eti", lure: "Yok", rig: "Dip", hook: "2 - 4", baitEn: "Fish strip", lureEn: "None", rigEn: "Bottom", hookEn: "2 - 4" },
         legalSize: "Yok",
-        note: "DİKKAT: Zehirli dikenleri var! Kuma gömülü bekler."
+        note: "DİKKAT: Zehirli dikenleri var! Kuma gömülü bekler.",
+        noteEn: "CAUTION: Venomous spines! Waits buried in sand."
     },
     "fener": {
         name: "Fener Balığı", nameEn: "Anglerfish", icon: "🐟", scientificName: "Lophius piscatorius",
@@ -1098,7 +1142,8 @@ const SPECIES_DB = {
         depth: { min: 20, opt: 80, max: 250 },
         advice: { bait: "Balık Eti", lure: "Yok", rig: "Ağır Dip", hook: "4/0 - 8/0", baitEn: "Fish strip", lureEn: "None", rigEn: "Heavy bottom", hookEn: "4/0 - 8/0" },
         legalSize: "30 cm",
-        note: "Çirkin ama çok lezzetli. Derin suda yaşar. Kuyruk eti makbul."
+        note: "Çirkin ama çok lezzetli. Derin suda yaşar. Kuyruk eti makbul.",
+        noteEn: "Ugly but very tasty. Lives in deep water. Tail meat is prized."
     },
     "hamsi": {
         name: "Hamsi", nameEn: "European Anchovy", icon: "🐟", scientificName: "Engraulis encrasicolus",
@@ -1126,7 +1171,8 @@ const SPECIES_DB = {
         depth: { min: 5, opt: 25, max: 60 },
         advice: { bait: "Çapari", lure: "İnce Çapari", rig: "Surf, Çapari", hook: "10 - 14", baitEn: "Sabiki feathers", lureEn: "Fine sabiki", rigEn: "Surf, sabiki", hookEn: "10 - 14" },
         legalSize: "9 cm",
-        note: "Karadeniz'in simgesi. Kış aylarında bollaşır. Tava için ideal."
+        note: "Karadeniz'in simgesi. Kış aylarında bollaşır. Tava için ideal.",
+        noteEn: "Symbol of the Black Sea. Abundant in winter. Ideal for pan-frying."
     },
     "aslan_baligi": {
         name: "Aslan Balığı", nameEn: "Devil Firefish", icon: "🦁", scientificName: "Pterois miles",
@@ -1145,7 +1191,8 @@ const SPECIES_DB = {
         depth: { min: 2, opt: 20, max: 50 },
         advice: { bait: "Karides, Küçük balık", lure: "Micro Jig", rig: "LRF, Dip", hook: "4 - 8", baitEn: "Shrimp, small fish", lureEn: "Micro jig", rigEn: "LRF, bottom", hookEn: "4 - 8" },
         legalSize: "Yok",
-        note: "⚠️ İSTİLACI TÜR! ZEHİRLİ dikenleri var. Avladığınızda öldürün."
+        note: "⚠️ İSTİLACI TÜR! ZEHİRLİ dikenleri var. Avladığınızda öldürün.",
+        noteEn: "WARNING: INVASIVE SPECIES! Has VENOMOUS spines. Kill when caught."
     },
     "balon_baligi": {
         name: "Balon Balığı", nameEn: "Silver-cheeked Toadfish", icon: "🐡", scientificName: "Lagocephalus sceleratus",
@@ -1164,7 +1211,8 @@ const SPECIES_DB = {
         depth: { min: 1, opt: 20, max: 60 },
         advice: { bait: "Her yemi yer", lure: "Yok", rig: "Dip", hook: "2 - 6", baitEn: "Takes any bait", lureEn: "None", rigEn: "Bottom", hookEn: "2 - 6" },
         legalSize: "Yok",
-        note: "⚠️ ÖLDÜRÜCÜ ZEHİRLİ! Kesinlikle yemeyin. İstilacı tür, avladığınızda öldürün."
+        note: "⚠️ ÖLDÜRÜCÜ ZEHİRLİ! Kesinlikle yemeyin. İstilacı tür, avladığınızda öldürün.",
+        noteEn: "WARNING: DEADLY VENOMOUS! Do not eat under any circumstances. Invasive species — kill when caught."
     },
     // ═══════════════════════════════════════════════════════════════════
     // YENİ EKLENEN BALIKLAR
@@ -1187,7 +1235,8 @@ const SPECIES_DB = {
         depth: { min: 1, opt: 15, max: 50 },
         advice: { bait: "Ekmek, Kurt, Karides", lure: "Yok", rig: "Çapari, Dip", hook: "10 - 14", baitEn: "Bread, worm, shrimp", lureEn: "None", rigEn: "Sabiki, bottom", hookEn: "10 - 14" },
         legalSize: "Yok",
-        note: "Sürü halinde gezer. Ekmek ile bereketle avlanır."
+        note: "Sürü halinde gezer. Ekmek ile bereketle avlanır.",
+        noteEn: "Schools together. Easily caught with bread. Good yield."
     },
     "yazili_orkinos": {
         name: "Yazılı Orkinos", nameEn: "Little Tunny", icon: "🐟", scientificName: "Euthynnus alletteratus",
@@ -1214,7 +1263,8 @@ const SPECIES_DB = {
         depth: { min: 5, opt: 50, max: 200 },
         advice: { bait: "Canlı balık, Sardalya", lure: "Rapala, Metal Jig", rig: "Trolling", hook: "2/0 - 4/0", baitEn: "Live fish, sardine", lureEn: "Rapala, metal jig", rigEn: "Trolling", hookEn: "2/0 - 4/0" },
         legalSize: "25 cm",
-        note: "Hızlı ve güçlü. Trolling ile avlanır."
+        note: "Hızlı ve güçlü. Trolling ile avlanır.",
+        noteEn: "Fast and powerful. Best caught by trolling."
     },
     "palamut": {
         name: "Palamut", nameEn: "Atlantic Bonito", icon: "🐟", scientificName: "Sarda sarda",
@@ -1243,7 +1293,8 @@ const SPECIES_DB = {
         depth: { min: 5, opt: 30, max: 100 },
         advice: { bait: "İstavrit, Sardalya, Sahte Yem", lure: "Tüylü Çapari, Kaşık, Kaplamalı Jig", rig: "Çapari, Trolling, Sırtı", hook: "1/0 - 3/0", baitEn: "Horse mackerel, sardine, artificial", lureEn: "Feathered sabiki, spoon, coated jig", rigEn: "Sabiki, trolling, drift", hookEn: "1/0 - 3/0" },
         legalSize: "25 cm",
-        note: "Sonbahar balığı. Boğazlarda bol bulunur. Yamyamlık eğilimi — sürüye metal atar."
+        note: "Sonbahar balığı. Boğazlarda bol bulunur. Yamyamlık eğilimi — sürüye metal atar.",
+        noteEn: "Autumn fish. Abundant in the Bosphorus. Cannibal tendencies — throw metal into the school."
     },
     "torik": {
         name: "Torik", nameEn: "Atlantic Bonito (Large)", icon: "🐟", scientificName: "Sarda sarda",
@@ -1267,7 +1318,8 @@ const SPECIES_DB = {
         depth: { min: 20, opt: 60, max: 150 },
         advice: { bait: "Canlı balık", lure: "Büyük Rapala, Jig", rig: "Trolling", hook: "3/0 - 5/0", baitEn: "Live fish", lureEn: "Large Rapala, jig", rigEn: "Trolling", hookEn: "3/0 - 5/0" },
         legalSize: "Yok",
-        note: "Palamutun büyüğü. Kış aylarında daha derin."
+        note: "Palamutun büyüğü. Kış aylarında daha derin.",
+        noteEn: "Larger bonito. Moves deeper in winter."
     },
     "cinekop": {
         name: "Çinekop", nameEn: "Baby Bluefish", icon: "🐟", scientificName: "Pomatomus saltatrix (juv.)",
@@ -1291,7 +1343,8 @@ const SPECIES_DB = {
         depth: { min: 2, opt: 15, max: 40 },
         advice: { bait: "Çaça, Hamsi", lure: "Küçük Kaşık", rig: "Spin, Çapari", hook: "4 - 8", baitEn: "Sprat, anchovy", lureEn: "Small spoon", rigEn: "Spin, sabiki", hookEn: "4 - 8" },
         legalSize: "20 cm",
-        note: "Lüferin yavrusu. Sürü halinde avlanır."
+        note: "Lüferin yavrusu. Sürü halinde avlanır.",
+        noteEn: "Juvenile bluefish. Caught in schools."
     },
     // ═══════════════════════════════════════════════════════════════════
     // TİCARİ BALIKLAR (Hobi oltası ile zor ama bölgede bulunur)
@@ -1318,7 +1371,8 @@ const SPECIES_DB = {
         depth: { min: 10, opt: 25, max: 100 },
         advice: { bait: "-", lure: "Tüylü Çapari", rig: "Çapari / Ağ", hook: "-", baitEn: "-", lureEn: "Feathered sabiki", rigEn: "Sabiki / net", hookEn: "-" },
         legalSize: "11 cm",
-        note: "Dikey göç yapar: gündüz 25-100m derin, gece 10-35m yüzeye çıkar. Gece çapari ile tutulabilir."
+        note: "Dikey göç yapar: gündüz 25-100m derin, gece 10-35m yüzeye çıkar. Gece çapari ile tutulabilir.",
+        noteEn: "Vertical migration: 25-100m deep during day, rises to 10-35m at night. Can be caught with sabiki at night."
     },
     "mezgit": {
         name: "Mezgit", nameEn: "Whiting", icon: "🐟", scientificName: "Merlangius merlangus",
@@ -1339,7 +1393,8 @@ const SPECIES_DB = {
         depth: { min: 20, opt: 60, max: 200 },
         advice: { bait: "Karides, Kurt, Midye, Tavuk Göğsü", lure: "Yok", rig: "Klasik Çapari, Üç Köstekli Dip Oltası", hook: "No: 2", baitEn: "Shrimp, worm, mussel, chicken breast", lureEn: "None", rigEn: "Three-hook bottom rig", hookEn: "No: 2" },
         legalSize: "13 cm",
-        note: "Karadeniz'in kış balığı. Soğuk suyu sever. İğne No:2 — bilimsel saha çalışmasıyla kanıtlandı."
+        note: "Karadeniz'in kış balığı. Soğuk suyu sever. İğne No:2 — bilimsel saha çalışmasıyla kanıtlandı.",
+        noteEn: "Black Sea winter fish. Prefers cold water. Hook No:2 — proven by scientific field study."
     },
     "kalkan": {
         name: "Kalkan", nameEn: "Turbot", icon: "🐟", scientificName: "Scophthalmus maximus",
@@ -1361,7 +1416,8 @@ const SPECIES_DB = {
         depth: { min: 20, opt: 40, max: 70 },
         advice: { bait: "Canlı Hamsi, İstavrit, Balık Fleto", lure: "Yok", rig: "Uzun Köstekli Ağır Dip Oltası", hook: "2 - 6", baitEn: "Live anchovy, horse mackerel, fillet", lureEn: "None", rigEn: "Long trace heavy bottom rig", hookEn: "2 - 6" },
         legalSize: "45 cm",
-        note: "Değerli ve nadir. Karadeniz'e özgü. Kumlu dibe kamufle olur — yavaş yem hareketi şart."
+        note: "Değerli ve nadir. Karadeniz'e özgü. Kumlu dibe kamufle olur — yavaş yem hareketi şart.",
+        noteEn: "Valuable and rare. Endemic to Black Sea. Camouflages on sandy bottom — slow bait movement essential."
     },
     "barbunya": {
         name: "Barbunya", nameEn: "Red Mullet", icon: "🐟", scientificName: "Mullus barbatus",
@@ -1381,7 +1437,8 @@ const SPECIES_DB = {
         depth: { min: 5, opt: 30, max: 100 },
         advice: { bait: "Kurt, Karides", lure: "Yok", rig: "Dip", hook: "8 - 12", baitEn: "Worm, shrimp", lureEn: "None", rigEn: "Bottom", hookEn: "8 - 12" },
         legalSize: "11 cm",
-        note: "Lezzetli ve değerli. Kumlu diplerde sürü halinde."
+        note: "Lezzetli ve değerli. Kumlu diplerde sürü halinde.",
+        noteEn: "Tasty and valuable. Schools on sandy bottoms."
     },
     "tekir": {
         name: "Tekir", nameEn: "Striped Red Mullet", icon: "🐟", scientificName: "Mullus surmuletus",
@@ -1401,7 +1458,8 @@ const SPECIES_DB = {
         depth: { min: 3, opt: 25, max: 80 },
         advice: { bait: "Kurt, Karides", lure: "Yok", rig: "Dip", hook: "8 - 12", baitEn: "Worm, shrimp", lureEn: "None", rigEn: "Bottom", hookEn: "8 - 12" },
         legalSize: "11 cm",
-        note: "Barbunyaya benzer, çizgili. Kayalık kenarlarında."
+        note: "Barbunyaya benzer, çizgili. Kayalık kenarlarında.",
+        noteEn: "Similar to red mullet but striped. Found along rocky edges."
     },
     "pisi": {
         name: "Pisi Balığı", nameEn: "European Flounder", icon: "🐟", scientificName: "Platichthys flesus",
@@ -1421,7 +1479,8 @@ const SPECIES_DB = {
         depth: { min: 1, opt: 15, max: 50 },
         advice: { bait: "Kurt, Midye", lure: "Yok", rig: "Dip", hook: "6 - 10", baitEn: "Worm, mussel", lureEn: "None", rigEn: "Bottom", hookEn: "6 - 10" },
         legalSize: "Yok",
-        note: "Yassı balık. Kumluk diplerde gece avlanır."
+        note: "Yassı balık. Kumluk diplerde gece avlanır.",
+        noteEn: "Flatfish. Nocturnal hunting on sandy bottoms."
     },
     "fangri": {
         name: "Fangri", nameEn: "Common Pandora", icon: "🐟", scientificName: "Pagellus erythrinus",
@@ -1443,7 +1502,8 @@ const SPECIES_DB = {
         depth: { min: 20, opt: 50, max: 100 },
         advice: { bait: "Karides, Tavuk Göğsü, Kalamar", lure: "Yok", rig: "Üçlü Dip Takımı", hook: "4 - 8", baitEn: "Shrimp, chicken breast, squid", lureEn: "None", rigEn: "Three-hook bottom rig", hookEn: "4 - 8" },
         legalSize: "15 cm",
-        note: "Kırma mercan ailesi. Karides ve tavuk göğsü en etkili yemler."
+        note: "Kırma mercan ailesi. Karides ve tavuk göğsü en etkili yemler.",
+        noteEn: "Broken bream family. Shrimp and chicken breast are the most effective baits."
     },
     "lahoz": {
         name: "Grida (Lagos/Lahoz)", nameEn: "Dusky Grouper", icon: "🐟", scientificName: "Epinephelus marginatus",
@@ -1467,7 +1527,8 @@ const SPECIES_DB = {
         depth: { min: 10, opt: 50, max: 200 },
         advice: { bait: "Canlı balık, Ahtapot", lure: "Büyük Silikon", rig: "Dip", hook: "4/0 - 6/0", baitEn: "Live fish, octopus", lureEn: "Large soft plastic", rigEn: "Bottom", hookEn: "4/0 - 6/0" },
         legalSize: "45 cm — Haziran/Temmuz/Ağustos avı yasak. Günlük limit: 2 adet.",
-        note: "⚠️ KORUMA ALTINDA. 1 Haziran - 31 Ağustos arası avlanması yasaktır. 45 cm altı tüm yıl yasak. Yakaladığınızda mutlaka serbest bırakın!"
+        note: "⚠️ KORUMA ALTINDA. 1 Haziran - 31 Ağustos arası avlanması yasaktır. 45 cm altı tüm yıl yasak. Yakaladığınızda mutlaka serbest bırakın!",
+        noteEn: "WARNING: PROTECTED. Fishing prohibited 1 June - 31 August. Fish under 45cm prohibited all year. Always release when caught!"
     },
     "mersin": {
         name: "Mersin Balığı", nameEn: "Sturgeon", icon: "🐟", scientificName: "Acipenser spp.",
@@ -1488,7 +1549,8 @@ const SPECIES_DB = {
         depth: { min: 20, opt: 80, max: 200 },
         advice: { bait: "Kurt, Midye, Balık parçası", lure: "Yok", rig: "Dip, Uzun Olta", hook: "2 - 6", baitEn: "Worm, mussel, fish piece", lureEn: "None", rigEn: "Bottom, long trace", hookEn: "2 - 6" },
         legalSize: "Yok",
-        note: "⚠️ NADİR TÜR. Karadeniz'e özgü. Yakaladığınızda serbest bırakın."
+        note: "⚠️ NADİR TÜR. Karadeniz'e özgü. Yakaladığınızda serbest bırakın.",
+        noteEn: "WARNING: RARE SPECIES. Endemic to Black Sea. Release when caught."
     },
 
     "aterin": {
@@ -1535,7 +1597,8 @@ const SPECIES_DB = {
     depth: { min: 30, opt: 80, max: 250 },
     advice: { bait: "İstavrit, Sardalya", lure: "Metal Jig", rig: "Dip Takımı", hook: "No:1-3" },
     legalSize: "-",
-    note: "Yalnız gezen pusu avcısıdır. Kumluk ve çamurluk dipleri sever."
+    note: "Yalnız gezen pusu avcısıdır. Kumluk ve çamurluk dipleri sever.",
+        noteEn: "Solitary ambush predator. Prefers sandy and muddy bottoms."
 },
 
 "kaya_levregi": {
@@ -1556,7 +1619,8 @@ const SPECIES_DB = {
     depth: { min: 2, opt: 15, max: 80 },
     advice: { bait: "Karides, Kurt", lure: "Küçük Silikon", rig: "Dip Takımı", hook: "No:6-8" },
     legalSize: "-",
-    note: "Kayalık bölgelerde küçük sürüler yapar. Gece de yakalanabilir."
+    note: "Kayalık bölgelerde küçük sürüler yapar. Gece de yakalanabilir.",
+        noteEn: "Forms small schools in rocky areas. Can also be caught at night."
 },
 
 "papalina": {
@@ -1580,7 +1644,8 @@ const SPECIES_DB = {
     depth: { min: 5, opt: 25, max: 120 },
     advice: { bait: "Yok", lure: "Çapari", rig: "Çapari", hook: "No:12-16" },
     legalSize: "-",
-    note: "Kışın Marmara'da yoğun sürüler yapar. İstavrit yemi olarak kritiktir."
+    note: "Kışın Marmara'da yoğun sürüler yapar. İstavrit yemi olarak kritiktir.",
+        noteEn: "Dense schools in Marmara in winter. Critical as bait fish for large predators."
 },
 
 "caca": {
@@ -1603,7 +1668,8 @@ const SPECIES_DB = {
     depth: { min: 10, opt: 30, max: 100 },
     advice: { bait: "Yok", lure: "Çapari", rig: "Çapari", hook: "No:14-18" },
     legalSize: "-",
-    note: "Soğuk su sürü balığı. Büyük avcıların ana yem zinciridir."
+    note: "Soğuk su sürü balığı. Büyük avcıların ana yem zinciridir.",
+        noteEn: "Cold water schooling fish. Main food chain for large predators."
 },
 
 "tirsi": {
@@ -1631,7 +1697,8 @@ const SPECIES_DB = {
     depth: { min: 2, opt: 15, max: 60 },
     advice: { bait: "Küçük Balık", lure: "Kaşık", rig: "Spin", hook: "No:4-8" },
     legalSize: "-",
-    note: "İlkbahar göçünde kıyıya yaklaşır. Akıntıyı sever."
+    note: "İlkbahar göçünde kıyıya yaklaşır. Akıntıyı sever.",
+        noteEn: "Approaches shore during spring migration. Likes currents."
 },
 
 "mirlan": {
@@ -1652,7 +1719,8 @@ const SPECIES_DB = {
     depth: { min: 15, opt: 60, max: 200 },
     advice: { bait: "Karides, Kurt", lure: "Yok", rig: "Dip Takımı", hook: "No:4-6" },
     legalSize: "-",
-    note: "Soğuk su dip balığı. Kışın çok verimli."
+    note: "Soğuk su dip balığı. Kışın çok verimli.",
+        noteEn: "Cold water bottom fish. Very productive in winter."
 },
 
 "deniz_ignesi": {
@@ -1672,7 +1740,8 @@ const SPECIES_DB = {
     depth: { min: 1, opt: 3, max: 15 },
     advice: { bait: "Yok", lure: "Küçük İpek", rig: "Şamandıra", hook: "No:12-16" },
     legalSize: "-",
-    note: "Bitkilik alanlarda yaşar. Ekosistem göstergesidir."
+    note: "Bitkilik alanlarda yaşar. Ekosistem göstergesidir.",
+        noteEn: "Lives in vegetated areas. Ecosystem indicator species."
 },
 
 "lapin": {
@@ -1692,7 +1761,8 @@ const SPECIES_DB = {
     depth: { min: 1, opt: 10, max: 40 },
     advice: { bait: "Karides, Midye", lure: "LRF Silikon", rig: "LRF", hook: "No:8-12" },
     legalSize: "-",
-    note: "Kayalık bölgede küçük avcıdır."
+    note: "Kayalık bölgede küçük avcıdır.",
+        noteEn: "Small predator in rocky areas."
 },
 
 "kizil_kirlangic": {
@@ -1713,7 +1783,8 @@ const SPECIES_DB = {
     depth: { min: 20, opt: 80, max: 200 },
     advice: { bait: "Karides", lure: "Yok", rig: "Dip Takımı", hook: "No:2-4" },
     legalSize: "-",
-    note: "Kumluk dipte gezinir."
+    note: "Kumluk dipte gezinir.",
+        noteEn: "Roams sandy bottoms."
 },
 
 "alyanak": {
@@ -1733,7 +1804,8 @@ const SPECIES_DB = {
     depth: { min: 10, opt: 40, max: 150 },
     advice: { bait: "Karides, Kurt", lure: "Yok", rig: "Dip Takımı", hook: "No:4-6" },
     legalSize: "-",
-    note: "Kumluk-kayalık karışık dipte."
+    note: "Kumluk-kayalık karışık dipte.",
+        noteEn: "Found on mixed sandy-rocky bottom."
 },
 
 "iskarmoz": {
@@ -1753,12 +1825,14 @@ const SPECIES_DB = {
     depth: { min: 5, opt: 25, max: 120 },
     advice: { bait: "Midye, Kurt", lure: "Micro Jig", rig: "Dip", hook: "No:4-8" },
     legalSize: "-",
-    note: "Sürü halinde gezer."
+    note: "Sürü halinde gezer.",
+        noteEn: "Travels in schools."
 },
 
 "lidaki": {
     name: "Lidaki", nameEn: "Young Gilthead Seabream", icon: "🐟", scientificName: "Sparus aurata",  // ← Diplodus annularis değil
     note: "Çipuranın 180-200g altındaki genci. Çok lezzetli, yüksek ekonomik değer.",
+    noteEn: "Juvenile gilthead seabream under 180-200g. Very tasty, high economic value.",
     photoId: 69,
     category: "KIYI",
     peakHours: "DAY", peakHoursDesc: "Gündüz sığ sularda",
@@ -1774,7 +1848,8 @@ const SPECIES_DB = {
     depth: { min: 1, opt: 10, max: 30 },
     advice: { bait: "Ekmek, Kurt", lure: "Micro Jig", rig: "Şamandıra", hook: "No:10-14" },
     legalSize: "-",
-    note: "Sığ ve berrak suyu sever."
+    note: "Sığ ve berrak suyu sever.",
+        noteEn: "Prefers shallow and clear water."
 },
     "yilan_baligi": {
     name: "Yılan Balığı", nameEn: "European Eel", icon: "🐍", scientificName: "Anguilla anguilla",
@@ -1793,7 +1868,8 @@ const SPECIES_DB = {
     depth: { min: 0, opt: 5, max: 20 },
     advice: { bait: "Solucan, Karides, Küçük Balık", lure: "Yok", rig: "Dip Takımı, Gece Oltası", hook: "4 - 8", baitEn: "Ragworm, shrimp, small fish", lureEn: "None", rigEn: "Bottom rig, night fishing", hookEn: "4 - 8" },
     legalSize: "50 cm",
-    note: "Gece avcısı. Lagün, nehir ağzı ve sığ kıyılarda bulunur. İç sularda min. boy 50 cm, günlük limit 3 adet. Avrupa genelinde nesli tehlike altında — vicdani limit uygulayın."
+    note: "Gece avcısı. Lagün, nehir ağzı ve sığ kıyılarda bulunur. İç sularda min. boy 50 cm, günlük limit 3 adet. Avrupa genelinde nesli tehlike altında — vicdani limit uygulayın.",
+        noteEn: "Night predator. Found in lagoons, river mouths and shallow shores. Min. size 50cm in inland waters, daily limit 3. Endangered across Europe — apply ethical limits."
 }
 };
 
