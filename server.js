@@ -4093,7 +4093,8 @@ function findTodayIndex(timeArray) {
 }
 
 // Paylaşılan hava verisiyle tek nokta skoru hesapla (API çağrısı yok)
-function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey) {
+function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey, lang) {
+
     const latF = parseFloat(lat).toFixed(4);
     const lonF = parseFloat(lon).toFixed(4);
     const now = new Date();
