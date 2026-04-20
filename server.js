@@ -4204,8 +4204,8 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             }
             allFishScores.sort((a, b) => b.score - a.score);
             const topFish = allFishScores.slice(0, 3).map(f => f.name);
-            const depthVal = depthAvg ? Math.round(depthAvg) : null;
-            const zone = !depthVal ? null : getZoneLabel(depthVal, lang);
+            const depthVal = (depthAvg !== null) ? Math.round(depthAvg) : null;
+            const zone = (depthVal === null) ? null : getZoneLabel(depthVal, lang);
             const substrateVal = params.substrate || null;
             return { score: topScore, fishName: topFishName, topFish, depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
         } else {
@@ -4377,7 +4377,7 @@ app.get('/api/scan', async (req, res) => {
                         score: parseFloat(score.toFixed(1)),
                         fishName: result.fishName,
                         topFish: result.topFish || [],
-                        depth: result.depth || null,
+                        depth: (result.depth !== undefined && result.depth !== null) ? result.depth : null,
                         zone: result.zone || null,
                         tempWater: result.tempWater || null,
                         substrate: result.substrate || null
