@@ -3600,7 +3600,6 @@ app.get('/api/fish-search', async (req, res) => {
                 bait:   lang === 'en' ? (fish.advice?.baitEn || fish.advice?.bait) : fish.advice?.bait,
                 method: lang === 'en' ? (fish.advice?.rigEn || fish.advice?.rig) : fish.advice?.rig,
                 lure:   lang === 'en' ? (fish.advice?.lureEn || fish.advice?.lure) : fish.advice?.lure,
-                legalSize: fish.legalSize,
                 advice: lang === 'en' ? {
                     bait:   fish.advice?.baitEn   || fish.advice?.bait,
                     lure:   fish.advice?.lureEn   || fish.advice?.lure,
