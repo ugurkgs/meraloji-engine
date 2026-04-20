@@ -228,7 +228,7 @@ function i18n(lang) { return SERVER_i18n[lang] || SERVER_i18n.tr; }
 function getZoneLabel(depthVal, lang) {
     const s = i18n(lang).zones;
     if (!depthVal) return null;
-    if (depthVal < 5)  return s.shallowSand;
+    if (depthVal < 5) return s.shallowSand;
     if (depthVal < 15) return s.shallowRock;
     if (depthVal < 40) return s.mid;
     return s.deep;
@@ -408,22 +408,22 @@ function eunisCategoryToSubstrate(code) {
     // Kaynak: eusm2025_subs_full layer, Substrate alanı
     // Doğrulanmış değerler: "Coarse & mixed sediment", "Rock and biogenic reef", vb.
     const EXACT = {
-        'ROCK AND BIOGENIC REEF':    'ROCK',
-        'ROCK':                      'ROCK',
-        'HARD SUBSTRATE':            'ROCK',
-        'SAND':                      'SAND',
-        'COARSE SEDIMENT':           'SAND',
-        'COARSE & MIXED SEDIMENT':   'SAND',
+        'ROCK AND BIOGENIC REEF': 'ROCK',
+        'ROCK': 'ROCK',
+        'HARD SUBSTRATE': 'ROCK',
+        'SAND': 'SAND',
+        'COARSE SEDIMENT': 'SAND',
+        'COARSE & MIXED SEDIMENT': 'SAND',
         'COARSE AND MIXED SEDIMENT': 'SAND',
-        'MIXED SEDIMENT':            'MIXED',
-        'MUD':                       'MUD',
-        'MUDDY SAND':                'MUD',
-        'FINE MUD':                  'MUD',
-        'SANDY MUD':                 'MUD',
-        'SEAGRASS':                  'SEAGRASS',
-        'SEAGRASS MEADOW':           'SEAGRASS',
-        'POSIDONIA OCEANICA':        'SEAGRASS',
-        'BIOGENIC':                  'ROCK',
+        'MIXED SEDIMENT': 'MIXED',
+        'MUD': 'MUD',
+        'MUDDY SAND': 'MUD',
+        'FINE MUD': 'MUD',
+        'SANDY MUD': 'MUD',
+        'SEAGRASS': 'SEAGRASS',
+        'SEAGRASS MEADOW': 'SEAGRASS',
+        'POSIDONIA OCEANICA': 'SEAGRASS',
+        'BIOGENIC': 'ROCK',
     };
     if (EXACT[c]) return EXACT[c];
 
@@ -576,44 +576,44 @@ function parseSubstrateFromHtml(html) {
 // null = ilgisiz (substrat skora etki etmez)
 const SUBSTRATE_PREFS = {
     // Kayalık / sert zemin sevenler
-    levrek:      ['ROCK', 'MIXED'],
-    karagoz:     ['ROCK', 'SEAGRASS', 'MIXED'],
-    cipura:      ['ROCK', 'SEAGRASS'],
-    mercan:      ['ROCK'],
-    orfoz:       ['ROCK'],
-    lahoz:       ['ROCK'],
-    sinagrit:    ['ROCK'],
-    sinarit:     ['ROCK'],
-    fangri:      ['ROCK', 'MIXED'],
-    isparoz:     ['ROCK', 'SEAGRASS'],
+    levrek: ['ROCK', 'MIXED'],
+    karagoz: ['ROCK', 'SEAGRASS', 'MIXED'],
+    cipura: ['ROCK', 'SEAGRASS'],
+    mercan: ['ROCK'],
+    orfoz: ['ROCK'],
+    lahoz: ['ROCK'],
+    sinagrit: ['ROCK'],
+    sinarit: ['ROCK'],
+    fangri: ['ROCK', 'MIXED'],
+    isparoz: ['ROCK', 'SEAGRASS'],
     yayinbaligi: ['MUD', 'MIXED'],
-    kirlangic:   ['SAND', 'MUD'],
+    kirlangic: ['SAND', 'MUD'],
     // Kum / çayır sevenler
-    tekir:       ['SAND', 'SEAGRASS', 'MIXED'],
-    barbun:      ['SAND', 'MUD'],
-    dil:         ['SAND', 'MUD'],
-    kalkan:      ['SAND', 'MUD', 'MIXED'],
-    pisi:        ['SAND', 'MUD'],
-    kefal:       ['MUD', 'MIXED', 'SEAGRASS'],
-    altinbas:    ['SEAGRASS', 'SAND'],
+    tekir: ['SAND', 'SEAGRASS', 'MIXED'],
+    barbun: ['SAND', 'MUD'],
+    dil: ['SAND', 'MUD'],
+    kalkan: ['SAND', 'MUD', 'MIXED'],
+    pisi: ['SAND', 'MUD'],
+    kefal: ['MUD', 'MIXED', 'SEAGRASS'],
+    altinbas: ['SEAGRASS', 'SAND'],
     // Pelajik (dip yapısı önemsiz)
-    lufer:       null,
-    palamut:     null,
-    torik:       null,
-    kolyoz:      null,
-    istavrit:    null,
-    sarikanat:   null,
-    lapsari:     null,
-    hamsi:       null,
-    sardalya:    null,
+    lufer: null,
+    palamut: null,
+    torik: null,
+    kolyoz: null,
+    istavrit: null,
+    sarikanat: null,
+    lapsari: null,
+    hamsi: null,
+    sardalya: null,
     // Dip türleri
-    mezgit:      ['SAND', 'MUD'],
-    berlam:      ['SAND', 'MUD'],
-    izmarit:     ['ROCK', 'MIXED'],
+    mezgit: ['SAND', 'MUD'],
+    berlam: ['SAND', 'MUD'],
+    izmarit: ['ROCK', 'MIXED'],
     // Kafadanbacaklılar
-    kalamar:     ['SAND', 'MIXED'],
-    ahtapot:     ['ROCK', 'MIXED'],
-    subye:       ['SAND', 'MUD'],
+    kalamar: ['SAND', 'MIXED'],
+    ahtapot: ['ROCK', 'MIXED'],
+    subye: ['SAND', 'MUD'],
     murekkepbal: ['SAND', 'MIXED'],
 };
 
@@ -965,7 +965,7 @@ app.use('/api/', (req, res, next) => {
         // Çok sık çalışan scan stream, hotspot veya monthly-trend gibi ufak verileri sessize alabiliriz (isteğe bağlı) 
         // ancak genel performans analizi için hepsi şimdilik loglanıyor.
         if (!req.url.includes('progress') && !req.url.includes('/hotspot?')) {
-             console.log(`[API-PERF] ${req.method} ${req.originalUrl} - ${timeMs}ms`);
+            console.log(`[API-PERF] ${req.method} ${req.originalUrl} - ${timeMs}ms`);
         }
     });
     next();
@@ -1418,11 +1418,11 @@ function getSeason(month) {
 function getMoonPhaseName(phase, lang = 'tr') {
     const m = i18n(lang).moon;
     if (phase < 0.125) return m.newMoon;
-    if (phase < 0.25)  return m.crescentWaxing;
+    if (phase < 0.25) return m.crescentWaxing;
     if (phase < 0.375) return m.firstQuarter;
-    if (phase < 0.5)   return m.waxingGibbous;
+    if (phase < 0.5) return m.waxingGibbous;
     if (phase < 0.625) return m.fullMoon;
-    if (phase < 0.75)  return m.waningGibbous;
+    if (phase < 0.75) return m.waningGibbous;
     if (phase < 0.875) return m.lastQuarter;
     return m.crescentWaning;
 }
@@ -1506,7 +1506,7 @@ function getHourWeight(hour, activityWindows, fishActivity) {
     // Gece balıkları için farklı ağırlık
     if (fishActivity === "NIGHT") {
         const nStart = n.startHour; // dinamik (SunCalc nautical dusk)
-        const nEnd   = n.endHour;   // dinamik (SunCalc nautical dawn)
+        const nEnd = n.endHour;   // dinamik (SunCalc nautical dawn)
         // Gece penceresi: startHour → (gece yarısını geçip) endHour
         if (hour >= nStart || hour < nEnd) return 3.0;
         // Gece öncesi geçiş: 3 saat öncesinden yumuşak artış
@@ -2606,7 +2606,7 @@ app.get('/api/forecast', async (req, res) => {
             // Yeni çekildi — Firestore'a kaydet (fire-and-forget)
             const chlCacheKey = `plankton_${parseFloat(lat).toFixed(2)}_${parseFloat(lon).toFixed(2)}`;
             db.collection('planktonCache').doc(chlCacheKey)
-                .set({ result: chlorophyllData, savedAt: Date.now() }).catch(() => {});
+                .set({ result: chlorophyllData, savedAt: Date.now() }).catch(() => { });
         }
         const chlorophyll = chlorophyllData?.chlorophyll ?? null;
 
@@ -3121,11 +3121,11 @@ app.get('/api/forecast', async (req, res) => {
                         peakHours: fish.peakHours,
                         peakHoursDesc: _ie ? (fish.peakHoursDescEn || fish.peakHoursDesc) : fish.peakHoursDesc,
                         score: smoothedScore,
-                        bait:   _ie ? (fish.advice.baitEn || fish.advice.bait)   : fish.advice.bait,
-                        method: _ie ? (fish.advice.hookEn || fish.advice.hook)   : fish.advice.hook,
-                        lure:   _ie ? (fish.advice.lureEn || fish.advice.lure)   : fish.advice.lure,
-                        rig:    _ie ? (fish.advice.rigEn  || fish.advice.rig)    : fish.advice.rig,
-                        note:   _ie ? (fish.noteEn || fish.note) : fish.note,
+                        bait: _ie ? (fish.advice.baitEn || fish.advice.bait) : fish.advice.bait,
+                        method: _ie ? (fish.advice.hookEn || fish.advice.hook) : fish.advice.hook,
+                        lure: _ie ? (fish.advice.lureEn || fish.advice.lure) : fish.advice.lure,
+                        rig: _ie ? (fish.advice.rigEn || fish.advice.rig) : fish.advice.rig,
+                        note: _ie ? (fish.noteEn || fish.note) : fish.note,
                         legalSize: fish.legalSize, reason: result.reason,
                         scoreDetails: result.scoreDetails
                     });
@@ -3283,6 +3283,29 @@ app.get('/api/fish-search', async (req, res) => {
             return res.status(400).json({ error: 'lat, lon ve fishKey gerekli' });
         }
 
+        // 🛡️ AUTH & KOTA KONTROLÜ
+        if (!req.user) {
+            return res.status(401).json({ error: 'Giriş gerekli' });
+        }
+
+        // PRO veya Grace Period değilse kota kontrolü yap
+        if (!req.isPremium && !req.isGracePeriod) {
+            const uid = req.user.uid;
+            const today = new Date().toISOString().split('T')[0];
+            const docId = `${uid}_${today}`;
+            
+            if (db) {
+                const usageDoc = await db.collection('clickUsage').doc(docId).get();
+                const count = usageDoc.exists ? (usageDoc.data().count || 0) : 0;
+                if (count >= FREE_DAILY_CLICKS) {
+                    return res.status(403).json({ 
+                        error: 'LIMIT_EXCEEDED', 
+                        message: i18n(lang).limit_desc || 'Günlük limitiniz doldu.' 
+                    });
+                }
+            }
+        }
+
         const fish = SPECIES_DB[fishKey];
         if (!fish) {
             return res.status(404).json({ error: 'Tür bulunamadı' });
@@ -3317,7 +3340,7 @@ app.get('/api/fish-search', async (req, res) => {
         // [CACHE] forecast endpoint daha önce aynı noktayı çektiyse ham veriyi kullan — OM'a gitme
         let [weather, marine, bathymetryRes] = await Promise.all([
             cache.get(`raw_weather_${gLat}_${gLon}`) ? Promise.resolve(cache.get(`raw_weather_${gLat}_${gLon}`)) : queuedFetch(weatherUrl),
-            cache.get(`raw_marine_${gLat}_${gLon}`)  ? Promise.resolve(cache.get(`raw_marine_${gLat}_${gLon}`))  : queuedFetch(marineUrl),
+            cache.get(`raw_marine_${gLat}_${gLon}`) ? Promise.resolve(cache.get(`raw_marine_${gLat}_${gLon}`)) : queuedFetch(marineUrl),
             skipBathymetry ? Promise.resolve(null) : fetchWithTimeout(bathymetryUrl).catch(() => null)
         ]);
 
@@ -3596,15 +3619,15 @@ app.get('/api/fish-search', async (req, res) => {
                 pressureSensitivity: fish.pressureSensitivity,
                 currentPref: fish.currentPref,
                 wavePref: fish.wavePref,
-                bait:   lang === 'en' ? (fish.advice?.baitEn || fish.advice?.bait) : fish.advice?.bait,
+                bait: lang === 'en' ? (fish.advice?.baitEn || fish.advice?.bait) : fish.advice?.bait,
                 method: lang === 'en' ? (fish.advice?.rigEn || fish.advice?.rig) : fish.advice?.rig,
-                lure:   lang === 'en' ? (fish.advice?.lureEn || fish.advice?.lure) : fish.advice?.lure,
+                lure: lang === 'en' ? (fish.advice?.lureEn || fish.advice?.lure) : fish.advice?.lure,
                 advice: lang === 'en' ? {
-                    bait:   fish.advice?.baitEn   || fish.advice?.bait,
-                    lure:   fish.advice?.lureEn   || fish.advice?.lure,
-                    method: fish.advice?.rigEn    || fish.advice?.rig,
-                    rig:    fish.advice?.rigEn    || fish.advice?.rig,
-                    hook:   fish.advice?.hookEn   || fish.advice?.hook,
+                    bait: fish.advice?.baitEn || fish.advice?.bait,
+                    lure: fish.advice?.lureEn || fish.advice?.lure,
+                    method: fish.advice?.rigEn || fish.advice?.rig,
+                    rig: fish.advice?.rigEn || fish.advice?.rig,
+                    hook: fish.advice?.hookEn || fish.advice?.hook,
                 } : fish.advice,
                 legalSize: isProtected ? null : fish.legalSize,
                 isProtected: isProtected,
@@ -3982,18 +4005,28 @@ async function fetchCenterWeather(lat, lon) {
 async function fetchBathymetry(lat, lon) {
     const latF = parseFloat(lat).toFixed(4);
     const lonF = parseFloat(lon).toFixed(4);
-    // 3 ondalık hassasiyetle cache key — ~100m grid'e denk gelir, scan için yeterli
+    // 3 ondalık hassasiyetle cache key
     const ck = `b_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`;
     const hit = bathyCache.get(ck);
     if (hit !== undefined) return hit;
+
     try {
-        const res = await fetch(`https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`);
+        const url = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`;
+        const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
         if (!res.ok) return null;
+        
         const b = await res.json();
-        const val = (b && b.avg !== undefined) ? b.avg : null;
-        bathyCache.set(ck, val);
-        return val;
-    } catch (e) { return null; }
+        if (b && b.avg !== undefined) {
+            // EMODnet deniz derinliğini (-) eksi olarak verir.
+            // Smoothed verisi varsa daha hassastır, onu kullan.
+            const val = (b.smoothed !== undefined && b.smoothed < 0) ? b.smoothed : b.avg;
+            bathyCache.set(ck, val);
+            return val;
+        }
+        return null;
+    } catch (e) {
+        return null;
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -4391,10 +4424,10 @@ app.get('/api/scan', async (req, res) => {
             const lastPt = batchResults[batchResults.length - 1];
             sendEvent({
                 type: 'progress', pct, done, total,
-                lastPoint: lastValid || { 
-                    lat: lastPt.pt.lat, 
-                    lon: lastPt.pt.lon, 
-                    score: lastPt.result?.score ?? null, 
+                lastPoint: lastValid || {
+                    lat: lastPt.pt.lat,
+                    lon: lastPt.pt.lon,
+                    score: lastPt.result?.score ?? null,
                     fishName: lastPt.result?.fishName ?? null,
                     depth: lastPt.result?.depth ?? null
                 }
@@ -4692,7 +4725,7 @@ cron.schedule('0 7 * * *', async () => {
                                 bestFav = f;
                             }
                         }
-                    } catch(e) {
+                    } catch (e) {
                         console.error(`[DAILY BEST CRON] Favori puanı alınamadı ${f.name}:`, e.message);
                     }
                 }
@@ -4718,7 +4751,7 @@ cron.schedule('0 7 * * *', async () => {
                     console.log(`[DAILY BEST CRON] ✅ Bildirim gönderildi -> uid:${uid}, mera:${bestFav.name}, skor:%${Math.round(bestScore)}`);
                     await new Promise(r => setTimeout(r, 200)); // Rate limit
                 }
-            } catch(e) {
+            } catch (e) {
                 console.error(`[DAILY BEST CRON] Kullanıcı hatası uid:${uid}`, e.message);
             }
         }
@@ -4746,7 +4779,7 @@ cron.schedule('0 3 * * *', async () => {
         const staleScans = await db.collection('scanCache')
             .where('createdAt', '<', now - 24 * 60 * 60 * 1000)
             .limit(200).get();
-        
+
         staleScans.forEach(doc => {
             batch.delete(doc.ref);
             deletedScans++;
@@ -4756,7 +4789,7 @@ cron.schedule('0 3 * * *', async () => {
         const stalePlankton = await db.collection('planktonCache')
             .where('savedAt', '<', now - 24 * 60 * 60 * 1000)
             .limit(200).get();
-        
+
         stalePlankton.forEach(doc => {
             batch.delete(doc.ref);
             deletedPlankton++;
@@ -4886,7 +4919,7 @@ cron.schedule('0 * * * *', async () => {
             tokens: tokens.map(t => t.token),
             notification: {
                 title: SERVER_i18n.tr.notification.title,
-                body:  SERVER_i18n.tr.notification.body(notifSpotName)
+                body: SERVER_i18n.tr.notification.body(notifSpotName)
             },
             data: {
                 type: 'pressure_alert',
