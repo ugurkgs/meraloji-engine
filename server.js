@@ -3515,9 +3515,11 @@ app.get('/api/fish-search', async (req, res) => {
         } catch (e) { console.log('Daily score calc error:', e.message); }
 
         // === LİSTEDE VAR MI KONTROL ===
-        const isInDailyList = dailyScore !== null && dailyScore > 15;
+        // Sadece günlük top 10 listesinde olan balıkları "listede" kabul et
+        const dailyTopList = forecast && forecast[0] ? forecast[0].fishList.slice(0, 10).map(f => f.key) : [];
+        const isInDailyList = dailyTopList.includes(fishKey);
 
-        // Neden listelenmediğini analiz et (sadece listede yoksa göster)
+        // Neden listelenmediğini analiz et
         const reasons = [];
         const season = getSeason(now.getMonth());
         const seasonEff = fish.seasons[season] || 0;
@@ -3616,7 +3618,7 @@ app.get('/api/fish-search', async (req, res) => {
             scoreDetails: (req.isPremium || req.isGracePeriod) ? result.scoreDetails : null,
             triggers: result.activeTriggers,
             reason: result.reason,
-            reasons: isInDailyList ? [] : reasons,
+            reasons: reasons,
             conditions: {
                 region: i18n(lang).regions[regionName] || regionName,
                 depthAvg: depthAvg,
