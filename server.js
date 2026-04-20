@@ -4215,15 +4215,15 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             try {
                 const dailyResult = calculateWeightedDailyScore(fish, fishKey, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
                 const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
-                const depthVal = depthAvg ? Math.round(depthAvg) : null;
-                const zone = !depthVal ? null : getZoneLabel(depthVal, lang);
+                const depthVal = (depthAvg !== null) ? Math.round(depthAvg) : null;
+                const zone = (depthVal === null) ? null : getZoneLabel(depthVal, lang);
                 const substrateVal = params.substrate || null;
                 const _n1 = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
                 return { score, fishName: _n1, topFish: [_n1], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
             } catch (e) {
                 const r = calculateFishScore(fish, fishKey, params, lang);
-                const depthVal = depthAvg ? Math.round(depthAvg) : null;
-                const zone = !depthVal ? null : getZoneLabel(depthVal, lang);
+                const depthVal = (depthAvg !== null) ? Math.round(depthAvg) : null;
+                const zone = (depthVal === null) ? null : getZoneLabel(depthVal, lang);
                 const substrateVal = params.substrate || null;
                 const _n2 = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
                 return { score: r.finalScore, fishName: _n2, topFish: [_n2], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
