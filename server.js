@@ -3515,9 +3515,8 @@ app.get('/api/fish-search', async (req, res) => {
         } catch (e) { console.log('Daily score calc error:', e.message); }
 
         // === LİSTEDE VAR MI KONTROL ===
-        // Sadece günlük top 10 listesinde olan balıkları "listede" kabul et
-        const dailyTopList = forecast && forecast[0] ? forecast[0].fishList.slice(0, 10).map(f => f.key) : [];
-        const isInDailyList = dailyTopList.includes(fishKey);
+        // Not: Arama sonuçlarında şeffaflık için reasons her zaman hesaplanır.
+        const isInDailyList = dailyScore !== null && dailyScore > 15;
 
         // Neden listelenmediğini analiz et
         const reasons = [];
