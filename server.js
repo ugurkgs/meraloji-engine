@@ -4391,7 +4391,13 @@ app.get('/api/scan', async (req, res) => {
             const lastPt = batchResults[batchResults.length - 1];
             sendEvent({
                 type: 'progress', pct, done, total,
-                lastPoint: lastValid || { lat: lastPt.pt.lat, lon: lastPt.pt.lon, score: lastPt.result?.score ?? null, fishName: lastPt.result?.fishName ?? null }
+                lastPoint: lastValid || { 
+                    lat: lastPt.pt.lat, 
+                    lon: lastPt.pt.lon, 
+                    score: lastPt.result?.score ?? null, 
+                    fishName: lastPt.result?.fishName ?? null,
+                    depth: lastPt.result?.depth ?? null
+                }
             });
             if (res.flush) res.flush();
 
