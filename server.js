@@ -3050,6 +3050,8 @@ app.get('/api/forecast', async (req, res) => {
                     waveDirection, windWaveHeight, swellPeriod
                 };
 
+                const resultsMap = new Map();
+
                 for (const [key, fish] of Object.entries(SPECIES_DB || {})) {
                     if (!isInHabitat(fish, lat, lon, regionName)) continue;
 
@@ -3060,39 +3062,68 @@ app.get('/api/forecast', async (req, res) => {
                     const dailyScore = dailyResult.score;
 
                     if (dailyScore > 15) {
-                        // Detaylar için anlık hesaplama
-                        const result = calculateFishScore(fish, key, baseParams, lang);
-
-                        // En iyi saat bilgisi
-                        const bestHourStr = dailyResult.bestHour >= 0
-                            ? `${String(dailyResult.bestHour).padStart(2, '0')}:00`
-                            : null;
-
-                        // lang=en ise İngilizce alanları kullan
+                        const scientificName = (fish.scientificName || fish.name).toLowerCase().trim();
                         const _isEn = lang === 'en';
-                        fishList.push({
-                            key,
-                            name: _isEn ? (fish.nameEn || fish.name) : fish.name,
-                            nameEn: fish.nameEn || fish.name,
-                            scientificName: fish.scientificName, photoId: fish.photoId,
-                            icon: fish.icon, category: fish.category,
-                            peakHours: fish.peakHours,
-                            peakHoursDesc: _isEn ? (fish.peakHoursDescEn || fish.peakHoursDesc) : fish.peakHoursDesc,
-                            score: dailyScore,
-                            bestHour: bestHourStr,
-                            bestHourScore: dailyResult.bestHourScore,
-                            hourlyScores: dailyResult.hourlyScores,
-                            bait: _isEn ? (fish.advice.baitEn || fish.advice.bait) : fish.advice.bait,
-                            method: _isEn ? (fish.advice.hookEn || fish.advice.hook) : fish.advice.hook,
-                            lure: _isEn ? (fish.advice.lureEn || fish.advice.lure) : fish.advice.lure,
-                            rig: _isEn ? (fish.advice.rigEn || fish.advice.rig) : fish.advice.rig,
-                            note: _isEn ? (fish.noteEn || fish.note) : fish.note,
-                            legalSize: fish.legalSize, reason: result.reason,
-                            activation: result.activeTriggers.join(", "),
-                            scoreDetails: result.scoreDetails
-                        });
+                        const currentName = _isEn ? (fish.nameEn || fish.name) : fish.name;
+
+                        // [DEDÜPLİKASYON MANTIĞI]
+                        // Aynı bilimsel isme sahip birden fazla kayıt varsa:
+                        // 1. Mevcut bölgeye (regionName) spesifik olanı seç.
+                        // 2. Yoksa isGlobal olmayanı (yerel olanı) seç.
+                        // 3. Skorları karşılaştır.
+                        const existing = resultsMap.get(scientificName);
+                        let shouldReplace = !existing;
+
+                        if (existing) {
+                            const currentIsSpecific = fish.regions && fish.regions.includes(regionName);
+                            const existingIsSpecific = existing.fish.regions && existing.fish.regions.includes(regionName);
+
+                            if (currentIsSpecific && !existingIsSpecific) {
+                                shouldReplace = true;
+                            } else if (!currentIsSpecific && existingIsSpecific) {
+                                shouldReplace = false;
+                            } else {
+                                // İkisi de aynı spesifiklikteyse yüksek skoru al
+                                shouldReplace = dailyScore > existing.score;
+                            }
+                        }
+
+                        if (shouldReplace) {
+                            // Detaylar için anlık hesaplama
+                            const result = calculateFishScore(fish, key, baseParams, lang);
+                            const bestHourStr = dailyResult.bestHour >= 0
+                                ? `${String(dailyResult.bestHour).padStart(2, '0')}:00`
+                                : null;
+
+                            resultsMap.set(scientificName, {
+                                score: dailyScore,
+                                fish: fish,
+                                data: {
+                                    key,
+                                    name: currentName,
+                                    nameEn: fish.nameEn || fish.name,
+                                    scientificName: fish.scientificName, photoId: fish.photoId,
+                                    icon: fish.icon, category: fish.category,
+                                    peakHours: fish.peakHours,
+                                    peakHoursDesc: _isEn ? (fish.peakHoursDescEn || fish.peakHoursDesc) : fish.peakHoursDesc,
+                                    score: dailyScore,
+                                    bestHour: bestHourStr,
+                                    bestHourScore: dailyResult.bestHourScore,
+                                    hourlyScores: dailyResult.hourlyScores,
+                                    bait: _isEn ? (fish.advice.baitEn || fish.advice.bait) : fish.advice.bait,
+                                    method: _isEn ? (fish.advice.hookEn || fish.advice.hook) : fish.advice.hook,
+                                    lure: _isEn ? (fish.advice.lureEn || fish.advice.lure) : fish.advice.lure,
+                                    rig: _isEn ? (fish.advice.rigEn || fish.advice.rig) : fish.advice.rig,
+                                    note: _isEn ? (fish.noteEn || fish.note) : fish.note,
+                                    legalSize: fish.legalSize, reason: result.reason,
+                                    activation: result.activeTriggers.join(", "),
+                                    scoreDetails: result.scoreDetails
+                                }
+                            });
+                        }
                     }
                 }
+                fishList = Array.from(resultsMap.values()).map(v => v.data);
                 fishList.sort((a, b) => b.score - a.score);
             }
 
@@ -4494,22 +4525,48 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         const commonResult = { depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal, localTime: localTimeStr, utcOffset: utcOff };
 
             if (!fishKey) {
-                let topScore = 0;
-                let topFishName = '';
-                const allFishScores = [];
+                const resultsMap = new Map();
                 for (const [key, fish] of Object.entries(SPECIES_DB || {})) {
                     if (!isInHabitat(fish, parseFloat(latF), parseFloat(lonF), regionName)) continue;
                     try {
                         const dailyResult = calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
                         const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
-                        const _fn = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
-                        if (score > 0) allFishScores.push({ name: _fn, score });
-                        if (score > topScore) { topScore = score; topFishName = _fn; }
+                        if (score > 0) {
+                            const scientificName = (fish.scientificName || fish.name).toLowerCase().trim();
+                            
+                            const existing = resultsMap.get(scientificName);
+                            let shouldReplace = !existing;
+
+                            if (existing) {
+                                const currentIsSpecific = fish.regions && fish.regions.includes(regionName);
+                                const existingIsSpecific = existing.fish.regions && existing.fish.regions.includes(regionName);
+
+                                if (currentIsSpecific && !existingIsSpecific) {
+                                    shouldReplace = true;
+                                } else if (!currentIsSpecific && existingIsSpecific) {
+                                    shouldReplace = false;
+                                } else {
+                                    shouldReplace = score > existing.score;
+                                }
+                            }
+
+                            if (shouldReplace) {
+                                const _fn = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
+                                resultsMap.set(scientificName, { 
+                                    score, 
+                                    name: _fn, 
+                                    fish: fish 
+                                });
+                            }
+                        }
                     } catch (e) { }
                 }
-                allFishScores.sort((a, b) => b.score - a.score);
-                const topFish = allFishScores.slice(0, 3).map(f => f.name);
-                return { ...commonResult, score: topScore, fishName: topFishName, topFish };
+                
+                const sorted = Array.from(resultsMap.values()).sort((a, b) => b.score - a.score);
+                const topFish = sorted.slice(0, 3).map(f => f.name);
+                const best = sorted[0];
+
+                return { ...commonResult, score: best ? best.score : 0, fishName: best ? best.name : '', topFish };
             } else {
                 const fish = SPECIES_DB[fishKey];
                 if (!fish) return null;
