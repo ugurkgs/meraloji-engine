@@ -4347,55 +4347,56 @@ async function findNearestSeaPoint(lat, lon) {
 // past_days=7 ile gelen dizide bugün genellikle 168. indekste başlar, ama
 // gün sınırları UTC'ye göre kayabilir — string eşleşmesi kesin çözüm.
 function findTodayIndex(timeArray, utcOffsetSeconds = 0) {
+    if (!timeArray || !Array.isArray(timeArray)) return 0;
     // Sunucu saati (UTC) + yerel fark = koordinatın gerçek yerel zamanı
     const localTime = new Date(Date.now() + (utcOffsetSeconds * 1000));
     const todayStr = localTime.toISOString().split('T')[0]; 
-    const idx = timeArray.findIndex(t => t.startsWith(todayStr));
-    return idx >= 0 ? idx : 7 * 24; 
+    const idx = timeArray.findIndex(t => t && t.startsWith(todayStr));
+    return idx >= 0 ? idx : 0; 
 }
 
 // Paylaşılan hava verisiyle tek nokta skoru hesapla (API çağrısı yok)
 function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey, lang) {
+    if (!weather || !marine || !weather.hourly || !marine.hourly || !marine.hourly.time) return null;
 
     const latF = parseFloat(lat).toFixed(4);
     const lonF = parseFloat(lon).toFixed(4);
     const now = new Date();
-    const _utcOff2 = weather?.utc_offset_seconds || 0;
-    const clickHour = Math.floor((Date.now() / 1000 + _utcOff2) % 86400 / 3600);
-    const regionName = getRegion(latF, lonF);
+    const _utcOff = weather.utc_offset_seconds || 0;
+    
+    // Zaman hesaplamaları
+    const clickHour = Math.floor((Date.now() / 1000 + _utcOff) % 86400 / 3600);
+    const regionName = getRegion(latF, lonF) || "AÇIK DENİZ";
 
     try {
         // Kara tespiti: bathymetri pozitifse kesin kara
         if (bathyRaw !== null && bathyRaw > 0) return null;
-        // Marine veri hiç yoksa kara/iç bölge (sadece null/undefined kontrolü, 0 dalga geçerli)
-        if (!marine.hourly?.wave_height || marine.hourly.wave_height.length === 0) return null;
+        // Marine veri kontrolü
+        if (!marine.hourly.wave_height || marine.hourly.wave_height.length === 0) return null;
 
-        const _utcOff = weather.utc_offset_seconds || 0;
-        const localClickHour = Math.floor((Date.now() / 1000 + _utcOff) % 86400 / 3600);
-        const correctedClickHour = localClickHour;
-
+        const correctedClickHour = clickHour;
         const hourlyOffset = 24;
         const hourlyIdx = hourlyOffset + correctedClickHour;
 
-        // Marine: past_days=7 → bugünün başlangıcını time dizisinden bul
+        // Marine: bugünün başlangıcını bul
         const marineHourlyOffset = findTodayIndex(marine.hourly.time, _utcOff);
         const marineHourlyIdx = marineHourlyOffset + correctedClickHour;
 
-        const rawWaterTemp = marine.hourly?.sea_surface_temperature?.[marineHourlyIdx];
+        const rawWaterTemp = marine.hourly.sea_surface_temperature?.[marineHourlyIdx];
         const tempWater = safeWaterTemp(rawWaterTemp, regionName, now.getMonth());
-        const wave = safeNum(marine.hourly?.wave_height?.[marineHourlyIdx]);
-        const windSpeed = safeNum(weather.hourly?.wind_speed_10m?.[hourlyIdx]);
+        const wave = safeNum(marine.hourly.wave_height?.[marineHourlyIdx]);
+        const windSpeed = safeNum(weather.hourly.wind_speed_10m?.[hourlyIdx]);
         const windDir = safeNum(weather.daily?.wind_direction_10m_dominant?.[1]);
-        const pressure = safeNum(weather.hourly?.surface_pressure?.[hourlyIdx], 1013);
-        const rain = safeNum(weather.hourly?.rain?.[hourlyIdx]);
-        const cloud = safeNum(weather.hourly?.cloud_cover?.[hourlyIdx], 50);
-        const uv = safeNum(weather.hourly?.uv_index?.[hourlyIdx], 0);
+        const pressure = safeNum(weather.hourly.surface_pressure?.[hourlyIdx], 1013);
+        const rain = safeNum(weather.hourly.rain?.[hourlyIdx]);
+        const cloud = safeNum(weather.hourly.cloud_cover?.[hourlyIdx], 50);
+        const uv = safeNum(weather.hourly.uv_index?.[hourlyIdx], 0);
         const clarity = calculateClarity(wave, windSpeed, rain);
         const currentEst = estimateCurrent(wave, windSpeed, regionName);
         const depthAvg = bathyRaw !== null ? Math.abs(bathyRaw) : null;
-        const sunTimes = SunCalc.getTimes(now, latF, lonF);
+        const sunTimes = SunCalc.getTimes(now, parseFloat(latF), parseFloat(lonF));
         const timeMode = getTimeOfDay(clickHour, sunTimes);
-        const solunar = getSolunarWindow(now, latF, lonF);
+        const solunar = getSolunarWindow(now, parseFloat(latF), parseFloat(lonF));
         const moon = SunCalc.getMoonIllumination(now);
 
         // [YENİ] Marine hourly
@@ -4438,8 +4439,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             moonlightIntensity: calculateMoonlightIntensity(now, parseFloat(latF), parseFloat(lonF), cloud),
             chlorophyll: null,
             isBoat: false,
-            substrate: substrateCache.get(`sub_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`) ?? null,
-            // YENİ (1C)
+            substrate: substrateCache.get(`sub_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`) || null,
             windGust: windGust_s, precipProb: precipProb_s, weatherCode: weatherCode_s,
             visibility: visibility_s, waveDirection: waveDirection_s,
             windWaveHeight: windWaveHeight_s, swellPeriod: swellPeriod_s
@@ -4447,16 +4447,16 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
 
         // Günlük ağırlıklı skor için activityWindows ve hourlyStartIdx
         const activityWindows = calculateActivityWindows(now, parseFloat(latF), parseFloat(lonF));
-        const hourlyStartIdx = 24; // today = past_days=1 offset (weather)
+        const hourlyStartIdx = 24; 
 
-            const utcOff = weather.utc_offset_seconds || 0;
-            const localTimeStr = new Date(Date.now() + (utcOff * 1000)).toISOString().replace('T', ' ').slice(0, 16);
-            
-            const depthVal = (depthAvg !== null) ? Math.round(depthAvg) : null;
-            const zone = (depthVal === null) ? null : getZoneLabel(depthVal, lang);
-            const substrateVal = params.substrate || null;
+        // [KRİTİK] Değişkenleri fonksiyon kapsamında (scope) garantiye al
+        let depthVal = (depthAvg !== null) ? Math.round(depthAvg) : null;
+        let zone = (depthVal === null) ? null : getZoneLabel(depthVal, lang);
+        let substrateVal = params.substrate || null;
 
-            const commonResult = { depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal, localTime: localTimeStr, utcOffset: utcOff };
+        const utcOff = weather.utc_offset_seconds || 0;
+        const localTimeStr = new Date(Date.now() + (utcOff * 1000)).toISOString().replace('T', ' ').slice(0, 16);
+        const commonResult = { depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal, localTime: localTimeStr, utcOffset: utcOff };
 
             if (!fishKey) {
                 let topScore = 0;
@@ -5314,7 +5314,7 @@ app.listen(PORT, () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════════╗
 ║         ⚓ MERALOJİ F.I.S.H. v3.0 AKTİF ⚓                ║
-║    ✅ ${Object.keys(SPECIES_DB).length} Balık | Fotoğraf | Gelişmiş Taktik          ║
+║    ✅ ${SPECIES_DB ? Object.keys(SPECIES_DB).length : 0} Balık | Fotoğraf | Gelişmiş Taktik          ║
 ║    📸 Balık Fotoğrafları | 85+ Skor Taktikleri           ║
 ║    Port: ${PORT}                                            ║
 ╚═══════════════════════════════════════════════════════════╝
