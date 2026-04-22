@@ -4182,10 +4182,10 @@ async function _fetchBathymetryBase(lat, lon, timeoutMs = 5000) {
             const maxL = (lonNum + delta).toFixed(4);
             const maxA = (latNum + delta).toFixed(4);
             
-            // DÜZELTME: Doğru GEBCO endpoint'i ve axis karmaşasını önlemek için WMS 1.1.1 (X, Y, SRS)
-            url = `https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?` +
+            // DÜZELTME: GEBCO katman isimleri küçük harfe duyarlıdır (gebco_latest)
+            url = `https://wms.gebco.net/mapserv?` +
                   `SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo` +
-                  `&LAYERS=GEBCO_LATEST&QUERY_LAYERS=GEBCO_LATEST` +
+                  `&LAYERS=gebco_latest&QUERY_LAYERS=gebco_latest` +
                   `&BBOX=${minL},${minA},${maxL},${maxA}` +
                   `&WIDTH=101&HEIGHT=101&X=50&Y=50&SRS=EPSG:4326&INFO_FORMAT=text/plain`;
         }
