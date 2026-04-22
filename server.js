@@ -503,11 +503,11 @@ async function fetchSubstrate(lat, lon) {
     let wmsUrl = "";
 
     if (isUS) {
-        // 🇺🇸 NOAA ArcGIS REST API (Kesin çalışan parametre sırası ve inSR=4326)
+        // 🇺🇸 NOAA ArcGIS REST API (Hassas Florida/US Ayarı)
         wmsUrl = `https://gis.ngdc.noaa.gov/arcgis/rest/services/web_mercator/nos_seabed_dynamic/MapServer/0/query` +
             `?inSR=4326&geometryType=esriGeometryPoint&geometry=${lonR},${latR}` +
             `&spatialRel=esriSpatialRelIntersects&distance=50000&units=esriSRUnit_Meter` +
-            `&outFields=DESCRP,PRIMARY_LITHOLOGY&returnGeometry=false&f=pjson`;
+            `&outFields=*&returnGeometry=false&f=pjson`;
     } else {
         // 🇪🇺 EMODnet Seabed Habitats (Europe/Global)
         wmsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/ows` +
@@ -4447,47 +4447,36 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         const activityWindows = calculateActivityWindows(now, parseFloat(latF), parseFloat(lonF));
         const hourlyStartIdx = 24; // today = past_days=1 offset (weather)
 
-        if (!fishKey) {
-            let topScore = 0;
-            let topFishName = '';
-            const allFishScores = [];
-            for (const [key, fish] of Object.entries(SPECIES_DB)) {
-                if (!isInHabitat(fish, lat, lon, regionName)) continue;
-                try {
-                    const dailyResult = calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
-                    const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
-                    const _fn = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
-                    if (score > 0) allFishScores.push({ name: _fn, score });
-                    if (score > topScore) { topScore = score; topFishName = _fn; }
-                } catch (e) { }
-            }
-            allFishScores.sort((a, b) => b.score - a.score);
-            const topFish = allFishScores.slice(0, 3).map(f => f.name);
-            const depthVal = (depthAvg !== null) ? Math.round(depthAvg) : null;
-            const zone = (depthVal === null) ? null : getZoneLabel(depthVal, lang);
-            const substrateVal = params.substrate || null;
-            return { score: topScore, fishName: topFishName, topFish, depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
-        } else {
-            const fish = SPECIES_DB[fishKey];
-            if (!fish) return null;
-            if (!isInHabitat(fish, lat, lon, regionName)) return null;
-            try {
+            const utcOff = weather.utc_offset_seconds || 0;
+            const localTimeStr = new Date(Date.now() + (utcOff * 1000)).toISOString().replace('T', ' ').slice(0, 16);
+            const commonResult = { depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal, localTime: localTimeStr, utcOffset: utcOff };
+
+            if (!fishKey) {
+                let topScore = 0;
+                let topFishName = '';
+                const allFishScores = [];
+                for (const [key, fish] of Object.entries(SPECIES_DB)) {
+                    if (!isInHabitat(fish, parseFloat(latF), parseFloat(lonF), regionName)) continue;
+                    try {
+                        const dailyResult = calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
+                        const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
+                        const _fn = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
+                        if (score > 0) allFishScores.push({ name: _fn, score });
+                        if (score > topScore) { topScore = score; topFishName = _fn; }
+                    } catch (e) { }
+                }
+                allFishScores.sort((a, b) => b.score - a.score);
+                const topFish = allFishScores.slice(0, 3).map(f => f.name);
+                return { ...commonResult, score: topScore, fishName: topFishName, topFish };
+            } else {
+                const fish = SPECIES_DB[fishKey];
+                if (!fish) return null;
+                if (!isInHabitat(fish, parseFloat(latF), parseFloat(lonF), regionName)) return null;
                 const dailyResult = calculateWeightedDailyScore(fish, fishKey, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
                 const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
-                const depthVal = (depthAvg !== null) ? Math.round(depthAvg) : null;
-                const zone = (depthVal === null) ? null : getZoneLabel(depthVal, lang);
-                const substrateVal = params.substrate || null;
                 const _n1 = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
-                return { score, fishName: _n1, topFish: [_n1], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
-            } catch (e) {
-                const r = calculateFishScore(fish, fishKey, params, lang);
-                const depthVal = (depthAvg !== null) ? Math.round(depthAvg) : null;
-                const zone = (depthVal === null) ? null : getZoneLabel(depthVal, lang);
-                const substrateVal = params.substrate || null;
-                const _n2 = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
-                return { score: r.finalScore, fishName: _n2, topFish: [_n2], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
+                return { ...commonResult, score, fishName: _n1, topFish: [_n1] };
             }
-        }
     } catch (e) {
         console.log('[SCAN-SCORE] Error:', e.message);
         return null;
