@@ -1516,9 +1516,9 @@ function isInHabitat(fish, lat, lon, regionName) {
     // 3. ÖNCELİK: Bölgesel/Endemik Kontrolü
     // Sadece belirli denizlere (Marmara, Ege vb.) kilitlenmiş türler.
     if (fish.regions && fish.regions.length > 0) {
-        // Balık sadece kendi tanımlı bölgesinde görünebilir.
-        // NOT: 'AÇIK DENİZ' serbestisi kaldırıldı, endemik türler açık denizde (başka ülkelerde) çıkmaz.
-        return fish.regions.includes(regionName);
+        // AÇIK DENİZ muafiyeti: poligon sınırı dışına çıkan Türkiye kıyı noktalarında
+        // da Türkiye türleri görünsün.
+        return fish.regions.includes(regionName) || regionName === 'AÇIK DENİZ';
     }
 
     // Hiçbir şart uymuyorsa (ve global değilse) gösterme
@@ -1946,13 +1946,13 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     s_env += windScore * 5;
     scoreDetails.wind = { score: windScore * 5, max: 5, stars: Math.round(windScore * 5), value: windSpeed, dir: windDir };
 
-    const regionMatch = isInHabitat(fish, params.lat, params.lon, region) ? 1.0 : 0.0;
-    // Global türler: bbox dışındaysa skor 0'a zorla
+    // Habitat filtresi — bbox dışı veya yanlış bölgede sıfır skor
     if (!isInHabitat(fish, params.lat, params.lon, region)) {
         return { finalScore: 0, score: 0, reason: i18n(lang).reasons.outOfRegion(region, (fish.regions||[]).join(', ')), activeTriggers: [], scoreDetails: {}, penalties: [] };
     }
-    s_env += regionMatch * 5;
-    scoreDetails.region = { score: regionMatch * 5, max: 5, stars: Math.round(regionMatch * 5) };
+    // isInHabitat true ise regionMatch her zaman tam puan
+    s_env += 5;
+    scoreDetails.region = { score: 5, max: 5, stars: 5 };
 
     // 4. AKTİVİTE (Max 20)
     let s_activity = 5;
@@ -3641,7 +3641,7 @@ app.get('/api/fish-search', async (req, res) => {
 
         const baseParams = {
             tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
-            timeMode, solunar, region: i18n(lang).regions[regionName] || regionName, targetDate: now, isInstant: true,
+            timeMode, solunar, region: regionName, targetDate: now, isInstant: true,
             currentSpeed: currentEst, pressureTrend, moonPhase: moon.phase,
             lat: parseFloat(latF), lon: parseFloat(lonF),
             depthAvg: depthAvg,
@@ -3700,12 +3700,15 @@ app.get('/api/fish-search', async (req, res) => {
 
         // Neden listelenmediğini analiz et
         const reasons = [];
-        const season = getSeason(now.getMonth());
+        const season = getSeason(now.getMonth(), parseFloat(latF));
         const seasonEff = fish.seasons[season] || 0;
 
         // Bölge kontrolü
         if (!isInHabitat(fish, lat, lon, regionName)) {
-            reasons.push({ type: 'CRITICAL', text: i18n(lang).reasons.outOfRegion(regionName, fish.regions.join(', ')) });
+            const regionsText = fish.regions?.length > 0
+                ? fish.regions.join(', ')
+                : (fish.habitatBboxes?.map(b => b.name).join(', ') || 'Global');
+            reasons.push({ type: 'CRITICAL', text: i18n(lang).reasons.outOfRegion(regionName, regionsText) });
         }
 
         // Mevsim kontrolü
@@ -4415,7 +4418,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
 
         const params = {
             tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
-            timeMode, solunar, region: i18n(lang).regions[regionName] || regionName, targetDate: now, isInstant: false,
+            timeMode, solunar, region: regionName, targetDate: now, isInstant: false,
             currentSpeed: currentEst,
             pressureTrend: (() => {
                 if (weather.hourly?.surface_pressure) {
