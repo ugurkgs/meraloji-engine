@@ -884,27 +884,7 @@ const SPECIES_DB = {
         note: "Otobur balık. Ekmekle kolay avlanır. Halüsinasyon yapabilir (dikkat!).",
         noteEn: "Herbivore fish. Easily caught with bread. Can cause hallucinations (caution!)."
     },
-    "iskatarya": {
-        name: "İskatarya", nameEn: "Atlantic Chub Mackerel", icon: "🐟", scientificName: "Scomber colias",
-        photoId: 73,
-        category: "PELAJIK",
-        shoreMonths: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // kıyıya yaklaşma ayları (0=Ocak)
-        peakHours: "DAY", peakHoursDesc: "Sabah erken ve akşamüstü, yüzey", peakHoursDescEn: "Early morning and afternoon, surface",
-        tempRange: { min: 15, opt: 20, max: 26 },
-        seasons: { winter: 0.20, spring: 0.75, summer: 0.90, autumn: 0.80 },
-        activity: "DAY",
-        pressureSensitivity: 0.4,
-        wavePref: 0.4,
-        clarityPref: "MEDIUM",
-        currentPref: 0.5,
-        salinityPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 0, opt: 25, max: 200 },
-        advice: { bait: "Çapari, Küçük balık", lure: "Tüylü iğne, Kaşık", rig: "Çoklu iğneli", hook: "8 - 12", baitEn: "Sabiki, small fish", lureEn: "Feathered hook, spoon", rigEn: "Multi-hook rig", hookEn: "8 - 12" },
-        legalSize: "18 cm",
-        note: "Kolyoza benzer ama karnında noktalı desen ayırt eder. Sürü halinde göç eder, sabah erken yüzeyde aktif.",
-        noteEn: "Similar to chub mackerel but spotted belly. Migrates in schools; active at surface early morning."
-    },
+
     "lokum": {
         name: "Lokum Balığı", nameEn: "Silver Biddy", icon: "🐟", scientificName: "Sillago sihama",
         photoId: 85,
@@ -1305,31 +1285,6 @@ const SPECIES_DB = {
         note: "Sonbahar balığı. Boğazlarda bol bulunur. Yamyamlık eğilimi — sürüye metal atar.",
         noteEn: "Autumn fish. Abundant in the Bosphorus. Cannibal tendencies — throw metal into the school."
     },
-    "torik": {
-        name: "Torik", nameEn: "Atlantic Bonito (Large)", icon: "🐟", scientificName: "Sarda sarda",
-        photoId: 26,
-        category: "PELAJIK",
-        shoreMonths: [], // kıyıya yaklaşma ayları (0=Ocak)
-        peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah-Akşam, derin", peakHoursDescEn: "Morning-Evening, deep",
-        tempRange: { min: 10, opt: 16, max: 22 },
-        seasons: { winter: 0.70, spring: 0.50, summer: 0.30, autumn: 0.65 },
-        monthlyActivity: [0.6, 0.55, 0.5, 0.55, 0.5, 0.3, 0.25, 0.3, 0.55, 0.75, 0.7, 0.65],
-        activity: "CREPUSCULAR",
-        pressureSensitivity: 0.6,
-        wavePref: 0.6,
-        clarityPref: "MODERATE",
-        currentPref: 0.6,
-        salinityPref: "ANY",
-        planktonPref: "HIGH",
-        moonPref: "dark",
-        sstTrendPref: "cooling",
-        regions: ["MARMARA", "KARADENİZ", "EGE"],
-        depth: { min: 20, opt: 60, max: 150 },
-        advice: { bait: "Canlı balık", lure: "Büyük Rapala, Jig", rig: "Trolling", hook: "3/0 - 5/0", baitEn: "Live fish", lureEn: "Large Rapala, jig", rigEn: "Trolling", hookEn: "3/0 - 5/0" },
-        legalSize: "Yok",
-        note: "Palamutun büyüğü. Kış aylarında daha derin.",
-        noteEn: "Larger bonito. Moves deeper in winter."
-    },
     "cinekop": {
         name: "Çinekop", nameEn: "Baby Bluefish", icon: "🐟", scientificName: "Pomatomus saltatrix (juv.)",
         photoId: 31,
@@ -1427,27 +1382,6 @@ const SPECIES_DB = {
         legalSize: "45 cm",
         note: "Değerli ve nadir. Karadeniz'e özgü. Kumlu dibe kamufle olur — yavaş yem hareketi şart.",
         noteEn: "Valuable and rare. Endemic to Black Sea. Camouflages on sandy bottom — slow bait movement essential."
-    },
-    "barbunya": {
-        name: "Barbunya", nameEn: "Red Mullet", icon: "🐟", scientificName: "Mullus barbatus",
-        photoId: 34,
-        category: "DIP_KIYI",
-        peakHours: "DAY", peakHoursDesc: "Gündüz, kumlu/çamurlu dip", peakHoursDescEn: "Daytime, sandy/muddy bottom",
-        tempRange: { min: 12, opt: 18, max: 24 },
-        seasons: { winter: 0.50, spring: 0.70, summer: 0.85, autumn: 0.75 },
-        activity: "DAY",
-        pressureSensitivity: 0.4,
-        wavePref: 0.3,
-        clarityPref: "MODERATE",
-        currentPref: 0.3,
-        salinityPref: "LOW",
-        planktonPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
-        depth: { min: 5, opt: 30, max: 100 },
-        advice: { bait: "Kurt, Karides", lure: "Yok", rig: "Dip", hook: "8 - 12", baitEn: "Worm, shrimp", lureEn: "None", rigEn: "Bottom", hookEn: "8 - 12" },
-        legalSize: "11 cm",
-        note: "Lezzetli ve değerli. Kumlu diplerde sürü halinde.",
-        noteEn: "Tasty and valuable. Schools on sandy bottoms."
     },
     "tekir": {
         name: "Tekir", nameEn: "Striped Red Mullet", icon: "🐟", scientificName: "Mullus surmuletus",
@@ -1608,28 +1542,6 @@ const SPECIES_DB = {
         legalSize: "-",
         note: "Yalnız gezen pusu avcısıdır. Kumluk ve çamurluk dipleri sever.",
         noteEn: "Solitary ambush predator. Prefers sandy and muddy bottoms."
-    },
-
-    "kaya_levregi": {
-        name: "Kaya Levreği", nameEn: "Comber", icon: "🐟", scientificName: "Serranus cabrilla",
-        photoId: 57,
-        category: "KIYI_AVCI",
-        peakHours: "DAY", peakHoursDesc: "Sabah ve akşam kayalıkta aktif",
-        tempRange: { min: 14, opt: 20, max: 26 },
-        seasons: { winter: 0.30, spring: 0.70, summer: 0.90, autumn: 0.70 },
-        activity: "DAY",
-        pressureSensitivity: 0.3,
-        wavePref: 0.5,
-        clarityPref: "CLEAR",
-        currentPref: 0.4,
-        salinityPref: "MEDIUM",
-        planktonPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 2, opt: 15, max: 80 },
-        advice: { bait: "Karides, Kurt", lure: "Küçük Silikon", rig: "Dip Takımı", hook: "No:6-8", baitEn: "Shrimp, worm", lureEn: "Small soft plastic", rigEn: "Bottom rig", hookEn: "No:6-8" },
-        legalSize: "-",
-        note: "Kayalık bölgelerde küçük sürüler yapar. Gece de yakalanabilir.",
-        noteEn: "Forms small schools in rocky areas. Can also be caught at night."
     },
 
     "papalina": {
@@ -1796,68 +1708,6 @@ const SPECIES_DB = {
         noteEn: "Roams sandy bottoms."
     },
 
-    "alyanak": {
-        name: "Alyanak", nameEn: "Common Pandora", icon: "🐟", scientificName: "Pagellus erythrinus",
-        photoId: 67,
-        category: "DIP_KIYI",
-        peakHours: "DAY", peakHoursDesc: "Gündüz dipte",
-        tempRange: { min: 14, opt: 22, max: 26 },
-        seasons: { winter: 0.40, spring: 0.70, summer: 0.75, autumn: 0.80 },
-        activity: "DAY",
-        pressureSensitivity: 0.4,
-        wavePref: 0.4,
-        clarityPref: "MODERATE",
-        currentPref: 0.4,
-        salinityPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 10, opt: 40, max: 150 },
-        advice: { bait: "Karides, Kurt", lure: "Yok", rig: "Dip Takımı", hook: "No:4-6", baitEn: "Shrimp, worm", lureEn: "None", rigEn: "Bottom rig", hookEn: "No:4-6" },
-        legalSize: "-",
-        note: "Kumluk-kayalık karışık dipte.",
-        noteEn: "Found on mixed sandy-rocky bottom."
-    },
-
-    "iskarmoz": {
-        name: "İskarmoz / Barakuda", nameEn: "Yellowmouth Barracuda", icon: "🐟", scientificName: "Sphyraena viridensis",
-        photoId: 68,
-        category: "KIYI",
-        peakHours: "DAY", peakHoursDesc: "Gündüz kıyıya yakın",
-        tempRange: { min: 14, opt: 20, max: 25 },
-        seasons: { winter: 0.50, spring: 0.70, summer: 0.60, autumn: 0.75 },
-        activity: "DAY",
-        pressureSensitivity: 0.35,
-        wavePref: 0.5,
-        clarityPref: "MODERATE",
-        currentPref: 0.4,
-        salinityPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 5, opt: 25, max: 120 },
-        advice: { bait: "Midye, Kurt", lure: "Micro Jig", rig: "Dip", hook: "No:4-8", baitEn: "Mussel, worm", lureEn: "Micro jig", rigEn: "Bottom", hookEn: "No:4-8" },
-        legalSize: "-",
-        note: "Sürü halinde gezer.",
-        noteEn: "Travels in schools."
-    },
-
-    "lidaki": {
-        name: "Lidaki", nameEn: "Young Gilthead Seabream", icon: "🐟", scientificName: "Sparus aurata",
-        photoId: 69,
-        category: "KIYI",
-        peakHours: "DAY", peakHoursDesc: "Gündüz sığ sularda",
-        tempRange: { min: 14, opt: 21, max: 27 },
-        seasons: { winter: 0.30, spring: 0.70, summer: 0.90, autumn: 0.60 },
-        activity: "DAY",
-        pressureSensitivity: 0.25,
-        wavePref: 0.3,
-        clarityPref: "CLEAR",
-        currentPref: 0.3,
-        salinityPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 1, opt: 10, max: 30 },
-        advice: { bait: "Ekmek, Kurt", lure: "Micro Jig", rig: "Şamandıra", hook: "No:10-14", baitEn: "Bread, worm", lureEn: "Micro jig", rigEn: "Float", hookEn: "No:10-14" },
-        legalSize: "-",
-        note: "Sığ ve berrak suyu sever.",
-        noteEn: "Prefers shallow and clear water."
-    },
     "yilan_baligi": {
         name: "Yılan Balığı", nameEn: "European Eel", icon: "🐍", scientificName: "Anguilla anguilla",
         photoId: 82,
@@ -1995,10 +1845,10 @@ const SPECIES_DB = {
         note: "Keskin dişleri vardır, çelik tel gerektirir. Sürü halinde gezer.",
         noteEn: "Sharp teeth, requires wire leader. Schools."
     },
-    "mahi_mahi": {
+    "florida_mahi_mahi": {
         name: "Lambuka/Mahi Mahi", nameEn: "Dolphin Fish", icon: "🐠", scientificName: "Coryphaena hippurus",
         photoId: 110, category: "PELAJIK",
-        isGlobal: true,
+        isGlobal: false,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
         tempRange: { min: 22, opt: 28, max: 32 },
         seasons: { winter: 0.3, spring: 0.8, summer: 0.9, autumn: 0.6 },
@@ -3773,7 +3623,7 @@ const SPECIES_DB = {
     "sverdfisk": {
         name: "Sverdfisk", nameEn: "Swordfish", icon: "🐟", scientificName: "Xiphias gladius",
         photoId: 347, category: "PELAJIK_AVCI",
-        isGlobal: true,
+        isGlobal: false,
         peakHours: "NIGHT", peakHoursDesc: "Gece yüzeye yakın",
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.0, spring: 0.1, summer: 0.9, autumn: 0.3 },
@@ -3944,20 +3794,6 @@ const SPECIES_DB = {
         noteEn: "The largest and tastiest of the whiting family. Recognized by its spotted back."
     },
     "tailor": {
-        name: "Tailor", nameEn: "Tailor / Bluefish", icon: "🐟", scientificName: "Pomatomus saltatrix",
-        photoId: 410, category: "SÜRÜ",
-        isGlobal: true,
-        peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak ve akşam yüzey",
-        tempRange: { min: 14, opt: 20, max: 26 },
-        seasons: { winter: 0.4, spring: 0.6, summer: 0.8, autumn: 0.9 },
-        activity: "DAWN_DUSK", pressureSensitivity: 0.5, wavePref: 0.6, clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: -44.0, lon1: 112.0, lat2: -10.0, lon2: 154.0, name: "Avustralya" }],
-        depth: { min: 0, opt: 5, max: 30 },
-        advice: { bait: "Uskumru/Sardalya Parçası", lure: "Metal Jig, Popper", rig: "Spinning with Wire", hook: "1/0 - 3/0", baitEn: "Mackerel/Sardine chunk", lureEn: "Metal jig, popper", rigEn: "Spinning with wire", hookEn: "1/0 - 3/0" },
-        note: "Türkiye'deki Lüfer'in yakın akrabasıdır. Çok agresif sürüler oluşturur ve misinaları keser.",
-        noteEn: "Close relative of the Bluefish (Lüfer). Forms very aggressive schools and known for cutting lines."
-    },
-"tailor": {
         name: "Tailor", nameEn: "Tailor / Bluefish", icon: "🐟", scientificName: "Pomatomus saltatrix",
         photoId: 410, category: "SÜRÜ",
         isGlobal: true,
@@ -4219,10 +4055,10 @@ const SPECIES_DB = {
         note: "Kıyıdan yakalanabilen en popüler tuna türüdür. Mavi yüzgeçli orkinosa göre daha küçük ama çok hızlıdır.",
         noteEn: "The most popular tuna targeted from the coast. Smaller than bluefin but exceptionally fast."
     },
-    "mahi_mahi": {
+    "aus_mahi_mahi": {
         name: "Mahi Mahi", nameEn: "Dolphin Fish", icon: "🐟", scientificName: "Coryphaena hippurus",
         photoId: 429, category: "PELAJIK_AVCI",
-        isGlobal: true,
+        isGlobal: false,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.95, autumn: 0.6 },
@@ -4234,20 +4070,6 @@ const SPECIES_DB = {
         noteEn: "Famous for its vibrant color changes when caught. The fastest-growing fish in the ocean."
     },
     "wahoo": {
-        name: "Wahoo", nameEn: "Wahoo", icon: "🐟", scientificName: "Acanthocybium solandri",
-        photoId: 430, category: "PELAJIK_AVCI",
-        isGlobal: true,
-        peakHours: "DAWN", peakHoursDesc: "Şafak vakti açık deniz yüzey",
-        tempRange: { min: 22, opt: 26, max: 30 },
-        seasons: { winter: 0.2, spring: 0.5, summer: 0.9, autumn: 0.7 },
-        activity: "DAY", pressureSensitivity: 0.7, wavePref: 0.5, clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: -35.0, lon1: 112.0, lat2: -10.0, lon2: 154.0, name: "Avustralya" }],
-        depth: { min: 0, opt: 10, max: 150 },
-        advice: { bait: "Balık (Hızlı Trolling)", lure: "High Speed Minnow", rig: "Wire Trace Trolling", hook: "6/0 - 9/0", baitEn: "Fish (high speed trolling)", lureEn: "High speed minnow", rigEn: "Wire trace trolling", hookEn: "6/0 - 9/0" },
-        note: "Okyanusun mermisidir. 80 km/s hıza ulaşabilir. Keskin dişleri için çelik tel (wire trace) şarttır.",
-        noteEn: "The bullet of the ocean. Can reach speeds of 80 km/h. Wire trace is essential for its sharp teeth."
-    },
-"wahoo": {
         name: "Wahoo", nameEn: "Wahoo", icon: "🐟", scientificName: "Acanthocybium solandri",
         photoId: 430, category: "PELAJIK_AVCI",
         isGlobal: true,
@@ -4393,19 +4215,6 @@ const SPECIES_DB = {
         note: "Eşsiz puantiyeli deseniyle tanınır. Çok yavaş büyür ve akvaryumcular arasında da popülerdir.",
         noteEn: "Recognized by its unique polka-dot pattern. Grows slowly and is popular in the aquarium trade."
     },
-"barramundi_cod": {
-        name: "Barramundi Cod", nameEn: "Barramundi Cod", icon: "🐟", scientificName: "Cromileptes altivelis",
-        photoId: 440, category: "KAYALIK",
-        peakHours: "DAY", peakHoursDesc: "Gündüz sığ mercan resifleri",
-        tempRange: { min: 24, opt: 28, max: 32 },
-        seasons: { winter: 0.6, spring: 0.8, summer: 0.9, autumn: 0.7 },
-        activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.2, clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: -25.0, lon1: 112.0, lat2: -10.0, lon2: 154.0, name: "Avustralya (Tropik)" }],
-        depth: { min: 2, opt: 15, max: 40 },
-        advice: { bait: "Küçük Balık, Karides", lure: "Soft Plastic, Slow Jig", rig: "Bottom Rig", hook: "4/0 - 6/0", baitEn: "Small fish, shrimp", lureEn: "Soft plastic, slow jig", rigEn: "Bottom rig", hookEn: "4/0 - 6/0" },
-        note: "Eşsiz puantiyeli deseniyle tanınır. Çok yavaş büyür ve akvaryumcular arasında da popülerdir.",
-        noteEn: "Recognized by its unique polka-dot pattern. Grows slowly and is popular in the aquarium trade."
-    },
     "black_marlin": {
         name: "Black Marlin", nameEn: "Black Marlin", icon: "🐟", scientificName: "Istiompax indica",
         photoId: 441, category: "PELAJIK_AVCI",
@@ -4515,7 +4324,7 @@ const SPECIES_DB = {
     "swordfish_aus": {
         name: "Broadbill Swordfish", nameEn: "Broadbill Swordfish", icon: "🐟", scientificName: "Xiphias gladius",
         photoId: 449, category: "DERİN",
-        isGlobal: true,
+        isGlobal: false,
         peakHours: "NIGHT", peakHoursDesc: "Gece yüzey / Gündüz çok derin",
         tempRange: { min: 12, opt: 18, max: 26 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.8, autumn: 0.9 },
@@ -6206,7 +6015,7 @@ const SPECIES_DB = {
     "med_swordfish": {
         name: "Kılıç Balığı", nameEn: "Swordfish", icon: "🐟", scientificName: "Xiphias gladius",
         photoId: 715, category: "PELAJIK_AVCI",
-        isGlobal: true,
+        isGlobal: false,
         peakHours: "NIGHT", peakHoursDesc: "Gece açık deniz yüzeye yakın",
         tempRange: { min: 14, opt: 19, max: 25 },
         seasons: { winter: 0.2, spring: 0.5, summer: 0.9, autumn: 0.8 },
@@ -7053,19 +6862,6 @@ const SPECIES_DB = {
         note: "Brezilya'da 'Pargo' olarak bilinir. Canlı kırmızı rengi ve muazzam etiyle en popüler sofralık balıktır.",
         noteEn: "Known as 'Pargo' in Brazil. The most popular commercial fish due to its bright red color and premium meat."
     },
-"brazil_southern_red_snapper": {
-        name: "Pargo / Kırmızı Mercan", nameEn: "Southern Red Snapper", icon: "🐟", scientificName: "Lutjanus purpureus",
-        photoId: 820, category: "KAYALIK",
-        peakHours: "DAY", peakHoursDesc: "Gündüz orta derinlikteki resifler",
-        tempRange: { min: 18, opt: 24, max: 29 },
-        seasons: { winter: 0.4, spring: 0.6, summer: 0.9, autumn: 0.8 },
-        activity: "DAY", pressureSensitivity: 0.5, wavePref: 0.3, clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: -35.0, lon1: -55.0, lat2: 5.0, lon2: -30.0, name: "Brezilya Kıyıları" }],
-        depth: { min: 20, opt: 50, max: 150 },
-        advice: { bait: "Karides, Balık Eti", lure: "Yok", rig: "Bottom Rig", hook: "4/0 - 6/0", baitEn: "Shrimp, fish meat", lureEn: "None", rigEn: "Bottom rig", hookEn: "4/0 - 6/0" },
-        note: "Brezilya'da 'Pargo' olarak bilinir. Canlı kırmızı rengi ve muazzam etiyle en popüler sofralık balıktır.",
-        noteEn: "Known as 'Pargo' in Brazil. The most popular commercial fish due to its bright red color and premium meat."
-    },
     "brazil_mutton_snapper": {
         name: "Cioba / Mutton Snapper", nameEn: "Mutton Snapper", icon: "🐟", scientificName: "Lutjanus analis",
         photoId: 821, category: "KUM_TABAN",
@@ -7188,20 +6984,6 @@ const SPECIES_DB = {
         noteEn: "Identified by yellow fins and blue spots around eyes. Juveniles inhabit mangroves."
     },
     "brazil_hogfish": {
-        name: "Bodião-papagaio", nameEn: "Brazilian Hogfish", icon: "🐟", scientificName: "Lachnolaimus maximus",
-        photoId: 830, category: "KAYALIK",
-        isGlobal: true,
-        peakHours: "DAY", peakHoursDesc: "Gündüz sığ ve orta derinlikte resifler",
-        tempRange: { min: 20, opt: 25, max: 29 },
-        seasons: { winter: 0.4, spring: 0.6, summer: 0.9, autumn: 0.8 },
-        activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.3, clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: -35.0, lon1: -55.0, lat2: 5.0, lon2: -30.0, name: "Brezilya Kıyıları" }],
-        depth: { min: 5, opt: 20, max: 50 },
-        advice: { bait: "Yengeç, Karides, Sülünez", lure: "Yok", rig: "Bottom Rig", hook: "2/0 - 4/0", baitEn: "Crab, shrimp, razor clam", lureEn: "None", rigEn: "Bottom rig", hookEn: "2/0 - 4/0" },
-        note: "Tuhaf yüz yapısı ve uzun sırt yüzgeçleriyle tanınır. Eti olağanüstü lezzetlidir.",
-        noteEn: "Recognized by its unique face and long dorsal spines. Features exceptionally tasty meat."
-    },
-"brazil_hogfish": {
         name: "Bodião-papagaio", nameEn: "Brazilian Hogfish", icon: "🐟", scientificName: "Lachnolaimus maximus",
         photoId: 830, category: "KAYALIK",
         isGlobal: true,
@@ -7492,21 +7274,7 @@ const SPECIES_DB = {
         name: "Tubarão-lixa", nameEn: "Nurse Shark", icon: "🦈", scientificName: "Ginglymostoma cirratum",
         photoId: 850, category: "KAYALIK",
         isGlobal: true,
-        peakHours: "NIGHT", peakHoursDesc: "Gece sığ resifler ve kumluklar",
-        tempRange: { min: 20, opt: 26, max: 32 },
-        seasons: { winter: 0.5, spring: 0.6, summer: 0.9, autumn: 0.8 },
-        activity: "NIGHT", pressureSensitivity: 0.4, wavePref: 0.2, clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: -35.0, lon1: -55.0, lat2: 5.0, lon2: -30.0, name: "Brezilya Kıyıları" }],
-        depth: { min: 1, opt: 15, max: 60 },
-        advice: { bait: "Balık Kafası, Kalamar, Yengeç", lure: "Yok", rig: "Heavy Bottom Rig", hook: "6/0 - 9/0", baitEn: "Fish head, squid, crab", lureEn: "None", rigEn: "Heavy bottom rig", hookEn: "6/0 - 9/0" },
-        note: "Brezilya kıyılarının uysal devidir. Gündüzleri mağaralarda dinlenir, geceleri kumun üzerinde avlanır.",
-        noteEn: "The gentle giant of the Brazilian coast. Rests in caves by day and hunts on the sand at night."
-    },
-"brazil_nurse_shark": {
-        name: "Tubarão-lixa", nameEn: "Nurse Shark", icon: "🦈", scientificName: "Ginglymostoma cirratum",
-        photoId: 850, category: "KAYALIK",
-        isGlobal: true,
-        peakHours: "NIGHT", peakHoursDesc: "Gece sığ resifler ve kumluklar",
+        peakHours: "NIGHT", peakHoursDesc: "Gece sığ resifler and kumluklar",
         tempRange: { min: 20, opt: 26, max: 32 },
         seasons: { winter: 0.5, spring: 0.6, summer: 0.9, autumn: 0.8 },
         activity: "NIGHT", pressureSensitivity: 0.4, wavePref: 0.2, clarityPref: "ANY",
@@ -9309,7 +9077,7 @@ const SPECIES_DB = {
     "safrica_swordfish": {
         name: "Kılıç Balığı", nameEn: "Broadbill Swordfish", icon: "🐟", scientificName: "Xiphias gladius",
         photoId: 1123, category: "PELAJIK_AVCI",
-        isGlobal: true,
+        isGlobal: false,
         peakHours: "NIGHT", peakHoursDesc: "Gece açık deniz üst katmanlar",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.8, spring: 0.7, summer: 0.6, autumn: 0.9 },
@@ -10116,7 +9884,7 @@ const SPECIES_DB = {
         note: "Yaz aylarında BAE açıklarında en çok aranan balıktır. Muhteşem renkleri ve lezzetiyle ünlüdür.",
         noteEn: "The most sought-after fish in UAE waters during summer. Famous for its stunning colors and taste."
     },
-    "uae_king_mackerel_v2": {
+    "uae_king_mackerel": {
         name: "Kral Balığı / Kingfish", nameEn: "King Mackerel", icon: "🐟", scientificName: "Scomberomorus commerson",
         photoId: 1228, category: "PELAJIK_AVCI",
         isGlobal: true,
@@ -10212,21 +9980,7 @@ const SPECIES_DB = {
         note: "Füceyre açıklarındaki en güçlü topwater avıdır. İnanılmaz bir güce sahiptir.",
         noteEn: "The strongest topwater target off Fujairah. Possesses incredible power."
     },
-    "uae_bluefin_trevally_v2": {
-        name: "Mavi Yüzgeçli Akya", nameEn: "Bluefin Trevally", icon: "🐟", scientificName: "Caranx melampygus",
-        photoId: 1234, category: "KAYALIK",
-        isGlobal: true,
-        peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
-        tempRange: { min: 25, opt: 29, max: 34 },
-        seasons: { winter: 0.7, spring: 0.8, summer: 0.95, autumn: 0.9 },
-        activity: "DAY", pressureSensitivity: 0.3, wavePref: 0.2, clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 22.0, lon1: 51.0, lat2: 27.0, lon2: 57.0, name: "Birleşik Arap Emirlikleri & Körfez" }],
-        depth: { min: 1, opt: 10, max: 50 },
-        advice: { bait: "Küçük Balık", lure: "Small Popper, Spoon", rig: "Spinning", hook: "2/0 - 4/0", baitEn: "Small fish", lureEn: "Small popper, spoon", rigEn: "Spinning", hookEn: "2/0 - 4/0" },
-        note: "Körfez'in doğu kıyısında (Musandam sınırı) çok popülerdir. Renkleri muazzamdır.",
-        noteEn: "Very popular on the east coast of the Gulf (near Musandam border). Colors are stunning."
-    },
-    "uae_bigeye_trevally_v2": {
+    "uae_bigeye_trevally": {
         name: "Kocagöz Akya", nameEn: "Bigeye Trevally", icon: "🐟", scientificName: "Caranx sexfasciatus",
         photoId: 1235, category: "KIYI_AVCI",
         isGlobal: true,
@@ -10240,7 +9994,7 @@ const SPECIES_DB = {
         note: "Geceleri sürüler halinde avlanır. Işığa duyarlı kocaman gözleri vardır.",
         noteEn: "Hunts in schools at night. Has large light-sensitive eyes."
     },
-    "uae_yellow_spotted_trevally_v2": {
+    "uae_yellow_spotted_trevally": {
         name: "Sarı Benekli Akya", nameEn: "Yellow-spotted Trevally", icon: "🐟", scientificName: "Carangoides fulvoguttatus",
         photoId: 1236, category: "KUM_TABAN",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk kanyonlar",
@@ -10253,7 +10007,7 @@ const SPECIES_DB = {
         note: "BAE sularında 'Jesh' ailesinin bir üyesi olarak bilinir. Kumluk alanlarda beslenir.",
         noteEn: "Known as a member of the 'Jesh' family in UAE waters. Feeds in sandy areas."
     },
-    "uae_bludger_trevally_v2": {
+    "uae_bludger_trevally": {
         name: "Gümüş Akya", nameEn: "Bludger Trevally", icon: "🐟", scientificName: "Carangoides gymnostethus",
         photoId: 1237, category: "PELAJIK_AVCI",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin resif kenarları",
@@ -10266,7 +10020,7 @@ const SPECIES_DB = {
         note: "Daha derin suları tercih eder. BAE'nin derin batıklarında sıkça rastlanır.",
         noteEn: "Prefers deeper waters. Frequently encountered in the deep wrecks of the UAE."
     },
-    "uae_greater_amberjack_v2": {
+    "uae_greater_amberjack": {
         name: "Büyük Akya", nameEn: "Greater Amberjack", icon: "🐟", scientificName: "Seriola dumerili",
         photoId: 1238, category: "PELAJIK_AVCI",
         isGlobal: true,
@@ -11255,7 +11009,7 @@ const SPECIES_DB = {
     "nz_swordfish": {
         name: "Kılıç Balığı (NZ)", nameEn: "Broadbill Swordfish", icon: "🐟", scientificName: "Xiphias gladius",
         photoId: 1423, category: "DERİN",
-        isGlobal: true,
+        isGlobal: false,
         peakHours: "NIGHT", peakHoursDesc: "Gece yüzeyde, Gündüz çok derin su",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -11291,19 +11045,6 @@ const SPECIES_DB = {
         advice: { bait: "Balık Parçası", lure: "Chrome Spoon, Shiny Jig", rig: "Spinning / Wire Trace", hook: "4/0 - 6/0", baitEn: "Fish piece", lureEn: "Chrome spoon, shiny jig", rigEn: "Spinning / wire trace", hookEn: "4/0 - 6/0" },
         note: "Çok keskin dişleri vardır ve takımları kesebilir. Güçlü bir dövüşçüdür.",
         noteEn: "Has razor-sharp teeth and can cut lines. A strong fighter."
-    },
-    "nz_blue_moki_v2": {
-        name: "Mavi Moki (NZ)", nameEn: "Blue Moki", icon: "🐟", scientificName: "Latridopsis ciliaris",
-        photoId: 1426, category: "KAYALIK",
-        peakHours: "DAY", peakHoursDesc: "Gündüz yosunlu kayalıklar",
-        tempRange: { min: 12, opt: 16, max: 20 },
-        seasons: { winter: 0.8, spring: 0.7, summer: 0.4, autumn: 0.9 },
-        activity: "DAY", pressureSensitivity: 0.3, wavePref: 0.5, clarityPref: "ANY",
-        regions: ["NEW_ZEALAND"], habitatBboxes: [{ lat1: -48.0, lon1: 165.0, lat2: -34.0, lon2: 179.0, name: "Yeni Zelanda Kıyıları" }],
-        depth: { min: 5, opt: 20, max: 100 },
-        advice: { bait: "Midye, Yengeç", lure: "Yok", rig: "Bottom Rig", hook: "2/0 - 4/0", baitEn: "Mussel, crab", lureEn: "None", rigEn: "Bottom rig", hookEn: "2/0 - 4/0" },
-        note: "Güney Adası'nda çok popülerdir. Göçmen bir türdür.",
-        noteEn: "Very popular in the South Island. A migratory species."
     },
     "nz_porae": {
         name: "Porae", nameEn: "Porae", icon: "🐟", scientificName: "Nemadactylus douglasii",
@@ -11640,19 +11381,6 @@ const SPECIES_DB = {
         note: "Sonbahar aylarında kıyı balıkçıları için en heyecan verici hedeftir. Çok hızlıdır.",
         noteEn: "The most exciting fall target for shore anglers. Exceptionally fast."
     },
-    "usne_tautog_v2": {
-        name: "Tautog (US NE)", nameEn: "Tautog (Blackfish)", icon: "🐟", scientificName: "Tautoga onitis",
-        photoId: 1614, category: "KAYALIK",
-        peakHours: "DAY", peakHoursDesc: "Gündüz kayalıklar ve batıklar",
-        tempRange: { min: 10, opt: 15, max: 20 },
-        seasons: { winter: 0.3, spring: 0.8, summer: 0.4, autumn: 0.9 },
-        activity: "DAY", pressureSensitivity: 0.5, wavePref: 0.3, clarityPref: "CLEAR",
-        regions: ["USA_NORTHEAST"], habitatBboxes: [{ lat1: 38.0, lon1: -75.0, lat2: 45.0, lon2: -69.0, name: "ABD Kuzeydoğu Kıyıları" }],
-        depth: { min: 5, opt: 15, max: 40 },
-        advice: { bait: "Green Crab, Asian Crab", lure: "Tautog Jig", rig: "Bottom Rig / Snafu Rig", hook: "2/0 - 4/0", baitEn: "Green crab, Asian crab", lureEn: "Tautog jig", rigEn: "Bottom rig / snafu rig", hookEn: "2/0 - 4/0" },
-        note: "Güçlü çenesiyle yengeç kabuklarını kırabilir. Çok inatçı bir savaşçıdır.",
-        noteEn: "Can crush crab shells with its strong jaws. A very stubborn fighter."
-    },
     "usne_cunner": {
         name: "Kuner / Cunner", nameEn: "Cunner (Bergall)", icon: "🐟", scientificName: "Tautogolabrus adspersus",
         photoId: 1615, category: "KAYALIK",
@@ -11829,32 +11557,6 @@ const SPECIES_DB = {
         advice: { bait: "Yok", lure: "Shad Dart, Small Fly", rig: "Light Spinning / Fly Fishing", hook: "4 - 8", baitEn: "None", lureEn: "Shad dart, small fly", rigEn: "Light spinning / fly fishing", hookEn: "4 - 8" },
         note: "US NE tarihinin en önemli balıklarından biridir. Eti ve havyarı çok değerlidir.",
         noteEn: "One of the most important fish in US NE history. Highly valued for meat and roe."
-    },
-    "usne_tautog_v3": {
-        name: "Siyah Balık / Tautog (US NE)", nameEn: "Tautog", icon: "🐟", scientificName: "Tautoga onitis",
-        photoId: 1621, category: "KAYALIK",
-        peakHours: "DAY", peakHoursDesc: "Gündüz kayalıklar ve batıklar",
-        tempRange: { min: 10, opt: 15, max: 20 },
-        seasons: { winter: 0.3, spring: 0.8, summer: 0.4, autumn: 0.9 },
-        activity: "DAY", pressureSensitivity: 0.5, wavePref: 0.3, clarityPref: "CLEAR",
-        regions: ["USA_NORTHEAST"], habitatBboxes: [{ lat1: 38.0, lon1: -75.0, lat2: 45.0, lon2: -69.0, name: "ABD Kuzeydoğu Kıyıları" }],
-        depth: { min: 5, opt: 15, max: 40 },
-        advice: { bait: "Yengeç (Green Crab, Asian Crab)", lure: "Tautog Jig", rig: "Bottom Rig", hook: "2/0 - 4/0", baitEn: "Crab", lureEn: "Tautog jig", rigEn: "Bottom rig", hookEn: "2/0 - 4/0" },
-        note: "Çok inatçı bir balıktır, yakalandığında hemen kayaların içine girer.",
-        noteEn: "A very stubborn fish that immediately dives into rocks when hooked."
-    },
-    "usne_black_sea_bass_v2": {
-        name: "Siyah Deniz Levreği (US NE)", nameEn: "Black Sea Bass", icon: "🐟", scientificName: "Centropristis striata",
-        photoId: 1622, category: "KAYALIK",
-        peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve batıklar",
-        tempRange: { min: 12, opt: 18, max: 24 },
-        seasons: { winter: 0.4, spring: 0.8, summer: 0.9, autumn: 0.7 },
-        activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.3, clarityPref: "ANY",
-        regions: ["USA_NORTHEAST"], habitatBboxes: [{ lat1: 38.0, lon1: -75.0, lat2: 45.0, lon2: -69.0, name: "ABD Kuzeydoğu Kıyıları" }],
-        depth: { min: 10, opt: 25, max: 60 },
-        advice: { bait: "Kalamar, Midye", lure: "Metal Jig, Slow Jig", rig: "High-Low Rig", hook: "1/0 - 3/0", baitEn: "Squid, clam", lureEn: "Metal jig, slow jig", rigEn: "High-low rig", hookEn: "1/0 - 3/0" },
-        note: "US NE mutfağının en sevilen balıklarından biridir.",
-        noteEn: "One of the most favorite table fish in US NE cuisine."
     },
     "usne_pollock": {
         name: "Atlantik Mezgit / Pollock", nameEn: "Pollock", icon: "🐟", scientificName: "Pollachius virens",
@@ -12115,20 +11817,6 @@ const SPECIES_DB = {
         note: "NZ'nin en ikonik derin su balığıdır. Eti muazzam değerlidir.",
         noteEn: "NZ's most iconic deep-water fish. Flesh is exceptionally valuable."
     },
-    "nz_john_dory_v2": {
-        name: "Dülger Balığı (NZ)", nameEn: "John Dory (Kuparu)", icon: "🐟", scientificName: "Zeus faber",
-        photoId: 1449, category: "KAYALIK",
-        isGlobal: true,
-        peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve iskele ayakları",
-        tempRange: { min: 14, opt: 18, max: 22 },
-        seasons: { winter: 0.5, spring: 0.8, summer: 0.9, autumn: 0.7 },
-        activity: "DAY", pressureSensitivity: 0.3, wavePref: 0.2, clarityPref: "CLEAR",
-        regions: ["NEW_ZEALAND"], habitatBboxes: [{ lat1: -48.0, lon1: 165.0, lat2: -34.0, lon2: 179.0, name: "Yeni Zelanda Kıyıları" }],
-        depth: { min: 5, opt: 20, max: 100 },
-        advice: { bait: "Canlı Küçük Balık", lure: "Yok", rig: "Light Ledger", hook: "2/0 - 4/0", baitEn: "Live small fish", lureEn: "None", rigEn: "Light ledger", hookEn: "2/0 - 4/0" },
-        note: "Vücudundaki siyah lekenin (St. Peter's mark) onu koruduğuna inanılır.",
-        noteEn: "The black spot on its body (St. Peter's mark) is believed to protect it."
-    },
     "nz_silver_warehou": {
         name: "Gümüş Warehou", nameEn: "Silver Warehou", icon: "🐟", scientificName: "Seriolella punctata",
         photoId: 1450, category: "SÜRÜ",
@@ -12265,19 +11953,6 @@ const SPECIES_DB = {
         advice: { bait: "Lugworm, Mackerel Dilimi", lure: "Yok", rig: "Paternoster Rig", hook: "4 - 2", baitEn: "Lugworm, mackerel strip", lureEn: "None", rigEn: "Paternoster rig", hookEn: "4 - 2" },
         note: "UK kıyılarında en yaygın küçük balıklardan biridir. Çabuk bozulduğu için taze tüketilmelidir.",
         noteEn: "One of the most common small fish on UK shores. Must be eaten very fresh."
-    },
-    "uk_brill_v2": {
-        name: "Çivisiz Kalkan (UK)", nameEn: "Brill", icon: "🐟", scientificName: "Scophthalmus rhombus",
-        photoId: 1535, category: "KUM_TABAN",
-        peakHours: "DAY", peakHoursDesc: "Gündüz kumluk alanlar",
-        tempRange: { min: 8, opt: 14, max: 20 },
-        seasons: { winter: 0.2, spring: 0.6, summer: 0.9, autumn: 0.7 },
-        activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.2, clarityPref: "ANY",
-        regions: ["UNITED_KINGDOM"], habitatBboxes: [{ lat1: 49.0, lon1: -10.0, lat2: 61.0, lon2: 2.0, name: "Birleşik Krallık Kıyıları" }],
-        depth: { min: 10, opt: 25, max: 70 },
-        advice: { bait: "Sandeel, Mackerel Strips", lure: "Yok", rig: "Running Ledger", hook: "2/0 - 4/0", baitEn: "Sandeel, mackerel strips", lureEn: "None", rigEn: "Running ledger", hookEn: "2/0 - 4/0" },
-        note: "Kalkan balığına göre daha ince ve ovaldir, eti benzer kalitededir.",
-        noteEn: "Thinner and more oval than Turbot, but flesh quality is similar."
     },
     "uk_halibut": {
         name: "Atlantik Halibut (UK)", nameEn: "Atlantic Halibut", icon: "🐟", scientificName: "Hippoglossus hippoglossus",
@@ -12469,20 +12144,6 @@ const SPECIES_DB = {
         note: "Kuyruk kökündeki siyah benekle tanınır. LRF için harika bir hedeftir.",
         noteEn: "Recognized by a black spot on the tail base. A great target for LRF."
     },
-    "uk_mackerel_v2": {
-        name: "Uskumru (UK)", nameEn: "Atlantic Mackerel", icon: "🐟", scientificName: "Scomber scombrus",
-        photoId: 1550, category: "SÜRÜ",
-        isGlobal: true,
-        peakHours: "DAY", peakHoursDesc: "Gündüz yüzey katmanları",
-        tempRange: { min: 10, opt: 16, max: 22 },
-        seasons: { winter: 0.05, spring: 0.4, summer: 0.95, autumn: 0.7 },
-        activity: "DAY", pressureSensitivity: 0.2, wavePref: 0.4, clarityPref: "ANY",
-        regions: ["UNITED_KINGDOM"], habitatBboxes: [{ lat1: 49.0, lon1: -10.0, lat2: 61.0, lon2: 2.0, name: "Birleşik Krallık Kıyıları" }],
-        depth: { min: 0, opt: 5, max: 50 },
-        advice: { bait: "Gümüş Balığı Parçası", lure: "Mackerel Feathers / Sabiki", rig: "Spinning / Feathering", hook: "1/0 - 3/0", baitEn: "Silver fish piece", lureEn: "Mackerel feathers / sabiki", rigEn: "Spinning / feathering", hookEn: "1/0 - 3/0" },
-        note: "UK yaz balıkçılığının temelidir. Binlerce kişilik sürüler halinde kıyıya yaklaşırlar.",
-        noteEn: "The staple of UK summer fishing. Approaches the shore in massive schools."
-    },
     "usne_white_hake": {
         name: "Beyaz Mezgit / White Hake", nameEn: "White Hake", icon: "🐟", scientificName: "Urophycis tenuis",
         photoId: 1624, category: "DIP",
@@ -12508,19 +12169,6 @@ const SPECIES_DB = {
         advice: { bait: "Spearing, Kalamar", lure: "Yok", rig: "High-Low Rig", hook: "1/0 - 3/0", baitEn: "Spearing, squid", lureEn: "None", rigEn: "High-low rig", hookEn: "1/0 - 3/0" },
         note: "Genellikle 'Ling' olarak adlandırılır. Uzun bir sırt yüzgeci teli vardır.",
         noteEn: "Commonly referred to as 'Ling'. Features a long filament on the first dorsal fin."
-    },
-    "usne_summer_flounder_v2": {
-        name: "Yaz Dil Balığı / Fluke (US NE)", nameEn: "Summer Flounder", icon: "🐟", scientificName: "Paralichthys dentatus",
-        photoId: 1626, category: "KUM_TABAN",
-        peakHours: "DAY", peakHoursDesc: "Gündüz kum kanalları ve yamaçlar",
-        tempRange: { min: 14, opt: 20, max: 26 },
-        seasons: { winter: 0.1, spring: 0.6, summer: 0.95, autumn: 0.5 },
-        activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.3, clarityPref: "CLEAR",
-        regions: ["USA_NORTHEAST"], habitatBboxes: [{ lat1: 38.0, lon1: -75.0, lat2: 45.0, lon2: -69.0, name: "ABD Kuzeydoğu Kıyıları" }],
-        depth: { min: 2, opt: 15, max: 60 },
-        advice: { bait: "Live Snapper Blue, Squid/Minnow Combo", lure: "Bucktail Jig with Gulp", rig: "Fluke Rig (Drifting)", hook: "3/0 - 5/0", baitEn: "Live snapper blue, squid/minnow combo", lureEn: "Bucktail jig with Gulp", rigEn: "Fluke rig", hookEn: "3/0 - 5/0" },
-        note: "Gözleri sol taraftadır ve büyük, keskin dişleri vardır. Aktif bir avcıdır.",
-        noteEn: "Eyes are on the left side and it has large, sharp teeth. An active predator."
     },
     "usne_windowpane": {
         name: "Pencere Camı Balığı", nameEn: "Windowpane Flounder", icon: "🐟", scientificName: "Scophthalmus aquosus",
@@ -12739,7 +12387,7 @@ const SPECIES_DB = {
         note: "US NE derin deniz balıkçılığının en büyük ödülüdür.",
         noteEn: "The ultimate prize of US NE deep-sea fishing."
     },
-    "usne_mahimahi_v2": {
+    "usne_mahimahi": {
         name: "Mahi Mahi (US NE)", nameEn: "Mahi Mahi (Dolphin)", icon: "🐟", scientificName: "Coryphaena hippurus",
         photoId: 1643, category: "PELAJIK_AVCI",
         isGlobal: true,
