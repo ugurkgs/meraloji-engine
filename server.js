@@ -499,13 +499,28 @@ async function fetchSubstrate(lat, lon) {
     const maxLon = (parseFloat(lonR) + delta).toFixed(4);
     const maxLat = (parseFloat(latR) + delta).toFixed(4);
 
-    const wmsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/ows` +
-        `?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
-        `&LAYERS=eusm2025_subs_full&QUERY_LAYERS=eusm2025_subs_full` +
-        `&INFO_FORMAT=text/html` +
-        `&CRS=CRS:84` +
-        `&BBOX=${minLon},${minLat},${maxLon},${maxLat}` +
-        `&WIDTH=101&HEIGHT=101&I=50&J=50&FEATURE_COUNT=1`;
+    const isUS = parseFloat(lonR) < -60;
+    let wmsUrl = "";
+
+    if (isUS) {
+        // 🇺🇸 NOAA Seabed Descriptions (US East/West Coast)
+        wmsUrl = `https://www.ngdc.noaa.gov/geoserv/rest/services/marine_geology/seabed_descriptions/MapServer/WmsServer` +
+            `?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
+            `&LAYERS=0&QUERY_LAYERS=0` +
+            `&INFO_FORMAT=text/html` +
+            `&CRS=EPSG:4326` +
+            `&BBOX=${minLat},${minLon},${maxLat},${maxLon}` +
+            `&WIDTH=101&HEIGHT=101&I=50&J=50&FEATURE_COUNT=1`;
+    } else {
+        // 🇪🇺 EMODnet Seabed Habitats (Europe/Global)
+        wmsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/ows` +
+            `?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
+            `&LAYERS=eusm2025_subs_full&QUERY_LAYERS=eusm2025_subs_full` +
+            `&INFO_FORMAT=text/html` +
+            `&CRS=CRS:84` +
+            `&BBOX=${minLon},${minLat},${maxLon},${maxLat}` +
+            `&WIDTH=101&HEIGHT=101&I=50&J=50&FEATURE_COUNT=1`;
+    }
 
     try {
         const res = await fetchWithTimeout(wmsUrl, 10000);
@@ -581,12 +596,21 @@ function parseSubstrateFromHtml(html) {
         if (!val || val === 'null' || /^\d+(\.\d+)?$/.test(val)) continue;
         const s = eunisCategoryToSubstrate(val);
         if (s) {
-            console.log(`[SUBSTRATE] scan match: "${val}" → ${s}`);
             return s;
         }
     }
 
-    console.log(`[SUBSTRATE] parse failed, raw text: ${html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200)}`);
+    // NOAA/ArcGIS Fallback: "Sand", "Mud", "Rock", "Shell" kelimelerini doğrudan ara
+    const textOnly = html.replace(/<[^>]+>/g, ' ');
+    if (/sand/i.test(textOnly)) return 'SAND';
+    if (/rock/i.test(textOnly) || /hard/i.test(textOnly)) return 'ROCK';
+    if (/mud/i.test(textOnly) || /clay/i.test(textOnly) || /silt/i.test(textOnly)) return 'MUD';
+    if (/shell/i.test(textOnly) || /coral/i.test(textOnly)) return 'MIXED';
+
+    // Boş tablo ise (GeoServer/ArcGIS header var ama veri yok) sessizce null dön
+    if (html.includes('table.featureInfo') || html.includes('Geoserver GetFeatureInfo output')) return null;
+
+    console.log(`[SUBSTRATE] no match: ${textOnly.replace(/\s+/g, ' ').trim().slice(0, 100)}...`);
     return null;
 }
 
@@ -4161,12 +4185,12 @@ async function _fetchBathymetryBase(lat, lon, timeoutMs = 5000) {
             const maxL = (lonNum + delta).toFixed(4);
             const maxA = (latNum + delta).toFixed(4);
             
-            // DÜZELTME: GEBCO katman isimleri ve parametreleri daha standart hale getirildi
+            // DÜZELTME: WMS 1.3.0 ve CRS:84 ile daha stabil global sorgu
             url = `https://wms.gebco.net/mapserv?` +
-                  `SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo` +
+                  `SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
                   `&LAYERS=GEBCO_LATEST&QUERY_LAYERS=GEBCO_LATEST` +
-                  `&BBOX=${minL},${minA},${maxL},${maxA}` +
-                  `&WIDTH=101&HEIGHT=101&X=50&Y=50&SRS=EPSG:4326&INFO_FORMAT=text/plain&STYLES=`;
+                  `&BBOX=${minA},${minL},${maxA},${maxL}` + 
+                  `&WIDTH=101&HEIGHT=101&I=50&J=50&CRS=EPSG:4326&INFO_FORMAT=text/plain&STYLES=`;
         }
 
         const res = await fetch(url, { signal: controller.signal });
