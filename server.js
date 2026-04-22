@@ -503,8 +503,8 @@ async function fetchSubstrate(lat, lon) {
     let wmsUrl = "";
 
     if (isUS) {
-        // 🇺🇸 NOAA Seabed Descriptions (US East/West Coast)
-        wmsUrl = `https://www.ngdc.noaa.gov/geoserv/rest/services/marine_geology/seabed_descriptions/MapServer/WmsServer` +
+        // 🇺🇸 NOAA NOS Seabed Descriptions (US Coast)
+        wmsUrl = `https://www.ngdc.noaa.gov/geoserv/rest/services/marine_geology/nos_seabed_descriptions/MapServer/WmsServer` +
             `?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
             `&LAYERS=0&QUERY_LAYERS=0` +
             `&INFO_FORMAT=text/html` +
@@ -4185,12 +4185,12 @@ async function _fetchBathymetryBase(lat, lon, timeoutMs = 5000) {
             const maxL = (lonNum + delta).toFixed(4);
             const maxA = (latNum + delta).toFixed(4);
             
-            // DÜZELTME: WMS 1.3.0 ve CRS:84 ile daha stabil global sorgu
+            // DÜZELTME: CRS:84 ile Boylam, Enlem (Lon, Lat) sırası garantiye alındı
             url = `https://wms.gebco.net/mapserv?` +
                   `SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
                   `&LAYERS=GEBCO_LATEST&QUERY_LAYERS=GEBCO_LATEST` +
-                  `&BBOX=${minA},${minL},${maxA},${maxL}` + 
-                  `&WIDTH=101&HEIGHT=101&I=50&J=50&CRS=EPSG:4326&INFO_FORMAT=text/plain&STYLES=`;
+                  `&BBOX=${minL},${minA},${maxL},${maxA}` + 
+                  `&WIDTH=101&HEIGHT=101&I=50&J=50&CRS=CRS:84&INFO_FORMAT=text/plain&STYLES=`;
         }
 
         const res = await fetch(url, { signal: controller.signal });
