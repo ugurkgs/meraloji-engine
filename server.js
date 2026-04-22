@@ -503,10 +503,10 @@ async function fetchSubstrate(lat, lon) {
     let wmsUrl = "";
 
     if (isUS) {
-        // 🇺🇸 NOAA ArcGIS REST API (WMS'den daha kararlı)
-        wmsUrl = `https://www.ngdc.noaa.gov/geoserv/rest/services/marine_geology/nos_seabed_descriptions/MapServer/0/query` +
+        // 🇺🇸 NOAA ArcGIS REST API (nos_seabed_dynamic — kesin adres)
+        wmsUrl = `https://gis.ngdc.noaa.gov/arcgis/rest/services/web_mercator/nos_seabed_dynamic/MapServer/0/query` +
             `?geometry=${lonR},${latR}&geometryType=esriGeometryPoint&inSR=4326` +
-            `&spatialRel=esriSpatialRelIntersects&outFields=DESCRIPT,PRIMARY_LITHOLOGY&returnGeometry=false&f=pjson`;
+            `&spatialRel=esriSpatialRelIntersects&outFields=DESCRP,PRIMARY_LITHOLOGY&returnGeometry=false&f=pjson`;
     } else {
         // 🇪🇺 EMODnet Seabed Habitats (Europe/Global)
         wmsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/ows` +
@@ -530,7 +530,7 @@ async function fetchSubstrate(lat, lon) {
             // ArcGIS JSON parse
             const data = await res.json();
             const feat = data.features?.[0]?.attributes;
-            const rawVal = feat ? (feat.DESCRIPT || feat.PRIMARY_LITHOLOGY || "") : "";
+            const rawVal = feat ? (feat.DESCRP || feat.PRIMARY_LITHOLOGY || "") : "";
             const substrate = parseSubstrateFromHtml(rawVal); // Mevcut regexleri kullanabilir
             console.log(`[SUBSTRATE-US] (${latR},${lonR}) → ${rawVal} → ${substrate}`);
             substrateCache.set(ck, substrate);
@@ -4192,10 +4192,10 @@ async function _fetchBathymetryBase(lat, lon, timeoutMs = 5000) {
             const maxL = (lonNum + delta).toFixed(4);
             const maxA = (latNum + delta).toFixed(4);
             
-            // DÜZELTME: GEBCO 1.1.1 ve SRS=EPSG:4326 kombinasyonu en kararlı olanıdır
+            // DÜZELTME: GEBCO_LATEST_2 sorgulanabilir (queryable) olan tek katmandır.
             url = `https://wms.gebco.net/mapserv?` +
                   `SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo` +
-                  `&LAYERS=GEBCO_LATEST&QUERY_LAYERS=GEBCO_LATEST` +
+                  `&LAYERS=GEBCO_LATEST_2&QUERY_LAYERS=GEBCO_LATEST_2` +
                   `&BBOX=${minL},${minA},${maxL},${maxA}` +
                   `&WIDTH=101&HEIGHT=101&X=50&Y=50&SRS=EPSG:4326&INFO_FORMAT=text/plain&STYLES=`;
         }
