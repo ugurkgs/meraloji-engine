@@ -503,10 +503,11 @@ async function fetchSubstrate(lat, lon) {
     let wmsUrl = "";
 
     if (isUS) {
-        // 🇺🇸 NOAA ArcGIS REST API (nos_seabed_dynamic — kesin adres)
+        // 🇺🇸 NOAA ArcGIS REST API (Kesin çalışan parametre sırası ve inSR=4326)
         wmsUrl = `https://gis.ngdc.noaa.gov/arcgis/rest/services/web_mercator/nos_seabed_dynamic/MapServer/0/query` +
-            `?geometry=${lonR},${latR}&geometryType=esriGeometryPoint&inSR=4326` +
-            `&spatialRel=esriSpatialRelIntersects&distance=50000&units=esriSRUnit_Meter&outFields=DESCRP,PRIMARY_LITHOLOGY&returnGeometry=false&f=pjson`;
+            `?inSR=4326&geometryType=esriGeometryPoint&geometry=${lonR},${latR}` +
+            `&spatialRel=esriSpatialRelIntersects&distance=50000&units=esriSRUnit_Meter` +
+            `&outFields=DESCRP,PRIMARY_LITHOLOGY&returnGeometry=false&f=pjson`;
     } else {
         // 🇪🇺 EMODnet Seabed Habitats (Europe/Global)
         wmsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/ows` +
@@ -602,14 +603,20 @@ function parseSubstrateFromHtml(html) {
     if (/mud/i.test(textOnly) || /clay/i.test(textOnly) || /silt/i.test(textOnly)) return 'MUD';
     if (/shell/i.test(textOnly) || /coral/i.test(textOnly) || /gravel/i.test(textOnly)) return 'MIXED';
 
-    // NOAA Kısaltmaları
+    // NOAA Kısaltmaları (SD=Sand, R=Rock, M=Mud, Sh=Shell vb.)
     const words = textOnly.split(/[\s,;]+/);
     for (const w of words) {
         const up = w.toUpperCase();
-        if (up === 'S') return 'SAND';
+        if (up === 'S' || up === 'SD') return 'SAND';
         if (up === 'R' || up === 'ST' || up === 'H') return 'ROCK';
-        if (up === 'M' || up === 'SI' || up === 'CL') return 'MUD';
-        if (up === 'SH' || up === 'CO' || up === 'G') return 'MIXED';
+        if (up === 'M' || up === 'SI' || up === 'CL' || up === 'OZ') return 'MUD';
+        if (up === 'SH' || up === 'CO' || up === 'G' || up === 'P' || up === 'GY') {
+             // GY genelde Gray demektir ama Sand ile beraber gelir (SD,GY)
+             // Eğer metinde Sand yoksa ama GY varsa, genelde Mixed veya Sand kategorisine girer.
+             // Biz 'SD'yi önce kontrol ettiğimiz için sorun yok.
+             if (up === 'G' || up === 'P') return 'MIXED';
+             if (up === 'SH' || up === 'CO') return 'MIXED';
+        }
     }
 
     // Boş tablo ise sessizce null dön
@@ -2892,8 +2899,8 @@ app.get('/api/forecast', async (req, res) => {
         // Weather: past_days=1 → hourly[0-23]=dün, [24-47]=bugün, [48-71]=yarın...
         // Marine:  past_days=7 → hourly[0-167]=geçmiş 7 gün, [168-191]=bugün, [192+]=gelecek
         // Weather hourlyOffset (past_days=1): bugün = indeks 24
-        const hourlyOffset = 24;         // weather için bugünün başlangıcı
-        const marineHourlyOffset = findTodayIndex(marine.hourly.time); // global fonksiyon
+        const utcOffsetSeconds = weather.utc_offset_seconds || 0;
+        const marineHourlyOffset = findTodayIndex(marine.hourly.time, utcOffsetSeconds); 
 
 
         // UTC offset düzeltmesi — sunucu UTC'de çalışır, Open-Meteo yerel saat döner
@@ -3575,12 +3582,16 @@ app.get('/api/fish-search', async (req, res) => {
             return res.json({ error: 'land', message: landReason === 'CERTAIN_LAND' ? 'Burası kara parçası' : (landReason || 'Burası kara parçası') });
         }
 
+        const utcOffsetSeconds = weather.utc_offset_seconds || 0;
+        const localClickHour = Math.floor((Date.now() / 1000 + utcOffsetSeconds) % 86400 / 3600);
+        const correctedClickHour = localClickHour; 
+
         const hourlyOffset = 24;          // weather: past_days=1 → bugün = indeks 24
-        const hourlyIdx = hourlyOffset + clickHour;
+        const hourlyIdx = hourlyOffset + correctedClickHour;
 
         // Marine: past_days=7 → bugünün başlangıcını time dizisinden bul (genellikle 168)
-        const marineHourlyOffset = findTodayIndex(marine.hourly.time);
-        const marineHourlyIdx = marineHourlyOffset + clickHour;
+        const marineHourlyOffset = findTodayIndex(marine.hourly.time, utcOffsetSeconds);
+        const marineHourlyIdx = marineHourlyOffset + correctedClickHour;
 
         const rawWaterTemp = marine.hourly?.sea_surface_temperature?.[marineHourlyIdx];
         const tempWater = safeWaterTemp(rawWaterTemp, regionName, now.getMonth());
@@ -4333,10 +4344,12 @@ async function findNearestSeaPoint(lat, lon) {
 // ─── Marine time dizisinden bugünün başlangıç indeksini bul ──────────────────
 // past_days=7 ile gelen dizide bugün genellikle 168. indekste başlar, ama
 // gün sınırları UTC'ye göre kayabilir — string eşleşmesi kesin çözüm.
-function findTodayIndex(timeArray) {
-    const todayStr = new Date().toISOString().split('T')[0]; // "2026-04-10"
+function findTodayIndex(timeArray, utcOffsetSeconds = 0) {
+    // Sunucu saati (UTC) + yerel fark = koordinatın gerçek yerel zamanı
+    const localTime = new Date(Date.now() + (utcOffsetSeconds * 1000));
+    const todayStr = localTime.toISOString().split('T')[0]; 
     const idx = timeArray.findIndex(t => t.startsWith(todayStr));
-    return idx >= 0 ? idx : 7 * 24; // bulamazsa fallback: 168
+    return idx >= 0 ? idx : 7 * 24; 
 }
 
 // Paylaşılan hava verisiyle tek nokta skoru hesapla (API çağrısı yok)
@@ -4355,12 +4368,16 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         // Marine veri hiç yoksa kara/iç bölge (sadece null/undefined kontrolü, 0 dalga geçerli)
         if (!marine.hourly?.wave_height || marine.hourly.wave_height.length === 0) return null;
 
+        const _utcOff = weather.utc_offset_seconds || 0;
+        const localClickHour = Math.floor((Date.now() / 1000 + _utcOff) % 86400 / 3600);
+        const correctedClickHour = localClickHour;
+
         const hourlyOffset = 24;
-        const hourlyIdx = hourlyOffset + clickHour;
+        const hourlyIdx = hourlyOffset + correctedClickHour;
 
         // Marine: past_days=7 → bugünün başlangıcını time dizisinden bul
-        const marineHourlyOffset = findTodayIndex(marine.hourly.time);
-        const marineHourlyIdx = marineHourlyOffset + clickHour;
+        const marineHourlyOffset = findTodayIndex(marine.hourly.time, _utcOff);
+        const marineHourlyIdx = marineHourlyOffset + correctedClickHour;
 
         const rawWaterTemp = marine.hourly?.sea_surface_temperature?.[marineHourlyIdx];
         const tempWater = safeWaterTemp(rawWaterTemp, regionName, now.getMonth());
