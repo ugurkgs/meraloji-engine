@@ -4135,33 +4135,76 @@ async function fetchCenterWeather(lat, lon) {
     return { weather, marine };
 }
 
-// Sadece bathymetry çek - her nokta için (kara tespiti + derinlik)
-// 24 saatlik NodeCache ile — aynı bölgede tekrar taramada API çağrısı sıfır
+/**
+ * _fetchBathymetryBase(lat, lon, timeoutMs)
+ * Ortak derinlik çekme mantığı. Hem EMODnet hem GEBCO destekler.
+ */
+async function _fetchBathymetryBase(lat, lon, timeoutMs = 5000) {
+    const latNum = parseFloat(lat);
+    const lonNum = parseFloat(lon);
+    const latF = latNum.toFixed(4);
+    const lonF = lonNum.toFixed(4);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        let url;
+        let isG = false;
+
+        if (isEmodnetArea(latNum, lonNum)) {
+            url = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`;
+        } else {
+            isG = true;
+            const delta = 0.0005;
+            const minL = (lonNum - delta).toFixed(4);
+            const minA = (latNum - delta).toFixed(4);
+            const maxL = (lonNum + delta).toFixed(4);
+            const maxA = (latNum + delta).toFixed(4);
+            
+            url = `https://wms.gebco.net/mapserv?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
+                  `&LAYERS=GEBCO_LATEST&QUERY_LAYERS=GEBCO_LATEST` +
+                  `&BBOX=${minL},${minA},${maxL},${maxA}` +
+                  `&WIDTH=101&HEIGHT=101&I=50&J=50&CRS=CRS:84&INFO_FORMAT=text/plain`;
+        }
+
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) return null;
+        
+        if (isG) {
+            const text = await res.text();
+            return parseGebcoDepth(text);
+        } else {
+            const b = await res.json();
+            return (b && b.avg !== undefined) ? ((b.smoothed !== undefined && b.smoothed < 0) ? b.smoothed : b.avg) : null;
+        }
+    } catch (e) {
+        clearTimeout(timeoutId);
+        return null;
+    }
+}
+
 async function fetchBathymetry(lat, lon) {
-    const latF = parseFloat(lat).toFixed(4);
-    const lonF = parseFloat(lon).toFixed(4);
-    // 3 ondalık hassasiyetle cache key
-    const ck = `b_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`;
+    const latNum = parseFloat(lat);
+    const lonNum = parseFloat(lon);
+    
+    // [FUZZY CACHE] 0.01 hassasiyetle (yaklaşık 1.1km) cache key.
+    // Farklı kullanıcılar yakın yerlere tıkladığında aynı veriyi paylaşır.
+    const ck = `b_${latNum.toFixed(2)}_${lonNum.toFixed(2)}`;
     const hit = bathyCache.get(ck);
     if (hit !== undefined) return hit;
 
-    try {
-        const url = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`;
-        const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-        if (!res.ok) return null;
-        
-        const b = await res.json();
-        if (b && b.avg !== undefined) {
-            // EMODnet deniz derinliğini (-) eksi olarak verir.
-            // Smoothed verisi varsa daha hassastır, onu kullan.
-            const val = (b.smoothed !== undefined && b.smoothed < 0) ? b.smoothed : b.avg;
-            bathyCache.set(ck, val);
-            return val;
-        }
-        return null;
-    } catch (e) {
-        return null;
-    }
+    const val = await _fetchBathymetryBase(lat, lon, 5000);
+    bathyCache.set(ck, val);
+    return val;
+}
+
+// Snap için hassas (non-fuzzy) bathymetry fetch
+async function fetchBathymetrySnap(lat, lon) {
+    // Snap işlemi için 4 saniye timeout yeterli (hızlı sonuç için)
+    return await _fetchBathymetryBase(lat, lon, 4000);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -4173,20 +4216,7 @@ async function fetchBathymetry(lat, lon) {
 // İlk bulunan ≥1m derin noktayı döner.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Snap için kısa timeout'lu bathymetry fetch (ana akışı bloke etmemek için)
-async function fetchBathymetrySnap(lat, lon) {
-    const latF = parseFloat(lat).toFixed(4);
-    const lonF = parseFloat(lon).toFixed(4);
-    try {
-        const res = await Promise.race([
-            fetch(`https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('snap_timeout')), 4000))
-        ]);
-        if (!res.ok) return null;
-        const b = await res.json();
-        return (b && b.avg !== undefined) ? b.avg : null;
-    } catch (e) { return null; }
-}
+
 
 async function findNearestSeaPoint(lat, lon) {
     const latF = parseFloat(lat);
