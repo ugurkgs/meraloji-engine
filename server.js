@@ -2661,7 +2661,7 @@ app.get('/api/forecast', async (req, res) => {
         const chlFromCache = chlCachedPre?.exists && (Date.now() - chlCachedPre.data().savedAt < 6 * 60 * 60 * 1000)
             ? chlCachedPre.data().result : null;
 
-        let [weather, marine, bathymetryRes, chlorophyllDataPre, sstSatPre, substrateData] = await Promise.all([
+        let [weather, marine, bathymetryRaw, chlorophyllDataPre, sstSatPre, substrateData] = await Promise.all([
             cache.get(`raw_weather_${gLat}_${gLon}`)
                 ? Promise.resolve(cache.get(`raw_weather_${gLat}_${gLon}`))
                 : deduplicatedFetch(`w_${gLat}_${gLon}`, () => queuedFetch(weatherUrl)),
@@ -4123,13 +4123,14 @@ function isEmodnetArea(lat, lon) {
 
 // ── EKSİK FONKSİYON 2: GEBCO MapServer'ın text/plain çıktısını ayrıştırır ──
 function parseGebcoDepth(text) {
-    if (!text) return null;
+    if (!text || text.includes('<?xml') || text.includes('ServiceExceptionReport')) return null;
+    
     // GEBCO çıktısı genellikle "value_0 = '-45'" veya "value = '-45.5'" şeklindedir
     const match = text.match(/value[^=]*=\s*['"]?(-?\d+(?:\.\d+)?)['"]?/i) ||
-                  text.match(/(-?\d+(?:\.\d+)?)/); // Fallback: ilk sayıyı yakala
+                  text.match(/(-?\d+(?:\.\d+)?)/);
     
     if (match && match[1]) {
-        return parseFloat(match[1]); // Negatif ise deniz, pozitif ise karadır.
+        return parseFloat(match[1]);
     }
     return null;
 }
@@ -4160,12 +4161,12 @@ async function _fetchBathymetryBase(lat, lon, timeoutMs = 5000) {
             const maxL = (lonNum + delta).toFixed(4);
             const maxA = (latNum + delta).toFixed(4);
             
-            // DÜZELTME: GEBCO katman isimleri küçük harfe duyarlıdır (gebco_latest)
+            // DÜZELTME: GEBCO katman isimleri ve parametreleri daha standart hale getirildi
             url = `https://wms.gebco.net/mapserv?` +
                   `SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo` +
-                  `&LAYERS=gebco_latest&QUERY_LAYERS=gebco_latest` +
+                  `&LAYERS=GEBCO_LATEST&QUERY_LAYERS=GEBCO_LATEST` +
                   `&BBOX=${minL},${minA},${maxL},${maxA}` +
-                  `&WIDTH=101&HEIGHT=101&X=50&Y=50&SRS=EPSG:4326&INFO_FORMAT=text/plain`;
+                  `&WIDTH=101&HEIGHT=101&X=50&Y=50&SRS=EPSG:4326&INFO_FORMAT=text/plain&STYLES=`;
         }
 
         const res = await fetch(url, { signal: controller.signal });
