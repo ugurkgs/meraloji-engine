@@ -558,7 +558,7 @@ async function fetchSubstrate(lat, lon) {
 // Doğrulanmış yanıt formatı (EUSeaMap 2025):
 //   <td>Substrate</td><td>Coarse &amp; mixed sediment</td>
 function parseSubstrateFromHtml(html) {
-    if (!html || html.length < 10) return null;
+    if (!html) return null;
 
     // HTML entity decode — &amp; → &, &lt; → < vb.
     const decodeHtml = (s) => s
@@ -569,9 +569,7 @@ function parseSubstrateFromHtml(html) {
         .replace(/&#39;/gi, "'")
         .trim();
 
-    // GeoServer HTML: <td>Substrate</td><td>Coarse &amp; mixed sediment</td>
-    // Alan adı TD/TH içinde, değer hemen arkasındaki TD'de
-    // [^<]* ile hem düz hem entity içeren değerleri yakala
+    // 1. Tablo Bazlı Eşleşmeler (EMODnet/GeoServer)
     const fieldPatterns = [
         /Substrate[^<]*<\/t[dh]>\s*<td[^>]*>([^<]+)<\/td>/i,
         /Folk5cl[^<]*<\/t[dh]>\s*<td[^>]*>([^<]+)<\/td>/i,
@@ -592,32 +590,32 @@ function parseSubstrateFromHtml(html) {
                 console.log(`[SUBSTRATE] field match: "${val}" → ${s}`);
                 return s;
             }
-            console.log(`[SUBSTRATE] field found but unmapped: "${val}"`);
         }
     }
 
-    // Fallback: tüm <td> değerlerini tara (entity decode ile)
-    const tdMatches = [...html.matchAll(/<td[^>]*>([^<]{2,100})<\/td>/gi)];
-    for (const m of tdMatches) {
-        const val = decodeHtml(m[1]);
-        if (!val || val === 'null' || /^\d+(\.\d+)?$/.test(val)) continue;
-        const s = eunisCategoryToSubstrate(val);
-        if (s) {
-            return s;
-        }
-    }
-
-    // NOAA/ArcGIS Fallback: "Sand", "Mud", "Rock", "Shell" kelimelerini doğrudan ara
-    const textOnly = html.replace(/<[^>]+>/g, ' ');
+    // 2. Catch-all: Tüm metin içinde kelime/kısaltma tara (NOAA/US desteği)
+    const textOnly = html.replace(/<[^>]+>/g, ' ').trim();
+    
+    // Tam kelimeler
     if (/sand/i.test(textOnly)) return 'SAND';
-    if (/rock/i.test(textOnly) || /hard/i.test(textOnly)) return 'ROCK';
+    if (/rock/i.test(textOnly) || /hard/i.test(textOnly) || /stone/i.test(textOnly)) return 'ROCK';
     if (/mud/i.test(textOnly) || /clay/i.test(textOnly) || /silt/i.test(textOnly)) return 'MUD';
-    if (/shell/i.test(textOnly) || /coral/i.test(textOnly)) return 'MIXED';
+    if (/shell/i.test(textOnly) || /coral/i.test(textOnly) || /gravel/i.test(textOnly)) return 'MIXED';
 
-    // Boş tablo ise (GeoServer/ArcGIS header var ama veri yok) sessizce null dön
+    // NOAA Kısaltmaları
+    const words = textOnly.split(/[\s,;]+/);
+    for (const w of words) {
+        const up = w.toUpperCase();
+        if (up === 'S') return 'SAND';
+        if (up === 'R' || up === 'ST' || up === 'H') return 'ROCK';
+        if (up === 'M' || up === 'SI' || up === 'CL') return 'MUD';
+        if (up === 'SH' || up === 'CO' || up === 'G') return 'MIXED';
+    }
+
+    // Boş tablo ise sessizce null dön
     if (html.includes('table.featureInfo') || html.includes('Geoserver GetFeatureInfo output')) return null;
 
-    console.log(`[SUBSTRATE] no match: ${textOnly.replace(/\s+/g, ' ').trim().slice(0, 100)}...`);
+    console.log(`[SUBSTRATE] no match: ${textOnly.slice(0, 100)}...`);
     return null;
 }
 
