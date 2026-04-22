@@ -503,14 +503,10 @@ async function fetchSubstrate(lat, lon) {
     let wmsUrl = "";
 
     if (isUS) {
-        // 🇺🇸 NOAA NOS Seabed Descriptions (US Coast)
-        wmsUrl = `https://www.ngdc.noaa.gov/geoserv/rest/services/marine_geology/nos_seabed_descriptions/MapServer/WmsServer` +
-            `?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
-            `&LAYERS=0&QUERY_LAYERS=0` +
-            `&INFO_FORMAT=text/html` +
-            `&CRS=EPSG:4326` +
-            `&BBOX=${minLat},${minLon},${maxLat},${maxLon}` +
-            `&WIDTH=101&HEIGHT=101&I=50&J=50&FEATURE_COUNT=1`;
+        // 🇺🇸 NOAA ArcGIS REST API (WMS'den daha kararlı)
+        wmsUrl = `https://www.ngdc.noaa.gov/geoserv/rest/services/marine_geology/nos_seabed_descriptions/MapServer/0/query` +
+            `?geometry=${lonR},${latR}&geometryType=esriGeometryPoint&inSR=4326` +
+            `&spatialRel=esriSpatialRelIntersects&outFields=DESCRIPT,PRIMARY_LITHOLOGY&returnGeometry=false&f=pjson`;
     } else {
         // 🇪🇺 EMODnet Seabed Habitats (Europe/Global)
         wmsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/ows` +
@@ -528,6 +524,17 @@ async function fetchSubstrate(lat, lon) {
             console.log(`[SUBSTRATE] HTTP ${res.status} — (${latR},${lonR})`);
             substrateCache.set(ck, null);
             return null;
+        }
+
+        if (isUS) {
+            // ArcGIS JSON parse
+            const data = await res.json();
+            const feat = data.features?.[0]?.attributes;
+            const rawVal = feat ? (feat.DESCRIPT || feat.PRIMARY_LITHOLOGY || "") : "";
+            const substrate = parseSubstrateFromHtml(rawVal); // Mevcut regexleri kullanabilir
+            console.log(`[SUBSTRATE-US] (${latR},${lonR}) → ${rawVal} → ${substrate}`);
+            substrateCache.set(ck, substrate);
+            return substrate;
         }
 
         const html = await res.text();
@@ -4185,12 +4192,12 @@ async function _fetchBathymetryBase(lat, lon, timeoutMs = 5000) {
             const maxL = (lonNum + delta).toFixed(4);
             const maxA = (latNum + delta).toFixed(4);
             
-            // DÜZELTME: CRS:84 ile Boylam, Enlem (Lon, Lat) sırası garantiye alındı
+            // DÜZELTME: GEBCO 1.1.1 ve SRS=EPSG:4326 kombinasyonu en kararlı olanıdır
             url = `https://wms.gebco.net/mapserv?` +
-                  `SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
+                  `SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo` +
                   `&LAYERS=GEBCO_LATEST&QUERY_LAYERS=GEBCO_LATEST` +
-                  `&BBOX=${minL},${minA},${maxL},${maxA}` + 
-                  `&WIDTH=101&HEIGHT=101&I=50&J=50&CRS=CRS:84&INFO_FORMAT=text/plain&STYLES=`;
+                  `&BBOX=${minL},${minA},${maxL},${maxA}` +
+                  `&WIDTH=101&HEIGHT=101&X=50&Y=50&SRS=EPSG:4326&INFO_FORMAT=text/plain&STYLES=`;
         }
 
         const res = await fetch(url, { signal: controller.signal });
