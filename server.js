@@ -13,6 +13,7 @@ const rateLimit = require('express-rate-limit');
 const NodeCache = require('node-cache');
 const cron = require('node-cron'); // BİLDİRİMLER İÇİN EKLENDİ
 const fetch = globalThis.fetch || require('node-fetch');
+const { SPECIES_DB } = require('./species'); // Tür veritabanı ayrılmış dosyada
 
 // ═══════════════════════════════════════════════════════════════════════════
 // OPEN-METEO ENDPOINT KONFİGÜRASYONU
@@ -53,7 +54,15 @@ const SERVER_i18n = {
         regions: {
             'EGE': 'EGE', 'AKDENİZ': 'AKDENİZ',
             'MARMARA': 'MARMARA', 'KARADENİZ': 'KARADENİZ',
-            'AÇIK DENİZ': 'AÇIK DENİZ'
+            'AÇIK DENİZ': 'AÇIK DENİZ',
+            'Florida': 'Florida',
+            'Japonya Kıyıları': 'Japonya Kıyıları',
+            'Güney Afrika Kıyıları': 'Güney Afrika Kıyıları',
+            'Birleşik Arap Emirlikleri & Körfez': 'Birleşik Arap Emirlikleri & Körfez',
+            'Yeni Zelanda Kıyıları': 'Yeni Zelanda Kıyıları',
+            'Brezilya Kıyıları': 'Brezilya Kıyıları',
+            'Tayland & Güneydoğu Asya': 'Tayland & Güneydoğu Asya',
+            'Kızıldeniz Havzası': 'Kızıldeniz Havzası'
         },
         substrate: {
             ROCK: '🪨 Kayalık', SAND: '🏖️ Kum', MUD: '🟫 Çamur',
@@ -139,7 +148,15 @@ const SERVER_i18n = {
         regions: {
             'EGE': 'AEGEAN', 'AKDENİZ': 'MEDITERRANEAN',
             'MARMARA': 'MARMARA SEA', 'KARADENİZ': 'BLACK SEA',
-            'AÇIK DENİZ': 'OPEN SEA'
+            'AÇIK DENİZ': 'OPEN SEA',
+            'Florida': 'Florida',
+            'Japonya Kıyıları': 'Japan Coasts',
+            'Güney Afrika Kıyıları': 'South Africa Coasts',
+            'Birleşik Arap Emirlikleri & Körfez': 'UAE & Persian Gulf',
+            'Yeni Zelanda Kıyıları': 'New Zealand Coasts',
+            'Brezilya Kıyıları': 'Brazil Coasts',
+            'Tayland & Güneydoğu Asya': 'Thailand & SE Asia',
+            'Kızıldeniz Havzası': 'Red Sea Basin'
         },
         substrate: {
             ROCK: '🪨 Rocky', SAND: '🏖️ Sandy', MUD: '🟫 Muddy',
@@ -674,6 +691,23 @@ try {
     console.log(`✅ Deniz bölgeleri yüklendi — ${_seaRegionFeatures.length} bölge`);
 } catch (e) {
     console.warn('⚠️  tr-sea-regions.json bulunamadı — koordinat kutusu yöntemine düşülüyor:', e.message);
+}
+
+// Global bölgeleri (habitatBboxes) RAM'e yükle
+let _globalBboxFeatures = [];
+try {
+    Object.values(SPECIES_DB).forEach(fish => {
+        if (fish.habitatBboxes) {
+            fish.habitatBboxes.forEach(bbox => {
+                // Sadece benzersiz olanları ekle (name, lat1, lon1 bazlı)
+                const exists = _globalBboxFeatures.some(f => f.name === bbox.name && f.lat1 === bbox.lat1 && f.lon1 === bbox.lon1);
+                if (!exists) _globalBboxFeatures.push(bbox);
+            });
+        }
+    });
+    console.log(`✅ Global bölgeler yüklendi — ${_globalBboxFeatures.length} bölge`);
+} catch (e) {
+    console.warn('⚠️ Global bölgeler yüklenirken hata oluştu:', e.message);
 }
 
 /**
@@ -1384,17 +1418,25 @@ function getRegion(latRaw, lonRaw) {
     const lat = parseFloat(latRaw);
     const lon = parseFloat(lonRaw);
 
-    // Poligon yöntemi
+    // 1. Poligon yöntemi (Türkiye Detaylı)
     if (_seaRegionFeatures.length > 0) {
         for (const feature of _seaRegionFeatures) {
             if (_pointInFeature(lat, lon, feature)) {
                 return feature.properties.name;
             }
         }
-        return 'AÇIK DENİZ';
     }
 
-    // Fallback — koordinat kutusu yöntemi
+    // 2. Global BBox yöntemi (species.js habitatBboxes)
+    if (_globalBboxFeatures.length > 0) {
+        for (const bbox of _globalBboxFeatures) {
+            if (lat >= bbox.lat1 && lat <= bbox.lat2 && lon >= bbox.lon1 && lon <= bbox.lon2) {
+                return bbox.name;
+            }
+        }
+    }
+
+    // 3. Fallback — koordinat kutusu yöntemi
     const inTurkey = lat >= 35.8 && lat <= 42.2 && lon >= 25.5 && lon <= 44.8;
     if (!inTurkey) return 'AÇIK DENİZ';
     if (lat > 40.5 && lon < 32.0 && lon > 26.0) return 'MARMARA';
@@ -1724,8 +1766,7 @@ function calculate3HourWindowScore(fish, key, baseParams, weather, marine, cente
 // ═══════════════════════════════════════════════════════════════════════════
 // SPECIES DATABASE
 // ═══════════════════════════════════════════════════════════════════════════
-
-const { SPECIES_DB } = require('./species'); // Tür veritabanı ayrı dosyada
+// (require en üste taşındı)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // PUANLAMA MOTORU - 5 KRİTİK DÜZELTME
