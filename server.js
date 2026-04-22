@@ -4217,7 +4217,7 @@ async function _fetchBathymetryBase(lat, lon, timeoutMs = 5000) {
     }
 }
 
-async function fetchBathymetry(lat, lon) {
+async function fetchBathymetry(lat, lon, timeoutMs = 5000) {
     const latNum = parseFloat(lat);
     const lonNum = parseFloat(lon);
     
@@ -4227,8 +4227,12 @@ async function fetchBathymetry(lat, lon) {
     const hit = bathyCache.get(ck);
     if (hit !== undefined) return hit;
 
-    const val = await _fetchBathymetryBase(lat, lon, 5000);
-    bathyCache.set(ck, val);
+    const val = await _fetchBathymetryBase(lat, lon, timeoutMs);
+    // Sadece başarılı veya gerçek null (kara) yanıtlarını cache'le.
+    // Timeout durumunda null döner ama onu cache'lemeyelim ki tekrar denenebilsin.
+    if (val !== null) {
+        bathyCache.set(ck, val);
+    }
     return val;
 }
 
@@ -4550,11 +4554,10 @@ app.get('/api/scan', async (req, res) => {
         const gridPoints = generateGridPoints(centerLat, centerLon, radiusKm);
         const total = gridPoints.length;
         const results = [];
+        const delayedPoints = []; // Derinliği ilk aşamada alınamayan noktalar
 
-        // Batch paralel: 5 nokta aynı anda, aralarında 350ms — EMODnet rate-limit'e güvenli
-        // 5km (29 nokta): ~6 batch × ~1.2s = ~7s | 10km (45 nokta): ~9 batch = ~11s
-        const BATCH_SIZE = 8; // Ücretli API — batch büyütüldü
-        const BATCH_DELAY_MS = 100; // Ücretli API — batch delay kısaltıldı
+        const BATCH_SIZE = 8;
+        const BATCH_DELAY_MS = 100;
 
         sendEvent({ type: 'start', total, radiusKm, fishKey: fishKey || null });
         if (res.flush) res.flush();
@@ -4581,10 +4584,18 @@ app.get('/api/scan', async (req, res) => {
 
             const batch = gridPoints.slice(i, i + BATCH_SIZE);
 
-            // Batch içindeki bathymetry'leri paralel çek (cache'de varsa sıfır gecikme)
             const batchResults = await Promise.all(batch.map(async (pt) => {
                 let bathyRaw = null;
-                try { bathyRaw = await fetchBathymetry(pt.lat, pt.lon); } catch (e) { }
+                try { 
+                    // 1. AŞAMA: Hızlı Tarama (3 saniye limit)
+                    bathyRaw = await fetchBathymetry(pt.lat, pt.lon, 3000); 
+                } catch (e) { }
+
+                // Eğer derinlik gelmediyse (timeout veya hata), arka planda tekrar denemek için listeye ekle
+                if (bathyRaw === null) {
+                    delayedPoints.push(pt);
+                }
+
                 // Substrate'yi de paralel çek — cache'e yazar, calcPointScoreFromWeather cache'den okur
                 fetchSubstrate(pt.lat, pt.lon).catch(() => null); // fire-and-forget, cache doldursun
                 let result = null;
@@ -4656,15 +4667,42 @@ app.get('/api/scan', async (req, res) => {
             remainingScans
         };
 
-        // 3 saatlik cache'e kaydet
-        if (db) {
-            await db.collection('scanCache').doc(cacheKey).set({
-                result: scanResult,
-                createdAt: Date.now()
-            });
+        sendEvent({ type: 'complete', ...scanResult });
+        if (res.flush) res.flush();
+
+        // 2. AŞAMA: Arka Plan Derinlik Kovalamaca (Lazy Update)
+        // Sadece en önemli (Top 5) noktalarda derinlik eksikse onları kovala
+        const importantDelayed = delayedPoints.filter(dp => 
+            top5.some(t => t.lat === dp.lat && t.lon === dp.lon)
+        );
+
+        if (importantDelayed.length > 0 && !clientDisconnected) {
+            console.log(`[SCAN] Background depth fetch for ${importantDelayed.length} points...`);
+            
+            for (const pt of importantDelayed) {
+                if (clientDisconnected) break;
+                
+                // Uzun timeout (15 saniye) ile tekrar dene
+                const freshBathy = await fetchBathymetry(pt.lat, pt.lon, 15000);
+                
+                if (freshBathy !== null) {
+                    const updatedResult = calcPointScoreFromWeather(pt.lat, pt.lon, centerWeather, centerMarine, freshBathy, fishKey || null, lang);
+                    if (updatedResult) {
+                        sendEvent({
+                            type: 'depth_update',
+                            message: 'Derinlik bilgisine ulaşıldı, analiz güncelleniyor...',
+                            lat: pt.lat,
+                            lon: pt.lon,
+                            score: parseFloat(updatedResult.score.toFixed(1)),
+                            depth: updatedResult.depth,
+                            zone: updatedResult.zone
+                        });
+                        if (res.flush) res.flush();
+                    }
+                }
+            }
         }
 
-        sendEvent({ type: 'complete', ...scanResult });
         res.end();
 
     } catch (error) {
