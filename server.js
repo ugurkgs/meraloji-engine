@@ -89,6 +89,7 @@ const SERVER_i18n = {
             denseFog: '🌫️ Yoğun Sis — TEHLİKELİ',
             reducedVis: '🌫️ Azalan Görüş',
             migrationSeason: (r) => `🔀 Göç Dönemi (${r})`,
+            spawningSeason: (r) => `🐟 Üreme Dönemi (${r})`,
             substrateLabel: (s, str) => `${str} zemin`,
         },
         reasons: {
@@ -174,6 +175,7 @@ const SERVER_i18n = {
             denseFog: '🌫️ Dense Fog — DANGEROUS',
             reducedVis: '🌫️ Reduced Visibility',
             migrationSeason: (r) => `🔀 Migration Season (${r})`,
+            spawningSeason: (r) => `🐟 Spawning Season (${r})`,
             substrateLabel: (s, str) => `${str} bottom`,
         },
         reasons: {
@@ -1413,20 +1415,34 @@ function getRegion(latRaw, lonRaw) {
 //   [{ lat1, lon1, lat2, lon2, name }]  (lat1<lat2, lon1<lon2 olmalı)
 // ═══════════════════════════════════════════════════════════════════════════
 function isInHabitat(fish, lat, lon, regionName) {
-    // Türkiye türleri — mevcut bölge sistemi
-    if (fish.regions && fish.regions.length > 0) {
-        return fish.regions.includes(regionName) || regionName === 'AÇIK DENİZ';
-    }
-    // Global türler — bbox sistemi
+    const latF = parseFloat(lat);
+    const lonF = parseFloat(lon);
+
+    // 1. ÖNCELİK: Koordinat Kutusu (Bbox) Kontrolü
+    // Japonya, Florida veya belirli bir lokal bölge için en kesin yöntem.
     if (fish.habitatBboxes && fish.habitatBboxes.length > 0) {
-        const latF = parseFloat(lat);
-        const lonF = parseFloat(lon);
-        return fish.habitatBboxes.some(b =>
+        const inBbox = fish.habitatBboxes.some(b =>
             latF >= b.lat1 && latF <= b.lat2 &&
             lonF >= b.lon1 && lonF <= b.lon2
         );
+        if (inBbox) return true; // Kutunun içindeyse göster
     }
-    // Ne regions ne habitatBboxes var → güvenli taraf: gösterme
+
+    // 2. ÖNCELİK: Global Tür Kontrolü
+    // Ahtapot, Kefal gibi kozmopolit türler için.
+    if (fish.isGlobal === true) {
+        return true; // Bölgeye bakma, biyolojik şartlar (sıcaklık vb.) karar versin
+    }
+
+    // 3. ÖNCELİK: Bölgesel/Endemik Kontrolü
+    // Sadece belirli denizlere (Marmara, Ege vb.) kilitlenmiş türler.
+    if (fish.regions && fish.regions.length > 0) {
+        // Balık sadece kendi tanımlı bölgesinde görünebilir.
+        // NOT: 'AÇIK DENİZ' serbestisi kaldırıldı, endemik türler açık denizde (başka ülkelerde) çıkmaz.
+        return fish.regions.includes(regionName);
+    }
+
+    // Hiçbir şart uymuyorsa (ve global değilse) gösterme
     return false;
 }
 
@@ -1440,11 +1456,12 @@ function getSalinity(region) {
 }
 
 // Mevsim
-function getSeason(month) {
-    if (month >= 2 && month <= 4) return "spring";
-    if (month >= 5 && month <= 8) return "summer";
-    if (month >= 9 && month <= 10) return "autumn";
-    return "winter";
+function getSeason(month, lat = 40) {
+    const isSouth = (lat < 0);
+    if (month >= 2 && month <= 4) return isSouth ? "autumn" : "spring";
+    if (month >= 5 && month <= 8) return isSouth ? "winter" : "summer";
+    if (month >= 9 && month <= 10) return isSouth ? "spring" : "autumn";
+    return isSouth ? "summer" : "winter";
 }
 
 // Ay Fazı İsmi
@@ -1749,7 +1766,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         waveDirection = 0, windWaveHeight = 0, swellPeriod = 0
     } = params;
 
-    const season = getSeason(targetDate.getMonth());
+    const season = getSeason(targetDate.getMonth(), params.lat);
     const currentMonth = targetDate.getMonth(); // 0=Ocak, 11=Aralık
     let activeTriggers = [];
 
@@ -1763,19 +1780,43 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // 1. MEVSİMSEL (Max 25)
     // monthlyActivity varsa 12 aylık hassas sistem, yoksa 4 mevsim kaba sistem
     let seasonalEff;
-    if (fish.monthlyActivity && fish.monthlyActivity.length === 12) {
-        seasonalEff = fish.monthlyActivity[currentMonth];
+    let monthToUse = currentMonth;
+    if (fish.isGlobal && params.lat < 0) {
+        monthToUse = (currentMonth + 6) % 12;
+    }
 
-        // Göç bonusu — tür + bölge + ay uyumuysa ekle
-        if (fish.migrationBonus && fish.migrationBonus[region]) {
-            const mb = fish.migrationBonus[region];
-            if (mb.months.includes(currentMonth)) {
+    if (fish.monthlyActivity && fish.monthlyActivity.length === 12) {
+        seasonalEff = fish.monthlyActivity[monthToUse];
+    } else {
+        seasonalEff = fish.seasons[season] || 0.3;
+    }
+
+    // Göç bonusu — tür + bölge + ay uyumuysa ekle
+    if (fish.migrationBonus && fish.migrationBonus[region]) {
+        const mb = fish.migrationBonus[region];
+        if (mb.months.includes(currentMonth)) {
+            // Opsiyonel sıcaklık tetikleyici (örneğin göç sadece su ısınınca başlar)
+            const tempMatch = (mb.tempMin === undefined || tempWater >= mb.tempMin) &&
+                             (mb.tempMax === undefined || tempWater <= mb.tempMax);
+            if (tempMatch) {
                 seasonalEff = Math.min(1.0, seasonalEff + mb.bonus);
                 activeTriggers.push(i18n(lang).triggers.migrationSeason(region));
             }
         }
-    } else {
-        seasonalEff = fish.seasons[season] || 0.3;
+    }
+
+    // Üreme bonusu — tür + bölge + ay uyumuysa ekle
+    if (fish.spawningBonus && fish.spawningBonus[region]) {
+        const sb = fish.spawningBonus[region];
+        if (sb.months.includes(currentMonth)) {
+            // Üreme genellikle çok dar bir sıcaklık bandında gerçekleşir
+            const tempMatch = (sb.tempMin === undefined || tempWater >= sb.tempMin) &&
+                             (sb.tempMax === undefined || tempWater <= sb.tempMax);
+            if (tempMatch) {
+                seasonalEff = Math.min(1.0, seasonalEff + sb.bonus);
+                activeTriggers.push(i18n(lang).triggers.spawningSeason(region));
+            }
+        }
     }
     let s_season = seasonalEff * 25;
     scoreDetails.season = { score: s_season, max: 25, stars: Math.round(seasonalEff * 5) };
@@ -2335,7 +2376,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     if (!isBoat && depthAvg !== undefined && depthAvg !== null) {
         const strictOffshoreCategories = ['PELAJIK', 'AVCI', 'DIP_DERIN', 'SÜRÜ'];
         if (strictOffshoreCategories.includes(fish.category)) {
-            const comesToShore = fish.shoreMonths && fish.shoreMonths.includes(targetDate.getMonth());
+            const mToUse = (fish.isGlobal && params.lat < 0) ? (targetDate.getMonth() + 6) % 12 : targetDate.getMonth();
+            const comesToShore = fish.shoreMonths && fish.shoreMonths.includes(mToUse);
             if (!comesToShore && depthAvg < 25) {
                 const shorePenalty = depthAvg < 10 ? 0.25 : 0.60;
                 rawScore *= shorePenalty;
