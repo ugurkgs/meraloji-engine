@@ -4200,7 +4200,10 @@ async function _fetchBathymetryBase(lat, lon, timeoutMs = 5000) {
         
         if (isG) {
             const text = await res.text();
-            return parseGebcoDepth(text);
+            console.log(`[GEBCO] Raw Response for ${latF},${lonF}:`, text.substring(0, 150));
+            const depth = parseGebcoDepth(text);
+            console.log(`[GEBCO] Parsed Depth: ${depth}`);
+            return depth;
         } else {
             const b = await res.json();
             // EMODnet değerini de pozitif derinlik (Math.abs) olarak standardize ediyoruz
@@ -4677,7 +4680,8 @@ app.get('/api/scan', async (req, res) => {
         );
 
         if (importantDelayed.length > 0 && !clientDisconnected) {
-            console.log(`[SCAN] Background depth fetch for ${importantDelayed.length} points...`);
+            console.log(`[SCAN] Background depth fetch started for ${importantDelayed.length} points:`, 
+                importantDelayed.map(p => `${p.lat},${p.lon}`).join(' | '));
             
             for (const pt of importantDelayed) {
                 if (clientDisconnected) break;
