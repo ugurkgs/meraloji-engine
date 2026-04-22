@@ -13,28 +13,7 @@ const rateLimit = require('express-rate-limit');
 const NodeCache = require('node-cache');
 const cron = require('node-cron'); // BİLDİRİMLER İÇİN EKLENDİ
 const fetch = globalThis.fetch || require('node-fetch');
-
-// ── SPECIES_DB — Dairesel bağımlılığa karşı güvenli yükleme ──────────────────
-// species.js başlangıçta server.js'e (dolaylı) bağımlı olabilir.
-// require() önce tamamlanmış exports'u dener; undefined gelirse process.nextTick
-// sonrası yeniden çeker. Route'lar her zaman istek anında çalıştığından o noktada
-// species.js çoktan yüklenmiş olur — production'da sorun yaşanmaz.
-// ─────────────────────────────────────────────────────────────────────────────
-let SPECIES_DB = null;
-try {
-    const _species = require('./species');
-    SPECIES_DB = _species.SPECIES_DB || null;
-    if (!SPECIES_DB) {
-        // Dairesel bağımlılık: exports henüz tamamlanmamış olabilir. Bir tick bekle.
-        process.nextTick(() => {
-            if (!SPECIES_DB) {
-                try { SPECIES_DB = require('./species').SPECIES_DB || null; } catch (e) { /* zaten loglandı */ }
-            }
-        });
-    }
-} catch (e) {
-    console.error('[SPECIES] species.js yüklenemedi:', e.message);
-}
+const { SPECIES_DB } = require('./species'); // Tür veritabanı ayrılmış dosyada
 
 // ═══════════════════════════════════════════════════════════════════════════
 // OPEN-METEO ENDPOINT KONFİGÜRASYONU
@@ -524,11 +503,11 @@ async function fetchSubstrate(lat, lon) {
     let wmsUrl = "";
 
     if (isUS) {
-        // 🇺🇸 NOAA ArcGIS REST API (Hassas Florida/US Ayarı)
+        // 🇺🇸 NOAA ArcGIS REST API (Kesin çalışan parametre sırası ve inSR=4326)
         wmsUrl = `https://gis.ngdc.noaa.gov/arcgis/rest/services/web_mercator/nos_seabed_dynamic/MapServer/0/query` +
             `?inSR=4326&geometryType=esriGeometryPoint&geometry=${lonR},${latR}` +
             `&spatialRel=esriSpatialRelIntersects&distance=50000&units=esriSRUnit_Meter` +
-            `&outFields=*&returnGeometry=false&f=pjson`;
+            `&outFields=DESCRP,PRIMARY_LITHOLOGY&returnGeometry=false&f=pjson`;
     } else {
         // 🇪🇺 EMODnet Seabed Habitats (Europe/Global)
         wmsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/ows` +
@@ -552,10 +531,9 @@ async function fetchSubstrate(lat, lon) {
             // ArcGIS JSON parse
             const data = await res.json();
             const feat = data.features?.[0]?.attributes;
-            // Tüm olası alanları string olarak birleştirip parse'a gönder (DESCRP, DESCRIPT vb. her şeyi yakalar)
-            const rawVal = feat ? Object.values(feat).join(" ") : "";
-            const substrate = parseSubstrateFromHtml(rawVal);
-            console.log(`[SUBSTRATE-US] (${latR},${lonR}) → ${rawVal.slice(0,50)} → ${substrate}`);
+            const rawVal = feat ? (feat.DESCRP || feat.PRIMARY_LITHOLOGY || "") : "";
+            const substrate = parseSubstrateFromHtml(rawVal); // Mevcut regexleri kullanabilir
+            console.log(`[SUBSTRATE-US] (${latR},${lonR}) → ${rawVal} → ${substrate}`);
             substrateCache.set(ck, substrate);
             return substrate;
         }
@@ -753,30 +731,17 @@ try {
 
 // Global bölgeleri (habitatBboxes) RAM'e yükle
 let _globalBboxFeatures = [];
-function _loadGlobalBboxFeatures() {
-    if (!SPECIES_DB) return;
-    _globalBboxFeatures = [];
-    try {
-        Object.values(SPECIES_DB || {}).forEach(fish => {
-            if (fish.habitatBboxes) {
-                fish.habitatBboxes.forEach(bbox => {
-                    const exists = _globalBboxFeatures.some(f => f.name === bbox.name && f.lat1 === bbox.lat1 && f.lon1 === bbox.lon1);
-                    if (!exists) _globalBboxFeatures.push(bbox);
-                });
-            }
-        });
-        console.log(`✅ Global bölgeler yüklendi — ${_globalBboxFeatures.length} bölge`);
-    } catch (e) {
-        console.warn('⚠️ Global bölgeler yüklenirken hata oluştu:', e.message);
-    }
-}
-// Hemen dene; dairesel bağımlılık nedeniyle SPECIES_DB null ise bir sonraki tick'te tekrar dene
 try {
-    if (SPECIES_DB) {
-        _loadGlobalBboxFeatures();
-    } else {
-        process.nextTick(() => _loadGlobalBboxFeatures());
-    }
+    Object.values(SPECIES_DB).forEach(fish => {
+        if (fish.habitatBboxes) {
+            fish.habitatBboxes.forEach(bbox => {
+                // Sadece benzersiz olanları ekle (name, lat1, lon1 bazlı)
+                const exists = _globalBboxFeatures.some(f => f.name === bbox.name && f.lat1 === bbox.lat1 && f.lon1 === bbox.lon1);
+                if (!exists) _globalBboxFeatures.push(bbox);
+            });
+        }
+    });
+    console.log(`✅ Global bölgeler yüklendi — ${_globalBboxFeatures.length} bölge`);
 } catch (e) {
     console.warn('⚠️ Global bölgeler yüklenirken hata oluştu:', e.message);
 }
@@ -1548,8 +1513,11 @@ function isInHabitat(fish, lat, lon, regionName) {
     }
 
     // 3. ÖNCELİK: Bölgesel/Endemik Kontrolü
+    // Sadece belirli denizlere (Marmara, Ege vb.) kilitlenmiş türler.
     if (fish.regions && fish.regions.length > 0) {
-        return fish.regions.includes(regionName) || regionName === 'AÇIK DENİZ';
+        // Balık sadece kendi tanımlı bölgesinde görünebilir.
+        // NOT: 'AÇIK DENİZ' serbestisi kaldırıldı, endemik türler açık denizde (başka ülkelerde) çıkmaz.
+        return fish.regions.includes(regionName);
     }
 
     // Hiçbir şart uymuyorsa (ve global değilse) gösterme
@@ -1977,13 +1945,13 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     s_env += windScore * 5;
     scoreDetails.wind = { score: windScore * 5, max: 5, stars: Math.round(windScore * 5), value: windSpeed, dir: windDir };
 
-    // Habitat filtresi — bbox dışı veya yanlış bölgede sıfır skor
+    const regionMatch = isInHabitat(fish, params.lat, params.lon, region) ? 1.0 : 0.0;
+    // Global türler: bbox dışındaysa skor 0'a zorla
     if (!isInHabitat(fish, params.lat, params.lon, region)) {
         return { finalScore: 0, score: 0, reason: i18n(lang).reasons.outOfRegion(region, (fish.regions||[]).join(', ')), activeTriggers: [], scoreDetails: {}, penalties: [] };
     }
-    // isInHabitat true ise regionMatch her zaman tam puan
-    s_env += 5;
-    scoreDetails.region = { score: 5, max: 5, stars: 5 };
+    s_env += regionMatch * 5;
+    scoreDetails.region = { score: regionMatch * 5, max: 5, stars: Math.round(regionMatch * 5) };
 
     // 4. AKTİVİTE (Max 20)
     let s_activity = 5;
@@ -3050,7 +3018,7 @@ app.get('/api/forecast', async (req, res) => {
                     waveDirection, windWaveHeight, swellPeriod
                 };
 
-                for (const [key, fish] of Object.entries(SPECIES_DB || {})) {
+                for (const [key, fish] of Object.entries(SPECIES_DB)) {
                     if (!isInHabitat(fish, lat, lon, regionName)) continue;
 
                     // Ağırlıklı günlük skor hesapla (24 saatlik ortalama)
@@ -3179,7 +3147,6 @@ app.get('/api/forecast', async (req, res) => {
                 swellPeriod: parseFloat(swellPeriod.toFixed(1)),
                 visibility: visibility,
                 weatherCode: weatherCode,
-                localTime: new Date(Date.now() + (utcOffsetSeconds * 1000)).toISOString().replace('T', ' ').slice(0, 16),
                 score: parseFloat(topScore.toFixed(1)),
                 apiGrid: (marine.latitude && marine.longitude) ? {
                     lat: parseFloat(marine.latitude.toFixed(4)),
@@ -3291,7 +3258,7 @@ app.get('/api/forecast', async (req, res) => {
             };
 
             let instantFishList = [];
-            for (const [key, fish] of Object.entries(SPECIES_DB || {})) {
+            for (const [key, fish] of Object.entries(SPECIES_DB)) {
                 if (!isInHabitat(fish, lat, lon, regionName)) continue;
 
                 // 3 saatlik pencere ortalaması ile daha stabil skor (gürültü filtreleme)
@@ -3452,7 +3419,6 @@ app.get('/api/forecast', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 app.get('/api/species-list', (req, res) => {
-    if (!SPECIES_DB) return res.status(503).json({ error: 'Tür veritabanı yükleniyor, lütfen tekrar deneyin' });
     const lang = req.query.lang || 'tr';
     const list = Object.entries(SPECIES_DB).map(([key, fish]) => ({
         key,
@@ -3673,7 +3639,7 @@ app.get('/api/fish-search', async (req, res) => {
 
         const baseParams = {
             tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
-            timeMode, solunar, region: regionName, targetDate: now, isInstant: true,
+            timeMode, solunar, region: i18n(lang).regions[regionName] || regionName, targetDate: now, isInstant: true,
             currentSpeed: currentEst, pressureTrend, moonPhase: moon.phase,
             lat: parseFloat(latF), lon: parseFloat(lonF),
             depthAvg: depthAvg,
@@ -3732,15 +3698,12 @@ app.get('/api/fish-search', async (req, res) => {
 
         // Neden listelenmediğini analiz et
         const reasons = [];
-        const season = getSeason(now.getMonth(), parseFloat(latF));
+        const season = getSeason(now.getMonth());
         const seasonEff = fish.seasons[season] || 0;
 
         // Bölge kontrolü
         if (!isInHabitat(fish, lat, lon, regionName)) {
-            const regionsText = fish.regions?.length > 0
-                ? fish.regions.join(', ')
-                : (fish.habitatBboxes?.map(b => b.name).join(', ') || 'Global');
-            reasons.push({ type: 'CRITICAL', text: i18n(lang).reasons.outOfRegion(regionName, regionsText) });
+            reasons.push({ type: 'CRITICAL', text: i18n(lang).reasons.outOfRegion(regionName, fish.regions.join(', ')) });
         }
 
         // Mevsim kontrolü
@@ -4382,56 +4345,55 @@ async function findNearestSeaPoint(lat, lon) {
 // past_days=7 ile gelen dizide bugün genellikle 168. indekste başlar, ama
 // gün sınırları UTC'ye göre kayabilir — string eşleşmesi kesin çözüm.
 function findTodayIndex(timeArray, utcOffsetSeconds = 0) {
-    if (!timeArray || !Array.isArray(timeArray)) return 0;
     // Sunucu saati (UTC) + yerel fark = koordinatın gerçek yerel zamanı
     const localTime = new Date(Date.now() + (utcOffsetSeconds * 1000));
     const todayStr = localTime.toISOString().split('T')[0]; 
-    const idx = timeArray.findIndex(t => t && t.startsWith(todayStr));
-    return idx >= 0 ? idx : 0; 
+    const idx = timeArray.findIndex(t => t.startsWith(todayStr));
+    return idx >= 0 ? idx : 7 * 24; 
 }
 
 // Paylaşılan hava verisiyle tek nokta skoru hesapla (API çağrısı yok)
 function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey, lang) {
-    if (!weather || !marine || !weather.hourly || !marine.hourly || !marine.hourly.time) return null;
 
     const latF = parseFloat(lat).toFixed(4);
     const lonF = parseFloat(lon).toFixed(4);
     const now = new Date();
-    const _utcOff = weather.utc_offset_seconds || 0;
-    
-    // Zaman hesaplamaları
-    const clickHour = Math.floor((Date.now() / 1000 + _utcOff) % 86400 / 3600);
-    const regionName = getRegion(latF, lonF) || "AÇIK DENİZ";
+    const _utcOff2 = weather?.utc_offset_seconds || 0;
+    const clickHour = Math.floor((Date.now() / 1000 + _utcOff2) % 86400 / 3600);
+    const regionName = getRegion(latF, lonF);
 
     try {
         // Kara tespiti: bathymetri pozitifse kesin kara
         if (bathyRaw !== null && bathyRaw > 0) return null;
-        // Marine veri kontrolü
-        if (!marine.hourly.wave_height || marine.hourly.wave_height.length === 0) return null;
+        // Marine veri hiç yoksa kara/iç bölge (sadece null/undefined kontrolü, 0 dalga geçerli)
+        if (!marine.hourly?.wave_height || marine.hourly.wave_height.length === 0) return null;
 
-        const correctedClickHour = clickHour;
+        const _utcOff = weather.utc_offset_seconds || 0;
+        const localClickHour = Math.floor((Date.now() / 1000 + _utcOff) % 86400 / 3600);
+        const correctedClickHour = localClickHour;
+
         const hourlyOffset = 24;
         const hourlyIdx = hourlyOffset + correctedClickHour;
 
-        // Marine: bugünün başlangıcını bul
+        // Marine: past_days=7 → bugünün başlangıcını time dizisinden bul
         const marineHourlyOffset = findTodayIndex(marine.hourly.time, _utcOff);
         const marineHourlyIdx = marineHourlyOffset + correctedClickHour;
 
-        const rawWaterTemp = marine.hourly.sea_surface_temperature?.[marineHourlyIdx];
+        const rawWaterTemp = marine.hourly?.sea_surface_temperature?.[marineHourlyIdx];
         const tempWater = safeWaterTemp(rawWaterTemp, regionName, now.getMonth());
-        const wave = safeNum(marine.hourly.wave_height?.[marineHourlyIdx]);
-        const windSpeed = safeNum(weather.hourly.wind_speed_10m?.[hourlyIdx]);
+        const wave = safeNum(marine.hourly?.wave_height?.[marineHourlyIdx]);
+        const windSpeed = safeNum(weather.hourly?.wind_speed_10m?.[hourlyIdx]);
         const windDir = safeNum(weather.daily?.wind_direction_10m_dominant?.[1]);
-        const pressure = safeNum(weather.hourly.surface_pressure?.[hourlyIdx], 1013);
-        const rain = safeNum(weather.hourly.rain?.[hourlyIdx]);
-        const cloud = safeNum(weather.hourly.cloud_cover?.[hourlyIdx], 50);
-        const uv = safeNum(weather.hourly.uv_index?.[hourlyIdx], 0);
+        const pressure = safeNum(weather.hourly?.surface_pressure?.[hourlyIdx], 1013);
+        const rain = safeNum(weather.hourly?.rain?.[hourlyIdx]);
+        const cloud = safeNum(weather.hourly?.cloud_cover?.[hourlyIdx], 50);
+        const uv = safeNum(weather.hourly?.uv_index?.[hourlyIdx], 0);
         const clarity = calculateClarity(wave, windSpeed, rain);
         const currentEst = estimateCurrent(wave, windSpeed, regionName);
         const depthAvg = bathyRaw !== null ? Math.abs(bathyRaw) : null;
-        const sunTimes = SunCalc.getTimes(now, parseFloat(latF), parseFloat(lonF));
+        const sunTimes = SunCalc.getTimes(now, latF, lonF);
         const timeMode = getTimeOfDay(clickHour, sunTimes);
-        const solunar = getSolunarWindow(now, parseFloat(latF), parseFloat(lonF));
+        const solunar = getSolunarWindow(now, latF, lonF);
         const moon = SunCalc.getMoonIllumination(now);
 
         // [YENİ] Marine hourly
@@ -4450,7 +4412,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
 
         const params = {
             tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
-            timeMode, solunar, region: regionName, targetDate: now, isInstant: false,
+            timeMode, solunar, region: i18n(lang).regions[regionName] || regionName, targetDate: now, isInstant: false,
             currentSpeed: currentEst,
             pressureTrend: (() => {
                 if (weather.hourly?.surface_pressure) {
@@ -4474,7 +4436,8 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             moonlightIntensity: calculateMoonlightIntensity(now, parseFloat(latF), parseFloat(lonF), cloud),
             chlorophyll: null,
             isBoat: false,
-            substrate: substrateCache.get(`sub_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`) || null,
+            substrate: substrateCache.get(`sub_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`) ?? null,
+            // YENİ (1C)
             windGust: windGust_s, precipProb: precipProb_s, weatherCode: weatherCode_s,
             visibility: visibility_s, waveDirection: waveDirection_s,
             windWaveHeight: windWaveHeight_s, swellPeriod: swellPeriod_s
@@ -4482,43 +4445,49 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
 
         // Günlük ağırlıklı skor için activityWindows ve hourlyStartIdx
         const activityWindows = calculateActivityWindows(now, parseFloat(latF), parseFloat(lonF));
-        const hourlyStartIdx = 24; 
+        const hourlyStartIdx = 24; // today = past_days=1 offset (weather)
 
-        // [KRİTİK] Değişkenleri fonksiyon kapsamında (scope) garantiye al
-        let depthVal = (depthAvg !== null) ? Math.round(depthAvg) : null;
-        let zone = (depthVal === null) ? null : getZoneLabel(depthVal, lang);
-        let substrateVal = params.substrate || null;
-
-        const utcOff = weather.utc_offset_seconds || 0;
-        const localTimeStr = new Date(Date.now() + (utcOff * 1000)).toISOString().replace('T', ' ').slice(0, 16);
-        const commonResult = { depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal, localTime: localTimeStr, utcOffset: utcOff };
-
-            if (!fishKey) {
-                let topScore = 0;
-                let topFishName = '';
-                const allFishScores = [];
-                for (const [key, fish] of Object.entries(SPECIES_DB || {})) {
-                    if (!isInHabitat(fish, parseFloat(latF), parseFloat(lonF), regionName)) continue;
-                    try {
-                        const dailyResult = calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
-                        const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
-                        const _fn = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
-                        if (score > 0) allFishScores.push({ name: _fn, score });
-                        if (score > topScore) { topScore = score; topFishName = _fn; }
-                    } catch (e) { }
-                }
-                allFishScores.sort((a, b) => b.score - a.score);
-                const topFish = allFishScores.slice(0, 3).map(f => f.name);
-                return { ...commonResult, score: topScore, fishName: topFishName, topFish };
-            } else {
-                const fish = SPECIES_DB[fishKey];
-                if (!fish) return null;
-                if (!isInHabitat(fish, parseFloat(latF), parseFloat(lonF), regionName)) return null;
+        if (!fishKey) {
+            let topScore = 0;
+            let topFishName = '';
+            const allFishScores = [];
+            for (const [key, fish] of Object.entries(SPECIES_DB)) {
+                if (!isInHabitat(fish, lat, lon, regionName)) continue;
+                try {
+                    const dailyResult = calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
+                    const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
+                    const _fn = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
+                    if (score > 0) allFishScores.push({ name: _fn, score });
+                    if (score > topScore) { topScore = score; topFishName = _fn; }
+                } catch (e) { }
+            }
+            allFishScores.sort((a, b) => b.score - a.score);
+            const topFish = allFishScores.slice(0, 3).map(f => f.name);
+            const depthVal = (depthAvg !== null) ? Math.round(depthAvg) : null;
+            const zone = (depthVal === null) ? null : getZoneLabel(depthVal, lang);
+            const substrateVal = params.substrate || null;
+            return { score: topScore, fishName: topFishName, topFish, depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
+        } else {
+            const fish = SPECIES_DB[fishKey];
+            if (!fish) return null;
+            if (!isInHabitat(fish, lat, lon, regionName)) return null;
+            try {
                 const dailyResult = calculateWeightedDailyScore(fish, fishKey, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
                 const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
+                const depthVal = (depthAvg !== null) ? Math.round(depthAvg) : null;
+                const zone = (depthVal === null) ? null : getZoneLabel(depthVal, lang);
+                const substrateVal = params.substrate || null;
                 const _n1 = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
-                return { ...commonResult, score, fishName: _n1, topFish: [_n1] };
+                return { score, fishName: _n1, topFish: [_n1], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
+            } catch (e) {
+                const r = calculateFishScore(fish, fishKey, params, lang);
+                const depthVal = (depthAvg !== null) ? Math.round(depthAvg) : null;
+                const zone = (depthVal === null) ? null : getZoneLabel(depthVal, lang);
+                const substrateVal = params.substrate || null;
+                const _n2 = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
+                return { score: r.finalScore, fishName: _n2, topFish: [_n2], depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal };
             }
+        }
     } catch (e) {
         console.log('[SCAN-SCORE] Error:', e.message);
         return null;
@@ -5349,7 +5318,7 @@ app.listen(PORT, () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════════╗
 ║         ⚓ MERALOJİ F.I.S.H. v3.0 AKTİF ⚓                ║
-║    ✅ ${SPECIES_DB ? Object.keys(SPECIES_DB).length : 0} Balık | Fotoğraf | Gelişmiş Taktik          ║
+║    ✅ ${Object.keys(SPECIES_DB).length} Balık | Fotoğraf | Gelişmiş Taktik          ║
 ║    📸 Balık Fotoğrafları | 85+ Skor Taktikleri           ║
 ║    Port: ${PORT}                                            ║
 ╚═══════════════════════════════════════════════════════════╝
