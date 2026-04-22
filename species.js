@@ -4451,6 +4451,11 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
 
             const utcOff = weather.utc_offset_seconds || 0;
             const localTimeStr = new Date(Date.now() + (utcOff * 1000)).toISOString().replace('T', ' ').slice(0, 16);
+            
+            const depthVal = (depthAvg !== null) ? Math.round(depthAvg) : null;
+            const zone = (depthVal === null) ? null : getZoneLabel(depthVal, lang);
+            const substrateVal = params.substrate || null;
+
             const commonResult = { depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal, localTime: localTimeStr, utcOffset: utcOff };
 
             if (!fishKey) {
