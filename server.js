@@ -1378,7 +1378,10 @@ function getWeatherCondition(rain, wind, cloud, clarity, timeMode) {
 
 // Bölge Tespiti — poligon tabanlı (tr-sea-regions.json)
 // Fallback: dosya yüklenemezse eski koordinat kutusu yöntemi
-function getRegion(lat, lon) {
+function getRegion(latRaw, lonRaw) {
+    const lat = parseFloat(latRaw);
+    const lon = parseFloat(lonRaw);
+
     // Poligon yöntemi
     if (_seaRegionFeatures.length > 0) {
         for (const feature of _seaRegionFeatures) {
@@ -2881,7 +2884,9 @@ app.get('/api/forecast', async (req, res) => {
                 // Base parametreleri oluştur
                 const baseParams = {
                     tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
-                    timeMode, solunar, region: i18n(lang).regions[regionName] || regionName, targetDate, isInstant: false,
+                    timeMode, solunar, 
+                    region: regionName, // FIX: Çevrilmiş isim değil, ham kod gönder (eşleşme için)
+                    targetDate, isInstant: false,
                     currentSpeed: currentEst,
                     pressureTrend: pressureTrend,
                     moonPhase: moon.phase,
@@ -3108,11 +3113,12 @@ app.get('/api/forecast', async (req, res) => {
             const i_windWaveHeight = safeNum(marine.hourly?.wind_wave_height?.[marineInstantIdx]);
             const i_swellPeriod = safeNum(marine.hourly?.swell_wave_period?.[marineInstantIdx]);
 
-            // FIX: Anlık blok için basınç trendi — forecast döngüsü scope'undan bağımsız
+            // FIX: Anlık blok için basınç trendi — ReferenceError düzeltildi
             let i_pressureTrend = { trend: 'STABLE', change: 0 };
-            if (hourlyPressureData) {
+            const i_surfacePressure = weather.hourly?.surface_pressure; 
+            if (i_surfacePressure) {
                 const iPressureStart = Math.max(0, instantIdx - 24); // 24 saatlik trend
-                i_pressureTrend = calculatePressureTrend(hourlyPressureData.slice(iPressureStart, instantIdx + 1));
+                i_pressureTrend = calculatePressureTrend(i_surfacePressure.slice(iPressureStart, instantIdx + 1));
             }
 
             // Base params (calculate3HourWindowScore için)
@@ -3120,7 +3126,8 @@ app.get('/api/forecast', async (req, res) => {
                 tempWater: i_tempWater, wave: i_wave, windSpeed: i_wind,
                 windDir: i_windDir,
                 clarity: i_clarity, rain: i_rain, pressure: i_pressure,
-                timeMode: i_timeMode, solunar: i_solunar, region: i18n(lang).regions[regionName] || regionName,
+                timeMode: i_timeMode, solunar: i_solunar, 
+                region: regionName, // FIX: Çevrilmiş isim değil, ham kod gönder (eşleşme için)
                 targetDate: instantDate, isInstant: true, currentSpeed: i_current,
                 pressureTrend: i_pressureTrend, moonPhase: i_moon.phase,
                 lat: parseFloat(lat), lon: parseFloat(lon),
