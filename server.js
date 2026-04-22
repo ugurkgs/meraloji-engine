@@ -4135,10 +4135,28 @@ async function fetchCenterWeather(lat, lon) {
     return { weather, marine };
 }
 
-/**
- * _fetchBathymetryBase(lat, lon, timeoutMs)
- * Ortak derinlik çekme mantığı. Hem EMODnet hem GEBCO destekler.
- */
+// ── EKSİK FONKSİYON 1: EMODnet sadece Avrupa'da çalışır, gerisi GEBCO'ya yönlendirilir ──
+function isEmodnetArea(lat, lon) {
+    // Kaba Avrupa, Akdeniz, Karadeniz sınırları
+    return (lat >= 25 && lat <= 75 && lon >= -30 && lon <= 45);
+}
+
+// ── EKSİK FONKSİYON 2: GEBCO MapServer'ın text/plain çıktısını ayrıştırır ──
+function parseGebcoDepth(text) {
+    if (!text) return null;
+    // GEBCO çıktısı genellikle "value_0 = '-45'" veya "value = '-45.5'" şeklindedir
+    const match = text.match(/value[^=]*=\s*['"]?(-?\d+(?:\.\d+)?)['"]?/i) ||
+                  text.match(/(-?\d+(?:\.\d+)?)/); // Fallback: ilk sayıyı yakala
+    
+    if (match && match[1]) {
+        const val = parseFloat(match[1]);
+        // GEBCO denizi negatif (-) değerle verir. Derinlik bilgisini pozitif kullanıyoruz.
+        if (val < 0) return Math.abs(val);
+    }
+    return null; // Sıfır veya pozitif (0, +10) ise karadır, null döndürür
+}
+
+// ── DÜZELTİLMİŞ FETCH FONKSİYONU ──
 async function _fetchBathymetryBase(lat, lon, timeoutMs = 5000) {
     const latNum = parseFloat(lat);
     const lonNum = parseFloat(lon);
@@ -4153,35 +4171,48 @@ async function _fetchBathymetryBase(lat, lon, timeoutMs = 5000) {
         let isG = false;
 
         if (isEmodnetArea(latNum, lonNum)) {
+            // Avrupa bölgesi için EMODnet (Yüksek hassasiyet)
             url = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`;
         } else {
+            // Global bölgeler (Brezilya, Tayland, Florida vb.) için GEBCO
             isG = true;
-            const delta = 0.0005;
+            const delta = 0.005; // 0.0005 çok dardı, MapServer hata vermemesi için büyütüldü
             const minL = (lonNum - delta).toFixed(4);
             const minA = (latNum - delta).toFixed(4);
             const maxL = (lonNum + delta).toFixed(4);
             const maxA = (latNum + delta).toFixed(4);
             
-            url = `https://wms.gebco.net/mapserv?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo` +
+            // DÜZELTME: Doğru GEBCO endpoint'i ve axis karmaşasını önlemek için WMS 1.1.1 (X, Y, SRS)
+            url = `https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?` +
+                  `SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo` +
                   `&LAYERS=GEBCO_LATEST&QUERY_LAYERS=GEBCO_LATEST` +
                   `&BBOX=${minL},${minA},${maxL},${maxA}` +
-                  `&WIDTH=101&HEIGHT=101&I=50&J=50&CRS=CRS:84&INFO_FORMAT=text/plain`;
+                  `&WIDTH=101&HEIGHT=101&X=50&Y=50&SRS=EPSG:4326&INFO_FORMAT=text/plain`;
         }
 
         const res = await fetch(url, { signal: controller.signal });
         clearTimeout(timeoutId);
 
-        if (!res.ok) return null;
+        if (!res.ok) {
+            console.log(`[BATHYMETRY] HTTP ${res.status} from ${isG ? 'GEBCO' : 'EMODnet'}`);
+            return null;
+        }
         
         if (isG) {
             const text = await res.text();
             return parseGebcoDepth(text);
         } else {
             const b = await res.json();
-            return (b && b.avg !== undefined) ? ((b.smoothed !== undefined && b.smoothed < 0) ? b.smoothed : b.avg) : null;
+            // EMODnet değerini de pozitif derinlik (Math.abs) olarak standardize ediyoruz
+            if (b && b.avg !== undefined) {
+                const rawDepth = (b.smoothed !== undefined && b.smoothed < 0) ? b.smoothed : b.avg;
+                return rawDepth < 0 ? Math.abs(rawDepth) : null;
+            }
+            return null;
         }
     } catch (e) {
         clearTimeout(timeoutId);
+        console.log(`[BATHYMETRY] Fetch failed: ${e.message}`);
         return null;
     }
 }
