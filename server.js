@@ -2901,11 +2901,11 @@ app.get('/api/forecast', async (req, res) => {
         // Weather hourlyOffset (past_days=1): bugün = indeks 24
         const utcOffsetSeconds = weather.utc_offset_seconds || 0;
         const marineHourlyOffset = findTodayIndex(marine.hourly.time, utcOffsetSeconds); 
+        const hourlyOffset = 24;         // weather için bugünün başlangıcı
 
 
         // UTC offset düzeltmesi — sunucu UTC'de çalışır, Open-Meteo yerel saat döner
         // utc_offset_seconds kullanarak gerçek yerel saati hesapla
-        const utcOffsetSeconds = weather.utc_offset_seconds || 0;
         const localClickHour = Math.floor((Date.now() / 1000 + utcOffsetSeconds) % 86400 / 3600);
         const correctedClickHour = localClickHour; // artık clickHour yerine bunu kullan
 
