@@ -506,7 +506,7 @@ async function fetchSubstrate(lat, lon) {
         // 🇺🇸 NOAA ArcGIS REST API (nos_seabed_dynamic — kesin adres)
         wmsUrl = `https://gis.ngdc.noaa.gov/arcgis/rest/services/web_mercator/nos_seabed_dynamic/MapServer/0/query` +
             `?geometry=${lonR},${latR}&geometryType=esriGeometryPoint&inSR=4326` +
-            `&spatialRel=esriSpatialRelIntersects&outFields=DESCRP,PRIMARY_LITHOLOGY&returnGeometry=false&f=pjson`;
+            `&spatialRel=esriSpatialRelIntersects&distance=50000&units=esriSRUnit_Meter&outFields=DESCRP,PRIMARY_LITHOLOGY&returnGeometry=false&f=pjson`;
     } else {
         // 🇪🇺 EMODnet Seabed Habitats (Europe/Global)
         wmsUrl = `https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/ows` +
