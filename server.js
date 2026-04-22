@@ -1101,48 +1101,51 @@ function getTempGateMultiplier(tempWater, tempRange) {
 }
 
 // Rüzgar Yönü Skoru
-function calculateWindScore(direction, speed, region) {
-    if (speed > 45) return 0.05;  // Fırtına - tehlikeli
-    if (speed > 35) return 0.2;   // Çok kuvvetli
+function calculateWindScore(direction, speed, region, lat, lon) {
+    if (speed > 45) return 0.05;
+    if (speed > 35) return 0.2;
 
     let score = 0.5;
 
-    // MARMARA: Poyraz (Kuzey/Kuzeydoğu) denizi yatırır = İYİ
-    //          Lodos (Güneybatı) denizi kaldırır = KÖTÜ
+    // ── TÜRKİYE BÖLGELERİ — Saha bilgisine dayalı yerel kurallar ────────────
     if (region === 'MARMARA') {
-        if (direction > 315 || direction < 60) score = 0.85;       // Poyraz/Kuzey - İYİ
-        else if (direction > 180 && direction < 270) score = 0.3;  // Lodos/Güneybatı - KÖTÜ
-        else if (direction >= 60 && direction <= 120) score = 0.6; // Doğu - ORTA
+        if (direction > 315 || direction < 60)  score = 0.85;
+        else if (direction > 180 && direction < 270) score = 0.3;
+        else if (direction >= 60 && direction <= 120) score = 0.6;
         else score = 0.5;
-    }
-    // EGE: Poyraz (Kuzey) berraklık getirir = İYİ
-    //      Lodos (Güney) bulanıklık getirir = KÖTÜ  
-    else if (region === 'EGE') {
-        if (direction > 315 || direction < 45) score = 0.85;       // Poyraz/Kuzey - İYİ
-        else if (direction > 135 && direction < 225) score = 0.35; // Güney/Lodos - KÖTÜ
-        else if (direction >= 45 && direction <= 135) score = 0.6; // Doğu - ORTA
+    } else if (region === 'EGE') {
+        if (direction > 315 || direction < 45)  score = 0.85;
+        else if (direction > 135 && direction < 225) score = 0.35;
+        else if (direction >= 45 && direction <= 135) score = 0.6;
         else score = 0.55;
-    }
-    // KARADENİZ: Güney rüzgarları kıyıya vuruyor = İYİ (balığı kıyıya iter)
-    //            Kuzey rüzgarları açığa iter = KÖTÜ
-    else if (region === 'KARADENİZ') {
-        if (direction > 135 && direction < 225) score = 0.8;       // Güney - İYİ
-        else if (direction > 315 || direction < 45) score = 0.35;  // Kuzey - KÖTÜ
+    } else if (region === 'KARADENİZ') {
+        if (direction > 135 && direction < 225) score = 0.8;
+        else if (direction > 315 || direction < 45) score = 0.35;
         else score = 0.55;
-    }
-    // AKDENİZ: Poyraz berraklık = İYİ, Lodos bulanıklık = KÖTÜ
-    else if (region === 'AKDENİZ') {
-        if (direction > 315 || direction < 60) score = 0.8;        // Kuzey/Kuzeydoğu - İYİ
-        else if (direction > 180 && direction < 270) score = 0.4;  // Güneybatı - KÖTÜ
+    } else if (region === 'AKDENİZ') {
+        if (direction > 315 || direction < 60)  score = 0.8;
+        else if (direction > 180 && direction < 270) score = 0.4;
         else score = 0.6;
+    } else {
+        // ── GLOBAL / AÇIK DENİZ — Kıyı yönüne göre dinamik hesap ────────────
+        // Strateji: Kıyı çizgisine paralel rüzgar = berrak su = iyi
+        //           Kıyıdan denize doğru = dalgalı = kötü
+        //           En basit yaklaşım: kuzey yarım kürede kuzey + doğu iyidir,
+        //           güney yarım kürede güney + doğu.
+        //           Enlem bazlı dinamik tercih.
+        const latF = lat ? parseFloat(lat) : 0;
+        if (latF >= 0) {
+            // Kuzey yarım küre: kuzey ve doğu rüzgarları genelde kıyıyı sakinleştirir
+            if (direction > 315 || direction < 90)  score = 0.75; // K + KD + D
+            else if (direction > 180 && direction < 270) score = 0.45; // GB
+            else score = 0.6;
+        } else {
+            // Güney yarım küre: güney ve doğu
+            if (direction > 90 && direction < 225) score = 0.75; // G + GD
+            else if (direction > 270 || direction < 45) score = 0.45; // KB
+            else score = 0.6;
+        }
     }
-    else {
-        score = 0.6; // AÇIK DENİZ
-    }
-
-    // FIX: Rüzgar hızı cezası KALDIRILDI — çift ceza sorunu.
-    // Hız cezası artık SADECE calculateFishScore() içinde uygulanıyor.
-    // Bu fonksiyon artık sadece rüzgar YÖN etkisini döndürüyor.
 
     return score;
 }
@@ -1395,6 +1398,33 @@ function getRegion(lat, lon) {
     if (lat <= 37.0 && lon >= 30.0) return 'AKDENİZ';
     if (lat > 37.0 && lat <= 40.5 && lon >= 30.0 && lon < 36.0) return 'AKDENİZ';
     return 'TÜRKİYE';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GLOBAL HABİTAT KONTROLÜ
+// Türkiye türleri → fish.regions ile bölge eşleşmesi (mevcut sistem)
+// Global türler   → fish.habitatBboxes ile koordinat kutusu eşleşmesi
+//
+// species.js'te regions:[] (boş dizi) olan türler global tür sayılır.
+// habitatBboxes formatı:
+//   [{ lat1, lon1, lat2, lon2, name }]  (lat1<lat2, lon1<lon2 olmalı)
+// ═══════════════════════════════════════════════════════════════════════════
+function isInHabitat(fish, lat, lon, regionName) {
+    // Türkiye türleri — mevcut bölge sistemi
+    if (fish.regions && fish.regions.length > 0) {
+        return fish.regions.includes(regionName) || regionName === 'AÇIK DENİZ';
+    }
+    // Global türler — bbox sistemi
+    if (fish.habitatBboxes && fish.habitatBboxes.length > 0) {
+        const latF = parseFloat(lat);
+        const lonF = parseFloat(lon);
+        return fish.habitatBboxes.some(b =>
+            latF >= b.lat1 && latF <= b.lat2 &&
+            lonF >= b.lon1 && lonF <= b.lon2
+        );
+    }
+    // Ne regions ne habitatBboxes var → güvenli taraf: gösterme
+    return false;
 }
 
 // Tuzluluk
@@ -1790,11 +1820,15 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     s_env += clarityScore * 5;
     scoreDetails.clarity = { score: clarityScore * 5, max: 5, stars: Math.round(clarityScore * 5), value: Math.round(clarity) };
 
-    const windScore = calculateWindScore(windDir, windSpeed, region);
+    const windScore = calculateWindScore(windDir, windSpeed, region, params.lat, params.lon);
     s_env += windScore * 5;
     scoreDetails.wind = { score: windScore * 5, max: 5, stars: Math.round(windScore * 5), value: windSpeed, dir: windDir };
 
-    const regionMatch = fish.regions.includes(region) || region === 'AÇIK DENİZ' ? 1.0 : 0.3;
+    const regionMatch = isInHabitat(fish, params.lat, params.lon, region) ? 1.0 : 0.0;
+    // Global türler: bbox dışındaysa skor 0'a zorla
+    if (!isInHabitat(fish, params.lat, params.lon, region)) {
+        return { finalScore: 0, score: 0, reason: i18n(lang).reasons.outOfRegion(region, (fish.regions||[]).join(', ')), activeTriggers: [], scoreDetails: {}, penalties: [] };
+    }
     s_env += regionMatch * 5;
     scoreDetails.region = { score: regionMatch * 5, max: 5, stars: Math.round(regionMatch * 5) };
 
@@ -2120,13 +2154,24 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
 
     // Dalga Yönü — Bölgeye göre korunaklılık
     if (waveDirection > 0) {
+        const _protectedLabel = i18n(lang).triggers.protectedDir.replace('🌊 ', '');
         const protectedDirs = {
-            'EGE': { favorable: [45, 135], label: i18n(lang).triggers.protectedDir.replace('🌊 ', '') },
-            'AKDENİZ': { favorable: [315, 45], label: 'Korunaklı Yön' },
-            'KARADENİZ': { favorable: [135, 225], label: 'Korunaklı Yön' },
-            'MARMARA': { favorable: [0, 90], label: 'Korunaklı Yön' }
+            'EGE':       { favorable: [45, 135],  label: _protectedLabel },
+            'AKDENİZ':   { favorable: [315, 45],  label: _protectedLabel },
+            'KARADENİZ': { favorable: [135, 225], label: _protectedLabel },
+            'MARMARA':   { favorable: [0, 90],    label: _protectedLabel }
         };
-        const pref = protectedDirs[region];
+        let pref = protectedDirs[region];
+
+        // Türkiye dışı bölgeler için: koordinat bazlı kıyı yönü tahmini
+        if (!pref && params.lat && params.lon) {
+            const latF = parseFloat(params.lat);
+            // Basit kural: kuzey yarım küre → doğudan gelen dalga genelde korunaklı
+            // güney yarım küre → batıdan gelen dalga
+            const favorable = latF >= 0 ? [45, 135] : [225, 315];
+            pref = { favorable, label: i18n(lang).triggers.protectedDir.replace('🌊 ', '') };
+        }
+
         if (pref) {
             const [lo, hi] = pref.favorable;
             const isFavorable = lo < hi
@@ -2862,7 +2907,7 @@ app.get('/api/forecast', async (req, res) => {
                 };
 
                 for (const [key, fish] of Object.entries(SPECIES_DB)) {
-                    if (!fish.regions.includes(regionName) && regionName !== 'AÇIK DENİZ') continue;
+                    if (!isInHabitat(fish, lat, lon, regionName)) continue;
 
                     // Ağırlıklı günlük skor hesapla (24 saatlik ortalama)
                     const dailyResult = calculateWeightedDailyScore(
@@ -3100,7 +3145,7 @@ app.get('/api/forecast', async (req, res) => {
 
             let instantFishList = [];
             for (const [key, fish] of Object.entries(SPECIES_DB)) {
-                if (!fish.regions.includes(regionName) && regionName !== 'AÇIK DENİZ') continue;
+                if (!isInHabitat(fish, lat, lon, regionName)) continue;
 
                 // 3 saatlik pencere ortalaması ile daha stabil skor (gürültü filtreleme)
                 const smoothedScore = calculate3HourWindowScore(
@@ -3547,7 +3592,7 @@ app.get('/api/fish-search', async (req, res) => {
         const seasonEff = fish.seasons[season] || 0;
 
         // Bölge kontrolü
-        if (!fish.regions.includes(regionName) && regionName !== 'AÇIK DENİZ') {
+        if (!isInHabitat(fish, lat, lon, regionName)) {
             reasons.push({ type: 'CRITICAL', text: i18n(lang).reasons.outOfRegion(regionName, fish.regions.join(', ')) });
         }
 
@@ -4226,7 +4271,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             let topFishName = '';
             const allFishScores = [];
             for (const [key, fish] of Object.entries(SPECIES_DB)) {
-                if (!fish.regions.includes(regionName) && regionName !== 'AÇIK DENİZ') continue;
+                if (!isInHabitat(fish, lat, lon, regionName)) continue;
                 try {
                     const dailyResult = calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
                     const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
@@ -4244,7 +4289,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         } else {
             const fish = SPECIES_DB[fishKey];
             if (!fish) return null;
-            if (!fish.regions.includes(regionName) && regionName !== 'AÇIK DENİZ') return null;
+            if (!isInHabitat(fish, lat, lon, regionName)) return null;
             try {
                 const dailyResult = calculateWeightedDailyScore(fish, fishKey, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
                 const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
