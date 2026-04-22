@@ -2668,7 +2668,7 @@ app.get('/api/forecast', async (req, res) => {
             cache.get(`raw_marine_${gLat}_${gLon}`)
                 ? Promise.resolve(cache.get(`raw_marine_${gLat}_${gLon}`))
                 : deduplicatedFetch(`m_${gLat}_${gLon}`, () => queuedFetch(marineUrl)),
-            skipBathymetry ? Promise.resolve(null) : fetchWithTimeout(bathymetryUrl).catch(() => null),
+            skipBathymetry ? Promise.resolve(null) : fetchBathymetry(lat, lon, 4500).catch(() => null),
             chlFromCache ? Promise.resolve(chlFromCache) : fetchChlorophyll(lat, lon).catch(() => null),
             fetchSatelliteSST(lat, lon).catch(() => null),
             fetchSubstrate(lat, lon).catch(() => null)
@@ -2744,26 +2744,14 @@ app.get('/api/forecast', async (req, res) => {
         // SST — paralel fetch sonucu (sstSatPre)
         // ─────────────────────────────────────────────────────────────────────
         let depthData = { avg: null, min: null, max: null };
-        let bathymetryRaw = null; // Ham değer (negatif=deniz, pozitif=kara)
-        try {
-            if (bathymetryRes && bathymetryRes.ok) {
-                const bathymetry = await bathymetryRes.json();
-                if (bathymetry && bathymetry.avg !== undefined) {
-                    // Kara/deniz tespiti için avg kullan (grid ortalaması)
-                    // Derinlik gösterimi için smoothed kullan (daha gerçekçi)
-                    bathymetryRaw = bathymetry.avg;
-                    const depthValue = (bathymetry.smoothed !== undefined && bathymetry.smoothed < 0)
-                        ? Math.abs(bathymetry.smoothed)
-                        : Math.abs(bathymetry.avg);
-                    depthData = {
-                        avg: depthValue,
-                        min: Math.abs(bathymetry.min || bathymetry.avg),
-                        max: Math.abs(bathymetry.max || bathymetry.avg)
-                    };
-                }
-            }
-        } catch (bathyErr) {
-            console.log('Bathymetry API error (non-critical):', bathyErr.message);
+        // bathymetryRaw zaten yukarıda Promise.all ile sayı olarak alındı
+        if (bathymetryRaw !== null) {
+            const depthValue = Math.abs(bathymetryRaw);
+            depthData = {
+                avg: depthValue,
+                min: depthValue,
+                max: depthValue
+            };
         }
 
         // === GELİŞMİŞ KARA TESPİTİ ===
@@ -3473,10 +3461,10 @@ app.get('/api/fish-search', async (req, res) => {
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`;
 
         // [CACHE] forecast endpoint daha önce aynı noktayı çektiyse ham veriyi kullan — OM'a gitme
-        let [weather, marine, bathymetryRes] = await Promise.all([
+        let [weather, marine, bathymetryRaw] = await Promise.all([
             cache.get(`raw_weather_${gLat}_${gLon}`) ? Promise.resolve(cache.get(`raw_weather_${gLat}_${gLon}`)) : queuedFetch(weatherUrl),
             cache.get(`raw_marine_${gLat}_${gLon}`) ? Promise.resolve(cache.get(`raw_marine_${gLat}_${gLon}`)) : queuedFetch(marineUrl),
-            skipBathymetry ? Promise.resolve(null) : fetchWithTimeout(bathymetryUrl).catch(() => null)
+            skipBathymetry ? Promise.resolve(null) : fetchBathymetry(latF, lonF, 4500).catch(() => null)
         ]);
 
         if (!weather || weather.error) {
@@ -3508,18 +3496,10 @@ app.get('/api/fish-search', async (req, res) => {
         clickHour = Math.floor((Date.now() / 1000 + _utcOff) % 86400 / 3600);
 
         let depthAvg = null;
-        let bathymetryRaw = null;
-        try {
-            if (bathymetryRes && bathymetryRes.ok) {
-                const bathymetry = await bathymetryRes.json();
-                if (bathymetry && bathymetry.avg !== undefined) {
-                    bathymetryRaw = bathymetry.avg;
-                    depthAvg = (bathymetry.smoothed !== undefined && bathymetry.smoothed < 0)
-                        ? Math.abs(bathymetry.smoothed)
-                        : Math.abs(bathymetry.avg);
-                }
-            }
-        } catch (e) { }
+        // bathymetryRaw zaten yukarıda Promise.all ile sayı olarak alındı
+        if (bathymetryRaw !== null) {
+            depthAvg = Math.abs(bathymetryRaw);
+        }
 
         // Gelişmiş kara tespiti
         let isLand = false;
@@ -4149,11 +4129,9 @@ function parseGebcoDepth(text) {
                   text.match(/(-?\d+(?:\.\d+)?)/); // Fallback: ilk sayıyı yakala
     
     if (match && match[1]) {
-        const val = parseFloat(match[1]);
-        // GEBCO denizi negatif (-) değerle verir. Derinlik bilgisini pozitif kullanıyoruz.
-        if (val < 0) return Math.abs(val);
+        return parseFloat(match[1]); // Negatif ise deniz, pozitif ise karadır.
     }
-    return null; // Sıfır veya pozitif (0, +10) ise karadır, null döndürür
+    return null;
 }
 
 // ── DÜZELTİLMİŞ FETCH FONKSİYONU ──
@@ -4206,10 +4184,8 @@ async function _fetchBathymetryBase(lat, lon, timeoutMs = 5000) {
             return depth;
         } else {
             const b = await res.json();
-            // EMODnet değerini de pozitif derinlik (Math.abs) olarak standardize ediyoruz
             if (b && b.avg !== undefined) {
-                const rawDepth = (b.smoothed !== undefined && b.smoothed < 0) ? b.smoothed : b.avg;
-                return rawDepth < 0 ? Math.abs(rawDepth) : null;
+                return (b.smoothed !== undefined && b.smoothed < 0) ? b.smoothed : b.avg;
             }
             return null;
         }
