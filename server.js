@@ -3267,7 +3267,8 @@ app.get('/api/forecast', async (req, res) => {
             const tideFlow = tideAmplitude; 
             const moonAltitude = tide.altitude;
 
-            const weatherSummary = getWeatherCondition(rain, windSpeed, cloud, clarity, timeMode);
+            // GÜN ÖZETİ (İkonlu Hava Durumu)
+            const weatherSummary = getWeatherIconicDescription(weatherCode, lang);
 
             let fishList = [];
 
