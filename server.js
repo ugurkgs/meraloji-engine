@@ -2171,6 +2171,10 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     if (solunar.isMajor) { s_trigger += 4; activeTriggers.push(i18n(lang).triggers.majorSolunar); }
     else if (solunar.isMinor) { s_trigger += 2; activeTriggers.push(i18n(lang).triggers.minorSolunar); }
 
+    if (pressureTrend && pressureTrend.pChange !== undefined) {
+        const pChange = pressureTrend.pChange;
+        const pSens = fish.pressureSensitivity || 0.5;
+
         // Basınç TRENDİ - V2.2 Süper Sentez (Claude tanh Modeli)
         /**
          * [BİLİMSEL NOT - V2.2]: Claude/Kimi sentezi.
@@ -2411,7 +2415,6 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         const fishDepth = fish.depth?.opt || 10;
         const diff = fishDepth - thermoclineDepth; // + = altında, - = üstünde
         const atBoundary = Math.abs(diff) <= 6; // ±6m termoklin bandı
-        const estDO = calculateOxygen(tempWater, salinity, chlorophyll, timeMode).saturation;
 
         if (atBoundary && estDO > 50) {
             // Termoklin sınırında: besin yoğunlaşması — tüm türler için bonus
@@ -2603,7 +2606,6 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
      * Termoklin bonusu 2 katına çıkarıldı (0.4) ve Oksijen doygunluğuna (%50) bağlandı.
      * Oksijen yetersizse (Hipoksi) termoklin zenginliği balığı çekmez.
      */
-    const estDO = calculateOxygen(tempWater, salinity, chlorophyll, timeMode).saturation;
     if (isDeepBottom && thermoclineDepth && depthAvg && estDO > 50) {
         const distToThermocline = Math.abs(depthAvg - thermoclineDepth);
         if (distToThermocline <= 10) {
