@@ -1385,17 +1385,32 @@ function estimateCurrent(wave, windSpeed, region) {
 // [DÜZELTME 4] Basınç Trendi Hesaplama
 // ── TOP 3 ORTALAMA SKOR (İSTİLACI ve KORUMA hariç) ──────────────────────
 function calcAvgScore(fishList) {
-    const EXCLUDED = ['İSTİLACI', 'KORUMA'];
+    const EXCLUDED = ['İSTİLACI', 'KORUMA', 'TİCARİ'];
     const eligible = fishList.filter(f => !EXCLUDED.includes(f.category));
     const top3 = eligible.slice(0, 3);
+    
     if (top3.length === 0) return { score: 0, dominant: false };
-    const avg = top3.reduce((sum, f) => sum + f.score, 0) / top3.length;
+
+    let score = 0;
+    const scores = top3.map(f => f.score);
+
+    // AI Konsensüsü: Dinamik Ağırlıklı Üssel Ortalama
+    if (scores.length === 3) {
+        score = (scores[0] * 0.60) + (scores[1] * 0.30) + (scores[2] * 0.10);
+    } else if (scores.length === 2) {
+        score = (scores[0] * 0.70) + (scores[1] * 0.30);
+    } else {
+        score = scores[0];
+    }
+
     let dominant = false;
     if (top3.length >= 2 && !EXCLUDED.includes(top3[0].category)) {
         const restAvg = top3.slice(1).reduce((sum, f) => sum + f.score, 0) / top3.slice(1).length;
-        dominant = (top3[0].score - restAvg) / restAvg >= 0.10;
+        // %10'dan fazla fark varsa dominant kabul et
+        dominant = (top3[0].score - restAvg) / (restAvg || 1) >= 0.10;
     }
-    return { score: parseFloat(avg.toFixed(1)), dominant };
+
+    return { score: parseFloat(score.toFixed(1)), dominant };
 }
 
 function calculatePressureTrend(pressureHistory) {
@@ -3163,11 +3178,17 @@ app.get('/api/forecast', async (req, res) => {
             const rawWaterTemp = marine.hourly?.sea_surface_temperature?.[marineHourlyIdx];
             // SST öncelik: NOAA uydu (~1km) → Open-Meteo (~10km) → bölgesel default
             // sstSat sadece bugün için geçerli — gelecek günler Open-Meteo SST kullanır
-            const tempWater = isLand ? 0 : (
+            let tempWater = isLand ? 0 : (
                 (i === 0 && sstSat !== null)
                     ? sstSat
                     : safeWaterTemp(rawWaterTemp, regionName, targetDate.getMonth())
             );
+
+            // [SANITY CHECK] Kutup bölgelerinde (Lat > 60) hatalı yüksek su sıcaklığı filtresi
+            if (parseFloat(lat) > 60 && tempWater > 12) {
+                console.log(`[SANITY] Kutup bölgesinde (${lat}) hatalı su sıcaklığı (${tempWater}C) düzeltildi.`);
+                tempWater = 4.5; // Grönland/Arktik için maksimum gerçekçi yaz sonu sıcaklığı
+            }
 
             const waveRaw = isLand ? 0 : safeNum(marine.daily?.wave_height_max?.[dailyIdx]);
             const tempAir = safeNum(weather.hourly?.temperature_2m?.[hourlyIdx]);
@@ -3341,21 +3362,22 @@ app.get('/api/forecast', async (req, res) => {
 
             if (isLand) {
                 tacticKey = "TACTIC_LAND";
-            } else if (wave > 2.0) {
+            } else if (wave > 1.5) { // 1.5m üstü dalga her zaman risklidir
                 tacticKey = "TACTIC_HIGH_WAVE";
-                tacticData = { warning: true };
+                tacticData = { warning: true, wave: wave.toFixed(1) };
             } else if (weatherSummary.includes("STORM")) {
                 tacticKey = "TACTIC_STORM";
                 tacticData = { warning: true };
-            } else if (windSpeed > 35) {
+            } else if (windSpeed > 30) { // 30km/h üstü sert rüzgardır
                 tacticKey = "TACTIC_STRONG_WIND";
                 tacticData = { warning: true, wind: windSpeed };
+            } else if (topScore < 15) { // [DÜZELTME] %0-15 arası çok düşük aktivitedir
+                tacticKey = "TACTIC_VERY_LOW_ACTIVITY";
+                tacticData = { suggest: "change_spot_or_time" };
             } else if (pressureTrend.trend === 'FALLING_FAST' && topScore >= 40) {
-                // Basınç düşüyor VE yeterli skor var — çılgın beslenme anlamlı
                 tacticKey = "TACTIC_FEEDING_FRENZY";
                 tacticData = { bonus: true };
-            } else if (highScoreFish.length > 0) {
-                // 85+ skor var - aktif taktik öner
+            } else if (highScoreFish.length > 0 && topScore >= 50) {
                 tacticKey = "TACTIC_HOT_SPOT";
                 tacticData = {
                     fish: highScoreFish.slice(0, 2).map(f => ({
@@ -3365,14 +3387,12 @@ app.get('/api/forecast', async (req, res) => {
                         lure: f.lure
                     }))
                 };
-            } else if (mediumScoreFish.length > 0) {
-                // 60-85 arası - orta aktivite
+            } else if (mediumScoreFish.length > 0 && topScore >= 35) {
                 tacticKey = "TACTIC_MODERATE";
                 tacticData = {
                     fish: mediumScoreFish.slice(0, 3).map(f => lang === 'en' ? (f.nameEn || f.name) : f.name)
                 };
             } else if (topScore < 40) {
-                // Düşük skor - mera değiştir önerisi
                 tacticKey = "TACTIC_LOW_ACTIVITY";
                 tacticData = { suggest: "change_spot" };
             } else {
