@@ -699,6 +699,7 @@ const SUBSTRATE_PREFS = {
     mezgit: ['SAND', 'MUD'],
     berlam: ['SAND', 'MUD'],
     izmarit: ['ROCK', 'MIXED'],
+    mirmir: ['SAND'], // [EKLENDİ] Mırmır kumluk uzmanıdır
     // Kafadanbacaklılar
     kalamar: ['SAND', 'MIXED'],
     ahtapot: ['ROCK', 'MIXED'],
@@ -2814,17 +2815,20 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
 
     // === KATMAN 4: HABİTAT FİNAL ÇARPANLARI ===
     // [GÜNCELLEME V2.2]: Substrat artık en sonda uygulanıyor.
-    // Böylece ağır hava koşulları (inhibitörler) substrat etkisini ezemez.
+    // [GÜNCELLEME V2.3]: Uzman taban balıkları (KUM_TABAN, DIP_DERIN) için zemin bonusu %15'e çıkarıldı.
     if (substrate) {
         const prefs = SUBSTRATE_PREFS[key];
         if (prefs !== undefined && prefs !== null) {
             if (prefs.includes(substrate)) {
-                rawScore *= 1.10; // Tercih edilen zemin — bonus
-                scoreDetails.substrate = { match: true, substrate, multiplier: 1.10 };
+                const isBottomSpecialist = fish.category === 'KUM_TABAN' || fish.category === 'DIP_DERIN';
+                const subMult = isBottomSpecialist ? 1.15 : 1.10;
+                
+                rawScore *= subMult; // Tercih edilen zemin — %10 veya %15 bonus
+                scoreDetails.substrate = { match: true, substrate, multiplier: subMult };
                 activeTriggers.push(i18n(lang).triggers.substrateLabel(substrate, i18n(lang).substrate[substrate] || substrate));
             } else {
-                rawScore *= 0.90; // Tercih edilmeyen zemin — ceza
-                scoreDetails.substrate = { match: false, substrate, multiplier: 0.90 };
+                rawScore *= 0.85; // Yanlış zemin cezası biraz artırıldı (-%15)
+                scoreDetails.substrate = { match: false, substrate, multiplier: 0.85 };
             }
         }
     }
