@@ -3634,9 +3634,21 @@ app.get('/api/forecast', async (req, res) => {
                 pressureTrend: i_pressureTrend.trend, clarity: i_clarity,
                 current: i_oceanCurrent !== null ? i_oceanCurrent : i_current,
                 currentIsReal: i_oceanCurrent !== null,
+                oxygen: parseFloat(i_oxygen.toFixed(1)),
+                upwelling: parseFloat(i_upwelling.toFixed(2)),
+                tide: i_tideFlow.toFixed(1),
+                salinity: salinity,
                 wavePeriod: parseFloat(i_wavePeriod.toFixed(1)),
                 swellHeight: parseFloat(i_swellHeight.toFixed(2)),
                 tempShock: i_tempShock.shock ? i_tempShock : null,
+                thermoclineDepth: i_thermoclineDepth,
+                moonlightIntensity: parseFloat(i_moonlightIntensity.toFixed(2)),
+                chlorophyll: chlorophyllData ? {
+                    value: chlorophyllData.chlorophyll,
+                    date: chlorophyllData.date,
+                    daysAgo: chlorophyllData.daysAgo,
+                    stale: chlorophyllData.stale || false
+                } : null,
                 timeMode: i_timeMode,
                 // YENİ (1F)
                 windGust: Math.round(i_windGust),
