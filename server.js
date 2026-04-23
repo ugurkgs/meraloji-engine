@@ -3662,7 +3662,7 @@ app.get('/api/forecast', async (req, res) => {
 
             instantData = {
                 score: i_topScore,
-                weatherSummary: getWeatherCondition(i_rain, i_wind, i_cloud, i_clarity, i_timeMode),
+                weatherSummary: i_topScore < 15 ? (lang === 'en' ? "Inefficient conditions" : "Verimsiz koşullar — aktivite çok düşük") : getWeatherCondition(i_rain, i_wind, i_cloud, i_clarity, i_timeMode),
                 tacticKey: instantTacticKey, tacticData: instantTacticData,
                 fishList: instantFishList.slice(0, 10),
                 temp: i_tempWater, 
