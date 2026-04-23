@@ -3655,7 +3655,7 @@ app.get('/api/forecast', async (req, res) => {
 
             instantData = {
                 score: i_topScore,
-                // ÜST KISIM: Sadece Hava Durumu (☀️ Güneşli, ⛈️ Fırtınalı vb.)
+                // ÜST KISIM: Sadece Hava Durumu (İkon + TR Metin)
                 weatherSummary: getWeatherIconicDescription(i_weatherCode, lang),
                 tacticKey: instantTacticKey, tacticData: instantTacticData,
                 fishList: instantFishList.slice(0, 10),
