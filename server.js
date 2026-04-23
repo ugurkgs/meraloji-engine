@@ -3621,17 +3621,19 @@ app.get('/api/forecast', async (req, res) => {
             const i_mediumScoreFish = instantFishList.filter(f => f.score >= 55 && f.score < 75 && f.category !== "TİCARİ");
             const { score: i_topScore, dominant: i_isDominant } = calcAvgScore(instantFishList);
 
-            if (i_wave > 2.0) {
+            if (i_wave > 1.5) { // 1.5m üstü dalga risklidir
                 instantTacticKey = "TACTIC_HIGH_WAVE";
-                instantTacticData = { warning: true };
-            } else if (i_wind > 35) {
+                instantTacticData = { warning: true, wave: i_wave.toFixed(1) };
+            } else if (i_wind > 30) { // 30km/h üstü sert rüzgardır
                 instantTacticKey = "TACTIC_STRONG_WIND";
-                instantTacticData = { warning: true };
+                instantTacticData = { warning: true, wind: i_wind };
+            } else if (i_topScore < 15) { // [DÜZELTME] Skor %0-15 ise "Çok Düşük Aktivite" ver
+                instantTacticKey = "TACTIC_VERY_LOW_ACTIVITY";
+                instantTacticData = { suggest: "change_spot_or_time" };
             } else if (i_pressureTrend.trend === 'FALLING_FAST' && i_topScore >= 40) {
-                // Basınç düşüyor VE yeterli skor var — çılgın beslenme anlamlı
                 instantTacticKey = "TACTIC_FEEDING_FRENZY";
                 instantTacticData = { bonus: true };
-            } else if (i_highScoreFish.length > 0) {
+            } else if (i_highScoreFish.length > 0 && i_topScore >= 50) {
                 instantTacticKey = "TACTIC_HOT_SPOT";
                 instantTacticData = {
                     fish: i_highScoreFish.slice(0, 2).map(f => ({
@@ -3641,7 +3643,7 @@ app.get('/api/forecast', async (req, res) => {
                         lure: f.lure
                     }))
                 };
-            } else if (i_mediumScoreFish.length > 0) {
+            } else if (i_mediumScoreFish.length > 0 && i_topScore >= 35) {
                 instantTacticKey = "TACTIC_MODERATE";
                 instantTacticData = {
                     fish: i_mediumScoreFish.slice(0, 3).map(f => f.name)
