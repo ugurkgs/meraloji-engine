@@ -1162,6 +1162,20 @@ function getGaussianScore(val, min, opt, max, optMin, optMax) {
     return Math.max(0.1, score);
 }
 
+// [DÜZELTME: Lethal Gate] — Balığın yaşayamayacağı sıcaklıkta skoru sıfırla
+// Bilimsel pay (margin): 4.5°C. Bu pay içinde skor lineer olarak 1'den 0'a düşer.
+function getTempGateMultiplier(temp, min, max) {
+    if (temp < min) {
+        const overshoot = min - temp;
+        return Math.max(0.0, 1.0 - (overshoot / 4.5));
+    }
+    if (temp > max) {
+        const overshoot = temp - max;
+        return Math.max(0.0, 1.0 - (overshoot / 3.0)); // Sıcak şoku daha hızlı öldürür
+    }
+    return 1.0;
+}
+
 // [DÜZELTME: Gating Multiplier] — Ölümcül sıcaklıkta skoru sıfıra götür
 // Balık biyolojik olarak o sıcaklıkta var olamıyorsa diğer tüm koşullar anlamsız.
 // min'in %20 altı veya max'ın %20 üstü = letal bölge → skor katmerli çöker.
@@ -1171,13 +1185,13 @@ function getGaussianScore(val, min, opt, max, optMin, optMax) {
 function calculateConfidence(params) {
     let score = 100;
 
-    if (!params.tempWater || params.tempWater === 0) score -= 20; // Su sıcaklığı yok — en kritik
-    if (params.wave === null || params.wave === undefined) score -= 10; // Dalga verisi yok
+    if (!params.tempWater || params.tempWater === 0) score -= 35; // Su sıcaklığı yok — KRİTİK
+    if (params.wave === null || params.wave === undefined) score -= 25; // Dalga verisi yok — KRİTİK
+    if (!params.depth || params.depth === null) score -= 20;  // Derinlik yok — KRİTİK
     if (!params.wavePeriod || params.wavePeriod === 0) score -= 5;  // Dalga periyodu yok
     if (!params.chlorophyll) score -= 10; // Klorofil yok
     if (params.chlorophyllStale) score -= 5;  // Klorofil bayat (7+ gün)
     if (!params.oceanCurrent) score -= 5;  // Akıntı tahmini kullanıldı
-    if (!params.depth || params.depth === null) score -= 5;  // Derinlik yok
 
     // YENİ (1E)
     if (!params.waveDirection) score -= 3;  // Dalga yönü yok
@@ -1185,11 +1199,11 @@ function calculateConfidence(params) {
 
     // Grid mesafesi cezası — API verisi farklı noktadan geliyorsa deniz verisi sapabilir
     const d = params.gridDistance || 0;
-    if (d > 9) score -= 15;
-    else if (d > 6) score -= 10;
-    else if (d > 3) score -= 5;
+    if (d > 9) score -= 20;
+    else if (d > 6) score -= 15;
+    else if (d > 3) score -= 10;
 
-    return Math.max(40, Math.round(score)); // Minimum 40 — hiçbir zaman sıfır değil
+    return Math.max(0, Math.round(score)); // Artık taban yok, veri yoksa güven 0'dır.
 }
 
 // İki koordinat arası mesafe (Haversine, km)
@@ -1200,23 +1214,6 @@ function haversineKm(lat1, lon1, lat2, lon2) {
     const a = Math.sin(dLat / 2) ** 2 +
         Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function getTempGateMultiplier(tempWater, tempRange) {
-    const { min, max } = tempRange;
-    // [DÜZELTİLDİ] 2°C çok keskin — 8°C'de hayatta olan balık 0 skor alıyordu.
-    // 4.5°C: doğada balıklar sınırın 2-3°C dışında hâlâ aktif (azalmış da olsa).
-    // Mevsim geçişlerinde gerçekçi olmayan sıfır skorların önüne geçer.
-    const lethalMargin = 4.5;
-    if (tempWater < min) {
-        const overshoot = min - tempWater;
-        return Math.max(0.0, 1.0 - (overshoot / lethalMargin));
-    }
-    if (tempWater > max) {
-        const overshoot = tempWater - max;
-        return Math.max(0.0, 1.0 - (overshoot / lethalMargin));
-    }
-    return 1.0; // Normal aralıkta: etkisiz
 }
 
 // Rüzgar Yönü Skoru
@@ -1279,23 +1276,23 @@ function calculateClarity(wave, windSpeed, rain) {
 }
 
 /** Oksijen seviyesini (mg/L) hesaplar - v4.0 Deep Reality */
-/** Oksijen seviyesini hesaplar - v4.0 Deep Reality */
 function calculateOxygen(temp, salinity, chlorophyll, timeMode) {
-    // 1. mg/L Tahmini (Henry Yasası basitleştirilmiş)
-    let mgL = 14.6 - (0.45 * temp) + (0.005 * temp * temp);
     const s = salinity || 36;
-    mgL = mgL * (1 - 0.006 * s); // Tuzluluk düzeltmesi
-
-    // Fotosentez/Respirasyon etkisi
+    
+    // 1. O sıcaklık ve tuzluluktaki teorik maksimum çözünürlük (Henry Yasası bazlı)
+    const baseSolubility = (14.6 - (0.45 * temp) + (0.005 * temp * temp)) * (1 - 0.006 * s);
+    
+    // 2. Tahmini mg/L (Baz çözünürlük üzerinden fotosentez/respirasyon eklenir)
+    let mgL = baseSolubility;
     const chl = parseFloat(chlorophyll || 0.1);
+    
     if (timeMode === 'DAY') mgL += Math.min(2.0, chl * 0.5);
     else mgL -= Math.min(1.0, chl * 0.3);
 
     mgL = Math.max(2.0, Math.min(13.0, mgL));
 
-    // 2. Doygunluk (%) Tahmini
-    // 10 mg/L (15C) yaklaşık %100 doygunluktur.
-    const saturation = (mgL / (14.6 * (1 - 0.006 * s))) * 100 * (1 + 0.015 * temp);
+    // 3. Doygunluk (%) = (Gerçek Değer / O Sıcaklıktaki Kapasite) * 100
+    const saturation = (mgL / baseSolubility) * 100;
 
     return { mgL: parseFloat(mgL.toFixed(1)), saturation: Math.round(saturation) };
 }
@@ -1312,7 +1309,9 @@ function calculateUpwelling(windSpeed, windDir, region) {
 
     if (coastAngle !== undefined) {
         const diff = Math.abs(windDir - coastAngle) % 180;
-        parallelism = Math.sin((diff * Math.PI) / 180); // 1 = tam paralel
+        // [KULLANICI TERCİHİ - V2.2]: Kıyıya dik esen rüzgar (90°) 
+        // upwelling/karışım için en iyi senaryo olarak kabul edilmiştir.
+        parallelism = Math.sin((diff * Math.PI) / 180); // 1 = tam dik (90°)
     }
 
     let intensity = parallelism * (windSpeed / 40);
@@ -1462,11 +1461,11 @@ function calculatePressureTrend(pressureHistory) {
     const newest = validPressures[validPressures.length - 1];
     const change = newest - oldest;
 
-    if (change < -4) return { trend: 'FALLING_FAST', change };
-    if (change < -2) return { trend: 'FALLING', change };
-    if (change > 4) return { trend: 'RISING_FAST', change };
-    if (change > 2) return { trend: 'RISING', change };
-    return { trend: 'STABLE', change };
+    if (change < -4) return { trend: 'FALLING_FAST', pChange: change };
+    if (change < -2) return { trend: 'FALLING', pChange: change };
+    if (change > 4) return { trend: 'RISING_FAST', pChange: change };
+    if (change > 2) return { trend: 'RISING', pChange: change };
+    return { trend: 'STABLE', pChange: change };
 }
 
 // SST Analizi — Şok (dün vs bugün) + 7 günlük trend (lineer regresyon)
@@ -1562,19 +1561,16 @@ function getSolunarWindow(date, lat = 41.0, lon = 29.0) {
 function getMoonPhaseMultiplier(phase, moonPref = 'neutral') {
     // 0.0 ve 1.0 Yeni Ay, 0.5 Dolunay'dır.
     if (moonPref === 'bright') {
-        if (phase > 0.3 && phase < 0.7) return 1.05; // Bonus %15 -> %5 (V2.2 Sentez)
-        if (phase < 0.15 || phase > 0.85) return 0.60; // Ceza %30'dan %40'a çıkarıldı
+        if (phase > 0.3 && phase < 0.7) return 1.05; // Bonus %5
+        if (phase < 0.15 || phase > 0.85) return 0.85; // Ceza %40 -> %15 (Daha dürüst)
     } else if (moonPref === 'dark') {
-        if (phase < 0.2 || phase > 0.8) return 1.10; // Bonus %15'ten %10'a düşürüldü
-        if (phase > 0.4 && phase < 0.6) return 0.55; // Ceza %35'ten %45'e çıkarıldı
+        if (phase < 0.2 || phase > 0.8) return 1.10; // Bonus %10
+        if (phase > 0.4 && phase < 0.6) return 0.80; // Ceza %45 -> %20 (Daha dürüst)
     }
 
-    // Nötr tercihler için hafif solunar etkisi
-    if (phase < 0.1 || phase > 0.9) return 1.10; // Yeni ay
-    if (phase > 0.45 && phase < 0.55) return 1.08; // Dolunay
-
-    if (phase > 0.22 && phase < 0.28) return 1.01; // V2.2 Sentez (Daraltıldı)
-    if (phase > 0.72 && phase < 0.78) return 1.01;
+    // Nötr tercihler için hafif solunar/ışık etkisi
+    if (phase < 0.1 || phase > 0.9) return 1.05; // Yeni ay hafif bonus
+    if (phase > 0.45 && phase < 0.55) return 1.03; // Dolunay hafif bonus
 
     return 1.0;
 }
@@ -2098,9 +2094,16 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     const tMin = fish.tempRange.min, tOpt = fish.tempRange.opt, tMax = fish.tempRange.max;
     const tOptMin = fish.tempRange.optMin ?? (tOpt - (tOpt - tMin) * 0.35);
     const tOptMax = fish.tempRange.optMax ?? (tOpt + (tMax - tOpt) * 0.35);
-    const tempScore = getGaussianScore(tempWater, tMin, tOpt, tMax, tOptMin, tOptMax);
+    
+    // Gaussian/Trapezoid skoru
+    const gaussianScore = getGaussianScore(tempWater, tMin, tOpt, tMax, tOptMin, tOptMax);
+    
+    // Lethal Gate — Çifte cezayı önlemek için doğrudan sıcaklık skoruna uygulanır
+    const gateMultiplier = getTempGateMultiplier(tempWater, tMin, tMax);
+    const tempScore = gaussianScore * gateMultiplier;
+    
     let s_temp = tempScore * 25;
-    scoreDetails.temp = { score: s_temp, max: 25, stars: Math.round(tempScore * 5), value: tempWater };
+    scoreDetails.temp = { score: s_temp, max: 25, stars: Math.round(tempScore * 5), value: tempWater, gate: gateMultiplier };
 
     // 3. ÇEVRESEL (Max 20)
     let s_env = 0;
@@ -2201,6 +2204,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
                     : pChange <= 1.5 ? 2 : 1;
 
         scoreDetails.pressure = {
+            score: Math.abs(parseFloat(pEffect.toFixed(2))), // Gerçek etki puanı (0-2.5 arası)
+            max: 2.5,
             stars: pressureStars,
             trend: pressureTrend.trend,
             change: pChange,
@@ -2368,29 +2373,42 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // "cold shock" yaşar → lethargic hale gelir → ceza almalı.
     if (tempShock && tempShock.shock) {
         const isMigratoryPelagic = fish.category === 'PELAJIK' || fish.sstTrendPref === 'cooling';
-        const isCoastalSensitive = fish.category === 'KIYI' || fish.category === 'DİP';
+        const isCoastalSensitive = fish.category === 'KIYI' || fish.category === 'LAGUN';
+        const isBenthic = ['DIP_DERIN', 'DIP_KIYI', 'KAYALIK', 'DİP', 'DERİN', 'KAFADANBACAKLI', 'KALAMAR'].includes(fish.category);
+        
         if (tempShock.direction === 'COOLING') {
             if (isMigratoryPelagic) {
-                // Pelagik göçmenler için güçlü pozitif tetikleyici
+                // Pelagik göçmenler için güçlü pozitif tetikleyici (göç sinyali)
                 s_trigger += 3;
                 activeTriggers.push(i18n(lang).triggers.migrationShock(tempShock.change));
             } else if (isCoastalSensitive) {
-                // Kıyı/dip türleri için ceza: ani soğuma → uyuşukluk
-                s_trigger -= 1.5;
+                // Hassas kıyı türleri için ağır ceza: ani soğuma -> lethargic (uyuşukluk)
+                s_trigger -= 2.0;
                 activeTriggers.push(i18n(lang).triggers.coolingShock(tempShock.change));
+            } else if (isBenthic) {
+                // Dip türleri ve kafadanbacaklılar: metabolizma yavaşlar ama dramatik bir çöküş değildir
+                s_trigger -= 0.5;
             } else {
-                // Diğer türler — nötr, hafif negatif
-                s_trigger += 0.5;
+                // Diğer tüm genel türler için standart soğuma şoku stresi
+                s_trigger -= 1.0; 
             }
         } else if (tempShock.direction === 'WARMING') {
             if (fish.sstTrendPref === 'warming') {
                 s_trigger += 2; // Isınmayı seven türler için bonus
                 activeTriggers.push(i18n(lang).triggers.warmingShock(tempShock.change));
+            } else if (fish.sstTrendPref === 'cooling') {
+                s_trigger -= 1.0; // Soğuk seven balık için ani ısınma stresi
             } else {
-                s_trigger += 0.5; // Genel hafif ısınma bonusu
+                s_trigger += 0.0; // Nötr
             }
         }
-        scoreDetails.tempShock = { change: tempShock.change, direction: tempShock.direction, isMigratoryPelagic, isCoastalSensitive };
+        scoreDetails.tempShock = { 
+            change: tempShock.change, 
+            direction: tempShock.direction, 
+            isMigratoryPelagic, 
+            isCoastalSensitive,
+            isBenthic
+        };
     }
 
     // SST 7 Günlük Trend — yavaş ama süregelen değişim
@@ -2422,15 +2440,21 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     if (thermoclineDepth !== null && thermoclineDepth !== undefined) {
         const fishDepth = fish.depth?.opt || 10;
         const diff = fishDepth - thermoclineDepth; // + = altında, - = üstünde
-        const atBoundary = Math.abs(diff) <= 6; // ±6m termoklin bandı
+        const dist = Math.abs(diff);
+        const atBoundary = dist <= 10; // Genişletilmiş 10m termoklin bandı
 
+        /**
+         * [BİLİMSEL NOT - V2.2]: Claude/Gemini sentezi. 
+         * Termoklin bonusu mesafeye bağlı dinamikleşti ve Oksijen doygunluğuna (%50) bağlandı.
+         * Oksijen yetersizse (Hipoksi) termoklin zenginliği balığı çekmez.
+         */
         if (atBoundary && estDO > 50) {
-            // Termoklin sınırında: besin yoğunlaşması — tüm türler için bonus
-            // [BİLİMSEL NOT - V2.2]: Claude/Gemini sentezi. %50 altı oksijende bonus iptal.
-            s_trigger += 3;
-            activeTriggers.push(i18n(lang).triggers.thermocline(thermoclineDepth));
-            scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'AT', stars: 5 };
-        } else if (diff > 6) {
+            // Mesafeye göre dinamik bonus (0-4 puan)
+            const thermBonus = Math.max(1.0, (10 - dist) * 0.4); 
+            s_trigger += thermBonus;
+            activeTriggers.push(i18n(lang).triggers.thermocline(Math.round(thermoclineDepth)));
+            scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'AT', stars: 5, bonus: parseFloat(thermBonus.toFixed(1)) };
+        } else if (diff > 10) {
             // Balık termoklinin altında — dip türler için normal, yüzey türler için ceza
             if (['DIP_KIYI', 'DIP_DERIN', 'KAYALIK', 'DİP', 'DERİN'].includes(fish.category)) {
                 s_trigger += 1.5; // Dip türü termoklin altında — doğal habitat
@@ -2450,28 +2474,6 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         }
     }
 
-    // AY IŞIĞI ŞİDDETİ — Sadece gece saatlerinde aktif
-    if (moonlightIntensity !== undefined && moonlightIntensity !== null && timeMode === 'NIGHT') {
-        const pref = fish.moonPref || 'neutral';
-        const intensity = moonlightIntensity; // 0-1
-
-        if (pref === 'bright') {
-            // Aydınlık sever: kalamar, bazı dip türleri — dolunayda av kolaylaşır
-            const bonus = Math.round(intensity * 8 * 10) / 10;
-            if (bonus > 0) { s_trigger += bonus; activeTriggers.push(i18n(lang).triggers.moonlight((intensity * 100).toFixed(0))); }
-            scoreDetails.moonlight = { intensity, pref, bonus, stars: Math.round(intensity * 5) };
-        } else if (pref === 'dark') {
-            // Karanlık sever: lüfer, çinekop, torik — dolunayda sürü dağılır
-            const penalty = Math.round(intensity * 8 * 10) / 10;
-            if (penalty > 1) { s_trigger -= penalty; }
-            const stars = intensity < 0.2 ? 5 : intensity < 0.5 ? 3 : 1;
-            scoreDetails.moonlight = { intensity, pref, penalty, stars };
-        } else {
-            // neutral — hafif etki, stabil ay ışığı biraz avlanmayı kolaylaştırır
-            if (intensity > 0.3) { s_trigger += 1; }
-            scoreDetails.moonlight = { intensity, pref, stars: 3 };
-        }
-    }
 
     // [YENİ] KLOROFİL-A — Plankton yoğunluğu → besin zinciri etkisi
     // Sadece planktonPref tanımlı türlere uygulanır (pelajik, sürü, kıyı avcılar)
@@ -2599,86 +2601,64 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         const visMod = isDeepBottom ? 0.2 : (isVisualPredator ? 1.5 : (fish.clarityPref === 'CLEAR' ? 1.0 : 0.5));
 
         if (visibility < 1000) {
-            s_trigger -= (isVisualPredator ? 15 : 6) * visMod;
+            // [DÜZELTİLDİ: V2.2] — Baz ceza 15'ten 8'e düşürüldü (1.5x ile 12 puan - Sınırı taşırmaz)
+            s_trigger -= (isVisualPredator ? 8 : 4) * visMod;
             if (visMod > 0) activeTriggers.push(i18n(lang).triggers.denseFog);
         } else if (visibility < 5000) {
-            s_trigger -= (isVisualPredator ? 6 : 3) * visMod;
+            s_trigger -= (isVisualPredator ? 4 : 2) * visMod;
             if (visMod > 0) activeTriggers.push(i18n(lang).triggers.reducedVis);
         }
         scoreDetails.visibility = { value: visibility, km: parseFloat((visibility / 1000).toFixed(1)), isVisualPredator };
     }
 
-    // Termoklin & Oksijen Sinerjisi - V2.2 Süper Sentez (Claude/Gemini)
-    /**
-     * [BİLİMSEL NOT - V2.2]: Claude/Gemini sentezi.
-     * Termoklin bonusu 2 katına çıkarıldı (0.4) ve Oksijen doygunluğuna (%50) bağlandı.
-     * Oksijen yetersizse (Hipoksi) termoklin zenginliği balığı çekmez.
-     */
-    if (isDeepBottom && thermoclineDepth && depthAvg && estDO > 50) {
-        const distToThermocline = Math.abs(depthAvg - thermoclineDepth);
-        if (distToThermocline <= 10) {
-            const thermBonus = (10 - distToThermocline) * 0.4; // 0.2 -> 0.4 (2x Ağırlık)
-            s_trigger += thermBonus;
-            activeTriggers.push(i18n(lang).triggers.thermocline(Math.round(thermoclineDepth)));
-            scoreDetails.thermoclineBonus = { depth: thermoclineDepth, bonus: thermBonus };
-        }
-    }
 
     s_trigger = asymptoticTriggerSum(s_trigger);
-
-    // [DÜRÜST BİLİM İNSANI] Barometrik Enerji Faktörü (Mutlak Basınç)
-    // 1013.25 hPa standarttır. Çok yüksek basınç balığı baskılar, düşük basınç hareketlendirir.
-    // Etki gücü artırıldı: Divizör 1000 -> 300. (1030hPa artık ~%6 ceza veriyor)
-    const absPressureFactor = 1.0 + (1013.25 - pressure) / 250; // V2.2: 300 -> 250 (Claude/Gemini Sentezi)
 
     scoreDetails.trigger = {
         score: parseFloat(s_trigger.toFixed(1)),
         max: 12,
-        triggers: activeTriggers,
-        absPressureFactor: parseFloat(absPressureFactor.toFixed(3))
+        triggers: activeTriggers
     };
 
-    // TOPLAM
+    // === KATMAN 1: TEMEL TOPLAM (BASE POTENTIAL) ===
     let rawScore = s_season + s_temp + s_env + s_activity + s_trigger;
-    rawScore *= absPressureFactor; // Mutlak basınç çarpanı
 
-    // wavePeriod rawScore çarpanı — dip türleri yüzey dalga periyodundan az etkilenir
-    if (wavePeriod > 0) {
-        let wavePeriodMult = 1.0;
-        if (isDeepBottom) {
-            // Dip türleri: periyot etkisi çok hafif (yüzey olayı)
-            if (wavePeriod <= 3 && wave > 0.5) wavePeriodMult = 0.95;
-            else if (wavePeriod >= 10) wavePeriodMult = 1.03;
-        } else {
-            // Yüzey/kıyı türleri: yumuşatılmış çarpanlar (eski: 0.70→0.85, 0.85→0.92)
-            if (wavePeriod <= 3 && wave > 0.3) wavePeriodMult = 0.85;
-            else if (wavePeriod <= 5 && wave > 0.5) wavePeriodMult = 0.92;
-            else if (wavePeriod >= 10) wavePeriodMult = 1.08;
-            else if (wavePeriod >= 8) wavePeriodMult = 1.04;
-        }
-        rawScore *= wavePeriodMult;
-    }
-
+    // === KATMAN 2: BİYOLOJİK POTANSİYEL ÇARPANLARI ===
+    // Bu çarpanlar balığın o bölgedeki temel var olma potansiyelini belirler.
+    
+    // 1. Ay Fazı Çarpanı
     if (moonPhase !== undefined) {
         const moonMult = getMoonPhaseMultiplier(moonPhase, fish.moonPref);
         rawScore *= moonMult;
         scoreDetails.moon = { multiplier: moonMult, phase: moonPhase, pref: fish.moonPref };
     }
 
+
+    // 3. Dalga Periyodu (Swell) Çarpanı
+    if (wavePeriod > 0) {
+        let wavePeriodMult = 1.0;
+        if (isDeepBottom) {
+            if (wavePeriod <= 3 && wave > 0.5) wavePeriodMult = 0.95;
+            else if (wavePeriod >= 10) wavePeriodMult = 1.03;
+        } else {
+            if (wavePeriod <= 3 && wave > 0.3) wavePeriodMult = 0.85;
+            else if (wavePeriod <= 5 && wave > 0.5) wavePeriodMult = 0.92;
+            else if (wavePeriod >= 10) wavePeriodMult = 1.08;
+            else if (wavePeriod >= 8) wavePeriodMult = 1.04;
+        }
+        rawScore *= wavePeriodMult;
+        scoreDetails.wavePeriodMult = wavePeriodMult;
+    }
+
+    // === KATMAN 3: ÇEVRESEL ENGELLEYİCİLER (INHIBITORS) ===
+    // Bu çarpanlar dış koşulların avcılığı ne kadar zorlaştırdığını belirler.
+
     // CEZALAR
     let penalties = [];
 
-    // Dinamik Metabolik Kapı (Gate) - V2.2 Süper Sentez (Claude/Gemini)
-    /**
-     * [BİLİMSEL NOT - V2.2]: Claude uyarısı (T_opt - 8).
-     * Sabit 15°C yerine türün optimum sıcaklığına bağlı dinamik eşik kullanıldı.
-     * Q10 katsayısı gereği metabolik hızdaki düşüş (Termik Niş dışı) simüle edildi.
-     */
-    const metabolicThreshold = (fish.tempRange.opt || 20) - 8;
-    if (tempWater < metabolicThreshold) {
-        const tempGate = 0.4 + (tempWater / metabolicThreshold) * 0.6; // %40 Floor korunarak lineer sönümleme
-        rawScore *= tempGate;
-        scoreDetails.tempGate = { multiplier: parseFloat(tempGate.toFixed(2)), threshold: metabolicThreshold, status: 'METABOLIC_SLOWDOWN' };
+    // [DÜZELTİLDİ: V2.2 Sentez] — Eski agresif metabolicThreshold kapısı kaldırıldı.
+    // Artık sadece kritik 'min' değerinin altında s_temp üzerinden gate uygulanıyor.
+    if (tempWater < (fish.tempRange.min || 10)) {
         penalties.push(i18n(lang).penalties.criticalTemp);
     }
 
@@ -2740,23 +2720,6 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         }
     }
 
-    // === DİP YAPISI (SUBSTRAT) SKORU — EMODnet Seabed Habitats ===
-    // Tür tercih ettiği dip yapısındaysa %10 bonus, yanlış zeminindeyse %10 ceza.
-    // Pelajik türler (SUBSTRATE_PREFS[key] === null) etkilenmez.
-    // Substrat verisi yoksa (null) etki uygulanmaz — güvenli fallback.
-    if (substrate) {
-        const prefs = SUBSTRATE_PREFS[key];
-        if (prefs !== undefined && prefs !== null) {
-            if (prefs.includes(substrate)) {
-                rawScore *= 1.10; // Tercih edilen zemin — bonus
-                scoreDetails.substrate = { match: true, substrate, multiplier: 1.10 };
-                activeTriggers.push(i18n(lang).triggers.substrateLabel(substrate, i18n(lang).substrate[substrate] || substrate));
-            } else {
-                rawScore *= 0.90; // Tercih edilmeyen zemin — ceza
-                scoreDetails.substrate = { match: false, substrate, multiplier: 0.90 };
-            }
-        }
-    }
 
     // === FAZ 1.5: KIYI / TEKNE FİLTRESİ ===
     if (!isBoat && depthAvg !== undefined && depthAvg !== null) {
@@ -2846,33 +2809,25 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         if (wave > 0.8) { rawScore *= 0.4; penalties.push(i18n(lang).penalties.wavyWater); }
     }
 
-    // === FAZ 3: PELAJİK VOLATİLİTE (Günlük seed) ===
-    if (fish.category === "PELAJIK" || fish.category === "SÜRÜ") {
-        // Günlük seed: aynı gün aynı tür için aynı volatilite
-        const dayOfYear = Math.floor((targetDate - new Date(targetDate.getFullYear(), 0, 0)) / 86400000);
-        const seedStr = `${key}_${dayOfYear}_${targetDate.getFullYear()}`;
-        let hash = 0;
-        for (let c = 0; c < seedStr.length; c++) {
-            hash = ((hash << 5) - hash) + seedStr.charCodeAt(c);
-            hash |= 0;
-        }
-        const pseudoRand = (Math.abs(hash) % 1000) / 1000; // 0-1 arası deterministik
-
-        // Yüksek göçmen türler: 0.75-1.20 (daraltıldı — eski: 0.65-1.35)
-        // Normal pelagik/sürü türler: 0.85-1.15 (daraltıldı — eski: 0.80-1.20)
-        // Sebep: Geniş band 75 puanlık balığı 95'e çıkarıyordu, kullanıcıyı yanıltıyordu
-        const isHighMigratory = ['lufer', 'palamut', 'torik', 'sarikanat', 'kolyoz', 'istavrit', 'lapsari'].includes(key);
-        const volMin = isHighMigratory ? 0.75 : 0.85;
-        const volRange = isHighMigratory ? 0.45 : 0.30;
-        const volatility = volMin + (pseudoRand * volRange);
-
-        rawScore *= volatility;
-        scoreDetails.volatility = { multiplier: volatility.toFixed(2), migratory: isHighMigratory };
-        if (volatility < 0.85) { penalties.push(i18n(lang).penalties.noSchool); }
-        else if (volatility > 1.10) { activeTriggers.push(i18n(lang).penalties.schoolActive); }
-    }
 
     scoreDetails.penalties = penalties;
+
+    // === KATMAN 4: HABİTAT FİNAL ÇARPANLARI ===
+    // [GÜNCELLEME V2.2]: Substrat artık en sonda uygulanıyor.
+    // Böylece ağır hava koşulları (inhibitörler) substrat etkisini ezemez.
+    if (substrate) {
+        const prefs = SUBSTRATE_PREFS[key];
+        if (prefs !== undefined && prefs !== null) {
+            if (prefs.includes(substrate)) {
+                rawScore *= 1.10; // Tercih edilen zemin — bonus
+                scoreDetails.substrate = { match: true, substrate, multiplier: 1.10 };
+                activeTriggers.push(i18n(lang).triggers.substrateLabel(substrate, i18n(lang).substrate[substrate] || substrate));
+            } else {
+                rawScore *= 0.90; // Tercih edilmeyen zemin — ceza
+                scoreDetails.substrate = { match: false, substrate, multiplier: 0.90 };
+            }
+        }
+    }
 
     // === FAZ 2: OVER-STACKING KORUMA — Minimum taban ===
     rawScore = Math.max(3, rawScore);
@@ -2880,7 +2835,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // === MATEMATİKSEL OLARAK DÜRÜST ASİMPTOTİK SIKIŞTIRMA - V2.2 Süper Sentez ===
     /**
      * [BİLİMSEL NOT - V2.2]: DeepSeek/Claude sentezi.
-     * Skor 80'e kadar lineer artar. 80'den sonra 98'e doğru sönümlenir.
+     * Skor 80'e kadar lineer artar. 80'den sonra asimptotik olarak 98'e doğru sönümlenir.
+     * Formül: f(x) = 98 - 18 * exp(-(x - 80) / 25)
      * Bu baraj, "İyi" ile "Mükemmel" arasındaki ince farkı dürüstçe ayrıştırır.
      */
     let finalScore = Math.max(0, rawScore);
@@ -3292,11 +3248,10 @@ app.get('/api/forecast', async (req, res) => {
             const oxygenData = isLand ? { mgL: 0 } : calculateOxygen(tempWater, salinity, chlorophyll, timeMode);
             const oxygen = oxygenData.mgL;
             const upwelling = isLand ? 0 : calculateUpwelling(windSpeed, windDir, regionName);
-            const tide = SunCalc.getMoonPosition(targetDate, lat, lon);
-            // TideFlow artık bir "genlik" (amplitude) çarpanıdır. Yeni/Dolunayda (Spring tide) daha yüksektir.
-            // TÜM ENDPOINT'LERDE AYNI FORMÜL (Tutarlılık için)
+            // GELGİT AKINTISI (Tide Flow) — V2.2 Birleşik Model (Faz + İrtifa)
             const tideAmplitude = 1.0 + Math.abs(Math.cos(moon.phase * Math.PI * 2)) * 0.5;
-            const tideFlow = tideAmplitude;
+            const tideAltitudeFactor = Math.abs(Math.sin(tide.altitude));
+            const tideFlow = tideAmplitude * tideAltitudeFactor * 1.5;
             const moonAltitude = tide.altitude;
 
             // GÜN ÖZETİ (İkonlu Hava Durumu)
@@ -3309,7 +3264,7 @@ app.get('/api/forecast', async (req, res) => {
                 const baseParams = {
                     tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
                     timeMode, solunar,
-                    region: regionName, // FIX: Çevrilmiş isim değil, ham kod gönder (eşleşme için)
+                    region: regionName,
                     targetDate, isInstant: false,
                     currentSpeed: currentEst,
                     pressureTrend: pressureTrend,
@@ -3493,6 +3448,8 @@ app.get('/api/forecast', async (req, res) => {
                     chlorophyllStale: chlorophyllData ? chlorophyllData.stale : true,
                     oceanCurrent,
                     depth: depthData ? depthData.avg : null,
+                    waveDirection: marine.hourly?.wave_direction?.[i * 24 + 12],
+                    visibility: weather.hourly?.visibility?.[i * 24 + 12],
                     gridDistance: (() => {
                         if (!marine.latitude || !marine.longitude) return 0;
                         const d = haversineKm(parseFloat(lat), parseFloat(lon), parseFloat(marine.latitude), parseFloat(marine.longitude));
@@ -3564,7 +3521,8 @@ app.get('/api/forecast', async (req, res) => {
             }
 
             const i_tide = SunCalc.getMoonPosition(instantDate, lat, lon);
-            const i_tideFlow = Math.abs(Math.sin(i_tide.altitude)) * 1.5;
+            const i_tideAmplitude = 1.0 + Math.abs(Math.cos(i_moon.phase * Math.PI * 2)) * 0.5;
+            const i_tideFlow = i_tideAmplitude * Math.abs(Math.sin(i_tide.altitude)) * 1.5;
 
             // Base params (calculate3HourWindowScore için)
             const baseParams = {
@@ -3730,7 +3688,23 @@ app.get('/api/forecast', async (req, res) => {
                 windWaveHeight: parseFloat(i_windWaveHeight.toFixed(2)),
                 swellPeriod: parseFloat(i_swellPeriod.toFixed(1)),
                 visibility: i_visibility,
-                weatherCode: i_weatherCode
+                weatherCode: i_weatherCode,
+                confidence: calculateConfidence({
+                    tempWater: i_tempWater,
+                    wave: i_waveRaw,
+                    wavePeriod: i_wavePeriod,
+                    chlorophyll: chlorophyllData ? chlorophyllData.chlorophyll : null,
+                    chlorophyllStale: chlorophyllData ? chlorophyllData.stale : true,
+                    oceanCurrent: i_oceanCurrent,
+                    depth: depthData ? depthData.avg : null,
+                    gridDistance: (() => {
+                        if (!marine.latitude || !marine.longitude) return 0;
+                        const d = haversineKm(parseFloat(lat), parseFloat(lon), parseFloat(marine.latitude), parseFloat(marine.longitude));
+                        return d;
+                    })(),
+                    waveDirection: i_waveDirection,
+                    visibility: i_visibility
+                })
             };
         }
 
@@ -4034,7 +4008,8 @@ app.get('/api/fish-search', async (req, res) => {
         const substrateData = await fetchSubstrate(latF, lonF).catch(() => null);
 
         const s_tide = SunCalc.getMoonPosition(now, parseFloat(latF), parseFloat(lonF));
-        const s_tideFlow = Math.abs(Math.sin(s_tide.altitude)) * 1.5;
+        const s_tideAmplitude = 1.0 + Math.abs(Math.cos(moon.phase * Math.PI * 2)) * 0.5;
+        const s_tideFlow = s_tideAmplitude * Math.abs(Math.sin(s_tide.altitude)) * 1.5;
 
         const baseParams = {
             tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
@@ -4160,6 +4135,19 @@ app.get('/api/fish-search', async (req, res) => {
         // Koruma altında mı — protected boolean alanını kullan (string eşleştirme yerine)
         const isProtected = fish.protected === true;
 
+        const confidence = calculateConfidence({
+            tempWater,
+            wave,
+            wavePeriod,
+            depth: depthAvg,
+            chlorophyll: baseParams.chlorophyll,
+            chlorophyllStale: false,
+            oceanCurrent,
+            gridDistance: 0,
+            waveDirection: waveDirection,
+            visibility
+        });
+
         res.json({
             fish: {
                 key: fishKey,
@@ -4195,6 +4183,7 @@ app.get('/api/fish-search', async (req, res) => {
             },
             score: result.finalScore,
             dailyScore: dailyScore,
+            confidence,
             bestHour: bestHour,
             bestHourScore: bestHourScore,
             hourlyScores: (req.isPremium || req.isGracePeriod) ? hourlyScores : null,
