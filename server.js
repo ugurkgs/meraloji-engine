@@ -3570,7 +3570,7 @@ app.get('/api/forecast', async (req, res) => {
                 windWaveHeight: i_windWaveHeight, swellPeriod: i_swellPeriod,
                 oxygen: i_oxygen, upwelling: i_upwelling,
                 tideFlow: i_tideFlow,
-                moonAltitude: i_moonPos.altitude
+                moonAltitude: i_tide.altitude
             };
 
             const instantResultsMap = new Map();
