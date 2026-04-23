@@ -1276,6 +1276,50 @@ function calculateClarity(wave, windSpeed, rain) {
     return Math.max(5, Math.min(100, clarity));
 }
 
+/** Oksijen seviyesini (mg/L) hesaplar - v4.0 Deep Reality */
+/** Oksijen seviyesini hesaplar - v4.0 Deep Reality */
+function calculateOxygen(temp, salinity, chlorophyll, timeMode) {
+    // 1. mg/L Tahmini (Henry Yasası basitleştirilmiş)
+    let mgL = 14.6 - (0.45 * temp) + (0.005 * temp * temp);
+    const s = salinity || 36;
+    mgL = mgL * (1 - 0.006 * s); // Tuzluluk düzeltmesi
+    
+    // Fotosentez/Respirasyon etkisi
+    const chl = parseFloat(chlorophyll || 0.1);
+    if (timeMode === 'DAY') mgL += Math.min(2.0, chl * 0.5);
+    else mgL -= Math.min(1.0, chl * 0.3);
+    
+    mgL = Math.max(2.0, Math.min(13.0, mgL));
+    
+    // 2. Doygunluk (%) Tahmini
+    // 10 mg/L (15C) yaklaşık %100 doygunluktur.
+    const saturation = (mgL / (14.6 * (1 - 0.006 * s))) * 100 * (1 + 0.015 * temp); 
+    
+    return { mgL: parseFloat(mgL.toFixed(1)), saturation: Math.round(saturation) };
+}
+
+/** Upwelling indeksini hesaplar (0-2.5) */
+function calculateUpwelling(windSpeed, windDir, region) {
+    if (windSpeed < 12) return 0;
+    
+    const regionalCoastline = {
+        'EGE': 180, 'AKDENİZ': 90, 'KARADENİZ': 270, 'MARMARA': 90
+    };
+    const coastAngle = regionalCoastline[region];
+    let parallelism = 0.5; // Açık deniz için varsayılan
+    
+    if (coastAngle !== undefined) {
+        const diff = Math.abs(windDir - coastAngle) % 180;
+        parallelism = Math.sin((diff * Math.PI) / 180); // 1 = tam paralel
+    }
+    
+    let intensity = parallelism * (windSpeed / 40);
+    if (region === 'EGE' && (windDir > 330 || windDir < 30)) intensity *= 1.4;
+    if (region === 'AKDENİZ' && (windDir > 250 && windDir < 290)) intensity *= 1.2;
+    
+    return Math.max(0, Math.min(2.5, intensity));
+}
+
 // Akıntı Tahmini
 // Termoklin Derinliği Tahmini — SST + mevsim + bölgeden
 // Kışın null döner (termoklin yok). Yazın 10-50m arası.
@@ -1490,56 +1534,7 @@ function asymptoticTriggerSum(rawSum) {
     }
 }
 
-/**
- * calculateDissolvedOxygen (Oksijen Tahmini)
- * Sıcaklık, tuzluluk ve klorofil verilerinden çözünmüş oksijen doygunluğunu tahmin eder.
- */
-function calculateDissolvedOxygen(temp, salinity, chlorophyll, timeMode) {
-    // 1. Sıcaklığa bağlı teorik doygunluk (Henry Kanunu benzeri basit model)
-    // Su ısındıkça oksijen tutma kapasitesi düşer.
-    let saturationBase = 100 - (temp - 10) * 2.5; 
-    
-    // 2. Tuzluluk etkisi (Tuzlu su daha az oksijen tutar)
-    if (salinity > 35) saturationBase -= 5;
-    
-    // 3. Klorofil (Fotosentez/Respirasyon)
-    const chl = parseFloat(chlorophyll || 0);
-    if (timeMode === 'DAY') {
-        // Gündüz: Plankton oksijen üretir (Fotosentez)
-        saturationBase += Math.min(15, chl * 3);
-    } else {
-        // Gece: Plankton oksijen tüketir (Respirasyon)
-        saturationBase -= Math.min(20, chl * 4);
-    }
-    
-    return Math.max(20, Math.min(120, saturationBase));
-}
-
-/**
- * calculateUpwellingIndex (Besin Yükselmesi)
- * Rüzgar yönü ile kıyı yönü arasındaki ilişkiye göre upwelling gücünü hesaplar.
- */
-function calculateUpwellingIndex(windDir, windSpeed, region) {
-    if (windSpeed < 15) return 0; // Çok hafif rüzgar upwelling yaratmaz
-    
-    // Bölgesel kıyı yönleri (Kıyıya paralel rüzgar upwelling yaratır)
-    const regionalCoastline = {
-        'EGE': 180,       // Kuzey-Güney hattı (Kuzeyli rüzgar upwelling yapar)
-        'AKDENİZ': 90,    // Doğu-Batı hattı (Batılı rüzgar)
-        'KARADENİZ': 270, // Doğu-Batı hattı (Doğulu rüzgar)
-        'MARMARA': 90
-    };
-    
-    const coastAngle = regionalCoastline[region];
-    if (coastAngle === undefined) return 0;
-    
-    // Rüzgar yönü kıyıya ne kadar paralel? (sin(angleDiff))
-    const diff = Math.abs(windDir - coastAngle) % 180;
-    const parallelism = Math.sin((diff * Math.PI) / 180); // 1 = paralel, 0 = dik
-    
-    // Coriolis etkisi ve rüzgar hızı
-    return parallelism * (windSpeed / 50); 
-}
+// (Mükerrer oksijen ve upwelling fonksiyonları kaldırıldı, yukarıdaki calculateOxygen/calculateUpwelling kullanılıyor)
 
 /**
  * applyLightAttenuation (Işık Sönümlemesi)
@@ -2150,26 +2145,29 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     }
 
     // [YENİ v4.0] Upwelling (Besin Yükselmesi) Analizi
-    const upwelling = calculateUpwellingIndex(windDir, windSpeed, region);
+    // [YENİ v4.0] Upwelling (Besin Yükselmesi) Analizi
+    const upwelling = calculateUpwelling(windSpeed, windDir, region);
     if (upwelling > 0.3) {
-        const upScore = upwelling * 5;
+        const isPelagicHunter = ['PELAJIK', 'AVCI', 'SÜRÜ', 'KIYI_AVCI'].includes(fish.category);
+        const upScore = upwelling * (isPelagicHunter ? 6 : 3); // Pelajik avcılar upwelling'e daha duyarlıdır
         s_trigger += upScore;
         activeTriggers.push(i18n(lang).triggers.upwelling);
         scoreDetails.upwelling = { value: parseFloat(upwelling.toFixed(2)), score: upScore };
     }
 
     // [YENİ v4.0] Oksijen Tahmini ve Metabolik Filtre
-    const estDO = calculateDissolvedOxygen(tempWater, salinity, chlorophyll, timeMode);
+    const oxygenResult = calculateOxygen(tempWater, salinity, chlorophyll, timeMode);
+    const estDO = oxygenResult.saturation; // Skor için doygunluk kullanılır
     if (estDO < 60) {
         // Hipoksi riski: Oksijen %60 altındaysa metabolizma yavaşlar
-        const oxygenPenalty = (60 - estDO) * 0.2;
+        const oxygenPenalty = (60 - estDO) * 0.25;
         s_trigger -= oxygenPenalty;
         activeTriggers.push(i18n(lang).triggers.lowOxygen);
-        scoreDetails.oxygen = { value: Math.round(estDO), penalty: oxygenPenalty, status: 'LOW' };
+        scoreDetails.oxygen = { value: Math.round(estDO), mgL: oxygenResult.mgL, penalty: oxygenPenalty, status: 'LOW' };
     } else if (estDO > 90) {
-        s_trigger += 1.5; // Zengin oksijen bonusu
+        s_trigger += 2.0; // Zengin oksijen bonusu
         activeTriggers.push(i18n(lang).triggers.optimalOxygen);
-        scoreDetails.oxygen = { value: Math.round(estDO), bonus: 1.5, status: 'OPTIMAL' };
+        scoreDetails.oxygen = { value: Math.round(estDO), mgL: oxygenResult.mgL, bonus: 2.0, status: 'OPTIMAL' };
     }
 
     // Akıntı — gerçek okyanus akıntısı verisi varsa kullan, yoksa tahmin
@@ -2624,6 +2622,17 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         depthScore = Math.max(0.05, Math.min(1.0, depthScore));
         rawScore *= depthScore;
         scoreDetails.depth = { score: depthScore * 5, max: 5, stars: Math.round(depthScore * 5), value: depthAvg, fishMin: fMin, fishOpt: fOpt, fishMax: fMax };
+
+        // [YENİ v4.0] Termoklin Yakınlığı Bonusu — Derin su balıkları termoklin bandında aktifleşir
+        if (isDeepBottom && thermoclineDepth && depthAvg) {
+            const distToThermocline = Math.abs(depthAvg - thermoclineDepth);
+            if (distToThermocline <= 10) {
+                const thermBonus = (10 - distToThermocline) * 0.4;
+                s_trigger += thermBonus;
+                activeTriggers.push(i18n(lang).triggers.thermocline(Math.round(thermoclineDepth)));
+                scoreDetails.thermoclineBonus = { depth: thermoclineDepth, bonus: thermBonus };
+            }
+        }
 
         // Frontend HUD uyarısı için depthGate objesi
         if (depthScore < 0.7) {
@@ -3184,6 +3193,9 @@ app.get('/api/forecast', async (req, res) => {
 
             const currentEst = isLand ? 0 : estimateCurrent(wave, windSpeed, regionName);
             const clarity = isLand ? 0 : calculateClarity(wave, windSpeed, rain);
+            const oxygenData = isLand ? {mgL:0} : calculateOxygen(tempWater, salinity, chlorophyll, timeMode);
+            const oxygen = oxygenData.mgL;
+            const upwelling = isLand ? 0 : calculateUpwelling(windSpeed, windDir, regionName);
             const tide = SunCalc.getMoonPosition(targetDate, lat, lon);
             // TideFlow artık bir "genlik" (amplitude) çarpanıdır. Yeni/Dolunayda (Spring tide) daha yüksektir.
             const tideAmplitude = 1.0 + Math.abs(Math.cos(moon.phase * Math.PI * 2)) * 0.5;
@@ -3223,7 +3235,7 @@ app.get('/api/forecast', async (req, res) => {
                     // YENİ (1C)
                     windGust, precipProb, weatherCode, visibility,
                     waveDirection, windWaveHeight, swellPeriod,
-                    tideFlow, moonAltitude
+                    tideFlow, moonAltitude, oxygen, upwelling
                 };
 
                 const resultsMap = new Map();
@@ -3367,6 +3379,8 @@ app.get('/api/forecast', async (req, res) => {
                 cloud: cloud + "%", rain: rain, salinity, tide: tideFlow.toFixed(1),
                 current: oceanCurrent !== null ? oceanCurrent.toFixed(3) : currentEst.toFixed(2),
                 currentIsReal: oceanCurrent !== null,
+                oxygen: parseFloat(oxygen.toFixed(1)),
+                upwelling: parseFloat(upwelling.toFixed(2)),
                 wavePeriod: parseFloat(wavePeriod.toFixed(1)),
                 swellHeight: parseFloat(swellHeight.toFixed(2)),
                 tempShock: tempShock.shock ? tempShock : null,
@@ -3442,6 +3456,9 @@ app.get('/api/forecast', async (req, res) => {
             const i_wave = applyShoaling(i_waveRaw, i_wavePeriod, depthData.avg);
             const i_clarity = calculateClarity(i_wave, i_wind, i_rain);
             const i_current = estimateCurrent(i_wave, i_wind, regionName);
+            const i_oxygenData = calculateOxygen(i_tempWater, salinity, chlorophyll, i_timeMode);
+            const i_oxygen = i_oxygenData.mgL;
+            const i_upwelling = calculateUpwelling(i_wind, i_windDir, regionName);
             const i_moon = SunCalc.getMoonIllumination(instantDate);
             // daily[1] = bugün (past_days=1)
             const i_windDir = safeNum(weather.daily?.wind_direction_10m_dominant?.[1]);
@@ -3498,6 +3515,7 @@ app.get('/api/forecast', async (req, res) => {
                 windGust: i_windGust, precipProb: i_precipProb, weatherCode: i_weatherCode,
                 visibility: i_visibility, waveDirection: i_waveDirection,
                 windWaveHeight: i_windWaveHeight, swellPeriod: i_swellPeriod,
+                oxygen: i_oxygen, upwelling: i_upwelling
                 tideFlow: i_tideFlow
             };
 
@@ -4692,6 +4710,9 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         const uv = safeNum(weather.hourly.uv_index?.[hourlyIdx], 0);
         const clarity = calculateClarity(wave, windSpeed, rain);
         const currentEst = estimateCurrent(wave, windSpeed, regionName);
+        const oxygenData = calculateOxygen(tempWater, getSalinity(regionName), null, timeMode);
+        const oxygen = oxygenData.mgL;
+        const upwelling = calculateUpwelling(windSpeed, windDir, regionName);
         const depthAvg = bathyRaw !== null ? Math.abs(bathyRaw) : null;
         const sunTimes = SunCalc.getTimes(now, parseFloat(latF), parseFloat(lonF));
         const timeMode = getTimeOfDay(clickHour, sunTimes);
@@ -4741,7 +4762,8 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             substrate: substrateCache.get(`sub_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`) || null,
             windGust: windGust_s, precipProb: precipProb_s, weatherCode: weatherCode_s,
             visibility: visibility_s, waveDirection: waveDirection_s,
-            windWaveHeight: windWaveHeight_s, swellPeriod: swellPeriod_s
+            windWaveHeight: windWaveHeight_s, swellPeriod: swellPeriod_s,
+            oxygen, upwelling
         };
 
         // Günlük ağırlıklı skor için activityWindows ve hourlyStartIdx
@@ -4755,7 +4777,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
 
         const utcOff = weather.utc_offset_seconds || 0;
         const localTimeStr = new Date(Date.now() + (utcOff * 1000)).toISOString().replace('T', ' ').slice(0, 16);
-        const commonResult = { depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal, localTime: localTimeStr, utcOffset: utcOff };
+        const commonResult = { depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal, localTime: localTimeStr, utcOffset: utcOff, oxygen: parseFloat(oxygen.toFixed(1)), upwelling: parseFloat(upwelling.toFixed(2)) };
 
             if (!fishKey) {
                 const resultsMap = new Map();
