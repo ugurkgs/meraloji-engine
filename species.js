@@ -19,8 +19,8 @@ const SPECIES_DB = {
         planktonPref: "MEDIUM",
         moonPref: "dark",
         sstTrendPref: "warming",
-        regions: ["MARMARA", "EGE", "AKDENİZ"],
-        depth: { min: 1, opt: 8, max: 40 },
+        regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
+        depth: { min: 0.5, opt: 5, max: 40 },
         advice: { bait: "Canlı Teke, Mamun, Boru Kurdu", lure: "WTD, 10-14cm Maket, Silikon", rig: "Gezer Kurşunlu Dip, Spin", hook: "1/0 - 4/0 Geniş Pala", baitEn: "Live sand smelt, lugworm, tube worm", lureEn: "Walk-the-dog, 10-14cm lure, soft plastic", rigEn: "Running sinker bottom, spin", hookEn: "1/0 - 4/0 wide gape" },
         legalSize: "25 cm",
         spawningBonus: {
@@ -53,7 +53,7 @@ const SPECIES_DB = {
         planktonPref: "HIGH",
         moonPref: "bright",  // BİYOLOJİK DÜZELTİ: Dolunayda avları (istavrit, çaça) yüzeye çıkar; Lüfer derinde yoğun beslenır — "dark" efsanesi balıkçı miti
         sstTrendPref: "cooling",
-        regions: ["MARMARA", "EGE", "KARADENİZ"],
+        regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 1, opt: 8, max: 40 },
         advice: { bait: "Yaprak Zargana, İstavrit Fleto", lure: "Kaşık, Ağır Rapala, Poşhter", rig: "Uzun Olta, Mantarlı Çinekop, Hırsızlı Zoka", hook: "1 - 4/0 Uzun Pala + Çelik Tel", baitEn: "Garfish fillet, horse mackerel fillet", lureEn: "Metal spoon, heavy Rapala, feathered jig", rigEn: "Long trace, float rig, sabiki", hookEn: "1 - 4/0 long shank + wire trace" },
         legalSize: "20 cm",
@@ -76,14 +76,14 @@ const SPECIES_DB = {
         "clarityPref": "MODERATE",
         "currentPref": 0.3,
         "salinityPref": "ANY",
-        "regions": ["EGE", "AKDENİZ", "MARMARA"],
+        "regions": ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         "depth": { "min": 1, "opt": 8, "max": 40 },
         "advice": {
             "bait": "Canlı Teke (Gece), Yengeç",
             "lure": "Silikon Karides (LRF)",
             "rig": "Şamandıralı (Starlight), Dip Bırakma",
             "hook": "1 - 3"
-        },
+    },
         "legalSize": "Yok (5 adet/gün)",
         "note": "Zifiri karanlıkta avlanır. Fosforlu şamandıra şart."
     },
@@ -132,14 +132,14 @@ const SPECIES_DB = {
         "clarityPref": "TURBID",
         "currentPref": 0.5,
         "salinityPref": "MEDIUM",
-        "regions": ["EGE", "AKDENİZ"],
+        "regions": ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         "depth": { "min": 1, "opt": 8, "max": 40 },
         "advice": {
             "bait": "Boru Kurdu, Sülünez, Sardalya",
             "lure": "Silikon Yemler",
             "rig": "Ağır Dip Takımı",
             "hook": "1/0 - 2/0"
-        },
+    },
         "legalSize": "Yok (5kg/gün)",
         "note": "Gece ve alacakaranlıkta aktif. Çalkantılı suyu sever."
     },
@@ -160,14 +160,14 @@ const SPECIES_DB = {
         "clarityPref": "CLEAR",
         "currentPref": 0.4,
         "salinityPref": "HIGH",
-        "regions": ["EGE", "AKDENİZ", "MARMARA"],
+        "regions": ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         "depth": { "min": 5, "opt": 25, "max": 100 },
         "advice": {
             "bait": "Ekmek İçi, Küçük Solucan, Midye",
             "lure": "Micro Jig",
             "rig": "Çoklu İğneli Takım, Şamandıralı",
             "hook": "8 - 12"
-        },
+    },
         "legalSize": "11 cm",
         "note": "Sürü halinde gezer. Küçük yem ve ince misina şart."
     },
@@ -209,7 +209,7 @@ const SPECIES_DB = {
         currentPref: 0.5,
         salinityPref: "MEDIUM",
         planktonPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 0, opt: 10, max: 160 },
         advice: { bait: "Mamun, Yengeç, Madya", lure: "Silikon Karides (Nadir)", rig: "Şeytan Oltası, Tek İğneli Dip", hook: "2 - 5 Sağlam Dövme", baitEn: "Sand smelt, crab, mussel", lureEn: "Soft plastic shrimp (rare)", rigEn: "Paternoster, single bottom hook", hookEn: "2 - 5 forged" },
         legalSize: "18 cm",
@@ -229,7 +229,7 @@ const SPECIES_DB = {
         clarityPref: "TURBID",
         currentPref: 0.4,
         salinityPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 0, opt: 10, max: 150 },
         advice: { bait: "Boru Kurdu (Favori), Mamun, Kum Solucanı", lure: "Kokulu Silikon (Kurt/Yengeç)", rig: "Hafif Gezer Kurşunlu Dip", hook: "4 - 6 İnce Pala", baitEn: "Lugworm (favourite), ragworm", lureEn: "Scented soft plastic", rigEn: "Light running sinker bottom", hookEn: "4 - 6 fine wire" },
         legalSize: "20 cm (Etik)",
@@ -294,7 +294,7 @@ const SPECIES_DB = {
         clarityPref: "CLEAR",
         currentPref: 0.5,
         salinityPref: "HIGH",
-        regions: ["EGE", "AKDENİZ"],
+        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 1, opt: 10, max: 50 },
         advice: { bait: "Karides, Yengeç, Midye", lure: "LRF Silikon, Micro Jig", rig: "Dip Takımı, LRF", hook: "4 - 1 Güçlü", baitEn: "Shrimp, crab, mussel", lureEn: "LRF soft plastic, micro jig", rigEn: "Bottom rig, LRF", hookEn: "4 - 1 strong" },
         legalSize: "Yasal limit yok",
@@ -346,7 +346,7 @@ const SPECIES_DB = {
         currentPref: 0.3,
         salinityPref: "HIGH",
         sstTrendPref: "stable",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 10, opt: 80, max: 300 },
         advice: { bait: "Karides, Kurt, Midye, Tavuk Göğsü", lure: "Genelde Yok", rig: "Üçlü Dip Oltası", hook: "9 - 11 İnce Telli", baitEn: "Shrimp, worm, mussel, chicken breast", lureEn: "Rarely used", rigEn: "Three-hook bottom rig", hookEn: "9 - 11 fine wire" },
         legalSize: "13 cm",
@@ -390,7 +390,7 @@ const SPECIES_DB = {
         salinityPref: "HIGH",
         planktonPref: "HIGH",
         sstTrendPref: "WARMING",
-        regions: ["EGE", "AKDENİZ"],
+        regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 0, opt: 20, max: 50 },
         advice: { bait: "Hamsi, İstavrit", lure: "Metal Kaşık, Jig", rig: "Paternoster, Trolling", hook: "2 - 4", baitEn: "Anchovy, horse mackerel", lureEn: "Metal spoon, jig", rigEn: "Paternoster, trolling", hookEn: "2 - 4" },
         legalSize: "18 cm",
@@ -398,7 +398,8 @@ const SPECIES_DB = {
         noteEn: "Schooling fish. Dense in Aegean and Mediterranean shores in summer."
     },
     "kefal": {
-        name: "Kefal", nameEn: "Flathead Grey Mullet", isGlobal: true, icon: "🐟", scientificName: "Mugil cephalus",
+        name: "Kefal", nameEn: "Flathead Grey Mullet",
+        icon: "🐟", scientificName: "Mugil cephalus",
         photoId: 44,
         category: "LAGUN",
         peakHours: "DAY", peakHoursDesc: "Sabah erken ve ikindi saatleri", peakHoursDescEn: "Early morning and mid-afternoon",
@@ -420,7 +421,8 @@ const SPECIES_DB = {
         noteEn: "Found in lagoons and river mouths. Tolerates low salinity."
     },
     "zargana": {
-        name: "Zargana", nameEn: "Garfish", isGlobal: true, icon: "🐟", scientificName: "Belone belone",
+        name: "Zargana", nameEn: "Garfish",
+        icon: "🐟", scientificName: "Belone belone",
         photoId: 20,
         category: "KIYI",
         peakHours: "DAY", peakHoursDesc: "Güneşli günlerde yüzeyde", peakHoursDescEn: "Sunny days at surface",
@@ -434,7 +436,7 @@ const SPECIES_DB = {
         salinityPref: "ANY",
         planktonPref: "MEDIUM",
         moonPref: "bright",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 1, opt: 8, max: 40 },
         advice: { bait: "Kurt, Fleto Balık", lure: "İpek (Turuncu)", rig: "Şamandıralı Top, İpek", hook: "6 - 10 İnce", baitEn: "Worm, fish strip", lureEn: "Silk feather (orange)", rigEn: "Float with bobber, silk", hookEn: "6 - 10 fine wire" },
         legalSize: "Yok",
@@ -467,7 +469,8 @@ const SPECIES_DB = {
         noteEn: "STRICTLY PROHIBITED to catch. IUCN Endangered. Regulation 6/2. Release immediately if caught."
     },
     "akya": {
-        name: "Akya", nameEn: "Greater Amberjack", isGlobal: true, icon: "🐟", scientificName: "Seriola dumerili",
+        name: "Akya", nameEn: "Greater Amberjack",
+        icon: "🐟", scientificName: "Seriola dumerili",
         photoId: 6,
         category: "PELAJIK",
         shoreMonths: [6, 7, 8, 9], // kıyıya yaklaşma ayları (0=Ocak)
@@ -482,7 +485,7 @@ const SPECIES_DB = {
         salinityPref: "HIGH",
         planktonPref: "HIGH",
         moonPref: "dark",
-        regions: ["EGE", "AKDENİZ"],
+        regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 10, opt: 50, max: 300 },
         advice: { bait: "Canlı İstavrit, Sardalya", lure: "Popper, Stickbait, Metal Jig", rig: "Trolling, Jigging, Popping", hook: "3/0 - 6/0 + Çelik Tel", baitEn: "Live horse mackerel, sardine", lureEn: "Popper, stickbait, metal jig", rigEn: "Trolling, jigging, popping", hookEn: "3/0 - 6/0 + wire trace" },
         legalSize: "30 cm",
@@ -503,7 +506,7 @@ const SPECIES_DB = {
         currentPref: 0.5,
         salinityPref: "HIGH",
         planktonPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 15, opt: 30, max: 50 },
         advice: { bait: "Canlı Kalamar, Sübye, Karides", lure: "Metal Jig, Maket Balık", rig: "Jigging, Dip Sırtısı, Trolling", hook: "2/0 - 5/0", baitEn: "Live squid, cuttlefish, shrimp", lureEn: "Metal jig, swim bait", rigEn: "Jigging, deep bottom rig, trolling", hookEn: "2/0 - 5/0" },
         legalSize: "35 cm",
@@ -525,7 +528,7 @@ const SPECIES_DB = {
         salinityPref: "MEDIUM",
         planktonPref: "MEDIUM",
         sstTrendPref: "stable",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 10, opt: 60, max: 250 },
         advice: { bait: "Karides, Kalamar, Midye, Sülünez", lure: "Jig, Silikon", rig: "Dip Takımı", hook: "2 - 6", baitEn: "Shrimp, squid, mussel, worm", lureEn: "Jig, soft plastic", rigEn: "Bottom rig", hookEn: "2 - 6" },
         legalSize: "18 cm",
@@ -608,7 +611,7 @@ const SPECIES_DB = {
         clarityPref: "MODERATE",
         currentPref: 0.4,
         salinityPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
+        regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
         depth: { min: 1, opt: 20, max: 100 },
         advice: { bait: "Ekmek, Hamur, Kurt", lure: "Çapari", rig: "Çapari, Şamandıralı", hook: "10 - 14", baitEn: "Bread, dough, worm", lureEn: "Sabiki", rigEn: "Sabiki, float", hookEn: "10 - 14" },
         legalSize: "Yok",
@@ -649,7 +652,7 @@ const SPECIES_DB = {
         currentPref: 0.5,
         salinityPref: "MEDIUM",
         planktonPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 1, opt: 15, max: 50 },
         advice: { bait: "Midye, Yengeç, Mamun", lure: "Silikon", rig: "Şeytan Oltası, Dip", hook: "1 - 4", baitEn: "Mussel, crab, sand smelt", lureEn: "Soft plastic", rigEn: "Paternoster, bottom", hookEn: "1 - 4" },
         legalSize: "23 cm",
@@ -760,7 +763,7 @@ const SPECIES_DB = {
         currentPref: 0.6,
         salinityPref: "MEDIUM",
         moonPref: "dark",
-        regions: ["AKDENİZ", "EGE"],
+        regions: ["AKDENİZ", "EGE", "MARMARA"],
         depth: { min: 10, opt: 35, max: 70 },
         advice: { bait: "Canlı Zargana", lure: "Jig 60-150g, Popper", rig: "Jigging Setup", hook: "3/0 - 5/0", baitEn: "Live garfish", lureEn: "Jig 60-150g, popper", rigEn: "Jigging setup", hookEn: "3/0 - 5/0" },
         legalSize: "45 cm",
@@ -818,7 +821,7 @@ const SPECIES_DB = {
         category: "SÜRÜ",
         shoreMonths: [], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "DAY", peakHoursDesc: "Sabah/Akşam", peakHoursDescEn: "Morning/Evening",
-        tempRange: { min: 10, opt: 15, max: 20 },
+        tempRange: { min: 8, opt: 16, max: 22 },
         seasons: { winter: 0.60, spring: 0.85, summer: 0.40, autumn: 0.75 },
         monthlyActivity: [0.55, 0.5, 0.7, 0.85, 0.9, 0.4, 0.3, 0.35, 0.6, 0.8, 0.75, 0.6],
         activity: "DAY",
@@ -829,7 +832,7 @@ const SPECIES_DB = {
         salinityPref: "HIGH",
         planktonPref: "HIGH",
         sstTrendPref: "any",
-        regions: ["MARMARA", "EGE"],
+        regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 5, opt: 20, max: 50 },
         advice: { bait: "Çapari", lure: "Küçük Kaşık", rig: "Çapari Takımı", hook: "6 - 10", baitEn: "Sabiki feathers", lureEn: "Small metal spoon", rigEn: "Sabiki rig", hookEn: "6 - 10" },
         legalSize: "18 cm",
@@ -857,7 +860,7 @@ const SPECIES_DB = {
         salinityPref: "MEDIUM",
         planktonPref: "HIGH",
         sstTrendPref: "warming",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 5, opt: 25, max: 50 },
         advice: { bait: "Çapari", lure: "Kaşık", rig: "Çapari Takımı, Spin", hook: "6 - 10", baitEn: "Sabiki feathers", lureEn: "Metal spoon", rigEn: "Sabiki rig, spin", hookEn: "6 - 10" },
         legalSize: "18 cm",
@@ -877,7 +880,7 @@ const SPECIES_DB = {
         clarityPref: "CLEAR",
         currentPref: 0.2,
         salinityPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ"],
+        regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 1, opt: 5, max: 15 },
         advice: { bait: "Ekmek, Yosun", lure: "Yok", rig: "Şamandıralı", hook: "10 - 14", baitEn: "Bread, seaweed", lureEn: "None", rigEn: "Float rig", hookEn: "10 - 14" },
         legalSize: "Yok",
@@ -899,7 +902,7 @@ const SPECIES_DB = {
         clarityPref: "HIGH",
         currentPref: 0.3,
         salinityPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "KKTC"],
+        regions: ["EGE", "AKDENİZ"],
         depth: { min: 0, opt: 10, max: 70 },
         advice: { bait: "Karides, Solucan, Deniz kurdu", lure: "Küçük jig", rig: "Hafif dip", hook: "8 - 12", baitEn: "Shrimp, ragworm, lugworm", lureEn: "Small jig", rigEn: "Light bottom", hookEn: "8 - 12" },
         legalSize: "15 cm",
@@ -940,7 +943,7 @@ const SPECIES_DB = {
         clarityPref: "TURBID",
         currentPref: 0.4,
         salinityPref: "HIGH",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 5, opt: 25, max: 60 },
         advice: { bait: "Balık Eti, Kalamar", lure: "Yok", rig: "Ağır Dip", hook: "4/0 - 8/0", baitEn: "Fish strip, squid", lureEn: "None", rigEn: "Heavy bottom", hookEn: "4/0 - 8/0" },
         legalSize: "Yok",
@@ -985,7 +988,7 @@ const SPECIES_DB = {
         planktonPref: "HIGH",
         moonPref: "dark",
         sstTrendPref: "warming",
-        regions: ["AKDENİZ", "EGE"],
+        regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 2, opt: 15, max: 40 },
         advice: { bait: "Yapay tercih", lure: "Uzun Sahte Balık", rig: "Spin", hook: "2/0 - 4/0", baitEn: "Artificial preferred", lureEn: "Long swim bait", rigEn: "Spin", hookEn: "2/0 - 4/0" },
         legalSize: "Yok",
@@ -1005,7 +1008,7 @@ const SPECIES_DB = {
         clarityPref: "MODERATE",
         currentPref: 0.4,
         salinityPref: "HIGH",
-        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
+        regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 15, opt: 35, max: 80 },
         advice: { bait: "Teke, İstavrit", lure: "Jig", rig: "Dip, Jig", hook: "2 - 2/0", baitEn: "Sand smelt, horse mackerel", lureEn: "Jig", rigEn: "Bottom, jig", hookEn: "2 - 2/0" },
         legalSize: "Yok",
@@ -1025,7 +1028,7 @@ const SPECIES_DB = {
         clarityPref: "TURBID",
         currentPref: 0.3,
         salinityPref: "ANY",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 3, opt: 15, max: 40 },
         advice: { bait: "Boru Kurdu", lure: "Yok", rig: "Dip", hook: "6 - 10", baitEn: "Lugworm", lureEn: "None", rigEn: "Bottom", hookEn: "6 - 10" },
         legalSize: "20 cm",
@@ -1045,7 +1048,7 @@ const SPECIES_DB = {
         clarityPref: "TURBID",
         currentPref: 0.3,
         salinityPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
+        regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 3, opt: 15, max: 40 },
         advice: { bait: "Karides, Balık eti", lure: "Yok", rig: "Dip", hook: "4 - 8", baitEn: "Shrimp, fish strip", lureEn: "None", rigEn: "Bottom", hookEn: "4 - 8" },
         legalSize: "Yok",
@@ -1065,7 +1068,7 @@ const SPECIES_DB = {
         clarityPref: "TURBID",
         currentPref: 0.3,
         salinityPref: "ANY",
-        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
+        regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 2, opt: 20, max: 60 },
         advice: { bait: "Balık Eti", lure: "Yok", rig: "Ağır Dip", hook: "4/0 - 6/0", baitEn: "Fish strip", lureEn: "None", rigEn: "Heavy bottom", hookEn: "4/0 - 6/0" },
         legalSize: "Yok",
@@ -1106,7 +1109,7 @@ const SPECIES_DB = {
         clarityPref: "TURBID",
         currentPref: 0.3,
         salinityPref: "HIGH",
-        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
+        regions: ["EGE", "AKDENİZ"],
         depth: { min: 3, opt: 20, max: 50 },
         advice: { bait: "Balık Eti", lure: "Yok", rig: "Dip", hook: "2 - 4", baitEn: "Fish strip", lureEn: "None", rigEn: "Bottom", hookEn: "2 - 4" },
         legalSize: "Yok",
@@ -1127,7 +1130,7 @@ const SPECIES_DB = {
         clarityPref: "TURBID",
         currentPref: 0.4,
         salinityPref: "ANY",
-        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
+        regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 20, opt: 80, max: 250 },
         advice: { bait: "Balık Eti", lure: "Yok", rig: "Ağır Dip", hook: "4/0 - 8/0", baitEn: "Fish strip", lureEn: "None", rigEn: "Heavy bottom", hookEn: "4/0 - 8/0" },
         legalSize: "30 cm",
@@ -1156,7 +1159,7 @@ const SPECIES_DB = {
         planktonPref: "HIGH",
         moonPref: "bright",
         sstTrendPref: "cooling",
-        regions: ["KARADENİZ", "MARMARA"],
+        regions: ["KARADENİZ", "MARMARA", "AKDENİZ"],
         depth: { min: 5, opt: 25, max: 60 },
         advice: { bait: "Çapari", lure: "İnce Çapari", rig: "Surf, Çapari", hook: "10 - 14", baitEn: "Sabiki feathers", lureEn: "Fine sabiki", rigEn: "Surf, sabiki", hookEn: "10 - 14" },
         legalSize: "9 cm",
@@ -1164,7 +1167,8 @@ const SPECIES_DB = {
         noteEn: "Symbol of the Black Sea. Abundant in winter. Ideal for pan-frying."
     },
     "aslan_baligi": {
-        name: "Aslan Balığı", nameEn: "Devil Firefish", isGlobal: true, icon: "🦁", scientificName: "Pterois miles",
+        name: "Aslan Balığı", nameEn: "Devil Firefish",
+        icon: "🦁", scientificName: "Pterois miles",
         photoId: 71,
         category: "İSTİLACI",
         peakHours: "CREPUSCULAR", peakHoursDesc: "Alacakaranlık", peakHoursDescEn: "Dusk",
@@ -1184,7 +1188,8 @@ const SPECIES_DB = {
         noteEn: "WARNING: INVASIVE SPECIES! Has VENOMOUS spines. Kill when caught."
     },
     "balon_baligi": {
-        name: "Balon Balığı", nameEn: "Silver-cheeked Toadfish", isGlobal: true, icon: "🐡", scientificName: "Lagocephalus sceleratus",
+        name: "Balon Balığı", nameEn: "Silver-cheeked Toadfish",
+        icon: "🐡", scientificName: "Lagocephalus sceleratus",
         photoId: 70,
         category: "İSTİLACI",
         peakHours: "DAY", peakHoursDesc: "Gündüz", peakHoursDescEn: "Daytime",
@@ -1278,7 +1283,7 @@ const SPECIES_DB = {
         planktonPref: "HIGH",
         moonPref: "dark",
         sstTrendPref: "cooling",
-        regions: ["MARMARA", "KARADENİZ", "EGE"],
+        regions: ["MARMARA", "KARADENİZ", "EGE", "AKDENİZ"],
         depth: { min: 5, opt: 30, max: 100 },
         advice: { bait: "İstavrit, Sardalya, Sahte Yem", lure: "Tüylü Çapari, Kaşık, Kaplamalı Jig", rig: "Çapari, Trolling, Sırtı", hook: "1/0 - 3/0", baitEn: "Horse mackerel, sardine, artificial", lureEn: "Feathered sabiki, spoon, coated jig", rigEn: "Sabiki, trolling, drift", hookEn: "1/0 - 3/0" },
         legalSize: "25 cm",
@@ -1397,7 +1402,7 @@ const SPECIES_DB = {
         currentPref: 0.3,
         salinityPref: "ANY",
         planktonPref: "MEDIUM",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 3, opt: 25, max: 80 },
         advice: { bait: "Kurt, Karides", lure: "Yok", rig: "Dip", hook: "8 - 12", baitEn: "Worm, shrimp", lureEn: "None", rigEn: "Bottom", hookEn: "8 - 12" },
         legalSize: "11 cm",
@@ -1657,7 +1662,7 @@ const SPECIES_DB = {
         clarityPref: "CLEAR",
         currentPref: 0.3,
         salinityPref: "LOW",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 1, opt: 3, max: 15 },
         advice: { bait: "Yok", lure: "Küçük İpek", rig: "Şamandıra", hook: "No:12-16", baitEn: "None", lureEn: "Small silk", rigEn: "Float", hookEn: "No:12-16" },
         legalSize: "-",
@@ -1814,7 +1819,7 @@ const SPECIES_DB = {
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
         activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.5, clarityPref: "ANY",
         regions: [], habitatBboxes: [{ lat1: 24.0, lon1: -83.0, lat2: 31.0, lon2: -78.0, name: "Florida" }],
-        depth: { min: 10, opt: 30, max: 100 },
+        depth: { min: 20, opt: 30, max: 100 },
         advice: { bait: "Bütün Balık, Büyük Yengeç", lure: "Büyük Jig", rig: "Extra Heavy", hook: "12/0 - 16/0", baitEn: "Whole fish, large crab", lureEn: "Large jig", rigEn: "Extra heavy", hookEn: "12/0 - 16/0" },
         note: "300 kg'a kadar ulaşabilir. Koruma altındadır, sudan çıkarılması yasaktır.",
         noteEn: "Can reach up to 300kg. Protected, removal from water is prohibited."
@@ -2031,7 +2036,6 @@ const SPECIES_DB = {
     "swordfish": {
         name: "Kılıç Balığı", nameEn: "Swordfish", icon: "⚔️", scientificName: "Xiphias gladius",
         photoId: 124, category: "DERİN",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece derin su (100-300m)",
         tempRange: { min: 10, opt: 18, max: 28 },
         seasons: { winter: 0.6, spring: 0.5, summer: 0.7, autumn: 0.9 },
@@ -2097,7 +2101,6 @@ const SPECIES_DB = {
     "gray_triggerfish": {
         name: "Gri Çütre", nameEn: "Gray Triggerfish", icon: "🐟", scientificName: "Balistes capriscus",
         photoId: 129, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resif ve batıklar",
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.4, spring: 0.8, summer: 0.9, autumn: 0.7 },
@@ -2111,7 +2114,6 @@ const SPECIES_DB = {
     "yellowfin_tuna": {
         name: "Sarı Yüzgeç Orkinos", nameEn: "Yellowfin Tuna", icon: "🐟", scientificName: "Thunnus albacares",
         photoId: 130, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak ve akşam okyanus akıntıları",
         tempRange: { min: 18, opt: 24, max: 30 },
         seasons: { winter: 0.3, spring: 0.8, summer: 0.9, autumn: 0.7 },
@@ -2125,7 +2127,6 @@ const SPECIES_DB = {
     "octopus": {
         name: "Ahtapot", nameEn: "Octopus", icon: "🐙", scientificName: "Octopus vulgaris",
         photoId: 131, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece aktif, kayalık kovuklar",
         tempRange: { min: 14, opt: 22, max: 28 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -2139,7 +2140,6 @@ const SPECIES_DB = {
     "cuttlefish": {
         name: "Sübye", nameEn: "Common Cuttlefish", icon: "🦑", scientificName: "Sepia officinalis",
         photoId: 132, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık ve gece",
         tempRange: { min: 12, opt: 18, max: 25 },
         seasons: { winter: 0.7, spring: 0.9, summer: 0.5, autumn: 0.6 },
@@ -2153,7 +2153,6 @@ const SPECIES_DB = {
     "squid": {
         name: "Kalamar", nameEn: "European Squid", icon: "🦑", scientificName: "Loligo vulgaris",
         photoId: 133, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece ve ışıklı alanlar",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.9, spring: 0.5, summer: 0.3, autumn: 0.8 },
@@ -2167,7 +2166,6 @@ const SPECIES_DB = {
     "blue_marlin": {
         name: "Mavi Marlin", nameEn: "Blue Marlin", icon: "🦈", scientificName: "Makaira nigricans",
         photoId: 134, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık okyanus akıntıları",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.3, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -2181,7 +2179,6 @@ const SPECIES_DB = {
     "white_marlin": {
         name: "Beyaz Marlin", nameEn: "White Marlin", icon: "🦈", scientificName: "Kajikia albida",
         photoId: 135, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz akıntılı hatlar",
         tempRange: { min: 20, opt: 25, max: 29 },
         seasons: { winter: 0.2, spring: 0.8, summer: 0.9, autumn: 0.7 },
@@ -2200,7 +2197,7 @@ const SPECIES_DB = {
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
         activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.3, clarityPref: "ANY",
         regions: [], habitatBboxes: [{ lat1: 24.0, lon1: -83.0, lat2: 31.0, lon2: -78.0, name: "Florida" }],
-        depth: { min: 150, opt: 300, max: 600 },
+        depth: { min: 20, opt: 300, max: 600 },
         advice: { bait: "Büyük Kalamar, Balık Parçası", lure: "Yok", rig: "Deep Drop Electric Reel", hook: "8/0 - 10/0 Circle", baitEn: "Large squid, fish pieces", lureEn: "None", rigEn: "Deep drop electric reel", hookEn: "8/0 - 10/0 circle" },
         note: "Derinlerde kumda oyuklar kazar. Eti ıstakoz tadındadır.",
         noteEn: "Digs burrows in deep sand. Meat tastes like lobster."
@@ -2213,7 +2210,7 @@ const SPECIES_DB = {
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
         activity: "DAY", pressureSensitivity: 0.5, wavePref: 0.4, clarityPref: "ANY",
         regions: [], habitatBboxes: [{ lat1: 24.0, lon1: -83.0, lat2: 31.0, lon2: -78.0, name: "Florida" }],
-        depth: { min: 100, opt: 250, max: 500 },
+        depth: { min: 20, opt: 250, max: 500 },
         advice: { bait: "Büyük Balık Eti, Kalamar", lure: "Derin Jig", rig: "Deep Drop", hook: "9/0 - 11/0 Circle", baitEn: "Large fish meat, squid", lureEn: "Deep jig", rigEn: "Deep drop", hookEn: "9/0 - 11/0 circle" },
         note: "Vücudundaki beyaz beneklerle tanınır. Florida'nın en değerli derin su orfozudur.",
         noteEn: "Recognized by white spots on its body. Florida's most valuable deep-water grouper."
@@ -2260,7 +2257,6 @@ const SPECIES_DB = {
     "hammerhead_shark": {
         name: "Çekiçbaş Köpekbalığı", nameEn: "Great Hammerhead", icon: "🦈", scientificName: "Sphyrna mokarran",
         photoId: 141, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece akıntılı kanallar",
         tempRange: { min: 20, opt: 26, max: 31 },
         seasons: { winter: 0.4, spring: 0.8, summer: 0.9, autumn: 0.7 },
@@ -2274,7 +2270,6 @@ const SPECIES_DB = {
     "bull_shark": {
         name: "Boğa Köpekbalığı", nameEn: "Bull Shark", icon: "🦈", scientificName: "Carcharhinus leucas",
         photoId: 142, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak/Akşam ve nehir ağızları",
         tempRange: { min: 18, opt: 25, max: 30 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -2340,7 +2335,6 @@ const SPECIES_DB = {
     "aji": {
         name: "Aji", nameEn: "Japanese Horse Mackerel", icon: "🐟", scientificName: "Trachurus japonicus",
         photoId: 204, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece ışıklı limanlar",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.4, spring: 0.8, summer: 0.9, autumn: 0.7 },
@@ -2354,7 +2348,6 @@ const SPECIES_DB = {
     "saba": {
         name: "Saba", nameEn: "Chub Mackerel", icon: "🐟", scientificName: "Scomber japonicus",
         photoId: 205, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sürüler halinde",
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.5, spring: 0.6, summer: 0.7, autumn: 0.9 },
@@ -2381,7 +2374,6 @@ const SPECIES_DB = {
     "maguro": {
         name: "Maguro", nameEn: "Pacific Bluefin Tuna", icon: "🦈", scientificName: "Thunnus orientalis",
         photoId: 207, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
         tempRange: { min: 10, opt: 18, max: 26 },
         seasons: { winter: 0.8, spring: 0.4, summer: 0.3, autumn: 0.9 },
@@ -2395,7 +2387,6 @@ const SPECIES_DB = {
     "katsuo": {
         name: "Katsuo", nameEn: "Skipjack Tuna", icon: "🐟", scientificName: "Katsuwonus pelamis",
         photoId: 208, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey akıntıları",
         tempRange: { min: 18, opt: 24, max: 30 },
         seasons: { winter: 0.2, spring: 0.9, summer: 0.8, autumn: 0.5 },
@@ -2409,7 +2400,6 @@ const SPECIES_DB = {
     "tachiuo": {
         name: "Tachiuo", nameEn: "Largehead Hairtail", icon: "⚔️", scientificName: "Trichiurus lepturus",
         photoId: 209, category: "DERİN",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece yüzeye yaklaşır",
         tempRange: { min: 14, opt: 22, max: 28 },
         seasons: { winter: 0.5, spring: 0.4, summer: 0.8, autumn: 0.9 },
@@ -2527,7 +2517,6 @@ const SPECIES_DB = {
     "shima_aji": {
         name: "Shima Aji", nameEn: "Striped Jack", icon: "🐟", scientificName: "Pseudocaranx dentex",
         photoId: 218, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz akıntılı resifler",
         tempRange: { min: 18, opt: 24, max: 28 },
         seasons: { winter: 0.5, spring: 0.8, summer: 0.9, autumn: 0.7 },
@@ -2619,7 +2608,6 @@ const SPECIES_DB = {
     "tara": {
         name: "Tara", nameEn: "Pacific Cod", icon: "🐟", scientificName: "Gadus macrocephalus",
         photoId: 225, category: "DERİN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin ve soğuk dipler",
         tempRange: { min: 2, opt: 8, max: 14 },
         seasons: { winter: 0.9, spring: 0.5, summer: 0.2, autumn: 0.7 },
@@ -2672,7 +2660,6 @@ const SPECIES_DB = {
     "unagi": {
         name: "Unagi", nameEn: "Japanese Eel", icon: "🐍", scientificName: "Anguilla japonica",
         photoId: 229, category: "LAGUN",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece nehir ağızları ve çamurlu dipler",
         tempRange: { min: 18, opt: 24, max: 30 },
         seasons: { winter: 0.2, spring: 0.5, summer: 0.9, autumn: 0.6 },
@@ -2699,7 +2686,6 @@ const SPECIES_DB = {
     "fugu": {
         name: "Fugu", nameEn: "Tiger Puffer", icon: "🐡", scientificName: "Takifugu rubripes",
         photoId: 231, category: "İSTİLACI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz ve sığ resifler",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.9, spring: 0.4, summer: 0.2, autumn: 0.6 },
@@ -2726,7 +2712,6 @@ const SPECIES_DB = {
     "nishin": {
         name: "Nishin", nameEn: "Pacific Herring", icon: "🐟", scientificName: "Clupea pallasii",
         photoId: 233, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sürüler halinde",
         tempRange: { min: 4, opt: 10, max: 16 },
         seasons: { winter: 0.7, spring: 0.95, summer: 0.3, autumn: 0.5 },
@@ -2792,7 +2777,6 @@ const SPECIES_DB = {
     "gochi": {
         name: "Gochi", nameEn: "Bartail Flathead", icon: "🐟", scientificName: "Platycephalus sp.",
         photoId: 238, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluklar",
         tempRange: { min: 18, opt: 24, max: 30 },
         seasons: { winter: 0.2, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -2871,7 +2855,6 @@ const SPECIES_DB = {
     "manda": {
         name: "Manda", nameEn: "Ocean Sunfish", icon: "🐟", scientificName: "Mola mola",
         photoId: 244, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz okyanus yüzeyi",
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -2911,7 +2894,6 @@ const SPECIES_DB = {
     "kanpachi": {
         name: "Kanpachi", nameEn: "Greater Amberjack", icon: "🐟", scientificName: "Seriola dumerili",
         photoId: 247, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin resif kenarları",
         tempRange: { min: 18, opt: 24, max: 28 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -2925,7 +2907,6 @@ const SPECIES_DB = {
     "hirasa": {
         name: "Hirasa", nameEn: "Yellowtail Amberjack", icon: "🐟", scientificName: "Seriola lalandi",
         photoId: 248, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ resifler ve akıntılar",
         tempRange: { min: 16, opt: 22, max: 27 },
         seasons: { winter: 0.3, spring: 0.8, summer: 0.9, autumn: 0.6 },
@@ -2939,7 +2920,6 @@ const SPECIES_DB = {
     "karasu": {
         name: "Karasu-garei", nameEn: "Greenland Halibut", icon: "🐟", scientificName: "Reinhardtius hippoglossoides",
         photoId: 249, category: "DERİN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin soğuk sular",
         tempRange: { min: 0, opt: 4, max: 10 },
         seasons: { winter: 0.9, spring: 0.6, summer: 0.2, autumn: 0.7 },
@@ -3057,7 +3037,6 @@ const SPECIES_DB = {
     "makrell": {
         name: "Makrell", nameEn: "Atlantic Mackerel", icon: "🐟", scientificName: "Scomber scombrus",
         photoId: 308, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey sürüler",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.95, autumn: 0.6 },
@@ -3253,7 +3232,6 @@ const SPECIES_DB = {
     "makrellstorje": {
         name: "Makrellstørje", nameEn: "Atlantic Bluefin Tuna", icon: "🦈", scientificName: "Thunnus thynnus",
         photoId: 321, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey sürüler",
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.1, spring: 0.3, summer: 0.9, autumn: 0.7 },
@@ -3267,7 +3245,6 @@ const SPECIES_DB = {
     "sild": {
         name: "Sild", nameEn: "Atlantic Herring", icon: "🐟", scientificName: "Clupea harengus",
         photoId: 322, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sürüler halinde",
         tempRange: { min: 4, opt: 10, max: 16 },
         seasons: { winter: 0.9, spring: 0.6, summer: 0.3, autumn: 0.8 },
@@ -3320,7 +3297,6 @@ const SPECIES_DB = {
     "horngjel": {
         name: "Horngjel", nameEn: "Garfish", icon: "🐟", scientificName: "Belone belone",
         photoId: 326, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey",
         tempRange: { min: 14, opt: 18, max: 24 },
         seasons: { winter: 0.0, spring: 0.7, summer: 0.9, autumn: 0.3 },
@@ -3425,7 +3401,6 @@ const SPECIES_DB = {
     "blakveite": {
         name: "Blåkveite", nameEn: "Greenland Halibut", icon: "🐟", scientificName: "Reinhardtius hippoglossoides",
         photoId: 333, category: "DERİN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin yamaçlar",
         tempRange: { min: 0, opt: 4, max: 10 },
         seasons: { winter: 0.8, spring: 0.6, summer: 0.3, autumn: 0.7 },
@@ -3478,7 +3453,6 @@ const SPECIES_DB = {
     "brugde": {
         name: "Brugde", nameEn: "Basking Shark", icon: "🦈", scientificName: "Cetorhinus maximus",
         photoId: 337, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzeyde plankton beslenmesi",
         tempRange: { min: 8, opt: 14, max: 20 },
         seasons: { winter: 0.0, spring: 0.4, summer: 0.9, autumn: 0.3 },
@@ -3557,7 +3531,6 @@ const SPECIES_DB = {
     "taggmakrell": {
         name: "Taggmakrell", nameEn: "Horse Mackerel", icon: "🐟", scientificName: "Trachurus trachurus",
         photoId: 342, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece ışıklı bölgeler ve fiyortlar",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.2, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -3676,7 +3649,6 @@ const SPECIES_DB = {
     "gt_trevally": {
         name: "GT (Giant Trevally)", nameEn: "Giant Trevally", icon: "🐟", scientificName: "Caranx ignobilis",
         photoId: 401, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz ve akıntılı resif kenarları",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.9, autumn: 0.7 },
@@ -3716,7 +3688,6 @@ const SPECIES_DB = {
     "yellowtail_kingfish": {
         name: "Yellowtail Kingfish", nameEn: "Yellowtail Kingfish", icon: "🐟", scientificName: "Seriola lalandi",
         photoId: 404, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz ve akıntılı burunlar",
         tempRange: { min: 16, opt: 22, max: 26 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.8 },
@@ -3769,7 +3740,6 @@ const SPECIES_DB = {
     "spanish_mackerel": {
         name: "Spanish Mackerel", nameEn: "Spanish Mackerel", icon: "🐟", scientificName: "Scomberomorus commerson",
         photoId: 408, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN", peakHoursDesc: "Şafak ve yüzey aksiyonu",
         tempRange: { min: 20, opt: 26, max: 30 },
         seasons: { winter: 0.2, spring: 0.5, summer: 0.9, autumn: 0.7 },
@@ -3796,7 +3766,6 @@ const SPECIES_DB = {
     "tailor": {
         name: "Tailor", nameEn: "Tailor / Bluefish", icon: "🐟", scientificName: "Pomatomus saltatrix",
         photoId: 410, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak ve akşam yüzey",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.8, autumn: 0.9 },
@@ -4018,7 +3987,6 @@ const SPECIES_DB = {
     "cobia": {
         name: "Cobia", nameEn: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
         photoId: 426, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve şamandıralar",
         tempRange: { min: 20, opt: 26, max: 30 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.6 },
@@ -4072,7 +4040,6 @@ const SPECIES_DB = {
     "wahoo": {
         name: "Wahoo", nameEn: "Wahoo", icon: "🐟", scientificName: "Acanthocybium solandri",
         photoId: 430, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN", peakHoursDesc: "Şafak vakti açık deniz yüzey",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.2, spring: 0.5, summer: 0.9, autumn: 0.7 },
@@ -4138,7 +4105,6 @@ const SPECIES_DB = {
     "john_dory_aus": {
         name: "John Dory", nameEn: "John Dory", icon: "🐟", scientificName: "Zeus faber",
         photoId: 435, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz batıklar ve derin resifler",
         tempRange: { min: 14, opt: 18, max: 22 },
         seasons: { winter: 0.8, spring: 0.6, summer: 0.3, autumn: 0.7 },
@@ -4178,7 +4144,6 @@ const SPECIES_DB = {
     "school_shark": {
         name: "School Shark", nameEn: "School Shark", icon: "🦈", scientificName: "Galeorhinus galeus",
         photoId: 438, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk alanlar",
         tempRange: { min: 10, opt: 15, max: 20 },
         seasons: { winter: 0.8, spring: 0.6, summer: 0.2, autumn: 0.7 },
@@ -4218,7 +4183,6 @@ const SPECIES_DB = {
     "black_marlin": {
         name: "Black Marlin", nameEn: "Black Marlin", icon: "🐟", scientificName: "Istiompax indica",
         photoId: 441, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve açık deniz",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -4232,7 +4196,6 @@ const SPECIES_DB = {
     "blue_marlin_aus": {
         name: "Blue Marlin", nameEn: "Blue Marlin", icon: "🐟", scientificName: "Makaira nigricans",
         photoId: 442, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık okyanus",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.6 },
@@ -4572,7 +4535,6 @@ const SPECIES_DB = {
     "pacific_mackerel": {
         name: "Pasifik Uskumrusu", nameEn: "Pacific Mackerel", icon: "🐟", scientificName: "Scomber japonicus",
         photoId: 516, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey sürüler",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.2, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -4586,7 +4548,6 @@ const SPECIES_DB = {
     "pacific_sardine": {
         name: "Pasifik Sardalyası", nameEn: "Pacific Sardine", icon: "🐟", scientificName: "Sardinops sagax",
         photoId: 517, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece yüzey sürüler",
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.4, spring: 0.8, summer: 0.7, autumn: 0.5 },
@@ -4730,7 +4691,6 @@ const SPECIES_DB = {
     "mako_shark_pac": {
         name: "Mako Shark", nameEn: "Shortfin Mako Shark", icon: "🦈", scientificName: "Isurus oxyrinchus",
         photoId: 527, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey",
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.7 },
@@ -4744,7 +4704,6 @@ const SPECIES_DB = {
     "blue_shark_pac": {
         name: "Mavi Köpekbalığı", nameEn: "Blue Shark", icon: "🦈", scientificName: "Prionace glauca",
         photoId: 528, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey",
         tempRange: { min: 12, opt: 17, max: 22 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -4758,7 +4717,6 @@ const SPECIES_DB = {
     "soupfin_shark": {
         name: "Soupfin Shark", nameEn: "Soupfin Shark", icon: "🦈", scientificName: "Galeorhinus galeus",
         photoId: 529, category: "PELAJIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece orta derinlikte kumluklar",
         tempRange: { min: 10, opt: 15, max: 20 },
         seasons: { winter: 0.8, spring: 0.6, summer: 0.4, autumn: 0.7 },
@@ -4941,7 +4899,6 @@ const SPECIES_DB = {
     "opah": {
         name: "Opah", nameEn: "Opah / Moonfish", icon: "🐟", scientificName: "Lampris guttatus",
         photoId: 541, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz derin su",
         tempRange: { min: 8, opt: 14, max: 20 },
         seasons: { winter: 0.3, spring: 0.5, summer: 0.9, autumn: 0.7 },
@@ -4955,7 +4912,6 @@ const SPECIES_DB = {
     "thresher_shark": {
         name: "Thresher Shark", nameEn: "Common Thresher Shark", icon: "🦈", scientificName: "Alopias vulpinus",
         photoId: 542, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey",
         tempRange: { min: 14, opt: 19, max: 24 },
         seasons: { winter: 0.2, spring: 0.5, summer: 0.9, autumn: 0.7 },
@@ -5333,7 +5289,6 @@ const SPECIES_DB = {
     "european_eel_ice": {
         name: "Yılan Balığı", nameEn: "European Eel", icon: "🐍", scientificName: "Anguilla anguilla",
         photoId: 619, category: "LAGUN",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece çamurlu dipler ve haliçler",
         tempRange: { min: 8, opt: 15, max: 22 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.6 },
@@ -5386,7 +5341,6 @@ const SPECIES_DB = {
     "porbeagle_shark_ice": {
         name: "Dikburun Köpekbalığı", nameEn: "Porbeagle Shark", icon: "🦈", scientificName: "Lamna nasus",
         photoId: 622, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve resif kenarları",
         tempRange: { min: 5, opt: 12, max: 18 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.6 },
@@ -5777,7 +5731,6 @@ const SPECIES_DB = {
     "spurdog_ice": {
         name: "Mahmuzlu Köpekbalığı", nameEn: "Spurdog / Spiny Dogfish", icon: "🦈", scientificName: "Squalus acanthias",
         photoId: 650, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ/orta derinlikte sürüler",
         tempRange: { min: 6, opt: 11, max: 16 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -5791,7 +5744,6 @@ const SPECIES_DB = {
 "spurdog_ice": {
         name: "Mahmuzlu Köpekbalığı", nameEn: "Spurdog / Spiny Dogfish", icon: "🦈", scientificName: "Squalus acanthias",
         photoId: 650, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ/orta derinlikte sürüler",
         tempRange: { min: 6, opt: 11, max: 16 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -5805,7 +5757,6 @@ const SPECIES_DB = {
     "med_sea_bass": {
         name: "Levrek", nameEn: "European Sea Bass", icon: "🐟", scientificName: "Dicentrarchus labrax",
         photoId: 701, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık köpüklü kıyılar ve nehir ağızları",
         tempRange: { min: 10, opt: 18, max: 25 },
         seasons: { winter: 0.9, spring: 0.7, summer: 0.3, autumn: 0.8 },
@@ -5819,7 +5770,6 @@ const SPECIES_DB = {
     "med_gilt_head": {
         name: "Çipura", nameEn: "Gilt-head Bream", icon: "🐟", scientificName: "Sparus aurata",
         photoId: 702, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluklar ve lagün ağızları",
         tempRange: { min: 14, opt: 22, max: 28 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.8, autumn: 0.9 },
@@ -5833,7 +5783,6 @@ const SPECIES_DB = {
     "med_dentex": {
         name: "Sinarit", nameEn: "Dentex", icon: "🐟", scientificName: "Dentex dentex",
         photoId: 703, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin kayalık burunlar",
         tempRange: { min: 15, opt: 20, max: 25 },
         seasons: { winter: 0.3, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -5847,7 +5796,6 @@ const SPECIES_DB = {
     "med_pandora": {
         name: "Kırma Mercan", nameEn: "Common Pandora", icon: "🐟", scientificName: "Pagellus erythrinus",
         photoId: 704, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve çakıllık dipler",
         tempRange: { min: 13, opt: 19, max: 24 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.7, autumn: 0.9 },
@@ -5861,7 +5809,6 @@ const SPECIES_DB = {
     "med_red_scorpion": {
         name: "Lipsoz", nameEn: "Red Scorpionfish", icon: "🐟", scientificName: "Scorpaena scrofa",
         photoId: 705, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece kayalık dipler",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -5875,7 +5822,6 @@ const SPECIES_DB = {
     "med_white_bream": {
         name: "Sargoz", nameEn: "White Bream", icon: "🐟", scientificName: "Diplodus sargus",
         photoId: 706, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık kıyı kayalıklar ve dalgalı sığlıklar",
         tempRange: { min: 14, opt: 21, max: 27 },
         seasons: { winter: 0.4, spring: 0.8, summer: 0.9, autumn: 0.7 },
@@ -5889,7 +5835,6 @@ const SPECIES_DB = {
     "med_two_banded": {
         name: "Karagöz", nameEn: "Two-banded Bream", icon: "🐟", scientificName: "Diplodus vulgaris",
         photoId: 707, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece kayalık ve erişte alanları",
         tempRange: { min: 13, opt: 19, max: 25 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.4, autumn: 0.6 },
@@ -5903,7 +5848,6 @@ const SPECIES_DB = {
     "med_sharp_snout": {
         name: "Sivriburun Karagöz", nameEn: "Sharp-snout Bream", icon: "🐟", scientificName: "Diplodus puntazzo",
         photoId: 708, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kayalıklar",
         tempRange: { min: 15, opt: 22, max: 28 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -5917,7 +5861,6 @@ const SPECIES_DB = {
     "med_amberjack": {
         name: "Akya", nameEn: "Amberjack / Ricciola", icon: "🐟", scientificName: "Seriola dumerili",
         photoId: 709, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık açık deniz resifleri",
         tempRange: { min: 16, opt: 23, max: 28 },
         seasons: { winter: 0.2, spring: 0.5, summer: 0.9, autumn: 0.8 },
@@ -5931,7 +5874,6 @@ const SPECIES_DB = {
     "med_bluefish": {
         name: "Lüfer", nameEn: "Bluefish", icon: "🐟", scientificName: "Pomatomus saltatrix",
         photoId: 710, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ kıyılar ve sürüler",
         tempRange: { min: 12, opt: 19, max: 26 },
         seasons: { winter: 0.2, spring: 0.6, summer: 0.8, autumn: 0.95 },
@@ -5945,7 +5887,6 @@ const SPECIES_DB = {
 "med_bluefish": {
         name: "Lüfer", nameEn: "Bluefish", icon: "🐟", scientificName: "Pomatomus saltatrix",
         photoId: 710, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ kıyılar ve sürüler",
         tempRange: { min: 12, opt: 19, max: 26 },
         seasons: { winter: 0.2, spring: 0.6, summer: 0.8, autumn: 0.95 },
@@ -5959,7 +5900,6 @@ const SPECIES_DB = {
     "med_dusky_grouper": {
         name: "Orfoz", nameEn: "Dusky Grouper / Cernia", icon: "🐟", scientificName: "Epinephelus marginatus",
         photoId: 711, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalık mağaralar",
         tempRange: { min: 16, opt: 22, max: 27 },
         seasons: { winter: 0.2, spring: 0.5, summer: 0.9, autumn: 0.8 },
@@ -5973,7 +5913,6 @@ const SPECIES_DB = {
     "med_goldblotch_grouper": {
         name: "Lagos / Grida", nameEn: "Goldblotch Grouper", icon: "🐟", scientificName: "Epinephelus costae",
         photoId: 712, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalık ve kumluk sınırları",
         tempRange: { min: 18, opt: 24, max: 28 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -5987,7 +5926,6 @@ const SPECIES_DB = {
     "med_white_grouper": {
         name: "Ak Lahoz", nameEn: "White Grouper", icon: "🐟", scientificName: "Epinephelus aeneus",
         photoId: 713, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk ve kayalık alanlar",
         tempRange: { min: 18, opt: 23, max: 27 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.6 },
@@ -6001,7 +5939,6 @@ const SPECIES_DB = {
     "med_leerfish": {
         name: "Çıplak / Akya", nameEn: "Leerfish / Garrick", icon: "🐟", scientificName: "Lichia amia",
         photoId: 714, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ kıyılar ve nehir ağızları",
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.8 },
@@ -6029,7 +5966,6 @@ const SPECIES_DB = {
     "med_bluefin_tuna": {
         name: "Mavi Yüzgeçli Orkinos", nameEn: "Bluefin Tuna", icon: "🐟", scientificName: "Thunnus thynnus",
         photoId: 716, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey ve orta su",
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.3, spring: 0.8, summer: 0.7, autumn: 0.5 },
@@ -6043,7 +5979,6 @@ const SPECIES_DB = {
     "med_albacore": {
         name: "Akkız / Yazılı Orkinos", nameEn: "Albacore", icon: "🐟", scientificName: "Thunnus alalunga",
         photoId: 717, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
         tempRange: { min: 14, opt: 19, max: 24 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.7 },
@@ -6057,7 +5992,6 @@ const SPECIES_DB = {
     "med_little_tunny": {
         name: "Yazılı Orkinos", nameEn: "Little Tunny / Euthynnus", icon: "🐟", scientificName: "Euthynnus alletteratus",
         photoId: 718, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey sürüler",
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.1, spring: 0.6, summer: 0.9, autumn: 0.8 },
@@ -6071,7 +6005,6 @@ const SPECIES_DB = {
     "med_bonito": {
         name: "Palamut", nameEn: "Atlantic Bonito", icon: "🐟", scientificName: "Sarda sarda",
         photoId: 719, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık yüzey sürüler",
         tempRange: { min: 14, opt: 19, max: 24 },
         seasons: { winter: 0.2, spring: 0.5, summer: 0.4, autumn: 0.95 },
@@ -6085,7 +6018,6 @@ const SPECIES_DB = {
     "med_chub_mackerel": {
         name: "Kolyoz", nameEn: "Chub Mackerel", icon: "🐟", scientificName: "Scomber colias",
         photoId: 720, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz orta su sürüler",
         tempRange: { min: 13, opt: 18, max: 24 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.6 },
@@ -6099,7 +6031,6 @@ const SPECIES_DB = {
 "med_chub_mackerel": {
         name: "Kolyoz", nameEn: "Chub Mackerel", icon: "🐟", scientificName: "Scomber colias",
         photoId: 720, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz orta su sürüler",
         tempRange: { min: 13, opt: 18, max: 24 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.6 },
@@ -6113,7 +6044,6 @@ const SPECIES_DB = {
     "med_common_bream": {
         name: "Fangri Mercan", nameEn: "Common Sea Bream", icon: "🐟", scientificName: "Pagrus pagrus",
         photoId: 721, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalıklar",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -6127,7 +6057,6 @@ const SPECIES_DB = {
     "med_blackspot_bream": {
         name: "Mandagöz Mercan", nameEn: "Blackspot Sea Bream", icon: "🐟", scientificName: "Pagellus bogaraveo",
         photoId: 722, category: "DERİN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin kayalık yamaçlar",
         tempRange: { min: 12, opt: 17, max: 22 },
         seasons: { winter: 0.8, spring: 0.7, summer: 0.3, autumn: 0.6 },
@@ -6141,7 +6070,6 @@ const SPECIES_DB = {
     "med_red_banded_bream": {
         name: "Çizgili Mercan", nameEn: "Red Banded Bream", icon: "🐟", scientificName: "Pagrus auriga",
         photoId: 723, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kayalık ve kumluk karışımı dipler",
         tempRange: { min: 16, opt: 21, max: 26 },
         seasons: { winter: 0.3, spring: 0.5, summer: 0.9, autumn: 0.7 },
@@ -6155,7 +6083,6 @@ const SPECIES_DB = {
     "med_zebra_bream": {
         name: "Zebra Karagöz", nameEn: "Zebra Bream", icon: "🐟", scientificName: "Diplodus cervinus",
         photoId: 724, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kıyı kayalıklar",
         tempRange: { min: 15, opt: 20, max: 26 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -6169,7 +6096,6 @@ const SPECIES_DB = {
     "med_annular_bream": {
         name: "Isparoz", nameEn: "Annular Bream", icon: "🐟", scientificName: "Diplodus annularis",
         photoId: 725, category: "OTLUK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ otluk ve kumluk alanlar",
         tempRange: { min: 14, opt: 20, max: 27 },
         seasons: { winter: 0.5, spring: 0.8, summer: 0.9, autumn: 0.6 },
@@ -6183,7 +6109,6 @@ const SPECIES_DB = {
     "med_salema": {
         name: "Sarpa", nameEn: "Salema", icon: "🐟", scientificName: "Sarpa salpa",
         photoId: 726, category: "OTLUK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ yosunlu kayalıklar",
         tempRange: { min: 15, opt: 22, max: 28 },
         seasons: { winter: 0.3, spring: 0.7, summer: 0.9, autumn: 0.6 },
@@ -6197,7 +6122,6 @@ const SPECIES_DB = {
     "med_common_sole": {
         name: "Dil Balığı", nameEn: "Common Sole", icon: "🐟", scientificName: "Solea solea",
         photoId: 727, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ kumluk ve çamurlu dipler",
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.4, autumn: 0.6 },
@@ -6211,7 +6135,6 @@ const SPECIES_DB = {
     "med_turbot": {
         name: "Kalkan", nameEn: "Turbot", icon: "🐟", scientificName: "Scophthalmus maximus",
         photoId: 728, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk ve çakıllık alanlar",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.8, spring: 0.7, summer: 0.2, autumn: 0.6 },
@@ -6225,7 +6148,6 @@ const SPECIES_DB = {
     "med_red_mullet": {
         name: "Tekir", nameEn: "Red Mullet", icon: "🐟", scientificName: "Mullus surmuletus",
         photoId: 729, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve kayalık sınırları",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.4, spring: 0.8, summer: 0.9, autumn: 0.7 },
@@ -6239,7 +6161,6 @@ const SPECIES_DB = {
     "med_striped_mullet": {
         name: "Barbunya", nameEn: "Striped Red Mullet", icon: "🐟", scientificName: "Mullus barbatus",
         photoId: 730, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve çamurlu dipler",
         tempRange: { min: 14, opt: 19, max: 25 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -6253,7 +6174,6 @@ const SPECIES_DB = {
 "med_striped_mullet": {
         name: "Barbunya", nameEn: "Striped Red Mullet", icon: "🐟", scientificName: "Mullus barbatus",
         photoId: 730, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve çamurlu dipler",
         tempRange: { min: 14, opt: 19, max: 25 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -6267,7 +6187,6 @@ const SPECIES_DB = {
     "med_scabbard_fish": {
         name: "Palaska", nameEn: "Scabbard Fish / Espada", icon: "🐟", scientificName: "Lepidopus caudatus",
         photoId: 731, category: "DERİN",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece orta derinlikte yüzeye yakın",
         tempRange: { min: 12, opt: 17, max: 22 },
         seasons: { winter: 0.8, spring: 0.6, summer: 0.3, autumn: 0.7 },
@@ -6281,7 +6200,6 @@ const SPECIES_DB = {
     "med_silver_scabbard": {
         name: "Gümüş Palaska", nameEn: "Silver Scabbard Fish", icon: "🐟", scientificName: "Benthodesmus simonyi",
         photoId: 732, category: "DERİN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin su",
         tempRange: { min: 10, opt: 15, max: 20 },
         seasons: { winter: 0.9, spring: 0.7, summer: 0.2, autumn: 0.6 },
@@ -6295,7 +6213,6 @@ const SPECIES_DB = {
     "med_barracuda": {
         name: "Iskarmoz / Barracuda", nameEn: "Yellowmouth Barracuda", icon: "🐟", scientificName: "Sphyraena viridensis",
         photoId: 733, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ burunlar ve ışıklı liman ağızları",
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.8 },
@@ -6309,7 +6226,6 @@ const SPECIES_DB = {
     "med_spearfish": {
         name: "Akdeniz Mızrak Balığı", nameEn: "Mediterranean Spearfish", icon: "🐟", scientificName: "Tetrapturus belone",
         photoId: 734, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
         tempRange: { min: 18, opt: 23, max: 27 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.7 },
@@ -6323,7 +6239,6 @@ const SPECIES_DB = {
     "med_oilfish": {
         name: "Yağ Balığı", nameEn: "Oilfish", icon: "🐟", scientificName: "Ruvettus pretiosus",
         photoId: 735, category: "DERİN",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece orta derinlik",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.7, spring: 0.6, summer: 0.4, autumn: 0.8 },
@@ -6337,7 +6252,6 @@ const SPECIES_DB = {
     "med_escolar": {
         name: "Yalancı Yağ Balığı", nameEn: "Escolar", icon: "🐟", scientificName: "Lepidocybium flavobrunneum",
         photoId: 736, category: "DERİN",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece açık deniz",
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.6, spring: 0.7, summer: 0.5, autumn: 0.8 },
@@ -6351,7 +6265,6 @@ const SPECIES_DB = {
     "med_greater_amberjack_xxl": {
         name: "Dev Akya", nameEn: "Greater Amberjack XXL", icon: "🐟", scientificName: "Seriola dumerili",
         photoId: 737, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin batıklar ve resifler",
         tempRange: { min: 16, opt: 22, max: 27 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.8 },
@@ -6365,7 +6278,6 @@ const SPECIES_DB = {
     "med_cobia": {
         name: "Kobia", nameEn: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
         photoId: 738, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz şamandıra ve batık çevreleri",
         tempRange: { min: 20, opt: 26, max: 31 },
         seasons: { winter: 0.1, spring: 0.3, summer: 0.95, autumn: 0.6 },
@@ -6379,7 +6291,6 @@ const SPECIES_DB = {
     "med_pompano": {
         name: "Yaladerma / Çatal Kuyruk", nameEn: "Pompano", icon: "🐟", scientificName: "Trachinotus ovatus",
         photoId: 739, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ köpüklü kıyılar",
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.2, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -6393,7 +6304,6 @@ const SPECIES_DB = {
     "med_blue_runner": {
         name: "Karakulak", nameEn: "Blue Runner", icon: "🐟", scientificName: "Caranx crysos",
         photoId: 740, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey sürüler ve liman ağızları",
         tempRange: { min: 18, opt: 24, max: 29 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.7 },
@@ -6407,7 +6317,6 @@ const SPECIES_DB = {
 "med_blue_runner": {
         name: "Karakulak", nameEn: "Blue Runner", icon: "🐟", scientificName: "Caranx crysos",
         photoId: 740, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey sürüler ve liman ağızları",
         tempRange: { min: 18, opt: 24, max: 29 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.7 },
@@ -6421,7 +6330,6 @@ const SPECIES_DB = {
     "med_meagre": {
         name: "Sarıağız / Granyöz", nameEn: "Meagre / Bocca d'oro", icon: "🐟", scientificName: "Argyrosomus regius",
         photoId: 741, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece nehir ağızları ve sığ kumluklar",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.2, spring: 0.6, summer: 0.9, autumn: 0.8 },
@@ -6435,7 +6343,6 @@ const SPECIES_DB = {
     "med_brown_meagre": {
         name: "Eşkina", nameEn: "Brown Meagre / Corvina", icon: "🐟", scientificName: "Sciaena umbra",
         photoId: 742, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece kıyı kayalık mağara ağızları",
         tempRange: { min: 14, opt: 21, max: 27 },
         seasons: { winter: 0.3, spring: 0.7, summer: 0.9, autumn: 0.6 },
@@ -6449,7 +6356,6 @@ const SPECIES_DB = {
     "med_shi_drum": {
         name: "Minekop", nameEn: "Shi Drum", icon: "🐟", scientificName: "Umbrina cirrosa",
         photoId: 743, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ kumluk ve çakıllık kıyılar",
         tempRange: { min: 13, opt: 19, max: 25 },
         seasons: { winter: 0.4, spring: 0.8, summer: 0.9, autumn: 0.7 },
@@ -6463,7 +6369,6 @@ const SPECIES_DB = {
     "med_gurnard": {
         name: "Kırlangıç", nameEn: "Tub Gurnard", icon: "🐟", scientificName: "Chelidonichthys lucerna",
         photoId: 744, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve çamurlu dipler",
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.4, autumn: 0.6 },
@@ -6477,7 +6382,6 @@ const SPECIES_DB = {
     "med_stargazer": {
         name: "Kurbağa Balığı / Tiryaki", nameEn: "Stargazer", icon: "🐟", scientificName: "Uranoscopus scaber",
         photoId: 745, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ kumluk dipler",
         tempRange: { min: 14, opt: 20, max: 27 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.6 },
@@ -6491,7 +6395,6 @@ const SPECIES_DB = {
     "med_anglerfish": {
         name: "Fener Balığı", nameEn: "Anglerfish / Rana pescatrice", icon: "🐟", scientificName: "Lophius piscatorius",
         photoId: 746, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin çamurlu dipler",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.8, spring: 0.7, summer: 0.3, autumn: 0.6 },
@@ -6505,7 +6408,6 @@ const SPECIES_DB = {
     "med_john_dory": {
         name: "Dülger", nameEn: "John Dory / San Pietro", icon: "🐟", scientificName: "Zeus faber",
         photoId: 747, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz orta derinlikteki kayalıklar",
         tempRange: { min: 14, opt: 19, max: 24 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.5, autumn: 0.7 },
@@ -6519,7 +6421,6 @@ const SPECIES_DB = {
     "med_conger_eel": {
         name: "Mığrı", nameEn: "Conger Eel", icon: "🐟", scientificName: "Conger conger",
         photoId: 748, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece kayalık çatlaklar ve batıklar",
         tempRange: { min: 13, opt: 18, max: 24 },
         seasons: { winter: 0.7, spring: 0.6, summer: 0.5, autumn: 0.8 },
@@ -6533,7 +6434,6 @@ const SPECIES_DB = {
     "med_moray_eel": {
         name: "Müren", nameEn: "Moray Eel", icon: "🐟", scientificName: "Muraena helena",
         photoId: 749, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ ve orta derinlikteki kayalıklar",
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -6547,7 +6447,6 @@ const SPECIES_DB = {
     "med_blue_shark": {
         name: "Mavi Köpekbalığı", nameEn: "Blue Shark / Verdesca", icon: "🦈", scientificName: "Prionace glauca",
         photoId: 750, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey",
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.8, autumn: 0.6 },
@@ -6561,7 +6460,6 @@ const SPECIES_DB = {
 "med_blue_shark": {
         name: "Mavi Köpekbalığı", nameEn: "Blue Shark / Verdesca", icon: "🦈", scientificName: "Prionace glauca",
         photoId: 750, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey",
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.8, autumn: 0.6 },
@@ -6601,7 +6499,6 @@ const SPECIES_DB = {
     "brazil_tarpon": {
         name: "Camurupim / Tarpon", nameEn: "Tarpon", icon: "🐟", scientificName: "Megalops atlanticus",
         photoId: 803, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece nehir ağızları ve aydınlatılmış kıyılar",
         tempRange: { min: 22, opt: 28, max: 32 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.95, autumn: 0.8 },
@@ -6615,7 +6512,6 @@ const SPECIES_DB = {
     "brazil_crevalle_jack": {
         name: "Xaréu", nameEn: "Crevalle Jack", icon: "🐟", scientificName: "Caranx hippos",
         photoId: 804, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kıyı yapıları ve akıntılı bölgeler",
         tempRange: { min: 18, opt: 24, max: 30 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -6629,7 +6525,6 @@ const SPECIES_DB = {
     "brazil_horse_eye_jack": {
         name: "Xarelete", nameEn: "Horse-eye Jack", icon: "🐟", scientificName: "Caranx latus",
         photoId: 805, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece resif kenarları ve yapay ışıklar",
         tempRange: { min: 20, opt: 26, max: 30 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -6643,7 +6538,6 @@ const SPECIES_DB = {
     "brazil_blue_runner": {
         name: "Guaivira", nameEn: "Blue Runner", icon: "🐟", scientificName: "Caranx crysos",
         photoId: 806, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey sürüler",
         tempRange: { min: 18, opt: 24, max: 30 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.6 },
@@ -6670,7 +6564,6 @@ const SPECIES_DB = {
     "brazil_king_mackerel": {
         name: "Cavala", nameEn: "King Mackerel", icon: "🐟", scientificName: "Scomberomorus cavalla",
         photoId: 808, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık açık deniz ve resif kenarları",
         tempRange: { min: 20, opt: 26, max: 30 },
         seasons: { winter: 0.2, spring: 0.5, summer: 0.9, autumn: 0.8 },
@@ -6684,7 +6577,6 @@ const SPECIES_DB = {
     "brazil_great_barracuda": {
         name: "Barracuda", nameEn: "Great Barracuda", icon: "🦈", scientificName: "Sphyraena barracuda",
         photoId: 809, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resifler ve sığlıklar",
         tempRange: { min: 22, opt: 28, max: 32 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -6698,7 +6590,6 @@ const SPECIES_DB = {
     "brazil_permit": {
         name: "Sernambiguara / Permit", nameEn: "Permit", icon: "🐟", scientificName: "Trachinotus falcatus",
         photoId: 810, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluklar ve düzlükler (flats)",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.8 },
@@ -6712,7 +6603,6 @@ const SPECIES_DB = {
 "brazil_permit": {
         name: "Sernambiguara / Permit", nameEn: "Permit", icon: "🐟", scientificName: "Trachinotus falcatus",
         photoId: 810, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluklar ve düzlükler (flats)",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.8 },
@@ -6726,7 +6616,6 @@ const SPECIES_DB = {
     "brazil_mahi_mahi": {
         name: "Dourado / Mahi Mahi", nameEn: "Dolphin Fish", icon: "🐟", scientificName: "Coryphaena hippurus",
         photoId: 811, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey akıntı çizgileri",
         tempRange: { min: 20, opt: 26, max: 30 },
         seasons: { winter: 0.2, spring: 0.5, summer: 0.95, autumn: 0.8 },
@@ -6740,7 +6629,6 @@ const SPECIES_DB = {
     "brazil_sailfish": {
         name: "Yelken Balığı", nameEn: "Sailfish / Agulhão Vela", icon: "🐟", scientificName: "Istiophorus platypterus",
         photoId: 812, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.3, spring: 0.7, summer: 0.9, autumn: 0.6 },
@@ -6754,7 +6642,6 @@ const SPECIES_DB = {
     "brazil_blue_marlin": {
         name: "Mavi Marlin", nameEn: "Blue Marlin / Agulhão Negro", icon: "🐟", scientificName: "Makaira nigricans",
         photoId: 813, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz derin mavi sular",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -6768,7 +6655,6 @@ const SPECIES_DB = {
     "brazil_white_marlin": {
         name: "Beyaz Marlin", nameEn: "White Marlin / Agulhão Branco", icon: "🐟", scientificName: "Kajikia albida",
         photoId: 814, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
         tempRange: { min: 21, opt: 25, max: 29 },
         seasons: { winter: 0.2, spring: 0.5, summer: 0.9, autumn: 0.7 },
@@ -6782,7 +6668,6 @@ const SPECIES_DB = {
     "brazil_yellowfin_tuna": {
         name: "Sarı Yüzgeçli Orkinos", nameEn: "Yellowfin Tuna / Atum Amarelo", icon: "🐟", scientificName: "Thunnus albacares",
         photoId: 815, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
         tempRange: { min: 18, opt: 24, max: 29 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -6796,7 +6681,6 @@ const SPECIES_DB = {
     "brazil_wahoo": {
         name: "Wahoo / Cavala Empata", nameEn: "Wahoo", icon: "🐟", scientificName: "Acanthocybium solandri",
         photoId: 816, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık açık deniz resifleri",
         tempRange: { min: 18, opt: 24, max: 30 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -6810,7 +6694,6 @@ const SPECIES_DB = {
     "brazil_cobia": {
         name: "Bijupirá / Cobia", nameEn: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
         photoId: 817, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz şamandıra ve batık çevreleri",
         tempRange: { min: 20, opt: 26, max: 31 },
         seasons: { winter: 0.3, spring: 0.5, summer: 0.9, autumn: 0.7 },
@@ -6824,7 +6707,6 @@ const SPECIES_DB = {
     "brazil_goliath_grouper": {
         name: "Mero / Dev Orfoz", nameEn: "Goliath Grouper", icon: "🐟", scientificName: "Epinephelus itajara",
         photoId: 818, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve mangrov kökleri",
         tempRange: { min: 20, opt: 26, max: 31 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -6838,7 +6720,6 @@ const SPECIES_DB = {
     "brazil_snowy_grouper": {
         name: "Karakulak Lagos", nameEn: "Snowy Grouper", icon: "🐟", scientificName: "Hyporthodus niveatus",
         photoId: 819, category: "DERİN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin kayalık yamaçlar",
         tempRange: { min: 14, opt: 19, max: 24 },
         seasons: { winter: 0.7, spring: 0.6, summer: 0.4, autumn: 0.8 },
@@ -6891,7 +6772,6 @@ const SPECIES_DB = {
     "brazil_yellowtail_snapper": {
         name: "Guaiúba", nameEn: "Yellowtail Snapper", icon: "🐟", scientificName: "Ocyurus chrysurus",
         photoId: 823, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece resif üstü sürüler",
         tempRange: { min: 22, opt: 26, max: 31 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.95, autumn: 0.8 },
@@ -6918,7 +6798,6 @@ const SPECIES_DB = {
     "brazil_gray_snapper": {
         name: "Caranha / Gray Snapper", nameEn: "Gray Snapper", icon: "🐟", scientificName: "Lutjanus griseus",
         photoId: 825, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ resifler ve mangrovlar",
         tempRange: { min: 18, opt: 24, max: 31 },
         seasons: { winter: 0.6, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -6932,7 +6811,6 @@ const SPECIES_DB = {
     "brazil_cubera_snapper": {
         name: "Caranha / Dev Snapper", nameEn: "Cubera Snapper", icon: "🐟", scientificName: "Lutjanus cyanopterus",
         photoId: 826, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece derin resifler ve batıklar",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.95, autumn: 0.8 },
@@ -6946,7 +6824,6 @@ const SPECIES_DB = {
     "brazil_queen_snapper": {
         name: "Etióro", nameEn: "Queen Snapper", icon: "🐟", scientificName: "Etelis oculatus",
         photoId: 827, category: "DERİN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin kayalık yamaçlar",
         tempRange: { min: 12, opt: 17, max: 23 },
         seasons: { winter: 0.8, spring: 0.7, summer: 0.4, autumn: 0.6 },
@@ -6986,7 +6863,6 @@ const SPECIES_DB = {
     "brazil_hogfish": {
         name: "Bodião-papagaio", nameEn: "Brazilian Hogfish", icon: "🐟", scientificName: "Lachnolaimus maximus",
         photoId: 830, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ ve orta derinlikte resifler",
         tempRange: { min: 20, opt: 25, max: 29 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.9, autumn: 0.8 },
@@ -7000,7 +6876,6 @@ const SPECIES_DB = {
     "brazil_black_grouper": {
         name: "Badejo-quadrado", nameEn: "Black Grouper", icon: "🐟", scientificName: "Mycteroperca bonaci",
         photoId: 831, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve mercanlar",
         tempRange: { min: 20, opt: 25, max: 30 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -7014,7 +6889,6 @@ const SPECIES_DB = {
     "brazil_yellowmouth_grouper": {
         name: "Badejo-limão", nameEn: "Yellowmouth Grouper", icon: "🐟", scientificName: "Mycteroperca interstitialis",
         photoId: 832, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz orta derinlikteki resifler",
         tempRange: { min: 20, opt: 24, max: 29 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -7054,7 +6928,6 @@ const SPECIES_DB = {
     "brazil_red_hind": {
         name: "Garoupa-são-tomé", nameEn: "Red Hind", icon: "🐟", scientificName: "Epinephelus guttatus",
         photoId: 835, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ mercan resifleri",
         tempRange: { min: 22, opt: 26, max: 31 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.9, autumn: 0.8 },
@@ -7068,7 +6941,6 @@ const SPECIES_DB = {
     "brazil_graysby": {
         name: "Garoupa-mármore", nameEn: "Graysby", icon: "🐟", scientificName: "Cephalopholis cruentata",
         photoId: 836, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ resif çatlakları",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -7082,7 +6954,6 @@ const SPECIES_DB = {
     "brazil_coney": {
         name: "Garoupa-chita", nameEn: "Coney", icon: "🐟", scientificName: "Cephalopholis fulva",
         photoId: 837, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
         tempRange: { min: 23, opt: 27, max: 32 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.95, autumn: 0.8 },
@@ -7096,7 +6967,6 @@ const SPECIES_DB = {
     "brazil_rock_hind": {
         name: "Garoupa-pintada", nameEn: "Rock Hind", icon: "🐟", scientificName: "Epinephelus adscensionis",
         photoId: 838, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kayalıklar ve gelgit havuzları",
         tempRange: { min: 20, opt: 25, max: 30 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -7162,7 +7032,6 @@ const SPECIES_DB = {
     "brazil_golden_tilefish": {
         name: "Batata", nameEn: "Golden Tilefish", icon: "🐟", scientificName: "Lopholatilus chamaeleonticeps",
         photoId: 842, category: "DERİN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin yumuşak dipler",
         tempRange: { min: 10, opt: 15, max: 20 },
         seasons: { winter: 0.8, spring: 0.6, summer: 0.4, autumn: 0.7 },
@@ -7176,7 +7045,6 @@ const SPECIES_DB = {
     "brazil_gray_triggerfish": {
         name: "Peroá / Çütre", nameEn: "Gray Triggerfish", icon: "🐟", scientificName: "Balistes capriscus",
         photoId: 843, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resifler ve batıklar",
         tempRange: { min: 18, opt: 23, max: 28 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -7190,7 +7058,6 @@ const SPECIES_DB = {
     "brazil_queen_triggerfish": {
         name: "Cangulo-rei", nameEn: "Queen Triggerfish", icon: "🐟", scientificName: "Balistes vetula",
         photoId: 844, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
         tempRange: { min: 22, opt: 26, max: 31 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.9, autumn: 0.8 },
@@ -7204,7 +7071,6 @@ const SPECIES_DB = {
     "brazil_ocean_triggerfish": {
         name: "Cangulo-negro", nameEn: "Ocean Triggerfish", icon: "🐟", scientificName: "Canthidermis sufflamen",
         photoId: 845, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz resifleri ve şamandıralar",
         tempRange: { min: 20, opt: 25, max: 30 },
         seasons: { winter: 0.3, spring: 0.5, summer: 0.9, autumn: 0.8 },
@@ -7218,7 +7084,6 @@ const SPECIES_DB = {
     "brazil_blue_tang": {
         name: "Doktor Balığı", nameEn: "Blue Tang", icon: "🐟", scientificName: "Acanthurus coeruleus",
         photoId: 846, category: "OTLUK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ mercan resifleri",
         tempRange: { min: 22, opt: 26, max: 31 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -7232,7 +7097,6 @@ const SPECIES_DB = {
     "brazil_queen_angelfish": {
         name: "Peixe-anjo-rainha", nameEn: "Queen Angelfish", icon: "🐟", scientificName: "Holacanthus ciliaris",
         photoId: 847, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz renkli mercan resifleri",
         tempRange: { min: 22, opt: 27, max: 32 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.95, autumn: 0.8 },
@@ -7246,7 +7110,6 @@ const SPECIES_DB = {
     "brazil_french_angelfish": {
         name: "Peixe-anjo-francês", nameEn: "French Angelfish", icon: "🐟", scientificName: "Pomacanthus paru",
         photoId: 848, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ ve orta derinlikte resifler",
         tempRange: { min: 22, opt: 26, max: 31 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -7273,7 +7136,6 @@ const SPECIES_DB = {
     "brazil_nurse_shark": {
         name: "Tubarão-lixa", nameEn: "Nurse Shark", icon: "🦈", scientificName: "Ginglymostoma cirratum",
         photoId: 850, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ resifler and kumluklar",
         tempRange: { min: 20, opt: 26, max: 32 },
         seasons: { winter: 0.5, spring: 0.6, summer: 0.9, autumn: 0.8 },
@@ -7300,7 +7162,6 @@ const SPECIES_DB = {
     "redsea_giant_trevally": {
         name: "Dev Akya / GT", nameEn: "Giant Trevally", icon: "🐟", scientificName: "Caranx ignobilis",
         photoId: 902, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ resif kenarları",
         tempRange: { min: 22, opt: 27, max: 32 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.95, autumn: 0.9 },
@@ -7314,7 +7175,6 @@ const SPECIES_DB = {
     "redsea_bluefin_trevally": {
         name: "Mavi Yüzgeçli Akya", nameEn: "Bluefin Trevally", icon: "🐟", scientificName: "Caranx melampygus",
         photoId: 903, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resif üstleri ve kanallar",
         tempRange: { min: 22, opt: 26, max: 31 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -7328,7 +7188,6 @@ const SPECIES_DB = {
     "redsea_dogtooth_tuna": {
         name: "Köpekdiş Orkinos", nameEn: "Dogtooth Tuna", icon: "🐟", scientificName: "Gymnosarda unicolor",
         photoId: 904, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin resif duvarları",
         tempRange: { min: 20, opt: 25, max: 29 },
         seasons: { winter: 0.8, spring: 0.7, summer: 0.5, autumn: 0.8 },
@@ -7355,7 +7214,6 @@ const SPECIES_DB = {
     "redsea_coral_grouper": {
         name: "Mercan Orfozu", nameEn: "Coral Grouper", icon: "🐟", scientificName: "Cephalopholis miniata",
         photoId: 906, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz mercan blokları",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -7382,7 +7240,6 @@ const SPECIES_DB = {
     "redsea_ribbontail_ray": {
         name: "Mavi Benekli Vatoz", nameEn: "Bluespotted Ribbontail Ray", icon: "🐟", scientificName: "Taeniura lymma",
         photoId: 908, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluklar ve resif sınırları",
         tempRange: { min: 24, opt: 28, max: 32 },
         seasons: { winter: 0.8, spring: 0.8, summer: 0.95, autumn: 0.9 },
@@ -7396,7 +7253,6 @@ const SPECIES_DB = {
     "redsea_lionfish": {
         name: "Aslan Balığı", nameEn: "Lionfish", icon: "🐟", scientificName: "Pterois miles",
         photoId: 909, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık resif çıkıntıları",
         tempRange: { min: 20, opt: 26, max: 31 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -7436,7 +7292,6 @@ const SPECIES_DB = {
     "redsea_whitetip_shark": {
         name: "Beyaz Yüzgeçli Resif Köpekbalığı", nameEn: "Whitetip Reef Shark", icon: "🦈", scientificName: "Triaenodon obesus",
         photoId: 911, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece resif çatlakları ve mağaralar",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.8, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -7450,7 +7305,6 @@ const SPECIES_DB = {
     "redsea_blacktip_shark": {
         name: "Siyah Yüzgeçli Resif Köpekbalığı", nameEn: "Blacktip Reef Shark", icon: "🦈", scientificName: "Carcharhinus melanopterus",
         photoId: 912, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ resif düzlükleri",
         tempRange: { min: 23, opt: 27, max: 31 },
         seasons: { winter: 0.8, spring: 0.8, summer: 0.95, autumn: 0.9 },
@@ -7464,7 +7318,6 @@ const SPECIES_DB = {
     "redsea_grey_reef_shark": {
         name: "Gri Resif Köpekbalığı", nameEn: "Grey Reef Shark", icon: "🦈", scientificName: "Carcharhinus amblyrhynchos",
         photoId: 913, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resif dış yamaçları ve kanallar",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.8, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -7478,7 +7331,6 @@ const SPECIES_DB = {
     "redsea_oceanic_whitetip": {
         name: "Uzunkanat Köpekbalığı / Longimanus", nameEn: "Oceanic Whitetip Shark", icon: "🦈", scientificName: "Carcharhinus longimanus",
         photoId: 914, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
         tempRange: { min: 20, opt: 24, max: 28 },
         seasons: { winter: 0.6, spring: 0.7, summer: 0.8, autumn: 0.9 },
@@ -7492,7 +7344,6 @@ const SPECIES_DB = {
     "redsea_hammerhead": {
         name: "Büyük Çekiçbaş", nameEn: "Great Hammerhead Shark", icon: "🦈", scientificName: "Sphyrna mokarran",
         photoId: 915, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin resif duvarları ve açık su",
         tempRange: { min: 18, opt: 24, max: 29 },
         seasons: { winter: 0.5, spring: 0.8, summer: 0.9, autumn: 0.7 },
@@ -7506,7 +7357,6 @@ const SPECIES_DB = {
     "redsea_manta_ray": {
         name: "Manta Vatozu", nameEn: "Reef Manta Ray", icon: "🐟", scientificName: "Mobula alfredi",
         photoId: 916, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz temizleme istasyonları ve akıntılı kanallar",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.95, autumn: 0.9 },
@@ -7520,7 +7370,6 @@ const SPECIES_DB = {
     "redsea_whale_shark": {
         name: "Balina Köpekbalığı", nameEn: "Whale Shark", icon: "🦈", scientificName: "Rhincodon typus",
         photoId: 917, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.1, spring: 0.6, summer: 0.8, autumn: 0.3 },
@@ -7534,7 +7383,6 @@ const SPECIES_DB = {
     "redsea_eagle_ray": {
         name: "Benekli Kartal Vatozu", nameEn: "Spotted Eagle Ray", icon: "🐟", scientificName: "Aetobatus narinari",
         photoId: 918, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve açık su",
         tempRange: { min: 23, opt: 27, max: 31 },
         seasons: { winter: 0.8, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -7548,7 +7396,6 @@ const SPECIES_DB = {
     "redsea_green_turtle": {
         name: "Yeşil Deniz Kaplumbağası", nameEn: "Green Sea Turtle", icon: "🐢", scientificName: "Chelonia mydas",
         photoId: 919, category: "OTLUK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ yosunluk alanlar",
         tempRange: { min: 20, opt: 26, max: 32 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.95, autumn: 0.9 },
@@ -7562,7 +7409,6 @@ const SPECIES_DB = {
     "redsea_hawksbill_turtle": {
         name: "Şahin Gagalı Kaplumbağa", nameEn: "Hawksbill Turtle", icon: "🐢", scientificName: "Eretmochelys imbricata",
         photoId: 920, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
         tempRange: { min: 22, opt: 27, max: 32 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.95, autumn: 0.9 },
@@ -7576,7 +7422,6 @@ const SPECIES_DB = {
 "redsea_hawksbill_turtle": {
         name: "Şahin Gagalı Kaplumbağa", nameEn: "Hawksbill Turtle", icon: "🐢", scientificName: "Eretmochelys imbricata",
         photoId: 920, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
         tempRange: { min: 22, opt: 27, max: 32 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.95, autumn: 0.9 },
@@ -7590,7 +7435,6 @@ const SPECIES_DB = {
     "redsea_malabar_grouper": {
         name: "Malabar Orfozu", nameEn: "Malabar Grouper", icon: "🐟", scientificName: "Epinephelus malabaricus",
         photoId: 921, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resif çatlakları ve mağaralar",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.9, autumn: 0.8 },
@@ -7669,7 +7513,6 @@ const SPECIES_DB = {
     "redsea_lyretail_grouper": {
         name: "Ay Kuyruk Orfoz", nameEn: "Lyretail Grouper", icon: "🐟", scientificName: "Variola louti",
         photoId: 927, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resif üstleri ve dış yamaçlar",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -7696,7 +7539,6 @@ const SPECIES_DB = {
     "redsea_peacock_hind": {
         name: "Tavuskuşu Hanisi", nameEn: "Peacock Hind", icon: "🐟", scientificName: "Cephalopholis argus",
         photoId: 929, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ ve orta derinlikteki mercanlar",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.8, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -7827,7 +7669,6 @@ const SPECIES_DB = {
     "redsea_titan_triggerfish": {
         name: "Dev Tetik Balığı", nameEn: "Titan Triggerfish", icon: "🐟", scientificName: "Balistoides viridescens",
         photoId: 938, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve kumluklar",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.95, autumn: 0.9 },
@@ -7841,7 +7682,6 @@ const SPECIES_DB = {
     "redsea_yellowmargin_triggerfish": {
         name: "Sarı Kenarlı Tetik Balığı", nameEn: "Yellowmargin Triggerfish", icon: "🐟", scientificName: "Pseudobalistes flavimarginatus",
         photoId: 939, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk alanlar ve resifler",
         tempRange: { min: 22, opt: 26, max: 31 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.9, autumn: 0.8 },
@@ -7855,7 +7695,6 @@ const SPECIES_DB = {
     "redsea_blue_triggerfish": {
         name: "Mavi Tetik Balığı", nameEn: "Blue Triggerfish", icon: "🐟", scientificName: "Pseudobalistes fuscus",
         photoId: 940, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
         tempRange: { min: 24, opt: 28, max: 32 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.95, autumn: 0.9 },
@@ -7869,7 +7708,6 @@ const SPECIES_DB = {
 "redsea_blue_triggerfish": {
         name: "Mavi Tetik Balığı", nameEn: "Blue Triggerfish", icon: "🐟", scientificName: "Pseudobalistes fuscus",
         photoId: 940, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
         tempRange: { min: 24, opt: 28, max: 32 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.95, autumn: 0.9 },
@@ -7909,7 +7747,6 @@ const SPECIES_DB = {
     "redsea_spangled_emperor": {
         name: "Yıldızlı İmparator", nameEn: "Spangled Emperor", icon: "🐟", scientificName: "Lethrinus nebulosus",
         photoId: 943, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve kumluklar",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.95, autumn: 0.9 },
@@ -7988,7 +7825,6 @@ const SPECIES_DB = {
     "redsea_royal_angelfish": {
         name: "Kral Melek Balığı", nameEn: "Royal Angelfish", icon: "🐟", scientificName: "Pygoplites diacanthus",
         photoId: 949, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz zengin mercan resifleri",
         tempRange: { min: 24, opt: 28, max: 31 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.95, autumn: 0.9 },
@@ -8028,7 +7864,6 @@ const SPECIES_DB = {
     "thailand_barramundi": {
         name: "Asya Levreği / Barramundi", nameEn: "Barramundi", icon: "🐟", scientificName: "Lates calcarifer",
         photoId: 1002, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık gelgit kanalları ve iskeleler",
         tempRange: { min: 22, opt: 28, max: 32 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.95, autumn: 0.9 },
@@ -8055,7 +7890,6 @@ const SPECIES_DB = {
     "thailand_sailfish": {
         name: "Yelken Balığı", nameEn: "Indo-Pacific Sailfish", icon: "🐟", scientificName: "Istiophorus platypterus",
         photoId: 1004, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey",
         tempRange: { min: 24, opt: 28, max: 32 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -8069,7 +7903,6 @@ const SPECIES_DB = {
     "thailand_spanish_mackerel": {
         name: "Tenggiri", nameEn: "Narrow-barred Spanish Mackerel", icon: "🐟", scientificName: "Scomberomorus commerson",
         photoId: 1005, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık açık su ve resif kenarları",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -8083,7 +7916,6 @@ const SPECIES_DB = {
     "thailand_longtail_tuna": {
         name: "Uzunkuyruk Orkinos", nameEn: "Longtail Tuna", icon: "🐟", scientificName: "Thunnus tonggol",
         photoId: 1006, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -8097,7 +7929,6 @@ const SPECIES_DB = {
     "thailand_barracuda": {
         name: "Çizgili Iskarmoz", nameEn: "Pickhandle Barracuda", icon: "🐟", scientificName: "Sphyraena jello",
         photoId: 1007, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece ışıklı iskeleler ve resifler",
         tempRange: { min: 22, opt: 26, max: 31 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -8111,7 +7942,6 @@ const SPECIES_DB = {
     "thailand_cobia": {
         name: "Kobia", nameEn: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
         photoId: 1008, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz şamandıralar ve batıklar",
         tempRange: { min: 20, opt: 25, max: 30 },
         seasons: { winter: 0.5, spring: 0.8, summer: 0.9, autumn: 0.8 },
@@ -8125,7 +7955,6 @@ const SPECIES_DB = {
     "thailand_mangrove_snapper": {
         name: "Mangrov Mercanı", nameEn: "Mangrove Red Snapper", icon: "🐟", scientificName: "Lutjanus argentimaculatus",
         photoId: 1009, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece mangrov kökleri ve iskele ayakları",
         tempRange: { min: 20, opt: 25, max: 31 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -8165,7 +7994,6 @@ const SPECIES_DB = {
     "thailand_malabar_grouper": {
         name: "Malabar Orfozu", nameEn: "Malabar Grouper", icon: "🐟", scientificName: "Epinephelus malabaricus",
         photoId: 1011, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resif çatlakları ve mağaralar",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.9, autumn: 0.8 },
@@ -8179,7 +8007,6 @@ const SPECIES_DB = {
     "thailand_orange_spotted_grouper": {
         name: "Turuncu Benekli Orfoz", nameEn: "Orange-spotted Grouper", icon: "🐟", scientificName: "Epinephelus coioides",
         photoId: 1012, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz nehir ağızları ve mangrovlar",
         tempRange: { min: 24, opt: 28, max: 32 },
         seasons: { winter: 0.8, spring: 0.8, summer: 0.95, autumn: 0.9 },
@@ -8206,7 +8033,6 @@ const SPECIES_DB = {
     "thailand_coral_trout": {
         name: "Mercan Alabalığı", nameEn: "Coral Trout", icon: "🐟", scientificName: "Plectropomus leopardus",
         photoId: 1014, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz zengin mercan resifleri",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -8233,7 +8059,6 @@ const SPECIES_DB = {
     "thailand_giant_grouper": {
         name: "Dev Orfoz", nameEn: "Giant Grouper", icon: "🐟", scientificName: "Epinephelus lanceolatus",
         photoId: 1016, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler, batıklar ve mağaralar",
         tempRange: { min: 22, opt: 26, max: 31 },
         seasons: { winter: 0.8, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -8325,7 +8150,6 @@ const SPECIES_DB = {
     "thailand_giant_moray": {
         name: "Dev Müren", nameEn: "Giant Moray", icon: "🐍", scientificName: "Gymnothorax javanicus",
         photoId: 1022, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece resif duvarları ve mağaralar",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.8, spring: 0.8, summer: 0.95, autumn: 0.9 },
@@ -8339,7 +8163,6 @@ const SPECIES_DB = {
     "thailand_honeycomb_moray": {
         name: "Bal Peteği Müreni", nameEn: "Honeycomb Moray", icon: "🐍", scientificName: "Gymnothorax favagineus",
         photoId: 1023, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece mercan resifleri",
         tempRange: { min: 24, opt: 28, max: 32 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -8353,7 +8176,6 @@ const SPECIES_DB = {
     "thailand_zebra_moray": {
         name: "Zebra Müreni", nameEn: "Zebra Moray", icon: "🐍", scientificName: "Gymnomuraena zebra",
         photoId: 1024, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ resif alanları",
         tempRange: { min: 22, opt: 26, max: 31 },
         seasons: { winter: 0.8, spring: 0.8, summer: 0.9, autumn: 0.8 },
@@ -8458,7 +8280,6 @@ const SPECIES_DB = {
     "thailand_hammerhead_shark": {
         name: "Dev Çekiçbaş Köpekbalığı", nameEn: "Great Hammerhead Shark", icon: "🦈", scientificName: "Sphyrna mokarran",
         photoId: 1031, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve derin resifler",
         tempRange: { min: 20, opt: 25, max: 30 },
         seasons: { winter: 0.6, spring: 0.7, summer: 0.8, autumn: 0.9 },
@@ -8472,7 +8293,6 @@ const SPECIES_DB = {
     "thailand_blacktip_reef_shark": {
         name: "Siyah Yüzgeçli Resif Köpekbalığı", nameEn: "Blacktip Reef Shark", icon: "🦈", scientificName: "Carcharhinus melanopterus",
         photoId: 1032, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ resifler ve lagünler",
         tempRange: { min: 24, opt: 28, max: 32 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.95, autumn: 0.9 },
@@ -8486,7 +8306,6 @@ const SPECIES_DB = {
     "thailand_whitetip_reef_shark": {
         name: "Beyaz Yüzgeçli Resif Köpekbalığı", nameEn: "Whitetip Reef Shark", icon: "🦈", scientificName: "Triaenodon obesus",
         photoId: 1033, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece resif mağaraları ve çatlaklar",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -8500,7 +8319,6 @@ const SPECIES_DB = {
     "thailand_grey_reef_shark": {
         name: "Gri Resif Köpekbalığı", nameEn: "Grey Reef Shark", icon: "🦈", scientificName: "Carcharhinus amblyrhynchos",
         photoId: 1034, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve açık su",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -8566,7 +8384,6 @@ const SPECIES_DB = {
     "thailand_eagle_ray": {
         name: "Benekli Kartal Vatozu", nameEn: "Spotted Eagle Ray", icon: "🐟", scientificName: "Aetobatus narinari",
         photoId: 1039, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık su ve resif yamaçları",
         tempRange: { min: 24, opt: 28, max: 32 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.95, autumn: 0.9 },
@@ -8580,7 +8397,6 @@ const SPECIES_DB = {
     "thailand_ribbontail_ray": {
         name: "Mavi Benekli Vatoz", nameEn: "Blue-spotted Ribbontail Ray", icon: "🐟", scientificName: "Taeniura lymma",
         photoId: 1040, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri altları",
         tempRange: { min: 24, opt: 28, max: 32 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.95, autumn: 0.9 },
@@ -8594,7 +8410,6 @@ const SPECIES_DB = {
 "thailand_ribbontail_ray": {
         name: "Mavi Benekli Vatoz", nameEn: "Blue-spotted Ribbontail Ray", icon: "🐟", scientificName: "Taeniura lymma",
         photoId: 1040, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri altları",
         tempRange: { min: 24, opt: 28, max: 32 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.95, autumn: 0.9 },
@@ -8608,7 +8423,6 @@ const SPECIES_DB = {
     "thailand_whale_shark": {
         name: "Balina Köpekbalığı", nameEn: "Whale Shark", icon: "🦈", scientificName: "Rhincodon typus",
         photoId: 1041, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve plankton zengin alanlar",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.9, autumn: 0.9 },
@@ -8713,7 +8527,6 @@ const SPECIES_DB = {
     "thailand_green_turtle": {
         name: "Yeşil Deniz Kaplumbağası", nameEn: "Green Sea Turtle", icon: "🐢", scientificName: "Chelonia mydas",
         photoId: 1049, category: "OTLUK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz deniz çayırları ve resifler",
         tempRange: { min: 22, opt: 27, max: 32 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.95, autumn: 0.9 },
@@ -8727,7 +8540,6 @@ const SPECIES_DB = {
     "thailand_hawksbill_turtle": {
         name: "Şahin Gagalı Kaplumbağa", nameEn: "Hawksbill Turtle", icon: "🐢", scientificName: "Eretmochelys imbricata",
         photoId: 1050, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
         tempRange: { min: 22, opt: 27, max: 32 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.95, autumn: 0.9 },
@@ -8741,7 +8553,6 @@ const SPECIES_DB = {
 "thailand_hawksbill_turtle": {
         name: "Şahin Gagalı Kaplumbağa", nameEn: "Hawksbill Turtle", icon: "🐢", scientificName: "Eretmochelys imbricata",
         photoId: 1050, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
         tempRange: { min: 22, opt: 27, max: 32 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.95, autumn: 0.9 },
@@ -8755,7 +8566,6 @@ const SPECIES_DB = {
     "safrica_great_white_shark": {
         name: "Büyük Beyaz Köpekbalığı", nameEn: "Great White Shark", icon: "🦈", scientificName: "Carcharodon carcharias",
         photoId: 1101, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve mühür kolonileri çevresi",
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.9, spring: 0.8, summer: 0.6, autumn: 0.8 },
@@ -8769,7 +8579,6 @@ const SPECIES_DB = {
     "safrica_yellowtail": {
         name: "Sarı Kuyruk", nameEn: "Yellowtail", icon: "🐟", scientificName: "Seriola lalandi",
         photoId: 1102, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık burunlar ve akıntılı bölgeler",
         tempRange: { min: 14, opt: 19, max: 24 },
         seasons: { winter: 0.7, spring: 0.9, summer: 0.8, autumn: 0.8 },
@@ -8783,7 +8592,6 @@ const SPECIES_DB = {
     "safrica_garrick": {
         name: "Akya / Garrick", nameEn: "Garrick", icon: "🐟", scientificName: "Lichia amia",
         photoId: 1103, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz köpüklü sığ kıyılar ve nehir ağızları",
         tempRange: { min: 16, opt: 22, max: 27 },
         seasons: { winter: 0.5, spring: 0.8, summer: 0.95, autumn: 0.8 },
@@ -8875,7 +8683,6 @@ const SPECIES_DB = {
     "safrica_bronze_whaler": {
         name: "Bronz Köpekbalığı", nameEn: "Bronze Whaler Shark", icon: "🦈", scientificName: "Carcharhinus brachyurus",
         photoId: 1110, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kıyıya yakın açık sular",
         tempRange: { min: 15, opt: 20, max: 25 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.9, autumn: 0.8 },
@@ -8889,7 +8696,6 @@ const SPECIES_DB = {
 "safrica_bronze_whaler": {
         name: "Bronz Köpekbalığı", nameEn: "Bronze Whaler Shark", icon: "🦈", scientificName: "Carcharhinus brachyurus",
         photoId: 1110, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kıyıya yakın açık sular",
         tempRange: { min: 15, opt: 20, max: 25 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.9, autumn: 0.8 },
@@ -8903,7 +8709,6 @@ const SPECIES_DB = {
     "safrica_bull_shark": {
         name: "Boğa Köpekbalığı / Zambezi", nameEn: "Bull Shark", icon: "🦈", scientificName: "Carcharhinus leucas",
         photoId: 1111, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz nehir ağızları ve bulanık kıyılar",
         tempRange: { min: 20, opt: 25, max: 30 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -8917,7 +8722,6 @@ const SPECIES_DB = {
     "safrica_ragged_tooth": {
         name: "Kum Kaplanı Köpekbalığı", nameEn: "Ragged-tooth Shark", icon: "🦈", scientificName: "Carcharias taurus",
         photoId: 1112, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece kaya kovukları ve resifler",
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -8944,7 +8748,6 @@ const SPECIES_DB = {
     "safrica_yellowbelly_rockcod": {
         name: "Sarı Karınlı Orfoz", nameEn: "Yellowbelly Rockcod", icon: "🐟", scientificName: "Epinephelus marginatus",
         photoId: 1114, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kaya altları ve mağaralar",
         tempRange: { min: 14, opt: 19, max: 24 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -9049,7 +8852,6 @@ const SPECIES_DB = {
     "safrica_blue_marlin": {
         name: "Mavi Marlin", nameEn: "Blue Marlin", icon: "🐟", scientificName: "Makaira nigricans",
         photoId: 1121, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.95, autumn: 0.8 },
@@ -9063,7 +8865,6 @@ const SPECIES_DB = {
     "safrica_black_marlin": {
         name: "Siyah Marlin", nameEn: "Black Marlin", icon: "🐟", scientificName: "Istiompax indica",
         photoId: 1122, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kıta sahanlığı kenarları",
         tempRange: { min: 20, opt: 25, max: 29 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -9091,7 +8892,6 @@ const SPECIES_DB = {
     "safrica_yellowfin_tuna": {
         name: "Sarıkanat Orkinos", nameEn: "Yellowfin Tuna", icon: "🐟", scientificName: "Thunnus albacares",
         photoId: 1124, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz akıntı çizgileri ve kuş sürüsü altları",
         tempRange: { min: 18, opt: 22, max: 26 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.95, autumn: 0.8 },
@@ -9105,7 +8905,6 @@ const SPECIES_DB = {
     "safrica_bigeye_tuna": {
         name: "Kocagöz Orkinos", nameEn: "Bigeye Tuna", icon: "🐟", scientificName: "Thunnus obesus",
         photoId: 1125, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin sular",
         tempRange: { min: 15, opt: 20, max: 25 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.8, autumn: 0.9 },
@@ -9119,7 +8918,6 @@ const SPECIES_DB = {
     "safrica_albacore": {
         name: "Ak Orkinos / Longfin", nameEn: "Albacore", icon: "🐟", scientificName: "Thunnus alalunga",
         photoId: 1126, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz serin açık deniz suları",
         tempRange: { min: 14, opt: 18, max: 22 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.5, autumn: 0.8 },
@@ -9133,7 +8931,6 @@ const SPECIES_DB = {
     "safrica_skipjack_tuna": {
         name: "Çizgili Orkinos / Skipjack", nameEn: "Skipjack Tuna", icon: "🐟", scientificName: "Katsuwonus pelamis",
         photoId: 1127, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzeydeki kuş hareketleri",
         tempRange: { min: 18, opt: 24, max: 30 },
         seasons: { winter: 0.4, spring: 0.8, summer: 0.9, autumn: 0.8 },
@@ -9147,7 +8944,6 @@ const SPECIES_DB = {
     "safrica_king_mackerel": {
         name: "Couta / King Mackerel", nameEn: "King Mackerel", icon: "🐟", scientificName: "Scomberomorus commerson",
         photoId: 1128, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık resif kenarları ve kıyı yamaçları",
         tempRange: { min: 20, opt: 25, max: 29 },
         seasons: { winter: 0.5, spring: 0.8, summer: 0.95, autumn: 0.8 },
@@ -9174,7 +8970,6 @@ const SPECIES_DB = {
     "safrica_wahoo": {
         name: "Vahu / Wahoo", nameEn: "Wahoo", icon: "🐟", scientificName: "Acanthocybium solandri",
         photoId: 1130, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz akıntıları",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -9188,7 +8983,6 @@ const SPECIES_DB = {
 "safrica_wahoo": {
         name: "Vahu / Wahoo", nameEn: "Wahoo", icon: "🐟", scientificName: "Acanthocybium solandri",
         photoId: 1130, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz akıntıları",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -9202,7 +8996,6 @@ const SPECIES_DB = {
     "safrica_great_barracuda": {
         name: "Dev Barrakuda", nameEn: "Great Barracuda", icon: "🐟", scientificName: "Sphyraena barracuda",
         photoId: 1131, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resif yamaçları ve sığlıklar",
         tempRange: { min: 22, opt: 27, max: 32 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -9229,7 +9022,6 @@ const SPECIES_DB = {
     "safrica_giant_trevally": {
         name: "Dev Akya / GT", nameEn: "Giant Trevally", icon: "🐟", scientificName: "Caranx ignobilis",
         photoId: 1133, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık resif kenarları ve sığlıklar",
         tempRange: { min: 22, opt: 26, max: 31 },
         seasons: { winter: 0.5, spring: 0.8, summer: 0.95, autumn: 0.8 },
@@ -9243,7 +9035,6 @@ const SPECIES_DB = {
     "safrica_bluefin_trevally": {
         name: "Mavi Yüzgeçli Akya", nameEn: "Bluefin Trevally", icon: "🐟", scientificName: "Caranx melampygus",
         photoId: 1134, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz mercan ve kaya resifleri",
         tempRange: { min: 24, opt: 28, max: 32 },
         seasons: { winter: 0.7, spring: 0.9, summer: 0.95, autumn: 0.9 },
@@ -9257,7 +9048,6 @@ const SPECIES_DB = {
     "safrica_bigeye_trevally": {
         name: "Kocagöz Akya", nameEn: "Bigeye Trevally", icon: "🐟", scientificName: "Caranx sexfasciatus",
         photoId: 1135, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ koylar ve resifler",
         tempRange: { min: 22, opt: 26, max: 31 },
         seasons: { winter: 0.8, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -9297,7 +9087,6 @@ const SPECIES_DB = {
     "safrica_talang_queenfish": {
         name: "Kraliçe Balığı", nameEn: "Talang Queenfish", icon: "🐟", scientificName: "Scomberoides commersonnianus",
         photoId: 1138, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kıyılar ve köpüklü bölgeler",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.5, spring: 0.8, summer: 0.95, autumn: 0.8 },
@@ -9324,7 +9113,6 @@ const SPECIES_DB = {
     "safrica_greater_amberjack": {
         name: "Büyük Akya", nameEn: "Greater Amberjack", icon: "🐟", scientificName: "Seriola dumerili",
         photoId: 1140, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve batıklar",
         tempRange: { min: 16, opt: 21, max: 26 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -9338,7 +9126,6 @@ const SPECIES_DB = {
 "safrica_greater_amberjack": {
         name: "Büyük Akya", nameEn: "Greater Amberjack", icon: "🐟", scientificName: "Seriola dumerili",
         photoId: 1140, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve batıklar",
         tempRange: { min: 16, opt: 21, max: 26 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -9443,7 +9230,6 @@ const SPECIES_DB = {
     "safrica_humpback_whale": {
         name: "Kambur Balina", nameEn: "Humpback Whale", icon: "🐋", scientificName: "Megaptera novaeangliae",
         photoId: 1148, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz göç yolları",
         tempRange: { min: 10, opt: 18, max: 25 },
         seasons: { winter: 0.8, spring: 0.7, summer: 0.5, autumn: 0.9 },
@@ -9496,7 +9282,6 @@ const SPECIES_DB = {
     "uae_king_mackerel_kanaad": {
         name: "Kanaad / Kral Makrelya", nameEn: "King Mackerel (Kanaad)", icon: "🐟", scientificName: "Scomberomorus commerson",
         photoId: 1201, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin su akıntıları",
         tempRange: { min: 22, opt: 28, max: 34 },
         seasons: { winter: 0.95, spring: 0.8, summer: 0.4, autumn: 0.7 },
@@ -9523,7 +9308,6 @@ const SPECIES_DB = {
     "uae_queenfish_talang": {
         name: "Talang / Kraliçe Balığı", nameEn: "Talang Queenfish", icon: "🐟", scientificName: "Scomberoides commersonnianus",
         photoId: 1203, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kıyılar ve mendirekler",
         tempRange: { min: 24, opt: 30, max: 36 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.95, autumn: 0.8 },
@@ -9550,7 +9334,6 @@ const SPECIES_DB = {
     "uae_golden_trevally": {
         name: "Altın Akya", nameEn: "Golden Trevally", icon: "🐟", scientificName: "Gnathanodon speciosus",
         photoId: 1205, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kum ve çakıl tabanlar",
         tempRange: { min: 25, opt: 30, max: 35 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.9, autumn: 0.8 },
@@ -9590,7 +9373,6 @@ const SPECIES_DB = {
     "uae_sakhla_cobia": {
         name: "Sakhla / Cobia", nameEn: "Sakhla (Cobia)", icon: "🐟", scientificName: "Rachycentron canadum",
         photoId: 1208, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz şamandıralar ve batıklar",
         tempRange: { min: 20, opt: 26, max: 32 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.95, autumn: 0.8 },
@@ -9604,7 +9386,6 @@ const SPECIES_DB = {
     "uae_blacktip_shark": {
         name: "Siyah Yüzgeçli Köpekbalığı", nameEn: "Blacktip Shark", icon: "🦈", scientificName: "Carcharhinus limbatus",
         photoId: 1209, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık kıyılar",
         tempRange: { min: 22, opt: 28, max: 35 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.7, autumn: 0.8 },
@@ -9644,7 +9425,6 @@ const SPECIES_DB = {
     "uae_sailfish": {
         name: "Yelken Balığı", nameEn: "Indo-Pacific Sailfish", icon: "🐟", scientificName: "Istiophorus platypterus",
         photoId: 1211, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzeyi",
         tempRange: { min: 24, opt: 28, max: 32 },
         seasons: { winter: 0.9, spring: 0.7, summer: 0.4, autumn: 0.8 },
@@ -9671,7 +9451,6 @@ const SPECIES_DB = {
     "uae_bluefin_trevally": {
         name: "Mavi Yüzgeçli Akya", nameEn: "Bluefin Trevally", icon: "🐟", scientificName: "Caranx melampygus",
         photoId: 1213, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
         tempRange: { min: 25, opt: 29, max: 34 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.95, autumn: 0.9 },
@@ -9685,7 +9464,6 @@ const SPECIES_DB = {
     "uae_barramundi": {
         name: "Asya Levreği", nameEn: "Barramundi", icon: "🐟", scientificName: "Lates calcarifer",
         photoId: 1214, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece mangrovlar ve nehir ağızları",
         tempRange: { min: 20, opt: 26, max: 32 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.95, autumn: 0.9 },
@@ -9790,7 +9568,6 @@ const SPECIES_DB = {
     "uae_blue_marlin": {
         name: "Mavi Marlin", nameEn: "Blue Marlin", icon: "🐟", scientificName: "Makaira nigricans",
         photoId: 1221, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
         tempRange: { min: 24, opt: 28, max: 32 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.95, autumn: 0.8 },
@@ -9804,7 +9581,6 @@ const SPECIES_DB = {
     "uae_black_marlin": {
         name: "Siyah Marlin", nameEn: "Black Marlin", icon: "🐟", scientificName: "Istiompax indica",
         photoId: 1222, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kıta sahanlığı kenarları",
         tempRange: { min: 22, opt: 27, max: 31 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -9818,7 +9594,6 @@ const SPECIES_DB = {
     "uae_yellowfin_tuna": {
         name: "Sarıkanat Orkinos", nameEn: "Yellowfin Tuna", icon: "🐟", scientificName: "Thunnus albacares",
         photoId: 1223, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz akıntı çizgileri ve açık deniz",
         tempRange: { min: 20, opt: 24, max: 28 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.95, autumn: 0.8 },
@@ -9845,7 +9620,6 @@ const SPECIES_DB = {
     "uae_bullet_tuna": {
         name: "Mermi Orkinos", nameEn: "Bullet Tuna", icon: "🐟", scientificName: "Thunnus rochei",
         photoId: 1225, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzeydeki kuş hareketleri",
         tempRange: { min: 20, opt: 25, max: 30 },
         seasons: { winter: 0.6, spring: 0.9, summer: 0.8, autumn: 0.8 },
@@ -9859,7 +9633,6 @@ const SPECIES_DB = {
     "uae_frigate_tuna": {
         name: "Gemi Orkinosu", nameEn: "Frigate Tuna", icon: "🐟", scientificName: "Auxis thazard",
         photoId: 1226, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
         tempRange: { min: 20, opt: 26, max: 32 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.9, autumn: 0.8 },
@@ -9873,7 +9646,6 @@ const SPECIES_DB = {
     "uae_mahi_mahi": {
         name: "Mahi Mahi / Dolphin Fish", nameEn: "Mahi Mahi", icon: "🐟", scientificName: "Coryphaena hippurus",
         photoId: 1227, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzen nesneler ve şamandıralar altı",
         tempRange: { min: 24, opt: 28, max: 33 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.95, autumn: 0.8 },
@@ -9887,7 +9659,6 @@ const SPECIES_DB = {
     "uae_king_mackerel": {
         name: "Kral Balığı / Kingfish", nameEn: "King Mackerel", icon: "🐟", scientificName: "Scomberomorus commerson",
         photoId: 1228, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin resif kenarları",
         tempRange: { min: 22, opt: 27, max: 32 },
         seasons: { winter: 0.9, spring: 0.8, summer: 0.4, autumn: 0.8 },
@@ -9914,7 +9685,6 @@ const SPECIES_DB = {
     "uae_sada_tunny": {
         name: "Sada / Kavaklı Palamut", nameEn: "Sada (Little Tunny)", icon: "🐟", scientificName: "Euthynnus affinis",
         photoId: 1230, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kıyıya yakın yüzey hareketleri",
         tempRange: { min: 20, opt: 26, max: 32 },
         seasons: { winter: 0.7, spring: 0.9, summer: 0.8, autumn: 0.9 },
@@ -9928,7 +9698,6 @@ const SPECIES_DB = {
 "uae_sada_tunny": {
         name: "Sada / Kavaklı Palamut", nameEn: "Sada (Little Tunny)", icon: "🐟", scientificName: "Euthynnus affinis",
         photoId: 1230, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kıyıya yakın yüzey hareketleri",
         tempRange: { min: 20, opt: 26, max: 32 },
         seasons: { winter: 0.7, spring: 0.9, summer: 0.8, autumn: 0.9 },
@@ -9942,7 +9711,6 @@ const SPECIES_DB = {
     "uae_great_barracuda": {
         name: "Dev Barrakuda", nameEn: "Great Barracuda", icon: "🐟", scientificName: "Sphyraena barracuda",
         photoId: 1231, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz resif yamaçları",
         tempRange: { min: 24, opt: 29, max: 35 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.7, autumn: 0.9 },
@@ -9969,7 +9737,6 @@ const SPECIES_DB = {
     "uae_giant_trevally": {
         name: "Dev Akya / GT", nameEn: "Giant Trevally", icon: "🐟", scientificName: "Caranx ignobilis",
         photoId: 1233, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık kayalık burunlar",
         tempRange: { min: 24, opt: 28, max: 34 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.95, autumn: 0.8 },
@@ -9983,7 +9750,6 @@ const SPECIES_DB = {
     "uae_bigeye_trevally": {
         name: "Kocagöz Akya", nameEn: "Bigeye Trevally", icon: "🐟", scientificName: "Caranx sexfasciatus",
         photoId: 1235, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece batıklar ve derin resifler",
         tempRange: { min: 22, opt: 27, max: 33 },
         seasons: { winter: 0.8, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -10023,7 +9789,6 @@ const SPECIES_DB = {
     "uae_greater_amberjack": {
         name: "Büyük Akya", nameEn: "Greater Amberjack", icon: "🐟", scientificName: "Seriola dumerili",
         photoId: 1238, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve petrol platformları",
         tempRange: { min: 18, opt: 22, max: 28 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.4, autumn: 0.7 },
@@ -10037,7 +9802,6 @@ const SPECIES_DB = {
     "uae_almaco_jack": {
         name: "Derin Su Akyası", nameEn: "Almaco Jack", icon: "🐟", scientificName: "Seriola rivoliana",
         photoId: 1239, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin resifler",
         tempRange: { min: 18, opt: 23, max: 28 },
         seasons: { winter: 0.8, spring: 0.8, summer: 0.6, autumn: 0.9 },
@@ -10051,7 +9815,6 @@ const SPECIES_DB = {
     "uae_rainbow_runner": {
         name: "Gökkuşağı Balığı", nameEn: "Rainbow Runner", icon: "🐟", scientificName: "Elagatis bipinnulata",
         photoId: 1240, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
         tempRange: { min: 24, opt: 28, max: 33 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.95, autumn: 0.9 },
@@ -10065,7 +9828,6 @@ const SPECIES_DB = {
 "uae_rainbow_runner": {
         name: "Gökkuşağı Balığı", nameEn: "Rainbow Runner", icon: "🐟", scientificName: "Elagatis bipinnulata",
         photoId: 1240, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
         tempRange: { min: 24, opt: 28, max: 33 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.95, autumn: 0.9 },
@@ -10196,7 +9958,6 @@ const SPECIES_DB = {
     "uae_whale_shark": {
         name: "Balina Köpekbalığı", nameEn: "Whale Shark", icon: "🐋", scientificName: "Rhincodon typus",
         photoId: 1250, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve Dubai Marina çevresi",
         tempRange: { min: 24, opt: 28, max: 32 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.7 },
@@ -10210,7 +9971,6 @@ const SPECIES_DB = {
     "sa_yellowfin_tuna": {
         name: "Sarıkanat Orkinos (SA)", nameEn: "Yellowfin Tuna", icon: "🐟", scientificName: "Thunnus albacares",
         photoId: 1301, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz akıntı çizgileri",
         tempRange: { min: 18, opt: 22, max: 26 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -10224,7 +9984,6 @@ const SPECIES_DB = {
     "sa_longfin_tuna": {
         name: "Albakor / Uzun Kanat Orkinos", nameEn: "Longfin Tuna (Albacore)", icon: "🐟", scientificName: "Thunnus alalunga",
         photoId: 1302, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin ve serin sular",
         tempRange: { min: 14, opt: 18, max: 22 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.4, autumn: 0.7 },
@@ -10238,7 +9997,6 @@ const SPECIES_DB = {
     "sa_black_marlin": {
         name: "Siyah Marlin (SA)", nameEn: "Black Marlin", icon: "🐟", scientificName: "Istiompax indica",
         photoId: 1303, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz resifleri",
         tempRange: { min: 20, opt: 25, max: 29 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.6 },
@@ -10356,7 +10114,6 @@ const SPECIES_DB = {
     "sa_shad": {
         name: "Elf / Lüfer (SA)", nameEn: "Shad (Elf)", icon: "🐟", scientificName: "Pomatomus saltatrix",
         photoId: 1312, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah ve akşam suyu sörf bölgesi",
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.3, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -10461,7 +10218,6 @@ const SPECIES_DB = {
     "sa_wahoo": {
         name: "Vahoo (SA)", nameEn: "Wahoo", icon: "🐟", scientificName: "Acanthocybium solandri",
         photoId: 1320, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.1, spring: 0.3, summer: 0.9, autumn: 0.6 },
@@ -10501,7 +10257,6 @@ const SPECIES_DB = {
     "uae_cobia": {
         name: "Kobia / Siyah Akya", nameEn: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
         photoId: 1253, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz batıklar ve petrol platformları",
         tempRange: { min: 22, opt: 27, max: 32 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.9, autumn: 0.9 },
@@ -10541,7 +10296,6 @@ const SPECIES_DB = {
     "uae_blacktip_reef_shark": {
         name: "Siyah Yüzgeçli Resif Köpekbalığı", nameEn: "Blacktip Reef Shark", icon: "🦈", scientificName: "Carcharhinus melanopterus",
         photoId: 1256, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ resif alanları",
         tempRange: { min: 24, opt: 28, max: 33 },
         seasons: { winter: 0.8, spring: 0.8, summer: 0.8, autumn: 0.8 },
@@ -10659,7 +10413,6 @@ const SPECIES_DB = {
     "nz_john_dory": {
         name: "Dülger / John Dory (NZ)", nameEn: "John Dory (Kuparu)", icon: "🐟", scientificName: "Zeus faber",
         photoId: 1407, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz iskele ayakları ve resif kenarları",
         tempRange: { min: 15, opt: 19, max: 24 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -10686,7 +10439,6 @@ const SPECIES_DB = {
     "uk_sea_bass": {
         name: "Avrupa Levreği (UK)", nameEn: "European Sea Bass", icon: "🐟", scientificName: "Dicentrarchus labrax",
         photoId: 1501, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık çalkantılı sığ kıyılar",
         tempRange: { min: 8, opt: 15, max: 22 },
         seasons: { winter: 0.2, spring: 0.6, summer: 0.9, autumn: 0.8 },
@@ -10700,7 +10452,6 @@ const SPECIES_DB = {
     "uk_cod": {
         name: "Atlantik Morinası (UK)", nameEn: "Atlantic Cod", icon: "🐟", scientificName: "Gadus morhua",
         photoId: 1502, category: "DIP",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin ve soğuk sular",
         tempRange: { min: 2, opt: 7, max: 12 },
         seasons: { winter: 0.9, spring: 0.5, summer: 0.2, autumn: 0.7 },
@@ -10740,7 +10491,6 @@ const SPECIES_DB = {
     "uk_mackerel": {
         name: "Uskumru (UK)", nameEn: "Atlantic Mackerel", icon: "🐟", scientificName: "Scomber scombrus",
         photoId: 1505, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey sürüler",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.95, autumn: 0.6 },
@@ -10767,7 +10517,6 @@ const SPECIES_DB = {
     "usne_bluefish": {
         name: "Lüfer (US) / Bluefish", nameEn: "Bluefish", icon: "🐟", scientificName: "Pomatomus saltatrix",
         photoId: 1602, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz her türlü su katmanı",
         tempRange: { min: 15, opt: 22, max: 28 },
         seasons: { winter: 0.1, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -10872,7 +10621,6 @@ const SPECIES_DB = {
     "nz_school_shark": {
         name: "Okul Köpekbalığı", nameEn: "School Shark (Tupere)", icon: "🦈", scientificName: "Galeorhinus galeus",
         photoId: 1413, category: "DIP",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece derin kumluk yamaçlar",
         tempRange: { min: 12, opt: 16, max: 21 },
         seasons: { winter: 0.5, spring: 0.8, summer: 0.7, autumn: 0.9 },
@@ -10899,7 +10647,6 @@ const SPECIES_DB = {
     "nz_albacore_tuna": {
         name: "Albakor / Ak Orkinos (NZ)", nameEn: "Albacore Tuna", icon: "🐟", scientificName: "Thunnus alalunga",
         photoId: 1415, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz akıntı çizgileri",
         tempRange: { min: 14, opt: 18, max: 22 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.7 },
@@ -10913,7 +10660,6 @@ const SPECIES_DB = {
     "nz_skipjack_tuna": {
         name: "Çizgili Orkinos / Skipjack (NZ)", nameEn: "Skipjack Tuna", icon: "🐟", scientificName: "Katsuwonus pelamis",
         photoId: 1416, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzeydeki kuş hareketleri",
         tempRange: { min: 18, opt: 22, max: 28 },
         seasons: { winter: 0.1, spring: 0.3, summer: 0.95, autumn: 0.6 },
@@ -10953,7 +10699,6 @@ const SPECIES_DB = {
     "nz_striped_marlin": {
         name: "Çizgili Marlin (NZ)", nameEn: "Striped Marlin", icon: "🐟", scientificName: "Kajikia audax",
         photoId: 1419, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
         tempRange: { min: 18, opt: 22, max: 26 },
         seasons: { winter: 0.1, spring: 0.3, summer: 0.95, autumn: 0.6 },
@@ -10967,7 +10712,6 @@ const SPECIES_DB = {
     "nz_blue_marlin": {
         name: "Mavi Marlin (NZ)", nameEn: "Blue Marlin", icon: "🐟", scientificName: "Makaira nigricans",
         photoId: 1420, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz akıntı sınırları",
         tempRange: { min: 20, opt: 24, max: 28 },
         seasons: { winter: 0.0, spring: 0.1, summer: 0.9, autumn: 0.4 },
@@ -10981,7 +10725,6 @@ const SPECIES_DB = {
     "nz_black_marlin": {
         name: "Siyah Marlin (NZ)", nameEn: "Black Marlin", icon: "🐟", scientificName: "Istiompax indica",
         photoId: 1421, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve sığlık kenarları",
         tempRange: { min: 20, opt: 25, max: 30 },
         seasons: { winter: 0.0, spring: 0.1, summer: 0.9, autumn: 0.5 },
@@ -10995,7 +10738,6 @@ const SPECIES_DB = {
     "nz_mahimahi": {
         name: "Mahi Mahi (NZ)", nameEn: "Mahimahi", icon: "🐟", scientificName: "Coryphaena hippurus",
         photoId: 1422, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzen nesneler altı",
         tempRange: { min: 21, opt: 25, max: 29 },
         seasons: { winter: 0.0, spring: 0.1, summer: 0.95, autumn: 0.3 },
@@ -11088,7 +10830,6 @@ const SPECIES_DB = {
     "nz_spiny_dogfish": {
         name: "Dikenli Camgöz (NZ)", nameEn: "Spiny Dogfish (Koinga)", icon: "🦈", scientificName: "Squalus acanthias",
         photoId: 1430, category: "DIP",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece soğuk derin sular",
         tempRange: { min: 8, opt: 13, max: 18 },
         seasons: { winter: 0.9, spring: 0.7, summer: 0.2, autumn: 0.6 },
@@ -11115,7 +10856,6 @@ const SPECIES_DB = {
     "uk_haddock": {
         name: "Mezgit (UK) / Haddock", nameEn: "Haddock", icon: "🐟", scientificName: "Melanogrammus aeglefinus",
         photoId: 1507, category: "DIP",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk dipler",
         tempRange: { min: 4, opt: 9, max: 15 },
         seasons: { winter: 0.8, spring: 0.7, summer: 0.4, autumn: 0.6 },
@@ -11129,7 +10869,6 @@ const SPECIES_DB = {
     "uk_coalie": {
         name: "Kömür Balığı / Saithe", nameEn: "Coalie (Saithe)", icon: "🐟", scientificName: "Pollachius virens",
         photoId: 1508, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık iskeleler ve derin kayalıklar",
         tempRange: { min: 6, opt: 11, max: 17 },
         seasons: { winter: 0.9, spring: 0.7, summer: 0.4, autumn: 0.8 },
@@ -11143,7 +10882,6 @@ const SPECIES_DB = {
     "uk_ling": {
         name: "Gelincik (UK) / Ling", nameEn: "Ling", icon: "🐟", scientificName: "Molva molva",
         photoId: 1509, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin batıklar ve kayalıklar",
         tempRange: { min: 6, opt: 11, max: 16 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.4, autumn: 0.7 },
@@ -11170,7 +10908,6 @@ const SPECIES_DB = {
     "uk_grey_mullet": {
         name: "Kefal (UK) / Grey Mullet", nameEn: "Thick-lipped Grey Mullet", icon: "🐟", scientificName: "Chelon labrosus",
         photoId: 1511, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz liman içleri ve nehir ağızları",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.1, spring: 0.5, summer: 0.95, autumn: 0.7 },
@@ -11184,7 +10921,6 @@ const SPECIES_DB = {
     "uk_smooth_hound": {
         name: "Pürüzsüz Camgöz (UK)", nameEn: "Smooth-hound", icon: "🦈", scientificName: "Mustelus mustelus",
         photoId: 1512, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ çakıllı ve kumlu kıyılar",
         tempRange: { min: 12, opt: 17, max: 22 },
         seasons: { winter: 0.1, spring: 0.6, summer: 0.95, autumn: 0.5 },
@@ -11211,7 +10947,6 @@ const SPECIES_DB = {
     "uk_turbot": {
         name: "Kalkan (UK) / Turbot", nameEn: "Turbot", icon: "🐟", scientificName: "Scophthalmus maximus",
         photoId: 1514, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve çakıllı dipler",
         tempRange: { min: 8, opt: 14, max: 20 },
         seasons: { winter: 0.2, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -11264,7 +10999,6 @@ const SPECIES_DB = {
     "uk_conger_eel": {
         name: "Mığrı (UK) / Conger Eel", nameEn: "Conger Eel", icon: "🐟", scientificName: "Conger conger",
         photoId: 1518, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece derin batıklar ve kayalık oyuklar",
         tempRange: { min: 8, opt: 14, max: 20 },
         seasons: { winter: 0.5, spring: 0.6, summer: 0.8, autumn: 0.9 },
@@ -11356,7 +11090,6 @@ const SPECIES_DB = {
     "usne_bluefin_tuna": {
         name: "Mavi Yüzgeçli Orkinos (US NE)", nameEn: "Atlantic Bluefin Tuna", icon: "🐟", scientificName: "Thunnus thynnus",
         photoId: 1612, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz akıntıları ve sığlık kenarları",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.8, autumn: 0.95 },
@@ -11370,7 +11103,6 @@ const SPECIES_DB = {
     "usne_false_albacore": {
         name: "Yalancı Albakor / Little Tunny", nameEn: "False Albacore (Albie)", icon: "🐟", scientificName: "Euthynnus alletteratus",
         photoId: 1613, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzeydeki hızlı yem hareketleri",
         tempRange: { min: 18, opt: 23, max: 28 },
         seasons: { winter: 0.0, spring: 0.1, summer: 0.6, autumn: 0.95 },
@@ -11410,7 +11142,6 @@ const SPECIES_DB = {
     "usne_cod": {
         name: "Atlantik Morinası (US NE)", nameEn: "Atlantic Cod", icon: "🐟", scientificName: "Gadus morhua",
         photoId: 1617, category: "DIP",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kanyonlar ve batıklar",
         tempRange: { min: 2, opt: 6, max: 12 },
         seasons: { winter: 0.8, spring: 0.6, summer: 0.1, autumn: 0.5 },
@@ -11424,7 +11155,6 @@ const SPECIES_DB = {
     "usne_spiny_dogfish": {
         name: "Dikenli Camgöz (US NE)", nameEn: "Spiny Dogfish", icon: "🦈", scientificName: "Squalus acanthias",
         photoId: 1618, category: "DIP",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece her türlü deniz tabanı",
         tempRange: { min: 8, opt: 13, max: 18 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.8, autumn: 0.9 },
@@ -11451,7 +11181,6 @@ const SPECIES_DB = {
     "uk_tope": {
         name: "Camgöz (UK) / Tope", nameEn: "Tope Shark", icon: "🦈", scientificName: "Galeorhinus galeus",
         photoId: 1520, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz orta su ve dip geçişleri",
         tempRange: { min: 12, opt: 16, max: 21 },
         seasons: { winter: 0.1, spring: 0.6, summer: 0.9, autumn: 0.5 },
@@ -11465,7 +11194,6 @@ const SPECIES_DB = {
     "uk_blue_shark": {
         name: "Mavi Köpekbalığı (UK)", nameEn: "Blue Shark", icon: "🦈", scientificName: "Prionace glauca",
         photoId: 1521, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
         tempRange: { min: 14, opt: 18, max: 22 },
         seasons: { winter: 0.0, spring: 0.1, summer: 0.95, autumn: 0.3 },
@@ -11479,7 +11207,6 @@ const SPECIES_DB = {
     "uk_thornback_ray": {
         name: "Dikenli Vatoz (UK)", nameEn: "Thornback Ray", icon: "🐟", scientificName: "Raja clavata",
         photoId: 1522, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece kumlu ve çamurlu dipler",
         tempRange: { min: 8, opt: 14, max: 20 },
         seasons: { winter: 0.4, spring: 0.9, summer: 0.7, autumn: 0.6 },
@@ -11493,7 +11220,6 @@ const SPECIES_DB = {
     "uk_garfish": {
         name: "Zargana (UK)", nameEn: "Garfish", icon: "🐟", scientificName: "Belone belone",
         photoId: 1523, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey katmanları",
         tempRange: { min: 14, opt: 18, max: 24 },
         seasons: { winter: 0.0, spring: 0.3, summer: 0.95, autumn: 0.4 },
@@ -11507,7 +11233,6 @@ const SPECIES_DB = {
     "uk_bream_gilthead": {
         name: "Çipura (UK)", nameEn: "Gilthead Bream", icon: "🐟", scientificName: "Sparus aurata",
         photoId: 1524, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ lagünler ve nehir ağızları",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.0, spring: 0.2, summer: 0.9, autumn: 0.6 },
@@ -11521,7 +11246,6 @@ const SPECIES_DB = {
     "uk_bream_black": {
         name: "Siyah Karagöz (UK)", nameEn: "Black Sea Bream", icon: "🐟", scientificName: "Spondyliosoma cantharus",
         photoId: 1525, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve sığlıklar",
         tempRange: { min: 12, opt: 17, max: 22 },
         seasons: { winter: 0.1, spring: 0.6, summer: 0.95, autumn: 0.7 },
@@ -11561,7 +11285,6 @@ const SPECIES_DB = {
     "usne_pollock": {
         name: "Atlantik Mezgit / Pollock", nameEn: "Pollock", icon: "🐟", scientificName: "Pollachius virens",
         photoId: 1623, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin su resifleri",
         tempRange: { min: 6, opt: 11, max: 17 },
         seasons: { winter: 0.8, spring: 0.7, summer: 0.3, autumn: 0.9 },
@@ -11575,7 +11298,6 @@ const SPECIES_DB = {
     "nz_bluefin_tuna": {
         name: "Güney Mavi Yüzgeçli Orkinos", nameEn: "Southern Bluefin Tuna", icon: "Or", scientificName: "Thunnus maccoyii",
         photoId: 1431, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz soğuk akıntı sınırları",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.8, spring: 0.4, summer: 0.1, autumn: 0.6 },
@@ -11602,7 +11324,6 @@ const SPECIES_DB = {
     "nz_grey_mullet": {
         name: "Kefal (NZ) / Grey Mullet", nameEn: "Grey Mullet (Kanae)", icon: "🐟", scientificName: "Mugil cephalus",
         photoId: 1433, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz haliçler ve nehir ağızları",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.8 },
@@ -11616,7 +11337,6 @@ const SPECIES_DB = {
     "nz_bronze_whaler": {
         name: "Bronz Balina Köpekbalığı", nameEn: "Bronze Whaler Shark", icon: "🦈", scientificName: "Carcharhinus brachyurus",
         photoId: 1434, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kıyı şeridi ve sörf bölgeleri",
         tempRange: { min: 16, opt: 21, max: 26 },
         seasons: { winter: 0.0, spring: 0.3, summer: 0.95, autumn: 0.6 },
@@ -11630,7 +11350,6 @@ const SPECIES_DB = {
     "nz_mako": {
         name: "Mako Köpekbalığı (NZ)", nameEn: "Shortfin Mako Shark", icon: "🦈", scientificName: "Isurus oxyrinchus",
         photoId: 1435, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
         tempRange: { min: 15, opt: 20, max: 26 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.7 },
@@ -11644,7 +11363,6 @@ const SPECIES_DB = {
     "nz_puka_bass": {
         name: "Hapuka Bas / Puka", nameEn: "Bass (Puka)", icon: "🐟", scientificName: "Polyprion americanus",
         photoId: 1436, category: "DERİN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin su resifleri",
         tempRange: { min: 8, opt: 12, max: 16 },
         seasons: { winter: 0.9, spring: 0.7, summer: 0.2, autumn: 0.6 },
@@ -11697,7 +11415,6 @@ const SPECIES_DB = {
     "nz_yellowfin_tuna": {
         name: "Sarı Yüzgeçli Orkinos (NZ)", nameEn: "Yellowfin Tuna", icon: "🐟", scientificName: "Thunnus albacares",
         photoId: 1440, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
         tempRange: { min: 18, opt: 24, max: 28 },
         seasons: { winter: 0.0, spring: 0.1, summer: 0.95, autumn: 0.4 },
@@ -11750,7 +11467,6 @@ const SPECIES_DB = {
     "nz_seven_gill": {
         name: "Yedi Solungaçlı Köpekbalığı", nameEn: "Broadnose Seven Gill Shark", icon: "🦈", scientificName: "Notorynchus cepedianus",
         photoId: 1444, category: "DIP",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ limanlar ve körfezler",
         tempRange: { min: 10, opt: 15, max: 20 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.7, autumn: 0.9 },
@@ -11764,7 +11480,6 @@ const SPECIES_DB = {
     "nz_thresher": {
         name: "Sapan Balığı / Thresher (NZ)", nameEn: "Thresher Shark", icon: "🦈", scientificName: "Alopias vulpinus",
         photoId: 1445, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve kıyı yamaçları",
         tempRange: { min: 14, opt: 19, max: 24 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.6 },
@@ -11778,7 +11493,6 @@ const SPECIES_DB = {
     "nz_hammerhead": {
         name: "Çekiç Balığı (NZ)", nameEn: "Smooth Hammerhead Shark", icon: "🦈", scientificName: "Sphyrna zygaena",
         photoId: 1446, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sıcak yüzey suları",
         tempRange: { min: 18, opt: 23, max: 28 },
         seasons: { winter: 0.0, spring: 0.2, summer: 0.95, autumn: 0.4 },
@@ -11792,7 +11506,6 @@ const SPECIES_DB = {
     "nz_porbeagle": {
         name: "Dikburun Camgöz (NZ)", nameEn: "Porbeagle Shark", icon: "🦈", scientificName: "Lamna nasus",
         photoId: 1447, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz soğuk sular",
         tempRange: { min: 8, opt: 13, max: 18 },
         seasons: { winter: 0.8, spring: 0.6, summer: 0.1, autumn: 0.7 },
@@ -11806,7 +11519,6 @@ const SPECIES_DB = {
     "nz_grand_hapuka": {
         name: "Dev Hapuka", nameEn: "Wreckfish (Hapuka)", icon: "🐟", scientificName: "Polyprion oxygeneios",
         photoId: 1448, category: "DERİN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin su resifleri",
         tempRange: { min: 8, opt: 12, max: 16 },
         seasons: { winter: 0.9, spring: 0.7, summer: 0.2, autumn: 0.6 },
@@ -11833,7 +11545,6 @@ const SPECIES_DB = {
     "uk_spurdog": {
         name: "Dikenli Camgöz (UK)", nameEn: "Spurdog", icon: "🦈", scientificName: "Squalus acanthias",
         photoId: 1526, category: "DIP",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece derin soğuk sular",
         tempRange: { min: 6, opt: 11, max: 16 },
         seasons: { winter: 0.9, spring: 0.7, summer: 0.2, autumn: 0.6 },
@@ -11847,7 +11558,6 @@ const SPECIES_DB = {
     "uk_monkfish": {
         name: "Fener Balığı (UK)", nameEn: "Monkfish (Anglerfish)", icon: "🐟", scientificName: "Lophius piscatorius",
         photoId: 1527, category: "DIP",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece derin kumluk ve kayalık dipler",
         tempRange: { min: 5, opt: 10, max: 15 },
         seasons: { winter: 0.7, spring: 0.6, summer: 0.4, autumn: 0.8 },
@@ -11874,7 +11584,6 @@ const SPECIES_DB = {
     "uk_red_gurnard": {
         name: "Kırlangıç (UK) / Red Gurnard", nameEn: "Red Gurnard", icon: "🐟", scientificName: "Chelidonichthys cuculus",
         photoId: 1529, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kumlu ve çakıllı dipler",
         tempRange: { min: 10, opt: 15, max: 20 },
         seasons: { winter: 0.2, spring: 0.6, summer: 0.9, autumn: 0.7 },
@@ -11888,7 +11597,6 @@ const SPECIES_DB = {
     "uk_red_mullet": {
         name: "Barbunya (UK) / Red Mullet", nameEn: "Red Mullet", icon: "🐟", scientificName: "Mullus surmuletus",
         photoId: 1530, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk alanlar",
         tempRange: { min: 12, opt: 17, max: 23 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.95, autumn: 0.6 },
@@ -11902,7 +11610,6 @@ const SPECIES_DB = {
     "uk_scad": {
         name: "İstavrit (UK) / Scad", nameEn: "Scad (Horse Mackerel)", icon: "🐟", scientificName: "Trachurus trachurus",
         photoId: 1531, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece yüzey katmanları ve iskele çevresi",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.1, spring: 0.5, summer: 0.9, autumn: 0.7 },
@@ -11916,7 +11623,6 @@ const SPECIES_DB = {
     "uk_salmon": {
         name: "Atlantik Somonu (UK)", nameEn: "Atlantic Salmon", icon: "🐟", scientificName: "Salmo salar",
         photoId: 1532, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz nehir ağızları ve açık kıyılar",
         tempRange: { min: 5, opt: 12, max: 18 },
         seasons: { winter: 0.2, spring: 0.8, summer: 0.9, autumn: 0.5 },
@@ -11930,7 +11636,6 @@ const SPECIES_DB = {
     "uk_sea_trout": {
         name: "Deniz Alası (UK)", nameEn: "Sea Trout", icon: "🐟", scientificName: "Salmo trutta",
         photoId: 1533, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece nehir ağızları ve kıyı sığlıkları",
         tempRange: { min: 8, opt: 14, max: 20 },
         seasons: { winter: 0.1, spring: 0.6, summer: 0.95, autumn: 0.4 },
@@ -11957,7 +11662,6 @@ const SPECIES_DB = {
     "uk_halibut": {
         name: "Atlantik Halibut (UK)", nameEn: "Atlantic Halibut", icon: "🐟", scientificName: "Hippoglossus hippoglossus",
         photoId: 1536, category: "DIP",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin ve soğuk sular",
         tempRange: { min: 2, opt: 7, max: 12 },
         seasons: { winter: 0.8, spring: 0.6, summer: 0.2, autumn: 0.7 },
@@ -11971,7 +11675,6 @@ const SPECIES_DB = {
     "uk_flounder": {
         name: "Dere Pisisi (UK)", nameEn: "Flounder", icon: "🐟", scientificName: "Platichthys flesus",
         photoId: 1537, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz nehir ağızları ve çamurluklar",
         tempRange: { min: 5, opt: 12, max: 20 },
         seasons: { winter: 0.9, spring: 0.6, summer: 0.3, autumn: 0.8 },
@@ -11985,7 +11688,6 @@ const SPECIES_DB = {
     "uk_gurnard_tub": {
         name: "Mazak (UK) / Tub Gurnard", nameEn: "Tub Gurnard", icon: "🐟", scientificName: "Chelidonichthys lucerna",
         photoId: 1538, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk alanlar",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.1, spring: 0.5, summer: 0.95, autumn: 0.6 },
@@ -11999,7 +11701,6 @@ const SPECIES_DB = {
     "uk_gurnard_grey": {
         name: "Gri Kırlangıç (UK)", nameEn: "Grey Gurnard", icon: "🐟", scientificName: "Eutrigla gurnardus",
         photoId: 1539, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve çamurluk dipler",
         tempRange: { min: 8, opt: 13, max: 18 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.4, autumn: 0.7 },
@@ -12013,7 +11714,6 @@ const SPECIES_DB = {
     "uk_ray_spotted": {
         name: "Benekli Vatoz (UK)", nameEn: "Spotted Ray", icon: "🐟", scientificName: "Raja montagui",
         photoId: 1540, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ kumluk alanlar",
         tempRange: { min: 10, opt: 15, max: 20 },
         seasons: { winter: 0.2, spring: 0.7, summer: 0.9, autumn: 0.6 },
@@ -12027,7 +11727,6 @@ const SPECIES_DB = {
     "uk_ray_blonde": {
         name: "Sarışın Vatoz (UK)", nameEn: "Blonde Ray", icon: "🐟", scientificName: "Raja brachyura",
         photoId: 1541, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk yamaçlar",
         tempRange: { min: 10, opt: 15, max: 20 },
         seasons: { winter: 0.3, spring: 0.8, summer: 0.7, autumn: 0.9 },
@@ -12041,7 +11740,6 @@ const SPECIES_DB = {
     "uk_starry_smooth_hound": {
         name: "Yıldızlı Camgöz (UK)", nameEn: "Starry Smooth-hound", icon: "🦈", scientificName: "Mustelus asterias",
         photoId: 1542, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ çakıllı kıyılar",
         tempRange: { min: 12, opt: 17, max: 22 },
         seasons: { winter: 0.1, spring: 0.6, summer: 0.95, autumn: 0.5 },
@@ -12107,7 +11805,6 @@ const SPECIES_DB = {
     "uk_rockling": {
         name: "Gelincik (Küçük) / Rockling", nameEn: "Shore Rockling", icon: "🐟", scientificName: "Gaidropsarus mediterraneus",
         photoId: 1547, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ kayalık havuzlar",
         tempRange: { min: 8, opt: 14, max: 20 },
         seasons: { winter: 0.8, spring: 0.8, summer: 0.8, autumn: 0.8 },
@@ -12186,7 +11883,6 @@ const SPECIES_DB = {
     "usne_monkfish": {
         name: "Fener Balığı (US NE)", nameEn: "Monkfish (Goosefish)", icon: "🐟", scientificName: "Lophius americanus",
         photoId: 1628, category: "DIP",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece derin deniz tabanı",
         tempRange: { min: 5, opt: 10, max: 15 },
         seasons: { winter: 0.7, spring: 0.6, summer: 0.4, autumn: 0.8 },
@@ -12226,7 +11922,6 @@ const SPECIES_DB = {
     "usne_spanish_mackerel": {
         name: "İspanyol Uskumrusu (US NE)", nameEn: "Spanish Mackerel", icon: "🐟", scientificName: "Scomberomorus maculatus",
         photoId: 1631, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzeydeki yem hareketleri",
         tempRange: { min: 20, opt: 25, max: 30 },
         seasons: { winter: 0.0, spring: 0.1, summer: 0.9, autumn: 0.4 },
@@ -12240,7 +11935,6 @@ const SPECIES_DB = {
     "usne_cobia": {
         name: "Kobya / Cobia (US NE)", nameEn: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
         photoId: 1632, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz şamandıralar ve yapı çevreleri",
         tempRange: { min: 20, opt: 26, max: 32 },
         seasons: { winter: 0.0, spring: 0.1, summer: 0.95, autumn: 0.3 },
@@ -12254,7 +11948,6 @@ const SPECIES_DB = {
     "usne_sheepshead": {
         name: "Koyunbaş Balığı", nameEn: "Sheepshead", icon: "🐟", scientificName: "Archosargus probatocephalus",
         photoId: 1633, category: "KAYALIK",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz köprü ayakları ve midyeli kayalıklar",
         tempRange: { min: 18, opt: 24, max: 30 },
         seasons: { winter: 0.0, spring: 0.2, summer: 0.9, autumn: 0.5 },
@@ -12268,7 +11961,6 @@ const SPECIES_DB = {
     "usne_red_drum": {
         name: "Kırmızı Davul Balığı / Red Drum", nameEn: "Red Drum (Redfish)", icon: "🐟", scientificName: "Sciaenops ocellatus",
         photoId: 1634, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluklar ve sörf bölgeleri",
         tempRange: { min: 18, opt: 24, max: 30 },
         seasons: { winter: 0.0, spring: 0.1, summer: 0.8, autumn: 0.95 },
@@ -12282,7 +11974,6 @@ const SPECIES_DB = {
     "usne_black_drum": {
         name: "Siyah Davul Balığı / Black Drum", nameEn: "Black Drum", icon: "🐟", scientificName: "Pogonias cromis",
         photoId: 1635, category: "KUM_TABAN",
-        isGlobal: true,
         peakHours: "NIGHT", peakHoursDesc: "Gece köprü ayakları ve derin çukurlar",
         tempRange: { min: 15, opt: 21, max: 27 },
         seasons: { winter: 0.1, spring: 0.9, summer: 0.4, autumn: 0.6 },
@@ -12309,7 +12000,6 @@ const SPECIES_DB = {
     "usne_jack_crevalle": {
         name: "Kriko Balığı / Jack Crevalle", nameEn: "Jack Crevalle", icon: "🐟", scientificName: "Caranx hippos",
         photoId: 1637, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzeydeki patlamalar",
         tempRange: { min: 20, opt: 26, max: 32 },
         seasons: { winter: 0.0, spring: 0.1, summer: 0.9, autumn: 0.3 },
@@ -12323,7 +12013,6 @@ const SPECIES_DB = {
     "usne_tarpon": {
         name: "Tarpon (US NE)", nameEn: "Tarpon", icon: "🐟", scientificName: "Megalops atlanticus",
         photoId: 1638, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ haliçler",
         tempRange: { min: 22, opt: 27, max: 32 },
         seasons: { winter: 0.0, spring: 0.0, summer: 0.6, autumn: 0.1 },
@@ -12376,7 +12065,6 @@ const SPECIES_DB = {
     "usne_halibut": {
         name: "Atlantik Halibut (US NE)", nameEn: "Atlantic Halibut", icon: "🐟", scientificName: "Hippoglossus hippoglossus",
         photoId: 1642, category: "DIP",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kanyonlar",
         tempRange: { min: 2, opt: 7, max: 12 },
         seasons: { winter: 0.8, spring: 0.6, summer: 0.2, autumn: 0.7 },
@@ -12390,7 +12078,6 @@ const SPECIES_DB = {
     "usne_mahimahi": {
         name: "Mahi Mahi (US NE)", nameEn: "Mahi Mahi (Dolphin)", icon: "🐟", scientificName: "Coryphaena hippurus",
         photoId: 1643, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzen yosunlar ve şamandıralar",
         tempRange: { min: 22, opt: 26, max: 30 },
         seasons: { winter: 0.0, spring: 0.1, summer: 0.95, autumn: 0.4 },
@@ -12404,7 +12091,6 @@ const SPECIES_DB = {
     "usne_spotted_seatrout": {
         name: "Benekli Deniz Alası (US)", nameEn: "Spotted Seatrout", icon: "🐟", scientificName: "Cynoscion nebulosus",
         photoId: 1644, category: "KIYI_AVCI",
-        isGlobal: true,
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ otluk alanlar",
         tempRange: { min: 18, opt: 24, max: 30 },
         seasons: { winter: 0.0, spring: 0.2, summer: 0.9, autumn: 0.6 },
@@ -12418,7 +12104,6 @@ const SPECIES_DB = {
     "usne_blue_runner": {
         name: "Mavi Koşucu / Blue Runner", nameEn: "Blue Runner", icon: "🐟", scientificName: "Caranx crysos",
         photoId: 1645, category: "SÜRÜ",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz iskeleler ve şamandıralar",
         tempRange: { min: 20, opt: 25, max: 30 },
         seasons: { winter: 0.0, spring: 0.1, summer: 0.95, autumn: 0.4 },
@@ -12484,7 +12169,6 @@ const SPECIES_DB = {
     "usne_king_mackerel": {
         name: "Kral Uskumru (US NE)", nameEn: "King Mackerel", icon: "🐟", scientificName: "Scomberomorus cavalla",
         photoId: 1650, category: "PELAJIK_AVCI",
-        isGlobal: true,
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yamaçları",
         tempRange: { min: 20, opt: 26, max: 32 },
         seasons: { winter: 0.0, spring: 0.0, summer: 0.8, autumn: 0.2 },
