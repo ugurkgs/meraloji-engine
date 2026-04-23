@@ -142,6 +142,7 @@ const SERVER_i18n = {
         score: {
             badConditions: 'Koşullar Uygun Değil',
             lowActivity: 'Düşük Aktivite',
+            moderateActivity: 'Orta Aktivite',
             goodConditions: 'İyi Koşullar',
         },
         penalties: {
@@ -241,6 +242,7 @@ const SERVER_i18n = {
         score: {
             badConditions: 'Poor Conditions',
             lowActivity: 'Low Activity',
+            moderateActivity: 'Moderate Activity',
             goodConditions: 'Good Conditions',
         },
         penalties: {
@@ -1405,9 +1407,13 @@ function calcAvgScore(fishList) {
 
     let dominant = false;
     if (top3.length >= 2 && !EXCLUDED.includes(top3[0].category)) {
-        const restAvg = top3.slice(1).reduce((sum, f) => sum + f.score, 0) / top3.slice(1).length;
-        // %10'dan fazla fark varsa dominant kabul et
-        dominant = (top3[0].score - restAvg) / (restAvg || 1) >= 0.10;
+        // [GÜNCELLEME] Baskın tür olması için:
+        // 1. En üstteki balık 75+ puan olmalı (Gerçekten iyi bir fırsat olmalı)
+        // 2. İkinci balıktan en az %15 daha yüksek skora sahip olmalı (Net bir ayrışma olmalı)
+        const topScore = top3[0].score;
+        const secondScore = top3[1].score;
+
+        dominant = topScore >= 75 && (topScore - secondScore) / (secondScore || 1) >= 0.15;
     }
 
     return { score: parseFloat(score.toFixed(1)), dominant };
@@ -1568,7 +1574,7 @@ function getMoonPhaseMultiplier(phase, moonPref = 'neutral') {
     if (phase > 0.45 && phase < 0.55) return 1.08; // Dolunay
 
     if (phase > 0.22 && phase < 0.28) return 1.01; // V2.2 Sentez (Daraltıldı)
-    if (phase > 0.72 && phase < 0.78) return 1.01; 
+    if (phase > 0.72 && phase < 0.78) return 1.01;
 
     return 1.0;
 }
@@ -2060,7 +2066,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
                 (mb.tempMax === undefined || tempWater <= mb.tempMax);
             if (tempMatch) {
                 seasonalEff = Math.min(1.0, seasonalEff + mb.bonus);
-                activeTriggers.push(i18n(lang).triggers.migrationSeason(region));
+                const localizedRegion = i18n(lang).regions[region] || region;
+                activeTriggers.push(i18n(lang).triggers.migrationSeason(localizedRegion));
             }
         }
     }
@@ -2074,7 +2081,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
                 (sb.tempMax === undefined || tempWater <= sb.tempMax);
             if (tempMatch) {
                 seasonalEff = Math.min(1.0, seasonalEff + sb.bonus);
-                activeTriggers.push(i18n(lang).triggers.spawningSeason(region));
+                const localizedRegion = i18n(lang).regions[region] || region;
+                activeTriggers.push(i18n(lang).triggers.spawningSeason(localizedRegion));
             }
         }
     }
@@ -2589,12 +2597,12 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     if (visibility < 20000) {
         const isVisualPredator = fish.huntingMode === 'visual';
         const visMod = isDeepBottom ? 0.2 : (isVisualPredator ? 1.5 : (fish.clarityPref === 'CLEAR' ? 1.0 : 0.5));
-        
+
         if (visibility < 1000) {
-            s_trigger -= (isVisualPredator ? 15 : 6) * visMod; 
+            s_trigger -= (isVisualPredator ? 15 : 6) * visMod;
             if (visMod > 0) activeTriggers.push(i18n(lang).triggers.denseFog);
         } else if (visibility < 5000) {
-            s_trigger -= (isVisualPredator ? 6 : 3) * visMod; 
+            s_trigger -= (isVisualPredator ? 6 : 3) * visMod;
             if (visMod > 0) activeTriggers.push(i18n(lang).triggers.reducedVis);
         }
         scoreDetails.visibility = { value: visibility, km: parseFloat((visibility / 1000).toFixed(1)), isVisualPredator };
@@ -2890,7 +2898,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     if (finalScore < 25) reason = activeTriggers.length > 0 ? activeTriggers[0] : i18n(lang).score.badConditions;
     else if (finalScore < 40) reason = i18n(lang).score.lowActivity;
     else if (finalScore >= 65) reason = activeTriggers.length > 0 ? activeTriggers[0] : i18n(lang).score.goodConditions;
-    else reason = "Orta Aktivite";
+    else reason = i18n(lang).score.moderateActivity;
 
     return { finalScore, activeTriggers, reason, scoreDetails };
 }
