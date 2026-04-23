@@ -1554,18 +1554,22 @@ function getSolunarWindow(date, lat = 41.0, lon = 29.0) {
 
 // Ay Fazı Çarpanı
 function getMoonPhaseMultiplier(phase, moonPref = 'neutral') {
+    // 0.0 ve 1.0 Yeni Ay, 0.5 Dolunay'dır.
     if (moonPref === 'bright') {
-        if (phase > 0.4 && phase < 0.6) return 1.20; // Dolunayda güçlü bonus
-        if (phase < 0.1 || phase > 0.9) return 0.90; // Yeni ayda ceza
+        if (phase > 0.3 && phase < 0.7) return 1.20; // Dolunay civarı bonus
+        if (phase < 0.15 || phase > 0.85) return 0.85; // Yeni ay civarı ceza
     } else if (moonPref === 'dark') {
-        if (phase < 0.1 || phase > 0.9) return 1.20; // Yeni ayda güçlü bonus
-        if (phase > 0.4 && phase < 0.6) return 0.80; // Dolunayda güçlü ceza
-    } else {
-        if (phase < 0.1 || phase > 0.9) return 1.15;
-        if (phase > 0.4 && phase < 0.6) return 1.12;
-    }
-    if (phase > 0.2 && phase < 0.3) return 1.05;
-    if (phase > 0.7 && phase < 0.8) return 1.05;
+        if (phase < 0.2 || phase > 0.8) return 1.20; // Yeni ay civarı bonus
+        if (phase > 0.4 && phase < 0.6) return 0.80; // Dolunay civarı ceza
+    } 
+    
+    // Nötr tercihler veya spesifik faz eşleşmeyen durumlar için hafif solunar etkisi
+    if (phase < 0.1 || phase > 0.9) return 1.15; // Yeni ay
+    if (phase > 0.45 && phase < 0.55) return 1.12; // Dolunay
+    
+    if (phase > 0.22 && phase < 0.28) return 1.05; // İlk dördün
+    if (phase > 0.72 && phase < 0.78) return 1.05; // Son dördün
+    
     return 1.0;
 }
 
@@ -2578,7 +2582,19 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         scoreDetails.visibility = { value: visibility, km: parseFloat((visibility / 1000).toFixed(1)) };
     }
 
-    s_trigger = asymptoticTriggerSum(s_trigger);
+        // [YENİ v4.0] Termoklin Yakınlığı Bonusu — Derin su balıkları termoklin bandında aktifleşir
+        // Sıkıştırmadan (asymptoticTriggerSum) önce eklenmeli ki limitler dahilinde kalsın
+        if (isDeepBottom && thermoclineDepth && depthAvg) {
+            const distToThermocline = Math.abs(depthAvg - thermoclineDepth);
+            if (distToThermocline <= 10) {
+                const thermBonus = (10 - distToThermocline) * 0.4;
+                s_trigger += thermBonus;
+                activeTriggers.push(i18n(lang).triggers.thermocline(Math.round(thermoclineDepth)));
+                scoreDetails.thermoclineBonus = { depth: thermoclineDepth, bonus: thermBonus };
+            }
+        }
+
+        s_trigger = asymptoticTriggerSum(s_trigger);
     
     // [YENİ v4.0] Barometrik Enerji Faktörü (Mutlak Basınç)
     // 1013.25 hPa standarttır. Çok yüksek basınç balığı baskılar, düşük basınç hareketlendirir.
@@ -2682,16 +2698,6 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         rawScore *= depthScore;
         scoreDetails.depth = { score: depthScore * 5, max: 5, stars: Math.round(depthScore * 5), value: depthAvg, fishMin: fMin, fishOpt: fOpt, fishMax: fMax };
 
-        // [YENİ v4.0] Termoklin Yakınlığı Bonusu — Derin su balıkları termoklin bandında aktifleşir
-        if (isDeepBottom && thermoclineDepth && depthAvg) {
-            const distToThermocline = Math.abs(depthAvg - thermoclineDepth);
-            if (distToThermocline <= 10) {
-                const thermBonus = (10 - distToThermocline) * 0.4;
-                s_trigger += thermBonus;
-                activeTriggers.push(i18n(lang).triggers.thermocline(Math.round(thermoclineDepth)));
-                scoreDetails.thermoclineBonus = { depth: thermoclineDepth, bonus: thermBonus };
-            }
-        }
 
         // Frontend HUD uyarısı için depthGate objesi
         if (depthScore < 0.7) {
@@ -3263,6 +3269,7 @@ app.get('/api/forecast', async (req, res) => {
             const upwelling = isLand ? 0 : calculateUpwelling(windSpeed, windDir, regionName);
             const tide = SunCalc.getMoonPosition(targetDate, lat, lon);
             // TideFlow artık bir "genlik" (amplitude) çarpanıdır. Yeni/Dolunayda (Spring tide) daha yüksektir.
+            // TÜM ENDPOINT'LERDE AYNI FORMÜL (Tutarlılık için)
             const tideAmplitude = 1.0 + Math.abs(Math.cos(moon.phase * Math.PI * 2)) * 0.5;
             const tideFlow = tideAmplitude; 
             const moonAltitude = tide.altitude;
@@ -3562,7 +3569,8 @@ app.get('/api/forecast', async (req, res) => {
                 visibility: i_visibility, waveDirection: i_waveDirection,
                 windWaveHeight: i_windWaveHeight, swellPeriod: i_swellPeriod,
                 oxygen: i_oxygen, upwelling: i_upwelling,
-                tideFlow: i_tideFlow
+                tideFlow: i_tideFlow,
+                moonAltitude: i_moonPos.altitude
             };
 
             const instantResultsMap = new Map();
@@ -3622,7 +3630,7 @@ app.get('/api/forecast', async (req, res) => {
                     }
                 }
             }
-            instantFishList = Array.from(instantResultsMap.values()).map(v => v.data);
+            let instantFishList = Array.from(instantResultsMap.values()).map(v => v.data);
             instantFishList.sort((a, b) => b.score - a.score);
 
             // GELİŞMİŞ TAKTİK SİSTEMİ - ANLIK
@@ -4761,14 +4769,16 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         const uv = safeNum(weather.hourly.uv_index?.[hourlyIdx], 0);
         const clarity = calculateClarity(wave, windSpeed, rain);
         const currentEst = estimateCurrent(wave, windSpeed, regionName);
+        const sunTimes = SunCalc.getTimes(now, parseFloat(latF), parseFloat(lonF));
+        const timeMode = getTimeOfDay(clickHour, sunTimes);
+        const moon = SunCalc.getMoonIllumination(now);
+        const moonPos = SunCalc.getMoonPosition(now, parseFloat(latF), parseFloat(lonF));
+
         const oxygenData = calculateOxygen(tempWater, getSalinity(regionName), null, timeMode);
         const oxygen = oxygenData.mgL;
         const upwelling = calculateUpwelling(windSpeed, windDir, regionName);
         const depthAvg = bathyRaw !== null ? Math.abs(bathyRaw) : null;
-        const sunTimes = SunCalc.getTimes(now, parseFloat(latF), parseFloat(lonF));
-        const timeMode = getTimeOfDay(clickHour, sunTimes);
         const solunar = getSolunarWindow(now, parseFloat(latF), parseFloat(lonF));
-        const moon = SunCalc.getMoonIllumination(now);
 
         // [YENİ] Marine hourly
         const wavePeriod = safeNum(marine.hourly?.wave_period?.[marineHourlyIdx]);
@@ -4797,6 +4807,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
                 return { trend: 'STABLE', change: 0 };
             })(),
             moonPhase: moon.phase,
+            moonAltitude: moonPos.altitude,
             lat: parseFloat(latF), lon: parseFloat(lonF), depthAvg,
             salinity: getSalinity(regionName),
             hour: clickHour,
