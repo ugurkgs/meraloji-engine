@@ -3456,12 +3456,11 @@ app.get('/api/forecast', async (req, res) => {
             const i_wave = applyShoaling(i_waveRaw, i_wavePeriod, depthData.avg);
             const i_clarity = calculateClarity(i_wave, i_wind, i_rain);
             const i_current = estimateCurrent(i_wave, i_wind, regionName);
+            const i_windDir = safeNum(weather.daily?.wind_direction_10m_dominant?.[1]);
             const i_oxygenData = calculateOxygen(i_tempWater, salinity, chlorophyll, i_timeMode);
             const i_oxygen = i_oxygenData.mgL;
             const i_upwelling = calculateUpwelling(i_wind, i_windDir, regionName);
             const i_moon = SunCalc.getMoonIllumination(instantDate);
-            // daily[1] = bugün (past_days=1)
-            const i_windDir = safeNum(weather.daily?.wind_direction_10m_dominant?.[1]);
 
             const i_swellHeight = safeNum(marine.hourly?.swell_wave_height?.[marineInstantIdx]);
             const i_oceanCurrent = marine.hourly?.ocean_current_velocity?.[marineInstantIdx] ?? null;
@@ -3515,7 +3514,7 @@ app.get('/api/forecast', async (req, res) => {
                 windGust: i_windGust, precipProb: i_precipProb, weatherCode: i_weatherCode,
                 visibility: i_visibility, waveDirection: i_waveDirection,
                 windWaveHeight: i_windWaveHeight, swellPeriod: i_swellPeriod,
-                oxygen: i_oxygen, upwelling: i_upwelling
+                oxygen: i_oxygen, upwelling: i_upwelling,
                 tideFlow: i_tideFlow
             };
 
