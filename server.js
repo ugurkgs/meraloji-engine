@@ -1413,6 +1413,35 @@ function calcAvgScore(fishList) {
     return { score: parseFloat(score.toFixed(1)), dominant };
 }
 
+function getWeatherIconicDescription(code, lang) {
+    const isEn = lang === 'en';
+    const weatherMap = {
+        0: { tr: "☀️ Güneşli", en: "☀️ Sunny" },
+        1: { tr: "🌤️ Az Bulutlu", en: "🌤️ Mainly Clear" },
+        2: { tr: "⛅ Parçalı Bulutlu", en: "⛅ Partly Cloudy" },
+        3: { tr: "☁️ Bulutlu", en: "☁️ Overcast" },
+        45: { tr: "🌫️ Sisli", en: "🌫️ Foggy" },
+        48: { tr: "🌫️ Kırağılı Sis", en: "🌫️ Depositing Rime Fog" },
+        51: { tr: "🌦️ Hafif Çiseleme", en: "🌦️ Light Drizzle" },
+        53: { tr: "🌦️ Çiseleme", en: "🌦️ Moderate Drizzle" },
+        55: { tr: "🌦️ Şiddetli Çiseleme", en: "🌦️ Dense Drizzle" },
+        61: { tr: "🌧️ Hafif Yağmurlu", en: "🌧️ Slight Rain" },
+        63: { tr: "🌧️ Yağmurlu", en: "🌧️ Moderate Rain" },
+        65: { tr: "🌧️ Şiddetli Yağmurlu", en: "🌧️ Heavy Rain" },
+        71: { tr: "🌨️ Hafif Kar Yağışlı", en: "🌨️ Slight Snow" },
+        73: { tr: "🌨️ Kar Yağışlı", en: "🌨️ Moderate Snow" },
+        75: { tr: "🌨️ Şiddetli Kar Yağışlı", en: "🌨️ Heavy Snow" },
+        80: { tr: "🌦️ Hafif Sağanak", en: "🌦️ Slight Rain Showers" },
+        81: { tr: "🌦️ Sağanak Yağışlı", en: "🌦️ Rain Showers" },
+        82: { tr: "🌦️ Şiddetli Sağanak", en: "🌦️ Violent Rain Showers" },
+        95: { tr: "⛈️ Gök Gürültülü Fırtına", en: "⛈️ Thunderstorm" },
+        96: { tr: "⛈️ Dolu ve Fırtına", en: "⛈️ Thunderstorm with Hail" },
+        99: { tr: "⛈️ Ağır Fırtına ve Dolu", en: "⛈️ Heavy Thunderstorm with Hail" }
+    };
+    const res = weatherMap[code] || { tr: "☁️ Değişken", en: "☁️ Variable" };
+    return isEn ? res.en : res.tr;
+}
+
 function calculatePressureTrend(pressureHistory) {
     if (!pressureHistory || pressureHistory.length < 2) {
         return { trend: 'STABLE', change: 0 };
@@ -3621,48 +3650,31 @@ app.get('/api/forecast', async (req, res) => {
             const i_mediumScoreFish = instantFishList.filter(f => f.score >= 55 && f.score < 75 && f.category !== "TİCARİ");
             const { score: i_topScore, dominant: i_isDominant } = calcAvgScore(instantFishList);
 
-            if (i_wave > 1.5) { // 1.5m üstü dalga risklidir
+            // RISK TABANLI TAKTİK SİSTEMİ - SADECE TEHLİKELER (Dalga Simülasyonunun altı)
+            if (i_wave > 1.5) { 
                 instantTacticKey = "TACTIC_HIGH_WAVE";
                 instantTacticData = { warning: true, wave: i_wave.toFixed(1) };
-            } else if (i_wind > 30) { // 30km/h üstü sert rüzgardır
+            } else if (i_weatherCode >= 95) { // Fırtına kodları
+                instantTacticKey = "TACTIC_STORM";
+                instantTacticData = { warning: true };
+            } else if (i_wind > 30) {
                 instantTacticKey = "TACTIC_STRONG_WIND";
                 instantTacticData = { warning: true, wind: i_wind };
-            } else if (i_topScore < 15) { // [DÜZELTME] Skor %0-15 ise "Çok Düşük Aktivite" ver
-                instantTacticKey = "TACTIC_VERY_LOW_ACTIVITY";
-                instantTacticData = { suggest: "change_spot_or_time" };
-            } else if (i_pressureTrend.trend === 'FALLING_FAST' && i_topScore >= 40) {
-                instantTacticKey = "TACTIC_FEEDING_FRENZY";
-                instantTacticData = { bonus: true };
-            } else if (i_highScoreFish.length > 0 && i_topScore >= 50) {
-                instantTacticKey = "TACTIC_HOT_SPOT";
-                instantTacticData = {
-                    fish: i_highScoreFish.slice(0, 2).map(f => ({
-                        name: f.name,
-                        score: f.score,
-                        bait: f.bait,
-                        lure: f.lure
-                    }))
-                };
-            } else if (i_mediumScoreFish.length > 0 && i_topScore >= 35) {
-                instantTacticKey = "TACTIC_MODERATE";
-                instantTacticData = {
-                    fish: i_mediumScoreFish.slice(0, 3).map(f => f.name)
-                };
-            } else if (i_topScore < 40) {
-                instantTacticKey = "TACTIC_LOW_ACTIVITY";
-                instantTacticData = { suggest: "change_spot" };
             } else {
-                instantTacticKey = "TACTIC_STANDARD";
+                // Risk yoksa taktik kutusunu boş bırakıyoruz (Kullanıcı isteği)
+                instantTacticKey = "TACTIC_SAFE";
+                instantTacticData = null;
             }
 
-            if (i_isDominant) {
-                instantTacticData = instantTacticData || {};
-                instantTacticData.dominantNote = i18n(lang).tactic.dominantNote;
+            if (i_isDominant && instantTacticKey === "TACTIC_SAFE") {
+                instantTacticKey = "TACTIC_DOMINANT";
+                instantTacticData = { dominantNote: i18n(lang).tactic.dominantNote };
             }
 
             instantData = {
                 score: i_topScore,
-                weatherSummary: i_topScore < 15 ? (lang === 'en' ? "Inefficient conditions" : "Verimsiz koşullar — aktivite çok düşük") : getWeatherCondition(i_rain, i_wind, i_cloud, i_clarity, i_timeMode),
+                // ÜST KISIM: Sadece Hava Durumu (☀️ Güneşli, ⛈️ Fırtınalı vb.)
+                weatherSummary: getWeatherIconicDescription(i_weatherCode, lang),
                 tacticKey: instantTacticKey, tacticData: instantTacticData,
                 fishList: instantFishList.slice(0, 10),
                 temp: i_tempWater, 
