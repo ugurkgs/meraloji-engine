@@ -1961,7 +1961,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         // YENİ (1D)
         windGust = 0, precipProb = 0, weatherCode = 0, visibility = 20000,
         waveDirection = 0, windWaveHeight = 0, swellPeriod = 0,
-        tideFlow = 0
+        tideFlow = 0, moonAltitude = 0
     } = params;
 
     const season = getSeason(targetDate.getMonth(), params.lat);
@@ -2139,9 +2139,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     if (tideFlow > 0) {
         const tidePref = fish.tidePref || fish.currentPref || 0.5;
         // Matematiksel türev simülasyonu: altitude ~sin(t) ise velocity ~cos(t)
-        // params içindeki altitude radyan ise cos(alt) kullanabiliriz.
-        // Ancak tideFlow zaten bir şiddet verisidir. Onu "flux" haline getirelim.
-        const flux = tideFlow * Math.abs(Math.cos(params.altitude || 0)) * 1.5;
+        // Akıntı hızı Ay ufuktayken (altitude=0, cos=1) zirve yapar.
+        const flux = tideFlow * Math.abs(Math.cos(moonAltitude)) * 1.5;
         const tScore = flux * tidePref * 4;
         s_trigger += tScore;
         if (tScore > 2.5) activeTriggers.push(i18n(lang).triggers.goodTideFlow);
@@ -3186,7 +3185,10 @@ app.get('/api/forecast', async (req, res) => {
             const currentEst = isLand ? 0 : estimateCurrent(wave, windSpeed, regionName);
             const clarity = isLand ? 0 : calculateClarity(wave, windSpeed, rain);
             const tide = SunCalc.getMoonPosition(targetDate, lat, lon);
-            const tideFlow = Math.abs(Math.sin(tide.altitude)) * 1.5;
+            // TideFlow artık bir "genlik" (amplitude) çarpanıdır. Yeni/Dolunayda (Spring tide) daha yüksektir.
+            const tideAmplitude = 1.0 + Math.abs(Math.cos(moon.phase * Math.PI * 2)) * 0.5;
+            const tideFlow = tideAmplitude; 
+            const moonAltitude = tide.altitude;
 
             const weatherSummary = getWeatherCondition(rain, windSpeed, cloud, clarity, timeMode);
 
@@ -3221,7 +3223,7 @@ app.get('/api/forecast', async (req, res) => {
                     // YENİ (1C)
                     windGust, precipProb, weatherCode, visibility,
                     waveDirection, windWaveHeight, swellPeriod,
-                    tideFlow
+                    tideFlow, moonAltitude
                 };
 
                 const resultsMap = new Map();
