@@ -231,23 +231,23 @@ const SPECIES_DB = {
     "mirmir": {
         name: "Mırmır", nameEn: "Striped Seabream", icon: "🦓", scientificName: "Lithognathus mormyrus",
         photoId: 13,
-        category: "KIYI",
+        category: "KUM_TABAN", // Kategorisi KUM_TABAN olarak güncellendi (Zemin sadakati için)
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece kıyıya yaklaşır, 21:00-02:00", peakHoursDescEn: "Approaches shore at night, 21:00-02:00",
-        tempRange: { min: 14, opt: 18, max: 24 },
-        seasons: { winter: 0.25, spring: 0.55, summer: 0.85, autumn: 0.70 },
+        tempRange: { min: 14, opt: 19, max: 25 },
+        seasons: { winter: 0.25, spring: 0.65, summer: 0.85, autumn: 0.70 },
         activity: "NIGHT",
         pressureSensitivity: 0.5,
-        wavePref: 0.7,
-        clarityPref: "TURBID",
+        wavePref: 0.4, // Sakin suda da aktif
+        clarityPref: "MODERATE", // Berrak sudan daha az etkilenir
         currentPref: 0.4,
         salinityPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
-        depth: { min: 0, opt: 10, max: 150 },
+        depth: { min: 0, opt: 5, max: 150 }, // Daha sığ sular opt seviyesine çekildi
         advice: { bait: "Boru Kurdu (Favori), Mamun, Kum Solucanı", lure: "Kokulu Silikon (Kurt/Yengeç)", rig: "Hafif Gezer Kurşunlu Dip", hook: "4 - 6 İnce Pala", baitEn: "Lugworm (favourite), ragworm", lureEn: "Scented soft plastic", rigEn: "Light running sinker bottom", hookEn: "4 - 6 fine wire" },
         legalSize: "20 cm (Etik)",
-        note: "Gece kıyıya 1m'ye kadar yaklaşır. Işık tutmayın!",
-        noteEn: "Approaches within 1m of shore at night. No flashlights!"
+        note: "Gece kıyıya 1m'ye kadar yaklaşır. Işık tutmayın! Kumluk mera balığıdır.",
+        noteEn: "Approaches within 1m of shore at night. No flashlights! Sand bottom specialist."
     },
     "kalamar": {
         name: "Kalamar", nameEn: "European Squid", icon: "🦑", scientificName: "Loligo vulgaris",
