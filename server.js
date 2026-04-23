@@ -123,6 +123,9 @@ const SERVER_i18n = {
             substrateLabel: (s, str) => `${str} zemin`,
             goodTideFlow: '🌊 Verimli Gelgit Akıntısı',
             slackWater: '🌊 Durgun Su (Gelgit Sonu)',
+            optimalOxygen: '🧬 İdeal Oksijen Seviyesi',
+            lowOxygen: '⚠️ Düşük Oksijen — Metabolik Yavaşlama',
+            upwelling: '🌊 Upwelling (Besin Yükselmesi) — Aktifleşme',
         },
         reasons: {
             outOfRegion: (r, regions) => `Bu tür ${r} bölgesinde bulunmaz. Bölgeleri: ${regions}`,
@@ -219,6 +222,9 @@ const SERVER_i18n = {
             substrateLabel: (s, str) => `${str} bottom`,
             goodTideFlow: '🌊 Favorable Tidal Flow',
             slackWater: '🌊 Slack Water (End of Tide)',
+            optimalOxygen: '🧬 Optimal Oxygen Level',
+            lowOxygen: '⚠️ Low Oxygen — Metabolic Slowdown',
+            upwelling: '🌊 Upwelling (Nutrient Rise) — Activation',
         },
         reasons: {
             outOfRegion: (r, regions) => `This species is not found in ${r}. Regions: ${regions}`,
@@ -2149,7 +2155,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     if (upwelling > 0.3) {
         const upScore = upwelling * 5;
         s_trigger += upScore;
-        activeTriggers.push(i18n(lang).triggers.strongCurrent + " (Upwelling)");
+        activeTriggers.push(i18n(lang).triggers.upwelling);
         scoreDetails.upwelling = { value: parseFloat(upwelling.toFixed(2)), score: upScore };
     }
 
@@ -2159,9 +2165,11 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         // Hipoksi riski: Oksijen %60 altındaysa metabolizma yavaşlar
         const oxygenPenalty = (60 - estDO) * 0.2;
         s_trigger -= oxygenPenalty;
+        activeTriggers.push(i18n(lang).triggers.lowOxygen);
         scoreDetails.oxygen = { value: Math.round(estDO), penalty: oxygenPenalty, status: 'LOW' };
     } else if (estDO > 90) {
         s_trigger += 1.5; // Zengin oksijen bonusu
+        activeTriggers.push(i18n(lang).triggers.optimalOxygen);
         scoreDetails.oxygen = { value: Math.round(estDO), bonus: 1.5, status: 'OPTIMAL' };
     }
 
