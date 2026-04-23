@@ -1622,6 +1622,10 @@ function isInHabitat(fish, lat, lon, regionName) {
             lonF >= b.lon1 && lonF <= b.lon2
         );
         if (inBbox) return true; // Kutunun içindeyse göster
+        
+        // EĞER bbox'ı varsa ve bbox dışında isek, (ve global bir tür değilse) kesinlikle FALSE dön!
+        // Bu sayede USA veya Japonya balıkları Akdeniz'e sızamaz.
+        if (!fish.isGlobal) return false;
     }
 
     // 2. ÖNCELİK: Global Tür Kontrolü
@@ -1632,7 +1636,18 @@ function isInHabitat(fish, lat, lon, regionName) {
 
     // 3. ÖNCELİK: Bölgesel/Endemik Kontrolü
     if (fish.regions && fish.regions.length > 0) {
-        return fish.regions.includes(regionName) || regionName === 'AÇIK DENİZ';
+        if (fish.regions.includes(regionName)) return true;
+        
+        // AÇIK DENİZ istisnası: Sadece Türkiye/Akdeniz balıklarının açık denize sızmasına izin ver.
+        if (regionName === 'AÇIK DENİZ') {
+            const turkishRegions = ['MARMARA', 'EGE', 'AKDENİZ', 'KARADENİZ', 'TÜRKİYE'];
+            const isTurkishFish = fish.regions.some(r => turkishRegions.includes(r));
+            
+            // Eğer Türkiye balığıysa ve kabaca Akdeniz/Karadeniz havzasındaysa (lat 30-45, lon 10-45)
+            if (isTurkishFish && latF > 30 && latF < 45 && lonF > 10 && lonF < 45) {
+                return true;
+            }
+        }
     }
 
     // Hiçbir şart uymuyorsa (ve global değilse) gösterme
