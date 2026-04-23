@@ -3249,6 +3249,7 @@ app.get('/api/forecast', async (req, res) => {
             const oxygen = oxygenData.mgL;
             const upwelling = isLand ? 0 : calculateUpwelling(windSpeed, windDir, regionName);
             // GELGİT AKINTISI (Tide Flow) — V2.2 Birleşik Model (Faz + İrtifa)
+            const tide = SunCalc.getMoonPosition(targetDate, lat, lon);
             const tideAmplitude = 1.0 + Math.abs(Math.cos(moon.phase * Math.PI * 2)) * 0.5;
             const tideAltitudeFactor = Math.abs(Math.sin(tide.altitude));
             const tideFlow = tideAmplitude * tideAltitudeFactor * 1.5;
