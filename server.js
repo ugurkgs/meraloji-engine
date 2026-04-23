@@ -3389,52 +3389,34 @@ app.get('/api/forecast', async (req, res) => {
             const mediumScoreFish = fishList.filter(f => f.score >= 55 && f.score < 75 && f.category !== "TİCARİ");
             const { score: topScore, dominant: isDominant } = calcAvgScore(fishList);
 
+            // RISK TABANLI TAKTİK SİSTEMİ - SADECE TEHLİKELER
             if (isLand) {
                 tacticKey = "TACTIC_LAND";
-            } else if (wave > 1.5) { // 1.5m üstü dalga her zaman risklidir
+            } else if (wave > 1.5) { 
                 tacticKey = "TACTIC_HIGH_WAVE";
                 tacticData = { warning: true, wave: wave.toFixed(1) };
-            } else if (weatherSummary.includes("STORM")) {
+            } else if (weatherSummary.includes("STORM") || weatherCode >= 95) {
                 tacticKey = "TACTIC_STORM";
                 tacticData = { warning: true };
-            } else if (windSpeed > 30) { // 30km/h üstü sert rüzgardır
+            } else if (windSpeed > 30) {
                 tacticKey = "TACTIC_STRONG_WIND";
                 tacticData = { warning: true, wind: windSpeed };
-            } else if (topScore < 15) { // [DÜZELTME] %0-15 arası çok düşük aktivitedir
-                tacticKey = "TACTIC_VERY_LOW_ACTIVITY";
-                tacticData = { suggest: "change_spot_or_time" };
-            } else if (pressureTrend.trend === 'FALLING_FAST' && topScore >= 40) {
-                tacticKey = "TACTIC_FEEDING_FRENZY";
-                tacticData = { bonus: true };
-            } else if (highScoreFish.length > 0 && topScore >= 50) {
-                tacticKey = "TACTIC_HOT_SPOT";
-                tacticData = {
-                    fish: highScoreFish.slice(0, 2).map(f => ({
-                        name: lang === 'en' ? (f.nameEn || f.name) : f.name,
-                        score: f.score,
-                        bait: f.bait,
-                        lure: f.lure
-                    }))
-                };
-            } else if (mediumScoreFish.length > 0 && topScore >= 35) {
-                tacticKey = "TACTIC_MODERATE";
-                tacticData = {
-                    fish: mediumScoreFish.slice(0, 3).map(f => lang === 'en' ? (f.nameEn || f.name) : f.name)
-                };
-            } else if (topScore < 40) {
-                tacticKey = "TACTIC_LOW_ACTIVITY";
-                tacticData = { suggest: "change_spot" };
             } else {
-                tacticKey = "TACTIC_STANDARD";
+                // Risk yoksa boş bırakıyoruz (Kullanıcı isteği)
+                tacticKey = "TACTIC_SAFE";
+                tacticData = null;
             }
 
-            if (isDominant) {
-                tacticData = tacticData || {};
-                tacticData.dominantNote = i18n(lang).tactic.dominantNote;
+            if (isDominant && tacticKey === "TACTIC_SAFE") {
+                tacticKey = "TACTIC_DOMINANT";
+                tacticData = { dominantNote: i18n(lang).tactic.dominantNote };
             }
 
             forecast.push({
                 date: targetDate.toISOString(),
+                // ÜST KISIM İÇİN: Net Hava Durumu
+                weatherSummary: getWeatherIconicDescription(weatherCode, lang),
+                tacticKey, tacticData,
                 temp: Math.round(tempWater * 10) / 10,
                 wave, wind: Math.round(windSpeed),
                 windDirection: safeNum(weather.daily?.wind_direction_10m_dominant?.[dailyIdx]),
