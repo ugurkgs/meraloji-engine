@@ -2624,6 +2624,26 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // === KATMAN 1: TEMEL TOPLAM (BASE POTENTIAL) ===
     let rawScore = s_season + s_temp + s_env + s_activity + s_trigger;
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // BÖLGESEL BOLLUK (ABUNDANCE) FAKTÖRÜ — [YENİ v4.1]
+    // ─────────────────────────────────────────────────────────────────────────────
+    // [BİLİMSEL NOT]: Bir balığın bölgede "var olması" (isInHabitat) ile "bol olması"
+    // farklıdır. Karadeniz'de Mırmır bulunur ancak Ege'deki yoğunluğa sahip değildir.
+    // ═══════════════════════════════════════════════════════════════════════════
+    let abundanceMult = 1.0;
+    if (region === 'KARADENİZ') {
+        if (key === 'mirmir') abundanceMult = 0.70; // Karadeniz'de seyrek popülasyon
+        else if (key === 'cipura') abundanceMult = 0.40; // Çok nadir (tesadüfi)
+        else if (key === 'mercan') abundanceMult = 0.30; // Neredeyse hiç yok
+        else if (key === 'ahtapot') abundanceMult = 0.20; // Karadeniz'de yok denecek kadar az
+    } else if (region === 'MARMARA') {
+        if (key === 'mirmir') abundanceMult = 0.85; // Marmara'da orta yoğunluk
+        else if (key === 'cipura') abundanceMult = 0.80; 
+    }
+    
+    rawScore *= abundanceMult;
+    scoreDetails.abundance = { multiplier: abundanceMult, region };
+
     // === KATMAN 2: BİYOLOJİK POTANSİYEL ÇARPANLARI ===
     // Bu çarpanlar balığın o bölgedeki temel var olma potansiyelini belirler.
     
