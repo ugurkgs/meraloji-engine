@@ -149,6 +149,8 @@ const SERVER_i18n = {
         },
         tactic: {
             dominantNote: '⭐ Baskın tür tespit edildi — ticari değeri olan bir balık ise, av için ideal koşullar.',
+            TACTIC_DANGER_WAVE: '🚫 TEHLİKELİ DALGALAR! Denize kesinlikle çıkmayın.',
+            TACTIC_ROUGH_WAVE: '⚠️ SERT DALGALAR! Küçük tekneler için riskli.',
         },
         score: {
             badConditions: 'Koşullar Uygun Değil',
@@ -260,6 +262,8 @@ const SERVER_i18n = {
         },
         tactic: {
             dominantNote: '⭐ Dominant species detected — if commercially valued, ideal conditions for a catch.',
+            TACTIC_DANGER_WAVE: '🚫 DANGEROUS WAVES! Absolutely do not go out.',
+            TACTIC_ROUGH_WAVE: '⚠️ ROUGH WAVES! Risky for small boats.',
         },
         score: {
             badConditions: 'Poor Conditions',
@@ -3480,8 +3484,11 @@ app.get('/api/forecast', async (req, res) => {
             // RISK TABANLI TAKTİK SİSTEMİ - SADECE TEHLİKELER
             if (isLand) {
                 tacticKey = "TACTIC_LAND";
-            } else if (wave > 2.5) {
-                tacticKey = "TACTIC_HIGH_WAVE";
+            } else if (wave > 3.0) {
+                tacticKey = "TACTIC_DANGER_WAVE"; // Kesinlikle çıkılmamalı
+                tacticData = { warning: true, wave: wave.toFixed(1) };
+            } else if (wave > 2.0) {
+                tacticKey = "TACTIC_ROUGH_WAVE";  // Küçük tekneler için riskli
                 tacticData = { warning: true, wave: wave.toFixed(1) };
             } else if (weatherSummary.includes("STORM") || weatherCode >= 95) {
                 tacticKey = "TACTIC_STORM";
@@ -3725,8 +3732,11 @@ app.get('/api/forecast', async (req, res) => {
             const { score: i_topScore, dominant: i_isDominant } = calcAvgScore(instantFishList);
 
             // RISK TABANLI TAKTİK SİSTEMİ - SADECE TEHLİKELER (Dalga Simülasyonunun altı)
-            if (i_wave > 2.5) {
-                instantTacticKey = "TACTIC_HIGH_WAVE";
+            if (i_wave > 3.0) {
+                instantTacticKey = "TACTIC_DANGER_WAVE";
+                instantTacticData = { warning: true, wave: i_wave.toFixed(1) };
+            } else if (i_wave > 2.0) {
+                instantTacticKey = "TACTIC_ROUGH_WAVE";
                 instantTacticData = { warning: true, wave: i_wave.toFixed(1) };
             } else if (i_weatherCode >= 95) { // Fırtına kodları
                 instantTacticKey = "TACTIC_STORM";
