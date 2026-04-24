@@ -2332,7 +2332,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     if (uvIndex !== undefined && uvIndex !== null && uvIndex > 0) {
         if (uvIndex >= 8 && timeMode === 'DAY') {
             // Çok yüksek UV: kıyı/sığ türler için ceza
-            if (fish.category === 'KIYI' || fish.category === 'KIYI_AVCI' || fish.category === 'LAGUN') {
+            if (fish.category === 'KIYI' || fish.category === 'KIYI_AVCI' || fish.category === 'LAGUN' || fish.category === 'KUM_TABAN') {
                 s_trigger -= 1.5;
             }
             // CLEAR seven türler bile yüksek UV'de derine iner
@@ -2341,7 +2341,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             }
         } else if (uvIndex <= 3 && timeMode === 'DAY') {
             // Düşük UV gündüz: sığ su türleri rahat avlanır
-            if (fish.category === 'KIYI' || fish.category === 'KIYI_AVCI') {
+            if (fish.category === 'KIYI' || fish.category === 'KIYI_AVCI' || fish.category === 'KUM_TABAN') {
                 s_trigger += 1;
             }
         }
@@ -2374,8 +2374,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // "cold shock" yaşar → lethargic hale gelir → ceza almalı.
     if (tempShock && tempShock.shock) {
         const isMigratoryPelagic = fish.category === 'PELAJIK' || fish.sstTrendPref === 'cooling';
-        const isCoastalSensitive = fish.category === 'KIYI' || fish.category === 'LAGUN';
-        const isBenthic = ['DIP_DERIN', 'DIP_KIYI', 'KAYALIK', 'DİP', 'DERİN', 'KAFADANBACAKLI', 'KALAMAR'].includes(fish.category);
+        const isCoastalSensitive = fish.category === 'KIYI' || fish.category === 'LAGUN' || fish.category === 'KUM_TABAN';
+        const isBenthic = ['DIP_DERIN', 'DIP_KIYI', 'KAYALIK', 'DİP', 'DERİN', 'KUM_TABAN', 'KAFADANBACAKLI', 'KALAMAR'].includes(fish.category);
         
         if (tempShock.direction === 'COOLING') {
             if (isMigratoryPelagic) {
@@ -2460,7 +2460,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             if (['DIP_KIYI', 'DIP_DERIN', 'KAYALIK', 'DİP', 'DERİN'].includes(fish.category)) {
                 s_trigger += 1.5; // Dip türü termoklin altında — doğal habitat
                 scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'BELOW', stars: 4 };
-            } else if (['PELAJIK', 'KIYI_AVCI', 'KIYI', 'SÜRÜ'].includes(fish.category)) {
+            } else if (['PELAJIK', 'KIYI_AVCI', 'KIYI', 'KUM_TABAN', 'SÜRÜ'].includes(fish.category)) {
                 s_trigger -= Math.min(3, diff / 10); // Yüzey türü çok derinlerde
                 scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'BELOW', stars: 2 };
             }
@@ -2753,7 +2753,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             middayPenalty = 0.75;
         } else if (cat === 'PELAJIK' || cat === 'SÜRÜ') {
             middayPenalty = 0.92;
-        } else if (cat === 'KIYI' || cat === 'LAGUN') {
+        } else if (cat === 'KIYI' || cat === 'LAGUN' || cat === 'KUM_TABAN') {
             middayPenalty = 0.70;
         } else if (cat === 'KAFADANBACAKLI' || cat === 'KALAMAR') {
             middayPenalty = 0.70; // Işığa hassas
@@ -2820,14 +2820,16 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         const prefs = SUBSTRATE_PREFS[key];
         if (prefs !== undefined && prefs !== null) {
             if (prefs.includes(substrate)) {
-                const isBottomSpecialist = fish.category === 'KUM_TABAN' || fish.category === 'DIP_DERIN';
-                const subMult = isBottomSpecialist ? 1.15 : 1.10;
+                // [EVRENSEL DÜZELTME]: Sadece 1-2 tip zemine bağımlı olan uzmanlar (specialists)
+                // veya zemin odaklı kategoriler (KUM_TABAN, DIP_DERIN) habitat eşleşmesinden %15 verim alır.
+                const isSpecialist = prefs.length <= 2 || fish.category === 'KUM_TABAN' || fish.category === 'DIP_DERIN';
+                const subMult = isSpecialist ? 1.15 : 1.10;
                 
-                rawScore *= subMult; // Tercih edilen zemin — %10 veya %15 bonus
+                rawScore *= subMult;
                 scoreDetails.substrate = { match: true, substrate, multiplier: subMult };
                 activeTriggers.push(i18n(lang).triggers.substrateLabel(substrate, i18n(lang).substrate[substrate] || substrate));
             } else {
-                rawScore *= 0.85; // Yanlış zemin cezası biraz artırıldı (-%15)
+                rawScore *= 0.85;
                 scoreDetails.substrate = { match: false, substrate, multiplier: 0.85 };
             }
         }
