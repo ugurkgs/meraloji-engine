@@ -3480,7 +3480,7 @@ app.get('/api/forecast', async (req, res) => {
             // RISK TABANLI TAKTİK SİSTEMİ - SADECE TEHLİKELER
             if (isLand) {
                 tacticKey = "TACTIC_LAND";
-            } else if (wave > 1.5) {
+            } else if (wave > 2.5) {
                 tacticKey = "TACTIC_HIGH_WAVE";
                 tacticData = { warning: true, wave: wave.toFixed(1) };
             } else if (weatherSummary.includes("STORM") || weatherCode >= 95) {
@@ -3725,7 +3725,7 @@ app.get('/api/forecast', async (req, res) => {
             const { score: i_topScore, dominant: i_isDominant } = calcAvgScore(instantFishList);
 
             // RISK TABANLI TAKTİK SİSTEMİ - SADECE TEHLİKELER (Dalga Simülasyonunun altı)
-            if (i_wave > 1.5) {
+            if (i_wave > 2.5) {
                 instantTacticKey = "TACTIC_HIGH_WAVE";
                 instantTacticData = { warning: true, wave: i_wave.toFixed(1) };
             } else if (i_weatherCode >= 95) { // Fırtına kodları
