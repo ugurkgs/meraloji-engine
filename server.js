@@ -131,6 +131,17 @@ const SERVER_i18n = {
             outOfRegion: (r, regions) => `Bu tür ${r} bölgesinde bulunmaz. Bölgeleri: ${regions}`,
             tooShallow: (d, min) => `Derinlik (${d}m) bu tür için çok sığ (min: ${min}m)`,
             tooDeep: (d, max) => `Derinlik (${d}m) bu tür için çok derin (max: ${max}m)`,
+            seasonalLow: (s, p) => `Bu mevsimde (${s}) aktivite düşük (%${p})`,
+            seasonalVeryLow: (s, p) => `Bu mevsimde (${s}) aktivite çok düşük (%${p})`,
+            tempMismatch: (v, min, max) => `Su sıcaklığı (${v}°C) uygun aralık dışında (${min}-${max}°C)`,
+            nightOnly: 'Bu tür gece aktiftir, şu an gündüz',
+            dayOnly: 'Bu tür gündüz aktiftir, şu an gece',
+            crepuscularOnly: 'Bu tür şafak/akşam aktiftir',
+            scoreThreshold: (s) => `Toplam skor (%${s}) listeleme eşiğinin (%15) altında`,
+            salinityMismatch: 'Tuzluluk uyumsuz',
+            camDeniz: 'Cam deniz',
+            boatRequired: 'Tekne gerektirir',
+            highWave: 'Yüksek dalga',
         },
         notification: {
             title: '🌪️ Fırtına Öncesi Fırsatı!',
@@ -231,6 +242,17 @@ const SERVER_i18n = {
             outOfRegion: (r, regions) => `This species is not found in ${r}. Regions: ${regions}`,
             tooShallow: (d, min) => `Depth (${d}m) too shallow for this species (min: ${min}m)`,
             tooDeep: (d, max) => `Depth (${d}m) too deep for this species (max: ${max}m)`,
+            seasonalLow: (s, p) => `Activity is low in this season (${s}) (%${p})`,
+            seasonalVeryLow: (s, p) => `Activity is very low in this season (${s}) (%${p})`,
+            tempMismatch: (v, min, max) => `Water temperature (${v}°C) is outside the suitable range (${min}-${max}°C)`,
+            nightOnly: 'This species is active at night, currently daytime',
+            dayOnly: 'This species is active during the day, currently night',
+            crepuscularOnly: 'This species is active at dawn/dusk',
+            scoreThreshold: (s) => `Total score (%${s}) is below the listing threshold (%15)`,
+            salinityMismatch: 'Salinity mismatch',
+            camDeniz: 'Glassy sea',
+            boatRequired: 'Boat required',
+            highWave: 'High waves',
         },
         notification: {
             title: '🌪️ Pre-Storm Opportunity!',
@@ -2685,7 +2707,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
 
     // Tuzluluk uyumsuzluk cezası penalties listesine de ekle (görsel uyarı)
     if (scoreDetails.salinity && scoreDetails.salinity.match === 'MISMATCH') {
-        penalties.push('Tuzluluk uyumsuz');
+        penalties.push(i18n(lang).reasons.salinityMismatch);
     }
 
     // === FAZ 1: DERİNLİK SOFT GATE ===
@@ -2791,7 +2813,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // FIX: scoreDetails.camDeniz.isInfo=true → frontend "uyarı ama ceza yok" olarak gösterir.
     if (wave < 0.3 && clarity > 80) {
         if (fish.clarityPref === 'TURBID' || fish.clarityPref === 'MODERATE') {
-            penalties.push("Cam deniz");
+            penalties.push(i18n(lang).reasons.camDeniz);
         }
         // NOT: rawScore çarpanı kaldırıldı. Ceza zaten clarityScore hesabında var.
         scoreDetails.camDeniz = { penalty: 1.0, note: "Ceza clarityScore içinde", isInfo: true };
@@ -2799,10 +2821,10 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
 
     // Dalga TEHLİKE
     if (wave > 2.5) { rawScore *= 0.15; penalties.push(i18n(lang).penalties.dangerWave); activeTriggers = [i18n(lang).penalties.dangerWaveTrigger]; }
-    else if (wave > 2.0) { rawScore *= 0.35; penalties.push("Yüksek dalga"); activeTriggers.push(i18n(lang).triggers.highWave); }
+    else if (wave > 2.0) { rawScore *= 0.35; penalties.push(i18n(lang).reasons.highWave); activeTriggers.push(i18n(lang).triggers.highWave); }
     else if (wave > 1.5) { rawScore *= 0.6; penalties.push(i18n(lang).penalties.wavyWater); }
 
-    if (windSpeed > 40) { rawScore *= 0.2; penalties.push(i18n(lang).penalties.storm); activeTriggers = ["⚠️ FIRTINA!"]; }
+    if (windSpeed > 40) { rawScore *= 0.2; penalties.push(i18n(lang).penalties.storm); activeTriggers = ["⚠️ " + i18n(lang).penalties.storm.toUpperCase() + "!"]; }
     else if (windSpeed > 35) { rawScore *= 0.35; penalties.push(i18n(lang).penalties.veryWindy); }
     else if (windSpeed > 25) { rawScore *= 0.7; penalties.push(i18n(lang).penalties.windy); }
 
@@ -2815,11 +2837,11 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         // Eğer derinlik verisi yoksa veya sığ ise, eski ceza mantığı
         if (depthAvg === null || depthAvg === undefined || (fish.depth.min > 0 && depthAvg < fish.depth.min)) {
             rawScore *= 0.35;
-            penalties.push("Tekne gerektirir");
-            if (!activeTriggers.includes("Tekne gerektirir")) activeTriggers.push(i18n(lang).triggers.needsBoat);
+            penalties.push(i18n(lang).reasons.boatRequired);
+            if (!activeTriggers.includes(i18n(lang).reasons.boatRequired)) activeTriggers.push(i18n(lang).triggers.needsBoat);
         } else {
             // Derinlik uygun — tekne notu ekle ama ceza verme
-            if (!activeTriggers.includes("Tekne gerektirir")) activeTriggers.push(i18n(lang).triggers.needsBoat);
+            if (!activeTriggers.includes(i18n(lang).reasons.boatRequired)) activeTriggers.push(i18n(lang).triggers.needsBoat);
         }
     }
 
@@ -4106,7 +4128,7 @@ app.get('/api/fish-search', async (req, res) => {
             })()
         };
 
-        const result = calculateFishScore(fish, fishKey, baseParams);
+        const result = calculateFishScore(fish, fishKey, baseParams, lang);
 
         // === GÜNLÜK SKOR HESAPLA ===
         let dailyScore = null;
@@ -4143,14 +4165,14 @@ app.get('/api/fish-search', async (req, res) => {
 
         // Mevsim kontrolü
         if (seasonEff < 0.3) {
-            reasons.push({ type: 'HIGH', text: `Bu mevsimde (${season}) aktivite çok düşük (%${(seasonEff * 100).toFixed(0)})` });
+            reasons.push({ type: 'HIGH', text: i18n(lang).reasons.seasonalVeryLow(season, (seasonEff * 100).toFixed(0)) });
         } else if (seasonEff < 0.5) {
-            reasons.push({ type: 'MEDIUM', text: `Bu mevsimde (${season}) aktivite düşük (%${(seasonEff * 100).toFixed(0)})` });
+            reasons.push({ type: 'MEDIUM', text: i18n(lang).reasons.seasonalLow(season, (seasonEff * 100).toFixed(0)) });
         }
 
         // Sıcaklık kontrolü
         if (tempWater < fish.tempRange.min || tempWater > fish.tempRange.max) {
-            reasons.push({ type: 'HIGH', text: `Su sıcaklığı (${tempWater.toFixed(1)}°C) uygun aralık dışında (${fish.tempRange.min}-${fish.tempRange.max}°C)` });
+            reasons.push({ type: 'HIGH', text: i18n(lang).reasons.tempMismatch(tempWater.toFixed(1), fish.tempRange.min, fish.tempRange.max) });
         }
 
         // Derinlik kontrolü
@@ -4169,16 +4191,16 @@ app.get('/api/fish-search', async (req, res) => {
 
         // Aktivite saati kontrolü
         if (fish.activity === 'NIGHT' && timeMode === 'DAY') {
-            reasons.push({ type: 'MEDIUM', text: 'Bu tür gece aktiftir, şu an gündüz' });
+            reasons.push({ type: 'MEDIUM', text: i18n(lang).reasons.nightOnly });
         } else if (fish.activity === 'DAWN_DUSK' && timeMode === 'DAY') {
-            reasons.push({ type: 'LOW', text: 'Bu tür şafak/akşam aktiftir' });
+            reasons.push({ type: 'LOW', text: i18n(lang).reasons.crepuscularOnly });
         } else if (fish.activity === 'DAY' && timeMode === 'NIGHT') {
-            reasons.push({ type: 'MEDIUM', text: 'Bu tür gündüz aktiftir, şu an gece' });
+            reasons.push({ type: 'MEDIUM', text: i18n(lang).reasons.dayOnly });
         }
 
         // Düşük skor nedeni
         if (result.finalScore <= 15) {
-            reasons.push({ type: 'INFO', text: `Toplam skor (%${result.finalScore.toFixed(1)}) listeleme eşiğinin (%15) altında` });
+            reasons.push({ type: 'INFO', text: i18n(lang).reasons.scoreThreshold(result.finalScore.toFixed(1)) });
         }
 
         // Gelgit
