@@ -1188,7 +1188,7 @@ function calculateConfidence(params) {
 
     if (!params.tempWater || params.tempWater === 0) score -= 35; // Su sıcaklığı yok — KRİTİK
     if (params.wave === null || params.wave === undefined) score -= 25; // Dalga verisi yok — KRİTİK
-    if (!params.depth || params.depth === null) score -= 20;  // Derinlik yok — KRİTİK
+    if (params.depth === null || params.depth === undefined) score -= 20;  // Derinlik yok — KRİTİK
     if (!params.wavePeriod || params.wavePeriod === 0) score -= 5;  // Dalga periyodu yok
     if (!params.chlorophyll) score -= 10; // Klorofil yok
     if (params.chlorophyllStale) score -= 5;  // Klorofil bayat (7+ gün)
@@ -2701,10 +2701,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         const fOpt = fish.depth.opt;
         const fMax = fish.depth.max;
 
-        // FIX: fMin=0 olan kıyı türleri (Karagöz, Mırmır vb.) için
-        // d < fMin*0.5 = d < 0 asla tetiklenmiyordu.
-        // effectiveMin: kıyı türleri için minimum 0.5m eşik.
-        const effectiveMin = Math.max(fMin, 0.5);
+        // effectiveMin: kıyı türleri (fMin=0) için 0m; diğerleri için minimum 0.5m eşik.
+        const effectiveMin = fMin === 0 ? 0 : Math.max(fMin, 0.5);
 
         if (!isPelagicType && d < effectiveMin * 0.5) {
             // İmkansız derinlik — neredeyse kuru zemin (pelajikler muaf)
@@ -2815,7 +2813,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // DİP BALIKLARI KIYI CEZASI — Artık derinlik tabanlı (DIP_DERIN sabit ceza kaldırıldı)
     if (fish.category === "DIP_DERIN") {
         // Eğer derinlik verisi yoksa veya sığ ise, eski ceza mantığı
-        if (!depthAvg || depthAvg < fish.depth.min) {
+        if (depthAvg === null || depthAvg === undefined || (fish.depth.min > 0 && depthAvg < fish.depth.min)) {
             rawScore *= 0.35;
             penalties.push("Tekne gerektirir");
             if (!activeTriggers.includes("Tekne gerektirir")) activeTriggers.push(i18n(lang).triggers.needsBoat);
@@ -4125,10 +4123,13 @@ app.get('/api/fish-search', async (req, res) => {
 
         // Derinlik kontrolü
         if (depthAvg !== null && fish.depth) {
-            if (depthAvg < fish.depth.min * 0.5) {
-                reasons.push({ type: 'CRITICAL', text: i18n(lang).reasons.tooShallow(Math.round(depthAvg), fish.depth.min) });
-            } else if (depthAvg < fish.depth.min) {
-                reasons.push({ type: 'HIGH', text: i18n(lang).reasons.tooShallow(Math.round(depthAvg), fish.depth.min) });
+            const fMin = fish.depth.min;
+            const effectiveMin = fMin === 0 ? 0 : Math.max(fMin, 0.5);
+
+            if (depthAvg < effectiveMin * 0.5) {
+                reasons.push({ type: 'CRITICAL', text: i18n(lang).reasons.tooShallow(Math.round(depthAvg), fMin) });
+            } else if (fMin > 0 && depthAvg < fMin) {
+                reasons.push({ type: 'HIGH', text: i18n(lang).reasons.tooShallow(Math.round(depthAvg), fMin) });
             } else if (depthAvg > fish.depth.max) {
                 reasons.push({ type: 'HIGH', text: i18n(lang).reasons.tooDeep(Math.round(depthAvg), fish.depth.max) });
             }
@@ -4742,8 +4743,8 @@ async function findNearestSeaPoint(lat, lon) {
             })
         );
 
-        // ≥1m derin deniz noktaları (bathyRaw < -1)
-        const seaPoints = results.filter(r => r.bathyRaw !== null && r.bathyRaw < -1);
+        // ≥0.1m derin deniz noktaları (bathyRaw < -0.1) — Sığ su avcıları (Mırmır vb.) için hassaslaştırıldı
+        const seaPoints = results.filter(r => r.bathyRaw !== null && r.bathyRaw < -0.1);
         if (seaPoints.length > 0) {
             // Birden fazla bulunursa en yakını seç
             seaPoints.sort((a, b) => a.distM - b.distM);
