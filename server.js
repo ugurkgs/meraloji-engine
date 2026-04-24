@@ -3808,7 +3808,6 @@ app.get('/api/forecast', async (req, res) => {
             cache.set(`raw_marine_${gLat}_${gLon}`, marine, 10800);
         }
         
-        const isProUser = req.isPremium || req.isGracePeriod || req.query.anonFree === 'true';
         res.json(applySanitization(rawResponseData, isProUser));
 
     } catch (error) {
