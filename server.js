@@ -3735,29 +3735,44 @@ app.get('/api/forecast', async (req, res) => {
 
         // ── PRO VERİSİ SIFIRLAMA: Premium olmayan kullanıcılara detaylı veri gönderme ──
         const isProUser = req.isPremium || req.isGracePeriod;
-        const sanitizedForecast = forecast.map(day => ({
-            ...day,
-            fishList: isProUser
-                ? day.fishList  // PRO: tam liste (10 balık, hourlyScores, scoreDetails dahil)
-                : day.fishList.slice(0, 3).map(f => ({
-                    // FREE: sadece temel alanlar, detaylı analiz yok
-                    key: f.key, name: f.name, icon: f.icon, score: f.score,
+        const sanitizedForecast = forecast.map(day => {
+            const base = { ...day };
+            if (!isProUser) {
+                base.score = -1; // Günlük genel skoru kilitle
+                // Teknik metrikleri sıfırla
+                base.temp = 0; base.airTemp = 0; base.wave = 0; base.wind = 0;
+                base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
+                base.salinity = 0; base.pressure = 0; base.tide = 0;
+                base.current = 0; base.swellHeight = 0; base.precipProb = 0;
+                base.hourlyScores = [];
+                base.activityWindows = null;
+                
+                base.fishList = day.fishList.slice(0, 3).map(f => ({
+                    key: f.key, name: f.name, icon: f.icon, score: -1, // Balık skorunu kilitle
                     category: f.category, reason: f.reason,
                     triggers: f.triggers ? f.triggers.slice(0, 2) : [],
-                    // hourlyScores ve scoreDetails kasıtlı olarak çıkarıldı
-                }))
-        }));
+                }));
+            }
+            return base;
+        });
 
-        const sanitizedInstant = instantData ? {
-            ...instantData,
-            fishList: isProUser
-                ? instantData.fishList
-                : instantData.fishList.slice(0, 3).map(f => ({
-                    key: f.key, name: f.name, icon: f.icon, score: f.score,
+        const sanitizedInstant = instantData ? (() => {
+            const base = { ...instantData };
+            if (!isProUser) {
+                base.score = -1; // Anlık genel skoru kilitle
+                // Teknik metrikleri sıfırla
+                base.temp = 0; base.airTemp = 0; base.wave = 0; base.wind = 0;
+                base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
+                base.salinity = 0; base.pressure = 0; base.current = 0;
+                
+                base.fishList = instantData.fishList.slice(0, 3).map(f => ({
+                    key: f.key, name: f.name, icon: f.icon, score: -1, // Balık skorunu kilitle
                     category: f.category, reason: f.reason,
                     triggers: f.triggers ? f.triggers.slice(0, 2) : [],
-                }))
-        } : null;
+                }));
+            }
+            return base;
+        })() : null;
 
         const responseData = {
             version: "F.I.S.H. v3.0", region: i18n(lang).regions[regionName] || regionName, isLand, landReason, clickHour: correctedClickHour,
@@ -4209,8 +4224,8 @@ app.get('/api/fish-search', async (req, res) => {
                 peakHoursDesc: lang === 'en' ? (fish.peakHoursDescEn || fish.peakHoursDesc) : fish.peakHoursDesc,
                 tempRange: fish.tempRange
             },
-            score: result.finalScore,
-            dailyScore: dailyScore,
+            score: (req.isPremium || req.isGracePeriod) ? result.finalScore : -1,
+            dailyScore: (req.isPremium || req.isGracePeriod) ? dailyScore : -1,
             confidence,
             bestHour: bestHour,
             bestHourScore: bestHourScore,
@@ -5087,7 +5102,7 @@ app.get('/api/scan', async (req, res) => {
                 if (score !== null && score > 5) {
                     results.push({
                         lat: pt.lat, lon: pt.lon,
-                        score: parseFloat(score.toFixed(1)),
+                        score: (req.isPremium || req.isGracePeriod) ? parseFloat(score.toFixed(1)) : -1,
                         fishName: result.fishName,
                         topFish: result.topFish || [],
                         depth: (result.depth !== undefined && result.depth !== null) ? result.depth : null,
@@ -5107,7 +5122,7 @@ app.get('/api/scan', async (req, res) => {
                 lastPoint: lastValid || {
                     lat: lastPt.pt.lat,
                     lon: lastPt.pt.lon,
-                    score: lastPt.result?.score ?? null,
+                    score: (req.isPremium || req.isGracePeriod) ? (lastPt.result?.score ?? -1) : -1,
                     fishName: lastPt.result?.fishName ?? null,
                     depth: lastPt.result?.depth ?? null
                 }
@@ -5167,7 +5182,7 @@ app.get('/api/scan', async (req, res) => {
                             message: 'Derinlik bilgisine ulaşıldı, analiz güncelleniyor...',
                             lat: pt.lat,
                             lon: pt.lon,
-                            score: parseFloat(updatedResult.score.toFixed(1)),
+                            score: (req.isPremium || req.isGracePeriod) ? parseFloat(updatedResult.score.toFixed(1)) : -1,
                             depth: updatedResult.depth,
                             zone: updatedResult.zone
                         });
