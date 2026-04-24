@@ -2887,6 +2887,54 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
 // API ROUTES
 // ═══════════════════════════════════════════════════════════════════════════
 
+function applySanitization(data, isProUser) {
+    if (isProUser) {
+        return { ...data, isPro: true };
+    }
+
+    const sanitizedForecast = data.forecast ? data.forecast.map(day => {
+        const base = { ...day };
+        base.score = -1; // Günlük genel skoru kilitle
+        // Teknik metrikleri sıfırla
+        base.temp = 0; base.airTemp = 0; base.wave = 0; base.wind = 0;
+        base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
+        base.salinity = 0; base.pressure = 0; base.tide = 0;
+        base.current = 0; base.swellHeight = 0; base.precipProb = 0;
+        base.hourlyScores = [];
+        base.activityWindows = null;
+        
+        base.fishList = day.fishList.slice(0, 3).map(f => ({
+            key: f.key, name: f.name, icon: f.icon, score: -1, // Balık skorunu kilitle
+            category: f.category, reason: f.reason,
+            triggers: f.triggers ? f.triggers.slice(0, 2) : [],
+        }));
+        return base;
+    }) : data.forecast;
+
+    const sanitizedInstant = data.instant ? (() => {
+        const base = { ...data.instant };
+        base.score = -1; // Anlık genel skoru kilitle
+        // Teknik metrikleri sıfırla
+        base.temp = 0; base.airTemp = 0; base.wave = 0; base.wind = 0;
+        base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
+        base.salinity = 0; base.pressure = 0; base.current = 0;
+        
+        base.fishList = data.instant.fishList.slice(0, 3).map(f => ({
+            key: f.key, name: f.name, icon: f.icon, score: -1, // Balık skorunu kilitle
+            category: f.category, reason: f.reason,
+            triggers: f.triggers ? f.triggers.slice(0, 2) : [],
+        }));
+        return base;
+    })() : data.instant;
+
+    return {
+        ...data,
+        forecast: sanitizedForecast,
+        instant: sanitizedInstant,
+        isPro: false
+    };
+}
+
 app.get('/api/forecast', async (req, res) => {
     try {
         const latRaw = parseFloat(req.query.lat);
@@ -2913,6 +2961,8 @@ app.get('/api/forecast', async (req, res) => {
         const cacheKey = `forecast_v24_${gLat}_${gLon}_h${clickHour}`;
         const cachedData = cache.get(cacheKey);
 
+        const isProUser = req.isPremium || req.isGracePeriod || req.query.anonFree === 'true';
+
         // Cache varsa hava/deniz verisini oradan al, ama derinliği taze çek
         if (cachedData) {
             // EMODnet'i taze çek (koordinatlar cache key'e dahil değil)
@@ -2929,14 +2979,17 @@ app.get('/api/forecast', async (req, res) => {
                         const merged = JSON.parse(JSON.stringify(cachedData));
                         if (merged.depth) merged.depth.avg = freshDepth;
                         // fishList'teki depthAvg'yi de güncelle
-                        if (merged.fishList) {
-                            merged.fishList = merged.fishList.map(f => ({ ...f }));
+                        if (merged.instant && merged.instant.fishList) {
+                            merged.instant.fishList = merged.instant.fishList.map(f => ({ ...f }));
                         }
-                        return res.json(merged);
+                        if (merged.forecast && merged.forecast.length > 0 && merged.forecast[0].fishList) {
+                            merged.forecast[0].fishList = merged.forecast[0].fishList.map(f => ({ ...f }));
+                        }
+                        return res.json(applySanitization(merged, isProUser));
                     }
                 } catch (e) { }
             }
-            return res.json(cachedData);
+            return res.json(applySanitization(cachedData, isProUser));
         }
 
         // ── OFFLİNE KONUM ANALİZİ ─────────────────────────────────────────
@@ -3734,64 +3787,29 @@ app.get('/api/forecast', async (req, res) => {
         }
 
         // ── PRO VERİSİ SIFIRLAMA: Premium olmayan kullanıcılara detaylı veri gönderme ──
-        const isProUser = req.isPremium || req.isGracePeriod;
-        const sanitizedForecast = forecast.map(day => {
-            const base = { ...day };
-            if (!isProUser) {
-                base.score = -1; // Günlük genel skoru kilitle
-                // Teknik metrikleri sıfırla
-                base.temp = 0; base.airTemp = 0; base.wave = 0; base.wind = 0;
-                base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
-                base.salinity = 0; base.pressure = 0; base.tide = 0;
-                base.current = 0; base.swellHeight = 0; base.precipProb = 0;
-                base.hourlyScores = [];
-                base.activityWindows = null;
-                
-                base.fishList = day.fishList.slice(0, 3).map(f => ({
-                    key: f.key, name: f.name, icon: f.icon, score: -1, // Balık skorunu kilitle
-                    category: f.category, reason: f.reason,
-                    triggers: f.triggers ? f.triggers.slice(0, 2) : [],
-                }));
-            }
-            return base;
-        });
+        // Sanitization işlemi artık applySanitization() içinde yapılıyor.
+        // Önbelleğe (cache) mutlaka HAM VERİ kaydedilmeli.
 
-        const sanitizedInstant = instantData ? (() => {
-            const base = { ...instantData };
-            if (!isProUser) {
-                base.score = -1; // Anlık genel skoru kilitle
-                // Teknik metrikleri sıfırla
-                base.temp = 0; base.airTemp = 0; base.wave = 0; base.wind = 0;
-                base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
-                base.salinity = 0; base.pressure = 0; base.current = 0;
-                
-                base.fishList = instantData.fishList.slice(0, 3).map(f => ({
-                    key: f.key, name: f.name, icon: f.icon, score: -1, // Balık skorunu kilitle
-                    category: f.category, reason: f.reason,
-                    triggers: f.triggers ? f.triggers.slice(0, 2) : [],
-                }));
-            }
-            return base;
-        })() : null;
-
-        const responseData = {
+        const rawResponseData = {
             version: "F.I.S.H. v3.0", region: i18n(lang).regions[regionName] || regionName, isLand, landReason, clickHour: correctedClickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
             depth: depthData,        // EMODnet Bathymetry derinlik verisi
             substrate: substrateData, // EMODnet Seabed Habitats dip yapısı
             snapInfo,                // null veya { distanceM, snapLat, snapLon } — kıyı snap bilgisi
-            forecast: sanitizedForecast,
-            instant: sanitizedInstant,
-            isPro: isProUser         // Frontend'in PRO badge/lock göstermesi için
+            forecast: forecast,
+            instant: instantData,
+            isPro: true              // Ham veri her zaman "Tam/Açık" veridir.
         };
 
-        cache.set(cacheKey, responseData);
+        cache.set(cacheKey, rawResponseData);
         // Ham API verisini de sakla — bir sonraki kullanıcı OM'a gitmesin
         if (weather) cache.set(`raw_weather_${gLat}_${gLon}`, weather, 10800);
         if (marine && marine.hourly?.sea_surface_temperature) {
             cache.set(`raw_marine_${gLat}_${gLon}`, marine, 10800);
         }
-        res.json(responseData);
+        
+        const isProUser = req.isPremium || req.isGracePeriod || req.query.anonFree === 'true';
+        res.json(applySanitization(rawResponseData, isProUser));
 
     } catch (error) {
         console.error("API Error:", error);
