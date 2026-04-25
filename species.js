@@ -72,6 +72,7 @@ const SPECIES_DB = {
         "huntingMode": "visual",
         "peakHours": "NIGHT",
         "peakHoursDesc": "22:00 - 03:00 arası en aktif",
+        "peakHoursDescEn": "Most active between 22:00 - 03:00",
         "tempRange": { "min": 12, "opt": 18, "max": 25 },
         "seasons": { "winter": 0.30, "spring": 0.75, "summer": 0.80, "autumn": 0.40 },
         "activity": "NIGHT",
@@ -86,10 +87,15 @@ const SPECIES_DB = {
             "bait": "Canlı Teke (Gece), Yengeç",
             "lure": "Silikon Karides (LRF)",
             "rig": "Şamandıralı (Starlight), Dip Bırakma",
-            "hook": "1 - 3"
-    },
+            "hook": "1 - 3",
+            "baitEn": "Live shrimp (night), crab",
+            "lureEn": "Soft plastic shrimp (LRF)",
+            "rigEn": "Float (Starlight), bottom rig",
+            "hookEn": "1 - 3"
+        },
         "legalSize": "Yok (5 adet/gün)",
-        "note": "Zifiri karanlıkta avlanır. Fosforlu şamandıra şart."
+        "note": "Zifiri karanlıkta avlanır. Fosforlu şamandıra şart.",
+        "noteEn": "Hunts in pitch black darkness. Luminous float is essential."
     },
     "ustura_baligi": {
         "name": "Fare Balığı/Ustura Balığı",
@@ -102,6 +108,7 @@ const SPECIES_DB = {
         "huntingMode": "chemosensory",
         "peakHours": "DAY",
         "peakHoursDesc": "Gündüz ve güneşli saatler",
+        "peakHoursDescEn": "Daytime and sunny hours",
         "tempRange": { "min": 15, "opt": 20, "max": 26 },
         "seasons": { "winter": 0.3, "spring": 0.6, "summer": 0.8, "autumn": 0.7 },
         "activity": "DAY",
@@ -116,10 +123,15 @@ const SPECIES_DB = {
             "bait": "Karides, Midye, Boru Kurdu, Küçük Kaya Kurdu",
             "lure": "Micro Jig, Silikon Yemler",
             "rig": "Hafif Dip Takımı (Hırsızlı), LRF",
-            "hook": "4 - 8"
+            "hook": "4 - 8",
+            "baitEn": "Shrimp, mussel, lugworm, small rock worm",
+            "lureEn": "Micro jig, soft plastics",
+            "rigEn": "Light bottom rig, LRF",
+            "hookEn": "4 - 8"
         },
         "legalSize": "Yok",
-        "note": "Sadece gündüz av verir; gece kuma gömülür. Çok keskin dişleri vardır, misinayı kesebilir. Eti lezzetlidir. Kışın 150 m derinliğe kadar inebilir."
+        "note": "Sadece gündüz av verir; gece kuma gömülür. Çok keskin dişleri vardır, misinayı kesebilir. Eti lezzetlidir. Kışın 150 m derinliğe kadar inebilir.",
+        "noteEn": "Diurnal species; buries in sand at night. Sharp teeth can cut lines. Delicious meat. Can descend to 150m in winter."
     },
     "minekop": {
         "name": "Minekop",
@@ -132,6 +144,7 @@ const SPECIES_DB = {
         "huntingMode": "visual",
         "peakHours": "NIGHT",
         "peakHoursDesc": "Gece ve alacakaranlık",
+        "peakHoursDescEn": "Night and dusk",
         "tempRange": { "min": 12, "opt": 18, "max": 25 },
         "seasons": { "winter": 0.40, "spring": 0.60, "summer": 0.50, "autumn": 0.70 },
         "activity": "NIGHT",
@@ -146,10 +159,15 @@ const SPECIES_DB = {
             "bait": "Boru Kurdu, Sülünez, Sardalya",
             "lure": "Silikon Yemler",
             "rig": "Ağır Dip Takımı",
-            "hook": "1/0 - 2/0"
-    },
+            "hook": "1/0 - 2/0",
+            "baitEn": "Lugworm, razor clam, sardine",
+            "lureEn": "Soft plastics",
+            "rigEn": "Heavy bottom rig",
+            "hookEn": "1/0 - 2/0"
+        },
         "legalSize": "Yok (5kg/gün)",
-        "note": "Gece ve alacakaranlıkta aktif. Çalkantılı suyu sever."
+        "note": "Gece ve alacakaranlıkta aktif. Çalkantılı suyu sever.",
+        "noteEn": "Active during night and dusk. Prefers turbulent waters."
     },
     "izmarit": {
         "name": "İzmarit",
@@ -162,6 +180,7 @@ const SPECIES_DB = {
         "huntingMode": "visual",
         "peakHours": "DAY",
         "peakHoursDesc": "Gündüz aktif, sabah erken ve akşamüstü zirve",
+        "peakHoursDescEn": "Active during day, peaks early morning and late afternoon",
         "tempRange": { "min": 13, "opt": 19, "max": 25 },
         "seasons": { "winter": 0.30, "spring": 0.70, "summer": 0.90, "autumn": 0.60 },
         "activity": "DAY",
@@ -176,10 +195,15 @@ const SPECIES_DB = {
             "bait": "Ekmek İçi, Küçük Solucan, Midye",
             "lure": "Micro Jig",
             "rig": "Çoklu İğneli Takım, Şamandıralı",
-            "hook": "8 - 12"
-    },
+            "hook": "8 - 12",
+            "baitEn": "Bread, small worm, mussel",
+            "lureEn": "Micro jig",
+            "rigEn": "Multi-hook rig, float rig",
+            "hookEn": "8 - 12"
+        },
         "legalSize": "11 cm",
-        "note": "Sürü halinde gezer. Küçük yem ve ince misina şart."
+        "note": "Sürü halinde gezer. Küçük yem ve ince misina şart.",
+        "noteEn": "Travels in schools. Small bait and thin lines are essential."
     },
     "cipura": {
         name: "Çipura", nameEn: "Gilt-head Bream", icon: "🐠", scientificName: "Sparus aurata",
@@ -231,7 +255,7 @@ const SPECIES_DB = {
     "mirmir": {
         name: "Mırmır", nameEn: "Striped Seabream", icon: "🦓", scientificName: "Lithognathus mormyrus",
         photoId: 13,
-        category: "KUM_TABAN", // Kategorisi KUM_TABAN olarak güncellendi (Zemin sadakati için)
+        category: "KIYI",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece kıyıya yaklaşır, 21:00-02:00", peakHoursDescEn: "Approaches shore at night, 21:00-02:00",
         tempRange: { min: 14, opt: 19, max: 25 },
