@@ -3575,16 +3575,16 @@ app.get('/api/forecast', async (req, res) => {
                                     scientificName: fish.scientificName, photoId: fish.photoId,
                                     icon: fish.icon, category: fish.category,
                                     peakHours: fish.peakHours,
-                                    peakHoursDesc: _isEn ? (fish.peakHoursDescEn || fish.peakHoursDesc) : fish.peakHoursDesc,
+                                    peakHoursDesc: getLoc(fish, 'peakHoursDesc', lang),
                                     score: dailyScore,
                                     bestHour: bestHourStr,
                                     bestHourScore: dailyResult.bestHourScore,
                                     hourlyScores: dailyResult.hourlyScores,
-                                    bait: _isEn ? (fish.advice.baitEn || fish.advice.bait) : fish.advice.bait,
-                                    method: _isEn ? (fish.advice.hookEn || fish.advice.hook) : fish.advice.hook,
-                                    lure: _isEn ? (fish.advice.lureEn || fish.advice.lure) : fish.advice.lure,
-                                    rig: _isEn ? (fish.advice.rigEn || fish.advice.rig) : fish.advice.rig,
-                                    note: _isEn ? (fish.noteEn || fish.note) : fish.note,
+                                    bait: getLoc(fish, 'bait', lang, 'advice'),
+                                    method: getLoc(fish, 'rig', lang, 'advice'),
+                                    lure: getLoc(fish, 'lure', lang, 'advice'),
+                                    rig: getLoc(fish, 'rig', lang, 'advice'),
+                                    note: getLoc(fish, 'note', lang),
                                     legalSize: fish.legalSize, reason: result.reason,
                                     activation: result.activeTriggers.join(", "),
                                     scoreDetails: result.scoreDetails
@@ -3982,8 +3982,7 @@ app.get('/api/species-list', (req, res) => {
     const speciesResultsMap = new Map();
     Object.entries(SPECIES_DB).forEach(([key, fish]) => {
         const scientificName = (fish.scientificName || fish.name).toLowerCase().trim();
-        const _isEn = lang === 'en';
-        const currentName = _isEn ? (fish.nameEn || fish.name) : fish.name;
+        const currentName = getLoc(fish, 'name', lang);
 
         // Arama listesinde Türkçe isme sahip olanı (yerel) tercih et
         const existing = speciesResultsMap.get(scientificName);
