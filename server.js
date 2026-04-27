@@ -4596,6 +4596,43 @@ app.post('/api/verify-subscription', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
+// 👤 KULLANICI PROFİLİ GÜNCELLEME (FCM Token, Dil, Cihaz Bilgisi)
+// ═══════════════════════════════════════════════════════════════
+app.post('/api/update-user-profile', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
+    
+    const { fcmToken, lang, appVersion, os, deviceModel, fishingStyle } = req.body;
+    const uid = req.user.uid;
+
+    try {
+        if (!db) return res.status(503).json({ error: 'Veritabanı hazır değil' });
+
+        const updateData = {
+            updatedAt: Date.now()
+        };
+
+        // Gelen verileri kontrol et ve ekle
+        if (fcmToken) updateData.fcmToken = fcmToken;
+        if (lang) updateData.lang = lang.toLowerCase();
+        if (appVersion) updateData.appVersion = appVersion;
+        if (os) updateData.os = os;
+        if (deviceModel) updateData.deviceModel = deviceModel;
+        if (fishingStyle) updateData.fishingStyle = fishingStyle;
+        
+        // Üyelik durumu özeti (mevcut auth middleware'den gelen veriyi kullan)
+        updateData.isPremium = req.isPremium || false;
+
+        await db.collection('users').doc(uid).set(updateData, { merge: true });
+        
+        console.log(`[USER-PROFILE] Güncellendi — uid:${uid} lang:${lang || 'tr'}`);
+        res.json({ success: true });
+    } catch (e) {
+        console.error('[USER-PROFILE-UPDATE]', e.message);
+        res.status(500).json({ error: 'Profil güncellenemedi' });
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
 // 🔍 BÖLGE TARAMA ENDPOİNTİ (PRO - Günlük 5 Hak)
 // ═══════════════════════════════════════════════════════════════
 
@@ -5670,70 +5707,84 @@ cron.schedule('0 * * * *', async () => {
         const notifSpotName = spotNames.slice(0, 2).join(' & ');
         const uniqueUids = [...new Set(spots.map(s => s.uid))];
 
-        const tokens = [];
+        // ── 5. Etkilenen kullanıcıların FCM tokenlarını dillere göre grupla ──
+        const tokensByLang = {}; // { 'tr': [{uid, token}...], 'en': [...] }
         await Promise.all(uniqueUids.map(async (uid) => {
             try {
                 const userDoc = await db.collection('users').doc(uid).get();
-                const token = userDoc.data()?.fcmToken;
-                if (token) tokens.push({ uid, token });
+                const userData = userDoc.data();
+                const token = userData?.fcmToken;
+                if (token) {
+                    // Kullanıcı dili yoksa varsayılan 'tr'
+                    const userLang = (userData?.lang || 'tr').toLowerCase();
+                    if (!tokensByLang[userLang]) tokensByLang[userLang] = [];
+                    tokensByLang[userLang].push({ uid, token });
+                }
             } catch (e) {
-                console.warn(`[NOTIFY CRON] Token alınamadı uid=${uid}:`, e.message);
+                console.warn(`[NOTIFY CRON] Token/Dil alınamadı uid=${uid}:`, e.message);
             }
         }));
 
-        if (tokens.length === 0) {
+        const languages = Object.keys(tokensByLang);
+        if (languages.length === 0) {
             console.log(`[NOTIFY CRON] Bu grup için geçerli FCM token yok.`);
             continue;
         }
 
-        // ── 6. FCM Multicast bildirimi gönder ─────────────────────────────
-        const message = {
-            tokens: tokens.map(t => t.token),
-            notification: {
-                title: SERVER_i18n.tr.notification.title,
-                body: SERVER_i18n.tr.notification.body(notifSpotName)
-            },
-            data: {
-                type: 'pressure_alert',
-                spotName: notifSpotName,
-                trend: trendResult.trend,
-                change: String(trendResult.change),
-                lat: String(lat),
-                lon: String(lon)
-            },
-            android: {
-                priority: 'high',
-                notification: { sound: 'default', channelId: 'pressure_alerts' }
-            },
-            apns: {
-                payload: { aps: { sound: 'default', badge: 1 } }
-            }
-        };
+        // ── 6. Her dil grubu için ayrı bildirim gönder ────────────────────────
+        for (const langKey of languages) {
+            const langTokens = tokensByLang[langKey];
+            // SERVER_i18n içinde bu dil yoksa varsayılan olarak Türkçe (tr) kullan
+            const i18nSet = SERVER_i18n[langKey] || SERVER_i18n.tr;
 
-        try {
-            const fcmResponse = await admin.messaging().sendEachForMulticast(message);
-            console.log(`[NOTIFY CRON] ✅ ${fcmResponse.successCount}/${tokens.length} bildirim gönderildi — ${notifSpotName}`);
+            const message = {
+                tokens: langTokens.map(t => t.token),
+                notification: {
+                    title: i18nSet.notification.title,
+                    body: i18nSet.notification.body(notifSpotName)
+                },
+                data: {
+                    type: 'pressure_alert',
+                    spotName: notifSpotName,
+                    trend: trendResult.trend,
+                    change: String(trendResult.change),
+                    lat: String(lat),
+                    lon: String(lon)
+                },
+                android: {
+                    priority: 'high',
+                    notification: { sound: 'default', channelId: 'pressure_alerts' }
+                },
+                apns: {
+                    payload: { aps: { sound: 'default', badge: 1 } }
+                }
+            };
 
-            // Geçersiz tokenları Firestore'dan temizle
-            fcmResponse.responses.forEach((resp, idx) => {
-                if (!resp.success) {
-                    const errCode = resp.error?.code;
-                    if (
-                        errCode === 'messaging/invalid-registration-token' ||
-                        errCode === 'messaging/registration-token-not-registered'
-                    ) {
-                        const { uid } = tokens[idx];
-                        if (uid) {
-                            db.collection('users').doc(uid)
-                                .update({ fcmToken: admin.firestore.FieldValue.delete() })
-                                .catch(() => { });
-                            console.log(`[NOTIFY CRON] Geçersiz token temizlendi — uid:${uid}`);
+            try {
+                const fcmResponse = await admin.messaging().sendEachForMulticast(message);
+                console.log(`[NOTIFY CRON] ✅ [${langKey}] ${fcmResponse.successCount}/${langTokens.length} bildirim gönderildi — ${notifSpotName}`);
+
+                // Geçersiz tokenları Firestore'dan temizle
+                fcmResponse.responses.forEach((resp, idx) => {
+                    if (!resp.success) {
+                        const errCode = resp.error?.code;
+                        if (
+                            errCode === 'messaging/invalid-registration-token' ||
+                            errCode === 'messaging/registration-token-not-registered'
+                        ) {
+                            const { uid } = langTokens[idx];
+                            if (uid) {
+                                db.collection('users').doc(uid)
+                                    .update({ fcmToken: admin.firestore.FieldValue.delete() })
+                                    .catch(() => { });
+                                console.log(`[NOTIFY CRON] Geçersiz token temizlendi — uid:${uid} (${langKey})`);
+                            }
                         }
                     }
-                }
-            });
-        } catch (err) {
-            console.error(`[NOTIFY CRON] FCM gönderim hatası:`, err.message);
+                });
+            } catch (err) {
+                console.error(`[NOTIFY CRON] FCM [${langKey}] gönderim hatası:`, err.message);
+            }
         }
 
         // API limitine saygı: gruplar arası kısa bekleme
