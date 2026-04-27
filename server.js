@@ -552,7 +552,10 @@ function getLang(req) {
 }
 function i18n(lang) { 
     const l = lang || 'tr';
-    return SERVER_i18n[l] || SERVER_i18n.tr || SERVER_i18n.en; 
+    const s = SERVER_i18n[l] || SERVER_i18n.tr || SERVER_i18n.en;
+    if (!s.triggers) s.triggers = {};
+    if (!s.reasons) s.reasons = {};
+    return s;
 }
 
 // Zone helper — depthAvg'dan zone string üret
@@ -2186,7 +2189,7 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
         };
 
         // Skor hesapla
-        const result = calculateFishScore(fish, key, hourParams);
+        const result = calculateFishScore(fish, key, hourParams, lang);
 
         // [YENİ] Saatlik skoru kaydet
         hourlyScores[h] = Math.round(result.finalScore * 10) / 10;
@@ -2255,7 +2258,7 @@ function calculate3HourWindowScore(fish, key, baseParams, weather, marine, cente
             hour: h
         };
 
-        const result = calculateFishScore(fish, key, hourParams);
+        const result = calculateFishScore(fish, key, hourParams, lang);
         totalScore += result.finalScore;
         count++;
     }
