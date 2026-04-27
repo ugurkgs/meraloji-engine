@@ -292,6 +292,119 @@ const SERVER_i18n = {
             penalties: ['🚫 FISHING PROHIBITED — Protected Species'],
             reason: '🚫 Fishing strictly prohibited in Turkey — Protected species (Regulation 6/2).',
         }
+    },
+    es: {
+        zones: {
+            shallowSand: 'Arena poco profunda', shallowRock: 'Roca poco profunda',
+            mid: 'Aguas medias', deep: 'Aguas profundas'
+        },
+        regions: {
+            'EGE': 'EGEO', 'AKDENİZ': 'MEDITERRÁNEO',
+            'MARMARA': 'MAR DE MÁRMARA', 'KARADENİZ': 'MAR NEGRO',
+            'AÇIK DENİZ': 'MAR ABIERTO',
+            'Florida': 'Florida',
+            'Japonya Kıyıları': 'Costas de Japón',
+            'Güney Afrika Kıyıları': 'Costas de Sudáfrica',
+            'Birleşik Arap Emirlikleri & Körfez': 'EAU y el Golfo',
+            'Yeni Zelanda Kıyıları': 'Costas de Nueva Zelanda',
+            'Brezilya Kıyıları': 'Costas de Brasil',
+            'Tayland & Güneydoğu Asya': 'Tailandia y SE Asiático',
+            'Kızıldeniz Havzası': 'Cuenca del Mar Rojo'
+        },
+        substrate: {
+            ROCK: '🪨 Rocoso', SAND: '🏖️ Arenoso', MUD: '🟫 Fangoso',
+            SEAGRASS: '🌿 Pradera marina', MIXED: '⬛ Mixto'
+        },
+        triggers: {
+            feedingFrenzy: '⚡ ¡Frenesí alimentario!',
+            pressureDrop: 'Presión bajando',
+            majorSolunar: 'Mayor Solunar',
+            minorSolunar: 'Menor Solunar',
+            strongCurrent: 'Corriente fuerte',
+            cloudyGood: 'Nublado ideal',
+            goodSwell: 'Swell favorable',
+            warmingShock: (c) => `🌡️ Choque térmico (${c}°C) — Activación`,
+            coolingShock: (c) => `🥶 Enfriamiento brusco (${c}°C) — Ralentización`,
+            migrationShock: (c) => `⚡ Choque de temp. (${c}°C) — Señal de migración`,
+            warmingTrend: '🌡️ Tendencia de calentamiento',
+            coolingTrend: '🌡️ Enfriamiento — Señal de migración',
+            stableSst: '🌡️ Temperatura estable',
+            thermocline: (d) => `🌊 Capa termoclina (${d}m)`,
+            moonlight: (p) => `🌕 Luz lunar (${p}%)`,
+            richPlankton: (c) => `🌿 Plancton rico (${c} mg/m³)`,
+            activePlankton: '🌿 Plancton activo',
+            suitablePlankton: '🌿 Plancton adecuado',
+            clearWater: '🌿 Agua limpia',
+            windyGood: 'Ventoso favorable',
+            foamyWater: 'Agua espumosa',
+            needsBoat: 'Requiere embarcación',
+            highWave: '⚠️ Oleaje alto',
+            windGust: '💨 Ráfagas de viento',
+            protectedDir: '🌊 Dirección protegida',
+            swellDominant: '🌊 Swell dominante — Agua limpia',
+            denseFog: '🌫️ Niebla densa — PELIGRO',
+            reducedVis: '🌫️ Visibilidad reducida',
+            migrationSeason: (r) => `🔀 Temporada de migración (${r})`,
+            spawningSeason: (r) => `🐟 Temporada de desove (${r})`,
+            substrateLabel: (s, str) => `Fondo ${str}`,
+            goodTideFlow: '🌊 Flujo de marea favorable',
+            slackWater: '🌊 Marea muerta (Repunte)',
+            optimalOxygen: '🧬 Nivel de oxígeno óptimo',
+            lowOxygen: '⚠️ Oxígeno bajo — Metabolismo lento',
+            upwelling: '🌊 Upwelling (Afloramiento) — Activación',
+        },
+        reasons: {
+            outOfRegion: (r, regions) => `Esta especie no se encuentra en ${r}. Regiones: ${regions}`,
+            tooShallow: (d, min) => `Profundidad insuficiente (${d}m < ${min}m)`,
+            tooDeep: (d, max) => `Profundidad excesiva (${d}m > ${max}m)`,
+            seasonalLow: (s, p) => `Actividad baja en esta temporada (${s}) (%${p})`,
+            seasonalVeryLow: (s, p) => `Actividad muy baja en esta temporada (${s}) (%${p})`,
+            tempMismatch: (v, min, max) => `Temperatura (${v}°C) fuera del rango adecuado (${min}-${max}°C)`,
+            nightOnly: 'Especie nocturna (actualmente día)',
+            dayOnly: 'Especie diurna (actualmente noche)',
+            crepuscularOnly: 'Activa al amanecer/atardecer',
+            scoreThreshold: (s) => `Puntuación total (%${s}) bajo el umbral (%15)`,
+            salinityMismatch: 'Salinidad incompatible',
+            camDeniz: 'Mar de cristal',
+            boatRequired: 'Requiere embarcación',
+            highWave: 'Oleaje alto',
+        },
+        notification: {
+            title: '🌪️ ¡Oportunidad pre-tormenta!',
+            body: (spot) => `La presión cae rápido en ${spot} — ¡los peces pueden estar activos!`
+        },
+        tactic: {
+            dominantNote: '⭐ Especie dominante detectada — si tiene valor comercial, condiciones ideales.',
+            TACTIC_DANGER_WAVE: '🚫 ¡OLAS PELIGROSAS! No salir al mar.',
+            TACTIC_ROUGH_WAVE: '⚠️ OLEAJE FUERTE! Riesgoso para botes pequeños.',
+        },
+        score: {
+            badConditions: 'Condiciones malas',
+            lowActivity: 'Actividad baja',
+            moderateActivity: 'Actividad moderada',
+            goodConditions: 'Condiciones buenas',
+        },
+        penalties: {
+            lethalTemp: 'Temp. letal', criticalTemp: 'Temp. crítica',
+            tooShallowSpot: 'Profundidad incompatible (muy poco profundo)', shallowSpot: 'Punto poco profundo',
+            tooDeeply: 'Demasiado profundo', hardToReach: 'Difícil acceso desde costa',
+            openWaterType: 'Especie de mar abierto / Embarcación', noonSuppression: 'Supresión del mediodía',
+            murkyWater: 'Agua turbia', wavyWater: 'Agitado', noSchool: 'Sin banco de peces',
+            schoolActive: '¡Banco de peces activo!', dangerWave: 'PELIGRO: Ola',
+            dangerWaveTrigger: '⚠️ ¡PELIGRO: Olas muy altas!',
+            storm: 'TORMENTA', veryWindy: 'Muy ventoso', windy: 'Ventoso',
+            heavyRain: 'Lluvia intensa', rainy: 'Lluvioso', lightRain: 'Lluvia ligera',
+        },
+        moon: {
+            newMoon: 'Luna Nueva 🌑', crescentWaxing: 'Luna Creciente 🌒',
+            firstQuarter: 'Cuarto Creciente 🌓', waxingGibbous: 'Luna Gibosa Creciente 🌔',
+            fullMoon: 'Luna Llena 🌕', waningGibbous: 'Luna Gibosa Menguante 🌖',
+            lastQuarter: 'Cuarto Menguante 🌗', crescentWaning: 'Luna Menguante 🌘',
+        },
+        protected: {
+            penalties: ['🚫 PESCA PROHIBIDA — Especie Protegida'],
+            reason: '🚫 Pesca estrictamente prohibida en Turquía — Especie protegida (Regulación 6/2).',
+        }
     }
 };
 
@@ -301,6 +414,20 @@ function getLang(req) {
     return SERVER_i18n[l] ? l : 'tr';
 }
 function i18n(lang) { return SERVER_i18n[lang] || SERVER_i18n.tr; }
+
+function getLoc(fish, field, lang, nested = null) {
+    const obj = nested ? fish[nested] : fish;
+    if (!obj) return "-";
+    if (lang === 'en') return obj[field + 'En'] || obj[field] || "-";
+    if (lang === 'es') return obj[field + 'Es'] || obj[field] || "-";
+    return obj[field] || "-";
+}
+
+function getLocalizedRegionName(name, lang) {
+    if (!name) return name;
+    const r = i18n(lang).regions;
+    return r[name] || name;
+}
 
 // Zone helper — depthAvg'dan zone string üret
 function getZoneLabel(depthVal, lang) {
@@ -1446,32 +1573,31 @@ function calcAvgScore(fishList) {
 }
 
 function getWeatherIconicDescription(code, lang) {
-    const isEn = lang === 'en';
     const weatherMap = {
-        0: { tr: "☀️ Güneşli", en: "☀️ Sunny" },
-        1: { tr: "🌤️ Az Bulutlu", en: "🌤️ Mainly Clear" },
-        2: { tr: "⛅ Parçalı Bulutlu", en: "⛅ Partly Cloudy" },
-        3: { tr: "☁️ Bulutlu", en: "☁️ Overcast" },
-        45: { tr: "🌫️ Sisli", en: "🌫️ Foggy" },
-        48: { tr: "🌫️ Kırağılı Sis", en: "🌫️ Depositing Rime Fog" },
-        51: { tr: "🌦️ Hafif Çiseleme", en: "🌦️ Light Drizzle" },
-        53: { tr: "🌦️ Çiseleme", en: "🌦️ Moderate Drizzle" },
-        55: { tr: "🌦️ Şiddetli Çiseleme", en: "🌦️ Dense Drizzle" },
-        61: { tr: "🌧️ Hafif Yağmurlu", en: "🌧️ Slight Rain" },
-        63: { tr: "🌧️ Yağmurlu", en: "🌧️ Moderate Rain" },
-        65: { tr: "🌧️ Şiddetli Yağmurlu", en: "🌧️ Heavy Rain" },
-        71: { tr: "🌨️ Hafif Kar Yağışlı", en: "🌨️ Slight Snow" },
-        73: { tr: "🌨️ Kar Yağışlı", en: "🌨️ Moderate Snow" },
-        75: { tr: "🌨️ Şiddetli Kar Yağışlı", en: "🌨️ Heavy Snow" },
-        80: { tr: "🌦️ Hafif Sağanak", en: "🌦️ Slight Rain Showers" },
-        81: { tr: "🌦️ Sağanak Yağışlı", en: "🌦️ Rain Showers" },
-        82: { tr: "🌦️ Şiddetli Sağanak", en: "🌦️ Violent Rain Showers" },
-        95: { tr: "⛈️ Gök Gürültülü Fırtına", en: "⛈️ Thunderstorm" },
-        96: { tr: "⛈️ Dolu ve Fırtına", en: "⛈️ Thunderstorm with Hail" },
-        99: { tr: "⛈️ Ağır Fırtına ve Dolu", en: "⛈️ Heavy Thunderstorm with Hail" }
+        0: { tr: "☀️ Güneşli", en: "☀️ Sunny", es: "☀️ Soleado" },
+        1: { tr: "🌤️ Az Bulutlu", en: "🌤️ Mainly Clear", es: "🌤️ Mayormente despejado" },
+        2: { tr: "⛅ Parçalı Bulutlu", en: "⛅ Partly Cloudy", es: "⛅ Parcialmente nublado" },
+        3: { tr: "☁️ Bulutlu", en: "☁️ Overcast", es: "☁️ Nublado" },
+        45: { tr: "🌫️ Sisli", en: "🌫️ Foggy", es: "🌫️ Niebla" },
+        48: { tr: "🌫️ Kırağılı Sis", en: "🌫️ Depositing Rime Fog", es: "🌫️ Niebla con escarcha" },
+        51: { tr: "🌦️ Hafif Çiseleme", en: "🌦️ Light Drizzle", es: "🌦️ Llovizna ligera" },
+        53: { tr: "🌦️ Çiseleme", en: "🌦️ Moderate Drizzle", es: "🌦️ Llovizna moderada" },
+        55: { tr: "🌦️ Şiddetli Çiseleme", en: "🌦️ Dense Drizzle", es: "🌦️ Llovizna intensa" },
+        61: { tr: "🌧️ Hafif Yağmurlu", en: "🌧️ Slight Rain", es: "🌧️ Lluvia ligera" },
+        63: { tr: "🌧️ Yağmurlu", en: "🌧️ Moderate Rain", es: "🌧️ Lluvia" },
+        65: { tr: "🌧️ Şiddetli Yağmurlu", en: "🌧️ Heavy Rain", es: "🌧️ Lluvia fuerte" },
+        71: { tr: "🌨️ Hafif Kar Yağışlı", en: "🌨️ Slight Snow", es: "🌨️ Nieve ligera" },
+        73: { tr: "🌨️ Kar Yağışlı", en: "🌨️ Moderate Snow", es: "🌨️ Nieve" },
+        75: { tr: "🌨️ Şiddetli Kar Yağışlı", en: "🌨️ Heavy Snow", es: "🌨️ Nieve fuerte" },
+        80: { tr: "🌦️ Hafif Sağanak", en: "🌦️ Slight Rain Showers", es: "🌦️ Chubascos ligeros" },
+        81: { tr: "🌦️ Sağanak Yağışlı", en: "🌦️ Rain Showers", es: "🌦️ Chubascos" },
+        82: { tr: "🌦️ Şiddetli Sağanak", en: "🌦️ Violent Rain Showers", es: "🌦️ Chubascos violentos" },
+        95: { tr: "⛈️ Gök Gürültülü Fırtına", en: "⛈️ Thunderstorm", es: "⛈️ Tormenta eléctrica" },
+        96: { tr: "⛈️ Dolu ve Fırtına", en: "⛈️ Thunderstorm with Hail", es: "⛈️ Tormenta con granizo" },
+        99: { tr: "⛈️ Ağır Fırtına ve Dolu", en: "⛈️ Heavy Thunderstorm with Hail", es: "⛈️ Tormenta fuerte con granizo" }
     };
-    const res = weatherMap[code] || { tr: "☁️ Değişken", en: "☁️ Variable" };
-    return isEn ? res.en : res.tr;
+    const res = weatherMap[code] || { tr: "☁️ Değişken", en: "☁️ Variable", es: "☁️ Variable" };
+    return res[lang] || res.tr;
 }
 
 function calculatePressureTrend(pressureHistory) {
@@ -2025,14 +2151,14 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         return {
             finalScore: 0,          // calculateWeightedDailyScore / 3HourWindow için
             score: 0,               // direkt erişim için
-            name: lang === 'en' ? (fish.nameEn || fish.name) : fish.name,
+            name: getLoc(fish, 'name', lang),
             nameEn: fish.nameEn, icon: fish.icon,
             scientificName: fish.scientificName, photoId: fish.photoId,
             category: fish.category, regions: fish.regions,
             peakHours: fish.peakHours,
-            peakHoursDesc: lang === 'en' ? (fish.peakHoursDescEn || fish.peakHoursDesc) : fish.peakHoursDesc,
+            peakHoursDesc: getLoc(fish, 'peakHoursDesc', lang),
             legalSize: fish.legalSize,
-            note: lang === 'en' ? (fish.noteEn || fish.note) : fish.note,
+            note: getLoc(fish, 'note', lang),
             bait: "-", lure: "-", rig: "-", hook: "-",
             method: "-",
             penalties: i18n(lang).protected.penalties,
@@ -2089,7 +2215,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
                 (mb.tempMax === undefined || tempWater <= mb.tempMax);
             if (tempMatch) {
                 seasonalEff = Math.min(1.0, seasonalEff + mb.bonus);
-                const localizedRegion = i18n(lang).regions[region] || region;
+                const localizedRegion = getLocalizedRegionName(region, lang);
                 activeTriggers.push(i18n(lang).triggers.migrationSeason(localizedRegion));
             }
         }
@@ -2104,7 +2230,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
                 (sb.tempMax === undefined || tempWater <= sb.tempMax);
             if (tempMatch) {
                 seasonalEff = Math.min(1.0, seasonalEff + sb.bonus);
-                const localizedRegion = i18n(lang).regions[region] || region;
+                const localizedRegion = getLocalizedRegionName(region, lang);
                 activeTriggers.push(i18n(lang).triggers.spawningSeason(localizedRegion));
             }
         }
@@ -3408,8 +3534,7 @@ app.get('/api/forecast', async (req, res) => {
 
                     if (dailyScore > 15) {
                         const scientificName = (fish.scientificName || fish.name).toLowerCase().trim();
-                        const _isEn = lang === 'en';
-                        const currentName = _isEn ? (fish.nameEn || fish.name) : fish.name;
+                        const currentName = getLoc(fish, 'name', lang);
 
                         // [DEDÜPLİKASYON MANTIĞI]
                         // Aynı bilimsel isme sahip birden fazla kayıt varsa:
@@ -3565,7 +3690,7 @@ app.get('/api/forecast', async (req, res) => {
                     })()
                 }), tacticKey, tacticData, weatherSummary,
                 fishList: fishList.slice(0, 10), moonPhase: moon.phase,
-                moonPhaseName: getMoonPhaseName(moon.phase), airTemp: tempAir, timeMode,
+                moonPhaseName: getMoonPhaseName(moon.phase, lang), airTemp: tempAir, timeMode,
                 activityWindows: activityWindows
             });
         }
@@ -3674,8 +3799,7 @@ app.get('/api/forecast', async (req, res) => {
 
                 if (smoothedScore > 15) {
                     const scientificName = (fish.scientificName || fish.name).toLowerCase().trim();
-                    const _ie = lang === 'en';
-                    const currentName = _ie ? (fish.nameEn || fish.name) : fish.name;
+                    const currentName = getLoc(fish, 'name', lang);
 
                     // [DEDÜPLİKASYON MANTIĞI]
                     const existing = instantResultsMap.get(scientificName);
@@ -3706,13 +3830,13 @@ app.get('/api/forecast', async (req, res) => {
                                 scientificName: fish.scientificName, photoId: fish.photoId,
                                 icon: fish.icon, category: fish.category,
                                 peakHours: fish.peakHours,
-                                peakHoursDesc: _ie ? (fish.peakHoursDescEn || fish.peakHoursDesc) : fish.peakHoursDesc,
+                                peakHoursDesc: getLoc(fish, 'peakHoursDesc', lang),
                                 score: smoothedScore,
-                                bait: _ie ? (fish.advice.baitEn || fish.advice.bait) : fish.advice.bait,
-                                method: _ie ? (fish.advice.hookEn || fish.advice.hook) : fish.advice.hook,
-                                lure: _ie ? (fish.advice.lureEn || fish.advice.lure) : fish.advice.lure,
-                                rig: _ie ? (fish.advice.rigEn || fish.advice.rig) : fish.advice.rig,
-                                note: _ie ? (fish.noteEn || fish.note) : fish.note,
+                                bait: getLoc(fish, 'bait', lang, 'advice'),
+                                method: getLoc(fish, 'rig', lang, 'advice'),
+                                lure: getLoc(fish, 'lure', lang, 'advice'),
+                                rig: getLoc(fish, 'rig', lang, 'advice'),
+                                note: getLoc(fish, 'note', lang),
                                 legalSize: fish.legalSize, reason: result.reason,
                                 scoreDetails: result.scoreDetails
                             }
@@ -4243,7 +4367,7 @@ app.get('/api/fish-search', async (req, res) => {
         res.json({
             fish: {
                 key: fishKey,
-                name: lang === 'en' ? (fish.nameEn || fish.name) : fish.name,
+                name: getLoc(fish, 'name', lang),
                 nameEn: fish.nameEn || fish.name,
                 scientificName: fish.scientificName,
                 icon: fish.icon,
@@ -4257,20 +4381,20 @@ app.get('/api/fish-search', async (req, res) => {
                 pressureSensitivity: fish.pressureSensitivity,
                 currentPref: fish.currentPref,
                 wavePref: fish.wavePref,
-                bait: lang === 'en' ? (fish.advice?.baitEn || fish.advice?.bait) : fish.advice?.bait,
-                method: lang === 'en' ? (fish.advice?.rigEn || fish.advice?.rig) : fish.advice?.rig,
-                lure: lang === 'en' ? (fish.advice?.lureEn || fish.advice?.lure) : fish.advice?.lure,
-                advice: lang === 'en' ? {
-                    bait: fish.advice?.baitEn || fish.advice?.bait,
-                    lure: fish.advice?.lureEn || fish.advice?.lure,
-                    method: fish.advice?.rigEn || fish.advice?.rig,
-                    rig: fish.advice?.rigEn || fish.advice?.rig,
-                    hook: fish.advice?.hookEn || fish.advice?.hook,
-                } : fish.advice,
+                bait: getLoc(fish, 'bait', lang, 'advice'),
+                method: getLoc(fish, 'rig', lang, 'advice'),
+                lure: getLoc(fish, 'lure', lang, 'advice'),
+                advice: {
+                    bait: getLoc(fish, 'bait', lang, 'advice'),
+                    lure: getLoc(fish, 'lure', lang, 'advice'),
+                    method: getLoc(fish, 'rig', lang, 'advice'),
+                    rig: getLoc(fish, 'rig', lang, 'advice'),
+                    hook: getLoc(fish, 'hook', lang, 'advice'),
+                },
                 legalSize: isProtected ? null : fish.legalSize,
                 isProtected: isProtected,
-                note: lang === 'en' ? (fish.noteEn || fish.note) : fish.note,
-                peakHoursDesc: lang === 'en' ? (fish.peakHoursDescEn || fish.peakHoursDesc) : fish.peakHoursDesc,
+                note: getLoc(fish, 'note', lang),
+                peakHoursDesc: getLoc(fish, 'peakHoursDesc', lang),
                 tempRange: fish.tempRange
             },
             score: (req.isPremium || req.isGracePeriod) ? result.finalScore : -1,
@@ -4974,7 +5098,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
                         }
 
                         if (shouldReplace) {
-                            const _fn = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
+                            const _fn = getLoc(fish, 'name', lang);
                             resultsMap.set(scientificName, {
                                 score,
                                 name: _fn,
@@ -4996,7 +5120,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             if (!isInHabitat(fish, parseFloat(latF), parseFloat(lonF), regionName)) return null;
             const dailyResult = calculateWeightedDailyScore(fish, fishKey, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
             const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
-            const _n1 = lang === 'en' ? (fish.nameEn || fish.name) : fish.name;
+            const _n1 = getLoc(fish, 'name', lang);
             return { ...commonResult, score, fishName: _n1, topFish: [_n1] };
         }
     } catch (e) {
