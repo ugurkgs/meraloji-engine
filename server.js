@@ -418,6 +418,45 @@ const SERVER_i18n = {
         }
     },
     tr: {
+        triggers: {
+            majorSolunar: '🌕 Majör Solunar (Zirve Aktivite)',
+            minorSolunar: '🌓 Minör Solunar (Yüksek Aktivite)',
+            feedingFrenzy: '⚡ BASINÇ ŞOKU: Balıklar çılgınca besleniyor!',
+            pressureDrop: '📉 Basınç düşüşü aktiviteyi artırıyor',
+            goodTideFlow: '🌊 İdeal gelgit akıntısı',
+            slackWater: '⏸️ Ölü su (Düşük akıntı)',
+            upwelling: '🌊 UPWELLING: Besin zenginliği aktiviteyi artırıyor',
+            lowOxygen: '⚠️ Düşük oksijen seviyesi (Hipoksi riski)',
+            optimalOxygen: '💎 Mükemmel oksijen seviyesi',
+            strongCurrent: '🚤 Güçlü akıntı avantajı',
+            cloudyGood: '☁️ Kapalı hava avantajı',
+            reducedVis: '🌫️ Düşük görüş (Avcılar için avantaj)',
+            denseFog: '🌫️ Yoğun sis etkisi',
+            migrationSeason: (r) => `🐟 ${r} GÖÇ DÖNEMİ`,
+            spawningSeason: (r) => `🥚 ${r} ÜREME DÖNEMİ`,
+            moonlight: (i) => `🌙 Ay Işığı Etkisi (%${i})`,
+            substrateLabel: (s, str) => `${str} zemin`
+        },
+        reasons: {
+            outOfRegion: (r, h) => `Bu tür ${r} bölgesinde bulunmaz. Habitat: ${h}`,
+        },
+        score: {
+            badConditions: 'Kötü Koşullar',
+            lowActivity: 'Düşük Aktivite',
+            moderateActivity: 'Orta Aktivite',
+            goodConditions: 'İyi Koşullar',
+        },
+        penalties: {
+            lethalTemp: 'Ölümcül sıcaklık', criticalTemp: 'Kritik sıcaklık',
+            tooShallowSpot: 'Uyumsuz derinlik (Çok sığ)', shallowSpot: 'Sığ bölge',
+            tooDeeply: 'Çok derin', hardToReach: 'Kıyıdan zor erişim',
+            openWaterType: 'Açık deniz / Tekne türü', noonSuppression: 'Öğle durgunluğu',
+            murkyWater: 'Bulanık su', wavyWater: 'Dalgalı su', noSchool: 'Sürü yok',
+            schoolActive: 'Balık sürüleri aktif!', dangerWave: 'TEHLİKE: Dalga',
+            dangerWaveTrigger: '⚠️ TEHLİKE: Dalga çok yüksek!',
+            storm: 'FIRTINA', veryWindy: 'Çok rüzgarlı', windy: 'Rüzgarlı',
+            heavyRain: 'Şiddetli yağış', rainy: 'Yağmurlu', lightRain: 'Hafif yağış',
+        },
         weather: {
             0: 'Güneşli', 1: 'Açık', 2: 'Parçalı Bulutlu', 3: 'Bulutlu',
             45: 'Sisli', 48: 'Kırağı Sisi',
@@ -430,6 +469,45 @@ const SERVER_i18n = {
         forecast: { bestTime: 'En iyi saat', tomorrow: 'Yarın', highTide: 'Yüksek Gelgit', lowTide: 'Alçak Gelgit', risingTide: 'Gelgit Yükseliyor', fallingTide: 'Gelgit Düşüyor' }
     },
     en: {
+        triggers: {
+            majorSolunar: '🌕 Major Solunar (Peak Activity)',
+            minorSolunar: '🌓 Minor Solunar (High Activity)',
+            feedingFrenzy: '⚡ PRESSURE SHOCK: Feeding frenzy!',
+            pressureDrop: '📉 Pressure drop increasing activity',
+            goodTideFlow: '🌊 Good tidal flow',
+            slackWater: '⏸️ Slack water (Low current)',
+            upwelling: '🌊 UPWELLING: Nutrient richness',
+            lowOxygen: '⚠️ Low oxygen levels',
+            optimalOxygen: '💎 Optimal oxygen levels',
+            strongCurrent: '🚤 Strong current advantage',
+            cloudyGood: '☁️ Overcast advantage',
+            reducedVis: '🌫️ Reduced visibility',
+            denseFog: '🌫️ Dense fog effect',
+            migrationSeason: (r) => `🐟 ${r} MIGRATION`,
+            spawningSeason: (r) => `🥚 ${r} SPAWNING`,
+            moonlight: (i) => `🌙 Moonlight Effect (%${i})`,
+            substrateLabel: (s, str) => `${str} bottom`
+        },
+        reasons: {
+            outOfRegion: (r, h) => `Not found in ${r}. Habitat: ${h}`,
+        },
+        score: {
+            badConditions: 'Bad Conditions',
+            lowActivity: 'Low Activity',
+            moderateActivity: 'Moderate Activity',
+            goodConditions: 'Good Conditions',
+        },
+        penalties: {
+            lethalTemp: 'Lethal temp', criticalTemp: 'Critical temp',
+            tooShallowSpot: 'Too shallow', shallowSpot: 'Shallow spot',
+            tooDeeply: 'Too deep', hardToReach: 'Hard to reach from shore',
+            openWaterType: 'Offshore / Boat species', noonSuppression: 'Midday suppression',
+            murkyWater: 'Murky water', wavyWater: 'Wavy water', noSchool: 'No school',
+            schoolActive: 'Schools active!', dangerWave: 'DANGER: Wave',
+            dangerWaveTrigger: '⚠️ DANGER: Waves too high!',
+            storm: 'STORM', veryWindy: 'Very windy', windy: 'Windy',
+            heavyRain: 'Heavy rain', rainy: 'Rainy', lightRain: 'Light rain',
+        },
         weather: {
             0: 'Sunny', 1: 'Mainly Clear', 2: 'Partly Cloudy', 3: 'Cloudy',
             45: 'Fog', 48: 'Depositing Rime Fog',
@@ -472,7 +550,10 @@ function getLang(req) {
     const l = (req?.query?.lang || 'tr').toLowerCase();
     return SERVER_i18n[l] ? l : 'tr';
 }
-function i18n(lang) { return SERVER_i18n[lang] || SERVER_i18n.tr; }
+function i18n(lang) { 
+    const l = lang || 'tr';
+    return SERVER_i18n[l] || SERVER_i18n.tr || SERVER_i18n.en; 
+}
 
 // Zone helper — depthAvg'dan zone string üret
 function getZoneLabel(depthVal, lang) {
