@@ -178,6 +178,29 @@ const SERVER_i18n = {
         protected: {
             penalties: ['🚫 AVLANMASI YASAKTIR — Koruma Altında Tür'],
             reason: "🚫 Türkiye'de avlanması kesinlikle yasak — Koruma altında tür (6/2 Tebliğ).",
+        },
+        scan: {
+            weather: 'Hava verisi alınıyor...',
+            depth: 'Derinlik bilgisine ulaşıldı, analiz güncelleniyor...',
+            landError: 'Burası kara parçası'
+        },
+        errors: {
+            missingParams: 'lat, lon ve fishKey gerekli',
+            authRequired: 'Giriş gerekli',
+            fishNotFound: 'Tür bulunamadı',
+            limitExceeded: 'Günlük limitiniz doldu.',
+            dbLoading: 'Tür veritabanı yükleniyor, lütfen tekrar deneyin',
+            fetchError: 'Hava/deniz verisi alınamadı, lütfen tekrar deneyin',
+            apiBusy: 'Hava durumu API geçici olarak meşgul. 5-10 dakika sonra tekrar deneyin.',
+            authServiceError: 'Doğrulama servisi hazır değil, lütfen tekrar deneyin',
+            authFailed: 'Doğrulama başarısız, lütfen tekrar deneyin',
+            invalidCoords: 'Geçersiz koordinat: lat ve lon sayısal olmalı',
+            invalidPurchase: 'Geçersiz satın alma',
+            subNotActive: 'Abonelik aktif değil',
+            productMismatch: 'Ürün eşleşmedi',
+            purchaseNotFound: 'Satın alma bulunamadı',
+            invalidPlan: 'Geçersiz abonelik planı',
+            scanLimit: (limit) => `Günlük ${limit} tarama hakkınızı kullandınız. PRO ile sınırsız tarama yapın.`
         }
     },
     en: {
@@ -291,6 +314,29 @@ const SERVER_i18n = {
         protected: {
             penalties: ['🚫 FISHING PROHIBITED — Protected Species'],
             reason: '🚫 Fishing strictly prohibited in Turkey — Protected species (Regulation 6/2).',
+        },
+        scan: {
+            weather: 'Fetching weather data...',
+            depth: 'Depth data obtained, updating analysis...',
+            landError: 'This is land'
+        },
+        errors: {
+            missingParams: 'lat, lon and fishKey are required',
+            authRequired: 'Login required',
+            fishNotFound: 'Species not found',
+            limitExceeded: 'Daily limit exceeded.',
+            dbLoading: 'Species database is loading, please try again',
+            fetchError: 'Marine data could not be retrieved, please try again',
+            apiBusy: 'Weather API is temporarily busy. Please try again in 5-10 minutes.',
+            authServiceError: 'Auth service is not ready, please try again',
+            authFailed: 'Authentication failed, please try again',
+            invalidCoords: 'Invalid coordinates: lat and lon must be numeric',
+            invalidPurchase: 'Invalid purchase',
+            subNotActive: 'Subscription not active',
+            productMismatch: 'Product mismatch',
+            purchaseNotFound: 'Purchase not found',
+            invalidPlan: 'Invalid subscription plan',
+            scanLimit: (limit) => `Daily limit of ${limit} scans reached. Upgrade to PRO for unlimited scans.`
         }
     },
     es: {
@@ -404,6 +450,29 @@ const SERVER_i18n = {
         protected: {
             penalties: ['🚫 PESCA PROHIBIDA — Especie Protegida'],
             reason: '🚫 Pesca estrictamente prohibida en Turquía — Especie protegida (Regulación 6/2).',
+        },
+        scan: {
+            weather: 'Obteniendo datos meteorológicos...',
+            depth: 'Información de profundidad obtenida, actualizando análisis...',
+            landError: 'Esto es tierra'
+        },
+        errors: {
+            missingParams: 'Se requieren lat, lon y fishKey',
+            authRequired: 'Inicio de sesión requerido',
+            fishNotFound: 'Especie no encontrada',
+            limitExceeded: 'Límite diario excedido.',
+            dbLoading: 'La base de datos de especies se está cargando, inténtelo de nuevo',
+            fetchError: 'No se pudieron obtener datos marinos, inténtelo de nuevo',
+            apiBusy: 'API del clima ocupada. Reintente en 5-10 minutos.',
+            authServiceError: 'Servicio de autenticación no listo, inténtelo de nuevo',
+            authFailed: 'Autenticación fallida, inténtelo de nuevo',
+            invalidCoords: 'Coordenadas inválidas: lat y lon deben ser numéricas',
+            invalidPurchase: 'Compra inválida',
+            subNotActive: 'Suscripción no activa',
+            productMismatch: 'El producto no coincide',
+            purchaseNotFound: 'Compra no encontrada',
+            invalidPlan: 'Plan de suscripción inválido',
+            scanLimit: (limit) => `Límite diario de ${limit} escaneos alcanzado. Actualiza a PRO para escaneos ilimitados.`
         }
     }
 };
@@ -3089,14 +3158,14 @@ function applySanitization(data, isProUser) {
 
 app.get('/api/forecast', async (req, res) => {
     try {
+        const lang = getLang(req); // i18n dil seçimi — ?lang=en
         const latRaw = parseFloat(req.query.lat);
         const lonRaw = parseFloat(req.query.lon);
         if (isNaN(latRaw) || isNaN(lonRaw)) {
-            return res.status(400).json({ error: 'Geçersiz koordinat: lat ve lon sayısal olmalı' });
+            return res.status(400).json({ error: i18n(lang).errors.invalidCoords });
         }
         const lat = latRaw.toFixed(4);
         const lon = lonRaw.toFixed(4);
-        const lang = getLang(req); // i18n dil seçimi — ?lang=en
         const isBoat = req.query.mode === 'boat'; // tekne modu
         const isAutoLoad = req.query.source === 'autoload'; // Sıcak başlangıç isteği
         const now = new Date();
@@ -3153,7 +3222,7 @@ app.get('/api/forecast', async (req, res) => {
             // İç bölge: sıfır API, anında reddet
             return res.json({
                 error: 'land',
-                message: `Burası kara (${offlineAnalysis.city}). Lütfen deniz veya kıyı bir nokta seçin.`,
+                message: `${i18n(lang).scan.landError} (${offlineAnalysis.city}).`,
                 isLand: true,
                 landReason: 'INLAND',
                 city: offlineAnalysis.city
@@ -3231,8 +3300,8 @@ app.get('/api/forecast', async (req, res) => {
                 return res.json({ ...staleData, _stale: true });
             }
             const errMsg = isBackoff
-                ? 'Hava durumu API geçici olarak meşgul. 5-10 dakika sonra tekrar deneyin.'
-                : 'Hava/deniz verisi alınamadı, lütfen tekrar deneyin';
+                ? i18n(lang).errors.apiBusy
+                : i18n(lang).errors.fetchError;
             return res.status(503).json({ error: 'API_UNAVAILABLE', message: errMsg, backoff: !!isBackoff });
         }
         if (!marine) {
@@ -3977,8 +4046,8 @@ app.get('/api/forecast', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 app.get('/api/species-list', (req, res) => {
-    if (!SPECIES_DB) return res.status(503).json({ error: 'Tür veritabanı yükleniyor, lütfen tekrar deneyin' });
     const lang = req.query.lang || 'tr';
+    if (!SPECIES_DB) return res.status(503).json({ error: i18n(lang).errors.dbLoading });
     const speciesResultsMap = new Map();
     Object.entries(SPECIES_DB).forEach(([key, fish]) => {
         const scientificName = (fish.scientificName || fish.name).toLowerCase().trim();
@@ -4021,12 +4090,12 @@ app.get('/api/fish-search', async (req, res) => {
         const lang = getLang(req);
         const { lat, lon, fishKey } = req.query;
         if (!lat || !lon || !fishKey) {
-            return res.status(400).json({ error: 'lat, lon ve fishKey gerekli' });
+            return res.status(400).json({ error: i18n(lang).errors.missingParams });
         }
 
         // 🛡️ AUTH & KOTA KONTROLÜ
         if (!req.user) {
-            return res.status(401).json({ error: 'Giriş gerekli' });
+            return res.status(401).json({ error: i18n(lang).errors.authRequired });
         }
 
         // PRO veya Grace Period değilse kota kontrolü yap
@@ -4040,8 +4109,7 @@ app.get('/api/fish-search', async (req, res) => {
                 const count = usageDoc.exists ? (usageDoc.data().count || 0) : 0;
                 if (count >= FREE_DAILY_CLICKS) {
                     return res.status(403).json({
-                        error: 'LIMIT_EXCEEDED',
-                        message: i18n(lang).limit_desc || 'Günlük limitiniz doldu.'
+                        message: i18n(lang).errors.limitExceeded
                     });
                 }
             }
@@ -4049,7 +4117,7 @@ app.get('/api/fish-search', async (req, res) => {
 
         const fish = SPECIES_DB[fishKey];
         if (!fish) {
-            return res.status(404).json({ error: 'Tür bulunamadı' });
+            return res.status(404).json({ error: i18n(lang).errors.fishNotFound });
         }
 
         const latF = parseFloat(lat).toFixed(4);
@@ -4062,7 +4130,7 @@ app.get('/api/fish-search', async (req, res) => {
         if (offlineAnalysis.status === 'INLAND') {
             return res.json({
                 error: 'land',
-                message: `Burası kara (${offlineAnalysis.city}). Lütfen deniz veya kıyı bir nokta seçin.`,
+                message: `${i18n(lang).scan.landError} (${offlineAnalysis.city}).`,
                 isLand: true,
                 landReason: 'INLAND',
                 city: offlineAnalysis.city
@@ -4126,7 +4194,7 @@ app.get('/api/fish-search', async (req, res) => {
         if (!marine.hourly || !marine.hourly.wave_height ||
             marine.hourly.wave_height.slice(0, 48).filter(v => v !== null && v !== undefined).every(v => v === 0)) {
             isLand = true;
-            landReason = 'Deniz verisi yok';
+            landReason = i18n(lang).scan.landError;
         }
 
         if (!isLand && bathymetryRaw !== null) {
@@ -4161,7 +4229,9 @@ app.get('/api/fish-search', async (req, res) => {
         // ─────────────────────────────────────────────────────────────────────
 
         if (isLand) {
-            return res.json({ error: 'land', message: landReason === 'CERTAIN_LAND' ? 'Burası kara parçası' : (landReason || 'Burası kara parçası') });
+            const lang = getLang(req);
+            const msg = i18n(lang).scan.landError;
+            return res.json({ error: 'land', message: landReason === 'CERTAIN_LAND' ? msg : (landReason || msg) });
         }
 
         const utcOffsetSeconds = weather.utc_offset_seconds || 0;
@@ -4605,15 +4675,16 @@ if (GOOGLE_PLAY_VERIFY) {
 }
 
 app.post('/api/verify-subscription', async (req, res) => {
-    if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
+    const lang = getLang(req);
+    if (!req.user) return res.status(401).json({ error: i18n(lang).errors.authRequired });
     const { purchaseToken, subscriptionId } = req.body;
-    if (!purchaseToken) return res.status(400).json({ error: 'purchaseToken gerekli' });
+    if (!purchaseToken) return res.status(400).json({ error: i18n(lang).errors.missingParams });
 
     const subId = subscriptionId || 'meraloji_pro_monthly';
 
     // ── Geçerli abonelik ID kontrolü ──
     if (!VALID_SUBSCRIPTIONS.includes(subId)) {
-        return res.status(400).json({ error: 'Geçersiz abonelik planı' });
+        return res.status(400).json({ error: i18n(lang).errors.invalidPlan });
     }
 
     // ── Google Play Doğrulaması ──
@@ -4622,7 +4693,7 @@ app.post('/api/verify-subscription', async (req, res) => {
             const client = await getPlayAuthClient();
             if (!client) {
                 console.error('[VERIFY] Play auth client yok — doğrulama yapılamıyor');
-                return res.status(503).json({ error: 'Doğrulama servisi hazır değil, lütfen tekrar deneyin' });
+                return res.status(503).json({ error: i18n(lang).errors.authServiceError });
             }
 
             const verifyUrl = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${GOOGLE_PACKAGE_NAME}/purchases/subscriptionsv2/tokens/${purchaseToken}`;
@@ -4632,7 +4703,7 @@ app.post('/api/verify-subscription', async (req, res) => {
 
             if (!purchase) {
                 console.log(`[VERIFY] ❌ Boş yanıt — uid:${req.user.uid} token:${purchaseToken.slice(0, 20)}...`);
-                return res.status(403).json({ error: 'Geçersiz satın alma' });
+                return res.status(403).json({ error: i18n(lang).errors.invalidPurchase });
             }
 
             // subscriptionState: aktif abonelik durumları
@@ -4645,14 +4716,14 @@ app.post('/api/verify-subscription', async (req, res) => {
 
             if (!validStates.includes(state)) {
                 console.log(`[VERIFY] ❌ Geçersiz durum: ${state} — uid:${req.user.uid}`);
-                return res.status(403).json({ error: 'Abonelik aktif değil', state });
+                return res.status(403).json({ error: i18n(lang).errors.subNotActive, state });
             }
 
             // Paket adı kontrolü (opsiyonel ama ekstra güvenlik)
             const linkedToken = purchase.lineItems?.[0]?.productId;
             if (linkedToken && !VALID_SUBSCRIPTIONS.includes(linkedToken)) {
                 console.log(`[VERIFY] ❌ Ürün ID uyuşmuyor: ${linkedToken} — uid:${req.user.uid}`);
-                return res.status(403).json({ error: 'Ürün eşleşmedi' });
+                return res.status(403).json({ error: i18n(lang).errors.productMismatch });
             }
 
             console.log(`[VERIFY] ✅ Google Play doğrulandı — uid:${req.user.uid} sub:${subId} state:${state}`);
@@ -4661,14 +4732,14 @@ app.post('/api/verify-subscription', async (req, res) => {
             const status = verifyError?.response?.status;
             if (status === 404) {
                 console.log(`[VERIFY] ❌ Token bulunamadı (404) — uid:${req.user.uid}`);
-                return res.status(403).json({ error: 'Satın alma bulunamadı' });
+                return res.status(403).json({ error: i18n(lang).errors.purchaseNotFound });
             }
             if (status === 401 || status === 403) {
                 console.error(`[VERIFY] ❌ Yetki hatası (${status}) — Play Console SA izinlerini kontrol edin`);
                 return res.status(503).json({ error: 'Doğrulama servisi yapılandırma hatası' });
             }
             console.error('[VERIFY] ❌ Google Play API hatası:', verifyError.message);
-            return res.status(503).json({ error: 'Doğrulama başarısız, lütfen tekrar deneyin' });
+            return res.status(503).json({ error: i18n(lang).errors.authFailed });
         }
     } else {
         // ⚠️ UYARI: Google Play doğrulaması kapalı — herhangi bir token kabul ediliyor!
@@ -5153,7 +5224,7 @@ app.get('/api/scan', async (req, res) => {
             if (usageCount >= FREE_DAILY_SCANS) {
                 return res.status(429).json({
                     error: 'daily_limit',
-                    message: `Günlük ${FREE_DAILY_SCANS} tarama hakkınızı kullandınız. PRO ile sınırsız tarama yapın.`,
+                    message: i18n(lang).errors.scanLimit(FREE_DAILY_SCANS),
                     remainingScans: 0
                 });
             }
@@ -5225,7 +5296,8 @@ app.get('/api/scan', async (req, res) => {
         // Merkez noktanın hava/deniz verisini bir kere çek
         let centerWeather, centerMarine;
         try {
-            sendEvent({ type: 'progress', pct: 0, done: 0, total, lastPoint: null, status: 'Hava verisi alınıyor...' });
+            const i18nScan = i18n(lang).scan;
+            sendEvent({ type: 'progress', pct: 0, done: 0, total, lastPoint: null, status: i18nScan.weather });
             if (res.flush) res.flush();
             const [wd] = await Promise.all([
                 fetchCenterWeather(centerLat, centerLon),
@@ -5351,7 +5423,7 @@ app.get('/api/scan', async (req, res) => {
                     if (updatedResult) {
                         sendEvent({
                             type: 'depth_update',
-                            message: 'Derinlik bilgisine ulaşıldı, analiz güncelleniyor...',
+                            message: i18n(lang).scan.depth,
                             lat: pt.lat,
                             lon: pt.lon,
                             score: (req.isPremium || req.isGracePeriod) ? parseFloat(updatedResult.score.toFixed(1)) : -1,
