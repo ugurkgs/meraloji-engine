@@ -416,6 +416,30 @@ const SERVER_i18n = {
             risingTide: 'Marea subiendo',
             fallingTide: 'Marea bajando'
         }
+    },
+    tr: {
+        weather: {
+            0: 'Güneşli', 1: 'Açık', 2: 'Parçalı Bulutlu', 3: 'Bulutlu',
+            45: 'Sisli', 48: 'Kırağı Sisi',
+            51: 'Hafif Çiseleme', 53: 'Orta Çiseleme', 55: 'Yoğun Çiseleme',
+            61: 'Hafif Yağmurlu', 63: 'Yağmurlu', 65: 'Şiddetli Yağmurlu',
+            71: 'Hafif Kar', 73: 'Kar Yağışlı', 75: 'Yoğun Kar',
+            80: 'Sağanak Yağış', 81: 'Kuvvetli Sağanak', 82: 'Şiddetli Sağanak',
+            95: 'Fırtına / Yıldırım',
+        },
+        forecast: { bestTime: 'En iyi saat', tomorrow: 'Yarın', highTide: 'Yüksek Gelgit', lowTide: 'Alçak Gelgit', risingTide: 'Gelgit Yükseliyor', fallingTide: 'Gelgit Düşüyor' }
+    },
+    en: {
+        weather: {
+            0: 'Sunny', 1: 'Mainly Clear', 2: 'Partly Cloudy', 3: 'Cloudy',
+            45: 'Fog', 48: 'Depositing Rime Fog',
+            51: 'Light Drizzle', 53: 'Moderate Drizzle', 55: 'Dense Drizzle',
+            61: 'Light Rain', 63: 'Moderate Rain', 65: 'Heavy Rain',
+            71: 'Light Snow', 73: 'Moderate Snow', 75: 'Heavy Snow',
+            80: 'Light Rain Showers', 81: 'Moderate Rain Showers', 82: 'Violent Rain Showers',
+            95: 'Thunderstorm',
+        },
+        forecast: { bestTime: 'Best time', tomorrow: 'Tomorrow', highTide: 'High Tide', lowTide: 'Low Tide', risingTide: 'Tide Rising', fallingTide: 'Tide Falling' }
     }
 };
 
