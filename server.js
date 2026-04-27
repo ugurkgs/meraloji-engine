@@ -435,7 +435,10 @@ const SERVER_i18n = {
             migrationSeason: (r) => `🐟 ${r} GÖÇ DÖNEMİ`,
             spawningSeason: (r) => `🥚 ${r} ÜREME DÖNEMİ`,
             moonlight: (i) => `🌙 Ay Işığı Etkisi (%${i})`,
-            substrateLabel: (s, str) => `${str} zemin`
+            substrateLabel: (s, str) => `${str} zemin`,
+            protectedDir: '🌊 Korunaklı Yön',
+            windGust: '💨 Ani Rüzgar',
+            swellDominant: '🌊 Swell Dominant — Temiz Su'
         },
         reasons: {
             outOfRegion: (r, h) => `Bu tür ${r} bölgesinde bulunmaz. Habitat: ${h}`,
@@ -2834,7 +2837,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
 
     // Dalga Yönü — Bölgeye göre korunaklılık
     if (waveDirection > 0) {
-        const _protectedLabel = i18n(lang).triggers.protectedDir.replace('🌊 ', '');
+        const _protectedLabel = (i18n(lang).triggers.protectedDir || '🌊 ').replace('🌊 ', '');
         const protectedDirs = {
             'EGE': { favorable: [45, 135], label: _protectedLabel },
             'AKDENİZ': { favorable: [315, 45], label: _protectedLabel },
@@ -2846,10 +2849,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         // Türkiye dışı bölgeler için: koordinat bazlı kıyı yönü tahmini
         if (!pref && params.lat && params.lon) {
             const latF = parseFloat(params.lat);
-            // Basit kural: kuzey yarım küre → doğudan gelen dalga genelde korunaklı
-            // güney yarım küre → batıdan gelen dalga
             const favorable = latF >= 0 ? [45, 135] : [225, 315];
-            pref = { favorable, label: i18n(lang).triggers.protectedDir.replace('🌊 ', '') };
+            pref = { favorable, label: (i18n(lang).triggers.protectedDir || '🌊 ').replace('🌊 ', '') };
         }
 
         if (pref) {
