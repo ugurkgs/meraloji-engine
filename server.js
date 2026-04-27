@@ -292,274 +292,15 @@ const SERVER_i18n = {
             penalties: ['🚫 FISHING PROHIBITED — Protected Species'],
             reason: '🚫 Fishing strictly prohibited in Turkey — Protected species (Regulation 6/2).',
         }
-    },
-    es: {
-        zones: {
-            shallowSand: 'Arena poco profunda', shallowRock: 'Roca poco profunda',
-            mid: 'Aguas medias', deep: 'Aguas profundas'
-        },
-        regions: {
-            'EGE': 'EGEO', 'AKDENİZ': 'MEDITERRÁNEO',
-            'MARMARA': 'MAR DE MARMARA', 'KARADENİZ': 'MAR NEGRO',
-            'AÇIK DENİZ': 'MAR ABIERTO',
-            'Florida': 'Florida',
-            'Japonya Kıyıları': 'Costas de Japón',
-            'Güney Afrika Kıyıları': 'Costas de Sudáfrica',
-            'Birleşik Arap Emirlikleri & Körfez': 'EAU y Golfo Pérsico',
-            'Yeni Zelanda Kıyıları': 'Costas de Nueva Zelanda',
-            'Brezilya Kıyıları': 'Costas de Brasil',
-            'Tayland & Güneydoğu Asya': 'Tailandia y SE Asiático',
-            'Kızıldeniz Havzası': 'Cuenca del Mar Rojo'
-        },
-        substrate: {
-            ROCK: '🪨 Rocoso', SAND: '🏖️ Arenoso', MUD: '🟫 Fangoso',
-            SEAGRASS: '🌿 Pradera marina', MIXED: '⬛ Mixto'
-        },
-        triggers: {
-            feedingFrenzy: '⚡ ¡Frenesí alimentario!',
-            pressureDrop: 'Presión bajando',
-            majorSolunar: 'Mayor Solunar',
-            minorSolunar: 'Menor Solunar',
-            strongCurrent: 'Corriente fuerte',
-            cloudyGood: 'Nublado ideal',
-            goodSwell: 'Mar de fondo favorable',
-            warmingShock: (c) => `🌡️ Choque térmico (${c}°C) — Activación`,
-            coolingShock: (c) => `🥶 Enfriamiento brusco (${c}°C) — Ralentización`,
-            migrationShock: (c) => `⚡ Choque de temp. (${c}°C) — Señal de migración`,
-            warmingTrend: '🌡️ Tendencia agua cálida',
-            coolingTrend: '🌡️ Agua enfriándose — Señal de migración',
-            stableSst: '🌡️ Temperatura estable',
-            thermocline: (d) => `🌊 Capa termoclina (${d}m)`,
-            moonlight: (p) => `🌕 Luz lunar (${p}%)`,
-            richPlankton: (c) => `🌿 Plancton rico (${c} mg/m³)`,
-            activePlankton: '🌿 Plancton activo',
-            suitablePlankton: '🌿 Plancton adecuado',
-            clearWater: '🌿 Agua clara',
-            windyGood: 'Viento favorable',
-            foamyWater: 'Agua espumosa',
-            needsBoat: 'Requiere barco',
-            highWave: '⚠️ Olas altas',
-            windGust: '💨 Ráfagas de viento',
-            protectedDir: '🌊 Dirección protegida',
-            swellDominant: '🌊 Swell dominante — Agua limpia',
-            denseFog: '🌫️ Niebla densa — PELIGRO',
-            reducedVis: '🌫️ Visibilidad reducida',
-            migrationSeason: (r) => `🔀 Temporada de migración (${r})`,
-            spawningSeason: (r) => `🐟 Temporada de desove (${r})`,
-            substrateLabel: (s, str) => `Fondo ${str}`,
-            goodTideFlow: '🌊 Flujo de marea favorable',
-            slackWater: '🌊 Repunte de marea',
-            optimalOxygen: '🧬 Nivel de oxígeno óptimo',
-            lowOxygen: '⚠️ Oxígeno bajo — Metabolismo lento',
-            upwelling: '🌊 Upwelling (Afloramiento de nutrientes) — Activación',
-        },
-        reasons: {
-            outOfRegion: (r, regions) => `Esta especie no se encuentra en ${r}. Regiones: ${regions}`,
-            tooShallow: (d, min) => `Profundidad (${d}m) insuficiente para esta especie (mín: ${min}m)`,
-            tooDeep: (d, max) => `Profundidad (${d}m) excesiva para esta especie (máx: ${max}m)`,
-            seasonalLow: (s, p) => `Actividad baja en esta temporada (${s}) (%${p})`,
-            seasonalVeryLow: (s, p) => `Actividad muy baja en esta temporada (${s}) (%${p})`,
-            tempMismatch: (v, min, max) => `Temp. del agua (${v}°C) fuera del rango adecuado (${min}-${max}°C)`,
-            nightOnly: 'Especie nocturna, actualmente es de día',
-            dayOnly: 'Especie diurna, actualmente es de noche',
-            crepuscularOnly: 'Especie activa al amanecer/atardecer',
-            scoreThreshold: (s) => `Puntuación total (%${s}) por debajo del umbral (%15)`,
-            salinityMismatch: 'Salinidad incompatible',
-            camDeniz: 'Mar como un plato',
-            boatRequired: 'Requiere barco',
-            highWave: 'Olas altas',
-        },
-        notification: {
-            title: '🌪️ ¡Oportunidad pre-tormenta!',
-            body: (spot) => `La presión baja rápido en ${spot} — ¡los peces pueden activarse!`
-        },
-        tactic: {
-            dominantNote: '⭐ Especie dominante detectada — si tiene valor comercial, condiciones ideales.',
-            TACTIC_DANGER_WAVE: '🚫 ¡OLAS PELIGROSAS! No salir a navegar.',
-            TACTIC_ROUGH_WAVE: '⚠️ ¡OLAS FUERTES! Riesgo para barcos pequeños.',
-        },
-        score: {
-            badConditions: 'Condiciones malas',
-            lowActivity: 'Actividad baja',
-            moderateActivity: 'Actividad moderada',
-            goodConditions: 'Condiciones buenas',
-        },
-        penalties: {
-            lethalTemp: 'Temp. letal', criticalTemp: 'Temp. crítica',
-            tooShallowSpot: 'Profundidad incompatible (muy poco profundo)', shallowSpot: 'Spot poco profundo',
-            tooDeeply: 'Muy profundo', hardToReach: 'Difícil acceso desde costa',
-            openWaterType: 'Especie de alta mar / barco', noonSuppression: 'Inactividad de mediodía',
-            murkyWater: 'Agua turbia', wavyWater: 'Agua agitada', noSchool: 'Sin bancos',
-            schoolActive: '¡Bancos de peces activos!', dangerWave: 'PELIGRO: Oleaje',
-            dangerWaveTrigger: '⚠️ ¡PELIGRO: Olas muy altas!',
-            storm: 'TORMENTA', veryWindy: 'Viento fuerte', windy: 'Ventoso',
-            heavyRain: 'Lluvia intensa', rainy: 'Lluvioso', lightRain: 'Lluvia ligera',
-        },
-        protected: {
-            penalties: ['🚫 PESCA PROHIBIDA — Especie protegida'],
-            reason: '🚫 Pesca estrictamente prohibida en Turquía — Especie protegida (Regulación 6/2).',
-        },
-        weather: {
-            0: 'Soleado', 1: 'Principalmente despejado', 2: 'Parcialmente nublado', 3: 'Nublado',
-            45: 'Niebla', 48: 'Niebla de escarcha',
-            51: 'Llovizna ligera', 53: 'Llovizna moderada', 55: 'Llovizna densa',
-            61: 'Lluvia ligera', 63: 'Lluvia moderada', 65: 'Lluvia fuerte',
-            71: 'Nieve ligera', 73: 'Nieve moderada', 75: 'Nieve fuerte',
-            80: 'Chubascos ligeros', 81: 'Chubascos moderados', 82: 'Chubascos violentos',
-            95: 'Tormenta eléctrica',
-        },
-        forecast: {
-            bestTime: 'Mejor momento',
-            tomorrow: 'Mañana',
-            highTide: 'Marea alta',
-            lowTide: 'Marea baja',
-            risingTide: 'Marea subiendo',
-            fallingTide: 'Marea bajando'
-        }
-    },
-    tr: {
-        triggers: {
-            majorSolunar: '🌕 Majör Solunar (Zirve Aktivite)',
-            minorSolunar: '🌓 Minör Solunar (Yüksek Aktivite)',
-            feedingFrenzy: '⚡ BASINÇ ŞOKU: Balıklar çılgınca besleniyor!',
-            pressureDrop: '📉 Basınç düşüşü aktiviteyi artırıyor',
-            goodTideFlow: '🌊 İdeal gelgit akıntısı',
-            slackWater: '⏸️ Ölü su (Düşük akıntı)',
-            upwelling: '🌊 UPWELLING: Besin zenginliği aktiviteyi artırıyor',
-            lowOxygen: '⚠️ Düşük oksijen seviyesi (Hipoksi riski)',
-            optimalOxygen: '💎 Mükemmel oksijen seviyesi',
-            strongCurrent: '🚤 Güçlü akıntı avantajı',
-            cloudyGood: '☁️ Kapalı hava avantajı',
-            reducedVis: '🌫️ Düşük görüş (Avcılar için avantaj)',
-            denseFog: '🌫️ Yoğun sis etkisi',
-            migrationSeason: (r) => `🐟 ${r} GÖÇ DÖNEMİ`,
-            spawningSeason: (r) => `🥚 ${r} ÜREME DÖNEMİ`,
-            moonlight: (i) => `🌙 Ay Işığı Etkisi (%${i})`,
-            substrateLabel: (s, str) => `${str} zemin`,
-            protectedDir: '🌊 Korunaklı Yön',
-            windGust: '💨 Ani Rüzgar',
-            swellDominant: '🌊 Swell Dominant — Temiz Su'
-        },
-        reasons: {
-            outOfRegion: (r, h) => `Bu tür ${r} bölgesinde bulunmaz. Habitat: ${h}`,
-        },
-        score: {
-            badConditions: 'Kötü Koşullar',
-            lowActivity: 'Düşük Aktivite',
-            moderateActivity: 'Orta Aktivite',
-            goodConditions: 'İyi Koşullar',
-        },
-        penalties: {
-            lethalTemp: 'Ölümcül sıcaklık', criticalTemp: 'Kritik sıcaklık',
-            tooShallowSpot: 'Uyumsuz derinlik (Çok sığ)', shallowSpot: 'Sığ bölge',
-            tooDeeply: 'Çok derin', hardToReach: 'Kıyıdan zor erişim',
-            openWaterType: 'Açık deniz / Tekne türü', noonSuppression: 'Öğle durgunluğu',
-            murkyWater: 'Bulanık su', wavyWater: 'Dalgalı su', noSchool: 'Sürü yok',
-            schoolActive: 'Balık sürüleri aktif!', dangerWave: 'TEHLİKE: Dalga',
-            dangerWaveTrigger: '⚠️ TEHLİKE: Dalga çok yüksek!',
-            storm: 'FIRTINA', veryWindy: 'Çok rüzgarlı', windy: 'Rüzgarlı',
-            heavyRain: 'Şiddetli yağış', rainy: 'Yağmurlu', lightRain: 'Hafif yağış',
-        },
-        weather: {
-            0: 'Güneşli', 1: 'Açık', 2: 'Parçalı Bulutlu', 3: 'Bulutlu',
-            45: 'Sisli', 48: 'Kırağı Sisi',
-            51: 'Hafif Çiseleme', 53: 'Orta Çiseleme', 55: 'Yoğun Çiseleme',
-            61: 'Hafif Yağmurlu', 63: 'Yağmurlu', 65: 'Şiddetli Yağmurlu',
-            71: 'Hafif Kar', 73: 'Kar Yağışlı', 75: 'Yoğun Kar',
-            80: 'Sağanak Yağış', 81: 'Kuvvetli Sağanak', 82: 'Şiddetli Sağanak',
-            95: 'Fırtına / Yıldırım',
-        },
-        forecast: { bestTime: 'En iyi saat', tomorrow: 'Yarın', highTide: 'Yüksek Gelgit', lowTide: 'Alçak Gelgit', risingTide: 'Gelgit Yükseliyor', fallingTide: 'Gelgit Düşüyor' }
-    },
-    en: {
-        triggers: {
-            majorSolunar: '🌕 Major Solunar (Peak Activity)',
-            minorSolunar: '🌓 Minor Solunar (High Activity)',
-            feedingFrenzy: '⚡ PRESSURE SHOCK: Feeding frenzy!',
-            pressureDrop: '📉 Pressure drop increasing activity',
-            goodTideFlow: '🌊 Good tidal flow',
-            slackWater: '⏸️ Slack water (Low current)',
-            upwelling: '🌊 UPWELLING: Nutrient richness',
-            lowOxygen: '⚠️ Low oxygen levels',
-            optimalOxygen: '💎 Optimal oxygen levels',
-            strongCurrent: '🚤 Strong current advantage',
-            cloudyGood: '☁️ Overcast advantage',
-            reducedVis: '🌫️ Reduced visibility',
-            denseFog: '🌫️ Dense fog effect',
-            migrationSeason: (r) => `🐟 ${r} MIGRATION`,
-            spawningSeason: (r) => `🥚 ${r} SPAWNING`,
-            moonlight: (i) => `🌙 Moonlight Effect (%${i})`,
-            substrateLabel: (s, str) => `${str} bottom`
-        },
-        reasons: {
-            outOfRegion: (r, h) => `Not found in ${r}. Habitat: ${h}`,
-        },
-        score: {
-            badConditions: 'Bad Conditions',
-            lowActivity: 'Low Activity',
-            moderateActivity: 'Moderate Activity',
-            goodConditions: 'Good Conditions',
-        },
-        penalties: {
-            lethalTemp: 'Lethal temp', criticalTemp: 'Critical temp',
-            tooShallowSpot: 'Too shallow', shallowSpot: 'Shallow spot',
-            tooDeeply: 'Too deep', hardToReach: 'Hard to reach from shore',
-            openWaterType: 'Offshore / Boat species', noonSuppression: 'Midday suppression',
-            murkyWater: 'Murky water', wavyWater: 'Wavy water', noSchool: 'No school',
-            schoolActive: 'Schools active!', dangerWave: 'DANGER: Wave',
-            dangerWaveTrigger: '⚠️ DANGER: Waves too high!',
-            storm: 'STORM', veryWindy: 'Very windy', windy: 'Windy',
-            heavyRain: 'Heavy rain', rainy: 'Rainy', lightRain: 'Light rain',
-        },
-        weather: {
-            0: 'Sunny', 1: 'Mainly Clear', 2: 'Partly Cloudy', 3: 'Cloudy',
-            45: 'Fog', 48: 'Depositing Rime Fog',
-            51: 'Light Drizzle', 53: 'Moderate Drizzle', 55: 'Dense Drizzle',
-            61: 'Light Rain', 63: 'Moderate Rain', 65: 'Heavy Rain',
-            71: 'Light Snow', 73: 'Moderate Snow', 75: 'Heavy Snow',
-            80: 'Light Rain Showers', 81: 'Moderate Rain Showers', 82: 'Violent Rain Showers',
-            95: 'Thunderstorm',
-        },
-        forecast: { bestTime: 'Best time', tomorrow: 'Tomorrow', highTide: 'High Tide', lowTide: 'Low Tide', risingTide: 'Tide Rising', fallingTide: 'Tide Falling' }
     }
 };
-
-// Bölge İsimleri Sözlüğü (Dinamik çeviri için)
-const REGION_TRANSLATIONS = {
-    'es': {
-        'BATI AKDENİZ': 'MEDITERRÁNEO OCCIDENTAL',
-        'ORTA AKDENİZ': 'MEDITERRÁNEO CENTRAL',
-        'DOĞU AKDENİZ': 'MEDITERRÁNEO ORIENTAL',
-        'EGE': 'MAR EGEO',
-        'MARMARA': 'MAR DE MARMARA',
-        'KARADENİZ': 'MAR NEGRO',
-        'KUZEY EGE': 'EGEO NORTE',
-        'GÜNEY EGE': 'EGEO SUR'
-    }
-};
-
-function getLocalizedRegionName(name, lang) {
-    if (lang === 'es' && REGION_TRANSLATIONS.es[name]) return REGION_TRANSLATIONS.es[name];
-    return name;
-}
-
-function getWeatherDesc(code, lang) {
-    const s = SERVER_i18n[lang] || SERVER_i18n.tr;
-    return s.weather[code] || s.weather[0];
-}
 
 // Lang helper — route'lardan req.query.lang ile çağır
 function getLang(req) {
     const l = (req?.query?.lang || 'tr').toLowerCase();
     return SERVER_i18n[l] ? l : 'tr';
 }
-function i18n(lang) { 
-    const l = lang || 'tr';
-    const s = SERVER_i18n[l] || SERVER_i18n.tr || SERVER_i18n.en;
-    if (!s.triggers) s.triggers = {};
-    if (!s.reasons) s.reasons = {};
-    return s;
-}
+function i18n(lang) { return SERVER_i18n[lang] || SERVER_i18n.tr; }
 
 // Zone helper — depthAvg'dan zone string üret
 function getZoneLabel(depthVal, lang) {
@@ -863,7 +604,7 @@ async function fetchSubstrate(lat, lon) {
         // GeoServer HTML tablosunda <td>alan_adı</td><td>değer</td> formatı
         // Alan adı: substrate, Folk5cl, Folk7cl, AllcombD, substrate_class, subs vb.
         const substrate = parseSubstrateFromHtml(html);
-        console.log(`[SUBSTRATE] (${latR},${lonR}) → ${substrate}`);
+        console.log(`[SUBSTRATE] (${latR},${lonR}) → ${substrate || 'null'}`);
         substrateCache.set(ck, substrate);
         return substrate;
 
@@ -993,9 +734,9 @@ const SUBSTRATE_PREFS = {
 };
 
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
 // OFFLİNE KONUM ANALİZİ — Türkiye + KKTC Şehir Sınırları (turf.js yok)
-// ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
 
 // Kıyı şeridine sahip iller — sadece bunlar için Snap çalışır
 const COASTAL_PROVINCES = new Set([
@@ -1100,7 +841,7 @@ function analyzeLocationOffline(lat, lon) {
     }
     return { status: 'SEA' };
 }
-// ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
 
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use('/api/', limiter);
@@ -2192,7 +1933,7 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
         };
 
         // Skor hesapla
-        const result = calculateFishScore(fish, key, hourParams, lang);
+        const result = calculateFishScore(fish, key, hourParams);
 
         // [YENİ] Saatlik skoru kaydet
         hourlyScores[h] = Math.round(result.finalScore * 10) / 10;
@@ -2261,7 +2002,7 @@ function calculate3HourWindowScore(fish, key, baseParams, weather, marine, cente
             hour: h
         };
 
-        const result = calculateFishScore(fish, key, hourParams, lang);
+        const result = calculateFishScore(fish, key, hourParams);
         totalScore += result.finalScore;
         count++;
     }
@@ -2348,7 +2089,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
                 (mb.tempMax === undefined || tempWater <= mb.tempMax);
             if (tempMatch) {
                 seasonalEff = Math.min(1.0, seasonalEff + mb.bonus);
-                const localizedRegion = getLocalizedRegionName(region, lang);
+                const localizedRegion = i18n(lang).regions[region] || region;
                 activeTriggers.push(i18n(lang).triggers.migrationSeason(localizedRegion));
             }
         }
@@ -2363,7 +2104,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
                 (sb.tempMax === undefined || tempWater <= sb.tempMax);
             if (tempMatch) {
                 seasonalEff = Math.min(1.0, seasonalEff + sb.bonus);
-                const localizedRegion = getLocalizedRegionName(region, lang);
+                const localizedRegion = i18n(lang).regions[region] || region;
                 activeTriggers.push(i18n(lang).triggers.spawningSeason(localizedRegion));
             }
         }
@@ -2837,7 +2578,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
 
     // Dalga Yönü — Bölgeye göre korunaklılık
     if (waveDirection > 0) {
-        const _protectedLabel = (i18n(lang).triggers.protectedDir || '🌊 ').replace('🌊 ', '');
+        const _protectedLabel = i18n(lang).triggers.protectedDir.replace('🌊 ', '');
         const protectedDirs = {
             'EGE': { favorable: [45, 135], label: _protectedLabel },
             'AKDENİZ': { favorable: [315, 45], label: _protectedLabel },
@@ -2849,8 +2590,10 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         // Türkiye dışı bölgeler için: koordinat bazlı kıyı yönü tahmini
         if (!pref && params.lat && params.lon) {
             const latF = parseFloat(params.lat);
+            // Basit kural: kuzey yarım küre → doğudan gelen dalga genelde korunaklı
+            // güney yarım küre → batıdan gelen dalga
             const favorable = latF >= 0 ? [45, 135] : [225, 315];
-            pref = { favorable, label: (i18n(lang).triggers.protectedDir || '🌊 ').replace('🌊 ', '') };
+            pref = { favorable, label: i18n(lang).triggers.protectedDir.replace('🌊 ', '') };
         }
 
         if (pref) {
@@ -2872,6 +2615,27 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             activeTriggers.push(i18n(lang).triggers.swellDominant);
         }
         scoreDetails.swellAnalysis = { windWave: windWaveHeight, swellPeriod, swellDominated };
+    }
+
+    // Görüş Mesafesi - V2.2 Süper Sentez (Kimi Ai / NTU Analizi)
+    /**
+     * [BİLİMSEL NOT - V2.2]: Kimi Ai uyarısı.
+     * Görsel avcılar için bulanıklık (NTU) reaksiyon mesafesini %2/NTU oranında düşürür.
+     * Artık fish.huntingMode === 'visual' özelliği veritabanından dinamik olarak okunur.
+     */
+    if (visibility < 20000) {
+        const isVisualPredator = fish.huntingMode === 'visual';
+        const visMod = isDeepBottom ? 0.2 : (isVisualPredator ? 1.5 : (fish.clarityPref === 'CLEAR' ? 1.0 : 0.5));
+
+        if (visibility < 1000) {
+            // [DÜZELTİLDİ: V2.2] — Baz ceza 15'ten 8'e düşürüldü (1.5x ile 12 puan - Sınırı taşırmaz)
+            s_trigger -= (isVisualPredator ? 8 : 4) * visMod;
+            if (visMod > 0) activeTriggers.push(i18n(lang).triggers.denseFog);
+        } else if (visibility < 5000) {
+            s_trigger -= (isVisualPredator ? 4 : 2) * visMod;
+            if (visMod > 0) activeTriggers.push(i18n(lang).triggers.reducedVis);
+        }
+        scoreDetails.visibility = { value: visibility, km: parseFloat((visibility / 1000).toFixed(1)), isVisualPredator };
     }
 
 
@@ -3136,19 +2900,13 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // Güvenlik amaçlı yuvarlama ve cap
     finalScore = Math.min(99, finalScore);
 
-    // Yerelleştirilmiş Hava Durumu ve Bölge
-    const localizedWeather = getWeatherDesc(weatherCode, lang);
-    const localizedRegion = getLocalizedRegionName(region, lang);
+    let reason = "";
+    if (finalScore < 25) reason = activeTriggers.length > 0 ? activeTriggers[0] : i18n(lang).score.badConditions;
+    else if (finalScore < 40) reason = i18n(lang).score.lowActivity;
+    else if (finalScore >= 65) reason = activeTriggers.length > 0 ? activeTriggers[0] : i18n(lang).score.goodConditions;
+    else reason = i18n(lang).score.moderateActivity;
 
-    return {
-        finalScore: Math.round(finalScore),
-        score: Math.round(finalScore),
-        weatherSummary: localizedWeather,
-        regionName: localizedRegion,
-        activeTriggers,
-        scoreDetails,
-        penalties
-    };
+    return { finalScore, activeTriggers, reason, scoreDetails };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -3634,9 +3392,7 @@ app.get('/api/forecast', async (req, res) => {
                     // YENİ (1C)
                     windGust, precipProb, weatherCode, visibility,
                     waveDirection, windWaveHeight, swellPeriod,
-                    tideFlow: tideFlow,
-                    moonAltitude: moonAltitude,
-                    oxygen, upwelling
+                    tideFlow, moonAltitude, oxygen, upwelling
                 };
 
                 const resultsMap = new Map();
@@ -4002,7 +3758,7 @@ app.get('/api/forecast', async (req, res) => {
             instantData = {
                 score: i_topScore,
                 // ÜST KISIM: Sadece İkonlu TR Hava Durumu (Ham veri gelmez)
-                weatherSummary: getWeatherDesc(i_weatherCode, lang),
+                weatherSummary: getWeatherIconicDescription(i_weatherCode, lang),
                 tacticKey: instantTacticKey, tacticData: instantTacticData,
                 fishList: instantFishList.slice(0, 10),
                 temp: i_tempWater,
@@ -4067,7 +3823,7 @@ app.get('/api/forecast', async (req, res) => {
         // Önbelleğe (cache) mutlaka HAM VERİ kaydedilmeli.
 
         const rawResponseData = {
-            version: "F.I.S.H. v3.0", region: getLocalizedRegionName(regionName, lang), isLand, landReason, clickHour: correctedClickHour,
+            version: "F.I.S.H. v3.0", region: i18n(lang).regions[regionName] || regionName, isLand, landReason, clickHour: correctedClickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
             depth: depthData,        // EMODnet Bathymetry derinlik verisi
             substrate: substrateData, // EMODnet Seabed Habitats dip yapısı
@@ -4836,43 +4592,6 @@ app.post('/api/verify-subscription', async (req, res) => {
     } catch (error) {
         console.error('[VERIFY] Firestore hatası:', error.message);
         res.status(500).json({ error: 'Doğrulama hatası' });
-    }
-});
-
-// ═══════════════════════════════════════════════════════════════
-// 👤 KULLANICI PROFİLİ GÜNCELLEME (FCM Token, Dil, Cihaz Bilgisi)
-// ═══════════════════════════════════════════════════════════════
-app.post('/api/update-user-profile', async (req, res) => {
-    if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
-    
-    const { fcmToken, lang, appVersion, os, deviceModel, fishingStyle } = req.body;
-    const uid = req.user.uid;
-
-    try {
-        if (!db) return res.status(503).json({ error: 'Veritabanı hazır değil' });
-
-        const updateData = {
-            updatedAt: Date.now()
-        };
-
-        // Gelen verileri kontrol et ve ekle
-        if (fcmToken) updateData.fcmToken = fcmToken;
-        if (lang) updateData.lang = lang.toLowerCase();
-        if (appVersion) updateData.appVersion = appVersion;
-        if (os) updateData.os = os;
-        if (deviceModel) updateData.deviceModel = deviceModel;
-        if (fishingStyle) updateData.fishingStyle = fishingStyle;
-        
-        // Üyelik durumu özeti (mevcut auth middleware'den gelen veriyi kullan)
-        updateData.isPremium = req.isPremium || false;
-
-        await db.collection('users').doc(uid).set(updateData, { merge: true });
-        
-        console.log(`[USER-PROFILE] Güncellendi — uid:${uid} lang:${lang || 'tr'}`);
-        res.json({ success: true });
-    } catch (e) {
-        console.error('[USER-PROFILE-UPDATE]', e.message);
-        res.status(500).json({ error: 'Profil güncellenemedi' });
     }
 });
 
@@ -5951,84 +5670,70 @@ cron.schedule('0 * * * *', async () => {
         const notifSpotName = spotNames.slice(0, 2).join(' & ');
         const uniqueUids = [...new Set(spots.map(s => s.uid))];
 
-        // ── 5. Etkilenen kullanıcıların FCM tokenlarını dillere göre grupla ──
-        const tokensByLang = {}; // { 'tr': [{uid, token}...], 'en': [...] }
+        const tokens = [];
         await Promise.all(uniqueUids.map(async (uid) => {
             try {
                 const userDoc = await db.collection('users').doc(uid).get();
-                const userData = userDoc.data();
-                const token = userData?.fcmToken;
-                if (token) {
-                    // Kullanıcı dili yoksa varsayılan 'tr'
-                    const userLang = (userData?.lang || 'tr').toLowerCase();
-                    if (!tokensByLang[userLang]) tokensByLang[userLang] = [];
-                    tokensByLang[userLang].push({ uid, token });
-                }
+                const token = userDoc.data()?.fcmToken;
+                if (token) tokens.push({ uid, token });
             } catch (e) {
-                console.warn(`[NOTIFY CRON] Token/Dil alınamadı uid=${uid}:`, e.message);
+                console.warn(`[NOTIFY CRON] Token alınamadı uid=${uid}:`, e.message);
             }
         }));
 
-        const languages = Object.keys(tokensByLang);
-        if (languages.length === 0) {
+        if (tokens.length === 0) {
             console.log(`[NOTIFY CRON] Bu grup için geçerli FCM token yok.`);
             continue;
         }
 
-        // ── 6. Her dil grubu için ayrı bildirim gönder ────────────────────────
-        for (const langKey of languages) {
-            const langTokens = tokensByLang[langKey];
-            // SERVER_i18n içinde bu dil yoksa varsayılan olarak Türkçe (tr) kullan
-            const i18nSet = SERVER_i18n[langKey] || SERVER_i18n.tr;
+        // ── 6. FCM Multicast bildirimi gönder ─────────────────────────────
+        const message = {
+            tokens: tokens.map(t => t.token),
+            notification: {
+                title: SERVER_i18n.tr.notification.title,
+                body: SERVER_i18n.tr.notification.body(notifSpotName)
+            },
+            data: {
+                type: 'pressure_alert',
+                spotName: notifSpotName,
+                trend: trendResult.trend,
+                change: String(trendResult.change),
+                lat: String(lat),
+                lon: String(lon)
+            },
+            android: {
+                priority: 'high',
+                notification: { sound: 'default', channelId: 'pressure_alerts' }
+            },
+            apns: {
+                payload: { aps: { sound: 'default', badge: 1 } }
+            }
+        };
 
-            const message = {
-                tokens: langTokens.map(t => t.token),
-                notification: {
-                    title: i18nSet.notification.title,
-                    body: i18nSet.notification.body(notifSpotName)
-                },
-                data: {
-                    type: 'pressure_alert',
-                    spotName: notifSpotName,
-                    trend: trendResult.trend,
-                    change: String(trendResult.change),
-                    lat: String(lat),
-                    lon: String(lon)
-                },
-                android: {
-                    priority: 'high',
-                    notification: { sound: 'default', channelId: 'pressure_alerts' }
-                },
-                apns: {
-                    payload: { aps: { sound: 'default', badge: 1 } }
-                }
-            };
+        try {
+            const fcmResponse = await admin.messaging().sendEachForMulticast(message);
+            console.log(`[NOTIFY CRON] ✅ ${fcmResponse.successCount}/${tokens.length} bildirim gönderildi — ${notifSpotName}`);
 
-            try {
-                const fcmResponse = await admin.messaging().sendEachForMulticast(message);
-                console.log(`[NOTIFY CRON] ✅ [${langKey}] ${fcmResponse.successCount}/${langTokens.length} bildirim gönderildi — ${notifSpotName}`);
-
-                // Geçersiz tokenları Firestore'dan temizle
-                fcmResponse.responses.forEach((resp, idx) => {
-                    if (!resp.success) {
-                        const errCode = resp.error?.code;
-                        if (
-                            errCode === 'messaging/invalid-registration-token' ||
-                            errCode === 'messaging/registration-token-not-registered'
-                        ) {
-                            const { uid } = langTokens[idx];
-                            if (uid) {
-                                db.collection('users').doc(uid)
-                                    .update({ fcmToken: admin.firestore.FieldValue.delete() })
-                                    .catch(() => { });
-                                console.log(`[NOTIFY CRON] Geçersiz token temizlendi — uid:${uid} (${langKey})`);
-                            }
+            // Geçersiz tokenları Firestore'dan temizle
+            fcmResponse.responses.forEach((resp, idx) => {
+                if (!resp.success) {
+                    const errCode = resp.error?.code;
+                    if (
+                        errCode === 'messaging/invalid-registration-token' ||
+                        errCode === 'messaging/registration-token-not-registered'
+                    ) {
+                        const { uid } = tokens[idx];
+                        if (uid) {
+                            db.collection('users').doc(uid)
+                                .update({ fcmToken: admin.firestore.FieldValue.delete() })
+                                .catch(() => { });
+                            console.log(`[NOTIFY CRON] Geçersiz token temizlendi — uid:${uid}`);
                         }
                     }
-                });
-            } catch (err) {
-                console.error(`[NOTIFY CRON] FCM [${langKey}] gönderim hatası:`, err.message);
-            }
+                }
+            });
+        } catch (err) {
+            console.error(`[NOTIFY CRON] FCM gönderim hatası:`, err.message);
         }
 
         // API limitine saygı: gruplar arası kısa bekleme
