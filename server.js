@@ -395,18 +395,53 @@ const SERVER_i18n = {
             storm: 'TORMENTA', veryWindy: 'Viento fuerte', windy: 'Ventoso',
             heavyRain: 'Lluvia intensa', rainy: 'Lluvioso', lightRain: 'Lluvia ligera',
         },
-        moon: {
-            newMoon: 'Luna Nueva 🌑', crescentWaxing: 'Luna Creciente 🌒',
-            firstQuarter: 'Cuarto Creciente 🌓', waxingGibbous: 'Gibosa Creciente 🌔',
-            fullMoon: 'Luna Llena 🌕', waningGibbous: 'Gibosa Menguante 🌖',
-            lastQuarter: 'Cuarto Menguante 🌗', crescentWaning: 'Luna Menguante 🌘',
-        },
         protected: {
             penalties: ['🚫 PESCA PROHIBIDA — Especie protegida'],
             reason: '🚫 Pesca estrictamente prohibida en Turquía — Especie protegida (Regulación 6/2).',
+        },
+        weather: {
+            0: 'Soleado', 1: 'Principalmente despejado', 2: 'Parcialmente nublado', 3: 'Nublado',
+            45: 'Niebla', 48: 'Niebla de escarcha',
+            51: 'Llovizna ligera', 53: 'Llovizna moderada', 55: 'Llovizna densa',
+            61: 'Lluvia ligera', 63: 'Lluvia moderada', 65: 'Lluvia fuerte',
+            71: 'Nieve ligera', 73: 'Nieve moderada', 75: 'Nieve fuerte',
+            80: 'Chubascos ligeros', 81: 'Chubascos moderados', 82: 'Chubascos violentos',
+            95: 'Tormenta eléctrica',
+        },
+        forecast: {
+            bestTime: 'Mejor momento',
+            tomorrow: 'Mañana',
+            highTide: 'Marea alta',
+            lowTide: 'Marea baja',
+            risingTide: 'Marea subiendo',
+            fallingTide: 'Marea bajando'
         }
     }
 };
+
+// Bölge İsimleri Sözlüğü (Dinamik çeviri için)
+const REGION_TRANSLATIONS = {
+    'es': {
+        'BATI AKDENİZ': 'MEDITERRÁNEO OCCIDENTAL',
+        'ORTA AKDENİZ': 'MEDITERRÁNEO CENTRAL',
+        'DOĞU AKDENİZ': 'MEDITERRÁNEO ORIENTAL',
+        'EGE': 'MAR EGEO',
+        'MARMARA': 'MAR DE MARMARA',
+        'KARADENİZ': 'MAR NEGRO',
+        'KUZEY EGE': 'EGEO NORTE',
+        'GÜNEY EGE': 'EGEO SUR'
+    }
+};
+
+function getLocalizedRegionName(name, lang) {
+    if (lang === 'es' && REGION_TRANSLATIONS.es[name]) return REGION_TRANSLATIONS.es[name];
+    return name;
+}
+
+function getWeatherDesc(code, lang) {
+    const s = SERVER_i18n[lang] || SERVER_i18n.tr;
+    return s.weather[code] || s.weather[0];
+}
 
 // Lang helper — route'lardan req.query.lang ile çağır
 function getLang(req) {
@@ -717,7 +752,7 @@ async function fetchSubstrate(lat, lon) {
         // GeoServer HTML tablosunda <td>alan_adı</td><td>değer</td> formatı
         // Alan adı: substrate, Folk5cl, Folk7cl, AllcombD, substrate_class, subs vb.
         const substrate = parseSubstrateFromHtml(html);
-        console.log(`[SUBSTRATE] (${latR},${lonR}) → ${substrate || 'null'}`);
+        console.log(`[SUBSTRATE] (${latR},${lonR}) → ${substrate}`);
         substrateCache.set(ck, substrate);
         return substrate;
 
@@ -847,9 +882,9 @@ const SUBSTRATE_PREFS = {
 };
 
 
-// ═══════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // OFFLİNE KONUM ANALİZİ — Türkiye + KKTC Şehir Sınırları (turf.js yok)
-// ═══════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 
 // Kıyı şeridine sahip iller — sadece bunlar için Snap çalışır
 const COASTAL_PROVINCES = new Set([
@@ -954,7 +989,7 @@ function analyzeLocationOffline(lat, lon) {
     }
     return { status: 'SEA' };
 }
-// ═══════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use('/api/', limiter);
@@ -2202,7 +2237,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
                 (mb.tempMax === undefined || tempWater <= mb.tempMax);
             if (tempMatch) {
                 seasonalEff = Math.min(1.0, seasonalEff + mb.bonus);
-                const localizedRegion = i18n(lang).regions[region] || region;
+                const localizedRegion = getLocalizedRegionName(region, lang);
                 activeTriggers.push(i18n(lang).triggers.migrationSeason(localizedRegion));
             }
         }
@@ -2217,7 +2252,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
                 (sb.tempMax === undefined || tempWater <= sb.tempMax);
             if (tempMatch) {
                 seasonalEff = Math.min(1.0, seasonalEff + sb.bonus);
-                const localizedRegion = i18n(lang).regions[region] || region;
+                const localizedRegion = getLocalizedRegionName(region, lang);
                 activeTriggers.push(i18n(lang).triggers.spawningSeason(localizedRegion));
             }
         }
@@ -2730,27 +2765,6 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         scoreDetails.swellAnalysis = { windWave: windWaveHeight, swellPeriod, swellDominated };
     }
 
-    // Görüş Mesafesi - V2.2 Süper Sentez (Kimi Ai / NTU Analizi)
-    /**
-     * [BİLİMSEL NOT - V2.2]: Kimi Ai uyarısı.
-     * Görsel avcılar için bulanıklık (NTU) reaksiyon mesafesini %2/NTU oranında düşürür.
-     * Artık fish.huntingMode === 'visual' özelliği veritabanından dinamik olarak okunur.
-     */
-    if (visibility < 20000) {
-        const isVisualPredator = fish.huntingMode === 'visual';
-        const visMod = isDeepBottom ? 0.2 : (isVisualPredator ? 1.5 : (fish.clarityPref === 'CLEAR' ? 1.0 : 0.5));
-
-        if (visibility < 1000) {
-            // [DÜZELTİLDİ: V2.2] — Baz ceza 15'ten 8'e düşürüldü (1.5x ile 12 puan - Sınırı taşırmaz)
-            s_trigger -= (isVisualPredator ? 8 : 4) * visMod;
-            if (visMod > 0) activeTriggers.push(i18n(lang).triggers.denseFog);
-        } else if (visibility < 5000) {
-            s_trigger -= (isVisualPredator ? 4 : 2) * visMod;
-            if (visMod > 0) activeTriggers.push(i18n(lang).triggers.reducedVis);
-        }
-        scoreDetails.visibility = { value: visibility, km: parseFloat((visibility / 1000).toFixed(1)), isVisualPredator };
-    }
-
 
     s_trigger = asymptoticTriggerSum(s_trigger);
 
@@ -3013,13 +3027,19 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // Güvenlik amaçlı yuvarlama ve cap
     finalScore = Math.min(99, finalScore);
 
-    let reason = "";
-    if (finalScore < 25) reason = activeTriggers.length > 0 ? activeTriggers[0] : i18n(lang).score.badConditions;
-    else if (finalScore < 40) reason = i18n(lang).score.lowActivity;
-    else if (finalScore >= 65) reason = activeTriggers.length > 0 ? activeTriggers[0] : i18n(lang).score.goodConditions;
-    else reason = i18n(lang).score.moderateActivity;
+    // Yerelleştirilmiş Hava Durumu ve Bölge
+    const localizedWeather = getWeatherDesc(weatherCode, lang);
+    const localizedRegion = getLocalizedRegionName(region, lang);
 
-    return { finalScore, activeTriggers, reason, scoreDetails };
+    return {
+        finalScore: Math.round(finalScore),
+        score: Math.round(finalScore),
+        weatherSummary: localizedWeather,
+        regionName: localizedRegion,
+        activeTriggers,
+        scoreDetails,
+        penalties
+    };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -3505,7 +3525,9 @@ app.get('/api/forecast', async (req, res) => {
                     // YENİ (1C)
                     windGust, precipProb, weatherCode, visibility,
                     waveDirection, windWaveHeight, swellPeriod,
-                    tideFlow, moonAltitude, oxygen, upwelling
+                    tideFlow: tideFlow,
+                    moonAltitude: moonAltitude,
+                    oxygen, upwelling
                 };
 
                 const resultsMap = new Map();
@@ -3871,7 +3893,7 @@ app.get('/api/forecast', async (req, res) => {
             instantData = {
                 score: i_topScore,
                 // ÜST KISIM: Sadece İkonlu TR Hava Durumu (Ham veri gelmez)
-                weatherSummary: getWeatherIconicDescription(i_weatherCode, lang),
+                weatherSummary: getWeatherDesc(i_weatherCode, lang),
                 tacticKey: instantTacticKey, tacticData: instantTacticData,
                 fishList: instantFishList.slice(0, 10),
                 temp: i_tempWater,
@@ -3936,7 +3958,7 @@ app.get('/api/forecast', async (req, res) => {
         // Önbelleğe (cache) mutlaka HAM VERİ kaydedilmeli.
 
         const rawResponseData = {
-            version: "F.I.S.H. v3.0", region: i18n(lang).regions[regionName] || regionName, isLand, landReason, clickHour: correctedClickHour,
+            version: "F.I.S.H. v3.0", region: getLocalizedRegionName(regionName, lang), isLand, landReason, clickHour: correctedClickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
             depth: depthData,        // EMODnet Bathymetry derinlik verisi
             substrate: substrateData, // EMODnet Seabed Habitats dip yapısı
