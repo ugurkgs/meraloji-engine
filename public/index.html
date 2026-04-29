@@ -9362,25 +9362,27 @@
 
         console.log('[PLATFORM]', isAndroidApp ? 'Android TWA (Google Billing)' : 'Web / iOS (Iyzico)');
 
-        // WEB BLOCKER AKTİVASYONU — Sadece web kullanıcılarına göster
+        // WEB BLOCKER AKTİVASYONU — Web sürümü tamamen durduruluyor
         if (!isAndroidApp) {
+            console.warn("MERALOJİ: Web sürümü pasife alınmıştır. Google Play'e yönlendiriliyor.");
+            
             document.addEventListener('DOMContentLoaded', () => {
                 const blocker = document.getElementById('web-blocker');
                 const splash = document.getElementById('splash');
-                
-                if (blocker) {
-                    blocker.style.display = 'flex';
-                    // Web kullanıcıları için arka plandaki auth card'ı tamamen gizleyelim
-                    const authCard = document.querySelector('.auth-card');
-                    if (authCard) authCard.style.display = 'none';
-                }
-
-                // Web'de splash ekranını beklemeden hemen kaldır, duvarı göster
+                if (blocker) blocker.style.display = 'flex';
                 if (splash) {
                     splash.style.opacity = '0';
-                    setTimeout(() => { splash.style.display = 'none'; }, 500);
+                    setTimeout(() => { splash.style.display = 'none'; }, 400);
                 }
+                // Giriş panelini tamamen yok et
+                const authCard = document.querySelector('.auth-card');
+                if (authCard) authCard.remove();
             });
+
+            // ⛔ [GÜVENLİK DUVARI] 
+            // BURADAN İTİBAREN KODLAR PASİFE EKİLMİŞTİR.
+            // Web kullanıcıları için uygulama motorunun çalışması burada durdurulur.
+            throw new Error("Meraloji Web Platform Disabled - Redirecting to Google Play");
         }
         // ─────────────────────────────────────────────────────────────────────────
 
