@@ -666,6 +666,7 @@ const bathyCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
 
 // Substrat sonuçlarını 24 saat cache'le — dip yapısı değişmez
 const substrateCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
+const planktonMemoryCache = new NodeCache({ stdTTL: 10800, checkperiod: 600 }); // Plankton RAM Önbelleği (3 Saat)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // EMODnet SEABED HABITATS — Dip Yapısı (Substrat) Analizi
@@ -1501,14 +1502,14 @@ function calculateClarity(wave, windSpeed, rain) {
 /** Oksijen seviyesini (mg/L) hesaplar - v4.0 Deep Reality */
 function calculateOxygen(temp, salinity, chlorophyll, timeMode) {
     const s = salinity || 36;
-    
+
     // 1. O sıcaklık ve tuzluluktaki teorik maksimum çözünürlük (Henry Yasası bazlı)
     const baseSolubility = (14.6 - (0.45 * temp) + (0.005 * temp * temp)) * (1 - 0.006 * s);
-    
+
     // 2. Tahmini mg/L (Baz çözünürlük üzerinden fotosentez/respirasyon eklenir)
     let mgL = baseSolubility;
     const chl = parseFloat(chlorophyll || 0.1);
-    
+
     if (timeMode === 'DAY') mgL += Math.min(2.0, chl * 0.5);
     else mgL -= Math.min(1.0, chl * 0.3);
 
@@ -2316,14 +2317,14 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     const tMin = fish.tempRange.min, tOpt = fish.tempRange.opt, tMax = fish.tempRange.max;
     const tOptMin = fish.tempRange.optMin ?? (tOpt - (tOpt - tMin) * 0.35);
     const tOptMax = fish.tempRange.optMax ?? (tOpt + (tMax - tOpt) * 0.35);
-    
+
     // Gaussian/Trapezoid skoru
     const gaussianScore = getGaussianScore(tempWater, tMin, tOpt, tMax, tOptMin, tOptMax);
-    
+
     // Lethal Gate — Çifte cezayı önlemek için doğrudan sıcaklık skoruna uygulanır
     const gateMultiplier = getTempGateMultiplier(tempWater, tMin, tMax);
     const tempScore = gaussianScore * gateMultiplier;
-    
+
     let s_temp = tempScore * 25;
     scoreDetails.temp = { score: s_temp, max: 25, stars: Math.round(tempScore * 5), value: tempWater, gate: gateMultiplier };
 
@@ -2597,7 +2598,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         const isMigratoryPelagic = fish.category === 'PELAJIK' || fish.sstTrendPref === 'cooling';
         const isCoastalSensitive = fish.category === 'KIYI' || fish.category === 'LAGUN' || fish.category === 'KUM_TABAN';
         const isBenthic = ['DIP_DERIN', 'DIP_KIYI', 'KAYALIK', 'DİP', 'DERİN', 'KUM_TABAN', 'KAFADANBACAKLI', 'KALAMAR'].includes(fish.category);
-        
+
         if (tempShock.direction === 'COOLING') {
             if (isMigratoryPelagic) {
                 // Pelagik göçmenler için güçlü pozitif tetikleyici (göç sinyali)
@@ -2612,7 +2613,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
                 s_trigger -= 0.5;
             } else {
                 // Diğer tüm genel türler için standart soğuma şoku stresi
-                s_trigger -= 1.0; 
+                s_trigger -= 1.0;
             }
         } else if (tempShock.direction === 'WARMING') {
             if (fish.sstTrendPref === 'warming') {
@@ -2624,10 +2625,10 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
                 s_trigger += 0.0; // Nötr
             }
         }
-        scoreDetails.tempShock = { 
-            change: tempShock.change, 
-            direction: tempShock.direction, 
-            isMigratoryPelagic, 
+        scoreDetails.tempShock = {
+            change: tempShock.change,
+            direction: tempShock.direction,
+            isMigratoryPelagic,
             isCoastalSensitive,
             isBenthic
         };
@@ -2672,7 +2673,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
          */
         if (atBoundary && estDO > 50) {
             // Mesafeye göre dinamik bonus (0-4 puan)
-            const thermBonus = Math.max(1.0, (10 - dist) * 0.4); 
+            const thermBonus = Math.max(1.0, (10 - dist) * 0.4);
             s_trigger += thermBonus;
             activeTriggers.push(i18n(lang).triggers.thermocline(Math.round(thermoclineDepth)));
             scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'AT', stars: 5, bonus: parseFloat(thermBonus.toFixed(1)) };
@@ -2859,15 +2860,15 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         else if (key === 'ahtapot') abundanceMult = 0.20; // Karadeniz'de yok denecek kadar az
     } else if (region === 'MARMARA') {
         if (key === 'mirmir') abundanceMult = 0.85; // Marmara'da orta yoğunluk
-        else if (key === 'cipura') abundanceMult = 0.80; 
+        else if (key === 'cipura') abundanceMult = 0.80;
     }
-    
+
     rawScore *= abundanceMult;
     scoreDetails.abundance = { multiplier: abundanceMult, region };
 
     // === KATMAN 2: BİYOLOJİK POTANSİYEL ÇARPANLARI ===
     // Bu çarpanlar balığın o bölgedeki temel var olma potansiyelini belirler.
-    
+
     // 1. Ay Fazı Çarpanı
     if (moonPhase !== undefined) {
         const moonMult = getMoonPhaseMultiplier(moonPhase, fish.moonPref);
@@ -3063,7 +3064,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
                 // veya zemin odaklı kategoriler (KUM_TABAN, DIP_DERIN) habitat eşleşmesinden %15 verim alır.
                 const isSpecialist = prefs.length <= 2 || fish.category === 'KUM_TABAN' || fish.category === 'DIP_DERIN';
                 const subMult = isSpecialist ? 1.15 : 1.10;
-                
+
                 rawScore *= subMult;
                 scoreDetails.substrate = { match: true, substrate, multiplier: subMult };
                 activeTriggers.push(i18n(lang).triggers.substrateLabel(substrate, i18n(lang).substrate[substrate] || substrate));
@@ -3123,7 +3124,7 @@ function applySanitization(data, isProUser) {
         base.current = 0; base.swellHeight = 0; base.precipProb = 0;
         base.hourlyScores = [];
         base.activityWindows = null;
-        
+
         base.fishList = day.fishList.slice(0, 3).map(f => ({
             key: f.key, name: f.name, icon: f.icon, score: -1, // Balık skorunu kilitle
             category: f.category, reason: f.reason,
@@ -3139,7 +3140,7 @@ function applySanitization(data, isProUser) {
         base.temp = 0; base.airTemp = 0; base.wave = 0; base.wind = 0;
         base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
         base.salinity = 0; base.pressure = 0; base.current = 0;
-        
+
         base.fishList = data.instant.fishList.slice(0, 3).map(f => ({
             key: f.key, name: f.name, icon: f.icon, score: -1, // Balık skorunu kilitle
             category: f.category, reason: f.reason,
@@ -3249,10 +3250,16 @@ app.get('/api/forecast', async (req, res) => {
         // [CRON CACHE] — background cron daha önce çektiyse direk kullan, API'ye gitme
         // [DEDUP]      — aynı koordinata eş zamanlı N istek gelirse tek OM çağrısı açılır
         // [PERF]       — Klorofil + SST de paralel başlatılıyor (eskiden sıralıydı → +3-12s gecikme)
-        const chlCacheKeyPre = `plankton_${parseFloat(lat).toFixed(2)}_${parseFloat(lon).toFixed(2)}`;
-        const chlCachedPre = db ? await db.collection('planktonCache').doc(chlCacheKeyPre).get().catch(() => null) : null;
-        const chlFromCache = chlCachedPre?.exists && (Date.now() - chlCachedPre.data().savedAt < 6 * 60 * 60 * 1000)
-            ? chlCachedPre.data().result : null;
+        const chlCacheKeyPre = `plankton_${parseFloat(lat).toFixed(1)}_${parseFloat(lon).toFixed(1)}`;
+        // Önce RAM Önbelleğine Bak (Fatura Tasarrufu)
+        let chlFromCache = planktonMemoryCache.get(chlCacheKeyPre);
+        if (!chlFromCache) {
+            const chlCachedPre = db ? await db.collection('planktonCache').doc(chlCacheKeyPre).get().catch(() => null) : null;
+            if (chlCachedPre?.exists && (Date.now() - chlCachedPre.data().savedAt < 6 * 60 * 60 * 1000)) {
+                chlFromCache = chlCachedPre.data().result;
+                planktonMemoryCache.set(chlCacheKeyPre, chlFromCache); // RAM'e kaydet
+            }
+        }
 
         let [weather, marine, bathymetryRaw, chlorophyllDataPre, sstSatPre, substrateData] = await Promise.all([
             cache.get(`raw_weather_${gLat}_${gLon}`)
@@ -3328,9 +3335,10 @@ app.get('/api/forecast', async (req, res) => {
         let chlorophyllData = chlorophyllDataPre || null;
         if (chlorophyllData && db && !chlFromCache) {
             // Yeni çekildi — Firestore'a kaydet (fire-and-forget)
-            const chlCacheKey = `plankton_${parseFloat(lat).toFixed(2)}_${parseFloat(lon).toFixed(2)}`;
+            const chlCacheKey = `plankton_${parseFloat(lat).toFixed(1)}_${parseFloat(lon).toFixed(1)}`;
             db.collection('planktonCache').doc(chlCacheKey)
                 .set({ result: chlorophyllData, savedAt: Date.now() }).catch(() => { });
+            planktonMemoryCache.set(chlCacheKey, chlorophyllData); // RAM'e de yaz
         }
         const chlorophyll = chlorophyllData?.chlorophyll ?? null;
 
@@ -4032,7 +4040,7 @@ app.get('/api/forecast', async (req, res) => {
         if (marine && marine.hourly?.sea_surface_temperature) {
             cache.set(`raw_marine_${gLat}_${gLon}`, marine, 10800);
         }
-        
+
         res.json(applySanitization(rawResponseData, isProUser));
 
     } catch (error) {
@@ -4314,18 +4322,24 @@ app.get('/api/fish-search', async (req, res) => {
             tideFlow: s_tideFlow,
             chlorophyll: await (async () => {
                 try {
-                    const chlCacheKey = `plankton_${parseFloat(lat).toFixed(2)}_${parseFloat(lon).toFixed(2)}`;
+                    const chlCacheKey = `plankton_${parseFloat(lat).toFixed(1)}_${parseFloat(lon).toFixed(1)}`;
+                    // RAM Önbelleği Kontrolü
+                    let memCached = planktonMemoryCache.get(chlCacheKey);
+                    if (memCached) return memCached.chlorophyll ?? null;
+
                     if (db) {
                         const chlRef = db.collection('planktonCache').doc(chlCacheKey);
                         const cached = await chlRef.get();
                         if (cached.exists) {
                             const d = cached.data();
                             if (Date.now() - d.savedAt < 6 * 60 * 60 * 1000) {
+                                planktonMemoryCache.set(chlCacheKey, d.result); // RAM'e al
                                 return d.result?.chlorophyll ?? null;
                             }
                         }
                     }
                     const freshChl = await fetchChlorophyll(lat, lon);
+                    if (freshChl) planktonMemoryCache.set(chlCacheKey, freshChl); // RAM'e al
                     return freshChl?.chlorophyll ?? null;
                 } catch (e) { return null; }
             })()
@@ -5453,9 +5467,13 @@ app.get('/api/plankton', async (req, res) => {
     const lon = parseFloat(req.query.lon);
     if (isNaN(lat) || isNaN(lon)) return res.status(400).json({ error: 'lat/lon gerekli' });
 
-    const cacheKey = `plankton_${lat.toFixed(2)}_${lon.toFixed(2)}`;
+    const cacheKey = `plankton_${lat.toFixed(1)}_${lon.toFixed(1)}`;
 
     try {
+        // 0. RAM Önbelleği (En Hızlı ve Bedava)
+        let memCached = planktonMemoryCache.get(cacheKey);
+        if (memCached) return res.json({ ...memCached, fromCache: true, fromRAM: true });
+
         // 1. Firestore cache kontrolü (6 saat)
         if (db) {
             const cacheRef = db.collection('planktonCache').doc(cacheKey);
@@ -5464,6 +5482,7 @@ app.get('/api/plankton', async (req, res) => {
                 const d = cached.data();
                 const ageMs = Date.now() - d.savedAt;
                 if (ageMs < 6 * 60 * 60 * 1000) {
+                    planktonMemoryCache.set(cacheKey, d.result); // RAM'e al
                     return res.json({ ...d.result, fromCache: true });
                 }
             }
@@ -5473,6 +5492,7 @@ app.get('/api/plankton', async (req, res) => {
         const result = await fetchChlorophyll(lat, lon);
 
         if (result) {
+            planktonMemoryCache.set(cacheKey, result); // RAM'e al
             // Başarılı — Firestore'a kaydet
             if (db) {
                 const cacheRef = db.collection('planktonCache').doc(cacheKey);
