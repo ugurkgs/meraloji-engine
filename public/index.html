@@ -1942,13 +1942,13 @@
             overflow-y: auto;
         }
 
-        /* WEB BLOCKER STİLLERİ */
+        /* WEB BLOCKER STİLLERİ - EN ÜST KATMAN */
         #web-blocker {
-            position: absolute;
+            position: fixed;
             inset: 0;
-            background: rgba(5, 38, 71, 0.88);
-            backdrop-filter: blur(15px);
-            z-index: 20000;
+            background: rgba(5, 38, 71, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 999999;
             display: none;
             flex-direction: column;
             align-items: center;
@@ -3269,26 +3269,27 @@
     <!-- ═══════════════════════════════════════════════════════════════════
          LOGIN OVERLAY
          ═══════════════════════════════════════════════════════════════════ -->
-    <div id="login-overlay" class="login-overlay">
-        <!-- WEB BLOCKER DUVARI -->
-        <div id="web-blocker">
-            <div class="blocker-content">
-                <div class="blocker-icon">🎣</div>
-                <div class="blocker-title">Meraloji Şimdi Google Market'te!</div>
-                <p class="blocker-text">
-                    Balık Avı Tahmini uygulamamız artık Google Play'de yayında. 
-                    Daha akıcı bir deneyim ve bildirimler için hemen indirin.
-                    <i>Our Fishing Forecast app is now live on Google Play! 
-                    Download now for a better experience and real-time alerts.</i>
-                    <i>¡Meraloji ya está disponible en Google Play! 
-                    Descarga nuestra aplicación de pronóstico de pesca ahora para una mejor experiencia.</i>
-                </p>
-                <a href="https://play.google.com/store/apps/details?id=com.meraloji.fish" target="_blank" class="play-store-btn">
-                    <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" 
-                         alt="Google Play'den indirin">
-                </a>
-            </div>
+    <!-- WEB BLOCKER DUVARI (BAĞIMSIZ EN ÜST KATMAN) -->
+    <div id="web-blocker">
+        <div class="blocker-content">
+            <div class="blocker-icon">🎣</div>
+            <div class="blocker-title">Meraloji Şimdi Google Market'te!</div>
+            <p class="blocker-text">
+                Balık Avı Tahmini uygulamamız artık Google Play'de yayında. 
+                Daha akıcı bir deneyim ve bildirimler için hemen indirin.
+                <i>Our Fishing Forecast app is now live on Google Play! 
+                Download now for a better experience and real-time alerts.</i>
+                <i>¡Meraloji ya está disponible en Google Play! 
+                Descarga nuestra aplicación de pronóstico de pesca ahora para una mejor experiencia.</i>
+            </p>
+            <a href="https://play.google.com/store/apps/details?id=com.meraloji.fish" target="_blank" class="play-store-btn">
+                <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" 
+                     alt="Google Play'den indirin">
+            </a>
         </div>
+    </div>
+
+    <div id="login-overlay" class="login-overlay">
         <img src="/logo.png" class="login-logo" alt="MERALOJİ">
         <div class="login-title">MERALOJİ</div>
         <div class="login-subtitle">F.I.S.H. SYSTEM</div>
@@ -9374,9 +9375,16 @@
                     splash.style.opacity = '0';
                     setTimeout(() => { splash.style.display = 'none'; }, 400);
                 }
-                // Giriş panelini tamamen yok et
+                // Giriş panelini ve onboarding ekranını tamamen yok et
                 const authCard = document.querySelector('.auth-card');
                 if (authCard) authCard.remove();
+                
+                // Onboarding (Hoş geldiniz) ekranını siliyoruz
+                const onboard = document.getElementById('onboard-modal') || document.querySelector('.onboard-container') || document.querySelector('[class*="onboard"]');
+                if (onboard) onboard.remove();
+
+                // Varsa diğer açık modalları temizle
+                document.querySelectorAll('.modal, .modal-overlay').forEach(m => m.remove());
             });
 
             // ⛔ [GÜVENLİK DUVARI] 
