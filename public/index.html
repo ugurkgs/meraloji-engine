@@ -155,7 +155,7 @@
         #splash {
             position: fixed;
             inset: 0;
-            background: linear-gradient(180deg, #020c1a 0%, #0a1628 50%, #071020 100%);
+            background: #052647; /* Native splash ile birebir aynı renk */
             z-index: 9999;
             display: flex;
             flex-direction: column;
@@ -1942,6 +1942,44 @@
             overflow-y: auto;
         }
 
+        /* WEB BLOCKER STİLLERİ */
+        #web-blocker {
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 38, 71, 0.88);
+            backdrop-filter: blur(15px);
+            z-index: 20000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .blocker-content {
+            max-width: 420px;
+            width: 100%;
+            background: linear-gradient(145deg, #0d1a2a 0%, #081220 100%);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 32px;
+            padding: 40px 24px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.9), 0 0 40px rgba(0, 212, 255, 0.1);
+        }
+
+        .blocker-icon { font-size: 4rem; margin-bottom: 20px; }
+        .blocker-title { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 12px; letter-spacing: -0.5px; }
+        .blocker-text { font-size: 0.95rem; color: #8ba4c7; line-height: 1.6; margin-bottom: 28px; }
+        .blocker-text i { font-size: 0.85rem; opacity: 0.7; font-style: normal; display: block; margin-top: 10px; }
+
+        .play-store-btn {
+            display: inline-block;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .play-store-btn:active { transform: scale(0.96); opacity: 0.8; }
+        .play-store-btn img { height: 60px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4)); }
+
         .login-overlay.hidden {
             opacity: 0;
             pointer-events: none;
@@ -3232,6 +3270,25 @@
          LOGIN OVERLAY
          ═══════════════════════════════════════════════════════════════════ -->
     <div id="login-overlay" class="login-overlay">
+        <!-- WEB BLOCKER DUVARI -->
+        <div id="web-blocker">
+            <div class="blocker-content">
+                <div class="blocker-icon">🎣</div>
+                <div class="blocker-title">Meraloji Şimdi Google Market'te!</div>
+                <p class="blocker-text">
+                    Balık Avı Tahmini uygulamamız artık Google Play'de yayında. 
+                    Daha akıcı bir deneyim ve bildirimler için hemen indirin.
+                    <i>Our Fishing Forecast app is now live on Google Play! 
+                    Download now for a better experience and real-time alerts.</i>
+                    <i>¡Meraloji ya está disponible en Google Play! 
+                    Descarga nuestra aplicación de pronóstico de pesca ahora para una mejor experiencia.</i>
+                </p>
+                <a href="https://play.google.com/store/apps/details?id=com.meraloji.fish" target="_blank" class="play-store-btn">
+                    <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" 
+                         alt="Google Play'den indirin">
+                </a>
+            </div>
+        </div>
         <img src="/logo.png" class="login-logo" alt="MERALOJİ">
         <div class="login-title">MERALOJİ</div>
         <div class="login-subtitle">F.I.S.H. SYSTEM</div>
@@ -3523,9 +3580,6 @@
 
     <div id="splash">
         <img src="logo.png" alt="Meraloji" class="splash-logo" onerror="this.style.display='none'">
-        <div class="splash-title">MERALOJİ</div>
-        <div class="splash-subtitle">F.I.S.H.</div>
-        <div class="splash-tagline">Find • Inspect • See • Hunt</div>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════
@@ -4155,6 +4209,7 @@
             </button>
             <button class="menu-btn" onclick="showTechModal()">🧠 <span id="algo-btn-text">Algoritma
                     Detayı</span></button>
+            <button class="menu-btn" onclick="showAboutModal()">🐟 <span id="about-btn-text">Hakkında</span></button>
             <button class="menu-btn" onclick="showHelpModal()">❓ <span id="help-btn-text">Yardım</span></button>
         </div>
 
@@ -4164,6 +4219,80 @@
                 style="color: var(--cyan); font-size: 0.8rem;">📧 <span class="__cf_email__"
                     data-cfemail="76031103041d1911030536111b171f1a5815191b">[email&#160;protected]</span></a><br>
             <span style="font-size: 0.75rem; opacity: 0.7;">F.I.S.H. System v3.0</span>
+        </div>
+    </div>
+    
+    <!-- ═══════════════════════════════════════════════════════════════════
+         ABOUT MODAL (HAKKINDA)
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div class="modal" id="about-modal">
+        <div class="modal-header">
+            <button class="modal-back" onclick="closeModal('about-modal')">←</button>
+            <div class="modal-title" id="about-modal-title">HAKKINDA</div>
+            <button class="modal-close" onclick="closeModal('about-modal')">✕</button>
+        </div>
+        <div style="padding: 24px; overflow-y: auto; max-height: calc(100vh - 100px);">
+            <!-- Logo & Title -->
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🐟</div>
+                <div style="font-size: 1.8rem; font-weight: 900; letter-spacing: 2px; color: var(--cyan);">MERALOJİ</div>
+                <div style="font-size: 0.9rem; opacity: 0.7; letter-spacing: 1px;">F.I.S.H. SYSTEM v3.0</div>
+            </div>
+
+            <!-- Scientific Mission -->
+            <div style="background: rgba(0, 200, 200, 0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(0, 200, 200, 0.1); margin-bottom: 24px;">
+                <h3 style="margin-top: 0; color: var(--cyan); font-size: 1.1rem;">🧬 Bilimsel Metodoloji</h3>
+                <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted);">
+                    Meraloji, bir "yapay zeka tahmini" değil, oşinografik verilere dayanan hassas bir <strong>matematiksel simülasyondur</strong>. Balıkların biyolojik davranışlarını, yaşam alanlarını ve çevresel faktörleri deniz biyolojisi literatüründeki <strong>asimptotik doyum eğrileri</strong> ile modeller.
+                </p>
+            </div>
+
+            <!-- F.I.S.H Engine -->
+            <div style="margin-bottom: 24px;">
+                <h3 style="color: var(--cyan); font-size: 1.1rem; margin-bottom: 12px;">⚓ F.I.S.H. Engine</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-weight: bold; color: var(--cyan);">Find</div>
+                        <div style="font-size: 0.75rem; opacity: 0.6;">Lokasyon Bul</div>
+                    </div>
+                    <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-weight: bold; color: var(--cyan);">Inspect</div>
+                        <div style="font-size: 0.75rem; opacity: 0.6;">Veriyi İncele</div>
+                    </div>
+                    <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-weight: bold; color: var(--cyan);">See</div>
+                        <div style="font-size: 0.75rem; opacity: 0.6;">Potansiyeli Gör</div>
+                    </div>
+                    <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-weight: bold; color: var(--cyan);">Hunt</div>
+                        <div style="font-size: 0.75rem; opacity: 0.6;">Avlanmaya Başla</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Honest Scientist -->
+            <div style="margin-bottom: 24px;">
+                <h3 style="color: var(--cyan); font-size: 1.1rem; margin-bottom: 12px;">🔬 Honest Scientist Yaklaşımı</h3>
+                <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted);">
+                    Sistemimiz sadece "iyi" şartları toplamaz. Balığın metabolik hızını etkileyen <strong>oksijen seviyesi (DO)</strong>, termoklin tabakası ve sıcaklık şokları gibi biyolojik eşikleri hesaplar. Eğer şartlar balığın biyolojik limitlerinin dışındaysa (lethal/critical threshold), sistem skoru radikal biçimde düşürerek sizi dürüstçe uyarır.
+                </p>
+            </div>
+
+            <!-- Data Sources -->
+            <div style="background: rgba(255, 255, 255, 0.03); padding: 16px; border-radius: 12px;">
+                <h4 style="margin-top: 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">Küresel Veri Ağı</h4>
+                <div style="font-size: 0.85rem; display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px;">
+                    <span style="color: var(--cyan);">● Open-Meteo Marine</span>
+                    <span style="color: var(--cyan);">● NOAA ArcGIS</span>
+                    <span style="color: var(--cyan);">● EMODnet Habitats</span>
+                    <span style="color: var(--cyan);">● SunCalc Solar Data</span>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px; font-size: 0.75rem; opacity: 0.4;">
+                © 2025 MERALOJİ — Bilimsel Balıkçılık Analiz Sistemi<br>
+                Uğur Kögüs • Denizlerin Geleceği Veride Saklıdır.
+            </div>
         </div>
     </div>
 
@@ -4840,9 +4969,14 @@
         let currentOverlayLayer = null;
 
         // ═══════════════════════════════════════════════════════════════════
-        // DİL SİSTEMİ - TR/EN Toggle
+        // DİL SİSTEMİ - TR/EN/ES Support
         // ═══════════════════════════════════════════════════════════════════
         let CURRENT_LANG = 'tr';
+        const _urlParamsForLang = new URLSearchParams(window.location.search);
+        const _langFromUrl = _urlParamsForLang.get('lang');
+        if (_langFromUrl && ['tr', 'en', 'es', 'el', 'ja'].includes(_langFromUrl)) {
+            CURRENT_LANG = _langFromUrl;
+        }
 
         const TRANSLATIONS = {
             tr: {
@@ -4852,7 +4986,7 @@
                 instant: "ANLIK",
                 confidence: "Güven",
                 land: "KARA veya çok SIĞ",
-                landMessage: "Burası kara parçası. Lütfen denizde bir nokta seçin.",
+                landMessage: getT('land_error'),
                 noSeaData: "Deniz verisi bulunamadı",
                 selectSea: "🌊 Denizde bir nokta seçtiğinizde<br>balık analizi burada görünecek",
                 region: "Bölge",
@@ -5309,7 +5443,195 @@
                 source2: "EMODnet Bathymetry (Depth)",
                 source3: "SunCalc (Astronomy Calculations)",
                 source4: "FAO FishBase (Species Data)",
-                confidenceNote: "Calculated based on API data quality. Drops if data is missing."
+            },
+            es: {
+                // General
+                score: "Puntuación",
+                daily: "DÍA",
+                instant: "AHORA",
+                confidence: "Confianza",
+                land: "Tierra o muy poco profundo",
+                landMessage: "Esto es tierra. Por favor, seleccione un punto en el mar.",
+                noSeaData: "No hay datos marinos disponibles",
+                selectSea: "🌊 Seleccione un punto en el mar<br>para ver el análisis de peces",
+                region: "Región",
+                depth: "Profundidad",
+
+                // Welcome screen
+                welcomeTitle: "ANÁLISIS DE SPOT DE PESCA",
+                welcomeSubtitle: "Toque el mar para analizar",
+
+                // Activity Windows
+                morningWater: "AMANECER",
+                eveningWater: "ATARDECER",
+                nightHunt: "PESCA NOCTURNA",
+                noon: "MEDIODÍA",
+                morningWaterTip: "Amanecer ±2 horas. Los peces depredadores se alimentan.",
+                eveningWaterTip: "Atardecer ±2 horas. Las horas más productivas.",
+                nightHuntTip: "22:00 - 03:00. Verrugato, Herrera activos.",
+                noonTip: "11:00 - 16:00. Actividad baja.",
+                activityPeriods: "Períodos de Actividad",
+
+                // Fish Card
+                bait: "Cebo",
+                lure: "Señuelo",
+                rig: "Aparejo",
+                hook: "Anzuelo",
+                legalSize: "Talla Legal",
+                peakTime: "Hora Pico",
+                note: "Nota",
+                species: "Especies",
+                speciesHint: "Toque para más detalles",
+                noData: "Datos no disponibles",
+                fishDetails: "Detalles del Pez",
+                triggers: "Disparadores",
+
+                // Metrics
+                waterTemp: "Temp Agua",
+                wave: "Oleaje",
+                wind: "Viento",
+                windDir: "Dir Viento",
+                clarity: "Claridad",
+                pressure: "Presión",
+                salinity: "Salinidad",
+                moon: "Fase Lunar",
+                tide: "Marea",
+                current: "Corriente",
+                cloud: "Nubes",
+                seabedLayer: "Fondo Marino",
+
+                // Wind Directions
+                windNorth: "Norte",
+                windNorthEast: "Noreste",
+                windEast: "Este",
+                windSouthEast: "Sureste",
+                windSouth: "Sur",
+                windSouthWest: "Suroeste",
+                windWest: "Oeste",
+                windNorthWest: "Noroeste",
+                windCalm: "Calma",
+
+                // Time
+                time: "Hora",
+                connecting: "Conectando",
+                processing: "Procesando datos marinos...",
+                complete: "Cálculo completo.",
+                today: "Hoy",
+                tomorrow: "Mañana",
+
+                // Menu
+                menu: "MERALOJI",
+                favorites: "Mis Spots Favoritos",
+                noFavorites: "Aún no hay favoritos",
+                mapLayer: "Capa del Mapa",
+                weeklyForecast: "Pronóstico 7 Días",
+                percent: "%",
+
+                // Weather
+                STORM_RISK: "⚠️ RIESGO DE TORMENTA",
+                VERY_WINDY: "💨 VIENTO MUY FUERTE",
+                WINDY: "💨 VIENTO",
+                HEAVY_RAIN: "🌧️ LLUVIA INTENSA",
+                RAINY: "🌦️ LLUVIOSO",
+                FOGGY: "🌫️ NIEBLA / BRUMA",
+                OVERCAST: "☁️ CUBIERTO",
+                PARTLY_CLOUDY: "⛅ PARCIALMENTE NUBLADO",
+                SLIGHTLY_CLOUDY: "🌤️ LIGERAMENTE NUBLADO",
+                CLEAR_SUNNY: "☀️ DESPEJADO / SOLEADO",
+                CLEAR_NIGHT: "🌙 DESPEJADO / NOCHE",
+
+                // Tactic Texts
+                TACTIC_LAND: "❌ Esto es tierra o muy poco profundo. Seleccione un punto más alejado.",
+                TACTIC_HIGH_WAVE: "🌊⚠️ ¡PELIGRO! Oleaje superior a 2m — no salga al mar, quédese cerca de la costa.",
+                TACTIC_STORM: "⛈️ ¡ALERTA DE TORMENTA! Toda la actividad de los peces se detuvo. No pesque hoy.",
+                TACTIC_FEEDING_FRENZY: "⚡ ¡FRENESÍ ALIMENTARIO! La presión baja rápido — los peces están agresivos. ¡Al agua ahora!",
+                TACTIC_PRESSURE_DROP: "📉 ¡LA PRESIÓN BAJA! Lubina, Anjova y Serviola estarán muy agresivos en las próximas 2–3 horas — no pierda la oportunidad.",
+                TACTIC_WAVY_MURKY: "🌊 AGUA AGITADA Y TURBIA — Lubina en orillas espumosas, Sargo en las rocas. Cebo vivo es imprescindible.",
+                TACTIC_NIGHT: "🌙 ¡CAZADORES NOCTURNOS ACTIVOS! Verrugato en rocas, Herrera en el fondo, Escórpora entre piedras, Calamar mar adentro — no use luces.",
+                TACTIC_DAWN: "🌅 ¡AMANECER! Lubina y Anjova más activos en las 2 horas tras la salida del sol — entre al agua ahora.",
+                TACTIC_DUSK: "🌆 ¡ATARDECER! La Lubina se acerca a la costa, la Anjova empieza la persecución en superficie — prepare su equipo.",
+                TACTIC_GOLDEN_HOURS: "✨ ¡HORAS DORADAS! Tanto el amanecer como el atardecer están activos — quédese en la playa, equipo listo.",
+                TACTIC_DAY: "☀️ TÁCTICA DIURNA: Dorada en rocas de fondo, Lisa cerca de la superficie, Jurel y Salmonete también activos. Cebo pequeño, línea fina.",
+                TACTIC_STANDARD: "🌤️ Condiciones normales — apunte a la especie en la cima de la lista, vaya con equipo estándar.",
+                TACTIC_HOT_SPOT: "🔥 ¡HOT SPOT! Este spot está muy activo ahora — pruébelo: ",
+                TACTIC_HOT_SPOT_FUTURE: "🔥 ¡HOT SPOT! Este spot estará muy activo entonces — apunte a: ",
+                TACTIC_MODERATE: "📊 Actividad moderada, requiere paciencia. Alta probabilidad con cebo y spot correctos: ",
+                TACTIC_MODERATE_FUTURE: "📊 Actividad moderada prevista. Alta probabilidad con cebo y spot correctos: ",
+                TACTIC_LOW_ACTIVITY: "😴 Baja actividad — cambie de profundidad o spot, o espere a la hora dorada.",
+                TACTIC_LOW_ACTIVITY_FUTURE: "😴 Baja actividad prevista. Prefiera una profundidad diferente o un spot cercano.",
+                TACTIC_FEEDING_FRENZY_FUTURE: "⚡ ¡SE ESPERA FRENESÍ ALIMENTARIO! Caída de presión prevista — los peces estarán muy agresivos.",
+                TACTIC_STANDARD_FUTURE: "🌤️ Condiciones normales previstas — apunte a la especie más alta de la lista.",
+                TACTIC_STRONG_WIND: "💨 ¡VIENTO FUERTE! Las costas abiertas son difíciles — prefiera calas a sotavento y puntos resguardados.",
+                TACTIC_DYNAMIC: "🎯 OBJETIVO RECOMENDADO: ",
+
+                // Legal Size
+                legalSizeNone: "Ninguna",
+
+                // Wind Direction Explanations
+                windExplainNorth: "Norte (Tramontana) - Aplana el mar",
+                windExplainSouth: "Sur (Libeccio) - Levanta el mar",
+                windExplainEast: "Este (Levante)",
+                windExplainWest: "Oeste (Poniente)",
+                windExplainNW: "Noroeste (Mistral)",
+                windExplainSE: "Sureste (Siroco)",
+
+                // Star System
+                starSeason: "Temporada",
+                starTemp: "Temp",
+                starWave: "Ola",
+                starClarity: "Claridad",
+                starWind: "Viento",
+                starActivity: "Actividad",
+                starTrigger: "Disparador",
+                starPenalty: "Penalización",
+                starCloud: "Nubes",
+                starUV: "Índice UV",
+                starWavePeriod: "Período Ola",
+                starTempShock: "Choque Térmico",
+                metricWavePeriod: "Período",
+                metricUV: "UV",
+                metricSwell: "Mar fondo",
+                tempShockCooling: "Choque frío — caza de presas activada",
+                tempShockWarming: "Calentamiento súbito — estrés a corto plazo",
+                realCurrent: "Medida",
+                estimatedCurrent: "Calculada",
+
+                // Help Modal
+                helpTitle: "¿Cómo se usa?",
+                helpIntro: "Meraloji calcula probabilidades de pesca analizando las condiciones marinas.",
+                helpMap: "🗺️ Mapa: Haga clic en un punto del mar",
+                helpScore: "📊 Puntuación: Probabilidad de actividad (%)",
+                helpDaily: "DÍA: Pronóstico promedio de 24 horas",
+                helpInstant: "AHORA: Condiciones actuales",
+                helpFish: "🐟 Lista de Peces: Haga clic para detalles",
+                helpStars: "⭐ Estrellas: Qué factores afectaron el puntaje",
+                helpWeekly: "📅 7 Días: Pronóstico semanal",
+                helpFavorite: "⭐ Favorito: Guarde la ubicación",
+                helpCommercial: "🏭 Los peces comerciales no se pescan con cañas de aficionado",
+
+                // Developer
+                developer: "Desarrollador",
+                contact: "Contacto",
+
+                // Algorithm Modal
+                algorithmTitle: "ALGORITMO F.I.S.H.",
+                algorithmSubtitle: "Lógica Difusa + Puntuación Multicapa",
+                algorithmDesc: "El sistema F.I.S.H. utiliza un motor de puntuación multicapa que combina condiciones marinas, biología de los peces y datos astronómicos.",
+                algorithmComponents: "Componentes Principales",
+                gaussianScoring: "Puntuación Gaussiana (Campana)",
+                gaussianDesc: "Se definen rangos óptimos de temperatura, oleaje y claridad para cada especie. Cuanto más cerca esté el valor actual de este rango, mayor será el puntaje.",
+                solunarTheory: "Teoría Solunar",
+                solunarDesc: "Se calculan las ventanas de alimentación mayor/menor según las posiciones del sol y la luna. Las horas de salida/puesta de la luna son críticas.",
+                pressureEffect: "Efecto de la Presión",
+                pressureDesc: "Una caída súbita de la presión atmosférica (3+ hPa/6 horas) dispara la actividad de los peces. Se produce el 'Frenesí Alimentario'.",
+                regionalFactors: "Factores Regionales",
+                regionalDesc: "Se calculan dinámicas de viento, corriente y salinidad diferentes para cada región (Egeo, Mármara, Mar Negro, Mediterráneo).",
+                dataSources: "Fuentes de Datos",
+                source1: "API Open-Meteo Marina y Clima",
+                source2: "EMODnet Bathymetry (Profundidad)",
+                source3: "SunCalc (Cálculos Astronómicos)",
+                source4: "FAO FishBase (Datos de Especies)",
+                confidenceNote: "Calculado según la calidad de los datos API. Baja si faltan datos."
             }
         };
 
@@ -7463,7 +7785,7 @@
                 const data = await res.json();
 
                 if (data.error === 'land') {
-                    resultDiv.innerHTML = `<div style="color:var(--red); text-align:center; padding:16px;">🏔️ ${data.message || 'Burası kara parçası'}</div>`;
+                    resultDiv.innerHTML = `<div style="color:var(--red); text-align:center; padding:16px;">🏔️ ${data.message || getT('land_error')}</div>`;
                     return;
                 }
 
@@ -8442,7 +8764,7 @@
                 } else {
                     if (badge) { badge.style.display = ''; badge.textContent = rem; }
                     if (remCount) remCount.textContent = rem;
-                    if (hudBadge) hudBadge.textContent = rem + ' hak';
+                    if (hudBadge) hudBadge.textContent = rem + ' ' + getT('scans_left');
                 }
 
                 // Haritayı top5'e sığdır
@@ -8465,7 +8787,9 @@
 
         function showScanResultModal(evt) {
             const fromCache = evt.fromCache;
-            const cacheNote = fromCache ? `Önbellekten · ${evt.cacheAge} dk önce hesaplandı` : `Az önce tarandı · ${evt.radiusKm} km yarıçap`;
+            const cacheNote = fromCache 
+                ? `${getT('from_cache')} · ${evt.cacheAge} ${getT('ago_calculated')}` 
+                : `${getT('just_scanned')} · ${evt.radiusKm} ${getT('radius')}`;
             const fishLabel = evt.fishKey ? ` · ${evt.fishKey}` : '';
 
             document.getElementById('scan-result-meta').innerHTML =
@@ -8495,7 +8819,7 @@
 
                 // Dip yapısı (EMODnet substrat)
                 const _subEmoji = { ROCK:'🪨', SAND:'🏖️', MUD:'🟫', SEAGRASS:'🌿', MIXED:'⬛' };
-                const _subTr    = { ROCK:'Kayalık', SAND:'Kumlu', MUD:'Çamurlu', SEAGRASS:'Deniz çayırı', MIXED:'Karışık' };
+                const _subTr    = getT('substrate');
                 const substrateHtml = pt.substrate
                     ? `<span style="font-size:0.68rem;color:var(--text-secondary);background:rgba(255,255,255,0.05);
                         border:1px solid var(--border-subtle);border-radius:5px;padding:1px 6px;">
@@ -9037,6 +9361,19 @@
         }
 
         console.log('[PLATFORM]', isAndroidApp ? 'Android TWA (Google Billing)' : 'Web / iOS (Iyzico)');
+
+        // WEB BLOCKER AKTİVASYONU — Sadece web kullanıcılarına göster
+        if (!isAndroidApp) {
+            document.addEventListener('DOMContentLoaded', () => {
+                const blocker = document.getElementById('web-blocker');
+                if (blocker) {
+                    blocker.style.display = 'flex';
+                    // Web kullanıcıları için arka plandaki auth card'ı tamamen gizleyelim
+                    const authCard = document.querySelector('.auth-card');
+                    if (authCard) authCard.style.display = 'none';
+                }
+            });
+        }
         // ─────────────────────────────────────────────────────────────────────────
 
         // ── İYZİCO ÖDEME ENTEGRASYONU ────────────────────────────────────────────
@@ -10478,28 +10815,39 @@
 
         async function saveTokenToFirestore(uid) {
             try {
-                // Önce bildirim izni iste
+                // 1. Bildirim izni iste
                 const permission = await Notification.requestPermission();
-                if (permission !== 'granted') {
-                    console.log('[FCM] Bildirim izni reddedildi.');
-                    return;
-                }
+                
+                // 2. Token al (İzin yoksa bile diğer verileri kaydedebiliriz)
+                let currentToken = null;
+                try {
+                    currentToken = await messaging.getToken({
+                        vapidKey: 'BL77o8i68xuOe0NkDMjvjPTZr9F4JnLpPqLqrE81PwFtLgNzNXgDuEI_sCJ8qDMzPvAU67-8py-MHkwjkCr-iSY'
+                    });
+                } catch(e) { }
 
-                const currentToken = await messaging.getToken({
-                    vapidKey: 'BL77o8i68xuOe0NkDMjvjPTZr9F4JnLpPqLqrE81PwFtLgNzNXgDuEI_sCJ8qDMzPvAU67-8py-MHkwjkCr-iSY'
-                });
+                // 3. Cihaz ve Dil Bilgilerini Topla
+                const ua = navigator.userAgent;
+                let os = "Web / Unknown";
+                if (ua.indexOf("Android") >= 0) os = "Android (Web)";
+                else if (ua.indexOf("iPhone") >= 0) os = "iOS (iPhone)";
+                else if (ua.indexOf("Windows") >= 0) os = "Windows";
+                
+                const lang = (typeof currentLang !== 'undefined' ? currentLang : (navigator.language || 'tr').split('-')[0].toLowerCase());
 
-                if (currentToken) {
-                    await db.collection('users').doc(uid).set({
-                        fcmToken: currentToken,
-                        lastTokenUpdate: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
-                    console.log("[FCM] Token Firestore'a kaydedildi.");
-                } else {
-                    console.log('[FCM] Token alınamadı — bildirim izni eksik olabilir.');
-                }
+                // 4. Firestore'a kaydet (Android tarafıyla uyumlu yapı)
+                await db.collection('users').doc(uid).set({
+                    fcmToken: currentToken || null,
+                    lang: lang,
+                    os: os,
+                    updatedAt: Date.now(),
+                    isPremium: isPremium || false,
+                    lastSeenWeb: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+
+                console.log("[FCM] Profil verileri Firestore'a senkronize edildi.");
             } catch (error) {
-                console.error('[FCM] Token kaydında hata:', error);
+                console.error('[FCM] Profil kaydında hata:', error);
             }
         }
 
