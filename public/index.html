@@ -9366,11 +9366,19 @@
         if (!isAndroidApp) {
             document.addEventListener('DOMContentLoaded', () => {
                 const blocker = document.getElementById('web-blocker');
+                const splash = document.getElementById('splash');
+                
                 if (blocker) {
                     blocker.style.display = 'flex';
                     // Web kullanıcıları için arka plandaki auth card'ı tamamen gizleyelim
                     const authCard = document.querySelector('.auth-card');
                     if (authCard) authCard.style.display = 'none';
+                }
+
+                // Web'de splash ekranını beklemeden hemen kaldır, duvarı göster
+                if (splash) {
+                    splash.style.opacity = '0';
+                    setTimeout(() => { splash.style.display = 'none'; }, 500);
                 }
             });
         }
