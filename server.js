@@ -5665,10 +5665,12 @@ async function warmWhenReady() {
     await warmAllHotSpots();
 }
 
+/*
 setTimeout(() => {
     warmWhenReady();
     setInterval(warmWhenReady, 55 * 60 * 1000);
 }, 60_000);
+*/
 // ═══════════════════════════════════════════════════════════════════════
 // 🐟 BUGÜN EN İYİ MERAM BİLDİRİMİ (BLOK 6C)
 // Günde 1 kez (Sabah 07:00'de) çalışır.
