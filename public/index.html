@@ -1949,7 +1949,7 @@
             background: rgba(5, 38, 71, 0.95);
             backdrop-filter: blur(20px);
             z-index: 999999;
-            display: none;
+            display: flex; /* Varsayılan olarak açık */
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -3289,6 +3289,8 @@
         </div>
     </div>
 
+    <!-- ⛔ [UYKU MODU AKTİF] - UYGULAMA KODLARI BURADAN İTİBAREN DONDURULMUŞTUR ⛔ -->
+    <!-- 
     <div id="login-overlay" class="login-overlay">
         <img src="/logo.png" class="login-logo" alt="MERALOJİ">
         <div class="login-title">MERALOJİ</div>
@@ -4935,6 +4937,20 @@
 
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
     <script>
+        // ── WEB DUVARI AKTİF FONKSİYONLARI ───────────────────────────────────────
+        function setLanguage(lang) {
+            document.querySelectorAll('.blocker-content').forEach(c => c.style.display = 'none');
+            const target = document.getElementById('content-' + lang);
+            if (target) target.style.display = 'block';
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            if (window.event && window.event.target) window.event.target.classList.add('active');
+        }
+
+        function goToPlayStore() {
+            window.location.href = "https://play.google.com/store/apps/details?id=com.meraloji.fish";
+        }
+
+        /*
         // ═══════════════════════════════════════════════════════════════════
         // DATA & STATE
         // ═══════════════════════════════════════════════════════════════════
@@ -9280,8 +9296,10 @@
             }
         }
 
+        */
     </script>
     <script>
+        /*
         // ═══════════════════════════════════════════════
         // MERALOJİ AUTH & PREMIUM SYSTEM
         // ═══════════════════════════════════════════════
@@ -10899,6 +10917,7 @@
 
         window.addEventListener('load', checkAndShowReviewPrompt);
 
+        */
     </script>
 </body>
 
