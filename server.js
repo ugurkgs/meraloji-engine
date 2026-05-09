@@ -1088,12 +1088,14 @@ async function fetchChlorophyll(lat, lon) {
             .map(r => r[4])
             .reduce((a, b) => a + b, 0) / Math.min(rows.length, 200);
 
+        const daysAgoVal = Math.round((Date.now() - new Date(latestDate)) / 86400000);
         return {
             chlorophyll: parseFloat(avg.toFixed(3)),
             chlorophyll_monthly_avg: parseFloat(monthlyAvg.toFixed(3)),
             date: latestDate,
             valid_pixels: values.length,
-            daysAgo: Math.round((Date.now() - new Date(latestDate)) / 86400000)
+            daysAgo: daysAgoVal,
+            stale: daysAgoVal >= 7
         };
     } catch (e) {
         console.log('[PLANKTON] NOAA fetch failed:', e.message);
@@ -1542,7 +1544,19 @@ function calculateUpwelling(windSpeed, windDir, region) {
     if (region === 'EGE' && (windDir > 330 || windDir < 30)) intensity *= 1.4;
     if (region === 'AKDENİZ' && (windDir > 250 && windDir < 290)) intensity *= 1.2;
 
-    return Math.max(0, Math.min(2.5, intensity));
+    const rawUpwelling = Math.max(0, Math.min(2.5, intensity));
+
+    // Bölgesel Upwelling Çarpanı (Kimi AI rebalansı - İç denizlerde zayıflatma)
+    const regionalMultiplier = {
+        'EGE': 0.6,      // Meltemi var ama açık deniz kadar değil
+        'AKDENİZ': 0.32, // Neredeyse yok
+        'KARADENİZ': 0.2,// Yok denecek kadar az
+        'MARMARA': 0.12, // İç deniz
+        'AÇIK DENİZ': 1.0
+    };
+    const mult = regionalMultiplier[region] || 0.5;
+
+    return parseFloat((rawUpwelling * mult).toFixed(2));
 }
 
 // Akıntı Tahmini
@@ -2246,7 +2260,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         isBoat,
         substrate = null,   // EMODnet dip yapısı: ROCK | SAND | MUD | SEAGRASS | MIXED | null
         // YENİ (1D)
-        windGust = 0, precipProb = 0, weatherCode = 0, visibility = 20000,
+        windGust = 0, precipProb = 0, visibility = 20000,
         waveDirection = 0, windWaveHeight = 0, swellPeriod = 0,
         tideFlow = 0, moonAltitude = 0
     } = params;
@@ -2305,8 +2319,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             }
         }
     }
-    let s_season = seasonalEff * 25;
-    scoreDetails.season = { score: s_season, max: 25, stars: Math.round(seasonalEff * 5) };
+    let s_season = seasonalEff * 22;
+    scoreDetails.season = { score: s_season, max: 22, stars: Math.round(seasonalEff * 5) };
 
     // 2. SICAKLIK (Max 25)
     // [DÜZELTME: Trapezoid] — optMin/optMax varsa trapezoid, yoksa gaussian kullan.
@@ -2325,8 +2339,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     const gateMultiplier = getTempGateMultiplier(tempWater, tMin, tMax);
     const tempScore = gaussianScore * gateMultiplier;
 
-    let s_temp = tempScore * 25;
-    scoreDetails.temp = { score: s_temp, max: 25, stars: Math.round(tempScore * 5), value: tempWater, gate: gateMultiplier };
+    let s_temp = tempScore * 28;
+    scoreDetails.temp = { score: s_temp, max: 28, stars: Math.round(tempScore * 5), value: tempWater, gate: gateMultiplier };
 
     // 3. ÇEVRESEL (Max 20)
     let s_env = 0;
@@ -2334,8 +2348,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // Dalga Puanı — Lineer Yumuşatma
     const targetWave = (fish.wavePref || 0.5) * 1.5;
     const waveScore = Math.max(0, 1 - Math.abs(wave - targetWave) / 1.5);
-    s_env += waveScore * 5;
-    scoreDetails.wave = { score: waveScore * 5, max: 5, stars: Math.round(waveScore * 5), value: wave, target: targetWave };
+    s_env += waveScore * 4.5;
+    scoreDetails.wave = { score: waveScore * 4.5, max: 4.5, stars: Math.round(waveScore * 5), value: wave, target: targetWave };
 
     // === FAZ 2: CAM DENİZ — Clarity cezası tür bazlı güçlendirme ===
     let clarityScore = 0.5;
@@ -2357,20 +2371,20 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         // CLEAR ve ANY seven türler cam denizden az etkilenir
     }
 
-    s_env += clarityScore * 5;
-    scoreDetails.clarity = { score: clarityScore * 5, max: 5, stars: Math.round(clarityScore * 5), value: Math.round(clarity) };
+    s_env += clarityScore * 4.5;
+    scoreDetails.clarity = { score: clarityScore * 4.5, max: 4.5, stars: Math.round(clarityScore * 5), value: Math.round(clarity) };
 
     const windScore = calculateWindScore(windDir, windSpeed, region, params.lat, params.lon);
-    s_env += windScore * 5;
-    scoreDetails.wind = { score: windScore * 5, max: 5, stars: Math.round(windScore * 5), value: windSpeed, dir: windDir };
+    s_env += windScore * 4.5;
+    scoreDetails.wind = { score: windScore * 4.5, max: 4.5, stars: Math.round(windScore * 5), value: windSpeed, dir: windDir };
 
     // Habitat filtresi — bbox dışı veya yanlış bölgede sıfır skor
     if (!isInHabitat(fish, params.lat, params.lon, region)) {
         return { finalScore: 0, score: 0, reason: i18n(lang).reasons.outOfRegion(region, (fish.regions || []).join(', ')), activeTriggers: [], scoreDetails: {}, penalties: [] };
     }
     // isInHabitat true ise regionMatch her zaman tam puan
-    s_env += 5;
-    scoreDetails.region = { score: 5, max: 5, stars: 5 };
+    s_env += 4.5;
+    scoreDetails.region = { score: 4.5, max: 4.5, stars: 5 };
 
     // 4. AKTİVİTE (Max 16) - V2.2 Süper Sentez
     /**
@@ -2378,26 +2392,26 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
      * Aktivite tavanı 20'den 16'ya çekildi. Amaç: "Saat uygunsa her türlü balık alırım" yanılsamasını kırmak.
      * Balığın beslenme saati (Diel pattern) sadece bir fırsat penceresidir, garanti değildir.
      */
-    let s_activity = 4;
+    let s_activity = 5;
     let activityScore = 0.25;
 
     if (fish.activity === "NIGHT") {
-        if (timeMode === "NIGHT") { s_activity = 16; activityScore = 1.0; }
-        else if (timeMode === "DUSK" || timeMode === "DAWN") { s_activity = 8; activityScore = 0.5; }
-        else { s_activity = 1; activityScore = 0.1; }
+        if (timeMode === "NIGHT") { s_activity = 20; activityScore = 1.0; }
+        else if (timeMode === "DUSK" || timeMode === "DAWN") { s_activity = 10; activityScore = 0.5; }
+        else { s_activity = 1.25; activityScore = 0.1; }
     } else if (fish.activity === "DAWN_DUSK" || fish.activity === "CREPUSCULAR") {
-        if (timeMode === "DAWN" || timeMode === "DUSK") { s_activity = 16; activityScore = 1.0; }
-        else if (timeMode === "NIGHT") { s_activity = 6; activityScore = 0.4; }
-        else { s_activity = 3; activityScore = 0.25; }
+        if (timeMode === "DAWN" || timeMode === "DUSK") { s_activity = 20; activityScore = 1.0; }
+        else if (timeMode === "NIGHT") { s_activity = 7.5; activityScore = 0.4; }
+        else { s_activity = 3.75; activityScore = 0.25; }
     } else if (fish.activity === "DAY") {
-        if (timeMode === "DAY") { s_activity = 16; activityScore = 1.0; }
-        else if (timeMode === "DAWN" || timeMode === "DUSK") { s_activity = 9; activityScore = 0.6; }
-        else { s_activity = 2; activityScore = 0.15; }
+        if (timeMode === "DAY") { s_activity = 20; activityScore = 1.0; }
+        else if (timeMode === "DAWN" || timeMode === "DUSK") { s_activity = 11.25; activityScore = 0.6; }
+        else { s_activity = 2.5; activityScore = 0.15; }
     } else {
-        if (timeMode === "DAWN" || timeMode === "DUSK") { s_activity = 14; activityScore = 0.9; }
-        else { s_activity = 9; activityScore = 0.6; }
+        if (timeMode === "DAWN" || timeMode === "DUSK") { s_activity = 17.5; activityScore = 0.9; }
+        else { s_activity = 11.25; activityScore = 0.6; }
     }
-    scoreDetails.activity = { score: s_activity, max: 16, stars: Math.round(activityScore * 5), timeMode };
+    scoreDetails.activity = { score: s_activity, max: 20, stars: Math.round(activityScore * 5), timeMode };
 
     // 5. TETİKLEYİCİLER (Max 10)
     let s_trigger = 0;
@@ -2411,11 +2425,11 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
 
         // Basınç TRENDİ - V2.2 Süper Sentez (Claude tanh Modeli)
         /**
-         * [BİLİMSEL NOT - V2.2]: Claude/Kimi sentezi.
-         * tanh(Δp/3) modeli: 3hPa altındaki gürültüleri bastırır, aşırı dalgalanmaları (fırtına) 2.5 puanla sınırlar.
-         * Kimi Ai uyarısı (VanderWeyst 2014): Basıncın beslenme üzerindeki etkisi abartılmamalıdır (Cap: 2.5).
+         * [BİLİMSEL NOT - V2.3]: Kimi Ai rebalansı.
+         * tanh(Δp/4) modeli: 4hPa altındaki gürültüleri bastırır, basıncın etkisi düşürülmüştür.
+         * Basıncın beslenme üzerindeki etkisi abartılmamalıdır (Cap: 1.2).
          */
-        const pEffect = Math.tanh(pChange / 3) * 2.5 * pSens;
+        const pEffect = Math.tanh(pChange / 4) * 1.2 * pSens;
         s_trigger -= pEffect; // Negatif pChange (düşüş) pozitif s_trigger üretir.
 
         if (pEffect < -1.5) activeTriggers.push(i18n(lang).triggers.feedingFrenzy);
@@ -2427,8 +2441,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
                     : pChange <= 1.5 ? 2 : 1;
 
         scoreDetails.pressure = {
-            score: Math.abs(parseFloat(pEffect.toFixed(2))), // Gerçek etki puanı (0-2.5 arası)
-            max: 2.5,
+            score: Math.abs(parseFloat(pEffect.toFixed(2))), // Gerçek etki puanı (0-1.2 arası)
+            max: 1.2,
             stars: pressureStars,
             trend: pressureTrend.trend,
             change: pChange,
@@ -2869,12 +2883,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // === KATMAN 2: BİYOLOJİK POTANSİYEL ÇARPANLARI ===
     // Bu çarpanlar balığın o bölgedeki temel var olma potansiyelini belirler.
 
-    // 1. Ay Fazı Çarpanı
-    if (moonPhase !== undefined) {
-        const moonMult = getMoonPhaseMultiplier(moonPhase, fish.moonPref);
-        rawScore *= moonMult;
-        scoreDetails.moon = { multiplier: moonMult, phase: moonPhase, pref: fish.moonPref };
-    }
+    // 1. Ay Fazı Çarpanı - (İptal edildi: Double-Dipping'i önlemek için etki sadece moonlightIntensity'ye bırakıldı)
 
 
     // 3. Dalga Periyodu (Swell) Çarpanı
