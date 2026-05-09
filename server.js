@@ -5882,6 +5882,14 @@ cron.schedule('0 * * * *', async () => {
 
         if (trendResult.trend !== 'FALLING_FAST') continue;
 
+        // ── 4.5. Cooldown Kontrolü (Aynı bölgeye 12 saatte bir bildirim) ─
+        const gridKey = snapNotifyCoord(lat, lon);
+        const cooldownKey = `notify_cooldown_${gridKey}`;
+        if (cache.get(cooldownKey)) {
+            console.log(`[NOTIFY CRON] (${lat},${lon}) için yakın zamanda bildirim gönderilmiş (Cooldown aktif). Atlanıyor.`);
+            continue;
+        }
+
         // ── 5. Etkilenen kullanıcıların FCM tokenlarını topla ─────────────
         const spotNames = [...new Set(spots.map(s => s.favName))];
         const notifSpotName = spotNames.slice(0, 2).join(' & ');
@@ -5930,6 +5938,11 @@ cron.schedule('0 * * * *', async () => {
         try {
             const fcmResponse = await admin.messaging().sendEachForMulticast(message);
             console.log(`[NOTIFY CRON] ✅ ${fcmResponse.successCount}/${tokens.length} bildirim gönderildi — ${notifSpotName}`);
+
+            // Başarılı gönderim varsa bu bölge için 12 saat cooldown başlat
+            if (fcmResponse.successCount > 0) {
+                cache.set(cooldownKey, true, 12 * 3600); // 12 saat
+            }
 
             // Geçersiz tokenları Firestore'dan temizle
             fcmResponse.responses.forEach((resp, idx) => {
