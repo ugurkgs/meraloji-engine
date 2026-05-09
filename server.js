@@ -5894,9 +5894,24 @@ cron.schedule('0 * * * *', async () => {
         // ── 4.5. Cooldown Kontrolü (Aynı bölgeye 12 saatte bir bildirim) ─
         const gridKey = snapNotifyCoord(lat, lon);
         const cooldownKey = `notify_cooldown_${gridKey}`;
+        
+        // Önce RAM (Hızlı geçiş)
         if (cache.get(cooldownKey)) {
-            console.log(`[NOTIFY CRON] (${lat},${lon}) için yakın zamanda bildirim gönderilmiş (Cooldown aktif). Atlanıyor.`);
+            console.log(`[NOTIFY CRON] (${lat},${lon}) için RAM cooldown aktif. Atlanıyor.`);
             continue;
+        }
+
+        // Sonra DB (Kalıcı hafıza - Render/Heroku restart koruması)
+        const cooldownDocRef = db.collection('systemCache').doc(cooldownKey);
+        try {
+            const cooldownDoc = await cooldownDocRef.get();
+            if (cooldownDoc.exists && cooldownDoc.data().expiresAt > Date.now()) {
+                console.log(`[NOTIFY CRON] (${lat},${lon}) için DB cooldown aktif. Atlanıyor.`);
+                cache.set(cooldownKey, true, Math.floor((cooldownDoc.data().expiresAt - Date.now()) / 1000));
+                continue;
+            }
+        } catch(e) {
+            console.warn('[NOTIFY CRON] DB Cooldown okuma hatası:', e.message);
         }
 
         // ── 5. Etkilenen kullanıcıların FCM tokenlarını topla ─────────────
@@ -5950,7 +5965,13 @@ cron.schedule('0 * * * *', async () => {
 
             // Başarılı gönderim varsa bu bölge için 12 saat cooldown başlat
             if (fcmResponse.successCount > 0) {
-                cache.set(cooldownKey, true, 12 * 3600); // 12 saat
+                cache.set(cooldownKey, true, 12 * 3600); // 12 saat RAM
+                // Veritabanına da yaz (sunucu restart atarsa unutmasın)
+                try {
+                    await cooldownDocRef.set({ expiresAt: Date.now() + 12 * 3600 * 1000 });
+                } catch(e) {
+                    console.warn('[NOTIFY CRON] DB Cooldown yazılamadı:', e.message);
+                }
             }
 
             // Geçersiz tokenları Firestore'dan temizle
