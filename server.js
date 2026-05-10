@@ -4796,6 +4796,15 @@ app.post('/api/verify-subscription', async (req, res) => {
                 verifiedByGoogle: GOOGLE_PLAY_VERIFY  // Doğrulama yapılıp yapılmadığını kaydet
             }, { merge: true });
 
+            // ++ EKLENEN KISIM: Native app uyumluluğu için users koleksiyonunu da güncelle
+            const userDocRef = db.collection('users').doc(req.user.uid);
+            await userDocRef.set({
+                isPro: true,
+                proExpiresAt: Date.now() + durationMs,
+                proPlan: subId
+            }, { merge: true });
+            // ++ SON
+
             if (isNewPro && isYearly) {
                 const statsRef = db.collection('stats').doc('pro_count');
                 await statsRef.set({ count: admin.firestore.FieldValue.increment(1) }, { merge: true });
