@@ -3138,6 +3138,9 @@ function applySanitization(data, isProUser) {
             key: f.key, name: f.name, icon: f.icon, score: -1, // Balık skorunu kilitle
             category: f.category, reason: f.reason,
             triggers: f.triggers ? f.triggers.slice(0, 2) : [],
+            hourlyScores: f.hourlyScores ? f.hourlyScores.map(hs => Object.assign({}, hs, { score: -1 })) : [],
+            bestHour: f.bestHour,
+            bestHourScore: -1
         }));
         return base;
     }) : data.forecast;
@@ -3154,6 +3157,9 @@ function applySanitization(data, isProUser) {
             key: f.key, name: f.name, icon: f.icon, score: -1, // Balık skorunu kilitle
             category: f.category, reason: f.reason,
             triggers: f.triggers ? f.triggers.slice(0, 2) : [],
+            hourlyScores: f.hourlyScores ? f.hourlyScores.map(hs => Object.assign({}, hs, { score: -1 })) : [],
+            bestHour: f.bestHour,
+            bestHourScore: -1
         }));
         return base;
     })() : data.instant;
@@ -3905,6 +3911,18 @@ app.get('/api/forecast', async (req, res) => {
                     }
 
                     if (shouldReplace) {
+                        let todayHourlyScores = [];
+                        let todayBestHour = null;
+                        let todayBestHourScore = 0;
+                        if (forecast && forecast.length > 0 && forecast[0].fishList) {
+                            const todayFish = forecast[0].fishList.find(f => f.key === key);
+                            if (todayFish) {
+                                todayHourlyScores = todayFish.hourlyScores || [];
+                                todayBestHour = todayFish.bestHour || null;
+                                todayBestHourScore = todayFish.bestHourScore || 0;
+                            }
+                        }
+
                         const result = calculateFishScore(fish, key, baseParams, lang);
                         instantResultsMap.set(scientificName, {
                             score: smoothedScore,
@@ -3918,6 +3936,9 @@ app.get('/api/forecast', async (req, res) => {
                                 peakHours: fish.peakHours,
                                 peakHoursDesc: getLoc(fish, 'peakHoursDesc', lang),
                                 score: smoothedScore,
+                                bestHour: todayBestHour,
+                                bestHourScore: todayBestHourScore,
+                                hourlyScores: todayHourlyScores,
                                 bait: getLoc(fish, 'bait', lang, 'advice'),
                                 method: getLoc(fish, 'rig', lang, 'advice'),
                                 lure: getLoc(fish, 'lure', lang, 'advice'),
@@ -3972,6 +3993,7 @@ app.get('/api/forecast', async (req, res) => {
                 tacticKey: instantTacticKey, tacticData: instantTacticData,
                 fishList: instantFishList.slice(0, 10),
                 temp: i_tempWater,
+                wave: parseFloat(i_wave.toFixed(2)),
                 airTemp: safeNum(weather.hourly?.temperature_2m?.[instantIdx]),
                 wind: i_wind,
                 windDirection: i_windDir,
