@@ -83,7 +83,11 @@ const SERVER_i18n = {
             'Yeni Zelanda Kıyıları': 'Yeni Zelanda Kıyıları',
             'Brezilya Kıyıları': 'Brezilya Kıyıları',
             'Tayland & Güneydoğu Asya': 'Tayland & Güneydoğu Asya',
-            'Kızıldeniz Havzası': 'Kızıldeniz Havzası'
+            'Kızıldeniz Havzası': 'Kızıldeniz Havzası',
+            'Birleşik Krallık Kıyıları': 'Birleşik Krallık Kıyıları',
+            'ABD Kuzeydoğu Kıyıları': 'ABD Kuzeydoğu Kıyıları',
+            'Norveç': 'Norveç',
+            'Avustralya': 'Avustralya'
         },
         substrate: {
             ROCK: '🪨 Kayalık', SAND: '🏖️ Kum', MUD: '🟫 Çamur',
@@ -219,7 +223,11 @@ const SERVER_i18n = {
             'Yeni Zelanda Kıyıları': 'New Zealand Coasts',
             'Brezilya Kıyıları': 'Brazil Coasts',
             'Tayland & Güneydoğu Asya': 'Thailand & SE Asia',
-            'Kızıldeniz Havzası': 'Red Sea Basin'
+            'Kızıldeniz Havzası': 'Red Sea Basin',
+            'Birleşik Krallık Kıyıları': 'United Kingdom Coasts',
+            'ABD Kuzeydoğu Kıyıları': 'US Northeast Coasts',
+            'Norveç': 'Norway',
+            'Avustralya': 'Australia'
         },
         substrate: {
             ROCK: '🪨 Rocky', SAND: '🏖️ Sandy', MUD: '🟫 Muddy',
@@ -355,7 +363,11 @@ const SERVER_i18n = {
             'Yeni Zelanda Kıyıları': 'Costas de Nueva Zelanda',
             'Brezilya Kıyıları': 'Costas de Brasil',
             'Tayland & Güneydoğu Asya': 'Tailandia y SE Asiático',
-            'Kızıldeniz Havzası': 'Cuenca del Mar Rojo'
+            'Kızıldeniz Havzası': 'Cuenca del Mar Rojo',
+            'Birleşik Krallık Kıyıları': 'Costas del Reino Unido',
+            'ABD Kuzeydoğu Kıyıları': 'Costas del Noreste de EE.UU.',
+            'Norveç': 'Noruega',
+            'Avustralya': 'Australia'
         },
         substrate: {
             ROCK: '🪨 Rocoso', SAND: '🏖️ Arenoso', MUD: '🟫 Fangoso',
@@ -5744,7 +5756,7 @@ cron.schedule('0 7 * * *', async () => {
                 for (const f of favs) {
                     if (!f.lat || !f.lon) continue;
                     try {
-                        const port = process.env.PORT || 8080;
+                        const port = process.env.PORT || 3000; // server.js ile aynı port
                         const localUrl = `http://localhost:${port}/api/forecast?lat=${f.lat}&lon=${f.lon}&forecast_days=1&past_days=0`;
                         const res = await safeFetchJSON(localUrl, 15000);
                         if (res && res.forecast && res.forecast.length > 0) {
@@ -5774,7 +5786,10 @@ cron.schedule('0 7 * * *', async () => {
                             lat: String(bestFav.lat),
                             lon: String(bestFav.lon)
                         },
-                        android: { priority: 'high' }
+                        android: {
+                            priority: 'high',
+                            notification: { sound: 'default', channelId: 'meraloji_notifications' }
+                        }
                     };
                     await admin.messaging().send(message);
                     console.log(`[DAILY BEST CRON] ✅ Bildirim gönderildi -> uid:${uid}, mera:${bestFav.name}, skor:%${Math.round(bestScore)}`);
@@ -5967,11 +5982,24 @@ cron.schedule('0 * * * *', async () => {
         }
 
         // ── 6. FCM Multicast bildirimi gönder ─────────────────────────────
+            // Kullanıcı dilini al (Firestore'da kayıtlı)
+            const firstUid = uniqueUids[0];
+            let notifLang = 'tr';
+            try {
+                const firstUserDoc = await db.collection('users').doc(firstUid).get();
+                const userLang = firstUserDoc.data()?.lang || 'tr';
+                if (SERVER_i18n[userLang]) notifLang = userLang;
+            } catch(_) {}
+
+            // Dilden bağımsız: her kullanıcıya kendi diliyle bildirim gönder
+            // (tokens dizisinde artık { uid, token, lang } tutuluyor)
+            const notifI18n = SERVER_i18n[notifLang] || SERVER_i18n.tr;
+
         const message = {
             tokens: tokens.map(t => t.token),
             notification: {
-                title: SERVER_i18n.tr.notification.title,
-                body: SERVER_i18n.tr.notification.body(notifSpotName)
+                title: notifI18n.notification.title,
+                body: notifI18n.notification.body(notifSpotName)
             },
             data: {
                 type: 'pressure_alert',
