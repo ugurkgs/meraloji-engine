@@ -4066,18 +4066,50 @@ app.get('/api/forecast', async (req, res) => {
         // ── TIME SLIDER İÇİN SAATLİK ZAMAN ÇİZELGESİ (HOURLY TIMELINE) ──
         if (instantData && !isLand) {
             const hourlyTimeline = [];
+
+            // forecast[0].fishList içindeki her balığın saatlik skorlarını map'e al
+            // Bu skorlar zaten gerçek hava/deniz verisiyle hesaplanmış (calculateWeightedDailyScore)
+            const fishHourlyMap = {};
+            if (forecast && forecast[0] && forecast[0].fishList) {
+                for (const fish of forecast[0].fishList) {
+                    if (fish.key && fish.hourlyScores && fish.hourlyScores.length > 0) {
+                        fishHourlyMap[fish.key] = fish.hourlyScores;
+                    }
+                }
+            }
+
             for (let h = 0; h < 24; h++) {
                 const wIdx = 24 + correctedClickHour + h; // weather
                 const mIdx = marineHourlyOffset + correctedClickHour + h; // marine
-                
+
                 if (!weather.hourly?.time || wIdx >= weather.hourly.time.length) break;
 
-                let hScore = instantData.score;
-                if (forecast && forecast.length > 1 && forecast[0].hourlyScores) {
-                    let hHour = correctedClickHour + h;
-                    if (hHour < 24 && forecast[0].hourlyScores[hHour]) hScore = forecast[0].hourlyScores[hHour];
-                    else if (hHour >= 24 && forecast[1].hourlyScores && forecast[1].hourlyScores[hHour - 24]) hScore = forecast[1].hourlyScores[hHour - 24];
+                const absoluteHour = correctedClickHour + h; // günün saati (0-23+)
+
+                // instantFishList'teki balıklar için o saatin skorunu al
+                // calcAvgScore ile aynı mantık: TİCARİ/KORUMA/İSTİLACI hariç, ilk 3 balığın ağırlıklı ortalaması
+                const EXCLUDED = ['İSTİLACI', 'KORUMA', 'TİCARİ'];
+                const eligible = instantFishList.filter(f => !EXCLUDED.includes(f.category));
+                const top3ForHour = eligible.slice(0, 3).map(f => {
+                    const hScores = fishHourlyMap[f.key];
+                    // Saatlik skor varsa kullan, yoksa anlık skora dön
+                    const hourScore = (hScores && absoluteHour < hScores.length && hScores[absoluteHour] > 0)
+                        ? hScores[absoluteHour]
+                        : f.score;
+                    return { ...f, score: hourScore };
+                }).filter(f => f.score > 0)
+                  .sort((a, b) => b.score - a.score);
+
+                // calcAvgScore mantığı ile genel skoru hesapla
+                let hScore = instantData.score; // fallback
+                if (top3ForHour.length >= 3) {
+                    hScore = (top3ForHour[0].score * 0.60) + (top3ForHour[1].score * 0.30) + (top3ForHour[2].score * 0.10);
+                } else if (top3ForHour.length === 2) {
+                    hScore = (top3ForHour[0].score * 0.70) + (top3ForHour[1].score * 0.30);
+                } else if (top3ForHour.length === 1) {
+                    hScore = top3ForHour[0].score;
                 }
+                hScore = Math.min(100, Math.max(0, hScore));
 
                 hourlyTimeline.push({
                     hourOffset: h,
@@ -4088,7 +4120,7 @@ app.get('/api/forecast', async (req, res) => {
                     wave: parseFloat(safeNum(marine.hourly?.wave_height?.[mIdx]).toFixed(2)),
                     waveDirection: safeNum(marine.hourly?.wave_direction?.[mIdx]),
                     temp: safeNum(weather.hourly?.temperature_2m?.[wIdx]),
-                    pressure: safeNum(weather.hourly?.surface_pressure?.[wIdx], 1013),
+                    pressure: Math.round(safeNum(weather.hourly?.surface_pressure?.[wIdx], 1013)),
                     rain: safeNum(weather.hourly?.rain?.[wIdx]),
                     cloud: safeNum(weather.hourly?.cloud_cover?.[wIdx]) + "%"
                 });
