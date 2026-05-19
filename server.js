@@ -4062,6 +4062,40 @@ app.get('/api/forecast', async (req, res) => {
                 })
             };
         }
+        
+        // ── TIME SLIDER İÇİN SAATLİK ZAMAN ÇİZELGESİ (HOURLY TIMELINE) ──
+        if (instantData && !isLand) {
+            const hourlyTimeline = [];
+            for (let h = 0; h < 24; h++) {
+                const wIdx = 24 + correctedClickHour + h; // weather
+                const mIdx = marineHourlyOffset + correctedClickHour + h; // marine
+                
+                if (!weather.hourly?.time || wIdx >= weather.hourly.time.length) break;
+
+                let hScore = instantData.score;
+                if (forecast && forecast.length > 1 && forecast[0].hourlyScores) {
+                    let hHour = correctedClickHour + h;
+                    if (hHour < 24 && forecast[0].hourlyScores[hHour]) hScore = forecast[0].hourlyScores[hHour];
+                    else if (hHour >= 24 && forecast[1].hourlyScores && forecast[1].hourlyScores[hHour - 24]) hScore = forecast[1].hourlyScores[hHour - 24];
+                }
+
+                hourlyTimeline.push({
+                    hourOffset: h,
+                    time: weather.hourly.time[wIdx],
+                    score: parseFloat(hScore.toFixed(1)),
+                    wind: Math.round(safeNum(weather.hourly?.wind_speed_10m?.[wIdx])),
+                    windDirection: safeNum(weather.hourly?.wind_direction_10m?.[wIdx]),
+                    wave: parseFloat(safeNum(marine.hourly?.wave_height?.[mIdx]).toFixed(2)),
+                    waveDirection: safeNum(marine.hourly?.wave_direction?.[mIdx]),
+                    temp: safeNum(weather.hourly?.temperature_2m?.[wIdx]),
+                    pressure: safeNum(weather.hourly?.surface_pressure?.[wIdx], 1013),
+                    rain: safeNum(weather.hourly?.rain?.[wIdx]),
+                    cloud: safeNum(weather.hourly?.cloud_cover?.[wIdx]) + "%"
+                });
+            }
+            instantData.hourlyTimeline = hourlyTimeline;
+        }
+
 
         // ── PRO VERİSİ SIFIRLAMA: Premium olmayan kullanıcılara detaylı veri gönderme ──
         // Sanitization işlemi artık applySanitization() içinde yapılıyor.
@@ -4075,6 +4109,7 @@ app.get('/api/forecast', async (req, res) => {
             snapInfo,                // null veya { distanceM, snapLat, snapLon } — kıyı snap bilgisi
             gridDistanceKm: parseFloat(gridDistanceKm.toFixed(2)), // Marine API grid sapması (km)
             gridWarning: gridDistanceKm > 10,                      // true ise veri 10km+ uzak noktadan
+            apiGrid: (marine && marine.latitude) ? { lat: marine.latitude, lon: marine.longitude } : null,
             forecast: forecast,
             instant: instantData,
             isPro: true              // Ham veri her zaman "Tam/Açık" veridir.
