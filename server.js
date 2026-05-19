@@ -1171,6 +1171,7 @@ function applyShoaling(waveHeight, wavePeriod, depthM) {
     if (!waveHeight || waveHeight <= 0) return waveHeight;
     if (!wavePeriod || wavePeriod <= 0) return waveHeight;
     if (!depthM || depthM <= 0) return waveHeight;
+    if (depthM < 0.5) return waveHeight;  // 50cm'den sığ sular: matematiksel patlamaları önlemek için ham dalgayı dön
     if (depthM >= 100) return waveHeight; // derin su — shoaling etkisi ihmal edilir
 
     const g = 9.81;
@@ -1710,11 +1711,11 @@ function calculatePressureTrend(pressureHistory) {
     const newest = validPressures[validPressures.length - 1];
     const change = newest - oldest;
 
-    if (change < -4) return { trend: 'FALLING_FAST', pChange: change };
-    if (change < -2) return { trend: 'FALLING', pChange: change };
-    if (change > 4) return { trend: 'RISING_FAST', pChange: change };
-    if (change > 2) return { trend: 'RISING', pChange: change };
-    return { trend: 'STABLE', pChange: change };
+    if (change < -4) return { trend: 'FALLING_FAST', change };
+    if (change < -2) return { trend: 'FALLING', change };
+    if (change > 4) return { trend: 'RISING_FAST', change };
+    if (change > 2) return { trend: 'RISING', change };
+    return { trend: 'STABLE', change };
 }
 
 // SST Analizi — Şok (dün vs bugün) + 7 günlük trend (lineer regresyon)
@@ -2431,8 +2432,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     if (solunar.isMajor) { s_trigger += 4; activeTriggers.push(i18n(lang).triggers.majorSolunar); }
     else if (solunar.isMinor) { s_trigger += 2; activeTriggers.push(i18n(lang).triggers.minorSolunar); }
 
-    if (pressureTrend && pressureTrend.pChange !== undefined) {
-        const pChange = pressureTrend.pChange;
+    if (pressureTrend && pressureTrend.change !== undefined) {
+        const pChange = pressureTrend.change;
         const pSens = fish.pressureSensitivity || 0.5;
 
         // Basınç TRENDİ - V2.2 Süper Sentez (Claude tanh Modeli)
@@ -3488,6 +3489,15 @@ app.get('/api/forecast', async (req, res) => {
 
         const forecast = [];
 
+        // Grid mesafesi — marine API'nin snap ettiği grid noktası ile tıklanan nokta arasındaki fark (km).
+        // Bir kez hesaplanır, hem confidence cezası hem de client uyarısı için kullanılır.
+        const gridDistanceKm = (marine.latitude && marine.longitude)
+            ? haversineKm(parseFloat(lat), parseFloat(lon), parseFloat(marine.latitude), parseFloat(marine.longitude))
+            : 0;
+        if (gridDistanceKm > 0) {
+            console.log(`[GRID] tıklanan:(${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}) apiGrid:(${marine.latitude},${marine.longitude}) mesafe:${gridDistanceKm.toFixed(2)}km`);
+        }
+
         // Weather: past_days=1 → hourly[0-23]=dün, [24-47]=bugün, [48-71]=yarın...
         // Marine:  past_days=7 → hourly[0-167]=geçmiş 7 gün, [168-191]=bugün, [192+]=gelecek
         // Weather hourlyOffset (past_days=1): bugün = indeks 24
@@ -3786,12 +3796,7 @@ app.get('/api/forecast', async (req, res) => {
                     depth: depthData ? depthData.avg : null,
                     waveDirection: marine.hourly?.wave_direction?.[i * 24 + 12],
                     visibility: weather.hourly?.visibility?.[i * 24 + 12],
-                    gridDistance: (() => {
-                        if (!marine.latitude || !marine.longitude) return 0;
-                        const d = haversineKm(parseFloat(lat), parseFloat(lon), parseFloat(marine.latitude), parseFloat(marine.longitude));
-                        console.log(`[GRID] tıklanan:(${lat},${lon}) apiGrid:(${marine.latitude},${marine.longitude}) mesafe:${d.toFixed(2)}km`);
-                        return d;
-                    })()
+                    gridDistance: gridDistanceKm
                 }), tacticKey, tacticData, weatherSummary,
                 fishList: fishList.slice(0, 10), moonPhase: moon.phase,
                 moonPhaseName: getMoonPhaseName(moon.phase, lang), airTemp: tempAir, timeMode,
@@ -4051,11 +4056,7 @@ app.get('/api/forecast', async (req, res) => {
                     chlorophyllStale: chlorophyllData ? chlorophyllData.stale : true,
                     oceanCurrent: i_oceanCurrent,
                     depth: depthData ? depthData.avg : null,
-                    gridDistance: (() => {
-                        if (!marine.latitude || !marine.longitude) return 0;
-                        const d = haversineKm(parseFloat(lat), parseFloat(lon), parseFloat(marine.latitude), parseFloat(marine.longitude));
-                        return d;
-                    })(),
+                    gridDistance: gridDistanceKm,
                     waveDirection: i_waveDirection,
                     visibility: i_visibility
                 })
@@ -4072,6 +4073,8 @@ app.get('/api/forecast', async (req, res) => {
             depth: depthData,        // EMODnet Bathymetry derinlik verisi
             substrate: substrateData, // EMODnet Seabed Habitats dip yapısı
             snapInfo,                // null veya { distanceM, snapLat, snapLon } — kıyı snap bilgisi
+            gridDistanceKm: parseFloat(gridDistanceKm.toFixed(2)), // Marine API grid sapması (km)
+            gridWarning: gridDistanceKm > 10,                      // true ise veri 10km+ uzak noktadan
             forecast: forecast,
             instant: instantData,
             isPro: true              // Ham veri her zaman "Tam/Açık" veridir.
