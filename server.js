@@ -4282,6 +4282,9 @@ app.get('/api/forecast', async (req, res) => {
                 const windRatio = hWind / (instantData.wind || 15 || 1);
                 const hUpwelling = parseFloat(Math.max(0.0, Math.min(5.0, baseUp * windRatio)).toFixed(2));
 
+                const hCode = safeNum(weather.hourly?.weather_code?.[wIdx], 0);
+                const hSummary = getWeatherIconicDescription(hCode, lang);
+
                 hourlyTimeline.push({
                     hourOffset: h,
                     time: weather.hourly.time[wIdx],
@@ -4304,7 +4307,9 @@ app.get('/api/forecast', async (req, res) => {
                     oxygen: hOxygen,
                     upwelling: hUpwelling,
                     salinity: instantData.salinity || 38.0,
-                    plankton: (instantData.chlorophyll && instantData.chlorophyll.value) ? instantData.chlorophyll.value : 0.2
+                    plankton: (instantData.chlorophyll && instantData.chlorophyll.value) ? instantData.chlorophyll.value : 0.2,
+                    weatherCode: hCode,
+                    weatherSummary: hSummary
                 });
             }
             instantData.hourlyTimeline = hourlyTimeline;
