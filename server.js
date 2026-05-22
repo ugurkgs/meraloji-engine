@@ -3955,7 +3955,7 @@ app.get('/api/forecast', async (req, res) => {
 
         let instantData = null;
         let instantFishList = [];
-        if (!isLand) {
+        if (true) {
             // Weather: past_days=1 → bugün offset 24
             // Marine:  past_days=7 → bugün offset 168 (marineHourlyOffset)
             const instantIdx = 24 + correctedClickHour;                         // weather indeksi
@@ -4214,7 +4214,7 @@ app.get('/api/forecast', async (req, res) => {
         }
         
         // ── TIME SLIDER İÇİN SAATLİK ZAMAN ÇİZELGESİ (HOURLY TIMELINE) ──
-        if (instantData && !isLand) {
+        if (instantData) {
             const instantDate = now;
             const i_moon = SunCalc.getMoonIllumination(instantDate);
             const hourlyTimeline = [];
@@ -4531,11 +4531,12 @@ app.get('/api/fish-search', async (req, res) => {
         }
         // ─────────────────────────────────────────────────────────────────────
 
-        if (isLand) {
-            const lang = getLang(req);
-            const msg = i18n(lang).scan.landError;
-            return res.json({ error: 'land', message: landReason === 'CERTAIN_LAND' ? msg : (landReason || msg) });
-        }
+        // [MODIFIED] Karasal bölgelerde de weather verisini göndermek için erken return kapatıldı.
+        // if (isLand) {
+        //     const lang = getLang(req);
+        //     const msg = i18n(lang).scan.landError;
+        //     return res.json({ error: 'land', message: landReason === 'CERTAIN_LAND' ? msg : (landReason || msg) });
+        // }
 
         const utcOffsetSeconds = weather.utc_offset_seconds || 0;
         const localClickHour = Math.floor((Date.now() / 1000 + utcOffsetSeconds) % 86400 / 3600);
