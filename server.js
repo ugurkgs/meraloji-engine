@@ -2502,7 +2502,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     const tempScore = gaussianScore * gateMultiplier;
 
     let s_temp = tempScore * 28;
-    scoreDetails.temp = { score: s_temp, max: 28, stars: Math.round(tempScore * 5), value: tempWater, gate: gateMultiplier };
+    const tempIdealText = (fish.tempRange && fish.tempRange.optMin && fish.tempRange.optMax) ? `${fish.tempRange.optMin}-${fish.tempRange.optMax}°C` : (fish.tempRange && fish.tempRange.opt ? `${fish.tempRange.opt}°C` : null);
+    scoreDetails.temp = { score: s_temp, max: 28, stars: Math.round(tempScore * 5), value: tempWater, gate: gateMultiplier, idealText: tempIdealText };
 
     // 3. ÇEVRESEL (Max 20)
     let s_env = 0;
@@ -2511,7 +2512,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     const targetWave = (fish.wavePref || 0.5) * 1.5;
     const waveScore = Math.max(0, 1 - Math.abs(wave - targetWave) / 1.5);
     s_env += waveScore * 4.5;
-    scoreDetails.wave = { score: waveScore * 4.5, max: 4.5, stars: Math.round(waveScore * 5), value: wave, target: targetWave };
+    scoreDetails.wave = { score: waveScore * 4.5, max: 4.5, stars: Math.round(waveScore * 5), value: wave, target: targetWave, idealText: `${targetWave.toFixed(1)}m` };
 
     // === FAZ 2: CAM DENİZ — Clarity cezası tür bazlı güçlendirme ===
     let clarityScore = 0.5;
@@ -2534,7 +2535,11 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     }
 
     s_env += clarityScore * 4.5;
-    scoreDetails.clarity = { score: clarityScore * 4.5, max: 4.5, stars: Math.round(clarityScore * 5), value: Math.round(clarity) };
+    let clarityIdealText = 'Fark etmez';
+    if (fish.clarityPref === 'CLEAR') clarityIdealText = '%70+';
+    else if (fish.clarityPref === 'TURBID') clarityIdealText = '%60-';
+    else if (fish.clarityPref === 'MODERATE') clarityIdealText = '%40-80';
+    scoreDetails.clarity = { score: clarityScore * 4.5, max: 4.5, stars: Math.round(clarityScore * 5), value: Math.round(clarity), idealText: clarityIdealText };
 
     const windScore = calculateWindScore(windDir, windSpeed, region, params.lat, params.lon);
     s_env += windScore * 4.5;
@@ -3119,7 +3124,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         }
         depthScore = Math.max(0.05, Math.min(1.0, depthScore));
         rawScore *= depthScore;
-        scoreDetails.depth = { score: depthScore * 5, max: 5, stars: Math.round(depthScore * 5), value: depthAvg, fishMin: fMin, fishOpt: fOpt, fishMax: fMax };
+        scoreDetails.depth = { score: depthScore * 5, max: 5, stars: Math.round(depthScore * 5), value: depthAvg, fishMin: fMin, fishOpt: fOpt, fishMax: fMax, idealText: fOpt ? `${fOpt}m` : null };
 
 
         // Frontend HUD uyarısı için depthGate objesi
