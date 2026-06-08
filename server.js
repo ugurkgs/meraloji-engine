@@ -4456,14 +4456,14 @@ app.get('/api/fish-search', async (req, res) => {
         const { gLat, gLon } = snapToGrid(latF, lonF);
 
         const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,cloud_cover,precipitation,precipitation_probability,weather_code,visibility,uv_index&past_days=1&timezone=auto`);
-        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
+        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`);
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`;
 
         // [CACHE] forecast endpoint daha önce aynı noktayı çektiyse ham veriyi kullan — OM'a gitme
         let [weather, marine, bathymetryRaw] = await Promise.all([
             cache.get(`raw_weather_${gLat}_${gLon}`) ? Promise.resolve(cache.get(`raw_weather_${gLat}_${gLon}`)) : queuedFetch(weatherUrl),
             cache.get(`raw_marine_${gLat}_${gLon}`) ? Promise.resolve(cache.get(`raw_marine_${gLat}_${gLon}`)) : queuedFetch(marineUrl),
-            skipBathymetry ? Promise.resolve(null) : fetchBathymetry(latF, lonF, 4500).catch(() => null)
+            skipBathymetry ? Promise.resolve(null) : fetchBathymetry(latF, lonF, 2500).catch(() => null)
         ]);
 
         if (!weather || weather.error) {
