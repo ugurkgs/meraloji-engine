@@ -954,7 +954,7 @@ async function fetchSubstrate(lat, lon, silent = false, logUser = null) {
         // HTML'den substrat değerini çıkar
         // GeoServer HTML tablosunda <td>alan_adı</td><td>değer</td> formatı
         // Alan adı: substrate, Folk5cl, Folk7cl, AllcombD, substrate_class, subs vb.
-        const substrate = parseSubstrateFromHtml(html);
+        const substrate = parseSubstrateFromHtml(html, logUser);
         if (!silent) {
             const u = logUser ? ` [${logUser}]` : '';
             console.log(`[SUBSTRATE]${u} (${latR},${lonR}) → ${substrate || 'null'}`);
@@ -975,7 +975,7 @@ async function fetchSubstrate(lat, lon, silent = false, logUser = null) {
 // GeoServer HTML GetFeatureInfo çıktısından substrat değerini parse et
 // Doğrulanmış yanıt formatı (EUSeaMap 2025):
 //   <td>Substrate</td><td>Coarse &amp; mixed sediment</td>
-function parseSubstrateFromHtml(html) {
+function parseSubstrateFromHtml(html, logUser = null) {
     if (!html) return null;
 
     // HTML entity decode — &amp; → &, &lt; → < vb.
@@ -1005,7 +1005,8 @@ function parseSubstrateFromHtml(html) {
             if (!val || val === 'null' || val === 'nodata') continue;
             const s = eunisCategoryToSubstrate(val);
             if (s) {
-                console.log(`[SUBSTRATE] field match: "${val}" → ${s}`);
+                const u = logUser ? ` [${logUser}]` : '';
+                console.log(`[SUBSTRATE]${u} field match: "${val}" → ${s}`);
                 return s;
             }
         }
@@ -1039,7 +1040,8 @@ function parseSubstrateFromHtml(html) {
     // Boş tablo ise sessizce null dön
     if (html.includes('table.featureInfo') || html.includes('Geoserver GetFeatureInfo output')) return null;
 
-    console.log(`[SUBSTRATE] no match: ${textOnly.slice(0, 100)}...`);
+    const u = logUser ? ` [${logUser}]` : '';
+    console.log(`[SUBSTRATE]${u} no match: ${textOnly.slice(0, 100)}...`);
     return null;
 }
 
@@ -1268,7 +1270,7 @@ async function fetchChlorophyll(lat, lon) {
 // Klorofil ile aynı sunucu/pattern, auth gerektirmez.
 // Bulutlu günlerde null döner — fallback Open-Meteo SST'ye düşer.
 // ═══════════════════════════════════════════════════════════════════════════
-async function fetchSatelliteSST(lat, lon) {
+async function fetchSatelliteSST(lat, lon, logUser = null) {
     const latMin = (parseFloat(lat) - 0.05).toFixed(4);
     const latMax = (parseFloat(lat) + 0.05).toFixed(4);
     const lonMin = (parseFloat(lon) - 0.05).toFixed(4);
@@ -1301,10 +1303,12 @@ async function fetchSatelliteSST(lat, lon) {
         const values = latestRows.map(r => r[4]);
         const avg = values.reduce((a, b) => a + b, 0) / values.length;
 
-        console.log(`[SST-SAT] ${latestDate}: ${avg.toFixed(2)}°C (${values.length} piksel)`);
+        const u = logUser ? ` [${logUser}]` : '';
+        console.log(`[SST-SAT]${u} ${latestDate}: ${avg.toFixed(2)}°C (${values.length} piksel)`);
         return parseFloat(avg.toFixed(2));
     } catch (e) {
-        console.log('[SST-SAT] NOAA fetch failed:', e.message);
+        const u = logUser ? ` [${logUser}]` : '';
+        console.log(`[SST-SAT]${u} NOAA fetch failed:`, e.message);
         return null;
     }
 }
@@ -3463,7 +3467,7 @@ app.get('/api/forecast', async (req, res) => {
                 : deduplicatedFetch(`m_${gLat}_${gLon}`, () => queuedFetch(marineUrl)),
             skipBathymetry ? Promise.resolve(null) : fetchBathymetry(lat, lon, 4500).catch(() => null),
             chlFromCache ? Promise.resolve(chlFromCache) : fetchChlorophyll(lat, lon).catch(() => null),
-            fetchSatelliteSST(lat, lon).catch(() => null),
+            fetchSatelliteSST(lat, lon, logUser).catch(() => null),
             fetchSubstrate(lat, lon, false, logUser).catch(() => null)
         ]);
 
