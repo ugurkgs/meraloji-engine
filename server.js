@@ -888,7 +888,7 @@ function eunisCategoryToSubstrate(code) {
     return null; // bilinmiyor — null dönünce dip yapısı gösterilmez
 }
 
-async function fetchSubstrate(lat, lon, silent = false) {
+async function fetchSubstrate(lat, lon, silent = false, logUser = null) {
     const latR = parseFloat(lat).toFixed(4);
     const lonR = parseFloat(lon).toFixed(4);
     const ck = `sub_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`;
@@ -955,12 +955,18 @@ async function fetchSubstrate(lat, lon, silent = false) {
         // GeoServer HTML tablosunda <td>alan_adı</td><td>değer</td> formatı
         // Alan adı: substrate, Folk5cl, Folk7cl, AllcombD, substrate_class, subs vb.
         const substrate = parseSubstrateFromHtml(html);
-        console.log(`[SUBSTRATE] (${latR},${lonR}) → ${substrate || 'null'}`);
+        if (!silent) {
+            const u = logUser ? ` [${logUser}]` : '';
+            console.log(`[SUBSTRATE]${u} (${latR},${lonR}) → ${substrate || 'null'}`);
+        }
         substrateCache.set(ck, substrate);
         return substrate;
 
     } catch (e) {
-        if (!silent) console.log(`[SUBSTRATE] fetch fail (${latR},${lonR}): ${e.message}`);
+        if (!silent) {
+            const u = logUser ? ` [${logUser}]` : '';
+            console.log(`[SUBSTRATE]${u} fetch fail (${latR},${lonR}): ${e.message}`);
+        }
         substrateCache.set(ck, null);
         return null;
     }
@@ -1472,7 +1478,9 @@ app.use('/api/', (req, res, next) => {
         // Çok sık çalışan scan stream, hotspot veya monthly-trend gibi ufak verileri sessize alabiliriz (isteğe bağlı) 
         // ancak genel performans analizi için hepsi şimdilik loglanıyor.
         if (!req.url.includes('progress') && !req.url.includes('/hotspot?')) {
-            console.log(`[API-PERF] ${req.method} ${req.originalUrl} - ${timeMs}ms`);
+            const logUser = req.user ? (req.user.email || req.user.uid) : 'anonim';
+            console.log(`[API-PERF] [${logUser}] ${req.method} ${req.originalUrl} - ${timeMs}ms`);
+            console.log('*'.repeat(80));
         }
     });
     next();
@@ -3456,7 +3464,7 @@ app.get('/api/forecast', async (req, res) => {
             skipBathymetry ? Promise.resolve(null) : fetchBathymetry(lat, lon, 4500).catch(() => null),
             chlFromCache ? Promise.resolve(chlFromCache) : fetchChlorophyll(lat, lon).catch(() => null),
             fetchSatelliteSST(lat, lon).catch(() => null),
-            fetchSubstrate(lat, lon).catch(() => null)
+            fetchSubstrate(lat, lon, false, logUser).catch(() => null)
         ]);
 
         // Fallback: gelişmiş URL başarısızsa basit URL dene
