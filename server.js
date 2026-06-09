@@ -888,7 +888,7 @@ function eunisCategoryToSubstrate(code) {
     return null; // bilinmiyor — null dönünce dip yapısı gösterilmez
 }
 
-async function fetchSubstrate(lat, lon) {
+async function fetchSubstrate(lat, lon, silent = false) {
     const latR = parseFloat(lat).toFixed(4);
     const lonR = parseFloat(lon).toFixed(4);
     const ck = `sub_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`;
@@ -960,7 +960,7 @@ async function fetchSubstrate(lat, lon) {
         return substrate;
 
     } catch (e) {
-        console.log(`[SUBSTRATE] fetch fail (${latR},${lonR}): ${e.message}`);
+        if (!silent) console.log(`[SUBSTRATE] fetch fail (${latR},${lonR}): ${e.message}`);
         substrateCache.set(ck, null);
         return null;
     }
@@ -3351,13 +3351,16 @@ app.get('/api/forecast', async (req, res) => {
         const lon = lonRaw.toFixed(4);
         const isBoat = req.query.mode === 'boat'; // tekne modu
         const isAutoLoad = req.query.source === 'autoload'; // Sıcak başlangıç isteği
+        const logUser = req.user ? (req.user.email || req.user.uid) : 'anonim';
         const now = new Date();
         const clickHour = now.getHours();
         const currentMonth = now.getMonth();
 
         // AutoLoad isteğini logla — click sayacı istemci tarafında zaten atlanıyor
         if (isAutoLoad) {
-            console.log(`[AUTOLOAD] ${lat},${lon} — sıcak başlangıç, click sayılmıyor`);
+            console.log(`[FORECAST] [${logUser}] 🌍 OTO-YÜKLEME TALEBİ BAŞLADI (lat:${lat}, lon:${lon})`);
+        } else {
+            console.log(`[FORECAST] [${logUser}] 🌍 YENİ ANALİZ TALEBİ BAŞLADI (lat:${lat}, lon:${lon})`);
         }
 
         // Izgara snap — 0.01° ≈ 1.1km hücre, derinlik hassasiyeti artırıldı
@@ -3399,7 +3402,7 @@ app.get('/api/forecast', async (req, res) => {
         // ── OFFLİNE KONUM ANALİZİ ─────────────────────────────────────────
         // API'lere gitmeden önce şehir sınırı kontrolü
         const offlineAnalysis = analyzeLocationOffline(lat, lon);
-        console.log(`[OFFLINE] lat:${lat} lon:${lon} → ${offlineAnalysis.status}${offlineAnalysis.city ? ' (' + offlineAnalysis.city + ')' : ''}`);
+        console.log(`[OFFLINE] [${logUser}] Durum: ${offlineAnalysis.status}${offlineAnalysis.city ? ' (' + offlineAnalysis.city + ')' : ''}`);
 
         if (offlineAnalysis.status === 'INLAND') {
             // İç bölge: sıfır API, anında reddet
@@ -3574,7 +3577,7 @@ app.get('/api/forecast', async (req, res) => {
         }
 
         if (isLand) {
-            console.log(`[LAND] lat:${lat} lon:${lon} reason:${landReason} bathyRaw:${bathymetryRaw}`);
+            console.log(`[LAND] [${logUser}] lat:${lat} lon:${lon} reason:${landReason} bathyRaw:${bathymetryRaw}`);
         }
 
         // ── KIYI SNAP ─────────────────────────────────────────────────────────
@@ -3611,16 +3614,16 @@ app.get('/api/forecast', async (req, res) => {
                             snapLat: parseFloat(snap.lat),
                             snapLon: parseFloat(snap.lon)
                         };
-                        console.log(`[SNAP] ✅ Kıyı→Deniz: ${snap.distanceM}m açık (${snap.lat},${snap.lon}), derinlik: ${Math.abs(snap.depthRaw).toFixed(1)}m`);
+                        console.log(`[SNAP] [${logUser}] ✅ Kıyı→Deniz: ${snap.distanceM}m açık (${snap.lat},${snap.lon}), derinlik: ${Math.abs(snap.depthRaw).toFixed(1)}m`);
                     } else {
-                        console.log(`[SNAP] ⚠️ Snap noktası (${snap.lat},${snap.lon}) için marine verisi alınamadı`);
+                        console.log(`[SNAP] [${logUser}] ⚠️ Snap noktası (${snap.lat},${snap.lon}) için marine verisi alınamadı`);
                     }
                 } else {
-                    console.log(`[SNAP] Yakın çevrede deniz bulunamadı (${lat},${lon}) — kara yanıtı dönecek`);
+                    console.log(`[SNAP] [${logUser}] Yakın çevrede deniz bulunamadı (${lat},${lon}) — kara yanıtı dönecek`);
                 }
             } catch (snapErr) {
                 // Snap başarısız olursa mevcut isLand davranışı korunur
-                console.log(`[SNAP] Hata (non-critical): ${snapErr.message}`);
+                console.log(`[SNAP] [${logUser}] Hata (non-critical): ${snapErr.message}`);
             }
         }
         // ─────────────────────────────────────────────────────────────────────
@@ -3630,9 +3633,9 @@ app.get('/api/forecast', async (req, res) => {
         // sstSat null ise (bulutlu gün / timeout) Open-Meteo SST kullanılır.
         const sstSat = sstSatPre; // Artık yukarıda paralel çekildi — await gerekmez
         if (sstSat !== null) {
-            console.log(`[SST] Uydu SST kullanılıyor: ${sstSat}°C`);
+            console.log(`[SST] [${logUser}] Uydu SST kullanılıyor: ${sstSat}°C`);
         } else {
-            console.log(`[SST] Uydu SST yok — Open-Meteo SST'ye düşülüyor`);
+            console.log(`[SST] [${logUser}] Uydu SST yok — Open-Meteo SST'ye düşülüyor`);
         }
         // ─────────────────────────────────────────────────────────────────────
 
@@ -3649,7 +3652,7 @@ app.get('/api/forecast', async (req, res) => {
             ? haversineKm(parseFloat(lat), parseFloat(lon), parseFloat(marine.latitude), parseFloat(marine.longitude))
             : 0;
         if (gridDistanceKm > 0) {
-            console.log(`[GRID] tıklanan:(${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}) apiGrid:(${marine.latitude},${marine.longitude}) mesafe:${gridDistanceKm.toFixed(2)}km`);
+            console.log(`[GRID] [${logUser}] Tıklanan:(${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}) API:(${marine.latitude},${marine.longitude}) Sapma:${gridDistanceKm.toFixed(2)}km`);
         }
 
         // Weather: past_days=1 → hourly[0-23]=dün, [24-47]=bugün, [48-71]=yarın...
@@ -5541,6 +5544,7 @@ app.get('/api/scan', async (req, res) => {
     const centerLon = parseFloat(lon);
     const radiusKm = Math.min(20, Math.max(3, parseFloat(radius) || 5));
     const uid = req.user.uid;
+    const logUser = req.user.email || uid;
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const dailyLimit = (req.isPremium || req.isGracePeriod) ? 999 : FREE_DAILY_SCANS;
 
@@ -5593,6 +5597,7 @@ app.get('/api/scan', async (req, res) => {
         }
 
         // ── SSE ile streaming yanıt ──
+        console.log(`[SCAN] [${logUser}] 🔍 YENİ MERA TARAMASI BAŞLADI (lat:${centerLat}, lon:${centerLon}, R:${radiusKm}km)`);
         res.writeHead(200, {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
@@ -5608,7 +5613,7 @@ app.get('/api/scan', async (req, res) => {
         let clientDisconnected = false;
         req.on('close', () => {
             clientDisconnected = true;
-            console.log('[SCAN] Client disconnected, aborting scan loop.');
+            console.log(`[SCAN] [${logUser}] İstemci bağlantıyı kesti, tarama durduruluyor.`);
         });
 
         const gridPoints = generateGridPoints(centerLat, centerLon, radiusKm);
@@ -5658,7 +5663,7 @@ app.get('/api/scan', async (req, res) => {
                 }
 
                 // Substrate'yi de paralel çek — cache'e yazar, calcPointScoreFromWeather cache'den okur
-                fetchSubstrate(pt.lat, pt.lon).catch(() => null); // fire-and-forget, cache doldursun
+                fetchSubstrate(pt.lat, pt.lon, true).catch(() => null); // fire-and-forget, cache doldursun
                 let result = null;
                 try {
                     result = calcPointScoreFromWeather(pt.lat, pt.lon, centerWeather, centerMarine, bathyRaw, fishKey || null, lang);
