@@ -149,7 +149,9 @@ const SERVER_i18n = {
         },
         notification: {
             title: '🌪️ Fırtına Öncesi Fırsatı!',
-            body: (spot) => `${spot} bölgesinde basınç hızla düşüyor, balıklar aktifleşebilir!`
+            body: (spot) => `${spot} bölgesinde basınç hızla düşüyor, balıklar aktifleşebilir!`,
+            dailyBestTitle: '🌟 Bugün En İyi Meran',
+            dailyBestBody: (spot, score) => `Bugün ${spot} merasında balık aktivitesi %${score} seviyesinde! Fırsatı kaçırma.`
         },
         tactic: {
             dominantNote: '⭐ Baskın tür tespit edildi — ticari değeri olan bir balık ise, av için ideal koşullar.',
@@ -289,7 +291,9 @@ const SERVER_i18n = {
         },
         notification: {
             title: '🌪️ Pre-Storm Opportunity!',
-            body: (spot) => `Pressure dropping fast at ${spot} — fish may be active!`
+            body: (spot) => `Pressure dropping fast at ${spot} — fish may be active!`,
+            dailyBestTitle: '🌟 Best Spot Today',
+            dailyBestBody: (spot, score) => `Fish activity at ${spot} is at ${score}% today! Don't miss out.`
         },
         tactic: {
             dominantNote: '⭐ Dominant species detected — if commercially valued, ideal conditions for a catch.',
@@ -429,7 +433,9 @@ const SERVER_i18n = {
         },
         notification: {
             title: '🌪️ ¡Oportunidad pre-tormenta!',
-            body: (spot) => `La presión cae rápido en ${spot} — ¡los peces pueden estar activos!`
+            body: (spot) => `La presión cae rápido en ${spot} — ¡los peces pueden estar activos!`,
+            dailyBestTitle: '🌟 Mejor lugar de hoy',
+            dailyBestBody: (spot, score) => `¡La actividad de pesca en ${spot} es del ${score}% hoy! No te lo pierdas.`
         },
         tactic: {
             dominantNote: '⭐ Especie dominante detectada — si tiene valor comercial, condiciones ideales.',
@@ -569,7 +575,9 @@ const SERVER_i18n = {
         },
         notification: {
             title: '🌪️ Ευκαιρία Προ-Καταιγίδας!',
-            body: (spot) => `Η πίεση πέφτει γρήγορα στο ${spot} — τα ψάρια μπορεί να είναι ενεργά!`
+            body: (spot) => `Η πίεση πέφτει γρήγορα στο ${spot} — τα ψάρια μπορεί να είναι ενεργά!`,
+            dailyBestTitle: '🌟 Καλύτερο σημείο σήμερα',
+            dailyBestBody: (spot, score) => `Η δραστηριότητα των ψαριών στο ${spot} είναι στο ${score}% σήμερα! Μην το χάσετε.`
         },
         tactic: {
             dominantNote: '⭐ Κυρίαρχο είδος εντοπίστηκε — ιδανικές συνθήκες για αλιεία.',
@@ -5700,7 +5708,7 @@ app.get('/api/scan', async (req, res) => {
                         tempWater: result.tempWater || null,
                         substrate: result.substrate || null
                     });
-                    lastValid = { lat: pt.lat, lon: pt.lon, score, fishName: result.fishName };
+                    lastValid = { lat: pt.lat, lon: pt.lon, score, fishName: result.fishName, depth: (result.depth !== undefined && result.depth !== null) ? result.depth : null };
                 }
             }
 
@@ -6027,6 +6035,8 @@ cron.schedule('0 7 * * *', async () => {
             try {
                 const userDoc = await db.collection('users').doc(uid).get();
                 const token = userDoc.data()?.fcmToken;
+                const userLang = userDoc.data()?.lang || 'tr';
+                const notifI18n = SERVER_i18n[userLang] || SERVER_i18n.tr;
                 if (!token) continue; // Token yoksa geç
 
                 let bestFav = null;
@@ -6056,8 +6066,8 @@ cron.schedule('0 7 * * *', async () => {
                     const message = {
                         token: token,
                         notification: {
-                            title: '🌟 Bugün En İyi Meran',
-                            body: `Bugün ${bestFav.name} merasında balık aktivitesi %${Math.round(bestScore)} seviyesinde! Fırsatı kaçırma.`
+                            title: notifI18n.notification.dailyBestTitle,
+                            body: notifI18n.notification.dailyBestBody(bestFav.name, Math.round(bestScore))
                         },
                         data: {
                             type: 'daily_best',
