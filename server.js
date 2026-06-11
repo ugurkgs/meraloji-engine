@@ -3319,9 +3319,8 @@ function applySanitization(data, isProUser) {
 
     const sanitizedForecast = data.forecast ? data.forecast.map(day => {
         const base = { ...day };
-        base.score = -1; // Günlük genel skoru kilitle
-        // Teknik metrikleri sıfırla
-        base.temp = 0; base.airTemp = 0; base.wave = 0; base.wind = 0;
+        // Teknik metrikleri sıfırla (Temel metrikler açık kalır: temp, airTemp, wave, wind)
+        base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
         base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
         base.salinity = 0; base.pressure = 0; base.tide = 0;
         base.current = 0; base.swellHeight = 0; base.precipProb = 0;
@@ -3341,9 +3340,8 @@ function applySanitization(data, isProUser) {
 
     const sanitizedInstant = data.instant ? (() => {
         const base = { ...data.instant };
-        base.score = -1; // Anlık genel skoru kilitle
-        // Teknik metrikleri sıfırla
-        base.temp = 0; base.airTemp = 0; base.wave = 0; base.wind = 0;
+        // Teknik metrikleri sıfırla (Temel metrikler açık kalır: temp, airTemp, wave, wind)
+        base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
         base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
         base.salinity = 0; base.pressure = 0; base.current = 0;
 
