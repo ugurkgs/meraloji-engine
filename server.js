@@ -1432,6 +1432,13 @@ async function verifyAuth(req, res, next) {
             return next();
         }
 
+        if (decoded.email === 'roadrush35@gmail.com') {
+            req.isPremium = false;
+            req.isGracePeriod = false;
+            req.graceDaysLeft = 0;
+            return next();
+        }
+
         if (db) {
             // Abonelik kontrol — 3 dakika cache
             let isPremiumCached = subscriptionCache.get(decoded.uid);
