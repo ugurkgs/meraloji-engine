@@ -3322,7 +3322,7 @@ function applySanitization(data, isProUser) {
         base.activityWindows = null;
 
         base.fishList = day.fishList.slice(0, 3).map(f => ({
-            key: f.key, name: f.name, icon: f.icon, score: -1, // Balık skorunu kilitle
+            key: f.key, name: f.name, icon: f.icon, score: f.score, // Balık skorunu göster
             category: f.category, reason: f.reason,
             triggers: f.triggers ? f.triggers.slice(0, 2) : [],
             hourlyScores: f.hourlyScores ? f.hourlyScores.map(hs => Object.assign({}, hs, { score: -1 })) : [],
@@ -3341,7 +3341,7 @@ function applySanitization(data, isProUser) {
         base.salinity = 0; base.pressure = 0; base.current = 0;
 
         base.fishList = data.instant.fishList.slice(0, 3).map(f => ({
-            key: f.key, name: f.name, icon: f.icon, score: -1, // Balık skorunu kilitle
+            key: f.key, name: f.name, icon: f.icon, score: f.score, // Balık skorunu göster
             category: f.category, reason: f.reason,
             triggers: f.triggers ? f.triggers.slice(0, 2) : [],
             hourlyScores: f.hourlyScores ? f.hourlyScores.map(hs => Object.assign({}, hs, { score: -1 })) : [],
@@ -4809,8 +4809,8 @@ app.get('/api/fish-search', async (req, res) => {
                 peakHoursDesc: getLoc(fish, 'peakHoursDesc', lang),
                 tempRange: fish.tempRange
             },
-            score: (req.isPremium || req.isGracePeriod) ? result.finalScore : -1,
-            dailyScore: (req.isPremium || req.isGracePeriod) ? dailyScore : -1,
+            score: result.finalScore,
+            dailyScore: dailyScore,
             confidence,
             bestHour: bestHour,
             bestHourScore: bestHourScore,
