@@ -1013,8 +1013,8 @@ function parseSubstrateFromHtml(html, logUser = null) {
             if (!val || val === 'null' || val === 'nodata') continue;
             const s = eunisCategoryToSubstrate(val);
             if (s) {
-                const u = logUser ? ` [${logUser}]` : '';
-                console.log(`[SUBSTRATE]${u} field match: "${val}" → ${s}`);
+                // const u = logUser ? ` [${logUser}]` : '';
+                // console.log(`[SUBSTRATE]${u} field match: "${val}" → ${s}`);
                 return s;
             }
         }
@@ -4901,9 +4901,9 @@ app.get('/api/subscription-status', async (req, res) => {
             clicksUsed,
             scansUsed,
             clickLimit: (req.isPremium || req.isGracePeriod) ? -1 : FREE_DAILY_CLICKS,
-            scanLimit: (req.isPremium || req.isGracePeriod) ? -1 : FREE_DAILY_SCANS,
+            scanLimit: (req.isPremium || req.isGracePeriod) ? 30 : FREE_DAILY_SCANS,
             clicksRemaining: (req.isPremium || req.isGracePeriod) ? -1 : Math.max(0, FREE_DAILY_CLICKS - clicksUsed),
-            scansRemaining: (req.isPremium || req.isGracePeriod) ? -1 : Math.max(0, FREE_DAILY_SCANS - scansUsed)
+            scansRemaining: (req.isPremium || req.isGracePeriod) ? Math.max(0, 30 - scansUsed) : Math.max(0, FREE_DAILY_SCANS - scansUsed)
         }
     });
 });
@@ -5571,19 +5571,22 @@ app.get('/api/scan', async (req, res) => {
     const uid = req.user.uid;
     const logUser = req.user.email || uid;
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    const dailyLimit = (req.isPremium || req.isGracePeriod) ? 999 : FREE_DAILY_SCANS;
+    const isPro = (req.isPremium || req.isGracePeriod);
+    const scanCost = isPro ? (radiusKm <= 3 ? 3 : radiusKm <= 5 ? 4 : radiusKm <= 10 ? 6 : 10) : 1;
+    const dailyLimit = isPro ? 30 : FREE_DAILY_SCANS;
 
     try {
-        // ── Günlük limit kontrolü (PRO ve grace period = sınırsız) ──
+        // ── Günlük limit kontrolü (Anti-Sabotaj Kredi Sistemi) ──
         const usageRef = db ? db.collection('scanUsage').doc(`${uid}_${today}`) : null;
-        if (!req.isPremium && !req.isGracePeriod && usageRef) {
+        let currentCount = 0;
+        if (usageRef) {
             const usageDoc = await usageRef.get();
-            const usageCount = usageDoc.exists ? (usageDoc.data().count || 0) : 0;
-            if (usageCount >= FREE_DAILY_SCANS) {
+            currentCount = usageDoc.exists ? (usageDoc.data().count || 0) : 0;
+            if (currentCount + scanCost > dailyLimit) {
                 return res.status(429).json({
                     error: 'daily_limit',
-                    message: i18n(lang).errors.scanLimit(FREE_DAILY_SCANS),
-                    remainingScans: 0
+                    message: "Sistem kaynaklarının kötüye kullanımını önlemek amacıyla günlük tarama limitinize ulaştınız.",
+                    remainingScans: Math.max(0, dailyLimit - currentCount)
                 });
             }
         }
@@ -5600,22 +5603,21 @@ app.get('/api/scan', async (req, res) => {
                 const d = cached.data();
                 const ageMs = Date.now() - d.createdAt;
                 if (ageMs < 3 * 60 * 60 * 1000) { // 3 saat
-                    // Cache hit → sadece free (grace period dışı) kullanıcı için sayacı artır
-                    let newCount = 0;
-                    if (!req.isPremium && !req.isGracePeriod && usageRef) {
-                        const curDoc = await usageRef.get();
-                        newCount = curDoc.exists ? (curDoc.data().count || 0) + 1 : 1;
+                    // Cache hit → Herkes için sayacı artır
+                    let newCount = currentCount;
+                    if (usageRef) {
+                        newCount = currentCount + scanCost;
                         await usageRef.set({ count: newCount, uid, date: today }, { merge: true });
                     }
-                    return res.json({ ...d.result, fromCache: true, cacheAge: Math.round(ageMs / 60000), remainingScans: (req.isPremium || req.isGracePeriod) ? 999 : Math.max(0, FREE_DAILY_SCANS - newCount) });
+                    return res.json({ ...d.result, fromCache: true, cacheAge: Math.round(ageMs / 60000), remainingScans: Math.max(0, dailyLimit - newCount) });
                 }
             }
         }
 
-        // ── Kullanım sayacını artır (sadece free — PRO ve grace period hariç) ──
-        if (!req.isPremium && !req.isGracePeriod && usageRef) {
+        // ── Kullanım sayacını artır (Herkes için) ──
+        if (usageRef) {
             await usageRef.set({
-                count: admin.firestore.FieldValue.increment(1),
+                count: admin.firestore.FieldValue.increment(scanCost),
                 uid,
                 date: today
             }, { merge: true });
@@ -5742,10 +5744,13 @@ app.get('/api/scan', async (req, res) => {
         const top5 = results.sort((a, b) => b.score - a.score).slice(0, 5);
 
         // Kalan hak hesapla
-        let remainingScans = req.isPremium ? 999 : Math.max(0, FREE_DAILY_SCANS - 1);
+        // Kalan hak hesapla
+        const isPro = (req.isPremium || req.isGracePeriod);
+        const dailyLimit = isPro ? 30 : FREE_DAILY_SCANS;
+        let remainingScans = Math.max(0, dailyLimit - scanCost);
         if (db && usageRef) {
             const finalDoc = await usageRef.get();
-            remainingScans = req.isPremium ? 999 : Math.max(0, FREE_DAILY_SCANS - (finalDoc.exists ? finalDoc.data().count : 1));
+            remainingScans = Math.max(0, dailyLimit - (finalDoc.exists ? finalDoc.data().count : scanCost));
         }
 
         const scanResult = {
@@ -5874,13 +5879,15 @@ app.get('/api/scan-usage', async (req, res) => {
 
     const uid = req.user.uid;
     const today = new Date().toISOString().split('T')[0];
+    const isPro = (req.isPremium || req.isGracePeriod);
+    const dailyLimit = isPro ? 30 : FREE_DAILY_SCANS;
     try {
-        if (!db) return res.json({ remainingScans: FREE_DAILY_SCANS });
+        if (!db) return res.json({ remainingScans: dailyLimit });
         const usageDoc = await db.collection('scanUsage').doc(`${uid}_${today}`).get();
         const count = usageDoc.exists ? (usageDoc.data().count || 0) : 0;
-        res.json({ remainingScans: Math.max(0, FREE_DAILY_SCANS - count), usedToday: count, limit: FREE_DAILY_SCANS });
+        res.json({ remainingScans: Math.max(0, dailyLimit - count), usedToday: count, limit: dailyLimit });
     } catch (e) {
-        res.json({ remainingScans: FREE_DAILY_SCANS, usedToday: 0 });
+        res.json({ remainingScans: dailyLimit, usedToday: 0 });
     }
 });
 
