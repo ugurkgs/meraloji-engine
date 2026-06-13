@@ -4901,9 +4901,9 @@ app.get('/api/subscription-status', async (req, res) => {
             clicksUsed,
             scansUsed,
             clickLimit: (req.isPremium || req.isGracePeriod) ? -1 : FREE_DAILY_CLICKS,
-            scanLimit: (req.isPremium || req.isGracePeriod) ? 30 : FREE_DAILY_SCANS,
+            scanLimit: req.isPremium ? 100 : (req.isGracePeriod ? 30 : FREE_DAILY_SCANS),
             clicksRemaining: (req.isPremium || req.isGracePeriod) ? -1 : Math.max(0, FREE_DAILY_CLICKS - clicksUsed),
-            scansRemaining: (req.isPremium || req.isGracePeriod) ? Math.max(0, 30 - scansUsed) : Math.max(0, FREE_DAILY_SCANS - scansUsed)
+            scansRemaining: req.isPremium ? Math.max(0, 100 - scansUsed) : (req.isGracePeriod ? Math.max(0, 30 - scansUsed) : Math.max(0, FREE_DAILY_SCANS - scansUsed))
         }
     });
 });
@@ -5573,7 +5573,9 @@ app.get('/api/scan', async (req, res) => {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const isPro = (req.isPremium || req.isGracePeriod);
     const scanCost = isPro ? (radiusKm <= 3 ? 3 : radiusKm <= 5 ? 4 : radiusKm <= 10 ? 6 : 10) : 1;
-    const dailyLimit = isPro ? 30 : FREE_DAILY_SCANS;
+    let dailyLimit = FREE_DAILY_SCANS;
+    if (req.isPremium) dailyLimit = 100;
+    else if (req.isGracePeriod) dailyLimit = 30;
 
     try {
         // ── Günlük limit kontrolü (Anti-Sabotaj Kredi Sistemi) ──
@@ -5744,9 +5746,6 @@ app.get('/api/scan', async (req, res) => {
         const top5 = results.sort((a, b) => b.score - a.score).slice(0, 5);
 
         // Kalan hak hesapla
-        // Kalan hak hesapla
-        const isPro = (req.isPremium || req.isGracePeriod);
-        const dailyLimit = isPro ? 30 : FREE_DAILY_SCANS;
         let remainingScans = Math.max(0, dailyLimit - scanCost);
         if (db && usageRef) {
             const finalDoc = await usageRef.get();
@@ -5880,7 +5879,9 @@ app.get('/api/scan-usage', async (req, res) => {
     const uid = req.user.uid;
     const today = new Date().toISOString().split('T')[0];
     const isPro = (req.isPremium || req.isGracePeriod);
-    const dailyLimit = isPro ? 30 : FREE_DAILY_SCANS;
+    let dailyLimit = FREE_DAILY_SCANS;
+    if (req.isPremium) dailyLimit = 100;
+    else if (req.isGracePeriod) dailyLimit = 30;
     try {
         if (!db) return res.json({ remainingScans: dailyLimit });
         const usageDoc = await db.collection('scanUsage').doc(`${uid}_${today}`).get();
