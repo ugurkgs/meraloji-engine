@@ -6075,7 +6075,7 @@ cron.schedule('0 7 * * *', async () => {
                 }
 
                 // En az %60 skor varsa kullanıcıya bildir
-                if (bestFav && bestScore >= 60) {
+                if (bestFav && bestScore >= 81) {
                     const message = {
                         token: token,
                         notification: {
