@@ -4360,6 +4360,7 @@ app.get('/api/forecast', async (req, res) => {
                     score: parseFloat(hScore.toFixed(1)),
                     wind: Math.round(hWind),
                     windDirection: safeNum(weather.hourly?.wind_direction_10m?.[wIdx]),
+                    windGust: Math.round(safeNum(weather.hourly?.wind_gusts_10m?.[wIdx])),
                     wave: parseFloat(hWave.toFixed(2)),
                     waveDirection: safeNum(marine.hourly?.wave_direction?.[mIdx]),
                     temp: parseFloat(hSst.toFixed(1)),
@@ -4380,7 +4381,9 @@ app.get('/api/forecast', async (req, res) => {
                     salinity: instantData.salinity || 38.0,
                     plankton: (instantData.chlorophyll && instantData.chlorophyll.value) ? instantData.chlorophyll.value : 0.2,
                     weatherCode: hCode,
-                    weatherSummary: hSummary
+                    weatherSummary: hSummary,
+                    visibility: safeNum(weather.hourly?.visibility?.[wIdx], 20000),
+                    cape: safeNum(weather.hourly?.cape?.[wIdx])
                 });
             }
             instantData.hourlyTimeline = hourlyTimeline;
