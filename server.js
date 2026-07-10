@@ -4244,6 +4244,10 @@ app.get('/api/forecast', async (req, res) => {
                 salinity: salinity,
                 wavePeriod: parseFloat(i_wavePeriod.toFixed(1)),
                 swellHeight: parseFloat(i_swellHeight.toFixed(2)),
+                swellDirection: i_swellWaveDir,
+                currentDirection: i_oceanCurrentDir,
+                cape: parseFloat(i_cape.toFixed(0)),
+                capeAlert: i_cape > 1000 ? 'EXTREME' : i_cape > 500 ? 'HIGH' : i_cape > 200 ? 'MODERATE' : null,
                 tempShock: i_tempShock.shock ? i_tempShock : null,
                 thermoclineDepth: i_thermoclineDepth,
                 moonlightIntensity: parseFloat(i_moonlightIntensity.toFixed(2)),
@@ -6489,3 +6493,4 @@ app.listen(PORT, () => {
 ╚═══════════════════════════════════════════════════════════╝
     `);
 });
+
