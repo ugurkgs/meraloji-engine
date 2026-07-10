@@ -1621,6 +1621,52 @@ function calculateConfidence(params) {
     return Math.max(0, Math.round(score)); // Artık taban yok, veri yoksa güven 0'dır.
 }
 
+function getWeatherIconicDescription(code, lang, rain = 0, wind = 0) {
+    const weatherMap = {
+        0: { tr: "☀️ Güneşli", en: "☀️ Sunny", es: "☀️ Soleado" },
+        1: { tr: "🌤️ Az Bulutlu", en: "🌤️ Mainly Clear", es: "🌤️ Mayormente despejado" },
+        2: { tr: "⛅ Parçalı Bulutlu", en: "⛅ Partly Cloudy", es: "⛅ Parcialmente nublado" },
+        3: { tr: "☁️ Bulutlu", en: "☁️ Overcast", es: "☁️ Nublado" },
+        45: { tr: "🌫️ Sisli", en: "🌫️ Foggy", es: "🌫️ Niebla" },
+        48: { tr: "🌫️ Kırağılı Sis", en: "🌫️ Depositing Rime Fog", es: "🌫️ Niebla con escarcha" },
+        51: { tr: "🌦️ Hafif Çiseleme", en: "🌦️ Light Drizzle", es: "🌦️ Llovizna ligera" },
+        53: { tr: "🌦️ Çiseleme", en: "🌦️ Moderate Drizzle", es: "🌦️ Llovizna moderada" },
+        55: { tr: "🌦️ Şiddetli Çiseleme", en: "🌦️ Dense Drizzle", es: "🌦️ Llovizna intensa" },
+        61: { tr: "🌧️ Hafif Yağmurlu", en: "🌧️ Slight Rain", es: "🌧️ Lluvia ligera" },
+        63: { tr: "🌧️ Yağmurlu", en: "🌧️ Moderate Rain", es: "🌧️ Lluvia" },
+        65: { tr: "🌧️ Şiddetli Yağmurlu", en: "🌧️ Heavy Rain", es: "🌧️ Lluvia fuerte" },
+        71: { tr: "🌨️ Hafif Kar Yağışlı", en: "🌨️ Slight Snow", es: "🌨️ Nieve ligera" },
+        73: { tr: "🌨️ Kar Yağışlı", en: "🌨️ Moderate Snow", es: "🌨️ Nieve" },
+        75: { tr: "🌨️ Şiddetli Kar Yağışlı", en: "🌨️ Heavy Snow", es: "🌨️ Nieve fuerte" },
+        80: { tr: "🌦️ Hafif Sağanak", en: "🌦️ Slight Rain Showers", es: "🌦️ Chubascos ligeros" },
+        81: { tr: "🌦️ Sağanak Yağışlı", en: "🌦️ Rain Showers", es: "🌦️ Chubascos" },
+        82: { tr: "🌦️ Şiddetli Sağanak", en: "🌦️ Violent Rain Showers", es: "🌦️ Chubascos violentos" },
+        95: { tr: "⛈️ Gök Gürültülü Fırtına", en: "⛈️ Thunderstorm", es: "⛈️ Tormenta eléctrica" },
+        96: { tr: "⛈️ Dolu ve Fırtına", en: "⛈️ Thunderstorm with Hail", es: "⛈️ Tormenta con granizo" },
+        99: { tr: "⛈️ Ağır Fırtına ve Dolu", en: "⛈️ Heavy Thunderstorm with Hail", es: "⛈️ Tormenta fuerte con granizo" }
+    };
+    const res = weatherMap[code] || { tr: "☁️ Değişken", en: "☁️ Variable", es: "☁️ Variable" };
+    let desc = res[lang] || res.tr;
+    
+    // Fırtına kodları için dinamik isimlendirme
+    if (code >= 95 && code <= 99) {
+        if (rain > 0) {
+            if (lang === 'tr') desc = "⛈️ Yağmurlu Fırtına";
+            else if (lang === 'en') desc = "⛈️ Rainy Storm";
+            else if (lang === 'es') desc = "⛈️ Tormenta Lluviosa";
+        } else if (wind > 20) {
+            if (lang === 'tr') desc = "🌩️ Rüzgarlı Fırtına";
+            else if (lang === 'en') desc = "🌩️ Windy Storm";
+            else if (lang === 'es') desc = "🌩️ Tormenta Ventosa";
+        } else {
+            if (lang === 'tr') desc = "🌩️ Kuru Fırtına";
+            else if (lang === 'en') desc = "🌩️ Dry Thunderstorm";
+            else if (lang === 'es') desc = "⛈️ Tormenta Seca";
+        }
+    }
+    return desc;
+}
+
 // İki koordinat arası mesafe (Haversine, km)
 function haversineKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
@@ -1845,34 +1891,6 @@ function calcAvgScore(fishList) {
     return { score: parseFloat(score.toFixed(1)), dominant };
 }
 
-function getWeatherIconicDescription(code, lang) {
-    const weatherMap = {
-        0: { tr: "☀️ Güneşli", en: "☀️ Sunny", es: "☀️ Soleado" },
-        1: { tr: "🌤️ Az Bulutlu", en: "🌤️ Mainly Clear", es: "🌤️ Mayormente despejado" },
-        2: { tr: "⛅ Parçalı Bulutlu", en: "⛅ Partly Cloudy", es: "⛅ Parcialmente nublado" },
-        3: { tr: "☁️ Bulutlu", en: "☁️ Overcast", es: "☁️ Nublado" },
-        45: { tr: "🌫️ Sisli", en: "🌫️ Foggy", es: "🌫️ Niebla" },
-        48: { tr: "🌫️ Kırağılı Sis", en: "🌫️ Depositing Rime Fog", es: "🌫️ Niebla con escarcha" },
-        51: { tr: "🌦️ Hafif Çiseleme", en: "🌦️ Light Drizzle", es: "🌦️ Llovizna ligera" },
-        53: { tr: "🌦️ Çiseleme", en: "🌦️ Moderate Drizzle", es: "🌦️ Llovizna moderada" },
-        55: { tr: "🌦️ Şiddetli Çiseleme", en: "🌦️ Dense Drizzle", es: "🌦️ Llovizna intensa" },
-        61: { tr: "🌧️ Hafif Yağmurlu", en: "🌧️ Slight Rain", es: "🌧️ Lluvia ligera" },
-        63: { tr: "🌧️ Yağmurlu", en: "🌧️ Moderate Rain", es: "🌧️ Lluvia" },
-        65: { tr: "🌧️ Şiddetli Yağmurlu", en: "🌧️ Heavy Rain", es: "🌧️ Lluvia fuerte" },
-        71: { tr: "🌨️ Hafif Kar Yağışlı", en: "🌨️ Slight Snow", es: "🌨️ Nieve ligera" },
-        73: { tr: "🌨️ Kar Yağışlı", en: "🌨️ Moderate Snow", es: "🌨️ Nieve" },
-        75: { tr: "🌨️ Şiddetli Kar Yağışlı", en: "🌨️ Heavy Snow", es: "🌨️ Nieve fuerte" },
-        80: { tr: "🌦️ Hafif Sağanak", en: "🌦️ Slight Rain Showers", es: "🌦️ Chubascos ligeros" },
-        81: { tr: "🌦️ Sağanak Yağışlı", en: "🌦️ Rain Showers", es: "🌦️ Chubascos" },
-        82: { tr: "🌦️ Şiddetli Sağanak", en: "🌦️ Violent Rain Showers", es: "🌦️ Chubascos violentos" },
-        95: { tr: "⛈️ Gök Gürültülü Fırtına", en: "⛈️ Thunderstorm", es: "⛈️ Tormenta eléctrica" },
-        96: { tr: "⛈️ Dolu ve Fırtına", en: "⛈️ Thunderstorm with Hail", es: "⛈️ Tormenta con granizo" },
-        99: { tr: "⛈️ Ağır Fırtına ve Dolu", en: "⛈️ Heavy Thunderstorm with Hail", es: "⛈️ Tormenta fuerte con granizo" }
-    };
-    const res = weatherMap[code] || { tr: "☁️ Değişken", en: "☁️ Variable", es: "☁️ Variable" };
-    return res[lang] || res.tr;
-}
-
 function calculatePressureTrend(pressureHistory) {
     if (!pressureHistory || pressureHistory.length < 2) {
         return { trend: 'STABLE', change: 0 };
@@ -2083,7 +2101,7 @@ function getRegion(latRaw, lonRaw) {
 
 // ═══════════════════════════════════════════════════════════════════════════
 // GLOBAL HABİTAT KONTROLÜ
-// Türkiye türleri → fish.regions ile bölge eşleşmesi (mevcut sistem)
+// Türkiye türleri → fish.regions ile bölge eşleşmesi (mve mevcut sistem)
 // Global türler   → fish.habitatBboxes ile koordinat kutusu eşleşmesi
 //
 // species.js'te regions:[] (boş dizi) olan türler global tür sayılır.
@@ -3448,10 +3466,10 @@ app.get('/api/forecast', async (req, res) => {
         const regionName = getRegion(lat, lon);
         const salinity = getSalinity(regionName);
 
-        const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,cloud_cover,precipitation,precipitation_probability,weather_code,visibility,uv_index&past_days=1&timezone=auto`);
+        const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,cloud_cover,precipitation,precipitation_probability,weather_code,visibility,uv_index,cape&past_days=1&timezone=auto`);
         const weatherUrlFallback = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,surface_pressure,cloud_cover,precipitation&past_days=1&timezone=auto`);
-        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
-        const marineUrlFallback = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
+        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,ocean_current_velocity,ocean_current_direction,sea_surface_temperature&past_days=7&timezone=auto`);
+        const marineUrlFallback = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&past_days=7&timezone=auto`);
 
         // EMODnet Bathymetry API - Derinlik verisi (SEA ise atlanır)
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lon} ${lat})`;
@@ -3746,11 +3764,15 @@ app.get('/api/forecast', async (req, res) => {
             const wave = isLand ? 0 : applyShoaling(waveRaw, wavePeriod, depthData.avg);
             const swellHeight = isLand ? 0 : safeNum(marine.hourly?.swell_wave_height?.[marineHourlyIdx]);
             const oceanCurrent = isLand ? null : (marine.hourly?.ocean_current_velocity?.[marineHourlyIdx] ?? null);
+            // YENİ: Akıntı ve ölü dalga yönleri
+            const oceanCurrentDir = isLand ? null : (marine.hourly?.ocean_current_direction?.[marineHourlyIdx] ?? null);
+            const swellWaveDir = isLand ? null : (marine.hourly?.swell_wave_direction?.[marineHourlyIdx] ?? null);
             // YENİ parametreler (1C)
             const windGust = safeNum(weather.hourly?.wind_gusts_10m?.[hourlyIdx]);
             const precipProb = safeNum(weather.hourly?.precipitation_probability?.[hourlyIdx]);
             const weatherCode = safeNum(weather.hourly?.weather_code?.[hourlyIdx]);
             const visibility = safeNum(weather.hourly?.visibility?.[hourlyIdx], 20000);
+            const cape = safeNum(weather.hourly?.cape?.[hourlyIdx]);
             const waveDirection = isLand ? 0 : safeNum(marine.hourly?.wave_direction?.[marineHourlyIdx]);
             const windWaveHeight = isLand ? 0 : safeNum(marine.hourly?.wind_wave_height?.[marineHourlyIdx]);
             const swellPeriod = isLand ? 0 : safeNum(marine.hourly?.swell_wave_period?.[marineHourlyIdx]);
@@ -3781,7 +3803,7 @@ app.get('/api/forecast', async (req, res) => {
             const moonAltitude = tide.altitude;
 
             // GÜN ÖZETİ (İkonlu Hava Durumu)
-            const weatherSummary = getWeatherIconicDescription(weatherCode, lang);
+            const weatherSummary = getWeatherIconicDescription(weatherCode, lang, rain, windSpeed);
 
             let fishList = [];
 
@@ -3931,7 +3953,7 @@ app.get('/api/forecast', async (req, res) => {
             forecast.push({
                 date: targetDate.toISOString(),
                 // ÜST KISIM İÇİN: Net Hava Durumu
-                weatherSummary: getWeatherIconicDescription(weatherCode, lang),
+                weatherSummary: getWeatherIconicDescription(weatherCode, lang, rain, windSpeed),
                 tacticKey, tacticData,
                 temp: Math.round(tempWater * 10) / 10,
                 wave, wind: Math.round(windSpeed),
@@ -3941,7 +3963,6 @@ app.get('/api/forecast', async (req, res) => {
                 cloud: cloud + "%", rain: rain, salinity, tide: tideFlow.toFixed(1),
                 current: oceanCurrent !== null ? oceanCurrent.toFixed(3) : currentEst.toFixed(2),
                 currentIsReal: oceanCurrent !== null,
-                oxygen: parseFloat(oxygen.toFixed(1)),
                 upwelling: parseFloat(upwelling.toFixed(2)),
                 wavePeriod: parseFloat(wavePeriod.toFixed(1)),
                 swellHeight: parseFloat(swellHeight.toFixed(2)),
@@ -3954,12 +3975,16 @@ app.get('/api/forecast', async (req, res) => {
                     daysAgo: chlorophyllData.daysAgo,
                     stale: chlorophyllData.stale || false
                 } : null,
-                // YENİ (1F)
+                // YENİ (1F) + (V43)
                 windGust: Math.round(windGust),
                 precipProb: precipProb,
                 waveDirection: waveDirection,
                 windWaveHeight: parseFloat(windWaveHeight.toFixed(2)),
                 swellPeriod: parseFloat(swellPeriod.toFixed(1)),
+                swellDirection: swellWaveDir,
+                currentDirection: oceanCurrentDir,
+                capeAlert: cape > 1000 ? 'EXTREME' : cape > 500 ? 'HIGH' : cape > 200 ? 'MODERATE' : null,
+                cape: parseFloat(cape.toFixed(0)),
                 visibility: visibility,
                 weatherCode: weatherCode,
                 localTime: new Date(Date.now() + (utcOffsetSeconds * 1000)).toISOString().replace('T', ' ').slice(0, 16),
@@ -4024,6 +4049,8 @@ app.get('/api/forecast', async (req, res) => {
 
             const i_swellHeight = safeNum(marine.hourly?.swell_wave_height?.[marineInstantIdx]);
             const i_oceanCurrent = marine.hourly?.ocean_current_velocity?.[marineInstantIdx] ?? null;
+            const i_oceanCurrentDir = marine.hourly?.ocean_current_direction?.[marineInstantIdx] ?? null;
+            const i_swellWaveDir = marine.hourly?.swell_wave_direction?.[marineInstantIdx] ?? null;
             const i_tempShock = calculateTempShock(marine, marineStartIdx);
             const i_thermoclineDepth = estimateThermoclineDepth(i_tempWater, now.getMonth(), regionName);
             const i_moonlightIntensity = calculateMoonlightIntensity(now, parseFloat(lat), parseFloat(lon), i_cloud);
@@ -4032,6 +4059,7 @@ app.get('/api/forecast', async (req, res) => {
             const i_precipProb = safeNum(weather.hourly?.precipitation_probability?.[instantIdx]);
             const i_weatherCode = safeNum(weather.hourly?.weather_code?.[instantIdx]);
             const i_visibility = safeNum(weather.hourly?.visibility?.[instantIdx], 20000);
+            const i_cape = safeNum(weather.hourly?.cape?.[instantIdx]);
             const i_waveDirection = safeNum(marine.hourly?.wave_direction?.[marineInstantIdx]);
             const i_windWaveHeight = safeNum(marine.hourly?.wind_wave_height?.[marineInstantIdx]);
             const i_swellPeriod = safeNum(marine.hourly?.swell_wave_period?.[marineInstantIdx]);
@@ -4071,10 +4099,13 @@ app.get('/api/forecast', async (req, res) => {
                 thermoclineDepth: i_thermoclineDepth,
                 moonlightIntensity: i_moonlightIntensity,
                 isBoat,
-                // YENİ (1C)
+                // YENİ (1C) + (V43)
                 windGust: i_windGust, precipProb: i_precipProb, weatherCode: i_weatherCode,
                 visibility: i_visibility, waveDirection: i_waveDirection,
                 windWaveHeight: i_windWaveHeight, swellPeriod: i_swellPeriod,
+                currentDirection: i_oceanCurrentDir, swellDirection: i_swellWaveDir,
+                capeAlert: i_cape > 1000 ? 'EXTREME' : i_cape > 500 ? 'HIGH' : i_cape > 200 ? 'MODERATE' : null,
+                cape: parseFloat(i_cape.toFixed(0)),
                 oxygen: i_oxygen, upwelling: i_upwelling,
                 tideFlow: i_tideFlow,
                 moonAltitude: i_tide.altitude
@@ -4189,7 +4220,7 @@ app.get('/api/forecast', async (req, res) => {
             instantData = {
                 score: i_topScore,
                 // ÜST KISIM: Sadece İkonlu TR Hava Durumu (Ham veri gelmez)
-                weatherSummary: getWeatherIconicDescription(i_weatherCode, lang),
+                weatherSummary: getWeatherIconicDescription(i_weatherCode, lang, i_rain, i_wind),
                 tacticKey: instantTacticKey, tacticData: instantTacticData,
                 fishList: instantFishList.slice(0, 10),
                 temp: i_tempWater,
@@ -4316,7 +4347,8 @@ app.get('/api/forecast', async (req, res) => {
                 const hUpwelling = parseFloat(Math.max(0.0, Math.min(5.0, baseUp * windRatio)).toFixed(2));
 
                 const hCode = safeNum(weather.hourly?.weather_code?.[wIdx], 0);
-                const hSummary = getWeatherIconicDescription(hCode, lang);
+                const hRain = safeNum(weather.hourly?.precipitation?.[wIdx]);
+                const hSummary = getWeatherIconicDescription(hCode, lang, hRain, hWind);
 
                 hourlyTimeline.push({
                     hourOffset: h,
@@ -4483,8 +4515,8 @@ app.get('/api/fish-search', async (req, res) => {
 
         const { gLat, gLon } = snapToGrid(latF, lonF);
 
-        const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,cloud_cover,precipitation,precipitation_probability,weather_code,visibility,uv_index&past_days=1&timezone=auto`);
-        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,sea_surface_temperature,ocean_current_velocity&past_days=1&timezone=auto`);
+        const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,cloud_cover,precipitation,precipitation_probability,weather_code,visibility,uv_index,cape&past_days=1&timezone=auto`);
+        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,ocean_current_velocity,ocean_current_direction,sea_surface_temperature&past_days=1&timezone=auto`);
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`;
 
         // [CACHE] forecast endpoint daha önce aynı noktayı çektiyse ham veriyi kullan — OM'a gitme
@@ -5174,8 +5206,8 @@ function generateGridPoints(centerLat, centerLon, radiusKm) {
 async function fetchCenterWeather(lat, lon) {
     const latF = parseFloat(lat).toFixed(4);
     const lonF = parseFloat(lon).toFixed(4);
-    const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,cloud_cover,precipitation,precipitation_probability,weather_code,visibility,uv_index&past_days=1&timezone=auto`);
-    const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`);
+    const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,cloud_cover,precipitation,precipitation_probability,weather_code,visibility,uv_index,cape&past_days=1&timezone=auto`);
+    const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&past_days=7&timezone=auto`);
 
     let [weather, marine] = await Promise.all([queuedFetch(weatherUrl), queuedFetch(marineUrl)]);
 
@@ -6074,8 +6106,8 @@ cron.schedule('0 7 * * *', async () => {
                     }
                 }
 
-                // En az %60 skor varsa kullanıcıya bildir
-                if (bestFav && bestScore >= 81) {
+                // En az %80 skor varsa kullanıcıya bildir
+                if (bestFav && bestScore >= 80) {
                     const message = {
                         token: token,
                         notification: {
