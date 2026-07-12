@@ -839,7 +839,7 @@ setInterval(() => {
         }
     }
     batch.commit().catch(e => console.error('[API Tracker] Firestore batch error:', e));
-}, 60 * 1000); // Flush every 60 seconds
+}, 30 * 60 * 1000); // Flush every 30 minutes
 // -------------------------
 const app = express();
 app.use(cors({
