@@ -671,7 +671,8 @@ function getZoneLabel(depthVal, lang) {
 }
 
 // Timeout'lu fetch — API yavaş yanıtlarında Promise.all'ın asılmasını önler
-function fetchWithTimeout(url, timeoutMs = 5000) { // Ücretli API — timeout kısaltıldı
+function fetchWithTimeout(url, timeoutMs = 5000) {
+    trackApiUsage(url); // Ücretli API — timeout kısaltıldı
     return Promise.race([
         fetch(url),
         new Promise((_, reject) => setTimeout(() => reject(new Error('API_TIMEOUT')), timeoutMs))
@@ -789,6 +790,57 @@ try {
     db = null;
 }
 
+
+// --- API USAGE TRACKER ---
+let apiUsageBuffer = {};
+
+function trackApiUsage(url) {
+    if (!url || typeof url !== 'string') return;
+    
+    let serviceName = null;
+    if (url.includes('api.open-meteo.com')) serviceName = 'open_meteo_forecast';
+    else if (url.includes('marine-api.open-meteo.com')) serviceName = 'open_meteo_marine';
+    else if (url.includes('emodnet-bathymetry.eu')) serviceName = 'emodnet_bathymetry';
+    else if (url.includes('gebco.net')) serviceName = 'gebco_bathymetry';
+    else if (url.includes('emodnet-seabedhabitats.eu')) serviceName = 'emodnet_substrate';
+    else if (url.includes('noaa.gov')) serviceName = 'noaa_sst';
+    else if (url.includes('open-meteo.com')) serviceName = 'open_meteo_other'; // fallback
+
+    if (serviceName) {
+        if (!apiUsageBuffer[serviceName]) apiUsageBuffer[serviceName] = 0;
+        apiUsageBuffer[serviceName]++;
+    }
+}
+
+setInterval(() => {
+    if (!db) return; // Wait for firebase initialization
+    const keys = Object.keys(apiUsageBuffer);
+    if (keys.length === 0) return;
+
+    // Snapshot current counts and reset buffer immediately
+    const flushData = { ...apiUsageBuffer };
+    apiUsageBuffer = {};
+
+    const now = new Date();
+    // Use UTC for consistent month/day rollover
+    const year = now.getUTCFullYear();
+    const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(now.getUTCDate()).padStart(2, '0');
+
+    const batch = db.batch();
+    for (const service of keys) {
+        const count = flushData[service];
+        if (count > 0) {
+            const docRef = db.collection('api_usage').doc(`${service}_${year}_${month}`);
+            batch.set(docRef, {
+                total: admin.firestore.FieldValue.increment(count),
+                [`days.${day}`]: admin.firestore.FieldValue.increment(count)
+            }, { merge: true });
+        }
+    }
+    batch.commit().catch(e => console.error('[API Tracker] Firestore batch error:', e));
+}, 60 * 1000); // Flush every 60 seconds
+// -------------------------
 const app = express();
 app.use(cors({
     origin: [
@@ -5285,6 +5337,7 @@ async function _fetchBathymetryBase(lat, lon, timeoutMs = 5000) {
                 `&WIDTH=101&HEIGHT=101&X=50&Y=50&SRS=EPSG:4326&INFO_FORMAT=text/plain&STYLES=`;
         }
 
+        trackApiUsage(url);
         const res = await fetch(url, { signal: controller.signal });
         clearTimeout(timeoutId);
 
