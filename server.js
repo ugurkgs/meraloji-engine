@@ -148,8 +148,8 @@ const SERVER_i18n = {
             highWave: 'Yüksek dalga',
         },
         notification: {
-            title: '🌪️ Fırtına Öncesi Fırsatı!',
-            body: (spot) => `${spot} bölgesinde basınç hızla düşüyor, balıklar aktifleşebilir!`,
+            title: '🌪️ Fırtına Öncesi Fırsatı Kaçırma!',
+            body: (spot) => `${spot} bölgesinde basınç hızla düşüyor, balıklar aşırı iştahlı!`,
             dailyBestTitle: '🌟 Bugün En İyi Meran',
             dailyBestBody: (spot, score) => `Bugün ${spot} merasında balık aktivitesi %${score} seviyesinde! Fırsatı kaçırma.`
         },
