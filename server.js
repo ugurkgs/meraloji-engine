@@ -3401,7 +3401,7 @@ function applySanitization(data, isProUser) {
             key: f.key, name: f.name, icon: f.icon, score: f.score, // Balık skorunu göster
             category: f.category, reason: f.reason,
             triggers: f.triggers ? f.triggers.slice(0, 2) : [],
-            hourlyScores: f.hourlyScores ? f.hourlyScores.map(hs => Object.assign({}, hs, { score: -1 })) : [],
+            hourlyScores: isPro ? (f.hourlyScores || []) : [],
             bestHour: f.bestHour,
             bestHourScore: -1
         }));
@@ -3419,7 +3419,7 @@ function applySanitization(data, isProUser) {
             key: f.key, name: f.name, icon: f.icon, score: f.score, // Balık skorunu göster
             category: f.category, reason: f.reason,
             triggers: f.triggers ? f.triggers.slice(0, 2) : [],
-            hourlyScores: f.hourlyScores ? f.hourlyScores.map(hs => Object.assign({}, hs, { score: -1 })) : [],
+            hourlyScores: isPro ? (f.hourlyScores || []) : [],
             bestHour: f.bestHour,
             bestHourScore: -1
         }));
@@ -4168,9 +4168,8 @@ app.get('/api/forecast', async (req, res) => {
                 if (!isInHabitat(fish, lat, lon, regionName)) continue;
 
                 // 3 saatlik pencere ortalaması ile daha stabil skor (gürültü filtreleme)
-                const smoothedScore = calculate3HourWindowScore(
-                    fish, key, baseParams, weather, marine, correctedClickHour, hourlyStartIdx, marineStartIdx
-                );
+                const result = calculateFishScore(fish, key, baseParams, lang);
+                const smoothedScore = result.finalScore;
 
                 if (smoothedScore > 15) {
                     const scientificName = (fish.scientificName || fish.name).toLowerCase().trim();
@@ -5597,17 +5596,18 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             for (const [key, fish] of Object.entries(SPECIES_DB || {})) {
                 if (!isInHabitat(fish, parseFloat(latF), parseFloat(lonF), regionName)) continue;
                 try {
-                    const score = calculate3HourWindowScore(fish, key, params, weather, marine, clickHour, hourlyStartIdx, marineHourlyOffset, lang);
+                    const instantResult = calculateFishScore(fish, key, params, lang);
+                    const score = instantResult ? instantResult.finalScore : 0;
+                    const scoreDetails = instantResult ? instantResult.scoreDetails : null;
+                    const dailyResult = calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
+                    const hourlyScores = dailyResult ? dailyResult.hourlyScores : null;
                     if (score > 0) {
                         const scientificName = (fish.scientificName || fish.name).toLowerCase().trim();
-
                         const existing = resultsMap.get(scientificName);
                         let shouldReplace = !existing;
-
                         if (existing) {
                             const currentIsSpecific = fish.regions && fish.regions.includes(regionName);
                             const existingIsSpecific = existing.fish.regions && existing.fish.regions.includes(regionName);
-
                             if (currentIsSpecific && !existingIsSpecific) {
                                 shouldReplace = true;
                             } else if (!currentIsSpecific && existingIsSpecific) {
@@ -5616,13 +5616,14 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
                                 shouldReplace = score > existing.score;
                             }
                         }
-
                         if (shouldReplace) {
-                            const _fn = getLoc(fish, 'name', lang);
+                            const _fn = getLoc(fish, "name", lang);
                             resultsMap.set(scientificName, {
                                 score,
                                 name: _fn,
-                                fish: fish
+                                fish: fish,
+                                hourlyScores,
+                                scoreDetails
                             });
                         }
                     }
@@ -5633,14 +5634,18 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             const topFish = sorted.slice(0, 3).map(f => f.name);
             const best = sorted[0];
 
-            return { ...commonResult, score: best ? best.score : 0, fishName: best ? best.name : '', topFish };
+            return { ...commonResult, score: best ? best.score : 0, fishName: best ? best.name : "", topFish, hourlyScores: best ? best.hourlyScores : null, scoreDetails: best ? best.scoreDetails : null };
         } else {
             const fish = SPECIES_DB[fishKey];
             if (!fish) return null;
             if (!isInHabitat(fish, parseFloat(latF), parseFloat(lonF), regionName)) return null;
-            const score = calculate3HourWindowScore(fish, fishKey, params, weather, marine, clickHour, hourlyStartIdx, marineHourlyOffset, lang);
-            const _n1 = getLoc(fish, 'name', lang);
-            return { ...commonResult, score, fishName: _n1, topFish: [_n1] };
+            const instantResult = calculateFishScore(fish, fishKey, params, lang);
+            const score = instantResult ? instantResult.finalScore : 0;
+            const scoreDetails = instantResult ? instantResult.scoreDetails : null;
+            const dailyResult = calculateWeightedDailyScore(fish, fishKey, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
+            const hourlyScores = dailyResult ? dailyResult.hourlyScores : null;
+            const _n1 = getLoc(fish, "name", lang);
+            return { ...commonResult, score, fishName: _n1, topFish: [_n1], hourlyScores, scoreDetails };
         }
     } catch (e) {
         console.log('[SCAN-SCORE] Error:', e.message);
@@ -6549,7 +6554,6 @@ app.listen(PORT, () => {
 ╚═══════════════════════════════════════════════════════════╝
     `);
 });
-
 
 
 
