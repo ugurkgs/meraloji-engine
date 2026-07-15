@@ -1,2 +1,14 @@
 node_modules
 .env
+
+# Android (android/ klasörü)
+android/.gradle/
+android/build/
+android/*/build/
+android/.idea/
+android/local.properties
+android/*.iml
+android/*/*.iml
+android/captures/
+android/.externalNativeBuild/
+android/.cxx/
