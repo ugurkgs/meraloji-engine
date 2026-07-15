@@ -2053,23 +2053,9 @@ function getSolunarWindow(date, lat = 41.0, lon = 29.0) {
     return { isMajor, isMinor };
 }
 
-// Ay Fazı Çarpanı
-function getMoonPhaseMultiplier(phase, moonPref = 'neutral') {
-    // 0.0 ve 1.0 Yeni Ay, 0.5 Dolunay'dır.
-    if (moonPref === 'bright') {
-        if (phase > 0.3 && phase < 0.7) return 1.05; // Bonus %5
-        if (phase < 0.15 || phase > 0.85) return 0.85; // Ceza %40 -> %15 (Daha dürüst)
-    } else if (moonPref === 'dark') {
-        if (phase < 0.2 || phase > 0.8) return 1.10; // Bonus %10
-        if (phase > 0.4 && phase < 0.6) return 0.80; // Ceza %45 -> %20 (Daha dürüst)
-    }
-
-    // Nötr tercihler için hafif solunar/ışık etkisi
-    if (phase < 0.1 || phase > 0.9) return 1.05; // Yeni ay hafif bonus
-    if (phase > 0.45 && phase < 0.55) return 1.03; // Dolunay hafif bonus
-
-    return 1.0;
-}
+// [KALDIRILDI] getMoonPhaseMultiplier — hiçbir yerden çağrılmayan ölü fonksiyondu.
+// Ay etkisi calculateFishScore içinde yalnızca moonlightIntensity üzerinden uygulanıyor
+// (double-dipping'i önlemek için). İkinci bir ay-fazı çarpanı bilerek devre dışı.
 
 // Asemptotik tetikleyici harmanlama (Limitlere doygunlukla yaklaşır)
 function asymptoticTriggerSum(rawSum) {
@@ -2535,7 +2521,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // SKOR DETAYLARI (Yıldız Sistemi)
     const scoreDetails = {};
 
-    // 1. MEVSİMSEL (Max 25)
+    // 1. MEVSİMSEL (Max 22)  — s_season = seasonalEff * 22
     // monthlyActivity varsa 12 aylık hassas sistem, yoksa 4 mevsim kaba sistem
     let seasonalEff;
     let monthToUse = currentMonth;
@@ -2581,7 +2567,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     let s_season = seasonalEff * 22;
     scoreDetails.season = { score: s_season, max: 22, stars: Math.round(seasonalEff * 5) };
 
-    // 2. SICAKLIK (Max 25)
+    // 2. SICAKLIK (Max 28)  — s_temp = tempScore * 28
     // [DÜZELTME: Trapezoid] — optMin/optMax varsa trapezoid, yoksa gaussian kullan.
     // optMin/optMax SPECIES_DB'ye girmeden dinamik olarak türetiliyor:
     //   optMin = opt ile min arasının %30'u yakını (sağ tarafa doğru)
@@ -2602,7 +2588,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     const tempIdealText = (fish.tempRange && fish.tempRange.optMin && fish.tempRange.optMax) ? `${fish.tempRange.optMin}-${fish.tempRange.optMax}°C` : (fish.tempRange && fish.tempRange.opt ? `${fish.tempRange.opt}°C` : null);
     scoreDetails.temp = { score: s_temp, max: 28, stars: Math.round(tempScore * 5), value: tempWater, gate: gateMultiplier, idealText: tempIdealText };
 
-    // 3. ÇEVRESEL (Max 20)
+    // 3. ÇEVRESEL (Max 18)  — 4 bileşen × 4.5 (dalga + berraklık + rüzgar + bölge)
     let s_env = 0;
 
     // Dalga Puanı — Lineer Yumuşatma
@@ -2650,11 +2636,12 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     s_env += 4.5;
     scoreDetails.region = { score: 4.5, max: 4.5, stars: 5 };
 
-    // 4. AKTİVİTE (Max 16) - V2.2 Süper Sentez
+    // 4. AKTİVİTE (Max 20) - V2.2 Süper Sentez
     /**
-     * [BİLİMSEL NOT - V2.2]: DeepSeek/Claude önerisi.
-     * Aktivite tavanı 20'den 16'ya çekildi. Amaç: "Saat uygunsa her türlü balık alırım" yanılsamasını kırmak.
-     * Balığın beslenme saati (Diel pattern) sadece bir fırsat penceresidir, garanti değildir.
+     * [BİLİMSEL NOT]: Balığın beslenme saati (Diel pattern) sadece bir fırsat
+     * penceresidir, garanti değildir. Uygun zaman diliminde s_activity = 20,
+     * uyumsuz saatte tabana (~1.25) iner. (Not: eski yorum "tavan 16'ya çekildi"
+     * diyordu ancak kod her zaman 20 veriyordu; yorum koda göre düzeltildi.)
      */
     let s_activity = 5;
     let activityScore = 0.25;
@@ -2677,7 +2664,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     }
     scoreDetails.activity = { score: s_activity, max: 20, stars: Math.round(activityScore * 5), timeMode };
 
-    // 5. TETİKLEYİCİLER (Max 10)
+    // 5. TETİKLEYİCİLER (Max 12) — asymptoticTriggerSum ile [-12, +12] bandına sıkıştırılır
     let s_trigger = 0;
 
     if (solunar.isMajor) { s_trigger += 4; activeTriggers.push(i18n(lang).triggers.majorSolunar); }
@@ -2717,10 +2704,13 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // [GÜNCELLEME v4.0] Gelgit Akıntısı (Tidal Velocity)
     // Akıntı hızı, yüksekliğin (altitude) en hızlı değiştiği "orta gelgit" anında zirve yapar.
     if (tideFlow > 0) {
-        const tidePref = fish.tidePref || fish.currentPref || 0.5;
-        // Matematiksel türev simülasyonu: altitude ~sin(t) ise velocity ~cos(t)
-        // Akıntı hızı Ay ufuktayken (altitude=0, cos=1) zirve yapar.
-        const flux = tideFlow * Math.abs(Math.cos(moonAltitude)) * 1.5;
+        const tidePref = (typeof fish.tidePref === 'number') ? fish.tidePref
+            : (typeof fish.currentPref === 'number') ? fish.currentPref : 0.5;
+        // [DÜZELTME] tideFlow zaten genlik × irtifa faktörünü içeriyor (bkz. forecast/scan
+        // hesabı). Eski kod bunu ayrıca |cos(moonAltitude)| × 1.5 ile çarparak irtifayı
+        // ÇİFT uyguluyor ve fiziksel olarak anlamsız bir sin×cos çarpımı üretiyordu.
+        // Artık tek faktör olarak, güvenli bir tavanla kullanılır.
+        const flux = Math.min(2.5, tideFlow);
         const tScore = flux * tidePref * 4;
         s_trigger += tScore;
         if (tScore > 2.5) activeTriggers.push(i18n(lang).triggers.goodTideFlow);
@@ -2740,46 +2730,64 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         scoreDetails.upwelling = { value: parseFloat(upwelling.toFixed(2)), score: upScore };
     }
 
-    // [YENİ v4.0] Oksijen Tahmini ve Metabolik Filtre
+    // [YENİ v4.0 / DÜZELTME] Oksijen Tahmini ve Metabolik Filtre
+    // Eski kod puanı DOYGUNLUK (%) üzerinden veriyordu. Ancak saturation, formül gereği
+    // (mgL / baseSolubility) ≈ %100 civarında çıktığı için hipoksi cezası neredeyse hiç
+    // tetiklenmiyor, +2 "zengin oksijen" bonusu ise her gündüz hesabında dağıtılıyordu.
+    // Balık için asıl fizyolojik stres etkeni MUTLAK çözünmüş oksijendir (mg/L) ve bu
+    // değer sıcaklıkla gerçekçi biçimde düşer (sıcak su daha az O2 tutar — Henry Yasası).
     const oxygenResult = calculateOxygen(tempWater, salinity, chlorophyll, timeMode);
-    const estDO = oxygenResult.saturation; // Skor için doygunluk kullanılır
-    if (estDO < 60) {
-        // [BİLİMSEL NOT - V2.2]: Gemini Pro uyarısı.
-        // Hipoksi riski: Oksijen %60 altındaysa metabolizma yavaşlar.
-        // Bentik (dip) türler için ceza %50 daha ağırdır (Durağan su/dip çökeltisi riski).
+    const estDO = oxygenResult.saturation; // termoklin kapısı için doygunluk korunur
+    const doMgL = oxygenResult.mgL;         // biyolojik puanlama mutlak mg/L üzerinden
+    if (doMgL < 5.0) {
+        // Az oksijenli / hipoksiye yakın su → metabolizma ve beslenme baskılanır.
+        // Bentik (dip) türler dip çökeltisi/durgun su nedeniyle daha ağır etkilenir.
         const benthicMultiplier = isDeepBottom ? 1.5 : 1.0;
-        const oxygenPenalty = (60 - estDO) * 0.25 * benthicMultiplier;
+        const oxygenPenalty = (5.0 - doMgL) * 1.6 * benthicMultiplier; // <4 mg/L'de belirgin
         s_trigger -= oxygenPenalty;
         activeTriggers.push(i18n(lang).triggers.lowOxygen);
-        scoreDetails.oxygen = { value: Math.round(estDO), mgL: oxygenResult.mgL, penalty: oxygenPenalty, status: 'LOW', benthicMultiplier };
-    } else if (estDO > 90) {
-        s_trigger += 2.0; // Zengin oksijen bonusu
+        scoreDetails.oxygen = { value: Math.round(estDO), mgL: doMgL, penalty: parseFloat(oxygenPenalty.toFixed(1)), status: 'LOW', benthicMultiplier };
+    } else if (doMgL > 8.5) {
+        // Soğuk, iyi karışmış, oksijence zengin su → aktif beslenme için ideal.
+        s_trigger += 2.0;
         activeTriggers.push(i18n(lang).triggers.optimalOxygen);
-        scoreDetails.oxygen = { value: Math.round(estDO), mgL: oxygenResult.mgL, bonus: 2.0, status: 'OPTIMAL' };
+        scoreDetails.oxygen = { value: Math.round(estDO), mgL: doMgL, bonus: 2.0, status: 'OPTIMAL' };
+    } else {
+        scoreDetails.oxygen = { value: Math.round(estDO), mgL: doMgL, status: 'OK' };
     }
 
     // Akıntı — gerçek okyanus akıntısı verisi varsa kullan, yoksa tahmin
     {
         const effectiveCurrent = (oceanCurrent !== null && oceanCurrent !== undefined && !isNaN(oceanCurrent))
             ? oceanCurrent   // m/s — gerçek veri
-            : currentSpeed;  // tahmin (estimateCurrent)
+            : safeNum(currentSpeed);  // tahmin (estimateCurrent)
 
-        const idealCurrent = fish.currentPref * 1.5;
+        // currentPref eksik türlerde NaN yayılımını önle (nötr tercih = 0.5).
+        const cp = (typeof fish.currentPref === 'number' && !isNaN(fish.currentPref)) ? fish.currentPref : 0.5;
+        const idealCurrent = cp * 1.5;
         const currentDiff = Math.abs(effectiveCurrent - idealCurrent);
-        const currentScore = Math.max(0, 1 - currentDiff / 1.5);
-        const currentPts = currentScore * 5;
+        const currentScore = Math.max(0, 1 - currentDiff / 1.5); // 0..1, 1 = ideal akıntı
+
+        // [DÜZELTME] Akıntı uygunluğu artık TÜM türlerin skorunu etkiler.
+        // Eski kodda currentScore hesaplanıp yalnızca scoreDetails'e yazılıyor, skora
+        // hiç eklenmiyordu; s_trigger'a katkı SADECE PELAJIK türlere veriliyordu. Bu
+        // nedenle currentPref, pelajik olmayan tüm türlerde ölü bir değişkendi.
+        // Merkezlenmiş katkı: ideal akıntıda +1.5, idealden tamamen sapınca -1.5.
+        s_trigger += (currentScore - 0.5) * 3;
+
+        // Pelajik avcılar için güçlü akıntı ek bonusu (yem yığılması / aktif avlanma).
         if (fish.category === "PELAJIK" && effectiveCurrent > 0.3) {
-            const currentBonus = Math.min(3, effectiveCurrent * fish.currentPref * 3);
+            const currentBonus = Math.min(3, effectiveCurrent * cp * 3);
             s_trigger += currentBonus;
             if (currentBonus > 1.5) activeTriggers.push(i18n(lang).triggers.strongCurrent);
         }
         scoreDetails.current = {
-            score: parseFloat(currentPts.toFixed(1)),
+            score: parseFloat((currentScore * 5).toFixed(1)),
             max: 5,
             stars: Math.round(currentScore * 5),
             value: parseFloat(effectiveCurrent.toFixed(3)),
             isReal: oceanCurrent !== null && oceanCurrent !== undefined && !isNaN(oceanCurrent),
-            pref: fish.currentPref
+            pref: cp
         };
     }
 
@@ -2805,8 +2813,16 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // [GÜNCELLEME v4.0] AY IŞIĞI ŞİDDETİ — Derinliğe bağlı sönümleme
     if (moonlightIntensity !== undefined && moonlightIntensity !== null && timeMode === 'NIGHT') {
         const pref = fish.moonPref || 'neutral';
+        // [DÜZELTME] Işık, deniz TABANINA (depthAvg) değil balığın TUTTUĞU derinliğe
+        // göre sönümlenmelidir. Eski kod depthAvg kullandığından 20-30 m'den derin her
+        // yerde ay ışığını daima ~0 yapıyor, yüzeye yakın duran türlerde (moonPref etkili
+        // olması gereken türlerde) ay etkisini tamamen yok ediyordu.
+        const holdDepth = Math.min(
+            (fish.depth && typeof fish.depth.opt === 'number') ? fish.depth.opt : 5,
+            (depthAvg !== undefined && depthAvg !== null && depthAvg > 0) ? depthAvg : Infinity
+        );
         // Beer-Lambert sönümlemesi uygula
-        const intensity = applyLightAttenuation(moonlightIntensity, depthAvg || 0, chlorophyll);
+        const intensity = applyLightAttenuation(moonlightIntensity, holdDepth, chlorophyll);
 
         if (intensity < 0.05) {
             // Işık bu derinliğe ulaşmıyor
