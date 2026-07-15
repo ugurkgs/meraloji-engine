@@ -5598,7 +5598,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
                 if (!isInHabitat(fish, parseFloat(latF), parseFloat(lonF), regionName)) continue;
                 try {
                     const dailyResult = calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
-                    const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
+                    const score = (dailyResult && dailyResult.hourlyScores && dailyResult.hourlyScores[clickHour] > 0) ? dailyResult.hourlyScores[clickHour] : (dailyResult ? dailyResult.score : 0);
                     if (score > 0) {
                         const scientificName = (fish.scientificName || fish.name).toLowerCase().trim();
 
@@ -5640,7 +5640,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             if (!fish) return null;
             if (!isInHabitat(fish, parseFloat(latF), parseFloat(lonF), regionName)) return null;
             const dailyResult = calculateWeightedDailyScore(fish, fishKey, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
-            const score = (dailyResult && dailyResult.score) ? dailyResult.score : 0;
+            const score = (dailyResult && dailyResult.hourlyScores && dailyResult.hourlyScores[clickHour] > 0) ? dailyResult.hourlyScores[clickHour] : (dailyResult ? dailyResult.score : 0);
             const _n1 = getLoc(fish, 'name', lang);
             return { ...commonResult, score, fishName: _n1, topFish: [_n1] };
         }
@@ -6551,4 +6551,5 @@ app.listen(PORT, () => {
 ╚═══════════════════════════════════════════════════════════╝
     `);
 });
+
 
