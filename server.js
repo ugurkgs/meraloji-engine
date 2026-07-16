@@ -1919,6 +1919,21 @@ function estimateThermoclineDepth(sst, month, region) {
     return Math.round(base + summerStrength * 20); // KARADENİZ: 10-34m, EGE/AKDENİZ: 25-49m
 }
 
+// Termoklin ALTINDAKİ (derin) su sıcaklığı — bölgesel, yıl boyu yaklaşık sabit.
+// Motor sıcaklığı yüzeyden (SST) okuyor; ama termoklin altında tutan dip türleri yüzey
+// ısısını hissetmez. Bu değerler literatürdeki tipik alt-tabaka sıcaklıklarıdır:
+//   Karadeniz "soğuk ara katman" ~8°C; Marmara alt tabaka (Akdeniz kökenli) ~14.5°C;
+//   Ege/Akdeniz ara/derin su ~14-15°C. (Kışın zaten su kolonu karışır → yüzey≈derin.)
+function estimateDeepTemp(region) {
+    switch (region) {
+        case 'KARADENİZ': return 8;
+        case 'MARMARA': return 14.5;
+        case 'EGE': return 15;
+        case 'AKDENİZ': return 15;
+        default: return 14;
+    }
+}
+
 function estimateCurrent(wave, windSpeed, region) {
     let base = (safeNum(wave) * 0.4) + (safeNum(windSpeed) * 0.02);
     if (region === 'MARMARA') base *= 1.8;
@@ -2701,16 +2716,28 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     const tOptMin = fish.tempRange.optMin ?? (tOpt - (tOpt - tMin) * 0.35);
     const tOptMax = fish.tempRange.optMax ?? (tOpt + (tMax - tOpt) * 0.35);
 
+    // [YENİ] DERİNLİĞE GÖRE SICAKLIK — dip/derin türler yüzey SST'sini değil, tuttukları
+    // derinlikteki suyu hisseder. Balığın optimum derinliği termoklinin ALTINDAysa, yüzey
+    // sıcaklığı yerine tahmini derin-su sıcaklığı kullanılır (ikisinin küçüğü — derin su
+    // yüzeyden sıcak olamaz). Böylece demersal türlere DÜRÜST DAR sıcaklık aralığı
+    // verilebilir; yazın yüzey 26°C olsa bile bu türler haksızca sıfırlanmaz. Pelajik
+    // türler (isDeepBottom değil) su kolonunda yukarı çıktığı için yüzey ısısını hisseder.
+    let effTemp = tempWater;
+    if (isDeepBottom && thermoclineDepth !== null && thermoclineDepth !== undefined
+        && fish.depth && typeof fish.depth.opt === 'number' && fish.depth.opt > thermoclineDepth) {
+        effTemp = Math.min(tempWater, estimateDeepTemp(region));
+    }
+
     // Gaussian/Trapezoid skoru
-    const gaussianScore = getGaussianScore(tempWater, tMin, tOpt, tMax, tOptMin, tOptMax);
+    const gaussianScore = getGaussianScore(effTemp, tMin, tOpt, tMax, tOptMin, tOptMax);
 
     // Lethal Gate — Çifte cezayı önlemek için doğrudan sıcaklık skoruna uygulanır
-    const gateMultiplier = getTempGateMultiplier(tempWater, tMin, tMax);
+    const gateMultiplier = getTempGateMultiplier(effTemp, tMin, tMax);
     const tempScore = gaussianScore * gateMultiplier;
 
     let s_temp = tempScore * 28;
     const tempIdealText = (fish.tempRange && fish.tempRange.optMin && fish.tempRange.optMax) ? `${fish.tempRange.optMin}-${fish.tempRange.optMax}°C` : (fish.tempRange && fish.tempRange.opt ? `${fish.tempRange.opt}°C` : null);
-    scoreDetails.temp = { score: s_temp, max: 28, stars: Math.round(tempScore * 5), value: tempWater, gate: gateMultiplier, idealText: tempIdealText };
+    scoreDetails.temp = { score: s_temp, max: 28, stars: Math.round(tempScore * 5), value: tempWater, effTemp: (effTemp !== tempWater ? parseFloat(effTemp.toFixed(1)) : undefined), gate: gateMultiplier, idealText: tempIdealText };
 
     // 3. ÇEVRESEL (Max 18)  — 4 bileşen × 4.5 (dalga + berraklık + rüzgar + bölge)
     let s_env = 0;

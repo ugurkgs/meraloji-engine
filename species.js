@@ -384,7 +384,7 @@ const SPECIES_DB = {
         huntingMode: "chemosensory",
         shoreMonths: [], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "DAY", peakHoursDesc: "Gündüz, çamurlu/kumlu dip", peakHoursDescEn: "Daytime, mud/sand bottom", peakHoursDescEl: "Daytime, mud/sand bottom", peakHoursDescEs: "Durante el día",
-        tempRange: { min: 12, opt: 18, max: 24 },
+        tempRange: { min: 12, opt: 15, max: 20 }, // FishBase tercih: 13.1-15.9°C ort 14.2
         seasons: { winter: 0.80, spring: 0.60, summer: 0.30, autumn: 0.70 },
         activity: "DAY",
         pressureSensitivity: 0.5,
@@ -606,7 +606,7 @@ const SPECIES_DB = {
         // balık, yaz aylarında yüzey 26-28°C'ye çıktığında (termoklinin çok altında olmasına
         // rağmen) yanlışlıkla sıcaklık kapısından neredeyse sıfırlanıyordu. Üst sınır,
         // yüzey sıcaklığının bu derin türü spesifik olarak kısıtlamaması için genişletildi.
-        tempRange: { min: 8, opt: 17, max: 28 },
+        tempRange: { min: 7, opt: 11, max: 16 }, // FishBase tercih: 6.9-14.9°C ort 11.2 (soğuk-derin; motor derin-su sıcaklığı kullanır)
         seasons: { winter: 0.70, spring: 0.60, summer: 0.40, autumn: 0.65 },
         activity: "DAY",
         pressureSensitivity: 0.4,
@@ -631,7 +631,7 @@ const SPECIES_DB = {
         // yaz sığ suyu kolayca 24-26°C'ye çıkar ve eski üst sınır bu dönemde skoru neredeyse
         // sıfırlıyordu. 20-150m aralığında yaşayan bu tür için yüzey sıcaklığı zaten kaba bir
         // vekil (proxy) olduğundan üst sınır gerçekçi yaz koşullarını kapsayacak şekilde açıldı.
-        tempRange: { min: 10, opt: 17, max: 26 },
+        tempRange: { min: 11, opt: 15, max: 21 }, // FishBase tercih: 11.1-18°C ort 14.4
         seasons: { winter: 0.65, spring: 0.70, summer: 0.55, autumn: 0.75 },
         activity: "NIGHT",
         pressureSensitivity: 0.5,
@@ -1186,7 +1186,7 @@ const SPECIES_DB = {
         // [DÜZELTME] opt derinliği 80m — bu derinlikte yüzey sıcaklığı (motorun ölçtüğü değer)
         // ile balığın hissettiği gerçek sıcaklık büyük ölçüde ayrışır. max=20°C, yaz aylarında
         // yüzey SST'si 25-28°C'ye çıktığında bu derin türü yanlışlıkla neredeyse sıfırlıyordu.
-        tempRange: { min: 8, opt: 15, max: 26 },
+        tempRange: { min: 8, opt: 12, max: 18 }, // FishBase tercih: 3.8-14.2°C ort 7.7 (Akdeniz pop. ılık ucu; derin-su sıcaklığıyla puanlanır)
         seasons: { winter: 0.70, spring: 0.75, summer: 0.55, autumn: 0.65 },
         activity: "DAY",
         pressureSensitivity: 0.5,
@@ -1517,7 +1517,7 @@ const SPECIES_DB = {
         // çıkar ve eski max=20 bu dönemde sıcaklık kapısını tetikleyip skoru bastırıyordu —
         // tam da uygulamanın "en iyi mevsim" dediği anda. Pagellus erythrinus literatürde
         // daha geniş bir termal aralığa (yaklaşık 13-27°C) sahip ılık su sparidae'sidir.
-        tempRange: { min: 13, opt: 21, max: 26 },
+        tempRange: { min: 12, opt: 17, max: 23 }, // FishBase tercih: 12.2-21°C ort 17.2
         seasons: { winter: 0.50, spring: 0.70, summer: 0.85, autumn: 0.70 },
         activity: "DAY",
         pressureSensitivity: 0.5,
