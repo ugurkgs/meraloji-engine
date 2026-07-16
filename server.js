@@ -3530,7 +3530,7 @@ function applySanitization(data, isProUser) {
             key: f.key, name: f.name, icon: f.icon, score: f.score, // Balık skorunu göster
             category: f.category, reason: f.reason,
             triggers: f.triggers ? f.triggers.slice(0, 2) : [],
-            hourlyScores: isPro ? (f.hourlyScores || []) : [],
+            hourlyScores: isProUser ? (f.hourlyScores || []) : [],
             bestHour: f.bestHour,
             bestHourScore: -1
         }));
@@ -3548,7 +3548,7 @@ function applySanitization(data, isProUser) {
             key: f.key, name: f.name, icon: f.icon, score: f.score, // Balık skorunu göster
             category: f.category, reason: f.reason,
             triggers: f.triggers ? f.triggers.slice(0, 2) : [],
-            hourlyScores: isPro ? (f.hourlyScores || []) : [],
+            hourlyScores: isProUser ? (f.hourlyScores || []) : [],
             bestHour: f.bestHour,
             bestHourScore: -1
         }));
