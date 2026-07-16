@@ -2889,7 +2889,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // olarak kullanır. Kıyı türleri (Çipura, Levrek, Karagöz) ise ani soğumada
     // "cold shock" yaşar → lethargic hale gelir → ceza almalı.
     if (tempShock && tempShock.shock) {
-        const isMigratoryPelagic = fish.category === 'PELAJIK' || fish.sstTrendPref === 'cooling';
+        const isMigratoryPelagic = fish.category === 'PELAJIK' || fish.sstTrendPref === 'COOLING';
         const isCoastalSensitive = fish.category === 'KIYI' || fish.category === 'LAGUN' || fish.category === 'KUM_TABAN';
         const isBenthic = ['DIP_DERIN', 'DIP_KIYI', 'KAYALIK', 'DİP', 'DERİN', 'KUM_TABAN', 'KAFADANBACAKLI', 'KALAMAR'].includes(fish.category);
 
@@ -2910,10 +2910,15 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
                 s_trigger -= 1.0;
             }
         } else if (tempShock.direction === 'WARMING') {
-            if (fish.sstTrendPref === 'warming') {
+            // [DÜZELTME] Karşılaştırma küçük harf ('warming'/'cooling') idi ama species.js
+            // TÜM türlerde bu alanı büyük harfle ("WARMING"/"COOLING") dolduruyor — tıpkı
+            // tempShock.direction/trendDirection gibi kod genelindeki tüm sıcaklık-yönü
+            // alanlarında olduğu gibi. Bu tutarsızlık yüzünden aşağıdaki iki dal hiçbir
+            // türde tetiklenmiyor, her tür sessizce "Nötr" dalına düşüyordu.
+            if (fish.sstTrendPref === 'WARMING') {
                 s_trigger += 2; // Isınmayı seven türler için bonus
                 activeTriggers.push(i18n(lang).triggers.warmingShock(tempShock.change));
-            } else if (fish.sstTrendPref === 'cooling') {
+            } else if (fish.sstTrendPref === 'COOLING') {
                 s_trigger -= 1.0; // Soğuk seven balık için ani ısınma stresi
             } else {
                 s_trigger += 0.0; // Nötr
@@ -2931,17 +2936,23 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // SST 7 Günlük Trend — yavaş ama süregelen değişim
     if (tempShock && tempShock.trendDirection && fish.sstTrendPref) {
         const td = tempShock.trendDirection;
-        const pref = fish.sstTrendPref;
-        if (pref === 'warming' && (td === 'WARMING' || td === 'WARMING_FAST')) {
+        // [DÜZELTME] Aynı büyük/küçük harf tutarsızlığı burada da vardı: species.js
+        // "WARMING"/"COOLING"/"STABLE"/"ANY" yazıyor, karşılaştırma 'warming'/'cooling'/
+        // 'stable'/'any' bekliyordu. Sonuç: ilk üç dal hiç tetiklenmiyor, her tanımlı
+        // sstTrendPref son "else if" dalına düşüp gerçek trendle eşleşip eşleşmediğine
+        // bakılmaksızın sabit -0.5 ceza alıyordu (örn. WARMING tercih eden bir balık,
+        // su gerçekten ısınırken bile cezalandırılıyordu).
+        const pref = (fish.sstTrendPref || '').toUpperCase();
+        if (pref === 'WARMING' && (td === 'WARMING' || td === 'WARMING_FAST')) {
             s_trigger += td === 'WARMING_FAST' ? 2.5 : 1.5;
             activeTriggers.push(i18n(lang).triggers.warmingTrend);
-        } else if (pref === 'cooling' && (td === 'COOLING' || td === 'COOLING_FAST')) {
+        } else if (pref === 'COOLING' && (td === 'COOLING' || td === 'COOLING_FAST')) {
             s_trigger += td === 'COOLING_FAST' ? 2.5 : 1.5;
             activeTriggers.push(i18n(lang).triggers.coolingTrend);
-        } else if (pref === 'stable' && td === 'STABLE') {
+        } else if (pref === 'STABLE' && td === 'STABLE') {
             s_trigger += 1.5;
             activeTriggers.push(i18n(lang).triggers.stableSst);
-        } else if (pref !== 'any') {
+        } else if (pref !== 'ANY') {
             s_trigger -= 0.5; // Tercih dışı trend — hafif ceza
         }
         scoreDetails.sstTrend = { trend: tempShock.trend, direction: td, pref };

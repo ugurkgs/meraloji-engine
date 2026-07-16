@@ -9,7 +9,15 @@ const SPECIES_DB = {
         category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak ve gün batımı ±2 saat", peakHoursDescEn: "Dawn and dusk ±2 hours", peakHoursDescEl: "Αυγή και σούρουπο ±2 ώρες", peakHoursDescEs: "Amanecer y atardecer",
-        tempRange: { min: 12, opt: 18, max: 25 },
+        // [DÜZELTME] Akdeniz popülasyonu üzerine hakemli çalışmalar (Person-Le Ruyet ve ark.)
+        // maksimum büyüme oranını 26°C'de, maksimum yem alımını 27.5°C'de, yabani ortamda
+        // yaşam aralığını 6-28°C olarak veriyor. Eski max=25 gerçek fizyolojik toleransı
+        // olduğundan düşük gösteriyor ve Ağustos Ege/Akdeniz yüzey sıcaklığını (26-28°C
+        // yaygın) yanlışlıkla "letal bölgeye yakın" işaretliyordu. "Yazın levrek azalır"
+        // gözlemi fizyolojik değil DAVRANIŞSAL/KONUMSAL bir olgudur (sığdan derine çekilme,
+        // beslenme ritmi kayması) — bu zaten ayrı 'seasons' alanında modelleniyor ve
+        // DEĞİŞTİRİLMEDİ (kış en yüksek skoru koruyor).
+        tempRange: { min: 12, opt: 20, max: 27 },
         seasons: { winter: 0.85, spring: 0.65, summer: 0.50, autumn: 0.80 },
         activity: "DAWN_DUSK",
         pressureSensitivity: 0.6,
@@ -111,7 +119,12 @@ const SPECIES_DB = {
         pressureSensitivity: 0.8,
         wavePref: 0.2, clarityPref: "CLEAR",
         currentPref: 0.3,
-        salinityPref: "MARINE",
+        // [DÜZELTME] "MARINE" geçerli bir salinityPref değeri değildi (motor sadece
+        // LOW/MEDIUM/HIGH/ANY tanıyor — server.js: salCat = LOW|MEDIUM|HIGH). Geçersiz
+        // değer, tuzluluk kontrolünün hiçbir zaman eşleşmemesine ve bu türün HER bölgede
+        // gereksiz yere -2 "MISMATCH" cezası almasına yol açıyordu. Tam tuzlu, açık deniz
+        // türü olduğu için doğru karşılığı "HIGH".
+        salinityPref: "HIGH",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 1, opt: 15, max: 150 },
         advice: {
@@ -290,17 +303,23 @@ const SPECIES_DB = {
         photoId: 47,
         category: "KAFADANBACAKLI",
         huntingMode: "visual",
-        peakHours: "DAY", peakHoursDesc: "Gündüz aktif, sabah saatleri", peakHoursDescEn: "Daytime, especially morning hours", peakHoursDescEl: "Daytime, especially morning hours", peakHoursDescEs: "Durante el día",
-        tempRange: { min: 14, opt: 19, max: 24 },
+        // [DÜZELTME] Literatür Akdeniz popülasyonlarında baskın olarak gece/alacakaranlık
+        // aktivitesi gösteriyor (dens'te gündüz saklanma, alacakaranlıkta çıkış) — DAY yanlıştı.
+        peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık ve gece, kovuklardan çıkış", peakHoursDescEn: "Dusk and night, emerging from dens", peakHoursDescEl: "Dusk and night, emerging from dens", peakHoursDescEs: "Anochecer y noche",
+        // [DÜZELTME] max 24°C çok düşüktü — Ege/Akdeniz yazında yüzey suyu rahatlıkla 26-27°C'ye
+        // çıkıyor ve ahtapot avcılığı yaz aylarında da (örn. Bodrum/Datça) sürüyor.
+        tempRange: { min: 13, opt: 20, max: 27 },
         seasons: { winter: 0.65, spring: 0.50, summer: 0.30, autumn: 0.55 },
-        activity: "DAY",
+        activity: "DAWN_DUSK",
         pressureSensitivity: 0.5,
         wavePref: 0.1, clarityPref: "MODERATE",
         currentPref: 0.1,
         salinityPref: "HIGH",  // Kayalık-açık deniz türü — yüksek tuzluluğu tercih eder,
         planktonPref: "LOW",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 2, opt: 20, max: 150 },
+        // [DÜZELTME] Literatür: Ege'de yoğun avcılık 0-50m, tür dağılımı büyük ölçüde 100m ile
+        // sınırlı (>200m nadir). opt=20 yerine gerçek yoğunluk bölgesi olan ~10m'ye çekildi.
+        depth: { min: 1, opt: 10, max: 120 },
         advice: { bait: "Yengeç, Tavuk But", lure: "Ahtapot Zokası, Plastik Yengeç", rig: "Çarpmalı Zoka", hook: "Özel Zoka", baitEn: "Crab, chicken leg", baitEl: "Crab, chicken leg", baitEs: "Cangrejo, chicken leg", lureEn: "Octopus jig, plastic crab", lureEl: "Octopus jig, plastic crab", lureEs: "Octopus Jig, plastic Cangrejo", rigEn: "Jigging with bounce", rigEl: "Jigging with bounce", rigEs: "Jigging with bounce", hookEn: "Dedicated jig", hookEl: "Dedicated jig", hookEs: "Dedicated Jig" },
         legalSize: "1 kg",
         note: "Yemi sarıp yapışır. Ağırlık hissedince sert tasma.",
@@ -374,7 +393,10 @@ const SPECIES_DB = {
         salinityPref: "HIGH",
         sstTrendPref: "STABLE",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
-        depth: { min: 10, opt: 80, max: 300 },
+        // [DÜZELTME] opt=80m, barbunun asıl rekreasyonel/kıyı avcılığı derinliğinin (tipik
+        // olarak 10-40m çamurlu/kumlu koylar) çok altındaydı — tür trol/ticari balıkçılıkta
+        // daha derine (100-200m) iniyor ama olta avcılığında yoğunlukla sığda tutuluyor.
+        depth: { min: 5, opt: 30, max: 200 },
         advice: { bait: "Karides, Kurt, Midye, Tavuk Göğsü", lure: "Genelde Yok", rig: "Üçlü Dip Oltası", hook: "9 - 11 İnce Telli", baitEn: "Shrimp, worm, mussel, chicken breast", baitEl: "Shrimp, worm, mussel, chicken breast", baitEs: "Camarón, Gusano, Mejillón, Pechuga de pollo", lureEn: "Rarely used", lureEl: "Rarely used", lureEs: "Raramente used", rigEn: "Three-hook bottom rig", rigEl: "Three-hook bottom rig", rigEs: "Three-Anzuelo Aparejo de fondo", hookEn: "9 - 11 fine wire", hookEl: "9 - 11 fine wire", hookEs: "9 - 11 Alambre fino" },
         legalSize: "13 cm",
         note: "Yumuşak dudak yapısı var — ince telli küçük iğne (9-11 no) şart. Yemi emerek alır.",
@@ -394,7 +416,9 @@ const SPECIES_DB = {
         currentPref: 0.3,
         salinityPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
-        depth: { min: 0, opt: 20, max: 200 },
+        // [DÜZELTME] İskorpit (Scorpaena porcus) daha derin kuzeni lipsoz'un (S. scrofa)
+        // aksine sığ kayalık/liman dibi türüdür — max=200m gerçek dışı derindi.
+        depth: { min: 0, opt: 12, max: 60 },
         advice: { bait: "İstavrit Fleto, Karides", lure: "Kokulu Silikonlar (LRF)", rig: "Dip Takımı, LRF", hook: "4 - 6 Uzun Pala", baitEn: "Horse mackerel fillet, shrimp", baitEl: "Horse mackerel fillet, shrimp", baitEs: "Horse mackerel fillet, Camarón", lureEn: "Scented soft plastics (LRF)", lureEl: "Scented soft plastics (LRF)", lureEs: "Scented Vinilos (LRF)", rigEn: "Bottom rig, LRF", rigEl: "Bottom rig, LRF", rigEs: "Aparejo de fondo, LRF", hookEn: "4 - 6 long shank", hookEl: "4 - 6 long shank", hookEs: "4 - 6 Pata larga" },
         legalSize: "Yok",
         note: "⚠️ DİKENLERİ ZEHİRLİ! Dikkatli olun.",
@@ -496,14 +520,19 @@ const SPECIES_DB = {
         noteEn: "STRICTLY PROHIBITED to catch. IUCN Endangered. Regulation 6/2. Release immediately if caught.", noteEl: "STRICTLY PROHIBITED to catch. IUCN Endangered. Regulation 6/2. Release immediately if caught.", noteEs: "STRICTLY PROHIBITED to catch. IUCN Endangered. Regulation 6/2. Release immediately if caught."
     },
     "akya": {
-        name: "Akya", nameEn: "Greater Amberjack", nameEl: "Greater Amberjack", nameEs: "Lecha (Pez Limón)",
+        // [DÜZELTME] "sarikuyruk" anahtarı aynı bilimsel türün (Seriola dumerili) çelişkili
+        // verilerle ikinci kez girilmiş, hiçbir kodda referans edilmeyen bir duplikeydi.
+        // Silindi; iki common-name Türkçe'de birbirinin yerine kullanıldığı için isimde korundu.
+        name: "Akya (Sarıkuyruk)", nameEn: "Greater Amberjack", nameEl: "Greater Amberjack", nameEs: "Lecha (Pez Limón)",
         icon: "🐟", scientificName: "Seriola dumerili",
         photoId: 6,
         category: "PELAJIK",
         huntingMode: "visual",
         shoreMonths: [6, 7, 8, 9], // kıyıya yaklaşma ayları (0=Ocak)
-        peakHours: "DAY", peakHoursDesc: "Gündüz akıntılı burun başları, 24°C üzeri", peakHoursDescEn: "Daytime at current points above 24C", peakHoursDescEl: "Daytime at current points above 24C", peakHoursDescEs: "Durante el día",
-        tempRange: { min: 14, opt: 22, max: 28 },
+        peakHours: "DAY", peakHoursDesc: "Gündüz akıntılı burun başları, 20°C üzeri", peakHoursDescEn: "Daytime at current points above 20C", peakHoursDescEl: "Daytime at current points above 20C", peakHoursDescEs: "Durante el día",
+        // [DÜZELTME] min=14 yerine 15 (iki kaynağın ortası); max=28 yerine 29 (yaz sonu Akdeniz
+        // yüzey sıcaklığı bunu aşabiliyor, tür yaz boyunca yoğun avlanıyor).
+        tempRange: { min: 15, opt: 23, max: 29 },
         seasons: { winter: 0.30, spring: 0.60, summer: 0.90, autumn: 0.75 },
         activity: "DAY",
         pressureSensitivity: 0.7,
@@ -513,7 +542,10 @@ const SPECIES_DB = {
         planktonPref: "HIGH",
         moonPref: "dark",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 10, opt: 50, max: 300 },
+        // [DÜZELTME] max=300 gerçekçi ama nadir uç değerdi; 250'ye çekildi (>250m rekreasyonel
+        // olta balıkçılığı için pratikte anlamsız). opt=50→40, iki kaynağın (35/50) ortası ve
+        // Türkiye'deki tipik jigging derinliğiyle (akıntılı burun başları) daha uyumlu.
+        depth: { min: 10, opt: 40, max: 250 },
         advice: { bait: "Canlı İstavrit, Sardalya", lure: "Popper, Stickbait, Metal Jig", rig: "Trolling, Jigging, Popping", hook: "3/0 - 6/0 + Çelik Tel", baitEn: "Live horse mackerel, sardine", baitEl: "Live horse mackerel, sardine", baitEs: "Live horse mackerel, Sardina", lureEn: "Popper, stickbait, metal jig", lureEl: "Popper, stickbait, metal jig", lureEs: "Popper, Stickbait, metal Jig", rigEn: "Trolling, jigging, popping", rigEl: "Trolling, jigging, popping", rigEs: "Curricán, Jigging, popping", hookEn: "3/0 - 6/0 + wire trace", hookEl: "3/0 - 6/0 + wire trace", hookEs: "3/0 - 6/0 + wire trace" },
         legalSize: "30 cm",
         note: "Güçlü avcı! Tekne gerektirir. Yaz aylarında açıklarda bollaşır.",
@@ -569,7 +601,12 @@ const SPECIES_DB = {
         huntingMode: "chemosensory",
         shoreMonths: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin kayalık dipte", peakHoursDescEn: "Daytime, deep rocky bottom", peakHoursDescEl: "Daytime, deep rocky bottom", peakHoursDescEs: "Durante el día",
-        tempRange: { min: 10, opt: 16, max: 22 },
+        // [DÜZELTME] Tür 50-700m'de yaşıyor; motor tempWater olarak YÜZEY sıcaklığını
+        // (API sea_surface_temperature) kullanıyor. max=22°C ile bu derinlikte yaşayan bir
+        // balık, yaz aylarında yüzey 26-28°C'ye çıktığında (termoklinin çok altında olmasına
+        // rağmen) yanlışlıkla sıcaklık kapısından neredeyse sıfırlanıyordu. Üst sınır,
+        // yüzey sıcaklığının bu derin türü spesifik olarak kısıtlamaması için genişletildi.
+        tempRange: { min: 8, opt: 17, max: 28 },
         seasons: { winter: 0.70, spring: 0.60, summer: 0.40, autumn: 0.65 },
         activity: "DAY",
         pressureSensitivity: 0.4,
@@ -590,7 +627,11 @@ const SPECIES_DB = {
         category: "DIP_KIYI",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece aktif, pusu kurarak avlanır", peakHoursDescEn: "Night active, ambush predator", peakHoursDescEl: "Night active, ambush predator", peakHoursDescEs: "Durante la noche",
-        tempRange: { min: 11, opt: 15, max: 18 },
+        // [DÜZELTME] max=18°C, türün kendi notuyla ("yazın sığ kıyılara yaklaşır") çelişiyordu:
+        // yaz sığ suyu kolayca 24-26°C'ye çıkar ve eski üst sınır bu dönemde skoru neredeyse
+        // sıfırlıyordu. 20-150m aralığında yaşayan bu tür için yüzey sıcaklığı zaten kaba bir
+        // vekil (proxy) olduğundan üst sınır gerçekçi yaz koşullarını kapsayacak şekilde açıldı.
+        tempRange: { min: 10, opt: 17, max: 26 },
         seasons: { winter: 0.65, spring: 0.70, summer: 0.55, autumn: 0.75 },
         activity: "NIGHT",
         pressureSensitivity: 0.5,
@@ -757,8 +798,10 @@ const SPECIES_DB = {
         name: "Sübye", nameEn: "Common Cuttlefish", nameEl: "Κοινή σουπιά", nameEs: "Sepia", icon: "🦑", scientificName: "Sepia officinalis",
         photoId: 48,
         category: "KALAMAR",
-        
-        huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece, kıyı yakını", peakHoursDescEn: "Night, near shore", peakHoursDescEl: "Night, near shore", peakHoursDescEs: "Durante la noche",
+        // [DÜZELTME] Sübye kamuflaj+pusu avcılığı yapan, çok gelişmiş görme sistemine sahip bir
+        // avcıdır (görme olmadan renk/doku eşleştirme mümkün değil) — huntingMode 'visual' olmalı
+        // ki server.js'teki görüş mesafesi (sis/bulanıklık) cezası doğru şekilde uygulansın.
+        huntingMode: "visual",peakHours: "NIGHT", peakHoursDesc: "Gece, kıyı yakını", peakHoursDescEn: "Night, near shore", peakHoursDescEl: "Night, near shore", peakHoursDescEs: "Durante la noche",
         tempRange: { min: 14, opt: 18, max: 24 },
         seasons: { winter: 0.75, spring: 0.85, summer: 0.50, autumn: 0.90 },
         activity: "NIGHT",
@@ -769,33 +812,13 @@ const SPECIES_DB = {
         planktonPref: "LOW",
         moonPref: "bright",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 2, opt: 10, max: 25 },
+        // [DÜZELTME] max=25m gerçek dışı dardı. Sepia officinalis kışın 100-150m'ye kadar açılıp
+        // ilkbaharda üreme için sığa göç eder (bu türün kendi notu da bunu belirtiyor: "sığlaşır").
+        depth: { min: 1, opt: 10, max: 100 },
         advice: { bait: "Kalamar Zokası", lure: "Egi 2.5-3.5", rig: "Eging Takımı", hook: "Zoka", baitEn: "Squid jig", baitEl: "Squid jig", baitEs: "Calamar Jig", lureEn: "Egi 2.5-3.5", lureEl: "Egi 2.5-3.5", lureEs: "Egi 2.5-3.5", rigEn: "Eging setup", rigEl: "Eging setup", rigEs: "Eging setup", hookEn: "Dedicated jig", hookEl: "Dedicated jig", hookEs: "Dedicated Jig" },
         legalSize: "Yok",
         note: "Sonbahar favorisi. Eging ile keyifli av. Gece lambası çeker.",
         noteEn: "Autumn favourite. Fun eging. Attracted to light at night.", noteEl: "Autumn favourite. Fun eging. Attracted to light at night.", noteEs: "Autumn favourite. Fun eging. Attracted to light at night."
-    },
-    "sarikuyruk": {
-        name: "Sarıkuyruk", nameEn: "Greater Amberjack", nameEl: "Greater Amberjack", nameEs: "Greater Amberjack", icon: "🐟", scientificName: "Seriola dumerili",
-        photoId: 50,
-        category: "AVCI",
-        huntingMode: "visual",
-        shoreMonths: [6, 7, 8, 9], // kıyıya yaklaşma ayları (0=Ocak)
-        peakHours: "DAY", peakHoursDesc: "Sabah/Akşam, açık su", peakHoursDescEn: "Morning/Evening, open water", peakHoursDescEl: "Morning/Evening, open water", peakHoursDescEs: "Durante el día",
-        tempRange: { min: 18, opt: 24, max: 28 },
-        seasons: { winter: 0.30, spring: 0.60, summer: 0.90, autumn: 0.80 },
-        activity: "DAY",
-        pressureSensitivity: 0.6,
-        wavePref: 0.5, clarityPref: "CLEAR",
-        currentPref: 0.6,
-        salinityPref: "MEDIUM",
-        moonPref: "dark",
-        regions: ["AKDENİZ", "EGE", "MARMARA"],
-        depth: { min: 10, opt: 35, max: 70 },
-        advice: { bait: "Canlı Zargana", lure: "Jig 60-150g, Popper", rig: "Jigging Setup", hook: "3/0 - 5/0", baitEn: "Live garfish", baitEl: "Live garfish", baitEs: "Live garfish", lureEn: "Jig 60-150g, popper", lureEl: "Jig 60-150g, popper", lureEs: "Jig 60-150g, Popper", rigEn: "Jigging setup", rigEl: "Jigging setup", rigEs: "Jigging setup", hookEn: "3/0 - 5/0", hookEl: "3/0 - 5/0", hookEs: "3/0 - 5/0" },
-        legalSize: "45 cm",
-        note: "Güçlü game fish. Jigging'in yıldızı. Acımasız direnç gösterir.",
-        noteEn: "Powerful game fish. Star of jigging. Relentless resistance.", noteEl: "Powerful game fish. Star of jigging. Relentless resistance.", noteEs: "Powerful game fish. Star of jigging. Relentless resistance."
     },
     "granyoz": {
         name: "Granyoz (Sarıağız)", nameEn: "Meagre", nameEl: "πενιχρό", nameEs: "Meagre", icon: "🐟", scientificName: "Argyrosomus regius",
@@ -927,7 +950,11 @@ const SPECIES_DB = {
         seasons: { winter: 0.10, spring: 0.50, summer: 1.00, autumn: 0.70 },
         activity: "DAY",
         pressureSensitivity: 0.3,
-        wavePref: 0.2, clarityPref: "HIGH",
+        // [DÜZELTME] "HIGH" geçerli bir clarityPref değeri değildi (motor sadece
+        // CLEAR/TURBID/MODERATE/ANY tanıyor). Geçersiz değer, berraklık puanının hiçbir
+        // koşulda hesaba katılmadan sabit nötr 0.5'te kalmasına yol açıyordu (sessiz bug).
+        // Kumlu-berrak sığ su türü olduğu için doğru karşılığı "CLEAR".
+        wavePref: 0.2, clarityPref: "CLEAR",
         currentPref: 0.3,
         salinityPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ"],
@@ -1008,13 +1035,18 @@ const SPECIES_DB = {
         peakHours: "CREPUSCULAR", peakHoursDesc: "Alacakaranlık ve gece", peakHoursDescEn: "Dusk and night", peakHoursDescEl: "Dusk and night", peakHoursDescEs: "Consultar detalles",
         tempRange: { min: 18, opt: 24, max: 29 },
         seasons: { winter: 0.25, spring: 0.50, summer: 0.85, autumn: 0.70 },
-        activity: "NIGHT",
+        // [DÜZELTME] Sphyraenidae (baraküda/zurna) görsel avcılardır — Sphyraena viridensis
+        // için activity="NIGHT" + moonPref="dark" kombinasyonu huntingMode="visual" ile
+        // çelişiyordu (görme ile avlanan bir tür en karanlık gecede en iyi avlanamaz).
+        // peakHours zaten "CREPUSCULAR" idi; activity buna uyumlu hale getirildi ve
+        // moonPref "bright" yapıldı (ay ışığı görsel avlanmaya yardımcı olur, tıpkı kalamar gibi).
+        activity: "DAWN_DUSK",
         pressureSensitivity: 0.5,
         wavePref: 0.4, clarityPref: "CLEAR",
         currentPref: 0.5,
         salinityPref: "HIGH",
         planktonPref: "HIGH",
-        moonPref: "dark",
+        moonPref: "bright",
         sstTrendPref: "WARMING",
         regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 2, opt: 15, max: 40 },
@@ -1151,7 +1183,10 @@ const SPECIES_DB = {
         huntingMode: "chemosensory",
         shoreMonths: [], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin dip", peakHoursDescEn: "Daytime, deep bottom", peakHoursDescEl: "Daytime, deep bottom", peakHoursDescEs: "Durante el día",
-        tempRange: { min: 10, opt: 14, max: 20 },
+        // [DÜZELTME] opt derinliği 80m — bu derinlikte yüzey sıcaklığı (motorun ölçtüğü değer)
+        // ile balığın hissettiği gerçek sıcaklık büyük ölçüde ayrışır. max=20°C, yaz aylarında
+        // yüzey SST'si 25-28°C'ye çıktığında bu derin türü yanlışlıkla neredeyse sıfırlıyordu.
+        tempRange: { min: 8, opt: 15, max: 26 },
         seasons: { winter: 0.70, spring: 0.75, summer: 0.55, autumn: 0.65 },
         activity: "DAY",
         pressureSensitivity: 0.5,
@@ -1244,7 +1279,12 @@ const SPECIES_DB = {
         name: "İsparoz", nameEn: "Annular Seabream", nameEl: "Δακτυλιοειδής τσιπούρα", nameEs: "Annular Seabream", icon: "🐟", scientificName: "Diplodus annularis",
         photoId: 21,
         category: "DIP_KIYI",
-        huntingMode: "chemosensory",
+        // [DÜZELTME] Diplodus cinsinin diğer üyeleri (karagöz, sargoz, sivriburun) bu DB'de
+        // "visual" olarak doğru işaretlenmiş; isparoz aynı cinsin görsel avlanan bir üyesi
+        // olduğu halde "chemosensory" olarak tutarsız girilmişti. Cins-geneli biyolojiyle
+        // uyumlu hale getirildi (fonksiyonel etkisi yok: DIP_KIYI zaten isDeepBottom
+        // grubunda olduğu için görüş cezası bu değişiklikten etkilenmiyor).
+        huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz, sığ kayalık", peakHoursDescEn: "Daytime, shallow rocky", peakHoursDescEl: "Daytime, shallow rocky", peakHoursDescEs: "Durante el día",
         tempRange: { min: 12, opt: 18, max: 26 },
         seasons: { winter: 0.50, spring: 0.75, summer: 0.85, autumn: 0.70 },
@@ -1342,9 +1382,13 @@ const SPECIES_DB = {
         regions: ["MARMARA", "KARADENİZ", "EGE", "AKDENİZ"],
         depth: { min: 2, opt: 15, max: 40 },
         advice: { bait: "Çaça, Hamsi", lure: "Küçük Kaşık", rig: "Spin, Çapari", hook: "4 - 8", baitEn: "Sprat, anchovy", baitEl: "Sprat, anchovy", baitEs: "Sprat, Boquerón", lureEn: "Small spoon", lureEl: "Small spoon", lureEs: "Small spoon", rigEn: "Spin, sabiki", rigEl: "Spin, sabiki", rigEs: "Spinning, Sabiki", hookEn: "4 - 8", hookEl: "4 - 8", hookEs: "4 - 8" },
+        // [DÜZELTME] "Çinekop" hukuken/biyolojik olarak lüferin 20cm ALTI (15-18cm "çinekop",
+        // 18-20cm "sarıkanat") genç evresidir; tutulması ve satışı YASAKTIR. legalSize "20 cm"
+        // tek başına yanıltıcıydı — not eklenerek 20cm altının serbest bırakılması gerektiği
+        // (yasal olarak lüfer sayılmadığı) açıkça belirtildi.
         legalSize: "20 cm",
-        note: "Lüferin yavrusu. Sürü halinde avlanır.",
-        noteEn: "Juvenile bluefish. Caught in schools.", noteEl: "Juvenile bluefish. Caught in schools.", noteEs: "Juvenile bluefish. Caught in schools."
+        note: "Lüferin 20 cm altı yavru evresidir (15-18cm 'çinekop', 18-20cm 'sarıkanat'). 20 cm altındaki bireylerin tutulması ve satışı yasaktır — mutlaka serbest bırakın.",
+        noteEn: "Juvenile bluefish under 20cm (15-18cm 'çinekop', 18-20cm 'sarıkanat'). Keeping or selling fish under 20cm is illegal — always release.", noteEl: "Juvenile bluefish under 20cm. Keeping or selling fish under 20cm is illegal — always release.", noteEs: "Juvenile bluefish under 20cm. Keeping or selling fish under 20cm is illegal — always release."
     },
     // ═══════════════════════════════════════════════════════════════════
     // TİCARİ BALIKLAR (Hobi oltası ile zor ama bölgede bulunur)
@@ -1468,7 +1512,12 @@ const SPECIES_DB = {
         huntingMode: "chemosensory",
         shoreMonths: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin kayalık ve çamurlu dip", peakHoursDescEn: "Daytime, deep rocky and muddy bottom", peakHoursDescEl: "Daytime, deep rocky and muddy bottom", peakHoursDescEs: "Durante el día",
-        tempRange: { min: 14, opt: 18, max: 20 },
+        // [DÜZELTME] max=20°C, türün KENDİ 'summer: 0.85' (en yüksek mevsim skoru) verisiyle
+        // doğrudan çelişiyordu: Ege/Akdeniz yaz yüzey sıcaklığı rutin olarak 24-26°C'ye
+        // çıkar ve eski max=20 bu dönemde sıcaklık kapısını tetikleyip skoru bastırıyordu —
+        // tam da uygulamanın "en iyi mevsim" dediği anda. Pagellus erythrinus literatürde
+        // daha geniş bir termal aralığa (yaklaşık 13-27°C) sahip ılık su sparidae'sidir.
+        tempRange: { min: 13, opt: 21, max: 26 },
         seasons: { winter: 0.50, spring: 0.70, summer: 0.85, autumn: 0.70 },
         activity: "DAY",
         pressureSensitivity: 0.5,
@@ -1509,15 +1558,22 @@ const SPECIES_DB = {
         note: "⚠️ KORUMA ALTINDA. 1 Haziran - 31 Ağustos arası avlanması yasaktır. 45 cm altı tüm yıl yasak. Yakaladığınızda mutlaka serbest bırakın!",
         noteEn: "WARNING: PROTECTED. Fishing prohibited 1 June - 31 August. Fish under 45cm prohibited all year. Always release when caught!", noteEl: "WARNING: PROTECTED. Fishing prohibited 1 June - 31 August. Fish under 45cm prohibited all year. Always release when caught!", noteEs: "WARNING: PROTECTED. Fishing prohibido 1 June - 31 August. Fish under 45cm prohibido all year. Always release when caught!"
     },
+    // [DÜZELTME - ÖNEMLİ] Karadeniz mersin balığı (Acipenser spp.) 1992'den beri Türkiye'de
+    // AVI TAMAMEN YASAK bir türdür; tarihsel 6 türünden 3'ü çoktan tükenmiş, kalan 3'ü de
+    // IUCN kırmızı listesinde. Eski kayıt sıradan bir avlanabilir tür gibi (legalSize: "Yok"
+    // = sınırsız, koruma bayrağı yok, olta/yem tavsiyesi var) modellenmişti — bu hem yasal
+    // hem etik açıdan yanlıştı. orfoz (Epinephelus marginatus) ile aynı muameleye alındı:
+    // category: KORUMA + protected: true → skor her zaman 0, olta tavsiyesi verilmez.
     "mersin": {
         name: "Mersin Balığı", nameEn: "Sturgeon", nameEl: "Ο οξύρρυγχος", nameEs: "Sturgeon", icon: "🐟", scientificName: "Acipenser spp.",
         photoId: 81,
-        category: "DIP_DERIN",
+        category: "KORUMA",
+        protected: true,
         huntingMode: "chemosensory",
         shoreMonths: [], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin su", peakHoursDescEn: "Daytime, deep water", peakHoursDescEl: "Daytime, deep water", peakHoursDescEs: "Durante el día",
         tempRange: { min: 10, opt: 16, max: 22 },
-        seasons: { winter: 0.60, spring: 0.75, summer: 0.50, autumn: 0.65 },
+        seasons: { winter: 0, spring: 0, summer: 0, autumn: 0 },
         activity: "DAY",
         pressureSensitivity: 0.5,
         wavePref: 0.3, clarityPref: "MODERATE",
@@ -1526,10 +1582,10 @@ const SPECIES_DB = {
         planktonPref: "LOW",
         regions: ["KARADENİZ", "MARMARA"],
         depth: { min: 20, opt: 80, max: 200 },
-        advice: { bait: "Kurt, Midye, Balık parçası", lure: "Yok", rig: "Dip, Uzun Olta", hook: "2 - 6", baitEn: "Worm, mussel, fish piece", baitEl: "Worm, mussel, fish piece", baitEs: "Gusano, Mejillón, fish piece", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom, long trace", rigEl: "Bottom, long trace", rigEs: "Bottom, Bajo de línea largo", hookEn: "2 - 6", hookEl: "2 - 6", hookEs: "2 - 6" },
-        legalSize: "Yok",
-        note: "⚠️ NADİR TÜR. Karadeniz'e özgü. Yakaladığınızda serbest bırakın.",
-        noteEn: "WARNING: RARE SPECIES. Endemic to Black Sea. Release when caught.", noteEl: "WARNING: RARE SPECIES. Endemic to Black Sea. Release when caught.", noteEs: "WARNING: RARE SPECIES. Endemic to Black Sea. Release when caught."
+        advice: { bait: "Yok — avı yasak", lure: "Yok", rig: "Yok", hook: "Yok", baitEn: "None — fishing prohibited", baitEl: "None — fishing prohibited", baitEs: "Ninguno — pesca prohibida", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "None", rigEl: "None", rigEs: "Ninguno", hookEn: "None", hookEl: "None", hookEs: "Ninguno" },
+        legalSize: "AVI YASAK",
+        note: "🚫 KRİTİK NESLİ TÜKENMEKTE OLAN TÜR — 1992'den beri Türkiye'de avı tamamen yasaktır. Tarihi 6 Karadeniz mersin balığı türünden 3'ü zaten tükenmiştir, kalanlar IUCN kırmızı listesindedir. Yakalarsanız zarar vermeden derhal suya geri bırakın.",
+        noteEn: "CRITICALLY ENDANGERED — fishing has been completely banned in Turkey since 1992. Of the 6 historic Black Sea sturgeon species, 3 are already extinct and the rest are IUCN Red List. If caught, release immediately without harm.", noteEl: "CRITICALLY ENDANGERED — fishing has been completely banned in Turkey since 1992. If caught, release immediately.", noteEs: "EN PELIGRO CRÍTICO — la pesca está totalmente prohibida en Turquía desde 1992. Si lo captura, libérelo de inmediato."
     },
 
     "aterin": {
@@ -1761,9 +1817,12 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 0, opt: 5, max: 20 },
         advice: { bait: "Solucan, Karides, Küçük Balık", lure: "Yok", rig: "Dip Takımı, Gece Oltası", hook: "4 - 8", baitEn: "Ragworm, shrimp, small fish", baitEl: "Ragworm, shrimp, small fish", baitEs: "RagGusano, Camarón, small fish", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom rig, night fishing", rigEl: "Bottom rig, night fishing", rigEs: "Aparejo de fondo, night fishing", hookEn: "4 - 8", hookEl: "4 - 8", hookEs: "4 - 8" },
-        legalSize: "50 cm",
-        note: "Gece avcısı. Lagün, nehir ağzı ve sığ kıyılarda bulunur. İç sularda min. boy 50 cm, günlük limit 3 adet. Avrupa genelinde nesli tehlike altında — vicdani limit uygulayın.",
-        noteEn: "Night predator. Found in lagoons, river mouths and shallow shores. Min. size 50cm in inland waters, daily limit 3. Endangered across Europe — apply ethical limits.", noteEl: "Night predator. Found in lagoons, river mouths and shallow shores. Min. size 50cm in inland waters, daily limit 3. Endangered across Europe — apply ethical limits.", noteEs: "Night predator. Found in lagoons, river mouths and shallow shores. Min. size 50cm in inland waters, daily limit 3. Endangered across Europe — apply ethical limits."
+        // [DÜZELTME] Not, türün genel olarak "nesli tehlikede" olduğunu söylüyordu ama
+        // Türkiye'ye özgü somut yasal av dönemini (1 Ekim-31 Aralık dışında avı yasak,
+        // kota sistemi) belirtmiyordu — kullanıcının fiilen uyması gereken kural buydu.
+        legalSize: "50 cm (sadece 1 Ekim-31 Aralık arası, kotalı)",
+        note: "Gece avcısı. Lagün, nehir ağzı ve sığ kıyılarda bulunur. Türkiye'de SADECE 1 Ekim-31 Aralık arasında, kota dahilinde avlanabilir; bu tarihler dışında avı yasaktır. İç sularda min. boy 50 cm, günlük limit 3 adet. Avrupa genelinde nesli kritik tehlike altında — mümkünse serbest bırakın.",
+        noteEn: "Night predator. Found in lagoons, river mouths and shallow shores. In Turkey, legally fishable ONLY between Oct 1-Dec 31 under a quota system; banned outside that window. Min. size 50cm in inland waters, daily limit 3. Critically endangered across Europe — release if possible.", noteEl: "Night predator. In Turkey, legally fishable only Oct 1-Dec 31 under quota; banned outside that window. Critically endangered — release if possible.", noteEs: "Depredador nocturno. En Turquía, la pesca es legal solo del 1 de octubre al 31 de diciembre bajo cuota; prohibida fuera de ese período. En peligro crítico — libere si es posible."
     },
     "snook": {
         name: "Snook", nameEn: "Common Snook", nameEl: "Κοινό Snook", nameEs: "Common Snook", icon: "🐟", scientificName: "Centropomus undecimalis",
@@ -2185,48 +2244,6 @@ const SPECIES_DB = {
         advice: { bait: "Canlı Balık, Chumming", lure: "Trolling Popper, Squid Lure", rig: "Heavy Fluorocarbon", hook: "6/0 - 9/0 Circle", baitEn: "Live fish, chumming", baitEl: "Live fish, chumming", baitEs: "Live fish, chumming", lureEn: "Trolling popper, squid lure", lureEl: "Trolling popper, squid lure", lureEs: "Curricán Popper, Calamar Señuelo", rigEn: "Heavy fluorocarbon", rigEl: "Heavy fluorocarbon", rigEs: "Pesado fluorocarbon", hookEn: "6/0 - 9/0 circle", hookEl: "6/0 - 9/0 circle", hookEs: "6/0 - 9/0 Circular" },
         note: "Açık denizin en güçlü savaşçılarından biri. Sürüler halinde gezer.",
         noteEn: "One of the strongest fighters in the open sea. Schools.", noteEl: "One of the strongest fighters in the open sea. Schools.", noteEs: "One of the strongest fighters in the open sea. Schools."
-    },
-    "octopus": {
-        name: "Ahtapot", nameEn: "Octopus", nameEl: "Χταπόδι", nameEs: "Octopus", icon: "🐙", scientificName: "Octopus vulgaris",
-        photoId: 131, category: "KAYALIK",
-        
-        huntingMode: "visual",peakHours: "NIGHT", peakHoursDesc: "Gece aktif, kayalık kovuklar",
-        tempRange: { min: 14, opt: 22, max: 28 },
-        seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
-        activity: "NIGHT", pressureSensitivity: 0.4, wavePref: 0.2, currentPref: 0.3, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 0, opt: 5, max: 50 },
-        advice: { bait: "Yengeç, Balık, Karides", lure: "Ahtapot Zokası", rig: "Dip Takımı", hook: "Büyük Zoka", baitEn: "Crab, fish, shrimp", baitEl: "Crab, fish, shrimp", baitEs: "Cangrejo, fish, Camarón", lureEn: "Octopus jig", lureEl: "Octopus jig", lureEs: "Octopus Jig", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "Large jig", hookEl: "Large jig", hookEs: "Large Jig" },
-        note: "Çok akıllı bir omurgasızdır. Gece beslenmek için sığlıklara çıkar.",
-        noteEn: "A very intelligent invertebrate. Comes to shallow waters at night to feed.", noteEl: "A very intelligent invertebrate. Comes to shallow waters at night to feed.", noteEs: "A very intelligent invertebrate. Comes to shallow waters at night to feed."
-    },
-    "cuttlefish": {
-        name: "Sübye", nameEn: "Common Cuttlefish", nameEl: "Κοινή σουπιά", nameEs: "Common Cuttlefish", icon: "🦑", scientificName: "Sepia officinalis",
-        photoId: 132, category: "KUM_TABAN",
-        huntingMode: "chemosensory",
-        peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık ve gece",
-        tempRange: { min: 12, opt: 18, max: 25 },
-        seasons: { winter: 0.7, spring: 0.9, summer: 0.5, autumn: 0.6 },
-        activity: "DAWN_DUSK", pressureSensitivity: 0.5, wavePref: 0.3, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "MODERATE",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 1, opt: 10, max: 100 },
-        advice: { bait: "Taze Balık, Karides", lure: "Sübye Zokası (Egi)", rig: "Egi Rig", hook: "Zoka", baitEn: "Fresh fish, shrimp", baitEl: "Fresh fish, shrimp", baitEs: "Fresh fish, Camarón", lureEn: "Cuttlefish jig (Egi)", lureEl: "Cuttlefish jig (Egi)", lureEs: "Sepia Jig (Egi)", rigEn: "Egi rig", rigEl: "Egi rig", rigEs: "Egi rig", hookEn: "Jig", hookEl: "Jig", hookEs: "Jig" },
-        note: "Kum ve eriştelik alanlarda kamuflaj ustasıdır. Bahar aylarında sığlaşır.",
-        noteEn: "Master of camouflage in sandy and seagrass areas. Moves to shallow waters in spring.", noteEl: "Master of camouflage in sandy and seagrass areas. Moves to shallow waters in spring.", noteEs: "Master of camouflage in sandy and seagrass areas. Moves to shallow waters in spring."
-    },
-    "squid": {
-        name: "Kalamar", nameEn: "European Squid", nameEl: "Ευρωπαϊκό Καλαμάρι", nameEs: "European Squid", icon: "🦑", scientificName: "Loligo vulgaris",
-        photoId: 133, category: "PELAJIK",
-        huntingMode: "visual",
-        peakHours: "NIGHT", peakHoursDesc: "Gece ve ışıklı alanlar",
-        tempRange: { min: 10, opt: 16, max: 22 },
-        seasons: { winter: 0.9, spring: 0.5, summer: 0.3, autumn: 0.8 },
-        activity: "NIGHT", pressureSensitivity: 0.6, wavePref: 0.4, currentPref: 0.6, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 2, opt: 15, max: 150 },
-        advice: { bait: "Canlı Yem", lure: "Kalamar Zokası (Egi)", rig: "Egi Fishing", hook: "Zoka", baitEn: "Live bait", baitEl: "Live bait", baitEs: "Cebo vivo", lureEn: "Squid jig (Egi)", lureEl: "Squid jig (Egi)", lureEs: "Calamar Jig (Egi)", rigEn: "Egi fishing", rigEl: "Egi fishing", rigEs: "Egi fishing", hookEn: "Jig", hookEl: "Jig", hookEs: "Jig" },
-        note: "Kış aylarında kıyılarda bollaşır. Işığa karşı duyarlıdır.",
-        noteEn: "Abundant on coasts in winter. Highly sensitive to light.", noteEl: "Abundant on coasts in winter. Highly sensitive to light.", noteEs: "Abundant on coasts in winter. Highly sensitive to light."
     },
     "blue_marlin": {
         name: "Mavi Marlin", nameEn: "Blue Marlin", nameEl: "Μπλε Μάρλιν", nameEs: "Blue Marlin", icon: "🦈", scientificName: "Makaira nigricans",
