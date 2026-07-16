@@ -5797,23 +5797,20 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
 
             const sorted = Array.from(resultsMap.values()).sort((a, b) => b.score - a.score);
 
-            // [STANDART] Mera "Genel Av Skoru" AGGREGASYON yöntemi = calcAvgScore:
-            // istilacı/koruma/ticari hariç, en iyi 3 uygun türün 60/30/10 ağırlıklı ortalaması.
-            // (Skorların kendisi artık ANLIK — yukarıda; aggregasyon yöntemi forecast ile aynı.)
-            // Eskiden burada tek en iyi balığın skoru (best.score) dönüyordu → hem istikrarsızdı
-            // hem de istilacı/koruma bir tür (ör. aslan balığı) merayı yanlışlıkla yüksek gösterebiliyordu.
-            const { score: spotScore, dominant } = calcAvgScore(
-                sorted.map(f => ({ score: f.score, category: f.fish ? f.fish.category : null }))
-            );
-
-            // Pin etiketi ve detay popup'ı skor tabanıyla tutarlı olsun → en iyi UYGUN tür
-            // (hariç tutulan kategori bir merayı temsil eden "başlık balık" olamaz).
+            // Uygun türler — istilacı/koruma/ticari HARİÇ (bunlar bir merayı temsil eden
+            // "başlık balık" olamaz; ör. istilacı aslan balığı bir merayı tanımlayamaz).
             const EXCLUDED_AGG = ['İSTİLACI', 'KORUMA', 'TİCARİ'];
             const eligibleSorted = sorted.filter(f => f.fish && !EXCLUDED_AGG.includes(f.fish.category));
             const headline = eligibleSorted[0] || null;
             const topFish = eligibleSorted.slice(0, 3).map(f => f.name);
 
-            return { ...commonResult, score: spotScore, dominant, fishName: headline ? headline.name : "", topFish, hourlyScores: headline ? headline.hourlyScores : null, scoreDetails: headline ? headline.scoreDetails : null };
+            // [KARAR] Mera skoru = o an en yüksek UYGUN balığın ANLIK skoru. Böylece harita
+            // pini, detay panelinin "ŞİMDİ" sekmesinin en üst satırıyla (balık VE sayı) birebir
+            // eşleşir. (Aggregasyon/harman yöntemi yalnızca forecast HUD'un "genel skoru"nda
+            // kullanılır; harita pini tek-balık tam-eşleşme gösterir.)
+            const spotScore = headline ? headline.score : 0;
+
+            return { ...commonResult, score: spotScore, fishName: headline ? headline.name : "", topFish, hourlyScores: headline ? headline.hourlyScores : null, scoreDetails: headline ? headline.scoreDetails : null };
         } else {
             const fish = SPECIES_DB[fishKey];
             if (!fish) return null;
