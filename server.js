@@ -5641,7 +5641,7 @@ function findTodayIndex(timeArray, utcOffsetSeconds = 0) {
 }
 
 // Paylaşılan hava verisiyle tek nokta skoru hesapla (API çağrısı yok)
-function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey, lang) {
+function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey, lang, centerChlorophyll = null) {
     if (!weather || !marine || !weather.hourly || !marine.hourly || !marine.hourly.time) return null;
 
     const latF = parseFloat(lat).toFixed(4);
@@ -5683,7 +5683,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         const moon = SunCalc.getMoonIllumination(now);
         const moonPos = SunCalc.getMoonPosition(now, parseFloat(latF), parseFloat(lonF));
 
-        const oxygenData = calculateOxygen(tempWater, getSalinity(regionName), null, timeMode);
+        const oxygenData = calculateOxygen(tempWater, getSalinity(regionName), centerChlorophyll, timeMode);
         const oxygen = oxygenData.mgL;
         const upwelling = calculateUpwelling(windSpeed, windDir, regionName);
         const depthAvg = bathyRaw !== null ? Math.abs(bathyRaw) : null;
@@ -5728,7 +5728,11 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             tempShock,
             thermoclineDepth: estimateThermoclineDepth(tempWater, now.getMonth(), regionName),
             moonlightIntensity: calculateMoonlightIntensity(now, parseFloat(latF), parseFloat(lonF), cloud),
-            chlorophyll: null,
+            // [DÜZELTME] Eskiden null geçiliyordu → forecast'in "şimdi" hesabı gerçek klorofil
+            // kullandığından (plankton/besin-zinciri bonusu) scan ile forecast arasında sistematik
+            // 1-3 puanlık fark oluşuyordu (ör. SÜRÜ türü Kolyoz'da). Merkez klorofili tüm pinlere
+            // uygulanır (klorofil 3km çapta neredeyse sabittir).
+            chlorophyll: centerChlorophyll,
             isBoat: false,
             substrate: substrateCache.get(`sub_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`) || null,
             windGust: windGust_s, precipProb: precipProb_s, weatherCode: weatherCode_s,
@@ -5930,18 +5934,22 @@ app.get('/api/scan', async (req, res) => {
         sendEvent({ type: 'start', total, radiusKm, fishKey: fishKey || null });
         if (res.flush) res.flush();
 
-        // Merkez noktanın hava/deniz verisini bir kere çek
-        let centerWeather, centerMarine;
+        // Merkez noktanın hava/deniz/klorofil verisini bir kere çek
+        let centerWeather, centerMarine, centerChlorophyll = null;
         try {
             const i18nScan = i18n(lang).scan;
             sendEvent({ type: 'progress', pct: 0, done: 0, total, lastPoint: null, status: i18nScan.weather });
             if (res.flush) res.flush();
-            const [wd] = await Promise.all([
+            const [wd, , centerChlData] = await Promise.all([
                 fetchCenterWeather(centerLat, centerLon),
-                fetchSubstrate(centerLat, centerLon).catch(() => null) // merkez nokta substratını cache'e yaz
+                fetchSubstrate(centerLat, centerLon).catch(() => null), // merkez nokta substratını cache'e yaz
+                // [DÜZELTME] Merkez klorofilini bir kez çek → tüm pinlerin skoru forecast "şimdi"
+                // ile aynı klorofil/plankton tabanını kullansın (scan eskiden null geçiyordu).
+                fetchChlorophyll(centerLat, centerLon).catch(() => null)
             ]);
             centerWeather = wd.weather;
             centerMarine = wd.marine;
+            centerChlorophyll = (centerChlData && typeof centerChlData.chlorophyll === 'number') ? centerChlData.chlorophyll : null;
         } catch (e) {
             sendEvent({ type: 'error', message: 'Hava verisi alınamadı: ' + e.message });
             res.end();
@@ -5969,7 +5977,7 @@ app.get('/api/scan', async (req, res) => {
                 fetchSubstrate(pt.lat, pt.lon, true).catch(() => null); // fire-and-forget, cache doldursun
                 let result = null;
                 try {
-                    result = calcPointScoreFromWeather(pt.lat, pt.lon, centerWeather, centerMarine, bathyRaw, fishKey || null, lang);
+                    result = calcPointScoreFromWeather(pt.lat, pt.lon, centerWeather, centerMarine, bathyRaw, fishKey || null, lang, centerChlorophyll);
                 } catch (e) {
                     console.log('[SCAN] Point error:', pt.lat, pt.lon, e.message);
                 }
@@ -6056,7 +6064,7 @@ app.get('/api/scan', async (req, res) => {
                 const freshBathy = await fetchBathymetry(pt.lat, pt.lon, 15000);
 
                 if (freshBathy !== null) {
-                    const updatedResult = calcPointScoreFromWeather(pt.lat, pt.lon, centerWeather, centerMarine, freshBathy, fishKey || null, lang);
+                    const updatedResult = calcPointScoreFromWeather(pt.lat, pt.lon, centerWeather, centerMarine, freshBathy, fishKey || null, lang, centerChlorophyll);
                     if (updatedResult) {
                         sendEvent({
                             type: 'depth_update',
