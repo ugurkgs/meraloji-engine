@@ -3358,8 +3358,14 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         // effectiveMin: kıyı türleri (fMin=0) için 0m; diğerleri için minimum 0.5m eşik.
         const effectiveMin = fMin === 0 ? 0 : Math.max(fMin, 0.5);
 
-        if (!isPelagicType && d < effectiveMin * 0.5) {
-            // İmkansız derinlik — neredeyse kuru zemin (pelajikler muaf)
+        if (d < effectiveMin * 0.5) {
+            // [DÜZELTME] İmkansız derinlik — pelajik muafiyeti burada KALDIRILDI. Eskiden
+            // "PELAJIK/AVCI kategorisi = muaf" kuralı, açık deniz/yapı bağımlı büyük avcıları
+            // (ör. Akya, min=10m) sığ bir kumsalda (1m) tam puan almasına yol açıyordu — çünkü
+            // "dikey göç" mazereti orada su kolonunun kendisi yok denecek kadar sığken geçerli
+            // değildir (göç edecek derin su yok, yapı yok). Eşik türün KENDİ asgari derinliğinin
+            // yarısı olduğundan, gerçekten sığ toleranslı türler (aterin min=1, lüfer min=1 gibi)
+            // bu daldan hâlâ etkilenmez — sadece min'i büyük türlerde (Akya gibi) devreye girer.
             depthScore = 0.05;
             penalties.push(i18n(lang).penalties.tooShallowSpot);
         } else if (!isPelagicType && fMin > 0 && d < fMin) {
