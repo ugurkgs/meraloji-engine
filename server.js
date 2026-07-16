@@ -1613,22 +1613,22 @@ function safeWaterTemp(val, region, month) {
 function getGaussianScore(val, min, opt, max, optMin, optMax) {
     val = safeNum(val);
 
-    // ── TRAPEZOID modu (optMin/optMax verilmişse) ──
-    // Şekil:      optMin───optMax
-    //            /                \
-    //          min                max
+    // ── OPTİMUMDA SİVRİLEN EĞRİ (optMin/optMax verildiğinde) ──
+    // [DÜZELTME - KRİTİK] Eski kod optMin..optMax arasındaki GENİŞ bir bantta herkese
+    // 1.0 (düz "konfor platosu") veriyordu. Ölçüm: tek bir 19°C'de Türkiye türlerinin
+    // %60'ı mükemmel sıcaklık puanı alıyordu → sıcaklık türleri AYIRT EDEMİYOR, skorlar
+    // topluca şişiyordu. Artık optimumda sivrilen Gauss kullanılıyor:
+    //   - Çok küçük bir konfor çekirdeği (±0.75°C) tam puan alır (gerçek optimum bandı).
+    //   - Ötesinde Gauss ile düşer; sigma ARALIĞA bağlıdır → geniş-toleranslı (eurythermal)
+    //     türler kenarda yine makul kalır, dar-toleranslı türler hızla düşer.
+    // (optMin/optMax parametreleri artık şeklin genişliğini değil yalnızca "bu mod aktif"
+    //  sinyalini veriyor; sigma doğrudan min/opt/max'tan türetiliyor.)
     if (optMin !== undefined && optMax !== undefined) {
-        if (val < min) {
-            const overshoot = (min - val) / Math.max(1, min * 0.3);
-            return Math.max(0.03, 0.25 * Math.exp(-overshoot * overshoot));
-        }
-        if (val > max) {
-            const overshoot = (val - max) / Math.max(1, max * 0.15);
-            return Math.max(0.03, 0.25 * Math.exp(-overshoot * overshoot));
-        }
-        if (val >= optMin && val <= optMax) return 1.0; // konfor platosu
-        if (val < optMin) return Math.max(0.1, (val - min) / Math.max(0.1, optMin - min));
-        return Math.max(0.1, (max - val) / Math.max(0.1, max - optMax));
+        const core = 0.75;                                   // ±0.75°C tam-puan çekirdeği
+        const sigma = Math.max(1.6, (max - min) / 4);        // aralık geniş → düşüş yumuşak
+        const d = Math.abs(val - opt);
+        if (d <= core) return 1.0;
+        return Math.max(0.06, Math.exp(-0.5 * Math.pow((d - core) / sigma, 2)));
     }
 
     // ── GAUSSIAN modu (eski davranış, geriye dönük uyumluluk) ──
@@ -2757,8 +2757,11 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         return { finalScore: 0, score: 0, reason: i18n(lang).reasons.outOfRegion(region, (fish.regions || []).join(', ')), activeTriggers: [], scoreDetails: {}, penalties: [] };
     }
     // isInHabitat true ise regionMatch her zaman tam puan
-    s_env += 4.5;
-    scoreDetails.region = { score: 4.5, max: 4.5, stars: 5 };
+    // [DÜZELTME] Sabit "bölge" bonusu 4.5 → 1.5. Habitat filtresini geçen HER türe eşit
+    // verildiği için ayırt edici değildi; sadece tüm skorları ~4.5 puan tabanla şişiriyordu
+    // (bölge kalitesi zaten abundanceMult ile ele alınıyor). Düşük taban = daha az iyimserlik.
+    s_env += 1.5;
+    scoreDetails.region = { score: 1.5, max: 1.5, stars: 5 };
 
     // 4. AKTİVİTE (Max 20) - V2.2 Süper Sentez
     /**
@@ -2786,7 +2789,12 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         if (timeMode === "DAWN" || timeMode === "DUSK") { s_activity = 17.5; activityScore = 0.9; }
         else { s_activity = 11.25; activityScore = 0.6; }
     }
-    scoreDetails.activity = { score: s_activity, max: 20, stars: Math.round(activityScore * 5), timeMode };
+    // [DÜZELTME] Aktivite tavanı 20 → 16 (0.8 ölçek). Kodun kendi yorumu da tavanın 16
+    // olması gerektiğini söylüyordu ("Saat uygunsa her balık alırım" yanılsamasını kır).
+    // Prime-time'da (sabah/akşam) çok sayıda türün üst üste yığılıp 70-82'ye çıkmasının
+    // başlıca sebebi bu 20'lik tavandı — beslenme saati bir FIRSAT penceresidir, garanti değil.
+    s_activity = s_activity * 0.8;
+    scoreDetails.activity = { score: s_activity, max: 16, stars: Math.round(activityScore * 5), timeMode };
 
     // 5. TETİKLEYİCİLER (Max 12) — asymptoticTriggerSum ile [-12, +12] bandına sıkıştırılır
     let s_trigger = 0;
