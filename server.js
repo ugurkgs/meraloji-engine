@@ -1414,7 +1414,7 @@ function applyShoaling(waveHeight, wavePeriod, depthM) {
 }
 
 
-const FREE_DAILY_CLICKS = 5;    // Ücretsiz kullanıcı günde 5 tıklama
+const FREE_DAILY_CLICKS = 2;    // Ücretsiz kullanıcı günde 2 tıklama (grace period sonrası)
 const FREE_DAILY_SCANS = 1;     // Ücretsiz kullanıcı günde 1 tarama
 const GRACE_PERIOD_DAYS = 14;   // Yeni kullanıcıya 14 gün tam erişim
 const VALID_SUBSCRIPTIONS = ['meraloji_pro_monthly', 'meraloji_pro_yearly'];
