@@ -2471,7 +2471,94 @@ function calculate3HourWindowScore(fish, key, baseParams, weather, marine, cente
 // (require en üste taşındı)
 
 // ═══════════════════════════════════════════════════════════════════════════
-// PUANLAMA MOTORU - 5 KRİTİK DÜZELTME
+// FONKSİYONEL GRUP (KATEGORİ) TABANLI BİYOLOJİK ÖZELLİK ATAMASI
+// ─────────────────────────────────────────────────────────────────────────────
+// [BİLİMSEL NOT]: Ekolojide "trait imputation" (özellik ataması) yerleşik bir
+// tekniktir — bir türün ölçülmemiş özelliği, ait olduğu fonksiyonel grubun
+// (burada 'category') bilinen tipik değerinden türetilir. Motor; planktonPref,
+// moonPref, sstTrendPref alanlarını okuyor ANCAK bu alanlar species.js'te
+// türlerin yalnızca %2-4'ünde doludur → ilgili skorlama blokları çoğu türde ölüdür.
+// Aşağıdaki katman, bir tür alanı AÇIKÇA tanımlamışsa onu kullanır; tanımlamamışsa
+// kategori öncelini (functional-group prior) devreye sokar. Böylece bloklar TÜM
+// türlerde, sahte bir per-tür kesinlik uydurmadan aktifleşir. Ayrıca oksijen
+// metabolik duyarlılığı (oxygenSensitivity) yeni bir eksen olarak eklenir.
+// ═══════════════════════════════════════════════════════════════════════════
+const CATEGORY_BIO_PRIORS = {
+    // plankton: klorofil→besin zinciri yanıtı | oxygen: 0..1 metabolik O2 talebi
+    // (yüksek = hipoksiden çok etkilenir; aktif pelajik avcılar en yüksek)
+    'PELAJIK':        { plankton: 'HIGH',   oxygen: 0.85 },
+    'PELAJIK_AVCI':   { plankton: 'HIGH',   oxygen: 0.85 },
+    'AVCI':           { plankton: 'HIGH',   oxygen: 0.85 },
+    'SÜRÜ':           { plankton: 'HIGH',   oxygen: 0.80 },
+    'TİCARİ':         { plankton: 'HIGH',   oxygen: 0.75 },
+    'KIYI_AVCI':      { plankton: 'HIGH',   oxygen: 0.70 },
+    'KIYI':           { plankton: 'MEDIUM', oxygen: 0.55 },
+    'KUM_TABAN':      { plankton: 'MEDIUM', oxygen: 0.50 },
+    'KUMSAL':         { plankton: 'MEDIUM', oxygen: 0.50 },
+    'OTLUK':          { plankton: 'MEDIUM', oxygen: 0.50 },
+    'LAGUN':          { plankton: 'MEDIUM', oxygen: 0.35 }, // hipoksi-toleranslı (kefal/yılan)
+    'KAYALIK':        { plankton: 'LOW',    oxygen: 0.55 },
+    'DIP':            { plankton: 'LOW',    oxygen: 0.55 },
+    'DİP':            { plankton: 'LOW',    oxygen: 0.55 },
+    'DIP_KIYI':       { plankton: 'LOW',    oxygen: 0.55 },
+    'DIP_DERIN':      { plankton: 'LOW',    oxygen: 0.55 },
+    'DERİN':          { plankton: 'LOW',    oxygen: 0.55 },
+    'KAFADANBACAKLI': { plankton: 'LOW',    oxygen: 0.75 }, // kalamar/ahtapot O2'ye duyarlı
+    'KALAMAR':        { plankton: 'LOW',    oxygen: 0.75 },
+    'İSTİLACI':       { plankton: 'MEDIUM', oxygen: 0.60 },
+    'KORUMA':         { plankton: 'MEDIUM', oxygen: 0.55 }
+};
+const _DEFAULT_BIO = { plankton: 'MEDIUM', oxygen: 0.5 };
+
+function resolveBio(fish) {
+    const cat = fish.category;
+    const prior = CATEGORY_BIO_PRIORS[cat] || _DEFAULT_BIO;
+
+    // planktonPref — açık değer > kategori önceli
+    const planktonPref = fish.planktonPref || prior.plankton;
+
+    // oxygenSensitivity — species.js'te bu alan henüz yok; kategoriden türetilir.
+    // (Açık bir sayısal değer verilirse o önceliklidir.)
+    const oxygenSensitivity = (typeof fish.oxygenSensitivity === 'number' && !isNaN(fish.oxygenSensitivity))
+        ? fish.oxygenSensitivity : prior.oxygen;
+
+    // moonPref — görsel avlanan gece/alacakaranlık türleri ve kafadanbacaklılar ay
+    // ışığından faydalanır ('bright'); diğerleri etkisiz ('neutral'). Açık değer öncelikli.
+    let moonPref = fish.moonPref;
+    if (!moonPref) {
+        const nocturnal = fish.activity === 'NIGHT' || fish.activity === 'DAWN_DUSK' || fish.activity === 'CREPUSCULAR';
+        if (cat === 'KALAMAR' || cat === 'KAFADANBACAKLI') moonPref = 'bright';
+        else if (fish.huntingMode === 'visual' && nocturnal) moonPref = 'bright';
+        else moonPref = 'neutral';
+    }
+
+    // sstTrendPref — açık değer > kategori/termal öncel. Yanlış pozitif üretmemek için
+    // varsayılan 'ANY' (skor etkisi yok). Sadece güçlü kanıtta yön atanır:
+    //   İSTİLACI (Lessepsian termofil) → WARMING; termal opt uçları → yön.
+    // Eşikler bilinçli DAR tutuldu: yalnızca net termofiller (opt≥25) ve net soğuk-su
+    // türleri (opt≤11) yön alır; geri kalan çoğunluk 'ANY' (skor etkisi yok). Bu,
+    // seasons alanıyla (takvim tabanlı mevsim önceli) çift-sayımı en aza indirir —
+    // sstTrend yalnızca GERÇEK ZAMANLI 7 günlük SST anomalisine tepki verir.
+    let sstTrendPref = fish.sstTrendPref;
+    if (!sstTrendPref) {
+        const opt = (fish.tempRange && typeof fish.tempRange.opt === 'number') ? fish.tempRange.opt : null;
+        if (cat === 'İSTİLACI') sstTrendPref = 'WARMING'; // Lessepsian termofil
+        else if (opt !== null && opt >= 25) sstTrendPref = 'WARMING';
+        else if (opt !== null && opt <= 11) sstTrendPref = 'COOLING';
+        else sstTrendPref = 'ANY';
+    } else {
+        sstTrendPref = String(sstTrendPref).toUpperCase();
+    }
+
+    // tidePref — açık değer > currentPref > 0.5 (eski inline fallback'i formalize eder)
+    const tidePref = (typeof fish.tidePref === 'number') ? fish.tidePref
+        : (typeof fish.currentPref === 'number') ? fish.currentPref : 0.5;
+
+    return { planktonPref, oxygenSensitivity, moonPref, sstTrendPref, tidePref };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PUANLAMA MOTORU
 // ═══════════════════════════════════════════════════════════════════════════
 
 function calculateFishScore(fish, key, params, lang = 'tr') {
@@ -2515,8 +2602,15 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     let activeTriggers = [];
 
     // Habitat duyarlılığı — dip/derin türler yüzey koşullarından az etkilenir
-    const DEEP_BOTTOM_CATS = ['DIP_DERIN', 'DIP_KIYI', 'KAYALIK', 'DİP', 'DERİN'];
+    // [DÜZELTME] Liste 'DİP' (Türkçe noktalı İ) içeriyordu ama species.js kategorisi
+    // 'DIP' (ASCII I) — bu Türkçe-i uyuşmazlığı yüzünden 19 "DIP" türü dip balığı olarak
+    // TANINMIYOR, yüzey türü gibi işleniyordu (yanlış rüzgar/sis/yağış cezaları). İki
+    // yazım da eklendi.
+    const DEEP_BOTTOM_CATS = ['DIP_DERIN', 'DIP_KIYI', 'KAYALIK', 'DİP', 'DIP', 'DERİN'];
     const isDeepBottom = DEEP_BOTTOM_CATS.includes(fish.category);
+
+    // Fonksiyonel-grup tabanlı biyolojik profil (eksik alanları kategoriden doldurur)
+    const bio = resolveBio(fish);
 
     // SKOR DETAYLARI (Yıldız Sistemi)
     const scoreDetails = {};
@@ -2704,8 +2798,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // [GÜNCELLEME v4.0] Gelgit Akıntısı (Tidal Velocity)
     // Akıntı hızı, yüksekliğin (altitude) en hızlı değiştiği "orta gelgit" anında zirve yapar.
     if (tideFlow > 0) {
-        const tidePref = (typeof fish.tidePref === 'number') ? fish.tidePref
-            : (typeof fish.currentPref === 'number') ? fish.currentPref : 0.5;
+        const tidePref = bio.tidePref;
         // [DÜZELTME] tideFlow zaten genlik × irtifa faktörünü içeriyor (bkz. forecast/scan
         // hesabı). Eski kod bunu ayrıca |cos(moonAltitude)| × 1.5 ile çarparak irtifayı
         // ÇİFT uyguluyor ve fiziksel olarak anlamsız bir sin×cos çarpımı üretiyordu.
@@ -2723,7 +2816,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // [YENİ v4.0] Upwelling (Besin Yükselmesi) Analizi
     const upwelling = calculateUpwelling(windSpeed, windDir, region);
     if (upwelling > 0.3) {
-        const isPelagicHunter = ['PELAJIK', 'AVCI', 'SÜRÜ', 'KIYI_AVCI'].includes(fish.category);
+        const isPelagicHunter = ['PELAJIK', 'PELAJIK_AVCI', 'AVCI', 'SÜRÜ', 'KIYI_AVCI'].includes(fish.category);
         const upScore = upwelling * (isPelagicHunter ? 6 : 3); // Pelajik avcılar upwelling'e daha duyarlıdır
         s_trigger += upScore;
         activeTriggers.push(i18n(lang).triggers.upwelling);
@@ -2741,12 +2834,16 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     const doMgL = oxygenResult.mgL;         // biyolojik puanlama mutlak mg/L üzerinden
     if (doMgL < 5.0) {
         // Az oksijenli / hipoksiye yakın su → metabolizma ve beslenme baskılanır.
-        // Bentik (dip) türler dip çökeltisi/durgun su nedeniyle daha ağır etkilenir.
-        const benthicMultiplier = isDeepBottom ? 1.5 : 1.0;
-        const oxygenPenalty = (5.0 - doMgL) * 1.6 * benthicMultiplier; // <4 mg/L'de belirgin
+        // [YENİ] Ceza artık türün METABOLİK O2 DUYARLILIĞIYLA (oxygenSensitivity, 0..1)
+        // ölçekleniyor. Eski kod "dip türü ise ×1.5" varsayıyordu; oysa asıl belirleyici
+        // metabolik taleptir: yüksek aktiviteli pelajik avcılar (ton, uskumru, lüfer)
+        // hipoksiden EN çok etkilenir, hipoksi-toleranslı dip/lagün türleri (yılan, kefal)
+        // en az. oxyMult = sensitivity/0.5 → 0.35→0.7, 0.5→1.0, 0.85→1.7.
+        const oxyMult = bio.oxygenSensitivity / 0.5;
+        const oxygenPenalty = (5.0 - doMgL) * 1.6 * oxyMult; // <4 mg/L'de belirgin
         s_trigger -= oxygenPenalty;
         activeTriggers.push(i18n(lang).triggers.lowOxygen);
-        scoreDetails.oxygen = { value: Math.round(estDO), mgL: doMgL, penalty: parseFloat(oxygenPenalty.toFixed(1)), status: 'LOW', benthicMultiplier };
+        scoreDetails.oxygen = { value: Math.round(estDO), mgL: doMgL, penalty: parseFloat(oxygenPenalty.toFixed(1)), status: 'LOW', sensitivity: bio.oxygenSensitivity };
     } else if (doMgL > 8.5) {
         // Soğuk, iyi karışmış, oksijence zengin su → aktif beslenme için ideal.
         s_trigger += 2.0;
@@ -2776,7 +2873,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         s_trigger += (currentScore - 0.5) * 3;
 
         // Pelajik avcılar için güçlü akıntı ek bonusu (yem yığılması / aktif avlanma).
-        if (fish.category === "PELAJIK" && effectiveCurrent > 0.3) {
+        // [DÜZELTME] 136 türlük 'PELAJIK_AVCI' kategorisi de dahil edildi.
+        if ((fish.category === "PELAJIK" || fish.category === "PELAJIK_AVCI") && effectiveCurrent > 0.3) {
             const currentBonus = Math.min(3, effectiveCurrent * cp * 3);
             s_trigger += currentBonus;
             if (currentBonus > 1.5) activeTriggers.push(i18n(lang).triggers.strongCurrent);
@@ -2812,7 +2910,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
 
     // [GÜNCELLEME v4.0] AY IŞIĞI ŞİDDETİ — Derinliğe bağlı sönümleme
     if (moonlightIntensity !== undefined && moonlightIntensity !== null && timeMode === 'NIGHT') {
-        const pref = fish.moonPref || 'neutral';
+        const pref = bio.moonPref; // resolveBio: açık değer > kategori önceli (görsel gece avcıları 'bright')
         // [DÜZELTME] Işık, deniz TABANINA (depthAvg) değil balığın TUTTUĞU derinliğe
         // göre sönümlenmelidir. Eski kod depthAvg kullandığından 20-30 m'den derin her
         // yerde ay ışığını daima ~0 yapıyor, yüzeye yakın duran türlerde (moonPref etkili
@@ -2889,9 +2987,11 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // olarak kullanır. Kıyı türleri (Çipura, Levrek, Karagöz) ise ani soğumada
     // "cold shock" yaşar → lethargic hale gelir → ceza almalı.
     if (tempShock && tempShock.shock) {
-        const isMigratoryPelagic = fish.category === 'PELAJIK' || fish.sstTrendPref === 'COOLING';
+        // [DÜZELTME] 'PELAJIK_AVCI' (136 tür) pelajik göçmen sınıfına dahil edildi;
+        // sstTrendPref artık resolveBio üzerinden (büyük harf normalize) okunuyor.
+        const isMigratoryPelagic = fish.category === 'PELAJIK' || fish.category === 'PELAJIK_AVCI' || bio.sstTrendPref === 'COOLING';
         const isCoastalSensitive = fish.category === 'KIYI' || fish.category === 'LAGUN' || fish.category === 'KUM_TABAN';
-        const isBenthic = ['DIP_DERIN', 'DIP_KIYI', 'KAYALIK', 'DİP', 'DERİN', 'KUM_TABAN', 'KAFADANBACAKLI', 'KALAMAR'].includes(fish.category);
+        const isBenthic = ['DIP_DERIN', 'DIP_KIYI', 'KAYALIK', 'DİP', 'DIP', 'DERİN', 'KUM_TABAN', 'KAFADANBACAKLI', 'KALAMAR'].includes(fish.category);
 
         if (tempShock.direction === 'COOLING') {
             if (isMigratoryPelagic) {
@@ -2915,10 +3015,10 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             // tempShock.direction/trendDirection gibi kod genelindeki tüm sıcaklık-yönü
             // alanlarında olduğu gibi. Bu tutarsızlık yüzünden aşağıdaki iki dal hiçbir
             // türde tetiklenmiyor, her tür sessizce "Nötr" dalına düşüyordu.
-            if (fish.sstTrendPref === 'WARMING') {
+            if (bio.sstTrendPref === 'WARMING') {
                 s_trigger += 2; // Isınmayı seven türler için bonus
                 activeTriggers.push(i18n(lang).triggers.warmingShock(tempShock.change));
-            } else if (fish.sstTrendPref === 'COOLING') {
+            } else if (bio.sstTrendPref === 'COOLING') {
                 s_trigger -= 1.0; // Soğuk seven balık için ani ısınma stresi
             } else {
                 s_trigger += 0.0; // Nötr
@@ -2934,15 +3034,15 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     }
 
     // SST 7 Günlük Trend — yavaş ama süregelen değişim
-    if (tempShock && tempShock.trendDirection && fish.sstTrendPref) {
+    // [DÜZELTME] Tercih artık resolveBio üzerinden geliyor ve HER zaman tanımlı
+    // (generalist türlerde 'ANY'). Böylece blok tüm türlerde çalışır; yön tercihi
+    // olmayan türler yalnızca stabil suda hafif bir genel bonus alır (eski "tanımsız
+    // tür" davranışıyla birebir aynı), belirli bir tercihi olanlar eşleşmede bonus /
+    // uyumsuzlukta -0.5 alır. Büyük/küçük harf normalize (resolveBio) edildiğinden
+    // eski 'warming' vs "WARMING" ölü-dal hatası da giderilmiştir.
+    if (tempShock && tempShock.trendDirection) {
         const td = tempShock.trendDirection;
-        // [DÜZELTME] Aynı büyük/küçük harf tutarsızlığı burada da vardı: species.js
-        // "WARMING"/"COOLING"/"STABLE"/"ANY" yazıyor, karşılaştırma 'warming'/'cooling'/
-        // 'stable'/'any' bekliyordu. Sonuç: ilk üç dal hiç tetiklenmiyor, her tanımlı
-        // sstTrendPref son "else if" dalına düşüp gerçek trendle eşleşip eşleşmediğine
-        // bakılmaksızın sabit -0.5 ceza alıyordu (örn. WARMING tercih eden bir balık,
-        // su gerçekten ısınırken bile cezalandırılıyordu).
-        const pref = (fish.sstTrendPref || '').toUpperCase();
+        const pref = bio.sstTrendPref;
         if (pref === 'WARMING' && (td === 'WARMING' || td === 'WARMING_FAST')) {
             s_trigger += td === 'WARMING_FAST' ? 2.5 : 1.5;
             activeTriggers.push(i18n(lang).triggers.warmingTrend);
@@ -2952,13 +3052,13 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         } else if (pref === 'STABLE' && td === 'STABLE') {
             s_trigger += 1.5;
             activeTriggers.push(i18n(lang).triggers.stableSst);
-        } else if (pref !== 'ANY') {
-            s_trigger -= 0.5; // Tercih dışı trend — hafif ceza
+        } else if (pref === 'ANY') {
+            // Yön tercihi olmayan (generalist) türler: yalnızca stabil suda hafif bonus
+            if (td === 'STABLE') s_trigger += 1;
+        } else {
+            s_trigger -= 0.5; // Belirli tercih var ama gerçek trend uymuyor
         }
         scoreDetails.sstTrend = { trend: tempShock.trend, direction: td, pref };
-    } else if (tempShock && tempShock.trendDirection === 'STABLE' && !fish.sstTrendPref) {
-        // sstTrendPref tanımsız türler için stabil su genel bonusu
-        s_trigger += 1;
     }
 
     if (key === "levrek" && wave > 0.7 && clarity < 60) { s_trigger += 2; activeTriggers.push(i18n(lang).triggers.foamyWater); }
@@ -2987,7 +3087,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             if (['DIP_KIYI', 'DIP_DERIN', 'KAYALIK', 'DİP', 'DERİN'].includes(fish.category)) {
                 s_trigger += 1.5; // Dip türü termoklin altında — doğal habitat
                 scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'BELOW', stars: 4 };
-            } else if (['PELAJIK', 'KIYI_AVCI', 'KIYI', 'KUM_TABAN', 'SÜRÜ'].includes(fish.category)) {
+            } else if (['PELAJIK', 'PELAJIK_AVCI', 'KIYI_AVCI', 'KIYI', 'KUM_TABAN', 'SÜRÜ'].includes(fish.category)) {
                 s_trigger -= Math.min(3, diff / 10); // Yüzey türü çok derinlerde
                 scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'BELOW', stars: 2 };
             }
@@ -3004,30 +3104,32 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
 
 
     // [YENİ] KLOROFİL-A — Plankton yoğunluğu → besin zinciri etkisi
-    // Sadece planktonPref tanımlı türlere uygulanır (pelajik, sürü, kıyı avcılar)
-    if (chlorophyll !== null && chlorophyll !== undefined && fish.planktonPref) {
+    // [DÜZELTME] Eskiden yalnızca planktonPref AÇIKÇA tanımlı türlerde (%4) çalışıyordu;
+    // artık resolveBio ile TÜM türlerde aktif. Klorofil, besin zincirinin tabanıdır ve
+    // (doğrudan planktivorlar, dolaylı olarak avcılar üzerinden) tüm türleri etkiler.
+    if (chlorophyll !== null && chlorophyll !== undefined && bio.planktonPref) {
         const chl = parseFloat(chlorophyll);
         if (!isNaN(chl)) {
-            if (fish.planktonPref === 'HIGH') {
+            if (bio.planktonPref === 'HIGH') {
                 // Yüksek klorofil sevenler: Lüfer, Palamut, İstavrit, Hamsi vb.
                 if (chl >= 1.5) { s_trigger += 3; activeTriggers.push(i18n(lang).triggers.richPlankton(chl.toFixed(2))); }
                 else if (chl >= 0.5) { s_trigger += 1.5; activeTriggers.push(i18n(lang).triggers.activePlankton); }
                 else if (chl < 0.1) { s_trigger -= 1.5; } // Çok düşük — yem azalmış
-            } else if (fish.planktonPref === 'MEDIUM') {
+            } else if (bio.planktonPref === 'MEDIUM') {
                 // Orta tercih: Levrek, Çipura, Kefal vb.
                 if (chl >= 0.5 && chl <= 3.0) { s_trigger += 1.5; activeTriggers.push(i18n(lang).triggers.suitablePlankton); }
                 else if (chl > 5.0) { s_trigger -= 1; } // Bloom = oksijen sorunu
-            } else if (fish.planktonPref === 'LOW') {
+            } else if (bio.planktonPref === 'LOW') {
                 // Düşük klorofil sevenler: Kalamar, derin dip türleri
                 if (chl < 0.3) { s_trigger += 1.5; activeTriggers.push(i18n(lang).triggers.clearWater); }
                 else if (chl > 2.0) { s_trigger -= 1; }
             }
             scoreDetails.chlorophyll = {
                 value: chl,
-                pref: fish.planktonPref,
-                stars: fish.planktonPref === 'HIGH'
+                pref: bio.planktonPref,
+                stars: bio.planktonPref === 'HIGH'
                     ? (chl >= 1.5 ? 5 : chl >= 0.5 ? 4 : chl >= 0.1 ? 2 : 1)
-                    : fish.planktonPref === 'MEDIUM'
+                    : bio.planktonPref === 'MEDIUM'
                         ? (chl >= 0.5 && chl <= 3.0 ? 5 : chl < 0.5 ? 3 : 2)
                         : (chl < 0.3 ? 5 : chl < 1.0 ? 3 : 2)
             };
@@ -3213,7 +3315,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // === FAZ 1: DERİNLİK SOFT GATE ===
     // Pelajik ve aktif avcı türler su kolonunda dikey göç yapar —
     // minimum derinlik cezasından muaf, ancak çok derin suda hâlâ ceza alır.
-    const PELAGIC_CATEGORIES = ['PELAJIK', 'KIYI_AVCI', 'AVCI', 'SÜRÜ'];
+    const PELAGIC_CATEGORIES = ['PELAJIK', 'PELAJIK_AVCI', 'KIYI_AVCI', 'AVCI', 'SÜRÜ'];
     const isPelagicType = PELAGIC_CATEGORIES.includes(fish.category);
 
     let depthScore = 1.0;
@@ -3291,7 +3393,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             middayPenalty = 0.65;
         } else if (cat === 'DIP_KIYI' || cat === 'DİP' || cat === 'KAYALIK') {
             middayPenalty = 0.75;
-        } else if (cat === 'PELAJIK' || cat === 'SÜRÜ') {
+        } else if (cat === 'PELAJIK' || cat === 'PELAJIK_AVCI' || cat === 'SÜRÜ') {
             middayPenalty = 0.92;
         } else if (cat === 'KIYI' || cat === 'LAGUN' || cat === 'KUM_TABAN') {
             middayPenalty = 0.70;
