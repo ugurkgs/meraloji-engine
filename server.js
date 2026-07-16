@@ -1495,11 +1495,29 @@ async function verifyAuth(req, res, next) {
             // Abonelik kontrol — 3 dakika cache
             let isPremiumCached = subscriptionCache.get(decoded.uid);
             if (isPremiumCached === undefined) {
-                const subDoc = await db.collection('subscriptions').doc(decoded.uid).get();
                 isPremiumCached = false;
+                // [DÜZELTME - KRİTİK] Abonelik verisi iki farklı koleksiyona yazılıyor
+                // (/api/verify-subscription: hem 'subscriptions/{uid}' hem 'users/{uid}'
+                // — ikincisi "native app uyumluluğu" için sonradan eklenmiş) ama bu kontrol
+                // yalnızca 'subscriptions' koleksiyonunu okuyordu; 'users/{uid}.isPro' hiç
+                // kontrol edilmiyordu. Gerçek ödeme yapan aboneler 'users' dokümanında
+                // isPro:true olsa bile 'subscriptions' kaydı eksik/senkron değilse ücretsiz
+                // kullanıcı sayılıyor, sanitizasyon (applySanitization) dalına düşüp veri/
+                // özellik kaybı yaşıyordu. Artık her iki kaynak da kontrol ediliyor;
+                // herhangi biri geçerli aboneliği gösteriyorsa premium kabul edilir.
+                const [subDoc, userDoc] = await Promise.all([
+                    db.collection('subscriptions').doc(decoded.uid).get(),
+                    db.collection('users').doc(decoded.uid).get()
+                ]);
                 if (subDoc.exists) {
                     const sub = subDoc.data();
                     if (sub.status === 'active' && sub.expiresAt > Date.now()) {
+                        isPremiumCached = true;
+                    }
+                }
+                if (!isPremiumCached && userDoc.exists) {
+                    const u = userDoc.data();
+                    if (u.isPro === true && (!u.proExpiresAt || u.proExpiresAt > Date.now())) {
                         isPremiumCached = true;
                     }
                 }
