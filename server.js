@@ -1928,18 +1928,33 @@ function estimateCurrent(wave, windSpeed, region) {
 
 // [DÜZELTME 4] Basınç Trendi Hesaplama
 // ── TOP 3 ORTALAMA SKOR (İSTİLACI ve KORUMA hariç) ──────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// MERA "GENEL AV SKORU" — TEK STANDART (hem /api/forecast HUD hem /api/scan pinleri)
+// ─────────────────────────────────────────────────────────────────────────────
+// Yöntem: İstilacı/Koruma/Ticari türleri eledikten sonra en iyi 3 UYGUN türün
+// tepe-baskın ağırlıklı ortalaması (60/30/10). Balıkçılık fırsatçıdır → en iyi
+// türe en yüksek ağırlık; ancak yedek seçenekler (2. ve 3. tür) de merayı daha
+// değerli/az riskli yapar. Girdi: her elemanın .score (sayı) ve .category alanı
+// olan bir dizi. Fonksiyon kendi içinde güvenli sıralama yapar (çağıranın önceden
+// sıralamış olması şart değildir).
+// ═══════════════════════════════════════════════════════════════════════════
 function calcAvgScore(fishList) {
     const EXCLUDED = ['İSTİLACI', 'KORUMA', 'TİCARİ'];
-    const eligible = fishList.filter(f => !EXCLUDED.includes(f.category));
+    if (!Array.isArray(fishList) || fishList.length === 0) return { score: 0, dominant: false };
+
+    const eligible = fishList
+        .filter(f => f && !EXCLUDED.includes(f.category) && Number.isFinite(Number(f.score)))
+        .map(f => ({ score: Number(f.score), category: f.category }))
+        .sort((a, b) => b.score - a.score);
+
+    if (eligible.length === 0) return { score: 0, dominant: false };
+
     const top3 = eligible.slice(0, 3);
-
-    if (top3.length === 0) return { score: 0, dominant: false };
-
-    let score = 0;
     const scores = top3.map(f => f.score);
 
-    // AI Konsensüsü: Dinamik Ağırlıklı Üssel Ortalama
-    if (scores.length === 3) {
+    // Tepe-baskın ağırlıklı ortalama
+    let score;
+    if (scores.length >= 3) {
         score = (scores[0] * 0.60) + (scores[1] * 0.30) + (scores[2] * 0.10);
     } else if (scores.length === 2) {
         score = (scores[0] * 0.70) + (scores[1] * 0.30);
@@ -1947,14 +1962,11 @@ function calcAvgScore(fishList) {
         score = scores[0];
     }
 
+    // Baskın tür: en üst tür 75+ VE 2.'den en az %15 ayrışmış (net tek-hedef fırsatı)
     let dominant = false;
-    if (top3.length >= 2 && !EXCLUDED.includes(top3[0].category)) {
-        // [GÜNCELLEME] Baskın tür olması için:
-        // 1. En üstteki balık 75+ puan olmalı (Gerçekten iyi bir fırsat olmalı)
-        // 2. İkinci balıktan en az %15 daha yüksek skora sahip olmalı (Net bir ayrışma olmalı)
+    if (top3.length >= 2) {
         const topScore = top3[0].score;
         const secondScore = top3[1].score;
-
         dominant = topScore >= 75 && (topScore - secondScore) / (secondScore || 1) >= 0.15;
     }
 
@@ -5744,10 +5756,13 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
                 if (!isInHabitat(fish, parseFloat(latF), parseFloat(lonF), regionName)) continue;
                 try {
                     const instantResult = calculateFishScore(fish, key, params, lang);
-                    const score = instantResult ? instantResult.finalScore : 0;
                     const scoreDetails = instantResult ? instantResult.scoreDetails : null;
                     const dailyResult = calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
                     const hourlyScores = dailyResult ? dailyResult.hourlyScores : null;
+                    // [STANDART] Tür skoru forecast ile AYNI temele otursun diye 24 saatlik
+                    // AĞIRLIKLI GÜNLÜK skordur (anlık değil). scoreDetails yine anlık koşullardan
+                    // (forecast de detayları anlık hesaptan alıyor — birebir aynı sözleşme).
+                    const score = dailyResult ? dailyResult.score : (instantResult ? instantResult.finalScore : 0);
                     if (score > 0) {
                         const scientificName = (fish.scientificName || fish.name).toLowerCase().trim();
                         const existing = resultsMap.get(scientificName);
@@ -5778,19 +5793,33 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             }
 
             const sorted = Array.from(resultsMap.values()).sort((a, b) => b.score - a.score);
-            const topFish = sorted.slice(0, 3).map(f => f.name);
-            const best = sorted[0];
 
-            return { ...commonResult, score: best ? best.score : 0, fishName: best ? best.name : "", topFish, hourlyScores: best ? best.hourlyScores : null, scoreDetails: best ? best.scoreDetails : null };
+            // [STANDART] Mera "Genel Av Skoru" = /api/forecast HUD ile AYNI yöntem: calcAvgScore
+            // (istilacı/koruma/ticari hariç, en iyi 3 uygun türün 60/30/10 ağırlıklı ortalaması).
+            // Eskiden burada tek en iyi balığın skoru (best.score) dönüyordu → HUD paneliyle
+            // uyumsuzdu VE istilacı/koruma bir tür merayı yanlışlıkla yüksek gösterebiliyordu.
+            const { score: spotScore, dominant } = calcAvgScore(
+                sorted.map(f => ({ score: f.score, category: f.fish ? f.fish.category : null }))
+            );
+
+            // Pin etiketi ve detay popup'ı skor tabanıyla tutarlı olsun → en iyi UYGUN tür
+            // (hariç tutulan kategori bir merayı temsil eden "başlık balık" olamaz).
+            const EXCLUDED_AGG = ['İSTİLACI', 'KORUMA', 'TİCARİ'];
+            const eligibleSorted = sorted.filter(f => f.fish && !EXCLUDED_AGG.includes(f.fish.category));
+            const headline = eligibleSorted[0] || null;
+            const topFish = eligibleSorted.slice(0, 3).map(f => f.name);
+
+            return { ...commonResult, score: spotScore, dominant, fishName: headline ? headline.name : "", topFish, hourlyScores: headline ? headline.hourlyScores : null, scoreDetails: headline ? headline.scoreDetails : null };
         } else {
             const fish = SPECIES_DB[fishKey];
             if (!fish) return null;
             if (!isInHabitat(fish, parseFloat(latF), parseFloat(lonF), regionName)) return null;
             const instantResult = calculateFishScore(fish, fishKey, params, lang);
-            const score = instantResult ? instantResult.finalScore : 0;
             const scoreDetails = instantResult ? instantResult.scoreDetails : null;
             const dailyResult = calculateWeightedDailyScore(fish, fishKey, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
             const hourlyScores = dailyResult ? dailyResult.hourlyScores : null;
+            // [STANDART] Tek-tür tarama skoru da 24 saatlik ağırlıklı günlük skordur (forecast ile aynı)
+            const score = dailyResult ? dailyResult.score : (instantResult ? instantResult.finalScore : 0);
             const _n1 = getLoc(fish, "name", lang);
             return { ...commonResult, score, fishName: _n1, topFish: [_n1], hourlyScores, scoreDetails };
         }
