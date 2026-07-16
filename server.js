@@ -5759,10 +5759,13 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
                     const scoreDetails = instantResult ? instantResult.scoreDetails : null;
                     const dailyResult = calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
                     const hourlyScores = dailyResult ? dailyResult.hourlyScores : null;
-                    // [STANDART] Tür skoru forecast ile AYNI temele otursun diye 24 saatlik
-                    // AĞIRLIKLI GÜNLÜK skordur (anlık değil). scoreDetails yine anlık koşullardan
-                    // (forecast de detayları anlık hesaptan alıyor — birebir aynı sözleşme).
-                    const score = dailyResult ? dailyResult.score : (instantResult ? instantResult.finalScore : 0);
+                    // [STANDART] Tür skoru ANLIK (o anki saat) skordur. Neden günlük değil:
+                    // Tarama pinine tıklayınca açılan detay panelinin varsayılan "ŞİMDİ" sekmesi
+                    // de anlık skora göre sıralar; harita ile panelin AYNI türü/temeli göstermesi
+                    // için ikisi de anlık olmalı. (Günlük ortalama kullanılırsa harita gün boyu
+                    // sabit kalır ve hep stabil türler kazanır → "hep aynı balık" sorunu.)
+                    // hourlyScores yine 24 saatlik dizi olarak taşınır (detay grafiği için).
+                    const score = instantResult ? instantResult.finalScore : 0;
                     if (score > 0) {
                         const scientificName = (fish.scientificName || fish.name).toLowerCase().trim();
                         const existing = resultsMap.get(scientificName);
@@ -5794,10 +5797,11 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
 
             const sorted = Array.from(resultsMap.values()).sort((a, b) => b.score - a.score);
 
-            // [STANDART] Mera "Genel Av Skoru" = /api/forecast HUD ile AYNI yöntem: calcAvgScore
-            // (istilacı/koruma/ticari hariç, en iyi 3 uygun türün 60/30/10 ağırlıklı ortalaması).
-            // Eskiden burada tek en iyi balığın skoru (best.score) dönüyordu → HUD paneliyle
-            // uyumsuzdu VE istilacı/koruma bir tür merayı yanlışlıkla yüksek gösterebiliyordu.
+            // [STANDART] Mera "Genel Av Skoru" AGGREGASYON yöntemi = calcAvgScore:
+            // istilacı/koruma/ticari hariç, en iyi 3 uygun türün 60/30/10 ağırlıklı ortalaması.
+            // (Skorların kendisi artık ANLIK — yukarıda; aggregasyon yöntemi forecast ile aynı.)
+            // Eskiden burada tek en iyi balığın skoru (best.score) dönüyordu → hem istikrarsızdı
+            // hem de istilacı/koruma bir tür (ör. aslan balığı) merayı yanlışlıkla yüksek gösterebiliyordu.
             const { score: spotScore, dominant } = calcAvgScore(
                 sorted.map(f => ({ score: f.score, category: f.fish ? f.fish.category : null }))
             );
@@ -5818,8 +5822,8 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             const scoreDetails = instantResult ? instantResult.scoreDetails : null;
             const dailyResult = calculateWeightedDailyScore(fish, fishKey, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
             const hourlyScores = dailyResult ? dailyResult.hourlyScores : null;
-            // [STANDART] Tek-tür tarama skoru da 24 saatlik ağırlıklı günlük skordur (forecast ile aynı)
-            const score = dailyResult ? dailyResult.score : (instantResult ? instantResult.finalScore : 0);
+            // [STANDART] Tek-tür tarama skoru da ANLIK skordur — detay panelinin "ŞİMDİ" sekmesiyle eşleşsin.
+            const score = instantResult ? instantResult.finalScore : 0;
             const _n1 = getLoc(fish, "name", lang);
             return { ...commonResult, score, fishName: _n1, topFish: [_n1], hourlyScores, scoreDetails };
         }
