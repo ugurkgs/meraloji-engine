@@ -115,6 +115,7 @@ const SERVER_i18n = {
             clearWater: '🌿 Temiz Su',
             windyGood: 'Rüzgarlı',
             foamyWater: 'Köpüklü Su',
+            headOnWave: '🌊 Dalga Kıyıya Dik Vuruyor',
             needsBoat: 'Tekne gerektirir',
             highWave: '⚠️ Yüksek dalga',
             windGust: '💨 Ani Rüzgar',
@@ -184,6 +185,12 @@ const SERVER_i18n = {
         protected: {
             penalties: ['🚫 AVLANMASI YASAKTIR — Koruma Altında Tür'],
             reason: "🚫 Türkiye'de avlanması kesinlikle yasak — Koruma altında tür (6/2 Tebliğ).",
+        },
+        safety: {
+            ripCurrentLow: 'Çeken akıntı riski düşük görünüyor.',
+            ripCurrentModerate: '⚠️ Orta düzeyde çeken akıntı riski — bilmediğiniz kıyılarda temkinli olun.',
+            ripCurrentHigh: '🚨 YÜKSEK çeken akıntı riski — dalga/rüzgar koşulları güçlü bir dip akıntısına uygun. Denize girmeyin.',
+            ripCurrentDisclaimer: 'Bu, hava/dalga verisinden üretilen bir TAHMİNDİR; resmi cankurtaran, sahil güvenlik uyarılarının veya kırmızı bayrak sisteminin yerine geçmez.',
         },
         scan: {
             weather: 'Hava verisi alınıyor...',
@@ -257,6 +264,7 @@ const SERVER_i18n = {
             clearWater: '🌿 Clear Water',
             windyGood: 'Windy',
             foamyWater: 'Foamy Water',
+            headOnWave: '🌊 Wave Hitting Shore Head-On',
             needsBoat: 'Boat required',
             highWave: '⚠️ High waves',
             windGust: '💨 Wind Gust',
@@ -326,6 +334,12 @@ const SERVER_i18n = {
         protected: {
             penalties: ['🚫 FISHING PROHIBITED — Protected Species'],
             reason: '🚫 Fishing strictly prohibited in Turkey — Protected species (Regulation 6/2).',
+        },
+        safety: {
+            ripCurrentLow: 'Rip current risk appears low.',
+            ripCurrentModerate: '⚠️ Moderate rip current risk — be cautious at unfamiliar beaches.',
+            ripCurrentHigh: '🚨 HIGH rip current risk — wave/wind conditions favor a strong rip current. Do not enter the water.',
+            ripCurrentDisclaimer: 'This is an ESTIMATE generated from weather/wave data; it does not replace official lifeguard, coast guard warnings, or flag systems.',
         },
         scan: {
             weather: 'Fetching weather data...',
@@ -399,6 +413,7 @@ const SERVER_i18n = {
             clearWater: '🌿 Agua limpia',
             windyGood: 'Ventoso favorable',
             foamyWater: 'Agua espumosa',
+            headOnWave: '🌊 Ola golpeando de frente',
             needsBoat: 'Requiere embarcación',
             highWave: '⚠️ Oleaje alto',
             windGust: '💨 Ráfagas de viento',
@@ -468,6 +483,12 @@ const SERVER_i18n = {
         protected: {
             penalties: ['🚫 PESCA PROHIBIDA — Especie Protegida'],
             reason: '🚫 Pesca estrictamente prohibida en Turquía — Especie protegida (Regulación 6/2).',
+        },
+        safety: {
+            ripCurrentLow: 'El riesgo de corriente de resaca parece bajo.',
+            ripCurrentModerate: '⚠️ Riesgo moderado de corriente de resaca — tenga precaución en playas desconocidas.',
+            ripCurrentHigh: '🚨 Riesgo ALTO de corriente de resaca — las condiciones de olas/viento favorecen una fuerte corriente de resaca. No entre al agua.',
+            ripCurrentDisclaimer: 'Esto es una ESTIMACIÓN generada a partir de datos meteorológicos/oleaje; no reemplaza las advertencias oficiales de socorristas, guardacostas o el sistema de banderas.',
         },
         scan: {
             weather: 'Obteniendo datos meteorológicos...',
@@ -541,6 +562,7 @@ const SERVER_i18n = {
             clearWater: '🌿 Καθαρό Νερό',
             windyGood: 'Άνεμος',
             foamyWater: 'Αφρώδες Νερό',
+            headOnWave: '🌊 Κύμα Κάθετο στην Ακτή',
             needsBoat: 'Απαιτεί σκάφος',
             highWave: '⚠️ Ψηλά κύματα',
             windGust: '💨 Ριπή Ανέμου',
@@ -610,6 +632,12 @@ const SERVER_i18n = {
         protected: {
             penalties: ['🚫 ΑΠΑΓΟΡΕΥΕΤΑΙ Η ΑΛΙΕΙΑ — Προστατευόμενο Είδος'],
             reason: '🚫 Αυστηρά απαγορευμένη αλιεία — Προστατευόμενο είδος.',
+        },
+        safety: {
+            ripCurrentLow: 'Ο κίνδυνος ρεύματος επιστροφής φαίνεται χαμηλός.',
+            ripCurrentModerate: '⚠️ Μέτριος κίνδυνος ρεύματος επιστροφής — προσοχή σε άγνωστες παραλίες.',
+            ripCurrentHigh: '🚨 ΥΨΗΛΟΣ κίνδυνος ρεύματος επιστροφής — οι συνθήκες κύματος/ανέμου ευνοούν ισχυρό ρεύμα επιστροφής. Μην μπείτε στο νερό.',
+            ripCurrentDisclaimer: 'Πρόκειται για ΕΚΤΙΜΗΣΗ από δεδομένα καιρού/κύματος· δεν αντικαθιστά επίσημες προειδοποιήσεις ναυαγοσώστη ή λιμενικού.',
         },
         scan: {
             weather: 'Λήψη μετεωρολογικών δεδομένων...',
@@ -1197,6 +1225,25 @@ try {
     console.log(`✅ Offline harita yüklendi — ${_cityFeatures.length} şehir/bölge`);
 } catch (e) {
     console.warn('⚠️  tr-cities.json bulunamadı — offline konum analizi devre dışı:', e.message);
+}
+
+// [YENİ] Kıyı açısı hesaplamaları için: sadece KIYI İLLERİNİN poligon köşelerini düz bir
+// diziye indirger (3332 nokta — sunucu başlangıcında 1 kez, RAM'de). "En yakın köşeye olan
+// yön" yaklaşımı, tam radyal kara/deniz taramasından çok daha ucuzdur (istek başına tek
+// geçişli haversine karşılaştırması, ~3332 nokta — <1ms) ve pratikte aynı sonucu verir:
+// bir deniz noktasının en yakın kıyı poligon köşesi neredeyse her zaman gerçek kıyı
+// şeridi üzerindedir (iç sınır köşeleri çok daha uzaktadır).
+let _coastlineVertices = [];
+try {
+    for (const f of _cityFeatures) {
+        if (!COASTAL_PROVINCES.has(f.properties.name)) continue;
+        const g = f.geometry;
+        const rings = g.type === 'Polygon' ? [g.coordinates[0]] : g.coordinates.map(p => p[0]);
+        for (const ring of rings) for (const [lon, lat] of ring) _coastlineVertices.push([lat, lon]);
+    }
+    if (_coastlineVertices.length > 0) console.log(`✅ Kıyı hattı köşeleri hazır — ${_coastlineVertices.length} nokta (kıyı açısı hesapları için)`);
+} catch (e) {
+    console.warn('⚠️  Kıyı hattı köşeleri oluşturulamadı:', e.message);
 }
 
 // Deniz bölgesi poligonlarını RAM'e yükle (sunucu başlangıcında 1 kez)
@@ -2231,6 +2278,133 @@ function getCoastalLocality(lat, lon, lang = 'tr') {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// KIYI AÇISI (Coastline Angle) — dip akıntısı riski ve dalga-kıyı hizası için
+// ─────────────────────────────────────────────────────────────────────────────
+// Gerçek bir kıyı-teğet (tangent) hesabı yerine, EN YAKIN KIYI POLİGON KÖŞESİNE
+// olan yön kullanılıyor: bir deniz noktası için "en yakın kıyı köşesi" pratikte
+// neredeyse her zaman o noktanın gerçekten baktığı kıyı şeridi üzerindedir (il
+// poligonunun iç/idari sınır köşeleri çok daha uzaktadır). Bu yön, düzgün/az
+// kavisli bir kıyı şeridi için kıyı-normaline (kıyıya dik eksene) makul bir
+// yaklaşıklıktır — kesin bir GIS kıyı-teğet hesabı değildir, ama iki kullanım
+// alanı için de (dalga baş-başa mı vuruyor, akıntı kıyıdan denize mi gidiyor)
+// yeterli hassasiyettedir.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Büyük daire ilk yön açısı (bearing), 0-360°, kuzeyden saat yönünde.
+function bearingBetween(lat1, lon1, lat2, lon2) {
+    const toRad = d => d * Math.PI / 180;
+    const y = Math.sin(toRad(lon2 - lon1)) * Math.cos(toRad(lat2));
+    const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+        Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(toRad(lon2 - lon1));
+    const brng = Math.atan2(y, x) * 180 / Math.PI;
+    return (brng + 360) % 360;
+}
+
+// İki yön arasındaki dairesel fark, 0-180° (yönden bağımsız, en kısa açı).
+function angularDiff(a, b) {
+    const d = Math.abs(a - b) % 360;
+    return d > 180 ? 360 - d : d;
+}
+
+// Noktadan en yakın kıyı köşesine olan yön = "kıyıya doğru" (onshore) eksen.
+// maxKm ötesinde hiçbir kıyı yeterince yakın değildir → null (özellik uygulanmaz).
+const SHORE_BEARING_MAX_KM = 8;
+function getShoreNormalBearing(lat, lon) {
+    if (_coastlineVertices.length === 0) return null;
+    const latF = parseFloat(lat), lonF = parseFloat(lon);
+    if (isNaN(latF) || isNaN(lonF)) return null;
+
+    let nearestDist = Infinity, nearestLat = null, nearestLon = null;
+    for (const [vLat, vLon] of _coastlineVertices) {
+        const d = haversineKm(latF, lonF, vLat, vLon);
+        if (d < nearestDist) { nearestDist = d; nearestLat = vLat; nearestLon = vLon; }
+    }
+    if (nearestDist > SHORE_BEARING_MAX_KM) return null;
+    return {
+        onshoreBearing: bearingBetween(latF, lonF, nearestLat, nearestLon), // noktadan kıyıya doğru
+        distanceKm: parseFloat(nearestDist.toFixed(2))
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ÇEKEN AKINTI (Rip Current) RİSK TAHMİNİ — GÜVENLİK ÖZELLİĞİ
+// ─────────────────────────────────────────────────────────────────────────────
+// [BİLİMSEL DÜRÜSTLÜK NOTU]: NOAA/NWS'in resmi rip-current modelleri (LURCS —
+// Lushine Rip Current Scale, 1991 — ve onun yerini alan olasılıksal makine
+// öğrenmesi modeli) kapalı/özel sistemlerdir; tam puan tablosu bu oturumda
+// erişilebilen kaynaklarda bulunamadı (birincil NWS PDF'leri erişime kapalıydı).
+// Bu fonksiyon o tabloyu TAKLİT ETMİYOR. Bunun yerine, literatürde tekrar tekrar
+// doğrulanmış NİTELİKSEL risk faktörlerini (Lushine 1991; NWS East Central
+// Florida rip current programı) şeffaf, açıklanabilir bir formülle birleştiriyor:
+//   1. Dalga YÜKSEKLİĞİ — eşiğin (0.3m) üstünde arttıkça risk artar.
+//   2. Dalga PERİYODU — uzun periyotlu kabarma (swell, >10-12s) aynı yükseklikteki
+//      kısa periyotlu rüzgar dalgasından ÇOK daha tehlikelidir (daha organize enerjik
+//      kırılma → daha güçlü geri-akış kanalı). Literatürde en güçlü belirleyicilerden.
+//   3. Kıyıya-DİK hiza (alignment) — dalga enerjisini ÇARPAN olarak etkiler (dalga
+//      kıyıya paralel/oblik geldiğinde enerji dağılır, tam dik geldiğinde odaklanır).
+//   4. Rüzgar — hız + kıyıya-dik bileşen, küçük ek katkı.
+// GELGİT (tide) KASITLI OLARAK DAHİL EDİLMEDİ: LURCS ABD Atlantik kıyısı için
+// geliştirildi (gelgit genliği ~1m+); Türkiye denizlerinde (Marmara/Karadeniz/Ege/
+// Akdeniz) astronomik gelgit birkaç santimetreyle sınırlıdır — anlamlı katkısı yok.
+// SINIRLAMA: Bu bir TAHMİNDİR — kum bariyerindeki gerçek bir kanal/boşluğu (gerçek
+// rip oluşumunun fiziksel önkoşulu) TESPİT ETMEZ; yalnızca koşulların rip oluşumuna
+// ne kadar UYGUN olduğunu ölçer. Resmi cankurtaran/sahil güvenlik uyarılarının,
+// kırmızı bayrak sisteminin veya yerel bilginin YERİNE GEÇMEZ — çağıran kod ve
+// kullanıcı arayüzü bunu her zaman açıkça belirtmelidir.
+// ═══════════════════════════════════════════════════════════════════════════
+function calculateRipCurrentRisk({ waveHeight, wavePeriod, windSpeed, windDir, waveDir, shoreBearing }) {
+    if (shoreBearing === null || shoreBearing === undefined || isNaN(shoreBearing)) return null;
+    const wave = safeNum(waveHeight);
+    const period = safeNum(wavePeriod, 5);
+    const wind = safeNum(windSpeed);
+    const wDir = safeNum(waveDir);
+    const windDirection = safeNum(windDir);
+
+    // Dalganın/rüzgarın "ideal" geliş yönü: kıyıdan denize bakan eksen (shoreBearing'in tersi).
+    const offshoreBearing = (shoreBearing + 180) % 360;
+    const waveAlign = Math.max(0, Math.cos(angularDiff(wDir, offshoreBearing) * Math.PI / 180));   // 0..1
+    const windAlign = Math.max(0, Math.cos(angularDiff(windDirection, offshoreBearing) * Math.PI / 180)); // 0..1
+
+    // Periyot çarpanı: kısa rüzgar dalgası (~3s) 0.5x, uzun swell (≥12s) 1.6x
+    const periodMult = 0.5 + Math.min(1.1, Math.max(0, (period - 3) / 9));
+
+    // Yükseklik+periyot temel enerjisi (0-85), sonra kıyıya-dik hizaya göre ÇARPILIR
+    // (enerji ancak kıyıya odaklanırsa organize bir geri-akışa dönüşür).
+    const baseEnergy = Math.min(85, Math.max(0, (wave - 0.3) / 1.5) * 60 * periodMult);
+    const alignmentMultiplier = 0.55 + 0.45 * waveAlign; // paralel/oblik dalga bile bir miktar risk taşır
+
+    // Rüzgar küçük ek katkı (kıyıya dik ve güçlüyse kırılma enerjisini artırır)
+    const windBonus = Math.min(15, (wind / 45) * 15 * (0.3 + 0.7 * windAlign));
+
+    const raw = baseEnergy * alignmentMultiplier + windBonus;
+    const score = Math.max(0, Math.min(100, Math.round(raw)));
+
+    let level;
+    if (score >= 65) level = 'HIGH';
+    else if (score >= 35) level = 'MODERATE';
+    else level = 'LOW';
+
+    return { score, level, waveAlign: parseFloat(waveAlign.toFixed(2)) };
+}
+
+// [YENİ] calculateRipCurrentRisk() çıktısını, kullanıcıya gösterilecek yerelleştirilmiş
+// bir güvenlik uyarısı nesnesine çevirir. riskResult null ise (shoreBearing çözülemediyse,
+// yani açık deniz/kıyıdan uzak nokta) null döner — response şemasına hiçbir alan eklenmez.
+function buildRipCurrentWarning(riskResult, lang = 'tr') {
+    if (!riskResult) return null;
+    const t = i18n(lang).safety;
+    const messageKey = riskResult.level === 'HIGH' ? 'ripCurrentHigh'
+        : riskResult.level === 'MODERATE' ? 'ripCurrentModerate'
+        : 'ripCurrentLow';
+    return {
+        level: riskResult.level,           // 'LOW' | 'MODERATE' | 'HIGH'
+        score: riskResult.score,           // 0-100
+        message: t[messageKey],
+        disclaimer: t.ripCurrentDisclaimer
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // GLOBAL HABİTAT KONTROLÜ
 // Türkiye türleri → fish.regions ile bölge eşleşmesi (mve mevcut sistem)
 // Global türler   → fish.habitatBboxes ile koordinat kutusu eşleşmesi
@@ -2687,7 +2861,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         // YENİ (1D)
         windGust = 0, precipProb = 0, visibility = 20000,
         waveDirection = 0, windWaveHeight = 0, swellPeriod = 0,
-        tideFlow = 0, moonAltitude = 0
+        tideFlow = 0, moonAltitude = 0,
+        shoreBearing = null   // [YENİ] {onshoreBearing, distanceKm} veya null — kıyı açısı hesapları için
     } = params;
 
     const season = getSeason(targetDate.getMonth(), params.lat);
@@ -3176,6 +3351,25 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
 
     if (key === "levrek" && wave > 0.7 && clarity < 60) { s_trigger += 2; activeTriggers.push(i18n(lang).triggers.foamyWater); }
     if (key === "lufer" && windSpeed > 15 && windSpeed < 35) { s_trigger += 2; activeTriggers.push(i18n(lang).triggers.windyGood); }
+
+    // [YENİ] Levrek — dalga kıyıya TAM DİK (baş-başa) vuruyorsa ek bonus. Doğrudan
+    // dalga çarpması dip kumunu/küçük canlıları karıştırır, yerel köpük/bulanıklık
+    // yaratır — levrek gibi pusu avcıları için ideal av koşuludur. Bu, yukarıdaki
+    // foamyWater tetikleyicisiyle AYNI biyolojik mekanizmanın dalga geliş açısına göre
+    // incelenmiş, ayrı ve katkısı toplanabilir (additive) bir versiyonudur — ikisi
+    // birlikte tetiklenebilir (baş-başa + bulanık su = en ideal koşul).
+    // shoreBearing çözümlenemiyorsa (açık deniz, kıyıdan >8km, veri yoksa) bu blok
+    // HİÇ ÇALIŞMAZ — mevcut kullanıcılar/skorlar hiçbir şekilde etkilenmez.
+    if (key === "levrek" && wave > 0.5 && waveDirection > 0 && shoreBearing && typeof shoreBearing.onshoreBearing === 'number') {
+        const offshoreBearing = (shoreBearing.onshoreBearing + 180) % 360;
+        const headOnAlign = Math.max(0, Math.cos(angularDiff(waveDirection, offshoreBearing) * Math.PI / 180));
+        if (headOnAlign >= 0.85) { // ~±30° içinde — neredeyse tam dik
+            const headOnBonus = parseFloat((1.5 * headOnAlign).toFixed(1));
+            s_trigger += headOnBonus;
+            activeTriggers.push(i18n(lang).triggers.headOnWave);
+            scoreDetails.waveHeadOn = { align: parseFloat(headOnAlign.toFixed(2)), bonus: headOnBonus };
+        }
+    }
 
     // TERMOKLİN ETKİSİ — Sadece Nisan-Ekim, sadece thermoclineDepth varsa
     if (thermoclineDepth !== null && thermoclineDepth !== undefined) {
@@ -4011,6 +4205,10 @@ app.get('/api/forecast', async (req, res) => {
         const localClickHour = Math.floor((Date.now() / 1000 + utcOffsetSeconds) % 86400 / 3600);
         const correctedClickHour = localClickHour; // artık clickHour yerine bunu kullan
 
+        // [YENİ] Kıyı açısı — tıklanan nokta boyunca sabit, döngü dışında bir kez hesaplanır.
+        // Kıyıya >8km uzaksa null döner (özellik uygulanmaz — mevcut davranış aynen korunur).
+        const shoreBearingInfo = getShoreNormalBearing(lat, lon);
+
         for (let i = 0; i < 7; i++) {
             const targetDate = new Date();
             targetDate.setDate(targetDate.getDate() + i);
@@ -4136,8 +4334,18 @@ app.get('/api/forecast', async (req, res) => {
                     // YENİ (1C)
                     windGust, precipProb, weatherCode, visibility,
                     waveDirection, windWaveHeight, swellPeriod,
-                    tideFlow, moonAltitude, oxygen, upwelling
+                    tideFlow, moonAltitude, oxygen, upwelling,
+                    shoreBearing: shoreBearingInfo   // [YENİ] levrek kıyı-dik dalga bonusu için
                 };
+
+                // [YENİ] Çeken akıntı (rip current) risk tahmini — bu günün dalga/rüzgar
+                // koşullarına göre. shoreBearingInfo yoksa (açık deniz/kıyıdan uzak) null
+                // döner ve aşağıda hiçbir güvenlik alanı eklenmez — additive, geriye dönük
+                // uyumlu bir alan (mevcut response şemasını bozmaz).
+                const dayRipRisk = shoreBearingInfo ? calculateRipCurrentRisk({
+                    waveHeight: wave, wavePeriod, windSpeed, windDir,
+                    waveDir: waveDirection, shoreBearing: shoreBearingInfo.onshoreBearing
+                }) : null;
 
                 const resultsMap = new Map();
 
@@ -4289,6 +4497,7 @@ app.get('/api/forecast', async (req, res) => {
                 weatherCode: weatherCode,
                 localTime: new Date(Date.now() + (utcOffsetSeconds * 1000)).toISOString().replace('T', ' ').slice(0, 16),
                 score: parseFloat(topScore.toFixed(1)),
+                ripCurrentRisk: buildRipCurrentWarning(dayRipRisk, lang), // [YENİ] additive — shoreBearingInfo yoksa null
                 apiGrid: (marine.latitude && marine.longitude) ? {
                     lat: parseFloat(marine.latitude.toFixed(4)),
                     lon: parseFloat(marine.longitude.toFixed(4))
@@ -4408,8 +4617,15 @@ app.get('/api/forecast', async (req, res) => {
                 cape: parseFloat(i_cape.toFixed(0)),
                 oxygen: i_oxygen, upwelling: i_upwelling,
                 tideFlow: i_tideFlow,
-                moonAltitude: i_tide.altitude
+                moonAltitude: i_tide.altitude,
+                shoreBearing: shoreBearingInfo   // [YENİ] levrek kıyı-dik dalga bonusu için (daily loop ile aynı, döngü dışında hesaplandı)
             };
+
+            // [YENİ] Anlık (instant) çeken akıntı risk tahmini
+            const i_ripRisk = shoreBearingInfo ? calculateRipCurrentRisk({
+                waveHeight: i_wave, wavePeriod: i_wavePeriod, windSpeed: i_wind,
+                windDir: i_windDir, waveDir: i_waveDirection, shoreBearing: shoreBearingInfo.onshoreBearing
+            }) : null;
 
             const instantResultsMap = new Map();
             for (const [key, fish] of Object.entries(SPECIES_DB || {})) {
@@ -4576,10 +4792,11 @@ app.get('/api/forecast', async (req, res) => {
                     gridDistance: gridDistanceKm,
                     waveDirection: i_waveDirection,
                     visibility: i_visibility
-                })
+                }),
+                ripCurrentRisk: buildRipCurrentWarning(i_ripRisk, lang) // [YENİ] additive — shoreBearingInfo yoksa null
             };
         }
-        
+
         // ── TIME SLIDER İÇİN SAATLİK ZAMAN ÇİZELGESİ (HOURLY TIMELINE) ──
         if (instantData) {
             const instantDate = now;
@@ -4980,6 +5197,9 @@ app.get('/api/fish-search', async (req, res) => {
         const s_tideAmplitude = 1.0 + Math.abs(Math.cos(moon.phase * Math.PI * 2)) * 0.5;
         const s_tideFlow = s_tideAmplitude * Math.abs(Math.sin(s_tide.altitude)) * 1.5;
 
+        // [YENİ] Kıyı açısı — levrek kıyı-dik dalga bonusu + çeken akıntı riski için
+        const shoreBearingInfo = getShoreNormalBearing(latF, lonF);
+
         const baseParams = {
             tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
             timeMode, solunar, region: regionName, targetDate: now, isInstant: true,
@@ -4999,6 +5219,7 @@ app.get('/api/fish-search', async (req, res) => {
             windGust, precipProb, weatherCode, visibility,
             waveDirection, windWaveHeight, swellPeriod,
             tideFlow: s_tideFlow,
+            shoreBearing: shoreBearingInfo,
             chlorophyll: await (async () => {
                 try {
                     const chlCacheKey = `plankton_${parseFloat(lat).toFixed(1)}_${parseFloat(lon).toFixed(1)}`;
@@ -5188,7 +5409,14 @@ app.get('/api/fish-search', async (req, res) => {
                 season: season,
                 moonPhase: moon.phase,
                 solunar: solunar,
-                rain: rain
+                rain: rain,
+                ripCurrentRisk: buildRipCurrentWarning(
+                    shoreBearingInfo ? calculateRipCurrentRisk({
+                        waveHeight: wave, wavePeriod, windSpeed, windDir,
+                        waveDir: waveDirection, shoreBearing: shoreBearingInfo.onshoreBearing
+                    }) : null,
+                    lang
+                ) // [YENİ] additive — shoreBearingInfo yoksa null
             },
             snapInfo  // null veya { distanceM, snapLat, snapLon }
         });
