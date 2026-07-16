@@ -1,0 +1,2595 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Adana",
+    "ilce": "Karataş"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     35.2522142,
+     36.6688686
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Adana",
+    "ilce": "Yumurtalık"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     35.6939961,
+     36.7331146
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Antalya",
+    "ilce": "Aksu"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     30.850168,
+     36.947594
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Antalya",
+    "ilce": "Alanya"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     32.088681,
+     36.5487237
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Antalya",
+    "ilce": "Demre"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.9302933,
+     36.2886114
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Antalya",
+    "ilce": "Finike"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     30.0200075,
+     36.4053988
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Antalya",
+    "ilce": "Gazipaşa"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     32.4361526,
+     36.3338893
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Antalya",
+    "ilce": "Kaş"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.5908927,
+     36.3875207
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Antalya",
+    "ilce": "Kemer"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     30.559761,
+     36.602789
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Antalya",
+    "ilce": "Konyaaltı"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     30.4833769,
+     36.8153706
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Antalya",
+    "ilce": "Kumluca"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     30.2909135,
+     36.5078646
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Antalya",
+    "ilce": "Manavgat"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     31.3985955,
+     37.0598749
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Antalya",
+    "ilce": "Muratpaşa"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     30.7646728,
+     36.888082
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Antalya",
+    "ilce": "Serik"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     31.0183904,
+     37.0891755
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Artvin",
+    "ilce": "Arhavi"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     41.3868842,
+     41.2343357
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Artvin",
+    "ilce": "Hopa"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     41.4393585,
+     41.3854494
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Artvin",
+    "ilce": "Kemalpaşa"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     41.526276,
+     41.481167
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Aydın",
+    "ilce": "Didim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.3298234,
+     37.4587849
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Aydın",
+    "ilce": "Kuşadası"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.2013235,
+     37.7849523
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Aydın",
+    "ilce": "Söke"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.3416476,
+     37.6741832
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Balıkesir",
+    "ilce": "Ayvalık"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7821509,
+     39.2880347
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Balıkesir",
+    "ilce": "Bandırma"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.9287602,
+     40.2505578
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Balıkesir",
+    "ilce": "Burhaniye"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.0358686,
+     39.4384986
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Balıkesir",
+    "ilce": "Edremit"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.021881,
+     39.594661
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Balıkesir",
+    "ilce": "Erdek"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.7977579,
+     40.4480516
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Balıkesir",
+    "ilce": "Gömeç"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.8720018,
+     39.3777635
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Balıkesir",
+    "ilce": "Gönen"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.6099077,
+     40.1156821
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Balıkesir",
+    "ilce": "Marmara"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.6123255,
+     40.568071
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Bartın",
+    "ilce": "Amasra"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     32.4311845,
+     41.7422613
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Bartın",
+    "ilce": "Kurucaşile"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     32.6684571,
+     41.7821165
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Bursa",
+    "ilce": "Gemlik"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.1899934,
+     40.4457868
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Bursa",
+    "ilce": "Karacabey"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.3867457,
+     40.237908
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Bursa",
+    "ilce": "Mudanya"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.751943,
+     40.412188
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Çanakkale",
+    "ilce": "Ayvacık"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.3631977,
+     39.5704439
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Çanakkale",
+    "ilce": "Biga"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.2078032,
+     40.2777587
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Çanakkale",
+    "ilce": "Bozcaada"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.0291828,
+     39.8638315
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Çanakkale",
+    "ilce": "Eceabat"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.3195809,
+     40.2123279
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Çanakkale",
+    "ilce": "Ezine"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.3199058,
+     39.8019946
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Çanakkale",
+    "ilce": "Gelibolu"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7046191,
+     40.5046052
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Çanakkale",
+    "ilce": "Gökçeada"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     25.8399984,
+     40.1659531
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Çanakkale",
+    "ilce": "Lapseki"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.788004,
+     40.257124
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Düzce",
+    "ilce": "Akçakoca"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     31.1327813,
+     41.0199566
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Edirne",
+    "ilce": "Enez"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.2047771,
+     40.6940987
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Edirne",
+    "ilce": "Keşan"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.5694153,
+     40.8250309
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Giresun",
+    "ilce": "Bulancak"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     38.1345452,
+     40.7345596
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Giresun",
+    "ilce": "Espiye"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     38.732682,
+     40.7581013
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Giresun",
+    "ilce": "Eynesil"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.1352,
+     41.0151767
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Giresun",
+    "ilce": "Görele"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.0403548,
+     40.9273199
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Giresun",
+    "ilce": "Keşap"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     38.516667,
+     40.916667
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Giresun",
+    "ilce": "Piraziz"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     38.0873231,
+     40.9273199
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Giresun",
+    "ilce": "Tirebolu"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     38.8475569,
+     40.9173766
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Hatay",
+    "ilce": "Arsuz"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     35.9665617,
+     36.4192404
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Hatay",
+    "ilce": "Dörtyol"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     36.3013842,
+     36.8511989
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Hatay",
+    "ilce": "Erzin"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     36.1851576,
+     36.9645897
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Hatay",
+    "ilce": "İskenderun"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     36.2090039,
+     36.620751
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Hatay",
+    "ilce": "Payas"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     36.2910911,
+     36.7403104
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Hatay",
+    "ilce": "Samandağ"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     35.9555731,
+     36.1604276
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Hatay",
+    "ilce": "Yayladağı"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     36.0679315,
+     35.9672732
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Adalar"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.0586945,
+     40.8662623
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Arnavutköy"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.6553507,
+     41.248359
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Avcılar"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.719514,
+     41.0375101
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Bakırköy"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.834697,
+     40.9806081
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Beşiktaş"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.0235152,
+     41.0717209
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Beykoz"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.2148246,
+     41.1388108
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Beylikdüzü"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.6474894,
+     40.9878721
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Beyoğlu"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.9673981,
+     41.0427567
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Büyükçekmece"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.5125046,
+     41.0570632
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Çatalca"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.4330748,
+     41.3195451
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Eyüpsultan"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.8731941,
+     41.1652482
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Fatih"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.9539952,
+     41.0142464
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Kadıköy"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.0630386,
+     40.9811334
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Kartal"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.1967212,
+     40.9155542
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Küçükçekmece"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.7795672,
+     41.020577
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Maltepe"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.155557,
+     40.9439584
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Pendik"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.3610719,
+     40.9571958
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Sarıyer"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.0244134,
+     41.1716366
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Silivri"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.1831501,
+     41.1979217
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Şile"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.6399345,
+     41.0891874
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Tuzla"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.3556976,
+     40.891668
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Üsküdar"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.0490257,
+     41.035208
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İstanbul",
+    "ilce": "Zeytinburnu"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.9096053,
+     41.0051984
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Aliağa"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.0400088,
+     38.8071752
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Balçova"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.0552313,
+     38.3805029
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Bayraklı"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.1574698,
+     38.4867388
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Bergama"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.1838665,
+     39.1184863
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Çeşme"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.3726441,
+     38.3173229
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Çiğli"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.001387,
+     38.4920664
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Dikili"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.9228813,
+     39.0790915
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Foça"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.8451106,
+     38.670113
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Güzelbahçe"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.881647,
+     38.335247
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Karaburun"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.4743567,
+     38.5476883
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Karşıyaka"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.1247435,
+     38.5033857
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Konak"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.1292146,
+     38.4219104
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Menderes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.1287447,
+     38.1495807
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Menemen"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.0326715,
+     38.6256423
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Narlıdere"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.9791549,
+     38.3728593
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Seferihisar"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.8715913,
+     38.169669
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Selçuk"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.3736784,
+     37.9482866
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "İzmir",
+    "ilce": "Urla"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.663271,
+     38.2862017
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kastamonu",
+    "ilce": "Abana"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     34.0464561,
+     41.9493607
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kastamonu",
+    "ilce": "Bozkurt"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     34.011672,
+     41.957339
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kastamonu",
+    "ilce": "Cide"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     33.0613927,
+     41.8770564
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kastamonu",
+    "ilce": "Çatalzeytin"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     34.1993997,
+     41.8554586
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kastamonu",
+    "ilce": "Doğanyurt"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     33.4444132,
+     41.9459431
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kastamonu",
+    "ilce": "İnebolu"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     33.7137304,
+     41.8980971
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kırklareli",
+    "ilce": "Demirköy"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.7695041,
+     41.8716377
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kırklareli",
+    "ilce": "Vize"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.8673677,
+     41.6073815
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kocaeli",
+    "ilce": "Başiskele"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.9503811,
+     40.6458636
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kocaeli",
+    "ilce": "Darıca"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.3775318,
+     40.7792537
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kocaeli",
+    "ilce": "Derince"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.8657536,
+     40.8820431
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kocaeli",
+    "ilce": "Dilovası"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.5951876,
+     40.8344905
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kocaeli",
+    "ilce": "Gebze"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.5461238,
+     40.9044873
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kocaeli",
+    "ilce": "Gölcük"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.7984061,
+     40.6513885
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kocaeli",
+    "ilce": "İzmit"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     30.0608512,
+     40.846102
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kocaeli",
+    "ilce": "Kandıra"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     30.100612,
+     41.0451018
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kocaeli",
+    "ilce": "Karamürsel"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.6014804,
+     40.6144601
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Kocaeli",
+    "ilce": "Körfez"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.7232853,
+     40.887743
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Mersin",
+    "ilce": "Akdeniz"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     34.7266937,
+     36.8825612
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Mersin",
+    "ilce": "Anamur"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     32.7883528,
+     36.2685367
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Mersin",
+    "ilce": "Aydıncık"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     33.3246,
+     36.14596
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Mersin",
+    "ilce": "Bozyazı"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     33.0580039,
+     36.2656993
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Mersin",
+    "ilce": "Erdemli"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     34.1338432,
+     36.8220024
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Mersin",
+    "ilce": "Gülnar"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     33.3207423,
+     36.3513787
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Mersin",
+    "ilce": "Mezitli"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     34.3631867,
+     36.8463316
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Mersin",
+    "ilce": "Silifke"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     33.8443234,
+     36.5857704
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Mersin",
+    "ilce": "Tarsus"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     34.8422841,
+     37.078508
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Mersin",
+    "ilce": "Yenişehir"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     34.59349,
+     36.80101
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Muğla",
+    "ilce": "Bodrum"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.4790943,
+     37.0636431
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Muğla",
+    "ilce": "Dalaman"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.9524938,
+     36.8167182
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Muğla",
+    "ilce": "Datça"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.7011527,
+     36.7303311
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Muğla",
+    "ilce": "Fethiye"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.0966987,
+     36.65095
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Muğla",
+    "ilce": "Köyceğiz"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.7401703,
+     36.9646552
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Muğla",
+    "ilce": "Marmaris"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.2069184,
+     36.7893201
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Muğla",
+    "ilce": "Milas"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.7376351,
+     37.2741823
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Muğla",
+    "ilce": "Ortaca"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.7239932,
+     36.8003503
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Muğla",
+    "ilce": "Seydikemer"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.4464028,
+     36.636811
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Muğla",
+    "ilce": "Ula"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.5168203,
+     37.0569995
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Ordu",
+    "ilce": "Altınordu"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     37.8595169,
+     40.8921943
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Ordu",
+    "ilce": "Fatsa"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     37.4847515,
+     40.9667891
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Ordu",
+    "ilce": "Gülyalı"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     38.0431435,
+     40.9371745
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Ordu",
+    "ilce": "Perşembe"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     37.7232329,
+     41.0161107
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Ordu",
+    "ilce": "Ünye"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     37.2301248,
+     41.0104666
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Rize",
+    "ilce": "Ardeşen"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     41.1577162,
+     41.0976752
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Rize",
+    "ilce": "Çayeli"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     40.7652127,
+     40.9517516
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Rize",
+    "ilce": "Fındıklı"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     41.2659463,
+     41.2012838
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Rize",
+    "ilce": "İyidere"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     40.3666951,
+     40.9934908
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Rize",
+    "ilce": "Pazar"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     40.886757,
+     41.180655
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Sakarya",
+    "ilce": "Karasu"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     30.6315458,
+     41.0111008
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Sakarya",
+    "ilce": "Kaynarca"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     30.3530448,
+     41.0605415
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Sakarya",
+    "ilce": "Kocaali"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     30.8816885,
+     40.9737033
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Samsun",
+    "ilce": "Alaçam"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     35.5907044,
+     41.4705243
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Samsun",
+    "ilce": "Atakum"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     36.1200889,
+     41.3354545
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Samsun",
+    "ilce": "Bafra"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     35.8039068,
+     41.4821368
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Samsun",
+    "ilce": "Canik"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     36.2991014,
+     41.1740939
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Samsun",
+    "ilce": "Çarşamba"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     36.6336594,
+     41.1554351
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Samsun",
+    "ilce": "İlkadım"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     36.2418883,
+     41.2309363
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Samsun",
+    "ilce": "Tekkeköy"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     36.4696932,
+     41.1482316
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Samsun",
+    "ilce": "Terme"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     36.9788584,
+     41.1440226
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Samsun",
+    "ilce": "Yakakent"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     35.4414261,
+     41.5775651
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Sinop",
+    "ilce": "Ayancık"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     34.5704267,
+     41.8321481
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Sinop",
+    "ilce": "Dikmen"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     35.2549523,
+     41.5827767
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Sinop",
+    "ilce": "Gerze"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     35.1014088,
+     41.7384487
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Sinop",
+    "ilce": "Türkeli"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     34.3423639,
+     41.8517496
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Tekirdağ",
+    "ilce": "Marmaraereğlisi"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.8713484,
+     41.0398798
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Tekirdağ",
+    "ilce": "Süleymanpaşa"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.4031317,
+     40.9713361
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Tekirdağ",
+    "ilce": "Şarköy"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     27.1536452,
+     40.680056
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Trabzon",
+    "ilce": "Akçaabat"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.5185812,
+     40.9586865
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Trabzon",
+    "ilce": "Araklı"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.9485011,
+     40.7449111
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Trabzon",
+    "ilce": "Arsin"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.926995,
+     40.8454453
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Trabzon",
+    "ilce": "Beşikdüzü"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.1952353,
+     41.0130538
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Trabzon",
+    "ilce": "Çarşıbaşı"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.3994791,
+     41.0288271
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Trabzon",
+    "ilce": "Of"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     40.3335011,
+     40.8815426
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Trabzon",
+    "ilce": "Ortahisar"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.7251161,
+     40.8938875
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Trabzon",
+    "ilce": "Sürmene"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     40.1269913,
+     40.802555
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Trabzon",
+    "ilce": "Vakfıkebir"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.3229192,
+     40.9902815
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Trabzon",
+    "ilce": "Yomra"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     39.8346759,
+     40.8513158
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Yalova",
+    "ilce": "Altınova"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.4892606,
+     40.6423586
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Yalova",
+    "ilce": "Armutlu"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.895609,
+     40.5240058
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Yalova",
+    "ilce": "Çınarcık"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.0495828,
+     40.6068096
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Yalova",
+    "ilce": "Çiftlikköy"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.3936376,
+     40.6238557
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Yalova",
+    "ilce": "Termal"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.1748811,
+     40.5967249
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Zonguldak",
+    "ilce": "Alaplı"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     31.4928401,
+     41.1084005
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Zonguldak",
+    "ilce": "Ereğli"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     31.420257,
+     41.279905
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Zonguldak",
+    "ilce": "Kilimli"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     31.926496,
+     41.4883227
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "il": "Zonguldak",
+    "ilce": "Kozlu"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     31.7397731,
+     41.3572621
+    ]
+   }
+  }
+ ]
+}

@@ -1209,6 +1209,20 @@ try {
     console.warn('⚠️  tr-sea-regions.json bulunamadı — koordinat kutusu yöntemine düşülüyor:', e.message);
 }
 
+// [YENİ] Kıyı yerleşim noktalarını RAM'e yükle — SADECE GÖRÜNTÜLEME etiketi için
+// ("Kuşadası Açıkları" gibi). Bilimsel bölge sınıflandırması (getRegion/EGE/MARMARA/
+// AKDENİZ/KARADENİZ) buna dokunmaz ve ayrı kalır — tür eşleşmesi, tuzluluk, rüzgar yönü
+// mantığı vb. hiçbir şey etkilenmez. Koordinatlar tr-cities.json'daki il poligonlarına
+// karşı programatik olarak doğrulanmıştır (185/185 satır il sınırına <10km veya içeride).
+let _coastalLocalityFeatures = [];
+try {
+    const locRaw = fs.readFileSync(path.join(__dirname, 'tr-coastal-localities.json'), 'utf8');
+    _coastalLocalityFeatures = JSON.parse(locRaw).features;
+    console.log(`✅ Kıyı yerleşim noktaları yüklendi — ${_coastalLocalityFeatures.length} nokta`);
+} catch (e) {
+    console.warn('⚠️  tr-coastal-localities.json bulunamadı — yerel isim etiketleme devre dışı:', e.message);
+}
+
 // Global bölgeleri (habitatBboxes) RAM'e yükle
 let _globalBboxFeatures = [];
 function _loadGlobalBboxFeatures() {
@@ -2180,6 +2194,40 @@ function getRegion(latRaw, lonRaw) {
     if (lat <= 37.0 && lon >= 30.0) return 'AKDENİZ';
     if (lat > 37.0 && lat <= 40.5 && lon >= 30.0 && lon < 36.0) return 'AKDENİZ';
     return 'TÜRKİYE';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// KIYI YERLEŞİM ETİKETİ — SADECE GÖRÜNTÜLEME (bilimsel regionName'i ETKİLEMEZ)
+// ─────────────────────────────────────────────────────────────────────────────
+// En yakın adlandırılmış kıyı noktasını (tr-coastal-localities.json, 185 doğrulanmış
+// ilçe/il noktası) bulur ve mesafeye göre "X Kıyıları" / "X Açıkları" üretir.
+// Hiçbir eşiği geçemezse null döner (çağıran kod bu durumda basin adına düşer).
+//   - ≤12km  → "{İlçe} Kıyıları"  (kıyıya çok yakın nokta)
+//   - ≤45km  → "{İlçe} Açıkları"  (o ilçenin açıklarında sayılır, ama kıyı değil)
+//   - >45km  → null (hiçbir yerleşime yeterince yakın değil — basin adı kullanılır)
+// ═══════════════════════════════════════════════════════════════════════════
+const COASTAL_LABEL_NEAR_KM = 12;
+const COASTAL_LABEL_FAR_KM = 45;
+
+function getCoastalLocality(lat, lon, lang = 'tr') {
+    if (_coastalLocalityFeatures.length === 0) return null;
+    const latF = parseFloat(lat), lonF = parseFloat(lon);
+    if (isNaN(latF) || isNaN(lonF)) return null;
+
+    let nearest = null, nearestDist = Infinity;
+    for (const f of _coastalLocalityFeatures) {
+        const [flon, flat] = f.geometry.coordinates;
+        const d = haversineKm(latF, lonF, flat, flon);
+        if (d < nearestDist) { nearestDist = d; nearest = f; }
+    }
+    if (!nearest || nearestDist > COASTAL_LABEL_FAR_KM) return null;
+
+    const ilce = nearest.properties.ilce;
+    const near = nearestDist <= COASTAL_LABEL_NEAR_KM;
+    if (lang === 'en') return `${ilce} ${near ? 'Coast' : 'Offshore'}`;
+    if (lang === 'es') return `${near ? 'Costa de' : 'Frente a'} ${ilce}`;
+    if (lang === 'el') return `${ilce} ${near ? 'Ακτές' : 'Ανοιχτά'}`;
+    return `${ilce} ${near ? 'Kıyıları' : 'Açıkları'}`;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -4645,8 +4693,13 @@ app.get('/api/forecast', async (req, res) => {
         // Sanitization işlemi artık applySanitization() içinde yapılıyor.
         // Önbelleğe (cache) mutlaka HAM VERİ kaydedilmeli.
 
+        // [YENİ] Kıyı yerleşim etiketi — bulunursa "Kuşadası Açıkları" gibi ince taneli bir
+        // isim gösterilir; bulunamazsa (açık deniz vb.) eskisi gibi basin adına (EGE vb.) düşer.
+        // Bilimsel regionName (tür eşleşmesi, tuzluluk, rüzgar mantığı) ETKİLENMEZ.
+        const displayRegion = getCoastalLocality(lat, lon, lang) || (i18n(lang).regions[regionName] || regionName);
+
         const rawResponseData = {
-            version: "F.I.S.H. v3.0", region: i18n(lang).regions[regionName] || regionName, isLand, landReason, clickHour: correctedClickHour,
+            version: "F.I.S.H. v3.0", region: displayRegion, isLand, landReason, clickHour: correctedClickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
             depth: depthData,        // EMODnet Bathymetry derinlik verisi
             substrate: substrateData, // EMODnet Seabed Habitats dip yapısı
@@ -5118,7 +5171,7 @@ app.get('/api/fish-search', async (req, res) => {
             reason: result.reason,
             reasons: reasons,
             conditions: {
-                region: i18n(lang).regions[regionName] || regionName,
+                region: getCoastalLocality(latF, lonF, lang) || (i18n(lang).regions[regionName] || regionName),
                 depthAvg: depthAvg,
                 tempWater: tempWater,
                 wave: wave,
