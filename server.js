@@ -4352,15 +4352,6 @@ app.get('/api/forecast', async (req, res) => {
                     shoreBearing: shoreBearingInfo   // [YENİ] levrek kıyı-dik dalga bonusu için
                 };
 
-                // [YENİ] Çeken akıntı (rip current) risk tahmini — bu günün dalga/rüzgar
-                // koşullarına göre. shoreBearingInfo yoksa (açık deniz/kıyıdan uzak) null
-                // döner ve aşağıda hiçbir güvenlik alanı eklenmez — additive, geriye dönük
-                // uyumlu bir alan (mevcut response şemasını bozmaz).
-                const dayRipRisk = shoreBearingInfo ? calculateRipCurrentRisk({
-                    waveHeight: wave, wavePeriod, windSpeed, windDir,
-                    waveDir: waveDirection, shoreBearing: shoreBearingInfo.onshoreBearing
-                }) : null;
-
                 const resultsMap = new Map();
 
                 for (const [key, fish] of Object.entries(SPECIES_DB || {})) {
@@ -4471,6 +4462,15 @@ app.get('/api/forecast', async (req, res) => {
                 tacticKey = "TACTIC_DOMINANT";
                 tacticData = { dominantNote: i18n(lang).tactic.dominantNote };
             }
+
+            // [YENİ] Çeken akıntı (rip current) risk tahmini — DÖNGÜ SCOPE'unda (isLand
+            // olsa bile forecast.push erişebilsin diye; kullanıcı kıyıya/plaja dokunduğunda
+            // COASTAL_LAND olarak sınıflanabilir ama yüzme uyarısı yine de anlamlıdır).
+            // shoreBearingInfo yoksa (açık deniz/kıyıdan uzak) null → hiçbir alan eklenmez.
+            const dayRipRisk = shoreBearingInfo ? calculateRipCurrentRisk({
+                waveHeight: wave, wavePeriod, windSpeed, windDir,
+                waveDir: waveDirection, shoreBearing: shoreBearingInfo.onshoreBearing
+            }) : null;
 
             forecast.push({
                 date: targetDate.toISOString(),
