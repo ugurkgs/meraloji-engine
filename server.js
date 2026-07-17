@@ -672,6 +672,61 @@ function getLang(req) {
 }
 function i18n(lang) { return SERVER_i18n[lang] || SERVER_i18n.tr; }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// LOG DÜZENİ — temiz "kullanıcı hikâyesi" + gürültü filtresi
+// ─────────────────────────────────────────────────────────────────────────────
+// Sadece console ÇIKTISINI sadeleştirir; API davranışını / yanıtlarını DEĞİŞTİRMEZ
+// (geriye dönük tamamen güvenli). Düşük değerli per-istek teknik loglar (SHOALING,
+// GEBCO ham dökümü, GRID, SST, SUBSTRATE, OFFLINE, FORECAST-başlangıç, SNAP,
+// BATHYMETRY) yalnızca LOG_VERBOSE=1 ortam değişkeni ayarlıysa gösterilir.
+// Her istek sonunda tek satırlık/blok bir "kim, ne yaptı, nerede" özeti basılır.
+// ═══════════════════════════════════════════════════════════════════════════
+const LOG_VERBOSE = process.env.LOG_VERBOSE === '1';
+const _NOISY_LOG = /^\[(SHOALING|GEBCO|GRID|SST|SUBSTRATE|SUBSTRATE-US|OFFLINE|FORECAST|SNAP|BATHYMETRY)\]/;
+const _origConsoleLog = console.log.bind(console);
+console.log = function (...args) {
+    if (!LOG_VERBOSE && typeof args[0] === 'string' && _NOISY_LOG.test(args[0])) return;
+    _origConsoleLog(...args);
+};
+function vlog(...args) { if (LOG_VERBOSE) _origConsoleLog(...args); }
+
+function _regDateStr(uid) {
+    try { const ms = userCreationCache.get(uid); return ms ? new Date(ms).toISOString().slice(0, 10) : '?'; }
+    catch (e) { return '?'; }
+}
+// Kullanıcının kim + hangi plan olduğunu döndürür (satın aldı mı / deneme / süre doldu / anonim).
+function _userBadge(req) {
+    if (!req.user) return { who: '🕵 anonim', plan: '—' };
+    const who = req.user.email || req.user.uid;
+    if (req.isPremium)     return { who, plan: '💎 PRO' };
+    if (req.isGracePeriod) return { who, plan: `🆓 DENEME · ${req.graceDaysLeft != null ? req.graceDaysLeft : '?'} gün kaldı · kayıt ${_regDateStr(req.user.uid)}` };
+    return { who, plan: `⛔ SÜRE DOLDU · kayıt ${_regDateStr(req.user.uid)}` };
+}
+// İstek sonunda çağrılır. Analiz/tarama/arama isteklerinde tam blok, diğerlerinde tek satır.
+function printRequestLog(req, timeMs) {
+    const p = req.path;
+    const ms = timeMs.toFixed(0);
+    const { who, plan } = _userBadge(req);
+    const KIND = { '/api/forecast': '🔍 ANALİZ', '/api/scan': '🛰 MERA TARAMASI', '/api/fish-search': '🐟 BALIK ARAMA' };
+    const kind = KIND[p];
+    if (kind) {
+        const s = req._story || {};
+        const lat = req.query.lat, lon = req.query.lon;
+        const parts = [];
+        if (lat != null && lon != null && !isNaN(+lat) && !isNaN(+lon)) parts.push(`📍 ${(+lat).toFixed(4)}, ${(+lon).toFixed(4)}`);
+        if (s.radiusKm != null) parts.push(`⌀ ${s.radiusKm} km`);
+        if (s.depth != null)    parts.push(`⬇ ${s.depth} m`);
+        if (s.substrate)        parts.push(`🪨 ${s.substrate}`);
+        if (s.status)           parts.push(`🌊 ${s.status}${s.city ? ' (' + s.city + ')' : ''}`);
+        _origConsoleLog('*'.repeat(80));
+        _origConsoleLog(`👤 ${who}   [${plan}]`);
+        _origConsoleLog(`${kind}   ${parts.join('  ·  ')}`);
+        _origConsoleLog(`⏱ ${ms} ms`);
+    } else {
+        _origConsoleLog(`· ${who} [${plan.split(' ')[0]}]  ${req.method} ${p}  ${ms}ms`);
+    }
+}
+
 function getLoc(fish, field, lang, nested = null) {
     const obj = nested ? fish[nested] : fish;
     if (!obj) return "-";
@@ -1623,15 +1678,11 @@ app.use('/api/', verifyAuth);
 app.use('/api/', (req, res, next) => {
     const start = process.hrtime();
     res.on('finish', () => {
+        if (req.url.includes('progress') || req.url.includes('/hotspot?')) return;
         const diff = process.hrtime(start);
-        const timeMs = (diff[0] * 1e3 + diff[1] * 1e-6).toFixed(2);
-        // Çok sık çalışan scan stream, hotspot veya monthly-trend gibi ufak verileri sessize alabiliriz (isteğe bağlı) 
-        // ancak genel performans analizi için hepsi şimdilik loglanıyor.
-        if (!req.url.includes('progress') && !req.url.includes('/hotspot?')) {
-            const logUser = req.user ? (req.user.email || req.user.uid) : 'anonim';
-            console.log(`[API-PERF] [${logUser}] ${req.method} ${req.originalUrl} - ${timeMs}ms`);
-            console.log('*'.repeat(80));
-        }
+        const timeMs = diff[0] * 1e3 + diff[1] * 1e-6;
+        // Temiz "kullanıcı hikâyesi" özeti (kim, plan, ne yaptı, nerede, derinlik/dip, süre).
+        try { printRequestLog(req, timeMs); } catch (e) { /* log hatası isteği asla etkilemesin */ }
     });
     next();
 });
@@ -3953,6 +4004,7 @@ app.get('/api/forecast', async (req, res) => {
         // ── OFFLİNE KONUM ANALİZİ ─────────────────────────────────────────
         // API'lere gitmeden önce şehir sınırı kontrolü
         const offlineAnalysis = analyzeLocationOffline(lat, lon);
+        req._story = { status: offlineAnalysis.status, city: offlineAnalysis.city }; // log hikâyesi
         console.log(`[OFFLINE] [${logUser}] Durum: ${offlineAnalysis.status}${offlineAnalysis.city ? ' (' + offlineAnalysis.city + ')' : ''}`);
 
         if (offlineAnalysis.status === 'INLAND') {
@@ -4218,6 +4270,12 @@ app.get('/api/forecast', async (req, res) => {
         // utc_offset_seconds kullanarak gerçek yerel saati hesapla
         const localClickHour = Math.floor((Date.now() / 1000 + utcOffsetSeconds) % 86400 / 3600);
         const correctedClickHour = localClickHour; // artık clickHour yerine bunu kullan
+
+        // Log hikâyesi: nokta derinliği + dip yapısı (bu noktada kesinleşmiş)
+        if (req._story) {
+            req._story.depth = (depthData && depthData.avg != null) ? +Number(depthData.avg).toFixed(1) : null;
+            req._story.substrate = substrateData || null;
+        }
 
         // [YENİ] Kıyı açısı — tıklanan nokta boyunca sabit, döngü dışında bir kez hesaplanır.
         // Kıyıya >8km uzaksa null döner (özellik uygulanmaz — mevcut davranış aynen korunur).
@@ -6185,6 +6243,7 @@ app.get('/api/scan', async (req, res) => {
     const centerLat = parseFloat(lat);
     const centerLon = parseFloat(lon);
     const radiusKm = Math.min(20, Math.max(3, parseFloat(radius) || 5));
+    req._story = { radiusKm }; // log hikâyesi (nokta req.query'den, yarıçap buradan)
     const uid = req.user.uid;
     const logUser = req.user.email || uid;
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
