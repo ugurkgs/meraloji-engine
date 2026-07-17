@@ -2404,6 +2404,20 @@ function buildRipCurrentWarning(riskResult, lang = 'tr') {
     };
 }
 
+// [YENİ] getShoreNormalBearing() çıktısını API yanıtına konabilecek sade bir nesneye çevirir.
+// İstemci (Android simülasyon görünümü) bu geometriyi çizim için kullanır:
+//   onshore  = noktadan KIYIYA doğru yön (denizden karaya bakan eksen)
+//   offshore = KIYIDAN DENİZE doğru yön — çeken akıntının (rip) fiziksel akış yönü
+// info null ise (açık deniz / kıyıdan >8km / veri yok) null döner → yanıta alan eklenmez.
+function serializeShoreBearing(info) {
+    if (!info || typeof info.onshoreBearing !== 'number') return null;
+    return {
+        onshore: Math.round(info.onshoreBearing),
+        offshore: Math.round((info.onshoreBearing + 180) % 360),
+        distanceKm: info.distanceKm
+    };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // GLOBAL HABİTAT KONTROLÜ
 // Türkiye türleri → fish.regions ile bölge eşleşmesi (mve mevcut sistem)
@@ -4498,6 +4512,7 @@ app.get('/api/forecast', async (req, res) => {
                 localTime: new Date(Date.now() + (utcOffsetSeconds * 1000)).toISOString().replace('T', ' ').slice(0, 16),
                 score: parseFloat(topScore.toFixed(1)),
                 ripCurrentRisk: buildRipCurrentWarning(dayRipRisk, lang), // [YENİ] additive — shoreBearingInfo yoksa null
+                shoreBearing: serializeShoreBearing(shoreBearingInfo),    // [YENİ] kıyı geometrisi (onshore/offshore/mesafe) — simülasyon çizimi için
                 apiGrid: (marine.latitude && marine.longitude) ? {
                     lat: parseFloat(marine.latitude.toFixed(4)),
                     lon: parseFloat(marine.longitude.toFixed(4))
@@ -4793,7 +4808,8 @@ app.get('/api/forecast', async (req, res) => {
                     waveDirection: i_waveDirection,
                     visibility: i_visibility
                 }),
-                ripCurrentRisk: buildRipCurrentWarning(i_ripRisk, lang) // [YENİ] additive — shoreBearingInfo yoksa null
+                ripCurrentRisk: buildRipCurrentWarning(i_ripRisk, lang), // [YENİ] additive — shoreBearingInfo yoksa null
+                shoreBearing: serializeShoreBearing(shoreBearingInfo)    // [YENİ] kıyı geometrisi — simülasyon çizimi için
             };
         }
 
@@ -5416,7 +5432,8 @@ app.get('/api/fish-search', async (req, res) => {
                         waveDir: waveDirection, shoreBearing: shoreBearingInfo.onshoreBearing
                     }) : null,
                     lang
-                ) // [YENİ] additive — shoreBearingInfo yoksa null
+                ), // [YENİ] additive — shoreBearingInfo yoksa null
+                shoreBearing: serializeShoreBearing(shoreBearingInfo) // [YENİ] kıyı geometrisi — simülasyon çizimi için
             },
             snapInfo  // null veya { distanceM, snapLat, snapLon }
         });
