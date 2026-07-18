@@ -1697,6 +1697,21 @@ function safeNum(val, defaultVal = 0) {
     return (val === undefined || val === null || isNaN(val)) ? defaultVal : Number(val);
 }
 
+// [DÜZELTME] CAPE tek başına yalnızca fırtına POTANSİYELİDİR — açık gökte de yüksek
+// olabilir. "Oraj/yıldırım" alarmını YALNIZCA gerçek fırtına kanıtı varken üret:
+//   • fırtına hava kodu (≥95, kuru fırtına dahil),  • ölçülebilir yağış (>0.1 mm),
+//   • ya da yüksek yağış olasılığı (≥%40).
+// Aksi halde CAPE ne kadar yüksek olursa olsun null döner (yanlış "ÖLÜMCÜL RİSK" önlenir).
+function capeAlertLevel(cape, weatherCode, precipProb, rain) {
+    const c = safeNum(cape), wc = safeNum(weatherCode), pp = safeNum(precipProb), rn = safeNum(rain);
+    const stormEvidence = (wc >= 95) || (rn > 0.1) || (pp >= 40);
+    if (!stormEvidence) return null;
+    if (c > 1000) return 'EXTREME';
+    if (c > 500)  return 'HIGH';
+    if (c > 200)  return 'MODERATE';
+    return null;
+}
+
 // [DÜZELTME 1] Su sıcaklığı için bölgesel varsayılan değerler
 function getDefaultWaterTemp(region, month) {
     const temps = {
@@ -4570,7 +4585,7 @@ app.get('/api/forecast', async (req, res) => {
                 swellPeriod: parseFloat(swellPeriod.toFixed(1)),
                 swellDirection: swellWaveDir,
                 currentDirection: oceanCurrentDir,
-                capeAlert: cape > 1000 ? 'EXTREME' : cape > 500 ? 'HIGH' : cape > 200 ? 'MODERATE' : null,
+                capeAlert: capeAlertLevel(cape, weatherCode, precipProb, rain), // sadece gerçek fırtına kanıtıyla
                 cape: parseFloat(cape.toFixed(0)),
                 visibility: visibility,
                 weatherCode: weatherCode,
@@ -4693,7 +4708,7 @@ app.get('/api/forecast', async (req, res) => {
                 visibility: i_visibility, waveDirection: i_waveDirection,
                 windWaveHeight: i_windWaveHeight, swellPeriod: i_swellPeriod,
                 currentDirection: i_oceanCurrentDir, swellDirection: i_swellWaveDir,
-                capeAlert: i_cape > 1000 ? 'EXTREME' : i_cape > 500 ? 'HIGH' : i_cape > 200 ? 'MODERATE' : null,
+                capeAlert: capeAlertLevel(i_cape, i_weatherCode, i_precipProb, i_rain), // sadece gerçek fırtına kanıtıyla
                 cape: parseFloat(i_cape.toFixed(0)),
                 oxygen: i_oxygen, upwelling: i_upwelling,
                 tideFlow: i_tideFlow,
@@ -4842,7 +4857,7 @@ app.get('/api/forecast', async (req, res) => {
                 swellDirection: i_swellWaveDir,
                 currentDirection: i_oceanCurrentDir,
                 cape: parseFloat(i_cape.toFixed(0)),
-                capeAlert: i_cape > 1000 ? 'EXTREME' : i_cape > 500 ? 'HIGH' : i_cape > 200 ? 'MODERATE' : null,
+                capeAlert: capeAlertLevel(i_cape, i_weatherCode, i_precipProb, i_rain), // sadece gerçek fırtına kanıtıyla
                 tempShock: i_tempShock.shock ? i_tempShock : null,
                 thermoclineDepth: i_thermoclineDepth,
                 moonlightIntensity: parseFloat(i_moonlightIntensity.toFixed(2)),
