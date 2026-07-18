@@ -4323,8 +4323,13 @@ app.get('/api/forecast', async (req, res) => {
 
             const waveRaw = isLand ? 0 : safeNum(marine.daily?.wave_height_max?.[dailyIdx]);
             const tempAir = safeNum(weather.hourly?.temperature_2m?.[hourlyIdx]);
-            const windSpeed = safeNum(weather.daily?.wind_speed_10m_max?.[dailyIdx]);
-            const windDir = safeNum(weather.daily?.wind_direction_10m_dominant?.[dailyIdx]);
+            // [DÜZELTME] Rüzgar hızı: günün MAKSİMUMU yerine ANALİZ SAATİNDEKİ saatlik değer.
+            // Eskiden wind_speed_10m_max kullanılıyordu → esinti az olsa bile günün zirvesini
+            // (ör. 19:00'da 21 km/s) gösteriyordu. Artık o günün, kullanıcının yerel saatine
+            // denk gelen saatlik rüzgarı; saatlik yoksa günlük max'a düşer. Hem gösterim hem
+            // skor artık "o anki" koşulla uyumlu.
+            const windSpeed = safeNum(weather.hourly?.wind_speed_10m?.[hourlyIdx], safeNum(weather.daily?.wind_speed_10m_max?.[dailyIdx]));
+            const windDir = safeNum(weather.hourly?.wind_direction_10m?.[hourlyIdx], safeNum(weather.daily?.wind_direction_10m_dominant?.[dailyIdx]));
             const pressure = safeNum(weather.hourly?.surface_pressure?.[hourlyIdx], 1013);
             const cloud = safeNum(weather.hourly?.cloud_cover?.[hourlyIdx]);
             const rain = safeNum(weather.hourly?.precipitation?.[hourlyIdx]);
@@ -4539,7 +4544,7 @@ app.get('/api/forecast', async (req, res) => {
                 tacticKey, tacticData,
                 temp: Math.round(tempWater * 10) / 10,
                 wave, wind: Math.round(windSpeed),
-                windDirection: safeNum(weather.daily?.wind_direction_10m_dominant?.[dailyIdx]),
+                windDirection: Math.round(windDir), // analiz saatindeki yön (rüzgar hızıyla tutarlı)
                 clarity: Math.round(clarity),
                 pressure: Math.round(pressure), pressureTrend: pressureTrend.trend,
                 cloud: cloud + "%", rain: rain, salinity, tide: tideFlow.toFixed(1),
