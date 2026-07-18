@@ -682,10 +682,12 @@ function i18n(lang) { return SERVER_i18n[lang] || SERVER_i18n.tr; }
 // Her istek sonunda tek satırlık/blok bir "kim, ne yaptı, nerede" özeti basılır.
 // ═══════════════════════════════════════════════════════════════════════════
 const LOG_VERBOSE = process.env.LOG_VERBOSE === '1';
-const _NOISY_LOG = /^\[(SHOALING|GEBCO|GRID|SST|SUBSTRATE|SUBSTRATE-US|OFFLINE|FORECAST|SNAP|BATHYMETRY)\]/;
+const _NOISY_LOG = /^\[(SHOALING|GEBCO|GRID|SST|SUBSTRATE|SUBSTRATE-US|OFFLINE|FORECAST|SNAP|BATHYMETRY|NOTIFY CRON|LAND)\]/;
+// Bağımlılıklardan sızan, anlam ifade etmeyen satırlar (örn. "0 services selected:").
+const _NOISY_SUBSTR = /services selected/i;
 const _origConsoleLog = console.log.bind(console);
 console.log = function (...args) {
-    if (!LOG_VERBOSE && typeof args[0] === 'string' && _NOISY_LOG.test(args[0])) return;
+    if (!LOG_VERBOSE && typeof args[0] === 'string' && (_NOISY_LOG.test(args[0]) || _NOISY_SUBSTR.test(args[0]))) return;
     _origConsoleLog(...args);
 };
 function vlog(...args) { if (LOG_VERBOSE) _origConsoleLog(...args); }
