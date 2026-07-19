@@ -755,13 +755,20 @@ function getZoneLabel(depthVal, lang) {
     return s.deep;
 }
 
-// Timeout'lu fetch — API yavaş yanıtlarında Promise.all'ın asılmasını önler
+// Timeout'lu fetch — API yavaş yanıtlarında Promise.all'ın asılmasını önler.
+// [O3] Eski Promise.race yalnızca BEKLEMEYİ bırakıyordu; fetch arkada sürüp soket
+// tutuyordu. AbortController ile istek gerçekten iptal edilir. Hata mesajı yine
+// 'API_TIMEOUT' — çağıranların retry/backoff mantığı birebir aynı çalışır.
 function fetchWithTimeout(url, timeoutMs = 5000) {
-    trackApiUsage(url); // Ücretli API — timeout kısaltıldı
-    return Promise.race([
-        fetch(url),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('API_TIMEOUT')), timeoutMs))
-    ]);
+    trackApiUsage(url);
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), timeoutMs);
+    return fetch(url, { signal: ctl.signal })
+        .finally(() => clearTimeout(timer))
+        .catch(e => {
+            if (e && (e.name === 'AbortError' || e.code === 'ABORT_ERR')) throw new Error('API_TIMEOUT');
+            throw e;
+        });
 }
 
 // Open-Meteo 429 backoff — 429 alındığında 10 dakika (600s) tüm OM isteklerini durdur
@@ -1061,7 +1068,7 @@ async function fetchSubstrate(lat, lon, silent = false, logUser = null) {
         // 🇺🇸 NOAA ArcGIS REST API (Hassas Florida/US Ayarı)
         wmsUrl = `https://gis.ngdc.noaa.gov/arcgis/rest/services/web_mercator/nos_seabed_dynamic/MapServer/0/query` +
             `?inSR=4326&geometryType=esriGeometryPoint&geometry=${lonR},${latR}` +
-            `&spatialRel=esriSpatialRelIntersects&distance=50000&units=esriSRUnit_Meter` +
+            `&spatialRel=esriSpatialRelIntersects&distance=5000&units=esriSRUnit_Meter` + // [O1] 50km→5km: 20+ km öteden yanlış dip yapısı gelmesin
             `&outFields=*&returnGeometry=false&f=pjson`;
     } else {
         // 🇪🇺 EMODnet Seabed Habitats (Europe/Global)
@@ -1160,10 +1167,11 @@ function parseSubstrateFromHtml(html, logUser = null) {
     // 2. Catch-all: Tüm metin içinde kelime/kısaltma tara (NOAA/US desteği)
     const textOnly = html.replace(/<[^>]+>/g, ' ').trim();
 
-    // Tam kelimeler
+    // Tam kelimeler — [D6] MUD desenleri SAND'den ÖNCE: "muddy sand" MUD sınıfıdır
+    // (EMODnet alan-eşleşme yolunda zaten öyle; bu catch-all yalnız NOAA/US fallback).
+    if (/mud/i.test(textOnly) || /clay/i.test(textOnly) || /silt/i.test(textOnly)) return 'MUD';
     if (/sand/i.test(textOnly)) return 'SAND';
     if (/rock/i.test(textOnly) || /hard/i.test(textOnly) || /stone/i.test(textOnly)) return 'ROCK';
-    if (/mud/i.test(textOnly) || /clay/i.test(textOnly) || /silt/i.test(textOnly)) return 'MUD';
     if (/shell/i.test(textOnly) || /coral/i.test(textOnly) || /gravel/i.test(textOnly)) return 'MIXED';
 
     // NOAA Kısaltmaları (SD=Sand, R=Rock, M=Mud, Sh=Shell vb.)
@@ -1380,7 +1388,12 @@ function analyzeLocationOffline(lat, lon) {
 }
 // ═══════════════════════════════════════════════════════════════════════
 
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
+// [D3] localhost muaf: daily-best cron'un kendi sunucusuna yaptığı iç forecast
+// çağrıları gerçek kullanıcıların IP kotasını/limitini tüketmesin.
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, max: 100,
+    skip: (req) => req.ip === '127.0.0.1' || req.ip === '::1' || req.ip === '::ffff:127.0.0.1'
+});
 app.use('/api/', limiter);
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1395,7 +1408,6 @@ async function fetchChlorophyll(lat, lon) {
 
     // Son 30 gün — bulutlu günlerde null dönebilir, en son geçerli değeri al
     const now = new Date();
-    const end = now.toISOString().split('T')[0] + 'T00:00:00Z';
     const startDate = new Date(now);
     startDate.setDate(startDate.getDate() - 30);
     const start = startDate.toISOString().split('T')[0] + 'T00:00:00Z';
@@ -1465,7 +1477,7 @@ async function fetchSatelliteSST(lat, lon, logUser = null) {
         `?sst[(${start}):(${end})][(0)][(${latMin}):(${latMax})][(${lonMin}):(${lonMax})]`;
 
     try {
-        const res = await fetchWithTimeout(url, 4000) // NOAA yavaşsa beklemesini kısalt;
+        const res = await fetchWithTimeout(url, 4000); // NOAA yavaşsa beklemesini kısalt
         if (!res.ok) return null;
         const json = await res.json();
         if (!json?.table?.rows) return null;
@@ -4311,7 +4323,11 @@ app.get('/api/forecast', async (req, res) => {
         // Weather hourlyOffset (past_days=1): bugün = indeks 24
         const utcOffsetSeconds = weather.utc_offset_seconds || 0;
         const marineHourlyOffset = findTodayIndex(marine.hourly.time, utcOffsetSeconds);
-        const hourlyOffset = 24;         // weather için bugünün başlangıcı
+        // [O2] Weather "bugün" indeksi de time dizisinden bulunur. Sabit 24, gece yarısını
+        // geçen 3 saatlik raw_weather cache'inde DÜNÜ gösteriyordu (00:00-03:00 arası eski
+        // gün verisiyle skor). findTodayIndex bulamazsa 24'e düşer (eski davranış).
+        const _wToday = findTodayIndex(weather.hourly?.time, utcOffsetSeconds);
+        const hourlyOffset = _wToday > 0 ? _wToday : 24;   // weather için bugünün başlangıcı
 
 
         // UTC offset düzeltmesi — sunucu UTC'de çalışır, Open-Meteo yerel saat döner
@@ -5271,7 +5287,9 @@ app.get('/api/fish-search', async (req, res) => {
         const localClickHour = Math.floor((Date.now() / 1000 + utcOffsetSeconds) % 86400 / 3600);
         const correctedClickHour = localClickHour;
 
-        const hourlyOffset = 24;          // weather: past_days=1 → bugün = indeks 24
+        // [O2] Weather bugün indeksi time dizisinden (gece yarısı + cache güvenli); yoksa 24
+        const _wToday = findTodayIndex(weather.hourly?.time, utcOffsetSeconds);
+        const hourlyOffset = _wToday > 0 ? _wToday : 24;
         const hourlyIdx = hourlyOffset + correctedClickHour;
 
         // Marine: past_days=7 → bugünün başlangıcını time dizisinden bul (genellikle 168)
@@ -5739,6 +5757,10 @@ app.post('/api/verify-subscription', async (req, res) => {
         return res.status(400).json({ error: i18n(lang).errors.invalidPlan });
     }
 
+    // [Y2] Google'ın bildirdiği GERÇEK bitiş zamanı (iptal/iade yansır). Doğrulama
+    // kapalıysa veya alan gelmezse null kalır → eski sabit 30/365 gün hesabına düşülür.
+    let googleExpiryMs = null;
+
     // ── Google Play Doğrulaması ──
     if (GOOGLE_PLAY_VERIFY) {
         try {
@@ -5778,7 +5800,14 @@ app.post('/api/verify-subscription', async (req, res) => {
                 return res.status(403).json({ error: i18n(lang).errors.productMismatch });
             }
 
-            console.log(`[VERIFY] ✅ Google Play doğrulandı — uid:${req.user.uid} sub:${subId} state:${state}`);
+            // [Y2] Gerçek bitiş: subscriptionsv2 → lineItems[0].expiryTime (RFC3339).
+            const _expiryStr = purchase.lineItems?.[0]?.expiryTime;
+            if (_expiryStr) {
+                const _ms = new Date(_expiryStr).getTime();
+                if (!isNaN(_ms) && _ms > Date.now()) googleExpiryMs = _ms;
+            }
+
+            console.log(`[VERIFY] ✅ Google Play doğrulandı — uid:${req.user.uid} sub:${subId} state:${state}${googleExpiryMs ? ' bitiş:' + new Date(googleExpiryMs).toISOString().slice(0, 10) : ''}`);
 
         } catch (verifyError) {
             const status = verifyError?.response?.status;
@@ -5812,13 +5841,16 @@ app.post('/api/verify-subscription', async (req, res) => {
             const userEmail = req.user.email || null;
             const userDisplayName = req.user.name || null;
 
+            // [Y2] Google gerçek bitişi verdiyse onu kullan; yoksa eski sabit süre (fallback).
+            const effectiveExpiresAt = googleExpiryMs || (Date.now() + durationMs);
+
             await userSubRef.set({
                 status: 'active',
                 subscriptionId: subId,
                 purchaseToken: purchaseToken,
                 isYearly,
                 startedAt: Date.now(),
-                expiresAt: Date.now() + durationMs,
+                expiresAt: effectiveExpiresAt,
                 updatedAt: Date.now(),
                 email: userEmail,
                 displayName: userDisplayName,
@@ -5829,7 +5861,7 @@ app.post('/api/verify-subscription', async (req, res) => {
             const userDocRef = db.collection('users').doc(req.user.uid);
             await userDocRef.set({
                 isPro: true,
-                proExpiresAt: Date.now() + durationMs,
+                proExpiresAt: effectiveExpiresAt,
                 proPlan: subId
             }, { merge: true });
             // ++ SON
@@ -6113,7 +6145,9 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         if (!marine.hourly.wave_height || marine.hourly.wave_height.length === 0) return null;
 
         const correctedClickHour = clickHour;
-        const hourlyOffset = 24;
+        // [O2] Weather bugün indeksi time dizisinden; yoksa 24 (eski davranış)
+        const _wToday = findTodayIndex(weather.hourly?.time, _utcOff);
+        const hourlyOffset = _wToday > 0 ? _wToday : 24;
         const hourlyIdx = hourlyOffset + correctedClickHour;
 
         // Marine: bugünün başlangıcını bul
@@ -6797,7 +6831,8 @@ cron.schedule('0 7 * * *', async () => {
                     if (!f.lat || !f.lon) continue;
                     try {
                         const port = process.env.PORT || 3000; // server.js ile aynı port
-                        const localUrl = `http://localhost:${port}/api/forecast?lat=${f.lat}&lon=${f.lon}&forecast_days=1&past_days=0`;
+                        // [D3] forecast_days/past_days parametreleri endpoint'te yok sayılıyordu — kaldırıldı
+                        const localUrl = `http://localhost:${port}/api/forecast?lat=${f.lat}&lon=${f.lon}`;
                         const res = await safeFetchJSON(localUrl, 15000);
                         if (res && res.forecast && res.forecast.length > 0) {
                             const todayScore = res.forecast[0].score || 0;
