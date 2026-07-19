@@ -2408,7 +2408,13 @@ function angularDiff(a, b) {
 
 // Noktadan en yakın kıyı köşesine olan yön = "kıyıya doğru" (onshore) eksen.
 // maxKm ötesinde hiçbir kıyı yeterince yakın değildir → null (özellik uygulanmaz).
-const SHORE_BEARING_MAX_KM = 8;
+// [DÜZELTME] 8km → 2km. Sahada ölçüldü: tr-cities.json'daki poligon bazı küçük
+// koylarda (ör. Urla açıkları, 38.3829,26.8324) çok sadeleştirilmiş — en yakın
+// köşe bile 3.62km uzakta ve tamamen yanlış bir yönde (WSW) çıkabiliyor, bu da
+// "AÇI: 90°" gibi yanlış ama kendinden emin bir gösterime yol açıyordu (gerçek
+// kıyı ~14° fark ile neredeyse tam dikti). 2km eşiği, veri seyrekse özelliği
+// SESSİZCE devre dışı bırakır (null) — yanlış açı göstermekten iyidir.
+const SHORE_BEARING_MAX_KM = 2;
 function getShoreNormalBearing(lat, lon) {
     if (_coastlineVertices.length === 0) return null;
     const latF = parseFloat(lat), lonF = parseFloat(lon);
