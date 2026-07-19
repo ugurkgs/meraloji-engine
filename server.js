@@ -2203,13 +2203,27 @@ function calculateTempShock(marine, hourlyStartIdx) {
     return { shock, change, direction, trend, trendDirection, dailyAvgs };
 }
 
-// Zaman Dilimi
-function getTimeOfDay(hour, sunTimes) {
+// ── Date → KONUM-YEREL saat (0-24) ─────────────────────────────────────────
+// [DÜZELTME - K2] SunCalc Date döndürür; .getHours() SUNUCUNUN saat diliminde
+// (Render=UTC) okur. Oysa motorun tüm 'hour' değerleri KONUMUN yerel saatidir
+// (timezone=auto veri + utc_offset_seconds). Bu uyuşmazlık DAWN/DUSK/NIGHT
+// sınıflandırmasını Türkiye için 3 saat kaydırıyordu (şafak 02:00-03:30'a,
+// akşam kuşağı NIGHT'a düşüyordu) → levrek/lüfer aktivite bonusları yanlış
+// saatlere gidiyordu. Bu yardımcı, Date'i konum ofsetiyle yerel saate çevirir.
+// Negatif-ofset (Greenwich batısı) güvenli modulo ile ele alınır.
+function toLocalHour(d, utcOffsetSeconds = 0) {
+    const s = ((d.getTime() / 1000 + utcOffsetSeconds) % 86400 + 86400) % 86400;
+    return s / 3600;
+}
+
+// Zaman Dilimi — utcOff verilmezse 0 varsayılır (UTC sunucuda eski davranışla birebir;
+// tüm çağrı noktaları artık gerçek konum ofsetini geçirir).
+function getTimeOfDay(hour, sunTimes, utcOff = 0) {
     if (!sunTimes) return "DAY";
-    const sunrise = sunTimes.sunrise.getHours() + sunTimes.sunrise.getMinutes() / 60;
-    const sunset = sunTimes.sunset.getHours() + sunTimes.sunset.getMinutes() / 60;
-    const dawn = sunTimes.dawn.getHours() + sunTimes.dawn.getMinutes() / 60;
-    const dusk = sunTimes.dusk.getHours() + sunTimes.dusk.getMinutes() / 60;
+    const sunrise = toLocalHour(sunTimes.sunrise, utcOff);
+    const sunset = toLocalHour(sunTimes.sunset, utcOff);
+    const dawn = toLocalHour(sunTimes.dawn, utcOff);
+    const dusk = toLocalHour(sunTimes.dusk, utcOff);
 
     if (hour >= dawn - 0.5 && hour < sunrise + 0.5) return "DAWN";
     if (hour >= sunset - 0.5 && hour < dusk + 0.5) return "DUSK";
@@ -2580,17 +2594,22 @@ function getMoonPhaseName(phase, lang = 'tr') {
 // AKTİVİTE SAATLERİ HESAPLAMA
 // ═══════════════════════════════════════════════════════════════════════════
 
-function calculateActivityWindows(date, lat, lon) {
+// [DÜZELTME - K2] utcOff eklendi: hem görüntülenen saatler (formatTime) hem ağırlık
+// pencereleri (startHour/endHour) artık KONUMUN yerel saatinde üretilir. utcOff
+// verilmezse 0 (UTC sunucuda eski davranış) — tüm çağrı noktaları ofseti geçirir.
+function calculateActivityWindows(date, lat, lon, utcOff = 0) {
     const sunTimes = SunCalc.getTimes(date, lat, lon);
 
     // Gün doğumu ve batımı saatlerini al
     const sunrise = sunTimes.sunrise;
     const sunset = sunTimes.sunset;
 
-    // Saat formatla (HH:MM)
+    // Saat formatla (HH:MM) — konum-yerel
     const formatTime = (d) => {
         if (!d || isNaN(d.getTime())) return "--:--";
-        return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+        const h = toLocalHour(d, utcOff);
+        const hh = Math.floor(h), mm = Math.round((h - hh) * 60) % 60;
+        return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
     };
 
     // Sabah Suyu: Sunrise - 1 saat → Sunrise + 2 saat
@@ -2612,12 +2631,12 @@ function calculateActivityWindows(date, lat, lon) {
         const na = sunTimes.nauticalDawn;
         if (nd && !isNaN(nd.getTime())) {
             const ns = new Date(nd.getTime() + 30 * 60 * 1000); // +30 dk buffer
-            nightStartHour = ns.getHours() + ns.getMinutes() / 60;
+            nightStartHour = toLocalHour(ns, utcOff);
             nightStartStr = formatTime(ns);
         }
         if (na && !isNaN(na.getTime())) {
             const ne = new Date(na.getTime() - 30 * 60 * 1000); // -30 dk buffer
-            nightEndHour = ne.getHours() + ne.getMinutes() / 60;
+            nightEndHour = toLocalHour(ne, utcOff);
             nightEndStr = formatTime(ne);
         }
     } catch (_) { /* fallback sabit değerlere */ }
@@ -2626,14 +2645,14 @@ function calculateActivityWindows(date, lat, lon) {
         morning: {
             start: formatTime(morningStart),
             end: formatTime(morningEnd),
-            startHour: morningStart.getHours() + morningStart.getMinutes() / 60,
-            endHour: morningEnd.getHours() + morningEnd.getMinutes() / 60
+            startHour: toLocalHour(morningStart, utcOff),
+            endHour: toLocalHour(morningEnd, utcOff)
         },
         evening: {
             start: formatTime(eveningStart),
             end: formatTime(eveningEnd),
-            startHour: eveningStart.getHours() + eveningStart.getMinutes() / 60,
-            endHour: eveningEnd.getHours() + eveningEnd.getMinutes() / 60
+            startHour: toLocalHour(eveningStart, utcOff),
+            endHour: toLocalHour(eveningEnd, utcOff)
         },
         night: {
             start: nightStartStr,
@@ -2722,8 +2741,8 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
         const hourlyOceanCurrent = marine.hourly?.ocean_current_velocity?.[mIdx];
         const hourlyClear = calculateClarity(hourlyWave, hourlyWind, hourlyRain);
 
-        // Bu saat için timeMode (SunCalc tekrar çağrılmıyor)
-        const timeMode = getTimeOfDay(h, sunTimes);
+        // Bu saat için timeMode (SunCalc tekrar çağrılmıyor) — konum ofsetiyle (K2)
+        const timeMode = getTimeOfDay(h, sunTimes, baseParams.utcOffsetSeconds || 0);
 
         // Parametreleri güncelle
         const hourParams = {
@@ -2794,7 +2813,7 @@ function calculate3HourWindowScore(fish, key, baseParams, weather, marine, cente
         const hourDate = new Date(baseParams.targetDate);
         hourDate.setHours(h, 0, 0, 0);
         const sunTimes = SunCalc.getTimes(hourDate, baseParams.lat, baseParams.lon);
-        const timeMode = getTimeOfDay(h, sunTimes);
+        const timeMode = getTimeOfDay(h, sunTimes, baseParams.utcOffsetSeconds || 0);
 
         const hourParams = {
             ...baseParams,
@@ -4387,12 +4406,12 @@ app.get('/api/forecast', async (req, res) => {
             const moonlightIntensity = calculateMoonlightIntensity(targetDate, parseFloat(lat), parseFloat(lon), cloud);
 
             const sunTimes = SunCalc.getTimes(targetDate, lat, lon);
-            const timeMode = getTimeOfDay(correctedClickHour, sunTimes);
+            const timeMode = getTimeOfDay(correctedClickHour, sunTimes, utcOffsetSeconds); // K2: konum-yerel
             const moon = SunCalc.getMoonIllumination(targetDate);
             const solunar = getSolunarWindow(targetDate, lat, lon);
 
             // Aktivite pencerelerini hesapla (calculateWeightedDailyScore için gerekli)
-            const activityWindows = calculateActivityWindows(targetDate, lat, lon);
+            const activityWindows = calculateActivityWindows(targetDate, lat, lon, utcOffsetSeconds);
 
             const currentEst = isLand ? 0 : estimateCurrent(wave, windSpeed, regionName);
             const clarity = isLand ? 0 : calculateClarity(wave, windSpeed, rain);
@@ -4441,7 +4460,8 @@ app.get('/api/forecast', async (req, res) => {
                     windGust, precipProb, weatherCode, visibility,
                     waveDirection, windWaveHeight, swellPeriod,
                     tideFlow, moonAltitude, oxygen, upwelling,
-                    shoreBearing: shoreBearingInfo   // [YENİ] levrek kıyı-dik dalga bonusu için
+                    shoreBearing: shoreBearingInfo,  // [YENİ] levrek kıyı-dik dalga bonusu için
+                    utcOffsetSeconds                 // K2: saatlik timeMode konum-yerel hesaplansın
                 };
 
                 const resultsMap = new Map();
@@ -4649,7 +4669,7 @@ app.get('/api/forecast', async (req, res) => {
             const i_uv = safeNum(weather.hourly?.uv_index?.[instantIdx], 0);
             const i_pressure = safeNum(weather.hourly?.surface_pressure?.[instantIdx], 1013);
             const i_sunTimes = SunCalc.getTimes(instantDate, lat, lon);
-            const i_timeMode = getTimeOfDay(correctedClickHour, i_sunTimes);
+            const i_timeMode = getTimeOfDay(correctedClickHour, i_sunTimes, utcOffsetSeconds); // K2
             const i_solunar = getSolunarWindow(instantDate, lat, lon);
             // [YENİ] Marine hourly veriler (instant) — marine indeksi kullan
             const i_wavePeriod = safeNum(marine.hourly?.wave_period?.[marineInstantIdx]);
@@ -4725,7 +4745,8 @@ app.get('/api/forecast', async (req, res) => {
                 oxygen: i_oxygen, upwelling: i_upwelling,
                 tideFlow: i_tideFlow,
                 moonAltitude: i_tide.altitude,
-                shoreBearing: shoreBearingInfo   // [YENİ] levrek kıyı-dik dalga bonusu için (daily loop ile aynı, döngü dışında hesaplandı)
+                shoreBearing: shoreBearingInfo,  // [YENİ] levrek kıyı-dik dalga bonusu için (daily loop ile aynı, döngü dışında hesaplandı)
+                utcOffsetSeconds                 // K2: saatlik timeMode konum-yerel hesaplansın
             };
 
             // [YENİ] Anlık (instant) çeken akıntı risk tahmini
@@ -5284,7 +5305,7 @@ app.get('/api/fish-search', async (req, res) => {
         const swellPeriod = safeNum(marine.hourly?.swell_wave_period?.[marineHourlyIdx]);
 
         const sunTimes = SunCalc.getTimes(now, latF, lonF);
-        const timeMode = getTimeOfDay(clickHour, sunTimes);
+        const timeMode = getTimeOfDay(clickHour, sunTimes, utcOffsetSeconds); // K2
         const solunar = getSolunarWindow(now, latF, lonF);
         const moon = SunCalc.getMoonIllumination(now);
 
@@ -5328,6 +5349,7 @@ app.get('/api/fish-search', async (req, res) => {
             waveDirection, windWaveHeight, swellPeriod,
             tideFlow: s_tideFlow,
             shoreBearing: shoreBearingInfo,
+            utcOffsetSeconds, // K2: saatlik timeMode konum-yerel hesaplansın
             chlorophyll: await (async () => {
                 try {
                     const chlCacheKey = `plankton_${parseFloat(lat).toFixed(1)}_${parseFloat(lon).toFixed(1)}`;
@@ -5361,7 +5383,7 @@ app.get('/api/fish-search', async (req, res) => {
         let bestHourScore = null;
         let hourlyScores = null;
         try {
-            const activityWindows = calculateActivityWindows(now, parseFloat(latF), parseFloat(lonF));
+            const activityWindows = calculateActivityWindows(now, parseFloat(latF), parseFloat(lonF), utcOffsetSeconds); // K2
             const dailyResult = calculateWeightedDailyScore(
                 fish, fishKey, baseParams, weather, marine, activityWindows, hourlyOffset, marineHourlyOffset
             );
@@ -6110,7 +6132,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         const clarity = calculateClarity(wave, windSpeed, rain);
         const currentEst = estimateCurrent(wave, windSpeed, regionName);
         const sunTimes = SunCalc.getTimes(now, parseFloat(latF), parseFloat(lonF));
-        const timeMode = getTimeOfDay(clickHour, sunTimes);
+        const timeMode = getTimeOfDay(clickHour, sunTimes, _utcOff); // K2
         const moon = SunCalc.getMoonIllumination(now);
         const moonPos = SunCalc.getMoonPosition(now, parseFloat(latF), parseFloat(lonF));
 
@@ -6169,11 +6191,12 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             windGust: windGust_s, precipProb: precipProb_s, weatherCode: weatherCode_s,
             visibility: visibility_s, waveDirection: waveDirection_s,
             windWaveHeight: windWaveHeight_s, swellPeriod: swellPeriod_s,
-            oxygen, upwelling
+            oxygen, upwelling,
+            utcOffsetSeconds: _utcOff // K2: saatlik timeMode konum-yerel hesaplansın
         };
 
         // Günlük ağırlıklı skor için activityWindows ve hourlyStartIdx
-        const activityWindows = calculateActivityWindows(now, parseFloat(latF), parseFloat(lonF));
+        const activityWindows = calculateActivityWindows(now, parseFloat(latF), parseFloat(lonF), _utcOff); // K2
         const hourlyStartIdx = 24;
 
         // [KRİTİK] Değişkenleri fonksiyon kapsamında (scope) garantiye al
@@ -6819,7 +6842,7 @@ cron.schedule('0 7 * * *', async () => {
     } catch (e) {
         console.error('[DAILY BEST CRON] Hata:', e.message);
     }
-});
+}, { timezone: 'Europe/Istanbul' }); // O4: "07:00 sabah" niyeti TR saatiyle çalışsın (UTC değil)
 
 // ═══════════════════════════════════════════════════════════════════════
 // BLOK 8: CACHE TEMİZLEME CRON (Performans Yönetimi)
@@ -6864,7 +6887,7 @@ cron.schedule('0 3 * * *', async () => {
     } catch (err) {
         console.error('[CACHE-CLEAN CRON] Hata:', err.message);
     }
-});
+}, { timezone: 'Europe/Istanbul' }); // O4: gece 03:00 TR saatiyle
 
 // ═══════════════════════════════════════════════════════════════════════
 // 🌪️ FIRTINA ÖNCESİ (FEEDING FRENZY) BİLDİRİM SİSTEMİ
