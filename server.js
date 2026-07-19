@@ -1545,8 +1545,14 @@ const subscriptionCache = new NodeCache({ stdTTL: 180 }); // 3 dakika TTL
 const DEVELOPER_UIDS = ['zhCzPS20wneS2njZKVGFAwOvc5m2'];
 
 async function verifyAuth(req, res, next) {
-    if (req.query.bypassAuth === 'true') {
-        req.user = { uid: 'zhCzPS20wneS2njZKVGFAwOvc5m2' };
+    // [GÜVENLİK - K1] Eski hali: ?bypassAuth=true diyen HERKES tam PRO oluyordu (token'sız).
+    // Artık bypass yalnızca DEV_BYPASS_SECRET env değişkeni ayarlıysa VE istek o gizli
+    // değeri gönderiyorsa çalışır. Env yoksa bypass tamamen kapalıdır. Gerçek kullanıcılar
+    // bu parametreyi hiç kullanmadığından geriye dönük etkisi yoktur; geliştirici testi
+    // için Render'a DEV_BYPASS_SECRET=<uzun rastgele değer> eklenmesi yeterlidir.
+    if (process.env.DEV_BYPASS_SECRET &&
+        req.query.bypassAuth === process.env.DEV_BYPASS_SECRET) {
+        req.user = { uid: DEVELOPER_UIDS[0] };
         req.isPremium = true;
         req.isGracePeriod = false;
         req.graceDaysLeft = 0;
@@ -3987,7 +3993,11 @@ app.get('/api/forecast', async (req, res) => {
         const cacheKey = `forecast_v24_${gLat}_${gLon}_h${clickHour}`;
         const cachedData = cache.get(cacheKey);
 
-        const isProUser = req.isPremium || req.isGracePeriod || req.query.anonFree === 'true';
+        // [GÜVENLİK - Y1] anonFree yalnızca GERÇEKTEN anonim (giriş yapmamış) istemcide
+        // geçerlidir — anonim ilk-deneme akışı aynen korunur. Eski hali: giriş yapmış
+        // ücretsiz/süresi dolmuş bir kullanıcı da &anonFree=true ekleyerek sanitizasyonu
+        // atlayıp tam PRO verisi alabiliyordu; o açık kapatıldı.
+        const isProUser = req.isPremium || req.isGracePeriod || (!req.user && req.query.anonFree === 'true');
 
         // Cache varsa hava/deniz verisini oradan al, ama derinliği taze çek
         if (cachedData) {
@@ -4109,7 +4119,9 @@ app.get('/api/forecast', async (req, res) => {
             }
             if (staleData) {
                 console.log(`[BACKOFF] Eski cache verisi döndürülüyor: ${gLat},${gLon}`);
-                return res.json({ ...staleData, _stale: true });
+                // [GÜVENLİK - Y3] Bayat veri de sanitizasyondan geçer — eskiden bu yol
+                // ücretsiz kullanıcıya tam PRO verisi sızdırıyordu.
+                return res.json({ ...applySanitization(staleData, isProUser), _stale: true });
             }
             const errMsg = isBackoff
                 ? i18n(lang).errors.apiBusy
