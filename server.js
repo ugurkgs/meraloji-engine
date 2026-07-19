@@ -2592,13 +2592,16 @@ function getSeason(month, lat = 40) {
 // Ay Fazı İsmi
 function getMoonPhaseName(phase, lang = 'tr') {
     const m = i18n(lang).moon;
-    if (phase < 0.125) return m.newMoon;
-    if (phase < 0.25) return m.crescentWaxing;
-    if (phase < 0.375) return m.firstQuarter;
-    if (phase < 0.5) return m.waxingGibbous;
-    if (phase < 0.625) return m.fullMoon;
-    if (phase < 0.75) return m.waningGibbous;
-    if (phase < 0.875) return m.lastQuarter;
+    // [D1] Bantlar faz merkezlerine hizalandı: SunCalc'ta 0=yeniay, 0.5=dolunay TAM
+    // değerdir. Eski bantlar yarım bant kaymıştı (ör. gerçek dolunay gecesi 0.49'da
+    // "Şişkin Ay" yazıyordu). Her isim artık merkez±0.0625 bandını kapsar.
+    if (phase < 0.0625 || phase >= 0.9375) return m.newMoon;
+    if (phase < 0.1875) return m.crescentWaxing;
+    if (phase < 0.3125) return m.firstQuarter;
+    if (phase < 0.4375) return m.waxingGibbous;
+    if (phase < 0.5625) return m.fullMoon;
+    if (phase < 0.6875) return m.waningGibbous;
+    if (phase < 0.8125) return m.lastQuarter;
     return m.crescentWaning;
 }
 
@@ -3729,7 +3732,9 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
 
     // [DÜZELTİLDİ: V2.2 Sentez] — Eski agresif metabolicThreshold kapısı kaldırıldı.
     // Artık sadece kritik 'min' değerinin altında s_temp üzerinden gate uygulanıyor.
-    if (tempWater < (fish.tempRange.min || 10)) {
+    // [D2] Etiket effTemp'e bakar (skorla tutarlı): derin türde yüzey soğuk ama balığın
+    // tuttuğu derinlik uygunsa yanlış "kritik sıcaklık" uyarısı basılmaz.
+    if (effTemp < (fish.tempRange.min || 10)) {
         penalties.push(i18n(lang).penalties.criticalTemp);
     }
 
