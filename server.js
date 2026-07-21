@@ -1546,13 +1546,7 @@ function applyShoaling(waveHeight, wavePeriod, depthM) {
 
 const FREE_DAILY_CLICKS = 2;    // Ücretsiz kullanıcı günde 2 tıklama (grace period sonrası)
 const FREE_DAILY_SCANS = 1;     // Ücretsiz kullanıcı günde 1 tarama
-// [DÜZELTME] Deneme süresi 14 → 7 gün. GERİYE DÖNÜK KORUMA: bu değişiklikten ÖNCE
-// hesap açmış (Firebase Auth createdAt < cutover) kullanıcılar hâlâ orijinal 14 günü
-// alır — mevcut bir denemenin ortasındaki kimseye süresi aniden kısaltılmaz. Yalnızca
-// BUGÜNDEN İTİBAREN ilk kez giriş yapan (hesabı yeni oluşan) kullanıcılar 7 gün alır.
-const GRACE_PERIOD_DAYS = 7;          // Yeni kullanıcı (cutover sonrası)
-const GRACE_PERIOD_DAYS_LEGACY = 14;  // cutover ÖNCESİ açılmış hesaplar — değişmez
-const GRACE_PERIOD_CUTOVER_MS = Date.parse('2026-07-21T00:00:00Z');
+const GRACE_PERIOD_DAYS = 14;   // Yeni kullanıcıya 14 gün tam erişim
 const VALID_SUBSCRIPTIONS = ['meraloji_pro_monthly', 'meraloji_pro_yearly'];
 
 // Firebase Auth createdAt cache — her kullanıcı için 24 saat cache'le
@@ -1677,16 +1671,11 @@ async function verifyAuth(req, res, next) {
                     createdAt = new Date(userRecord.metadata.creationTime).getTime();
                     userCreationCache.set(decoded.uid, createdAt);
                 }
-                // Hesap cutover'dan ÖNCE açıldıysa eski 14 gün, sonra açıldıysa yeni 7 gün.
-                const effectiveGraceDays = createdAt < GRACE_PERIOD_CUTOVER_MS
-                    ? GRACE_PERIOD_DAYS_LEGACY
-                    : GRACE_PERIOD_DAYS;
-                const gracePeriodMs = effectiveGraceDays * 24 * 60 * 60 * 1000;
+                const gracePeriodMs = GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000;
                 const elapsed = Date.now() - createdAt;
                 if (elapsed < gracePeriodMs) {
                     req.isGracePeriod = true;
                     req.graceDaysLeft = Math.max(0, Math.ceil((gracePeriodMs - elapsed) / 86400000));
-                    req.graceTotalDays = effectiveGraceDays; // [YENİ] istemci "X/Y gün" gösterebilsin diye
                 }
             } catch (e) {
                 console.log('[AUTH-MW] Grace period check failed:', e.message);
@@ -5638,7 +5627,6 @@ app.get('/api/subscription-status', async (req, res) => {
         isPremium: req.isPremium,
         isGracePeriod: req.isGracePeriod,
         graceDaysLeft: req.graceDaysLeft,
-        graceTotalDays: req.graceTotalDays || null, // [YENİ] 7 (yeni) veya 14 (eski/legacy) — istemci hardcode etmesin
         uid: req.user.uid,
         email: req.user.email,
         name: req.user.name || req.user.email,
