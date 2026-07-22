@@ -7046,17 +7046,26 @@ cron.schedule('0 * * * *', async () => {
             console.warn('[NOTIFY CRON] DB Cooldown okuma hatası:', e.message);
         }
 
-        // ── 5. Etkilenen kullanıcıların FCM tokenlarını topla ─────────────
-        const spotNames = [...new Set(spots.map(s => s.favName))];
-        const notifSpotName = spotNames.slice(0, 2).join(' & ');
+        // ── 5. Etkilenen kullanıcıların FCM tokenlarını + KENDİ favori adlarını topla ──
         const uniqueUids = [...new Set(spots.map(s => s.uid))];
+
+        // uid -> bu gruptaki KENDİ favori adları (başkasının favori adı asla karışmasın)
+        const uidFavNames = {};
+        spots.forEach(s => {
+            if (!uidFavNames[s.uid]) uidFavNames[s.uid] = new Set();
+            uidFavNames[s.uid].add(s.favName);
+        });
 
         const tokens = [];
         await Promise.all(uniqueUids.map(async (uid) => {
             try {
                 const userDoc = await db.collection('users').doc(uid).get();
-                const token = userDoc.data()?.fcmToken;
-                if (token) tokens.push({ uid, token });
+                const data = userDoc.data();
+                const token = data?.fcmToken;
+                if (token) {
+                    const lang = (data?.lang && SERVER_i18n[data.lang]) ? data.lang : 'tr';
+                    tokens.push({ uid, token, lang });
+                }
             } catch (e) {
                 console.warn(`[NOTIFY CRON] Token alınamadı uid=${uid}:`, e.message);
             }
@@ -7067,46 +7076,38 @@ cron.schedule('0 * * * *', async () => {
             continue;
         }
 
-        // ── 6. FCM Multicast bildirimi gönder ─────────────────────────────
-            // Kullanıcı dilini al (Firestore'da kayıtlı)
-            const firstUid = uniqueUids[0];
-            let notifLang = 'tr';
-            try {
-                const firstUserDoc = await db.collection('users').doc(firstUid).get();
-                const userLang = firstUserDoc.data()?.lang || 'tr';
-                if (SERVER_i18n[userLang]) notifLang = userLang;
-            } catch(_) {}
-
-            // Dilden bağımsız: her kullanıcıya kendi diliyle bildirim gönder
-            // (tokens dizisinde artık { uid, token, lang } tutuluyor)
-            const notifI18n = SERVER_i18n[notifLang] || SERVER_i18n.tr;
-
-        const message = {
-            tokens: tokens.map(t => t.token),
-            notification: {
-                title: notifI18n.notification.title,
-                body: notifI18n.notification.body(notifSpotName)
-            },
-            data: {
-                type: 'pressure_alert',
-                spotName: notifSpotName,
-                trend: trendResult.trend,
-                change: String(trendResult.change),
-                lat: String(lat),
-                lon: String(lon)
-            },
-            android: {
-                priority: 'high',
-                notification: { sound: 'default', channelId: 'pressure_alerts' }
-            },
-            apns: {
-                payload: { aps: { sound: 'default', badge: 1 } }
-            }
-        };
+        // ── 6. Her kullanıcıya KENDİ merasının adıyla + KENDİ diliyle kişiselleştirilmiş bildirim ──
+        const messages = tokens.map(t => {
+            const ownNames = [...(uidFavNames[t.uid] || [])];
+            const personalSpotName = ownNames.slice(0, 2).join(' & ') || 'Meran';
+            const i18n = SERVER_i18n[t.lang] || SERVER_i18n.tr;
+            return {
+                token: t.token,
+                notification: {
+                    title: i18n.notification.title,
+                    body: i18n.notification.body(personalSpotName)
+                },
+                data: {
+                    type: 'pressure_alert',
+                    spotName: personalSpotName,
+                    trend: trendResult.trend,
+                    change: String(trendResult.change),
+                    lat: String(lat),
+                    lon: String(lon)
+                },
+                android: {
+                    priority: 'high',
+                    notification: { sound: 'default', channelId: 'pressure_alerts' }
+                },
+                apns: {
+                    payload: { aps: { sound: 'default', badge: 1 } }
+                }
+            };
+        });
 
         try {
-            const fcmResponse = await admin.messaging().sendEachForMulticast(message);
-            console.log(`[NOTIFY CRON] ✅ ${fcmResponse.successCount}/${tokens.length} bildirim gönderildi — ${notifSpotName}`);
+            const fcmResponse = await admin.messaging().sendEach(messages);
+            console.log(`[NOTIFY CRON] ✅ ${fcmResponse.successCount}/${tokens.length} kişiselleştirilmiş bildirim gönderildi (${lat},${lon})`);
 
             // Başarılı gönderim varsa bu bölge için 12 saat cooldown başlat
             if (fcmResponse.successCount > 0) {
