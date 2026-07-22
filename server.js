@@ -4692,6 +4692,7 @@ app.get('/api/forecast', async (req, res) => {
                 weatherCode: weatherCode,
                 localTime: new Date(Date.now() + (utcOffsetSeconds * 1000)).toISOString().replace('T', ' ').slice(0, 16),
                 score: parseFloat(topScore.toFixed(1)),
+                hasActiveFish: topScore > 0, // taktik notu için: uygun tür var mı
                 ripCurrentRisk: buildRipCurrentWarning(dayRipRisk, lang), // [YENİ] additive — shoreBearingInfo yoksa null
                 shoreBearing: serializeShoreBearing(shoreBearingInfo),    // [YENİ] kıyı geometrisi (onshore/offshore/mesafe) — simülasyon çizimi için
                 apiGrid: (marine.latitude && marine.longitude) ? {
@@ -4931,6 +4932,7 @@ app.get('/api/forecast', async (req, res) => {
 
             instantData = {
                 score: i_topScore,
+                hasActiveFish: i_topScore > 0, // taktik notu için: uygun tür var mı
                 // ÜST KISIM: Sadece İkonlu TR Hava Durumu (Ham veri gelmez)
                 weatherSummary: getWeatherIconicDescription(i_weatherCode, lang, i_rain, i_wind),
                 tacticKey: instantTacticKey, tacticData: instantTacticData,
@@ -5028,14 +5030,30 @@ app.get('/api/forecast', async (req, res) => {
                       .slice(0, 3);
                 }
 
-                // calcAvgScore mantığı ile genel skoru hesapla
-                let hScore = instantData.score; // fallback
+                // calcAvgScore mantığı ile SAATLİK skoru hesapla.
+                // ESKİ HATA: uygun tür yokken hScore anlık skora (instantData.score)
+                // düşüyordu → taktik notu "bereketli av olabilir!" diyordu ama liste
+                // boştu. Artık: liste biliniyorsa ve uygun tür yoksa skor 0 +
+                // hasActiveFish=false (dürüst nötr mesaj). Liste bilinmiyorsa (veri
+                // boşluğu) iddia etmeyip anlık skora düşüyoruz.
+                const fishListKnown = !!(currentForecast && Array.isArray(currentForecast.fishList));
+                let hScore;
+                let hHasActiveFish;
                 if (top3ForHour.length >= 3) {
                     hScore = (top3ForHour[0].score * 0.60) + (top3ForHour[1].score * 0.30) + (top3ForHour[2].score * 0.10);
+                    hHasActiveFish = true;
                 } else if (top3ForHour.length === 2) {
                     hScore = (top3ForHour[0].score * 0.70) + (top3ForHour[1].score * 0.30);
+                    hHasActiveFish = true;
                 } else if (top3ForHour.length === 1) {
                     hScore = top3ForHour[0].score;
+                    hHasActiveFish = true;
+                } else if (fishListKnown) {
+                    hScore = 0;                  // liste var ama uygun tür yok → dürüst
+                    hHasActiveFish = false;
+                } else {
+                    hScore = instantData.score;  // veri boşluğu → iddia etme
+                    hHasActiveFish = true;
                 }
                 hScore = Math.min(100, Math.max(0, hScore));
 
@@ -5097,7 +5115,16 @@ app.get('/api/forecast', async (req, res) => {
                     weatherCode: hCode,
                     weatherSummary: hSummary,
                     visibility: safeNum(weather.hourly?.visibility?.[wIdx], 20000),
-                    cape: safeNum(weather.hourly?.cape?.[wIdx])
+                    cape: safeNum(weather.hourly?.cape?.[wIdx]),
+                    // capeAlert daha önce timeline'a EKLENMİYORDU → oraj/yıldırım
+                    // güvenlik uyarısı saatlik slider'da hiç görünmüyordu. Artık
+                    // her saat için hesaplanıyor.
+                    capeAlert: capeAlertLevel(
+                        safeNum(weather.hourly?.cape?.[wIdx]),
+                        hCode,
+                        safeNum(weather.hourly?.precipitation_probability?.[wIdx]),
+                        hRain),
+                    hasActiveFish: hHasActiveFish
                 });
             }
             instantData.hourlyTimeline = hourlyTimeline;
