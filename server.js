@@ -4030,6 +4030,48 @@ app.get('/api/forecast', async (req, res) => {
             console.log(`[FORECAST] [${logUser}] 🌍 YENİ ANALİZ TALEBİ BAŞLADI (lat:${lat}, lon:${lon})`);
         }
 
+        // ── [KOTA] Günlük analiz limiti — sunucu tarafı zorlaması ────────────
+        // Daha önce bu endpoint hiçbir kota kontrolü yapmıyordu: limit yalnızca
+        // istemcideki SharedPreferences'ta tutuluyordu (uygulama verisi silinince
+        // sıfırlanıyordu). /api/use-click sayacı vardı ama Android istemci onu
+        // hiç çağırmıyor, dolayısıyla clickUsage koleksiyonu hiç dolmuyordu.
+        // Mantık /api/fish-search'teki (bkz. FREE_DAILY_CLICKS kontrolü) ile aynı.
+        //
+        // Kapsam bilinçli olarak dar tutuldu:
+        //   • Yalnızca GİRİŞ YAPMIŞ kullanıcılar sayılır (anonim akış değişmedi)
+        //   • PRO ve deneme (grace) süresindekiler muaf
+        //   • autoload (sıcak başlangıç) sayılmaz — kullanıcı tıklaması değil
+        //   • db yoksa AÇIK KALIR (altyapı hatası kullanıcıyı kilitlemesin)
+        if (req.user && !req.isPremium && !req.isGracePeriod && !isAutoLoad && db) {
+            try {
+                const uid = req.user.uid;
+                const today = new Date().toISOString().split('T')[0];
+                const usageRef = db.collection('clickUsage').doc(`${uid}_${today}`);
+                const usageDoc = await usageRef.get();
+                const used = usageDoc.exists ? (usageDoc.data().count || 0) : 0;
+
+                if (used >= FREE_DAILY_CLICKS) {
+                    console.log(`[FORECAST] [${logUser}] ⛔ Günlük limit doldu (${used}/${FREE_DAILY_CLICKS})`);
+                    // İstemci 403'ü zaten paywall açarak karşılıyor.
+                    return res.status(403).json({
+                        message: i18n(lang).errors.limitExceeded,
+                        limit: FREE_DAILY_CLICKS,
+                        used
+                    });
+                }
+
+                await usageRef.set({
+                    count: admin.firestore.FieldValue.increment(1),
+                    date: today,
+                    uid,
+                    updatedAt: Date.now()
+                }, { merge: true });
+            } catch (quotaErr) {
+                // Kota altyapısı patlarsa isteği reddetme — sadece logla.
+                console.error('[FORECAST] Kota kontrolü hatası:', quotaErr.message);
+            }
+        }
+
         // Izgara snap — 0.01° ≈ 1.1km hücre, derinlik hassasiyeti artırıldı
         const { gLat, gLon } = snapToGrid(lat, lon);
         const cacheKey = `forecast_v24_${gLat}_${gLon}_h${clickHour}`;
