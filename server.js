@@ -5863,12 +5863,18 @@ app.post('/api/verify-subscription', async (req, res) => {
             // subscriptionState: aktif abonelik durumları
             // Ref: https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.subscriptionsv2
             const state = purchase.subscriptionState;
-            const validStates = [
+            const activeStates = [
                 'SUBSCRIPTION_STATE_ACTIVE',
                 'SUBSCRIPTION_STATE_IN_GRACE_PERIOD'
             ];
+            // CANCELED = kullanıcı otomatik yenilemeyi iptal etti AMA abonelik dönem
+            // sonuna kadar HÂLÂ AKTİF. Google, süre dolunca durumu EXPIRED'a çevirir;
+            // yani CANCELED daima "henüz bitmemiş" demektir. Erişim gerçek bitiş
+            // (expiryTime) gelene kadar sürmeli — eskiden bu kullanıcılar anında
+            // PRO'dan atılıyordu (paranın karşılığını almış olsalar da).
+            const isCanceledButActive = (state === 'SUBSCRIPTION_STATE_CANCELED');
 
-            if (!validStates.includes(state)) {
+            if (!activeStates.includes(state) && !isCanceledButActive) {
                 console.log(`[VERIFY] ❌ Geçersiz durum: ${state} — uid:${req.user.uid}`);
                 return res.status(403).json({ error: i18n(lang).errors.subNotActive, state });
             }
@@ -5885,6 +5891,13 @@ app.post('/api/verify-subscription', async (req, res) => {
             if (_expiryStr) {
                 const _ms = new Date(_expiryStr).getTime();
                 if (!isNaN(_ms) && _ms > Date.now()) googleExpiryMs = _ms;
+            }
+
+            // CANCELED için GERÇEK gelecekteki bitiş ZORUNLU. Bitiş yok/geçmişse
+            // sabit süre fallback'iyle (30/365 gün) erişimi UZATMA — süresi dolmuş say.
+            if (isCanceledButActive && !googleExpiryMs) {
+                console.log(`[VERIFY] ⛔ CANCELED + bitiş geçmiş/yok → süresi dolmuş — uid:${req.user.uid}`);
+                return res.status(403).json({ error: i18n(lang).errors.subNotActive, state });
             }
 
             console.log(`[VERIFY] ✅ Google Play doğrulandı — uid:${req.user.uid} sub:${subId} state:${state}${googleExpiryMs ? ' bitiş:' + new Date(googleExpiryMs).toISOString().slice(0, 10) : ''}`);
