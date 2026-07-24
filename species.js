@@ -354,7 +354,7 @@ const SPECIES_DB = {
         huntingMode: "visual",
         shoreMonths: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "ALL", peakHoursDesc: "Tüm gün aktif, sabah/akşam yoğun", peakHoursDescEn: "Active all day, peaks morning/evening", peakHoursDescEl: "Active all day, peaks morning/evening", peakHoursDescEs: "Todo el día",
-        tempRange: { min: 10, opt: 18, max: 24 },
+        tempRange: { min: 10, opt: 18, max: 26 },
         seasons: { winter: 0.60, spring: 0.80, summer: 0.75, autumn: 0.85 },
         
         monthlyActivity: [0.55, 0.5, 0.65, 0.75, 0.85, 0.9, 0.85, 0.85, 0.85, 0.8, 0.7, 0.6],
