@@ -5549,8 +5549,12 @@ app.get('/api/fish-search', async (req, res) => {
         }
 
         // Gelgit
-        const tide = SunCalc.getMoonPosition(now, parseFloat(latF), parseFloat(lonF));
-        const tideFlow = Math.abs(Math.sin(tide.altitude)) * 1.5;
+        // [DÜZELTME] Bu blok tideAmplitude (ay fazı genliği) çarpanını unutmuş bir kopya
+        // hesaptı; skor zaten yukarıda s_tideFlow (genlik dahil) ile hesaplanıyor. Burada
+        // ayrıca genliksiz bir değer üretilip conditions.tideFlow'a yazılıyordu — kullanıcıya
+        // gösterilen gelgit değeri, balığa uygulanan gerçek gelgit değerinden (≤%50) sapıyordu.
+        // Artık skor hesabında kullanılan aynı değer (s_tideFlow) gösteriliyor.
+        const tideFlow = s_tideFlow;
 
         // Rüzgar yön adı
         const windDirName = (dir) => {
@@ -6262,6 +6266,15 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         const timeMode = getTimeOfDay(clickHour, sunTimes, _utcOff); // K2
         const moon = SunCalc.getMoonIllumination(now);
         const moonPos = SunCalc.getMoonPosition(now, parseFloat(latF), parseFloat(lonF));
+        // [DÜZELTME] Gelgit Akıntısı (tideFlow) — forecast/fish-search/instant blokların
+        // hepsinde aynı formülle hesaplanıp calculateFishScore'a geçiriliyor; bu fonksiyon
+        // (scan/pin skorlaması) moon/moonPos zaten hesaplamışken tideFlow'u hiç üretmiyordu.
+        // params.tideFlow tanımsız kalınca calculateFishScore'daki varsayılan (tideFlow=0)
+        // devreye giriyor ve "if (tideFlow > 0)" bloğu (s_trigger'a +katkı) HARİTA/TARAMA
+        // pinlerinde her zaman sessizce atlanıyordu — aynı balık/an için forecast skorundan
+        // sistematik olarak düşük çıkabiliyordu.
+        const tideAmplitude_s = 1.0 + Math.abs(Math.cos(moon.phase * Math.PI * 2)) * 0.5;
+        const tideFlow_s = tideAmplitude_s * Math.abs(Math.sin(moonPos.altitude)) * 1.5;
 
         const oxygenData = calculateOxygen(tempWater, getSalinity(regionName), centerChlorophyll, timeMode);
         const oxygen = oxygenData.mgL;
@@ -6297,6 +6310,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             })(),
             moonPhase: moon.phase,
             moonAltitude: moonPos.altitude,
+            tideFlow: tideFlow_s,
             lat: parseFloat(latF), lon: parseFloat(lonF), depthAvg,
             salinity: getSalinity(regionName),
             hour: clickHour,
@@ -7323,6 +7337,3 @@ app.listen(PORT, () => {
 ╚═══════════════════════════════════════════════════════════╝
     `);
 });
-
-
-
