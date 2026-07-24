@@ -4722,9 +4722,13 @@ app.get('/api/forecast', async (req, res) => {
         if (true) {
             // Weather: past_days=1 → bugün offset 24
             // Marine:  past_days=7 → bugün offset 168 (marineHourlyOffset)
-            const instantIdx = 24 + correctedClickHour;                         // weather indeksi
+            // [DÜZELTME] Weather "bugün" indeksi sabit 24 idi; oysa aynı route'un günlük
+            // döngüsü (hourlyOffset) ve /api/scan findTodayIndex() kullanıyor. Sabit 24,
+            // raw_weather cache'i gece yarısını geçtiğinde DÜNÜN saatini okuyordu (bkz. [O2]
+            // notu ~4379) → "ŞİMDİ" skoru ile tarama/günlük grafik birbirini tutmuyordu.
+            const instantIdx = hourlyOffset + correctedClickHour;               // weather indeksi
             const marineInstantIdx = marineHourlyOffset + correctedClickHour;   // marine indeksi
-            const hourlyStartIdx = 24;                                 // weather bugün başlangıcı
+            const hourlyStartIdx = hourlyOffset;                       // weather bugün başlangıcı
             const marineStartIdx = marineHourlyOffset;                 // marine bugün başlangıcı (168)
             const instantDate = new Date();
             const rawInstantTemp = marine.hourly?.sea_surface_temperature?.[marineInstantIdx];
@@ -4804,6 +4808,11 @@ app.get('/api/forecast', async (req, res) => {
                 chlorophyll,
                 thermoclineDepth: i_thermoclineDepth,
                 moonlightIntensity: i_moonlightIntensity,
+                // [DÜZELTME] Dip yapısı anlık bloğa hiç geçirilmiyordu; günlük döngü (bkz.
+                // ~4530) ve /api/scan geçiriyor. Bu yüzden SUBSTRATE_PREFS'i olan türlerde
+                // "ŞİMDİ" skoru, aynı yanıttaki 24 saatlik grafiğin ilk saatiyle ve tarama
+                // pinleriyle %10-15 sapıyordu (uyum ×1.10-1.15, uyumsuzluk ×0.85).
+                substrate: substrateData,
                 isBoat,
                 // YENİ (1C) + (V43)
                 windGust: i_windGust, precipProb: i_precipProb, weatherCode: i_weatherCode,
@@ -6023,6 +6032,70 @@ async function fetchCenterWeather(lat, lon) {
     return { weather, marine };
 }
 
+// ── PIN BAŞINA HAVA/DENİZ VERİSİ (çoklu koordinat) ──────────────────────────
+// SORUN: Tarama, TÜM grid pinleri için merkez noktanın hava/deniz verisini
+// kullanıyordu; detaylı analiz ise noktanın KENDİ verisini çekiyordu. Merkezden
+// uzak pinlerde eşik tabanlı çarpanlar (ör. wavePeriod ≤3sn & wave >0.3m → ×0.85,
+// rain >2mm → ×0.85) bir tarafta tetiklenip diğerinde tetiklenmiyordu; aynı balık
+// haritada 54.6, detayda 64 çıkabiliyordu. Merkez pin ise hep örtüşüyordu.
+//
+// ÇÖZÜM: Open-Meteo tek istekte virgülle ayrılmış koordinat listesi kabul eder ve
+// GİRDİ SIRASIYLA bir dizi döndürür (timezone=auto her konum için ayrı çalışır).
+// Böylece N pin için 2N istek yerine 2·ceil(N/CHUNK) istek yeterli olur.
+// Not: Open-Meteo kotayı KONUM başına sayar — 49 pinlik tarama ≈ 98 çağrı.
+const GRID_WX_CHUNK = 10;   // marine past_days=7 payload'ı büyük — 10'arlı böl
+
+// Çoklu koordinatta dizi, tek koordinatta düz nesne döner — ikisini de diziye çevir.
+function omList(res, expected) {
+    if (!res) return new Array(expected).fill(null);
+    return Array.isArray(res) ? res : [res];
+}
+
+async function fetchGridWeather(points) {
+    const out = new Array(points.length).fill(null);
+
+    const chunks = [];
+    for (let i = 0; i < points.length; i += GRID_WX_CHUNK) {
+        chunks.push({ start: i, pts: points.slice(i, i + GRID_WX_CHUNK) });
+    }
+
+    // Chunk'lar paralel gider — queuedFetch zaten eşzamanlılığı _omQueue.max (5) ile
+    // sınırlıyor, dolayısıyla API'ye ani yük binmez. 49 pin ≈ 10 istek ≈ ~1 sn.
+    await Promise.all(chunks.map(async ({ start: i, pts: chunk }) => {
+        const lats = chunk.map(p => parseFloat(p.lat).toFixed(4)).join(',');
+        const lons = chunk.map(p => parseFloat(p.lon).toFixed(4)).join(',');
+
+        // Parametre listeleri fetchCenterWeather ile birebir aynı olmalı — aksi halde
+        // calcPointScoreFromWeather bazı alanları bulamaz.
+        const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lats}&longitude=${lons}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,cloud_cover,precipitation,precipitation_probability,weather_code,visibility,uv_index,cape&past_days=1&timezone=auto`);
+        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lats}&longitude=${lons}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&past_days=7&timezone=auto`);
+
+        let wRes = null, mRes = null;
+        try {
+            [wRes, mRes] = await Promise.all([
+                queuedFetch(weatherUrl, 20000),
+                queuedFetch(marineUrl, 20000)
+            ]);
+        } catch (e) {
+            console.log(`[SCAN] grid hava chunk hatası (${i}-${i + chunk.length - 1}):`, e.message);
+        }
+
+        const wArr = omList(wRes, chunk.length);
+        const mArr = omList(mRes, chunk.length);
+
+        for (let k = 0; k < chunk.length; k++) {
+            const w = wArr[k], m = mArr[k];
+            // Eksik/hatalı yanıtta null bırakılır → çağıran merkez verisine düşer.
+            // Uydurma değer ÜRETİLMEZ.
+            if (w && !w.error && w.hourly && m && !m.error && m.hourly) {
+                out[i + k] = { weather: w, marine: m };
+            }
+        }
+    }));
+
+    return out;
+}
+
 // ── EKSİK FONKSİYON 1: EMODnet sadece Avrupa'da çalışır, gerisi GEBCO'ya yönlendirilir ──
 function isEmodnetArea(lat, lon) {
     // Kaba Avrupa, Akdeniz, Karadeniz sınırları
@@ -6303,7 +6376,10 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             pressureTrend: (() => {
                 if (weather.hourly?.surface_pressure) {
                     const pIdx = hourlyOffset + clickHour;
-                    const pStart = Math.max(0, pIdx - 6);
+                    // [DÜZELTME] 6 saatlik pencere kullanılıyordu; forecast günlük döngüsü,
+                    // forecast anlık bloğu ve fish-search'ün üçü de 24 saatlik trend kullanıyor.
+                    // Kısa pencere basınç değişimini küçük gösterip trigger'ı eksik hesaplıyordu.
+                    const pStart = Math.max(0, pIdx - 24); // 24 saatlik trend
                     return calculatePressureTrend(weather.hourly.surface_pressure.slice(pStart, pIdx + 1));
                 }
                 return { trend: 'STABLE', change: 0 };
@@ -6552,12 +6628,29 @@ app.get('/api/scan', async (req, res) => {
             return;
         }
 
+        // [DÜZELTME] Her pin için KENDİ hava/deniz verisi. Eskiden tüm pinler merkezin
+        // verisiyle skorlanıyordu; detaylı analiz noktanın kendi verisini çektiği için
+        // merkezden uzak pinlerde skorlar örtüşmüyordu. Çoklu koordinat sayesinde bu
+        // ~2·ceil(N/10) ek istek demek. Başarısız olursa merkez verisine düşülür
+        // (tarama çalışmaya devam eder, uydurma veri üretilmez).
+        let gridWx = new Array(gridPoints.length).fill(null);
+        try {
+            gridWx = await fetchGridWeather(gridPoints);
+            const okCount = gridWx.filter(Boolean).length;
+            console.log(`[SCAN] [${logUser}] pin-başına hava verisi: ${okCount}/${gridPoints.length} (eksikler merkez verisine düşecek)`);
+        } catch (e) {
+            console.log(`[SCAN] [${logUser}] pin-başına hava verisi alınamadı, tamamı merkez verisine düşüyor:`, e.message);
+        }
+
         for (let i = 0; i < gridPoints.length; i += BATCH_SIZE) {
             if (clientDisconnected) break;
 
             const batch = gridPoints.slice(i, i + BATCH_SIZE);
 
-            const batchResults = await Promise.all(batch.map(async (pt) => {
+            const batchResults = await Promise.all(batch.map(async (pt, bi) => {
+                const wx = gridWx[i + bi];
+                const ptWeather = wx ? wx.weather : centerWeather;
+                const ptMarine = wx ? wx.marine : centerMarine;
                 let bathyRaw = null;
                 try {
                     // 1. AŞAMA: Hızlı Tarama (3 saniye limit)
@@ -6573,7 +6666,7 @@ app.get('/api/scan', async (req, res) => {
                 fetchSubstrate(pt.lat, pt.lon, true).catch(() => null); // fire-and-forget, cache doldursun
                 let result = null;
                 try {
-                    result = calcPointScoreFromWeather(pt.lat, pt.lon, centerWeather, centerMarine, bathyRaw, fishKey || null, lang, centerChlorophyll);
+                    result = calcPointScoreFromWeather(pt.lat, pt.lon, ptWeather, ptMarine, bathyRaw, fishKey || null, lang, centerChlorophyll);
                 } catch (e) {
                     console.log('[SCAN] Point error:', pt.lat, pt.lon, e.message);
                 }
@@ -6660,7 +6753,11 @@ app.get('/api/scan', async (req, res) => {
                 const freshBathy = await fetchBathymetry(pt.lat, pt.lon, 15000);
 
                 if (freshBathy !== null) {
-                    const updatedResult = calcPointScoreFromWeather(pt.lat, pt.lon, centerWeather, centerMarine, freshBathy, fishKey || null, lang, centerChlorophyll);
+                    // Ana döngüyle AYNI pin verisini kullan — yoksa aynı pin iki farklı
+                    // hava verisiyle iki farklı skor üretirdi.
+                    const dIdx = gridPoints.findIndex(g => g.lat === pt.lat && g.lon === pt.lon);
+                    const dWx = dIdx >= 0 ? gridWx[dIdx] : null;
+                    const updatedResult = calcPointScoreFromWeather(pt.lat, pt.lon, dWx ? dWx.weather : centerWeather, dWx ? dWx.marine : centerMarine, freshBathy, fishKey || null, lang, centerChlorophyll);
                     if (updatedResult) {
                         sendEvent({
                             type: 'depth_update',
