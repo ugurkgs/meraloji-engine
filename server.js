@@ -4782,6 +4782,17 @@ app.get('/api/forecast', async (req, res) => {
                 i_pressureTrend = calculatePressureTrend(i_surfacePressure.slice(iPressureStart, instantIdx + 1));
             }
 
+            // −3s → şimdi → +3s basınç serisi (simülasyon grafiği için).
+            // Geçmiş = ölçüm/yeniden analiz, gelecek = forecast — aynı saatlik diziden, dürüst.
+            let i_pressureSeries = null, i_pressureNowIdx = 3;
+            if (i_surfacePressure) {
+                const sStart = Math.max(0, instantIdx - 3);
+                const sEnd   = Math.min(i_surfacePressure.length - 1, instantIdx + 3);
+                i_pressureNowIdx = instantIdx - sStart;
+                i_pressureSeries = i_surfacePressure.slice(sStart, sEnd + 1)
+                    .map(p => (p == null ? null : Math.round(p * 10) / 10));
+            }
+
             const i_tide = SunCalc.getMoonPosition(instantDate, lat, lon);
             const i_tideAmplitude = 1.0 + Math.abs(Math.cos(i_moon.phase * Math.PI * 2)) * 0.5;
             const i_tideFlow = i_tideAmplitude * Math.abs(Math.sin(i_tide.altitude)) * 1.5;
@@ -4953,6 +4964,9 @@ app.get('/api/forecast', async (req, res) => {
                 windDirection: i_windDir,
                 pressure: i_pressure,
                 pressureTrend: i_pressureTrend.trend,
+                pressureChange: parseFloat((i_pressureTrend.change || 0).toFixed(1)),
+                pressureSeries: i_pressureSeries,
+                pressureNowIdx: i_pressureNowIdx,
                 clarity: i_clarity,
                 rain: i_rain,
                 cloud: i_cloud + "%",
@@ -7439,3 +7453,6 @@ app.listen(PORT, () => {
 ╚═══════════════════════════════════════════════════════════╝
     `);
 });
+
+
+
