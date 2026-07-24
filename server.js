@@ -5972,9 +5972,14 @@ app.post('/api/verify-subscription', async (req, res) => {
             }, { merge: true });
             // ++ SON
 
-            if (isNewPro && isYearly) {
+            if (isNewPro) {
+                // Toplam PRO sayacı — artık aylık + yıllık BİRLİKTE sayılıyor.
+                // Ayrıca kırılım için ayrı alanlar (monthlyCount / yearlyCount).
                 const statsRef = db.collection('stats').doc('pro_count');
-                await statsRef.set({ count: admin.firestore.FieldValue.increment(1) }, { merge: true });
+                await statsRef.set({
+                    count: admin.firestore.FieldValue.increment(1),
+                    [isYearly ? 'yearlyCount' : 'monthlyCount']: admin.firestore.FieldValue.increment(1)
+                }, { merge: true });
             }
         }
         // Cache'i temizle — bir sonraki istekte taze veri çekilsin
