@@ -3532,8 +3532,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'AT', stars: 5, bonus: parseFloat(thermBonus.toFixed(1)) };
         } else if (diff > 10) {
             // Balık termoklinin altında — dip türler için normal, yüzey türler için ceza
-            if (['DIP_KIYI', 'DIP_DERIN', 'KAYALIK', 'DİP', 'DERİN'].includes(fish.category)) {
-                s_trigger += 1.5; // Dip türü termoklin altında — doğal habitat
+            if (['DIP_KIYI', 'DIP_DERIN', 'KAYALIK', 'DİP', 'DIP', 'DERİN'].includes(fish.category)) {
+                s_trigger += 1.5; // Dip türü termoklin altında — doğal habitat (ASCII 'DIP' de dahil; species.js İ/I)
                 scoreDetails.thermocline = { depth: thermoclineDepth, fishDepth, position: 'BELOW', stars: 4 };
             } else if (['PELAJIK', 'PELAJIK_AVCI', 'KIYI_AVCI', 'KIYI', 'KUM_TABAN', 'SÜRÜ'].includes(fish.category)) {
                 s_trigger -= Math.min(3, diff / 10); // Yüzey türü çok derinlerde
@@ -3851,8 +3851,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             // (0.65) fazla ağırdı. 0.72 hâlâ 0.85 eşiğinin altında → "öğlen bastırması"
             // rozeti korunur, ama ceza gerçekçi aralığa çekildi.
             middayPenalty = 0.72;
-        } else if (cat === 'DIP_KIYI' || cat === 'DİP' || cat === 'KAYALIK') {
-            middayPenalty = 0.75;
+        } else if (cat === 'DIP_KIYI' || cat === 'DİP' || cat === 'DIP' || cat === 'KAYALIK') {
+            middayPenalty = 0.75;   // ASCII 'DIP' de dahil (species.js İ/I uyuşmazlığı)
         } else if (cat === 'PELAJIK' || cat === 'PELAJIK_AVCI' || cat === 'SÜRÜ') {
             middayPenalty = 0.92;
         } else if (cat === 'KIYI' || cat === 'LAGUN' || cat === 'KUM_TABAN') {
