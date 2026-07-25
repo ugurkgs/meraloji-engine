@@ -890,8 +890,13 @@ function trackApiUsage(url) {
     if (!url || typeof url !== 'string') return;
     
     let serviceName = null;
-    if (url.includes('api.open-meteo.com')) serviceName = 'open_meteo_forecast';
-    else if (url.includes('marine-api.open-meteo.com')) serviceName = 'open_meteo_marine';
+    // [DÜZELTME] Marine host'u ('marine-api.open-meteo.com') forecast host'undan
+    // ÖNCE kontrol edilmeli: 'api.open-meteo.com' alt-dizgesi marine URL'inin de içinde
+    // geçtiğinden, eski sıralamada marine dalı hiç çalışmıyor, TÜM marine trafiği
+    // yanlışlıkla 'forecast' altında sayılıyordu. Ücretli plandaki 'customer-' önekli
+    // host'lar (customer-api / customer-marine-api) da bu iki dala doğru düşer.
+    if (url.includes('marine-api.open-meteo.com')) serviceName = 'open_meteo_marine';
+    else if (url.includes('api.open-meteo.com')) serviceName = 'open_meteo_forecast';
     else if (url.includes('emodnet-bathymetry.eu')) serviceName = 'emodnet_bathymetry';
     else if (url.includes('gebco.net')) serviceName = 'gebco_bathymetry';
     else if (url.includes('emodnet-seabedhabitats.eu')) serviceName = 'emodnet_substrate';
@@ -2251,7 +2256,10 @@ function getSolunarWindow(date, lat = 41.0, lon = 29.0) {
 
     if (moonTimes.rise && moonTimes.set) {
         const transit = (moonTimes.rise.getTime() + moonTimes.set.getTime()) / 2;
-        if (Math.abs(now - transit) / 36e5 < 1.5) isMajor = true;
+        // [KALİBRASYON] Major pencere ay transiti ±1.0 saat (klasik Solunar Tabloları,
+        // Aldrich & Aldrich). Eski ±1.5 saat çok genişti: +4 puanlık major bonusu günde
+        // ~6 saate yayılıp ayırt ediciliğini kaybediyordu. Minor pencere (±0.75 sa) aynı.
+        if (Math.abs(now - transit) / 36e5 < 1.0) isMajor = true;
     }
     if (moonTimes.rise && Math.abs(now - moonTimes.rise.getTime()) / 36e5 < 0.75) isMinor = true;
     if (moonTimes.set && Math.abs(now - moonTimes.set.getTime()) / 36e5 < 0.75) isMinor = true;
@@ -3342,12 +3350,17 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             // Işık bu derinliğe ulaşmıyor
             scoreDetails.moonlight = { intensity: 0, status: 'DARK_BY_DEPTH' };
         } else {
+            // [KALİBRASYON] Ay ışığı katsayısı 8 → 5. Saha çalışmaları (ör. Lökken et al.
+            // 2019) ay ışığının balık aktivitesine etkisini ölçülü (~%10-30) buluyor; ×8
+            // ile bu tetikleyici (s_trigger ∈ [-12,+12]) içinde tek başına 8 puana çıkıp
+            // aşırı ağırlık kazanıyordu. ×5 hâlâ anlamlı ama diğer tetikleyicilerle dengeli.
+            // (Aşağıdaki `stars: ...intensity * 5` ayrı bir 0-5 yıldız ölçeğidir, değişmedi.)
             if (pref === 'bright') {
-                const bonus = Math.round(intensity * 8 * 10) / 10;
+                const bonus = Math.round(intensity * 5 * 10) / 10;
                 if (bonus > 0) { s_trigger += bonus; activeTriggers.push(i18n(lang).triggers.moonlight((intensity * 100).toFixed(0))); }
                 scoreDetails.moonlight = { intensity, pref, bonus, stars: Math.round(intensity * 5) };
             } else if (pref === 'dark') {
-                const penalty = Math.round(intensity * 8 * 10) / 10;
+                const penalty = Math.round(intensity * 5 * 10) / 10;
                 if (penalty > 1) { s_trigger -= penalty; }
                 const stars = intensity < 0.2 ? 5 : intensity < 0.5 ? 3 : 1;
                 scoreDetails.moonlight = { intensity, pref, penalty, stars };
@@ -3833,7 +3846,11 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     if (currentHour >= 11 && currentHour <= 15 && timeMode === 'DAY' && !_isNightOrCrep) {
         const cat = fish.category;
         if (cat === 'KIYI_AVCI' || cat === 'AVCI') {
-            middayPenalty = 0.65;
+            // [KALİBRASYON] 0.65 → 0.72. Davranışsal çalışmalar (ör. Becker 2010) kıyı
+            // avcılarının öğlen ~%20-30 aktivite kaybı gösterdiğini bildiriyor; %35 ceza
+            // (0.65) fazla ağırdı. 0.72 hâlâ 0.85 eşiğinin altında → "öğlen bastırması"
+            // rozeti korunur, ama ceza gerçekçi aralığa çekildi.
+            middayPenalty = 0.72;
         } else if (cat === 'DIP_KIYI' || cat === 'DİP' || cat === 'KAYALIK') {
             middayPenalty = 0.75;
         } else if (cat === 'PELAJIK' || cat === 'PELAJIK_AVCI' || cat === 'SÜRÜ') {
@@ -3963,7 +3980,6 @@ function applySanitization(data, isProUser) {
         const base = { ...day };
         // Teknik metrikleri sıfırla (Temel metrikler açık kalır: temp, airTemp, wave, wind)
         base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
-        base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
         base.salinity = 0; base.pressure = 0; base.tide = 0;
         base.current = 0; base.swellHeight = 0; base.precipProb = 0;
         base.hourlyScores = [];
@@ -3983,7 +3999,6 @@ function applySanitization(data, isProUser) {
     const sanitizedInstant = data.instant ? (() => {
         const base = { ...data.instant };
         // Teknik metrikleri sıfırla (Temel metrikler açık kalır: temp, airTemp, wave, wind)
-        base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
         base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
         base.salinity = 0; base.pressure = 0; base.current = 0;
 
@@ -4006,12 +4021,23 @@ function applySanitization(data, isProUser) {
     };
 }
 
+// [GÜVENLİK] Koordinat geçerlilik kontrolü — sonlu bir sayı mı ve Dünya sınırları
+// içinde mi? (lat ∈ [-90,90], lon ∈ [-180,180]). Geçersiz koordinatlar upstream
+// API'lere (Open-Meteo / EMODnet) boşuna istek göndermeden ve NaN skor üretmeden
+// erkenden reddedilir. Gerçek kullanım (Türkiye kıyıları) daima bu aralıkta olduğu
+// için mevcut istemci akışı — analiz, giriş, PRO — hiçbir şekilde etkilenmez.
+function isValidLatLon(lat, lon) {
+    return isFinite(lat) && isFinite(lon) &&
+        lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
+}
+
 app.get('/api/forecast', async (req, res) => {
     try {
         const lang = getLang(req); // i18n dil seçimi — ?lang=en
         const latRaw = parseFloat(req.query.lat);
         const lonRaw = parseFloat(req.query.lon);
-        if (isNaN(latRaw) || isNaN(lonRaw)) {
+        // NaN + aralık kontrolü (eskiden yalnızca isNaN vardı; yanıt biçimi aynı kaldı)
+        if (!isValidLatLon(latRaw, lonRaw)) {
             return res.status(400).json({ error: i18n(lang).errors.invalidCoords });
         }
         const lat = latRaw.toFixed(4);
@@ -5271,6 +5297,11 @@ app.get('/api/fish-search', async (req, res) => {
             return res.status(404).json({ error: i18n(lang).errors.fishNotFound });
         }
 
+        // NaN + aralık kontrolü — bu rotada eskiden koordinat sayısal doğrulaması yoktu
+        // (parseFloat("abc") → NaN sessizce ilerliyordu). Geçerli koordinatlar etkilenmez.
+        if (!isValidLatLon(parseFloat(lat), parseFloat(lon))) {
+            return res.status(400).json({ error: i18n(lang).errors.invalidCoords });
+        }
         const latF = parseFloat(lat).toFixed(4);
         const lonF = parseFloat(lon).toFixed(4);
         const now = new Date();
@@ -6535,6 +6566,12 @@ app.get('/api/scan', async (req, res) => {
 
     const centerLat = parseFloat(lat);
     const centerLon = parseFloat(lon);
+    // NaN + aralık kontrolü (lat ∈ [-90,90], lon ∈ [-180,180]) — geçersiz koordinat
+    // 25 grid noktası için boşuna upstream isteği ve NaN skor üretmesin. Geçerli
+    // koordinatlar (gerçek kullanım) etkilenmez.
+    if (!isValidLatLon(centerLat, centerLon)) {
+        return res.status(400).json({ error: 'lat ve lon geçersiz' });
+    }
     const radiusKm = Math.min(20, Math.max(3, parseFloat(radius) || 5));
     req._story = { radiusKm }; // log hikâyesi (nokta req.query'den, yarıçap buradan)
     const uid = req.user.uid;
