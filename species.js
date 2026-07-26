@@ -355,10 +355,10 @@ const SPECIES_DB = {
         huntingMode: "visual",
         shoreMonths: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "ALL", peakHoursDesc: "Tüm gün aktif, sabah/akşam yoğun", peakHoursDescEn: "Active all day, peaks morning/evening", peakHoursDescEl: "Active all day, peaks morning/evening", peakHoursDescEs: "Todo el día",
-        tempRange: { min: 10, opt: 18, max: 26 },
+        tempRange: { min: 10, opt: 20, max: 27 },
         seasons: { winter: 0.60, spring: 0.80, summer: 0.75, autumn: 0.85 },
         
-        monthlyActivity: [0.75, 0.65, 0.55, 0.5, 0.5, 0.55, 0.55, 0.6, 0.75, 0.9, 0.95, 0.85],
+        monthlyActivity: [0.80, 0.72, 0.62, 0.55, 0.58, 0.68, 0.78, 0.82, 0.88, 0.95, 0.92, 0.85],
         migrationBonus: {
             "KARADENİZ": { months: [4, 5, 6, 7], bonus: 0.20 },
             "EGE": { months: [3, 4, 10, 11], bonus: 0.15 }
@@ -1049,7 +1049,7 @@ const SPECIES_DB = {
         planktonPref: "LOW",
         moonPref: "bright",
         sstTrendPref: "WARMING",
-        regions: ["MARMARA", "EGE", "AKDENİZ"],
+        regions: ["EGE", "AKDENİZ"],
         depth: { min: 2, opt: 15, max: 40 },
         advice: { bait: "Yapay tercih", lure: "Uzun Sahte Balık", rig: "Spin", hook: "2/0 - 4/0", baitEn: "Artificial preferred", baitEl: "Artificial preferred", baitEs: "Artificial preferred", lureEn: "Long swim bait", lureEl: "Long swim bait", lureEs: "Long swim bait", rigEn: "Spin", rigEl: "Spin", rigEs: "Spinning", hookEn: "2/0 - 4/0", hookEl: "2/0 - 4/0", hookEs: "2/0 - 4/0" },
         legalSize: "Yok",
@@ -1324,7 +1324,7 @@ const SPECIES_DB = {
         salinityPref: "MEDIUM",
         planktonPref: "HIGH",
         sstTrendPref: "WARMING",
-        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        regions: ["EGE", "AKDENİZ"],
         depth: { min: 5, opt: 50, max: 200 },
         advice: { bait: "Canlı balık, Sardalya", lure: "Rapala, Metal Jig", rig: "Trolling", hook: "2/0 - 4/0", baitEn: "Live fish, sardine", baitEl: "Live fish, sardine", baitEs: "Live fish, Sardina", lureEn: "Rapala, metal jig", lureEl: "Rapala, metal jig", lureEs: "Rapala, metal Jig", rigEn: "Trolling", rigEl: "Trolling", rigEs: "Curricán", hookEn: "2/0 - 4/0", hookEl: "2/0 - 4/0", hookEs: "2/0 - 4/0" },
         legalSize: "45 cm",
