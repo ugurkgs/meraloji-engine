@@ -3716,6 +3716,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     } else if (region === 'MARMARA') {
         if (key === 'mirmir') abundanceMult = 0.85; // Marmara'da orta yoğunluk
         else if (key === 'cipura') abundanceMult = 0.80;
+        else if (key === 'akya') abundanceMult = 0.45;
     }
 
     rawScore *= abundanceMult;
