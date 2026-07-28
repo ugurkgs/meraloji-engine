@@ -1554,14 +1554,43 @@ const FREE_DAILY_SCANS = 1;     // Ücretsiz kullanıcı günde 1 tarama
 const GRACE_PERIOD_DAYS = 14;   // Yeni kullanıcıya 14 gün tam erişim
 const VALID_SUBSCRIPTIONS = ['meraloji_pro_monthly', 'meraloji_pro_yearly'];
 
+// ── GERİ DÖNÜŞ ("COMEBACK") DENEMESİ ─────────────────────────────────────
+// 14 günlük denemesi DOLMUŞ kullanıcıya, yeni sürüm yenilikleri (canlı
+// simülasyonlar) tanıtılırken TEK SEFERLİK 3 günlük tam erişim.
+//
+// GÜVENCE 1 — Gerçek PRO aboneler etkilenmez: aşağıdaki tüm mantık
+//   `!req.isPremium` koşuluna bağlıdır. PRO kullanıcı bu bloğa hiç girmez;
+//   ne Firestore okuması ne yazması yapılır, aboneliğine dokunulmaz.
+//   Kod hiçbir yerde `isPremium`'u DEĞİŞTİRMEZ, yalnızca `isGracePeriod`
+//   EKLER — yani erişim asla geri alınmaz, sadece geçici olarak açılır.
+// GÜVENCE 2 — Kampanya bitince kimse etkilenmez: cutoff yalnızca YENİ damga
+//   yazılmasını durdurur. Damgası olan kendi 72 saatini tamamlar, PRO'lar ve
+//   deneme süresi devam edenler her iki durumda da tamamen kapsam dışıdır.
+const COMEBACK_TRIAL_MS = 3 * 24 * 60 * 60 * 1000;   // 72 saat — kullanıcı başına süre
+// Kampanya penceresi ("kim hak kazanır"), 3 günlük sürenin kendisi değil.
+// Render'da COMEBACK_CAMPAIGN_END=2026-09-15 gibi bir env ile ezilebilir.
+const COMEBACK_CAMPAIGN_END = Date.parse(process.env.COMEBACK_CAMPAIGN_END || '2026-08-27T00:00:00Z');
+if (Number.isNaN(COMEBACK_CAMPAIGN_END)) {
+    // Bozuk env → kampanya KAPALI sayılır (fail-safe: kimseye yeni damga yazılmaz).
+    console.warn('[COMEBACK] ⚠️ COMEBACK_CAMPAIGN_END geçersiz, kampanya kapalı kabul ediliyor.');
+} else {
+    console.log(`[COMEBACK] Kampanya bitişi: ${new Date(COMEBACK_CAMPAIGN_END).toISOString()}`);
+}
+
 // Firebase Auth createdAt cache — her kullanıcı için 24 saat cache'le
 const userCreationCache = new NodeCache({ stdTTL: 86400 });
 const subscriptionCache = new NodeCache({ stdTTL: 180 }); // 3 dakika TTL
+// Comeback damgası değişmez bir değerdir → uzun cache güvenli. Süre kontrolü
+// zaman bazlı yapıldığı için cache bayatlamaz (damga sabit, saat ilerler).
+const comebackTrialCache = new NodeCache({ stdTTL: 86400 });
 
 // ── GELİŞTİRİCİ BYPASS LİSTESİ ───────────────────────────────────────────
 const DEVELOPER_UIDS = ['zhCzPS20wneS2njZKVGFAwOvc5m2'];
 
 async function verifyAuth(req, res, next) {
+    // Comeback bayrağı tek yerde başlatılır — aşağıdaki erken return'lerin
+    // (dev bypass, token yok, admin yok, token geçersiz) hepsi bunu kapsar.
+    req.isComebackTrial = false;
     // [GÜVENLİK - K1] Eski hali: ?bypassAuth=true diyen HERKES tam PRO oluyordu (token'sız).
     // Artık bypass yalnızca DEV_BYPASS_SECRET env değişkeni ayarlıysa VE istek o gizli
     // değeri gönderiyorsa çalışır. Env yoksa bypass tamamen kapalıdır. Gerçek kullanıcılar
@@ -1668,6 +1697,10 @@ async function verifyAuth(req, res, next) {
         }
 
         // Grace period: PRO değilse, Firebase Auth hesap oluşturma tarihine bak
+        // accountAgeKnown: hesap yaşı GERÇEKTEN öğrenilebildi mi? Comeback damgası
+        // yalnızca bu doğrulanmışken yazılır — Firebase okuması hata verirse yeni
+        // bir kullanıcı yanlışlıkla "denemesi dolmuş" sanılıp damgalanmasın.
+        let accountAgeKnown = false;
         if (!req.isPremium && admin) {
             try {
                 let createdAt = userCreationCache.get(decoded.uid);
@@ -1678,12 +1711,73 @@ async function verifyAuth(req, res, next) {
                 }
                 const gracePeriodMs = GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000;
                 const elapsed = Date.now() - createdAt;
+                accountAgeKnown = true;
                 if (elapsed < gracePeriodMs) {
                     req.isGracePeriod = true;
                     req.graceDaysLeft = Math.max(0, Math.ceil((gracePeriodMs - elapsed) / 86400000));
                 }
             } catch (e) {
                 console.log('[AUTH-MW] Grace period check failed:', e.message);
+            }
+        }
+
+        // ── GERİ DÖNÜŞ DENEMESİ (bkz. COMEBACK_TRIAL_MS tanımı) ──────────────
+        // Koşul zinciri bilinçli olarak dar: PRO DEĞİL + 14 günlük denemesi
+        // DOLMUŞ + hesap yaşı doğrulanmış + giriş yapmış kullanıcı.
+        //   • PRO abone     → `!req.isPremium` ile elenir, bloğa hiç girmez.
+        //   • Denemesi süren → `!req.isGracePeriod` ile elenir, dokunulmaz.
+        //   • Anonim         → decoded yok, zaten bu try bloğuna giremez.
+        if (!req.isPremium && !req.isGracePeriod && accountAgeKnown && db) {
+            try {
+                const uid = decoded.uid;
+                // Damga YALNIZCA gerçek analiz isteğinde yazılır. Aksi halde
+                // uygulama açılışındaki /api/subscription-status çağrısı 72 saati
+                // başlatır ve kullanıcı hiçbir yeniliği görmeden süresi yanar.
+                const isAnalysisRequest = req.originalUrl.startsWith('/api/forecast');
+                let stamp = comebackTrialCache.get(uid);
+
+                // 1) Damgayı öğren (cache boşsa Firestore'dan oku)
+                if (stamp === undefined) {
+                    const cbDoc = await db.collection('users').doc(uid).get();
+                    const raw = cbDoc.exists ? cbDoc.data().comebackTrialStart : null;
+                    // [GÜVENLİK] GELECEK tarihli damga geçersiz sayılır (0'a düşürülür).
+                    // Aksi halde damga geleceğe yazılırsa `Date.now() - stamp` NEGATİF olur,
+                    // negatif her zaman 72 saatten küçüktür → kalıcı bedava PRO. Asıl koruma
+                    // firestore_rules.txt'te (istemci bu alana yazamaz); bu ikinci katman,
+                    // kural deploy'u gecikse veya ileride gevşetilse bile açığı kapatır.
+                    stamp = (typeof raw === 'number' && raw > 0 && raw <= Date.now()) ? raw : 0;
+                    // "Damgası yok" (0) durumunu ancak kampanya kapandıysa kalıcı
+                    // cache'le; kampanya açıkken kullanıcı analiz yapınca
+                    // damgalanabilmeli, bayat 0 bunu engellerdi.
+                    if (stamp > 0 || !(Date.now() < COMEBACK_CAMPAIGN_END)) {
+                        comebackTrialCache.set(uid, stamp);
+                    }
+                }
+
+                // 2) Hak ediyorsa TEK SEFER damgala (yenilenmez — damga varsa bu dal çalışmaz)
+                if (stamp === 0 && isAnalysisRequest && Date.now() < COMEBACK_CAMPAIGN_END) {
+                    stamp = Date.now();
+                    await db.collection('users').doc(uid).set(
+                        { comebackTrialStart: stamp }, { merge: true }
+                    );
+                    comebackTrialCache.set(uid, stamp);
+                    console.log(`[COMEBACK] 🎁 ${uid} → 3 günlük geri dönüş denemesi başladı`);
+                }
+
+                // 3) 72 saat içindeyse tam erişim. Yalnızca isGracePeriod EKLENİR;
+                //    isPremium'a dokunulmaz, hiçbir erişim geri alınmaz.
+                // `cbElapsed >= 0` yukarıdaki kırpma sayesinde zaten garanti; yine de
+                // koşula açıkça yazıldı ki değişmez burada, kullanıldığı yerde görünsün.
+                const cbElapsed = Date.now() - stamp;
+                if (stamp > 0 && cbElapsed >= 0 && cbElapsed < COMEBACK_TRIAL_MS) {
+                    req.isGracePeriod = true;
+                    req.isComebackTrial = true;
+                    req.graceDaysLeft = Math.max(1, Math.ceil((COMEBACK_TRIAL_MS - cbElapsed) / 86400000));
+                }
+            } catch (e) {
+                // Comeback altyapısı patlarsa isteği reddetme — kullanıcı eski
+                // (kısıtlı) moduyla devam etsin, sadece logla.
+                console.log('[COMEBACK] Kontrol başarısız:', e.message);
             }
         }
     } catch (e) {
@@ -5755,6 +5849,9 @@ app.get('/api/subscription-status', async (req, res) => {
         isPremium: req.isPremium,
         isGracePeriod: req.isGracePeriod,
         graceDaysLeft: req.graceDaysLeft,
+        // Mevcut istemci bu alanı kullanmaz (Gson bilinmeyen alanı yok sayar).
+        // İleride "3 gün PRO açtık" dialogu eklenecekse hazır dursun diye var.
+        isComebackTrial: req.isComebackTrial,
         uid: req.user.uid,
         email: req.user.email,
         name: req.user.name || req.user.email,
@@ -7491,6 +7588,3 @@ app.listen(PORT, () => {
 ╚═══════════════════════════════════════════════════════════╝
     `);
 });
-
-
-
