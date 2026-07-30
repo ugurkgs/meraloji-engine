@@ -701,6 +701,10 @@ function _userBadge(req) {
     if (!req.user) return { who: '🕵 anonim', plan: '—' };
     const who = req.user.email || req.user.uid;
     if (req.isPremium)     return { who, plan: '💎 PRO' };
+    // isComebackTrial ÖNCE gelmeli: comeback aynı zamanda isGracePeriod'u da true
+    // yapıyor, sıra ters olursa geri dönüş kullanıcısı gerçek 14 günlük deneme
+    // kullanıcısından ayırt edilemez (kampanya izlenemez hale gelir).
+    if (req.isComebackTrial) return { who, plan: `🎁 GERİ DÖNÜŞ · ${req.graceDaysLeft != null ? req.graceDaysLeft : '?'} gün kaldı · kayıt ${_regDateStr(req.user.uid)}` };
     if (req.isGracePeriod) return { who, plan: `🆓 DENEME · ${req.graceDaysLeft != null ? req.graceDaysLeft : '?'} gün kaldı · kayıt ${_regDateStr(req.user.uid)}` };
     return { who, plan: `⛔ SÜRE DOLDU · kayıt ${_regDateStr(req.user.uid)}` };
 }
@@ -7640,3 +7644,6 @@ app.listen(PORT, () => {
 ╚═══════════════════════════════════════════════════════════╝
     `);
 });
+
+
+
