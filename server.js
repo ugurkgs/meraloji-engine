@@ -1584,6 +1584,34 @@ const subscriptionCache = new NodeCache({ stdTTL: 180 }); // 3 dakika TTL
 // zaman bazlı yapıldığı için cache bayatlamaz (damga sabit, saat ilerler).
 const comebackTrialCache = new NodeCache({ stdTTL: 86400 });
 
+// ── ANONİM TEASER KOTASI (anonFree) ──────────────────────────────────────
+// Giriş yapmamış kullanıcının günün ilk analizinde tam veri görmesi BİLİNÇLİ
+// bir teaser (istemci: MainActivity.checkClickLimit → mIsAnonFreeTrial). Ama
+// kontrol yalnız SharedPreferences'ta olduğu için API'ye doğrudan vuran biri
+// &anonFree=true ile SINIRSIZ tam PRO verisi çekebiliyordu — kota uid'ye bağlı,
+// token'sız istekte uid yok. 2026-07-30 log analizi: 330 analizin 65'i (%20)
+// token'sız geliyordu.
+//
+// Kalıcı çözüm Firebase Anonymous Auth (her istemciye gerçek uid). O gelene
+// kadar IP başına günlük tavan: toplu veri çekmeyi ekonomik olmaktan çıkarır.
+// 30 seçildi çünkü operatör CGNAT'i arkasında tek IP'de çok sayıda GERÇEK
+// kullanıcı olabilir; istemci zaten kişi başı 1/gün verdiğinden meşru kullanıcı
+// bu tavana asla çarpmaz. Aşan olursa log satırından görüp sıkabiliriz.
+//
+// ⚠️ DİKKAT — FAVORİ SKORLARI DA BU YOLU KULLANIYOR. MainActivity:5365
+// `analyzeAnon(lat, lon, lang, true)` çağırıyor: GİRİŞ YAPMIŞ bir kullanıcının
+// favori listesi açıldığında bile istekler token'sız + anonFree=true gidiyor
+// (favori başına 1 istek, istemcide 30 dk cache). Yani bu kotayı anonimler
+// kadar PRO kullanıcılar da tüketebilir.
+// Kırılma YOK, çünkü applySanitization (server.js:4085) `instant.score` alanına
+// DOKUNMUYOR — yalnız oxygen/upwelling/clarity/salinity/pressure/current sıfırlanır.
+// MainActivity:5368 tam olarak `instant.score` okuduğu için tavana takılan favori
+// isteği de doğru skoru döndürür. Tavanın tek etkisi: anonim teaser'ın o gün
+// o IP'de tam veri yerine ücretsiz seviye veri görmesi.
+// Bu bağı bozmadan önce iki tarafı da oku (favori akışı + applySanitization).
+const anonFreeIpCache = new NodeCache({ stdTTL: 86400 });
+const ANON_FREE_IP_DAILY_MAX = 30;
+
 // ── GELİŞTİRİCİ BYPASS LİSTESİ ───────────────────────────────────────────
 const DEVELOPER_UIDS = ['zhCzPS20wneS2njZKVGFAwOvc5m2'];
 
@@ -4202,7 +4230,31 @@ app.get('/api/forecast', async (req, res) => {
         // geçerlidir — anonim ilk-deneme akışı aynen korunur. Eski hali: giriş yapmış
         // ücretsiz/süresi dolmuş bir kullanıcı da &anonFree=true ekleyerek sanitizasyonu
         // atlayıp tam PRO verisi alabiliyordu; o açık kapatıldı.
-        const isProUser = req.isPremium || req.isGracePeriod || (!req.user && req.query.anonFree === 'true');
+        //
+        // [GÜVENLİK - Y2] anonFree artık sınırsız değil, IP başına günlük tavana bağlı
+        // (bkz. ANON_FREE_IP_DAILY_MAX tanımı). GERİYE DÖNÜK ETKİ YOK: aşağıdaki blok
+        // `!req.user` koşuluna bağlı, yani PRO abone / 14 gün denemesi süren / süresi
+        // dolmuş — giriş yapmış HİÇBİR kullanıcı bu bloğa girmez, davranışları birebir
+        // aynı kalır. Tavana takılan da hata almaz, yalnızca ücretsiz seviye veri alır.
+        let anonFreeGranted = false;
+        if (!req.user && req.query.anonFree === 'true') {
+            const fwd = req.headers['x-forwarded-for'];
+            const ip = (typeof fwd === 'string' && fwd.length ? fwd.split(',')[0] : '').trim() || req.ip || 'unknown';
+            if (ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') {
+                // localhost muaf — iç cron çağrıları kotayı yemesin (aynı gerekçe: limiter [D3])
+                anonFreeGranted = true;
+            } else {
+                const key = `af_${ip}_${new Date().toISOString().slice(0, 10)}`;
+                const used = anonFreeIpCache.get(key) || 0;
+                if (used < ANON_FREE_IP_DAILY_MAX) {
+                    anonFreeIpCache.set(key, used + 1);
+                    anonFreeGranted = true;
+                } else {
+                    console.log(`[ANON-FREE] ⚠️ ${ip} günlük tavanı aştı (${used}/${ANON_FREE_IP_DAILY_MAX}) → sanitize edilmiş veri`);
+                }
+            }
+        }
+        const isProUser = req.isPremium || req.isGracePeriod || anonFreeGranted;
 
         // Cache varsa hava/deniz verisini oradan al, ama derinliği taze çek
         if (cachedData) {
