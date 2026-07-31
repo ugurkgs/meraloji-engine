@@ -1755,11 +1755,22 @@ async function verifyAuth(req, res, next) {
 
         // ── GERİ DÖNÜŞ DENEMESİ (bkz. COMEBACK_TRIAL_MS tanımı) ──────────────
         // Koşul zinciri bilinçli olarak dar: PRO DEĞİL + 14 günlük denemesi
-        // DOLMUŞ + hesap yaşı doğrulanmış + giriş yapmış kullanıcı.
+        // DOLMUŞ + giriş yapmış kullanıcı.
         //   • PRO abone     → `!req.isPremium` ile elenir, bloğa hiç girmez.
         //   • Denemesi süren → `!req.isGracePeriod` ile elenir, dokunulmaz.
         //   • Anonim         → decoded yok, zaten bu try bloğuna giremez.
-        if (!req.isPremium && !req.isGracePeriod && accountAgeKnown && db) {
+        //
+        // [DÜZELTME 2026-07-31] `accountAgeKnown` buradan ALINDI, aşağıda yalnızca
+        // YENİ DAMGA YAZMA dalına taşındı. Eskiden blok komple bu bayrağa bağlıydı;
+        // `admin.auth().getUser()` geçici bir hata verdiğinde (bkz. yukarıdaki catch)
+        // bayrak false kalıyor ve HEDİYESİ ZATEN AKTİF olan kullanıcı da bloğa
+        // giremiyordu → o istekte "süresi dolmuş" muamelesi görüp 3 günlük hakkını
+        // kaybediyordu. Canlıda 2026-07-30'da sık sık yaşandı.
+        // Ayrım şu: hesap yaşını doğrulayamıyorsak YENİ damga basmayız (yeni bir
+        // kullanıcıyı yanlışlıkla "dolmuş" sanma riski), ama VAR OLAN damgayı okuyup
+        // onurlandırmak için hesap yaşını bilmeye gerek yok — damganın kendisi zaten
+        // kullanıcının o gün hak kazandığının kanıtı.
+        if (!req.isPremium && !req.isGracePeriod && db) {
             try {
                 const uid = decoded.uid;
                 // Damga YALNIZCA gerçek analiz isteğinde yazılır. Aksi halde
@@ -1787,7 +1798,11 @@ async function verifyAuth(req, res, next) {
                 }
 
                 // 2) Hak ediyorsa TEK SEFER damgala (yenilenmez — damga varsa bu dal çalışmaz)
-                if (stamp === 0 && isAnalysisRequest && Date.now() < COMEBACK_CAMPAIGN_END) {
+                // `accountAgeKnown` GÜVENLİK FRENİ ve yalnızca BURADA gerekli: hesap
+                // yaşı okunamadıysa kullanıcının denemesi gerçekten dolmuş mu bilemeyiz,
+                // o yüzden yeni damga basmayız. Aşağıdaki 3. adım (var olan damgayı
+                // onurlandırma) bu bayraktan bilinçli olarak BAĞIMSIZDIR.
+                if (stamp === 0 && accountAgeKnown && isAnalysisRequest && Date.now() < COMEBACK_CAMPAIGN_END) {
                     stamp = Date.now();
                     await db.collection('users').doc(uid).set(
                         { comebackTrialStart: stamp }, { merge: true }
