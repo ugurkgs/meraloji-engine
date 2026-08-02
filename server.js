@@ -3956,9 +3956,26 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             // bu daldan hâlâ etkilenmez — sadece min'i büyük türlerde (Akya gibi) devreye girer.
             depthScore = 0.05;
             penalties.push(i18n(lang).penalties.tooShallowSpot);
-        } else if (!isPelagicType && fMin > 0 && d < fMin) {
-            // Sınır bölgesi — pelajikler sığa iner, muaf
-            depthScore = 0.2 + 0.6 * (d / fMin);
+        } else if (fMin > 0 && d < fMin) {
+            // [DÜZELTME — TEKRAR UYGULANDI 2026-08-02] Eski koşul `!isPelagicType && ...` idi
+            // ve bir KÖR BANT bırakıyordu: derinlik `fMin/2` ile `fMin` arasındayken pelajik
+            // türler için hiçbir dal eşleşmiyor, depthScore başlangıç değeri olan 1.0'da
+            // kalıyor ve tür yaşayamayacağı sığlıkta 5/5 tam puan alıyordu.
+            //   • akya (min=10m)  → 6.3m kumsalda %69 ile listenin başı
+            //   • yazılı orkinos / palamut (min=5m) → 3.5m'de 5/5
+            // Üstelik aynı dosyadaki gerekçe motoru (bkz. "Derinlik kontrolü") bu muafiyeti
+            // içermiyor ve aynı balık için "çok sığ" uyarısı üretiyordu — skor ile açıklama
+            // birbiriyle çelişiyordu.
+            //
+            // Pelajikler su kolonunda dikey göç ettiği için cezaları dip türlerinden YUMUŞAK
+            // tutuluyor (0.45–0.80 bandı), ama artık tam puan alamıyorlar. Dip türlerinin
+            // davranışı aynen korundu (0.20–0.80).
+            //
+            // NOT: Bu düzeltme 6826428 ile kazara geri alınmıştı; lütfen `!isPelagicType`
+            // koşulunu geri getirmeyin.
+            depthScore = isPelagicType
+                ? 0.45 + 0.35 * (d / fMin)
+                : 0.2 + 0.6 * (d / fMin);
             penalties.push(i18n(lang).penalties.shallowSpot);
         } else if (d >= fMin && d <= fMax) {
             // Normal aralık — optimuma göre Gaussian benzeri
