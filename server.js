@@ -36,6 +36,23 @@ try {
     console.error('[SPECIES] species.js yüklenemedi:', e.message);
 }
 
+// ── NEHİR AĞZI ETKİSİ — bkz. rivermouth.js ───────────────────────────────────
+// Savunmacı yükleme: dosya eksik/bozuksa sunucu ÇÖKMEZ, yalnızca nehir ağzı
+// düzeltmesi kapanır ve tuzluluk eski bölgesel sabit davranışına döner.
+// ─────────────────────────────────────────────────────────────────────────────
+let riverInfluence = () => ({ w: 0, drop: 0 });   // fallback: etki yok
+try {
+    const _rm = require('./rivermouth');
+    if (typeof _rm.riverInfluence === 'function') {
+        riverInfluence = _rm.riverInfluence;
+        console.log(`[RIVER] Nehir ağzı tablosu yüklendi: ${_rm.RIVER_MOUTHS.length} isimli + ${_rm.MINOR_MOUTHS.length} küçük ağız`);
+    } else {
+        console.error('[RIVER] rivermouth.js riverInfluence dışa aktarmıyor — düzeltme KAPALI');
+    }
+} catch (e) {
+    console.error('[RIVER] rivermouth.js yüklenemedi, nehir ağzı düzeltmesi KAPALI:', e.message);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // OPEN-METEO ENDPOINT KONFİGÜRASYONU
 // ÜCRETLİ PLAN AKTİF — 1.000.000 API istek / gün
@@ -2726,13 +2743,22 @@ function isInHabitat(fish, lat, lon, regionName) {
     return false;
 }
 
-// Tuzluluk
-function getSalinity(region) {
+// Tuzluluk — bölgesel taban + nehir ağzı düzeltmesi (bkz. rivermouth.js).
+// lat/lon VERİLMEZSE eski davranış birebir korunur; böylece gözden kaçan bir
+// çağrı yeri kalsa bile eskisi gibi çalışır (geriye dönük uyumlu).
+function getSalinity(region, lat, lon) {
     const map = {
         'KARADENİZ': 18, 'MARMARA': 22, 'EGE': 38,
         'AKDENİZ': 39, 'AÇIK DENİZ': 35, 'TÜRKİYE': 30
     };
-    return map[region] || 35;
+    const base = map[region] || 35;
+    if (lat === undefined || lon === undefined || lat === null || lon === null) return base;
+    const { w, drop } = riverInfluence(parseFloat(lat), parseFloat(lon));
+    if (w <= 0) return base;
+    // Alt sınır 2 ppt: tam tatlı su (0) fizyolojik olarak deniz türü modeli için
+    // anlamsız, ayrıca calculateOxygen tuzluluğu bölen olarak kullanmıyor ama
+    // sıfıra yakın değerler oksijen çözünürlüğünü abartır.
+    return Math.max(2, Math.round((base - drop * w) * 10) / 10);
 }
 
 // Mevsim
@@ -4327,7 +4353,7 @@ app.get('/api/forecast', async (req, res) => {
         // ──────────────────────────────────────────────────────────────────
 
         const regionName = getRegion(lat, lon);
-        const salinity = getSalinity(regionName);
+        const salinity = getSalinity(regionName, lat, lon);
 
         const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,cloud_cover,precipitation,precipitation_probability,weather_code,visibility,uv_index,cape&past_days=1&timezone=auto`);
         const weatherUrlFallback = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,surface_pressure,cloud_cover,precipitation,uv_index,cape,wind_gusts_10m,precipitation_probability,weather_code,visibility&past_days=1&timezone=auto`);
@@ -5635,7 +5661,7 @@ app.get('/api/fish-search', async (req, res) => {
             pressureTrend = calculatePressureTrend(hourlyPressure.slice(startIdx, currentPressureIdx + 1));
         }
 
-        const salinity = getSalinity(regionName);  // baseParams'tan önce tanımlanmalı
+        const salinity = getSalinity(regionName, latF, lonF);  // baseParams'tan önce tanımlanmalı
 
         // Substrat — paralel çek (24h cache'li, yavaş değil)
         const substrateData = await fetchSubstrate(latF, lonF).catch(() => null);
@@ -6568,7 +6594,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         const tideAmplitude_s = 1.0 + Math.abs(Math.cos(moon.phase * Math.PI * 2)) * 0.5;
         const tideFlow_s = tideAmplitude_s * Math.abs(Math.sin(moonPos.altitude)) * 1.5;
 
-        const oxygenData = calculateOxygen(tempWater, getSalinity(regionName), centerChlorophyll, timeMode);
+        const oxygenData = calculateOxygen(tempWater, getSalinity(regionName, latF, lonF), centerChlorophyll, timeMode);
         const oxygen = oxygenData.mgL;
         const upwelling = calculateUpwelling(windSpeed, windDir, regionName);
         const depthAvg = bathyRaw !== null ? Math.abs(bathyRaw) : null;
@@ -6607,7 +6633,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             moonAltitude: moonPos.altitude,
             tideFlow: tideFlow_s,
             lat: parseFloat(latF), lon: parseFloat(lonF), depthAvg,
-            salinity: getSalinity(regionName),
+            salinity: getSalinity(regionName, latF, lonF),
             hour: clickHour,
             cloudCover: cloud,
             uvIndex: uv,
