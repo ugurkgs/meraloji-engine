@@ -17,7 +17,7 @@ const SPECIES_DB = {
         // gözlemi fizyolojik değil DAVRANIŞSAL/KONUMSAL bir olgudur (sığdan derine çekilme,
         // beslenme ritmi kayması) — bu zaten ayrı 'seasons' alanında modelleniyor ve
         // DEĞİŞTİRİLMEDİ (kış en yüksek skoru koruyor).
-        tempRange: { min: 8, opt: 20, max: 27 } /* [2026-08-03] min 12→8: Karadeniz Ocak-Şubat (7.5-8°C) kapıyı sıfırlıyordu, oysa kaydın kendi seasons.winter=0.85. Literatür: tolerans 5-28°C, CTMin 4.1-6.8°C. GÜVEN: YÜKSEK */,
+        tempRange: { min: 8, opt: 20, max: 27, optMin: 14, optMax: 24 } /* [2026-08-03] optMin/optMax: levrek geniş toleranslı (5-28°C); kışın da yazın da avlanır, tek tepe gerçeği yansıtmıyordu. */ /* [2026-08-03] min 12→8: Karadeniz Ocak-Şubat (7.5-8°C) kapıyı sıfırlıyordu, oysa kaydın kendi seasons.winter=0.85. Literatür: tolerans 5-28°C, CTMin 4.1-6.8°C. GÜVEN: YÜKSEK */,
         seasons: { winter: 0.85, spring: 0.65, summer: 0.50, autumn: 0.80 },
         activity: "DAWN_DUSK",
         pressureSensitivity: 0.6,
@@ -354,7 +354,7 @@ const SPECIES_DB = {
         huntingMode: "visual",
         shoreMonths: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "ALL", peakHoursDesc: "Tüm gün aktif, sabah/akşam yoğun", peakHoursDescEn: "Active all day, peaks morning/evening", peakHoursDescEl: "Active all day, peaks morning/evening", peakHoursDescEs: "Todo el día",
-        tempRange: { min: 10, opt: 20, max: 27 },
+        tempRange: { min: 10, opt: 20, max: 27, optMin: 13, optMax: 23 } /* [2026-08-03] optMin/optMax eklendi: T. mediterraneus öritermal; tek dar Gauss, Karadeniz sonbahar-kış zirvesinde (aktivite 0.92) sıcaklık puanını 3.9/28 e düşürüyordu. Plato modu 13-23°C arasını konfor bandı yapar. */,
         seasons: { winter: 0.60, spring: 0.80, summer: 0.75, autumn: 0.85 },
         
         monthlyActivity: [0.80, 0.72, 0.62, 0.55, 0.58, 0.68, 0.78, 0.82, 0.88, 0.95, 0.92, 0.85],
@@ -382,7 +382,7 @@ const SPECIES_DB = {
         photoId: 33,
         category: "DIP_KIYI",
         huntingMode: "chemosensory",
-        shoreMonths: [], // kıyıya yaklaşma ayları (0=Ocak)
+        // shoreMonths KALDIRILDI [DIP_KIYI] — motor bu alanı yalnız PELAJIK/AVCI/DIP_DERIN/SÜRÜ kategorilerinde okur; burada ölü veriydi.
         peakHours: "DAY", peakHoursDesc: "Gündüz, çamurlu/kumlu dip", peakHoursDescEn: "Daytime, mud/sand bottom", peakHoursDescEl: "Daytime, mud/sand bottom", peakHoursDescEs: "Durante el día",
         tempRange: { min: 8, opt: 18, max: 25 } /* [2026-08-03] min 12→8: Karadeniz Oca-Şub aktivitesi 0.80 iken kapı 0 veriyordu. Karadeniz barbun avı kışın da sürer. GÜVEN: YÜKSEK */, // FishBase tercih: 13.1-15.9°C ort 14.2
         seasons: { winter: 0.80, spring: 0.60, summer: 0.30, autumn: 0.70 },
@@ -455,7 +455,7 @@ const SPECIES_DB = {
         category: "LAGUN",
         
         huntingMode: "filter",peakHours: "DAY", peakHoursDesc: "Sabah erken ve ikindi saatleri", peakHoursDescEn: "Early morning and mid-afternoon", peakHoursDescEl: "Early morning and mid-afternoon", peakHoursDescEs: "Durante el día",
-        tempRange: { min: 10, opt: 18, max: 28 },
+        tempRange: { min: 10, opt: 18, max: 28, optMin: 14, optMax: 24 } /* [2026-08-03] optMin/optMax: Mugil cephalus aşırı öriyalin ve öritermal, yıl boyu avlanır. */,
         seasons: { winter: 0.40, spring: 0.70, summer: 0.85, autumn: 0.65 },
         activity: "DAY",
         pressureSensitivity: 0.4,
@@ -944,7 +944,7 @@ const SPECIES_DB = {
         photoId: 85,
         category: "KUMSAL",
         
-        huntingMode: "chemosensory",shoreMonths: [6, 7, 8], // kıyıya yaklaşma ayları (0=Ocak)
+        huntingMode: "chemosensory",  // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "DAY", peakHoursDesc: "Gündüz, kumlu sığ su ve kıyı şeridi", peakHoursDescEn: "Daytime, sandy shallow water", peakHoursDescEl: "Daytime, sandy shallow water", peakHoursDescEs: "Durante el día",
         tempRange: { min: 20, opt: 26, max: 30 },
         seasons: { winter: 0.10, spring: 0.50, summer: 1.00, autumn: 0.70 },
@@ -989,7 +989,7 @@ const SPECIES_DB = {
         photoId: 53,
         category: "DIP_KIYI",
         huntingMode: "chemosensory",
-        shoreMonths: [], // kıyıya yaklaşma ayları (0=Ocak)
+        // shoreMonths KALDIRILDI [DIP_KIYI] — motor bu alanı yalnız PELAJIK/AVCI/DIP_DERIN/SÜRÜ kategorilerinde okur; burada ölü veriydi.
         peakHours: "NIGHT", peakHoursDesc: "Gece, kayalık dip", peakHoursDescEn: "Night, rocky bottom", peakHoursDescEl: "Night, rocky bottom", peakHoursDescEs: "Durante la noche",
         tempRange: { min: 12, opt: 17, max: 26 },
         seasons: { winter: 0.55, spring: 0.65, summer: 0.70, autumn: 0.75 },
@@ -1206,7 +1206,7 @@ const SPECIES_DB = {
         category: "SÜRÜ",
         huntingMode: "visual",
         shoreMonths: [10, 11, 0, 1], // kıyıya yaklaşma ayları (0=Ocak)
-        peakHours: "DAY", peakHoursDesc: "Gündüz, sürü halinde", peakHoursDescEn: "Daytime, in schools", peakHoursDescEl: "Daytime, in schools", peakHoursDescEs: "Durante el día",
+        peakHours: "NIGHT", peakHoursDesc: "Gündüz, sürü halinde", peakHoursDescEn: "Daytime, in schools", peakHoursDescEl: "Daytime, in schools", peakHoursDescEs: "Durante el día",
         tempRange: { min: 8, opt: 12, max: 18 },
         seasons: { winter: 0.95, spring: 0.50, summer: 0.20, autumn: 0.70 },
         
@@ -1398,8 +1398,8 @@ const SPECIES_DB = {
         photoId: 24,
         category: "TİCARİ",
         
-        huntingMode: "filter",shoreMonths: [3, 4, 5, 6, 9, 10], // kıyıya yaklaşma ayları (0=Ocak)
-        peakHours: "DAY", peakHoursDesc: "Gündüz, yüzey", peakHoursDescEn: "Daytime, surface", peakHoursDescEl: "Daytime, surface", peakHoursDescEs: "Durante el día",
+        huntingMode: "filter",  // kıyıya yaklaşma ayları (0=Ocak)
+        peakHours: "NIGHT", peakHoursDesc: "Gündüz, yüzey", peakHoursDescEn: "Daytime, surface", peakHoursDescEl: "Daytime, surface", peakHoursDescEs: "Durante el día",
         tempRange: { min: 10, opt: 16, max: 27 },
         seasons: { winter: 0.60, spring: 0.75, summer: 0.85, autumn: 0.70 },
         monthlyActivity: [0.55, 0.5, 0.6, 0.7, 0.85, 0.9, 0.9, 0.85, 0.75, 0.65, 0.6, 0.55],
@@ -1489,7 +1489,7 @@ const SPECIES_DB = {
         photoId: 43,
         category: "DIP_KIYI",
         huntingMode: "chemosensory",
-        shoreMonths: [11, 0, 1, 2], // kıyıya yaklaşma ayları (0=Ocak)
+        // shoreMonths KALDIRILDI [DIP_KIYI] — motor bu alanı yalnız PELAJIK/AVCI/DIP_DERIN/SÜRÜ kategorilerinde okur; burada ölü veriydi.
         peakHours: "NIGHT", peakHoursDesc: "Gece, kumlu sığ", peakHoursDescEn: "Night, sandy shallow", peakHoursDescEl: "Night, sandy shallow", peakHoursDescEs: "Durante la noche",
         tempRange: { min: 8, opt: 14, max: 20 },
         seasons: { winter: 0.70, spring: 0.75, summer: 0.50, autumn: 0.65 },
@@ -1538,12 +1538,12 @@ const SPECIES_DB = {
         photoId: 8,
         category: "DIP_KIYI",
         huntingMode: "chemosensory",
-        shoreMonths: [], // kıyıya yaklaşma ayları (0=Ocak)
+        // shoreMonths KALDIRILDI [DIP_KIYI] — motor bu alanı yalnız PELAJIK/AVCI/DIP_DERIN/SÜRÜ kategorilerinde okur; burada ölü veriydi.
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık, kayalık dip", peakHoursDescEn: "Dusk, rocky bottom", peakHoursDescEl: "Dusk, rocky bottom", peakHoursDescEs: "Amanecer y atardecer",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.45, spring: 0.65, summer: 0.00, autumn: 0.65 },
         monthlyActivity: [0.45, 0.45, 0.55, 0.65, 0.70, 0.00, 0.00, 0.00, 0.70, 0.65, 0.55, 0.45],
-        activity: "DAY",
+        activity: "DAWN_DUSK",
         pressureSensitivity: 0.5,
         wavePref: 0.3, clarityPref: "CLEAR",
         currentPref: 0.3,
@@ -1570,7 +1570,7 @@ const SPECIES_DB = {
         category: "KORUMA",
         protected: true,
         huntingMode: "chemosensory",
-        shoreMonths: [], // kıyıya yaklaşma ayları (0=Ocak)
+        // shoreMonths KALDIRILDI [KORUMA] — motor bu alanı yalnız PELAJIK/AVCI/DIP_DERIN/SÜRÜ kategorilerinde okur; burada ölü veriydi.
         peakHours: "DAY", peakHoursDesc: "Gündüz, derin su", peakHoursDescEn: "Daytime, deep water", peakHoursDescEl: "Daytime, deep water", peakHoursDescEs: "Durante el día",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0, spring: 0, summer: 0, autumn: 0 },
@@ -1642,7 +1642,7 @@ const SPECIES_DB = {
         category: "PELAJIK",
         huntingMode: "visual",
         shoreMonths: [3, 4, 5, 9, 10], // kıyıya yaklaşma ayları (0=Ocak)
-        peakHours: "DAY", peakHoursDesc: "Gündüz sürü halinde orta su",
+        peakHours: "NIGHT", peakHoursDesc: "Gündüz sürü halinde orta su",
         tempRange: { min: 8, opt: 12, max: 20 },
         seasons: { winter: 0.80, spring: 0.85, summer: 0.40, autumn: 0.70 },
         monthlyActivity: [0.8, 0.75, 0.85, 0.85, 0.7, 0.45, 0.3, 0.3, 0.5, 0.65, 0.75, 0.8],
@@ -1667,7 +1667,7 @@ const SPECIES_DB = {
         category: "PELAJIK",
         huntingMode: "visual",
         shoreMonths: [10, 11, 0, 1], // kıyıya yaklaşma ayları (0=Ocak)
-        peakHours: "DAY", peakHoursDesc: "Gündüz sürü halinde",
+        peakHours: "NIGHT", peakHoursDesc: "Gündüz sürü halinde",
         tempRange: { min: 6, opt: 12, max: 18 },
         seasons: { winter: 0.90, spring: 0.80, summer: 0.30, autumn: 0.70 },
         monthlyActivity: [0.9, 0.85, 0.8, 0.65, 0.4, 0.25, 0.2, 0.25, 0.45, 0.65, 0.75, 0.85],
