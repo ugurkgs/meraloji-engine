@@ -1637,7 +1637,7 @@ const SPECIES_DB = {
     },
 
     "papalina": {
-        name: "Papalina", nameEn: "Black Sea Sprat", nameEl: "Παπαλίνα Μαύρης Θάλασσας", nameEs: "Black Sea Sprat", icon: "🐟", scientificName: "Sprattus sprattus phalericus",
+        name: "Papalina", nameEn: "European Sprat", nameEl: "ευρωπαϊκή παπαλίνα", nameEs: "European Sprat", icon: "🐟", scientificName: "Sprattus sprattus", /* [2026-08-03] Bu kayıt MARMARA'ya ayrıldığında "Black Sea Sprat"/"phalericus" etiketi ters kaldı: phalericus KARADENİZ alt türüdür (GBIF/WoRMS) ve o ad artık `caca` kaydında. Marmara kaydına tür adının kendisi bırakıldı. scientificName aynı zamanda dedüplikasyon anahtarı (server.js) olduğu için iki kayıt farklı dizge taşımalı. */
         photoId: 60,
         category: "PELAJIK",
         huntingMode: "visual",
@@ -1662,7 +1662,7 @@ const SPECIES_DB = {
     },
 
     "caca": {
-        name: "Çaça", nameEn: "European Sprat", nameEl: "ευρωπαϊκή παπαλίνα", nameEs: "European Sprat", icon: "🐟", scientificName: "Sprattus sprattus",
+        name: "Çaça", nameEn: "Black Sea Sprat", nameEl: "Παπαλίνα Μαύρης Θάλασσας", nameEs: "Black Sea Sprat", icon: "🐟", scientificName: "Sprattus sprattus phalericus", /* [2026-08-03] Karadeniz kaydı olduğu için Karadeniz alt türü adını taşır (S. s. phalericus, Risso 1827 = Black Sea sprat). NOT: WoRMS alt tür ayrımının zayıf tanımlandığını belirtiyor; ikisi de aynı türdür, ayrım halk adı (çaça=Karadeniz, papalina=Marmara) için korunuyor. */
         photoId: 61,
         category: "PELAJIK",
         huntingMode: "visual",
