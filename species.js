@@ -272,7 +272,10 @@ const SPECIES_DB = {
         peakHours: "NIGHT", peakHoursDesc: "Gece kıyıya yaklaşır, 21:00-02:00", peakHoursDescEn: "Approaches shore at night, 21:00-02:00", peakHoursDescEl: "Approaches shore at night, 21:00-02:00", peakHoursDescEs: "Durante la noche",
         tempRange: { min: 14, opt: 19, max: 28 },
         seasons: { winter: 0.25, spring: 0.65, summer: 0.85, autumn: 0.70 },
-        activity: "DAWN_DUSK",
+        activity: "NIGHT",   // [2026-08-03] DAWN_DUSK→NIGHT: peakHours ve peakHoursDesc
+        // ("Gece kıyıya yaklaşır, 21:00-02:00") gece diyordu, activity ise şafak/akşam.
+        // Uygulama bir şey gösterip başka saate göre puanlıyordu. Sahadaki Türkiye pratiği
+        // (kıyıdan gece avı) esas alınıp SKORLAMA ekrana uyduruldu.
         pressureSensitivity: 0.5,
         wavePref: 0.4, // Sakin suda da aktif
         clarityPref: "MODERATE", // Berrak sudan daha az etkilenir
@@ -325,7 +328,8 @@ const SPECIES_DB = {
         // çıkıyor ve ahtapot avcılığı yaz aylarında da (örn. Bodrum/Datça) sürüyor.
         tempRange: { min: 10, opt: 20, max: 27 } /* [2026-08-03] min 13→10: Marmara Şubat (8.5°C) sıfırlanıyordu, oysa seasons.winter=0.65 kaydın en yüksek değeri. GÜVEN: ORTA */,
         seasons: { winter: 0.65, spring: 0.50, summer: 0.30, autumn: 0.55 },
-        activity: "NIGHT",
+        activity: "DAWN_DUSK",   // [2026-08-03] NIGHT→DAWN_DUSK: peakHours "DAWN_DUSK" ile
+        // çelişiyordu. Ekranda yazan doğru kabul edildi.
         pressureSensitivity: 0.5,
         wavePref: 0.1, clarityPref: "MODERATE",
         currentPref: 0.1,
@@ -1253,7 +1257,8 @@ const SPECIES_DB = {
         huntingMode: "ambush",peakHours: "CREPUSCULAR", peakHoursDesc: "Alacakaranlık", peakHoursDescEn: "Dusk", peakHoursDescEl: "Dusk", peakHoursDescEs: "Consultar detalles",
         tempRange: { min: 18, opt: 25, max: 30 },
         seasons: { winter: 0.40, spring: 0.65, summer: 0.85, autumn: 0.75 },
-        activity: "NIGHT",
+        activity: "CREPUSCULAR",   // [2026-08-03] NIGHT→CREPUSCULAR: peakHours "CREPUSCULAR"
+        // ile çelişiyordu. Motorda CREPUSCULAR ile DAWN_DUSK birebir aynı işlenir.
         pressureSensitivity: 0.4,
         wavePref: 0.3, clarityPref: "CLEAR",
         currentPref: 0.3,
