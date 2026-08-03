@@ -4,7 +4,7 @@
 
 const SPECIES_DB = {
     "levrek": {
-        name: "Levrek", nameEn: "European Sea Bass", nameEl: "Ευρωπαϊκό λαβράκι", nameEs: "Lubina", icon: "🐟", scientificName: "Dicentrarchus labrax",
+        name: "Levrek", nameEn: "European Sea Bass", nameEl: "Λαβράκι", nameEs: "Lubina", icon: "🐟", scientificName: "Dicentrarchus labrax",
         photoId: 1,
         category: "KIYI_AVCI",
         huntingMode: "visual",
@@ -45,7 +45,7 @@ const SPECIES_DB = {
         note: "Dalgalı ve köpüklü suyu sever ancak durgun sularda da av verir. Gürültüden kaçının. Vicdani limit 40 cm.", noteEn: "Prefers foamy water but also caught in calm seas. Avoid noise. Ethical limit 40cm.", noteEl: "Prefers foamy water but also caught in calm seas. Avoid noise. Ethical limit 40cm.", noteEs: "Prefiere foamy water but also caught in calm seas. Evitar noise. Ethical limit 40cm."
     },
     "lufer": {
-        name: "Lüfer/Kofana", nameEn: "Bluefish", nameEl: "Bluefish", nameEs: "Anjova", icon: "🦈", scientificName: "Pomatomus saltatrix",
+        name: "Lüfer/Kofana", nameEn: "Bluefish", nameEl: "Γοφάρι", nameEs: "Anjova", icon: "🦈", scientificName: "Pomatomus saltatrix",
         photoId: 2,
         category: "PELAJIK",
         huntingMode: "visual",
@@ -80,7 +80,7 @@ const SPECIES_DB = {
     },
     "eskina": {
         name: "Eşkina",
-        nameEn: "Brown Meagre", nameEl: "Brown Meager", nameEs: "Corvallo",
+        nameEn: "Brown Meagre", nameEl: "Σκιός", nameEs: "Corvallo",
         icon: "🐟",
         scientificName: "Sciaena umbra",
         photoId: 3,
@@ -153,7 +153,7 @@ const SPECIES_DB = {
     },
     "minekop": {
         name: "Minekop",
-        nameEn: "Shi Drum", nameEl: "Shi Drum", nameEs: "Verrugato",
+        nameEn: "Shi Drum", nameEl: "Μυλοκόπι στικτό", nameEs: "Verrugato",
         icon: "🐟",
         scientificName: "Umbrina cirrosa",
         photoId: 4,
@@ -187,7 +187,7 @@ const SPECIES_DB = {
     },
     "izmarit": {
         name: "İzmarit",
-        nameEn: "Picarel", nameEl: "Picarel", nameEs: "Chanquete",
+        nameEn: "Picarel", nameEl: "Μαρίδα", nameEs: "Chanquete",
         icon: "🐟",
         scientificName: "Spicara smaris",
         photoId: 9,
@@ -220,7 +220,7 @@ const SPECIES_DB = {
         noteEn: "Travels in schools. Small bait and thin lines are essential.", noteEl: "Travels in schools. Small bait and thin lines are essential.", noteEs: "Analizando condiciones óptimas para esta especie en tiempo real."
     },
     "cipura": {
-        name: "Çipura", nameEn: "Gilt-head Bream", nameEl: "Τσιπούρα με επίχρυσο κεφάλι", nameEs: "Dorada", icon: "🐠", scientificName: "Sparus aurata",
+        name: "Çipura", nameEn: "Gilt-head Bream", nameEl: "Τσιπούρα", nameEs: "Dorada", icon: "🐠", scientificName: "Sparus aurata",
         photoId: 11,
         category: "KIYI",
         huntingMode: "visual",
@@ -244,7 +244,7 @@ const SPECIES_DB = {
         noteEn: "Crush the bait first; don't strike immediately.", noteEl: "Crush the bait first; don't strike immediately.", noteEs: "Crush the bait first; don't strike immediately."
     },
     "karagoz": {
-        name: "Karagöz", nameEn: "Common Two-banded Bream", nameEl: "Κοινή Τσιπούρα δύο ζωνών", nameEs: "Sargo Moarra", icon: "🐟", scientificName: "Diplodus vulgaris",
+        name: "Karagöz", nameEn: "Common Two-banded Bream", nameEl: "Σπάρος", nameEs: "Sargo Moarra", icon: "🐟", scientificName: "Diplodus vulgaris",
         photoId: 12,
         category: "KIYI",
         huntingMode: "visual",
@@ -265,7 +265,7 @@ const SPECIES_DB = {
         noteEn: "Rocky, foamy water. Watch for line friction.", noteEl: "Rocky, foamy water. Watch for line friction.", noteEs: "Rocky, foamy water. Watch for line friction."
     },
     "mirmir": {
-        name: "Mırmır", nameEn: "Striped Seabream", nameEl: "Ριγέ τσιπούρα", nameEs: "Herrera", icon: "🦓", scientificName: "Lithognathus mormyrus",
+        name: "Mırmır", nameEn: "Striped Seabream", nameEl: "Μουρμούρα", nameEs: "Herrera", icon: "🦓", scientificName: "Lithognathus mormyrus",
         photoId: 13,
         category: "KIYI",
         huntingMode: "chemosensory",
@@ -289,7 +289,7 @@ const SPECIES_DB = {
         noteEn: "Approaches within 1m of shore at night. No flashlights! Sand bottom specialist.", noteEl: "Approaches within 1m of shore at night. No flashlights! Sand bottom specialist.", noteEs: "Approaches within 1m of shore at night. No flashlights! Sand bottom specialist."
     },
     "kalamar": {
-        name: "Kalamar", nameEn: "European Squid", nameEl: "Ευρωπαϊκό Καλαμάρι", nameEs: "Calamar", icon: "🦑", scientificName: "Loligo vulgaris",
+        name: "Kalamar", nameEn: "European Squid", nameEl: "Καλαμάρι", nameEs: "Calamar", icon: "🦑", scientificName: "Loligo vulgaris",
         photoId: 46,
         category: "KAFADANBACAKLI",
         huntingMode: "visual",
@@ -317,7 +317,7 @@ const SPECIES_DB = {
         noteEn: "Clear water and moonlight. Avoid catching during early summer spawning.", noteEl: "Clear water and moonlight. Avoid catching during early summer spawning.", noteEs: "Clear water and moonlight. Evitar catching during early summer desove."
     },
     "ahtapot": {
-        name: "Ahtapot", nameEn: "Common Octopus", nameEl: "Κοινό χταπόδι", nameEs: "Pulpo", icon: "🐙", scientificName: "Octopus vulgaris",
+        name: "Ahtapot", nameEn: "Common Octopus", nameEl: "Χταπόδι", nameEs: "Pulpo", icon: "🐙", scientificName: "Octopus vulgaris",
         photoId: 47,
         category: "KAFADANBACAKLI",
         huntingMode: "chemosensory",
@@ -346,7 +346,7 @@ const SPECIES_DB = {
     },
 
     "kikla": {
-        name: "Kikla-Ot Balığı", nameEn: "Green Wrasse", nameEl: "Ballan Wrasse", nameEs: "Bodión", icon: "🐟", scientificName: "Labrus viridis",
+        name: "Kikla-Ot Balığı", nameEn: "Green Wrasse", nameEl: "Χειλού πράσινη", nameEs: "Bodión", icon: "🐟", scientificName: "Labrus viridis",
         photoId: 74,
         category: "KAYALIK",
         
@@ -445,7 +445,7 @@ const SPECIES_DB = {
     },
 
     "trakun": {
-        name: "Trakun (Tral)", nameEn: "Blue Runner", nameEl: "Blue Runner", nameEs: "Jurel Azul", icon: "🐟", scientificName: "Caranx crysos",
+        name: "Trakun (Tral)", nameEn: "Blue Runner", nameEl: "Κοκάλι", nameEs: "Jurel Azul", icon: "🐟", scientificName: "Caranx crysos",
         photoId: 73,
         category: "PELAJIK",
         huntingMode: "visual",
@@ -468,7 +468,7 @@ const SPECIES_DB = {
         noteEn: "Schooling fish. Dense in Aegean and Mediterranean shores in summer.", noteEl: "Schooling fish. Dense in Aegean and Mediterranean shores in summer.", noteEs: "Schooling fish. Dense in Aegean and Mediterranean shores in summer."
     },
     "kefal": {
-        name: "Kefal", nameEn: "Flathead Grey Mullet", nameEl: "Flathead Grey Mullet", nameEs: "Lisa",
+        name: "Kefal", nameEn: "Flathead Grey Mullet", nameEl: "Κέφαλος", nameEs: "Lisa",
         icon: "🐟", scientificName: "Mugil cephalus",
         photoId: 44,
         category: "LAGUN",
@@ -491,7 +491,7 @@ const SPECIES_DB = {
         noteEn: "Found in lagoons and river mouths. Tolerates low salinity.", noteEl: "Found in lagoons and river mouths. Tolerates low salinity.", noteEs: "Found in lagoons and river mouths. Tolerates low salinity."
     },
     "zargana": {
-        name: "Zargana", nameEn: "Garfish", nameEl: "Garfish", nameEs: "Aguja",
+        name: "Zargana", nameEn: "Garfish", nameEl: "Ζαργάνα", nameEs: "Aguja",
         icon: "🐟", scientificName: "Belone belone",
         photoId: 20,
         category: "KIYI",
@@ -517,7 +517,7 @@ const SPECIES_DB = {
     // YENİ TÜRLER - FishBase & FAO Referansları
     // ═══════════════════════════════════════════════════════════════════════════
     "orfoz": {
-        name: "Orfoz", nameEn: "Dusky Grouper", nameEl: "Dusky Grouper", nameEs: "Mero", icon: "🐟", scientificName: "Epinephelus marginatus",
+        name: "Orfoz", nameEn: "Dusky Grouper", nameEl: "Ροφός", nameEs: "Mero", icon: "🐟", scientificName: "Epinephelus marginatus",
         photoId: 5,
         category: "KORUMA",
         
@@ -542,7 +542,7 @@ const SPECIES_DB = {
         // [DÜZELTME] "sarikuyruk" anahtarı aynı bilimsel türün (Seriola dumerili) çelişkili
         // verilerle ikinci kez girilmiş, hiçbir kodda referans edilmeyen bir duplikeydi.
         // Silindi; iki common-name Türkçe'de birbirinin yerine kullanıldığı için isimde korundu.
-        name: "Akya (Sarıkuyruk)", nameEn: "Greater Amberjack", nameEl: "Greater Amberjack", nameEs: "Lecha (Pez Limón)",
+        name: "Akya (Sarıkuyruk)", nameEn: "Greater Amberjack", nameEl: "Μαγιάτικο", nameEs: "Lecha (Pez Limón)",
         icon: "🐟", scientificName: "Seriola dumerili",
         photoId: 6,
         category: "PELAJIK",
@@ -571,7 +571,7 @@ const SPECIES_DB = {
         noteEn: "Powerful predator! Boat required. Abundant offshore in summer.", noteEl: "Powerful predator! Boat required. Abundant offshore in summer.", noteEs: "Powerful predator! Boat required. Abundant offshore in summer."
     },
     "sinarit": {
-        name: "Sinarit", nameEn: "Common Dentex", nameEl: "Κοινή Dentex", nameEs: "Dentón", icon: "🐟", scientificName: "Dentex dentex",
+        name: "Sinarit", nameEn: "Common Dentex", nameEl: "Συναγρίδα", nameEs: "Dentón", icon: "🐟", scientificName: "Dentex dentex",
         photoId: 7,
         category: "KIYI_AVCI",
         huntingMode: "visual",
@@ -592,7 +592,7 @@ const SPECIES_DB = {
         noteEn: "King of the sea. Prefers rocky bottom. Legal size 35cm — scientific reference.", noteEl: "King of the sea. Prefers rocky bottom. Legal size 35cm — scientific reference.", noteEs: "King of the sea. Prefiere rocky bottom. Legal size 35cm — scientific reference."
     },
     "mercan": {
-        name: "Mercan", nameEn: "Red Porgy", nameEl: "Red Porgy", nameEs: "Breca", icon: "🐟", scientificName: "Pagrus pagrus",
+        name: "Mercan", nameEn: "Red Porgy", nameEl: "Φαγκρί", nameEs: "Breca", icon: "🐟", scientificName: "Pagrus pagrus",
         photoId: 35,
         category: "DIP_KIYI",
         huntingMode: "chemosensory",
@@ -614,7 +614,7 @@ const SPECIES_DB = {
         noteEn: "Roams mixed rocky-sandy bottom. Bait must reach bottom. More active in light current.", noteEl: "Roams mixed rocky-sandy bottom. Bait must reach bottom. More active in light current.", noteEs: "Roams mixed rocky-sandy bottom. Bait must reach bottom. More active in light current."
     },
     "antenli_mercan": {
-        name: "Antenli Mercan", nameEn: "Blackspot Seabream", nameEl: "Blackspot Seabream", nameEs: "Besugo", icon: "🐟", scientificName: "Pagellus bogaraveo",
+        name: "Antenli Mercan", nameEn: "Blackspot Seabream", nameEl: "Μουσμούλι", nameEs: "Besugo", icon: "🐟", scientificName: "Pagellus bogaraveo",
         photoId: 36,
         category: "DIP_DERIN",
         huntingMode: "chemosensory",
@@ -641,7 +641,7 @@ const SPECIES_DB = {
     },
 
     "lipsoz": {
-        name: "Lipsoz", nameEn: "Red Scorpionfish", nameEl: "Κόκκινο σκορπιόψαρο", nameEs: "Escórpora", icon: "🐟", scientificName: "Scorpaena scrofa",
+        name: "Lipsoz", nameEn: "Red Scorpionfish", nameEl: "Σκορπίνα", nameEs: "Escórpora", icon: "🐟", scientificName: "Scorpaena scrofa",
         photoId: 84,
         category: "DIP_KIYI",
         huntingMode: "ambush",
@@ -726,7 +726,7 @@ const SPECIES_DB = {
         noteEn: "Sharp-nosed bream. Prefers foamy water.", noteEl: "Sharp-nosed bream. Prefers foamy water.", noteEs: "Sharp-nosed bream. Prefiere foamy water."
     },
     "sargoz": {
-        name: "Sargoz", nameEn: "White Seabream", nameEl: "Λευκή τσιπούρα", nameEs: "Sargo Común", icon: "🐟", scientificName: "Diplodus sargus",
+        name: "Sargoz", nameEn: "White Seabream", nameEl: "Σαργός", nameEs: "Sargo Común", icon: "🐟", scientificName: "Diplodus sargus",
         photoId: 19,
         category: "KIYI",
         huntingMode: "visual",
@@ -747,7 +747,7 @@ const SPECIES_DB = {
         noteEn: "Larger relative of two-banded bream. Prefers foamy, choppy water.", noteEl: "Larger relative of two-banded bream. Prefers foamy, choppy water.", noteEs: "Larger relative of two-banded bream. Prefiere foamy, choppy water."
     },
     "hani": {
-        name: "Hani/Hanos", nameEn: "Comber", nameEl: "Comber", nameEs: "Serrano", icon: "🐟", scientificName: "Serranus cabrilla",
+        name: "Hani/Hanos", nameEn: "Comber", nameEl: "Χάνος", nameEs: "Serrano", icon: "🐟", scientificName: "Serranus cabrilla",
         photoId: 38,
         category: "DIP_KIYI",
         huntingMode: "ambush",
@@ -791,7 +791,7 @@ const SPECIES_DB = {
     // YENİ EKLENEN TÜRLER - v2.4
     // ═══════════════════════════════════════════════════════════════════════════
     "tranca": {
-        name: "Trança", nameEn: "Pink Dentex", nameEl: "Ροζ Dentex", nameEs: "Dentón de Pluma", icon: "🐟", scientificName: "Dentex gibbosus",
+        name: "Trança", nameEn: "Pink Dentex", nameEl: "Συναγρίδα καμπούρα", nameEs: "Dentón de Pluma", icon: "🐟", scientificName: "Dentex gibbosus",
         photoId: 49,
         category: "DIP_DERIN",
         huntingMode: "chemosensory",
@@ -813,7 +813,7 @@ const SPECIES_DB = {
         noteEn: "King of the deep. Legendary catch on jigging. Fights hard.", noteEl: "King of the deep. Legendary catch on jigging. Fights hard.", noteEs: "King of the deep. Legendary catch on jigging. Fights hard."
     },
     "subye": {
-        name: "Sübye", nameEn: "Common Cuttlefish", nameEl: "Κοινή σουπιά", nameEs: "Sepia", icon: "🦑", scientificName: "Sepia officinalis",
+        name: "Sübye", nameEn: "Common Cuttlefish", nameEl: "Σουπιά", nameEs: "Sepia", icon: "🦑", scientificName: "Sepia officinalis",
         photoId: 48,
         category: "KALAMAR",
         // [DÜZELTME] Sübye kamuflaj+pusu avcılığı yapan, çok gelişmiş görme sistemine sahip bir
@@ -839,7 +839,7 @@ const SPECIES_DB = {
         noteEn: "Autumn favourite. Fun eging. Attracted to light at night.", noteEl: "Autumn favourite. Fun eging. Attracted to light at night.", noteEs: "Autumn favourite. Fun eging. Attracted to light at night."
     },
     "granyoz": {
-        name: "Granyoz (Sarıağız)", nameEn: "Meagre", nameEl: "πενιχρό", nameEs: "Meagre", icon: "🐟", scientificName: "Argyrosomus regius",
+        name: "Granyoz (Sarıağız)", nameEn: "Meagre", nameEl: "πενιχρό", nameEs: "Corvina", icon: "🐟", scientificName: "Argyrosomus regius",
         photoId: 10,
         category: "AVCI",
         huntingMode: "chemosensory",
@@ -860,7 +860,7 @@ const SPECIES_DB = {
         noteEn: "Giant night predator. Can reach 50kg. Makes sounds (drumfish).", noteEl: "Giant night predator. Can reach 50kg. Makes sounds (drumfish).", noteEs: "Giant night predator. Can reach 50kg. Makes sounds (drumfish)."
     },
     "lambuga": {
-        name: "Lambuga (Mahi Mahi)", nameEn: "Common Dolphinfish", nameEl: "Κοινό δελφίνι", nameEs: "Common Dolphinfish", icon: "🐟", scientificName: "Coryphaena hippurus",
+        name: "Lambuga (Mahi Mahi)", nameEn: "Common Dolphinfish", nameEl: "Κυνηγός", nameEs: "Dorado", icon: "🐟", scientificName: "Coryphaena hippurus",
         photoId: 83,
         category: "AVCI",
         huntingMode: "visual",
@@ -884,7 +884,7 @@ const SPECIES_DB = {
         noteEn: "Tropical beauty. Found under floating objects. Fast-growing.", noteEl: "Tropical beauty. Found under floating objects. Fast-growing.", noteEs: "Tropical beauty. Found under floating objects. Fast-growing."
     },
     "uskumru": {
-        name: "Uskumru", nameEn: "Atlantic Mackerel", nameEl: "Σκουμπρί Ατλαντικού", nameEs: "Atlantic Mackerel", icon: "🐟", scientificName: "Scomber scombrus",
+        name: "Uskumru", nameEn: "Atlantic Mackerel", nameEl: "Σκουμπρί", nameEs: "Caballa", icon: "🐟", scientificName: "Scomber scombrus",
         photoId: 27,
         category: "SÜRÜ",
         huntingMode: "visual",
@@ -908,7 +908,7 @@ const SPECIES_DB = {
         noteEn: "Prefers cool water. Schooling fish. Tasty and plentiful catch.", noteEl: "Prefers cool water. Schooling fish. Tasty and plentiful catch.", noteEs: "Prefiere cool water. Schooling fish. Tasty and plentiful catch."
     },
     "kolyoz": {
-        name: "Kolyoz", nameEn: "Chub Mackerel", nameEl: "Τσουμπ Σκουμπρί", nameEs: "Chub Mackerel", icon: "🐟", scientificName: "Scomber colias",
+        name: "Kolyoz", nameEn: "Chub Mackerel", nameEl: "Τσουμπ Σκουμπρί", nameEs: "Estornino", icon: "🐟", scientificName: "Scomber colias",
         photoId: 28,
         category: "SÜRÜ",
         huntingMode: "visual",
@@ -958,7 +958,7 @@ const SPECIES_DB = {
     },
 
     "lokum": {
-        name: "Lokum Balığı", nameEn: "Silver Biddy", nameEl: "Silver Biddy", nameEs: "Silver Biddy", icon: "🐟", scientificName: "Sillago suezensis",
+        name: "Lokum Balığı", nameEn: "Silver Biddy", nameEl: "Σιλάγκο", nameEs: "Sillago de Suez", icon: "🐟", scientificName: "Sillago suezensis",
         photoId: 85,
         category: "KUMSAL",
         
@@ -983,7 +983,7 @@ const SPECIES_DB = {
         noteEn: "Lessepsian invasive species. Sandy and muddy shallow waters in schools. Very common in Aegean and Mediterranean shores in summer. Easily caught with shrimp and worm on bottom.", noteEl: "Lessepsian invasive species. Sandy and muddy shallow waters in schools. Very common in Aegean and Mediterranean shores in summer. Easily caught with shrimp and worm on bottom.", noteEs: "Lessepsian invasive species. Sandy and muddy shallow waters in schools. Very common in Aegean and Mediterranean shores in summer. Easily caught with shrimp and worm on bottom."
     },
     "muren": {
-        name: "Müren", nameEn: "Mediterranean Moray", nameEl: "Μεσογειακός Μοράι", nameEs: "Mediterranean Moray", icon: "🐍", scientificName: "Muraena helena",
+        name: "Müren", nameEn: "Mediterranean Moray", nameEl: "Σμέρνα", nameEs: "Morena", icon: "🐍", scientificName: "Muraena helena",
         photoId: 54,
         category: "KAYALIK",
         
@@ -1003,7 +1003,7 @@ const SPECIES_DB = {
         noteEn: "Sharp teeth! Handle carefully. Night predator. Lives in rocky crevices.", noteEl: "Sharp teeth! Handle carefully. Night predator. Lives in rocky crevices.", noteEs: "Sharp teeth! Handle carefully. Night predator. Lives in rocky crevices."
     },
     "migri": {
-        name: "Mığrı (Deniz Yılanı)", nameEn: "European Conger", nameEl: "Ευρωπαϊκό Κογκρέσο", nameEs: "European Conger", icon: "🐍", scientificName: "Conger conger",
+        name: "Mığrı (Deniz Yılanı)", nameEn: "European Conger", nameEl: "Μουγγρί", nameEs: "Congrio", icon: "🐍", scientificName: "Conger conger",
         photoId: 53,
         category: "DIP_KIYI",
         huntingMode: "chemosensory",
@@ -1024,7 +1024,7 @@ const SPECIES_DB = {
         noteEn: "Can grow huge (2m+). Night predator. Prefers rocky crevices.", noteEl: "Can grow huge (2m+). Night predator. Prefers rocky crevices.", noteEs: "Can grow huge (2m+). Night predator. Prefiere rocky crevices."
     },
     "zurna": {
-        name: "İskarmoz" /* [2026-08-03] Sphyraena sphyraena Türkçe adı İSKARMOZ (deniz turnası). Kayıt anahtarı geçmişten "zurna" kaldı ama zurna balığı AYRI bir türdür (Scomberesox saurus, Scomberesocidae) ve bu veritabanında yok. Parantezle alias vermek iki türü karıştırıyordu. */, nameEn: "European Barracuda", nameEl: "Ευρωπαϊκό Barracuda", nameEs: "European Barracuda", icon: "🐟", scientificName: "Sphyraena sphyraena",
+        name: "İskarmoz" /* [2026-08-03] Sphyraena sphyraena Türkçe adı İSKARMOZ (deniz turnası). Kayıt anahtarı geçmişten "zurna" kaldı ama zurna balığı AYRI bir türdür (Scomberesox saurus, Scomberesocidae) ve bu veritabanında yok. Parantezle alias vermek iki türü karıştırıyordu. */, nameEn: "European Barracuda", nameEl: "Λούτσος", nameEs: "Espetón europeo", icon: "🐟", scientificName: "Sphyraena sphyraena",
         photoId: 52,
         category: "AVCI",
         huntingMode: "visual",
@@ -1045,7 +1045,7 @@ const SPECIES_DB = {
         noteEn: "Fast predator. Schools at surface. Used as lure fish.", noteEl: "Fast predator. Schools at surface. Used as lure fish.", noteEs: "Fast predator. Schools at surface. Used as lure fish."
     },
     "barakuda": {
-        name: "Baraküda", nameEn: "Yellowmouth Barracuda", nameEl: "Yellowmouth Barracuda", nameEs: "Yellowmouth Barracuda", icon: "🐟", scientificName: "Sphyraena viridensis",
+        name: "Baraküda", nameEn: "Yellowmouth Barracuda", nameEl: "Λούτσος", nameEs: "Espetón", icon: "🐟", scientificName: "Sphyraena viridensis",
         photoId: 51,
         category: "AVCI",
         huntingMode: "visual",
@@ -1074,7 +1074,7 @@ const SPECIES_DB = {
         noteEn: "Sharp teeth! Wire trace essential. Aggressively hunts at dusk.", noteEl: "Sharp teeth! Wire trace essential. Aggressively hunts at dusk.", noteEs: "Sharp teeth! Wire trace essential. Aggressively hunts at dusk."
     },
     "kirlangic": {
-        name: "Kırlangıç", nameEn: "Tub Gurnard", nameEl: "Tub Gunard", nameEs: "Tub Gurnard", icon: "🐟", scientificName: "Chelidonichthys lucerna",
+        name: "Kırlangıç", nameEn: "Tub Gurnard", nameEl: "Καπόνι", nameEs: "Bejel", icon: "🐟", scientificName: "Chelidonichthys lucerna",
         photoId: 59,
         category: "DIP_KIYI",
         huntingMode: "chemosensory",
@@ -1094,7 +1094,7 @@ const SPECIES_DB = {
         noteEn: "Swims as if flying with colourful fins. Tasty flesh.", noteEl: "Swims as if flying with colourful fins. Tasty flesh.", noteEs: "Swims as if flying with colourful fins. Tasty flesh."
     },
     "dil_baligi": {
-        name: "Dil Balığı", nameEn: "Common Sole", nameEl: "Κοινή σόλα", nameEs: "Common Sole", icon: "🐟", scientificName: "Solea solea",
+        name: "Dil Balığı", nameEn: "Common Sole", nameEl: "Γλώσσα", nameEs: "Lenguado común", icon: "🐟", scientificName: "Solea solea",
         photoId: 42,
         category: "DIP_KIYI",
         huntingMode: "chemosensory",
@@ -1114,7 +1114,7 @@ const SPECIES_DB = {
         noteEn: "Active at night, buries in sand during day. Lugworm is best bait.", noteEl: "Active at night, buries in sand during day. Lugworm is best bait.", noteEs: "Activo at night, buries in sand during day. Lugworm is best bait."
     },
     "gelincik": {
-        name: "Gelincik", nameEn: "Shore Rockling", nameEl: "Shore Rockling", nameEs: "Shore Rockling", icon: "🐟", scientificName: "Gaidropsarus mediterraneus",
+        name: "Gelincik", nameEn: "Shore Rockling", nameEl: "Γαϊδουρόψαρο", nameEs: "Lota de roca", icon: "🐟", scientificName: "Gaidropsarus mediterraneus",
         photoId: 55,
         category: "KAYALIK",
         huntingMode: "chemosensory",
@@ -1134,7 +1134,7 @@ const SPECIES_DB = {
         noteEn: "Snake-like appearance. Hunts in rocky crevices at night.", noteEl: "Snake-like appearance. Hunts in rocky crevices at night.", noteEs: "Snake-like appearance. Caza in rocky crevices at night."
     },
     "vatoz": {
-        name: "Vatoz", nameEn: "Common Stingray", nameEl: "Κοινό Stingray", nameEs: "Common Stingray", icon: "🦈", scientificName: "Dasyatis pastinaca",
+        name: "Vatoz", nameEn: "Common Stingray", nameEl: "Τρυγόνα", nameEs: "Raya látigo común", icon: "🦈", scientificName: "Dasyatis pastinaca",
         photoId: 58,
         category: "DIP_KIYI",
         huntingMode: "chemosensory",
@@ -1154,7 +1154,7 @@ const SPECIES_DB = {
         noteEn: "CAUTION: Venomous spine! Handle with great care.", noteEl: "CAUTION: Venomous spine! Handle with great care.", noteEs: "CAUTION: Venomous spine! Handle with great care."
     },
     "cutre": {
-        name: "Çütre (Tetik)", nameEn: "Grey Triggerfish", nameEl: "Grey Triggerfish", nameEs: "Grey Triggerfish", icon: "🐟", scientificName: "Balistes capriscus",
+        name: "Çütre (Tetik)", nameEn: "Grey Triggerfish", nameEl: "Γουρουνόψαρο γκρι", nameEs: "Pejepuerco blanco", icon: "🐟", scientificName: "Balistes capriscus",
         photoId: 72,
         category: "KAYALIK",
         
@@ -1175,7 +1175,7 @@ const SPECIES_DB = {
         noteEn: "Hard-jawed; snaps hooks. Has a powerful trigger mechanism.", noteEl: "Hard-jawed; snaps hooks. Has a powerful trigger mechanism.", noteEs: "Hard-jawed; snaps hooks. Has a powerful trigger mechanism."
     },
     "kurbaga": {
-        name: "Kurbağa Balığı", nameEn: "Atlantic Stargazer", nameEl: "Atlantic Stargazer", nameEs: "Atlantic Stargazer", icon: "🐟", scientificName: "Uranoscopus scaber",
+        name: "Kurbağa Balığı", nameEn: "Atlantic Stargazer", nameEl: "Λύχνος", nameEs: "Rata", icon: "🐟", scientificName: "Uranoscopus scaber",
         photoId: 79,
         category: "DIP_KIYI",
         huntingMode: "ambush",
@@ -1195,7 +1195,7 @@ const SPECIES_DB = {
         noteEn: "CAUTION: Venomous spines! Waits buried in sand.", noteEl: "CAUTION: Venomous spines! Waits buried in sand.", noteEs: "CAUTION: Venomous spines! Waits buried in sand."
     },
     "fener": {
-        name: "Fener Balığı", nameEn: "Anglerfish", nameEl: "Ψαρόψαρο", nameEs: "Anglerfish", icon: "🐟", scientificName: "Lophius piscatorius",
+        name: "Fener Balığı", nameEn: "Anglerfish", nameEl: "Ψαρόψαρο", nameEs: "Rape", icon: "🐟", scientificName: "Lophius piscatorius",
         photoId: 80,
         category: "DIP_DERIN",
         huntingMode: "ambush",
@@ -1219,7 +1219,7 @@ const SPECIES_DB = {
         noteEn: "Ugly but very tasty. Lives in deep water. Tail meat is prized.", noteEl: "Ugly but very tasty. Lives in deep water. Tail meat is prized.", noteEs: "Ugly but very tasty. Lives in deep water. Tail meat is prized."
     },
     "hamsi": {
-        name: "Hamsi", nameEn: "European Anchovy", nameEl: "Ευρωπαϊκός γαύρος", nameEs: "European Anchovy", icon: "🐟", scientificName: "Engraulis encrasicolus",
+        name: "Hamsi", nameEn: "European Anchovy", nameEl: "Γαύρος", nameEs: "Boquerón", icon: "🐟", scientificName: "Engraulis encrasicolus",
         photoId: 32,
         category: "SÜRÜ",
         huntingMode: "visual",
@@ -1249,7 +1249,7 @@ const SPECIES_DB = {
         noteEn: "Symbol of the Black Sea. Abundant in winter. Ideal for pan-frying.", noteEl: "Symbol of the Black Sea. Abundant in winter. Ideal for pan-frying.", noteEs: "Symbol of the Black Sea. Abundant in winter. Ideal for pan-frying."
     },
     "aslan_baligi": {
-        name: "Aslan Balığı", nameEn: "Devil Firefish", nameEl: "Devil Firefish", nameEs: "Devil Firefish",
+        name: "Aslan Balığı", nameEn: "Devil Firefish", nameEl: "Λεοντόψαρο", nameEs: "Pez león",
         icon: "🦁", scientificName: "Pterois miles",
         photoId: 71,
         category: "İSTİLACI",
@@ -1271,7 +1271,7 @@ const SPECIES_DB = {
         noteEn: "WARNING: INVASIVE SPECIES! Has VENOMOUS spines. Kill when caught.", noteEl: "WARNING: INVASIVE SPECIES! Has VENOMOUS spines. Kill when caught.", noteEs: "WARNING: INVASIVE SPECIES! Has VENOMOUS spines. Kill when caught."
     },
     "balon_baligi": {
-        name: "Balon Balığı", nameEn: "Silver-cheeked Toadfish", nameEl: "Φρύνος με ασημί μάγουλα", nameEs: "Silver-cheeked Toadfish",
+        name: "Balon Balığı", nameEn: "Silver-cheeked Toadfish", nameEl: "Λαγοκέφαλος", nameEs: "Pez globo plateado",
         icon: "🐡", scientificName: "Lagocephalus sceleratus",
         photoId: 70,
         category: "İSTİLACI",
@@ -1295,7 +1295,7 @@ const SPECIES_DB = {
     // YENİ EKLENEN BALIKLAR
     // ═══════════════════════════════════════════════════════════════════
     "isparoz": {
-        name: "İsparoz", nameEn: "Annular Seabream", nameEl: "Δακτυλιοειδής τσιπούρα", nameEs: "Annular Seabream", icon: "🐟", scientificName: "Diplodus annularis",
+        name: "İsparoz", nameEn: "Annular Seabream", nameEl: "Σπαρίδα", nameEs: "Raspallón", icon: "🐟", scientificName: "Diplodus annularis",
         photoId: 21,
         category: "DIP_KIYI",
         // [DÜZELTME] Diplodus cinsinin diğer üyeleri (karagöz, sargoz, sivriburun) bu DB'de
@@ -1321,7 +1321,7 @@ const SPECIES_DB = {
         noteEn: "Schools together. Easily caught with bread. Good yield.", noteEl: "Schools together. Easily caught with bread. Good yield.", noteEs: "Schools together. Easily caught with bread. Good yield."
     },
     "yazili_orkinos": {
-        name: "Yazılı Orkinos", nameEn: "Little Tunny", nameEl: "Μικρή Τούνι", nameEs: "Little Tunny", icon: "🐟", scientificName: "Euthynnus alletteratus",
+        name: "Yazılı Orkinos", nameEn: "Little Tunny", nameEl: "Καρβούνι", nameEs: "Bacoreta", icon: "🐟", scientificName: "Euthynnus alletteratus",
         photoId: 29,
         category: "PELAJIK",
         huntingMode: "visual",
@@ -1350,7 +1350,7 @@ const SPECIES_DB = {
         noteEn: "Fast and powerful. Best caught by trolling.", noteEl: "Fast and powerful. Best caught by trolling.", noteEs: "Fast and powerful. Best caught by trolling."
     },
     "palamut": {
-        name: "Palamut", nameEn: "Atlantic Bonito", nameEl: "Atlantic Bonito", nameEs: "Atlantic Bonito", icon: "🐟", scientificName: "Sarda sarda",
+        name: "Palamut", nameEn: "Atlantic Bonito", nameEl: "Παλαμίδα", nameEs: "Bonito atlántico", icon: "🐟", scientificName: "Sarda sarda",
         photoId: 25,
         category: "PELAJIK",
         huntingMode: "visual",
@@ -1381,7 +1381,7 @@ const SPECIES_DB = {
         noteEn: "Autumn fish. Abundant in the Bosphorus. Cannibal tendencies — throw metal into the school.", noteEl: "Autumn fish. Abundant in the Bosphorus. Cannibal tendencies — throw metal into the school.", noteEs: "Autumn fish. Abundant in the Bosphorus. Cannibal tendencies — throw metal into the school."
     },
     "cinekop": {
-        name: "Çinekop", nameEn: "Baby Bluefish", nameEl: "Μωρό Bluefish", nameEs: "Baby Bluefish", icon: "🐟", scientificName: "Pomatomus saltatrix (juv.)",
+        name: "Çinekop", nameEn: "Baby Bluefish", nameEl: "Γοφαράκι", nameEs: "Anjova joven", icon: "🐟", scientificName: "Pomatomus saltatrix (juv.)",
         photoId: 31,
         category: "PELAJIK",
         huntingMode: "visual",
@@ -1413,7 +1413,7 @@ const SPECIES_DB = {
     // TİCARİ BALIKLAR (Hobi oltası ile zor ama bölgede bulunur)
     // ═══════════════════════════════════════════════════════════════════
     "sardalya": {
-        name: "Sardalya", nameEn: "European Sardine", nameEl: "Ευρωπαϊκή σαρδέλα", nameEs: "European Sardine", icon: "🐟", scientificName: "Sardina pilchardus",
+        name: "Sardalya", nameEn: "European Sardine", nameEl: "Σαρδέλα", nameEs: "Sardina", icon: "🐟", scientificName: "Sardina pilchardus",
         photoId: 24,
         category: "TİCARİ",
         
@@ -1438,7 +1438,7 @@ const SPECIES_DB = {
         noteEn: "Vertical migration: 25-100m deep during day, rises to 10-35m at night. Can be caught with sabiki at night.", noteEl: "Vertical migration: 25-100m deep during day, rises to 10-35m at night. Can be caught with sabiki at night.", noteEs: "Vertical migration: 25-100m deep during day, rises to 10-35m at night. Can be caught with sabiki at night."
     },
     "mezgit": {
-        name: "Mezgit", nameEn: "Whiting", nameEl: "Νταούκι", nameEs: "Whiting", icon: "🐟", scientificName: "Merlangius merlangus",
+        name: "Mezgit", nameEn: "Whiting", nameEl: "Νταούκι", nameEs: "Merlán", icon: "🐟", scientificName: "Merlangius merlangus",
         photoId: 41,
         category: "DIP_DERIN",
         huntingMode: "chemosensory",
@@ -1460,7 +1460,7 @@ const SPECIES_DB = {
         noteEn: "Black Sea winter fish. Prefers cold water. Hook No:2 — proven by scientific field study.", noteEl: "Black Sea winter fish. Prefers cold water. Hook No:2 — proven by scientific field study.", noteEs: "Black Sea winter fish. Prefiere cold water. Hook No:2 — proven by scientific field study."
     },
     "kalkan": {
-        name: "Kalkan", nameEn: "Turbot", nameEl: "Καλκάνι", nameEs: "Turbot", icon: "🐟", scientificName: "Scophthalmus maximus",
+        name: "Kalkan", nameEn: "Turbot", nameEl: "Καλκάνι", nameEs: "Rodaballo", icon: "🐟", scientificName: "Scophthalmus maximus",
         photoId: 39,
         category: "DIP_DERIN",
         huntingMode: "chemosensory",
@@ -1483,7 +1483,7 @@ const SPECIES_DB = {
         noteEn: "Valuable and rare. Endemic to Black Sea. Camouflages on sandy bottom — slow bait movement essential.", noteEl: "Valuable and rare. Endemic to Black Sea. Camouflages on sandy bottom — slow bait movement essential.", noteEs: "Valuable and rare. Endemic to Black Sea. Camouflages on sandy bottom — slow bait movement essential."
     },
     "tekir": {
-        name: "Tekir", nameEn: "Striped Red Mullet", nameEl: "Ριγέ μπαρμπούνι", nameEs: "Striped Red Mullet", icon: "🐟", scientificName: "Mullus surmuletus",
+        name: "Tekir", nameEn: "Striped Red Mullet", nameEl: "Μπαρμπούνι", nameEs: "Salmonete de roca", icon: "🐟", scientificName: "Mullus surmuletus",
         photoId: 37,
         category: "DIP_KIYI",
         huntingMode: "chemosensory",
@@ -1504,7 +1504,7 @@ const SPECIES_DB = {
         noteEn: "Similar to red mullet but striped. Found along rocky edges.", noteEl: "Similar to red mullet but striped. Found along rocky edges.", noteEs: "Similar to red mullet but striped. Found along rocky edges."
     },
     "pisi": {
-        name: "Pisi Balığı", nameEn: "European Flounder", nameEl: "Ευρωπαϊκός Χαλώνας", nameEs: "European Flounder", icon: "🐟", scientificName: "Platichthys flesus",
+        name: "Pisi Balığı", nameEn: "European Flounder", nameEl: "Φασί", nameEs: "Platija europea", icon: "🐟", scientificName: "Platichthys flesus",
         photoId: 43,
         category: "DIP_KIYI",
         huntingMode: "chemosensory",
@@ -1525,7 +1525,7 @@ const SPECIES_DB = {
         noteEn: "Flatfish. Nocturnal hunting on sandy bottoms.", noteEl: "Flatfish. Nocturnal hunting on sandy bottoms.", noteEs: "Flatfish. Nocturnal hunting on sandy bottoms."
     },
     "fangri": {
-        name: "Alyanak (Kırma Mercan)", nameEn: "Common Pandora", nameEl: "Κοινή Πανδώρα", nameEs: "Common Pandora", icon: "🐟", scientificName: "Pagellus erythrinus",
+        name: "Alyanak (Kırma Mercan)", nameEn: "Common Pandora", nameEl: "Λυθρίνι", nameEs: "Breca", icon: "🐟", scientificName: "Pagellus erythrinus",
         photoId: 14,
         category: "DIP_DERIN",
         huntingMode: "chemosensory",
@@ -1553,7 +1553,7 @@ const SPECIES_DB = {
         noteEn: "Broken bream family. Shrimp and chicken breast are the most effective baits.", noteEl: "Broken bream family. Shrimp and chicken breast are the most effective baits.", noteEs: "Broken bream family. Shrimp and chicken breast are the most effective baits."
     },
     "lahoz": {
-        name: "Grida (Lagos/Lahoz)", nameEn: "White Grouper", nameEl: "Λευκή σφυρίδα", nameEs: "White Grouper", icon: "🐟", scientificName: "Epinephelus aeneus",
+        name: "Grida (Lagos/Lahoz)", nameEn: "White Grouper", nameEl: "Σφυρίδα", nameEs: "Cherna de ley", icon: "🐟", scientificName: "Epinephelus aeneus",
         photoId: 8,
         category: "DIP_KIYI",
         huntingMode: "chemosensory",
@@ -1584,7 +1584,7 @@ const SPECIES_DB = {
     // hem etik açıdan yanlıştı. orfoz (Epinephelus marginatus) ile aynı muameleye alındı:
     // category: KORUMA + protected: true → skor her zaman 0, olta tavsiyesi verilmez.
     "mersin": {
-        name: "Mersin Balığı", nameEn: "Sturgeon", nameEl: "Ο οξύρρυγχος", nameEs: "Sturgeon", icon: "🐟", scientificName: "Acipenser spp.",
+        name: "Mersin Balığı", nameEn: "Sturgeon", nameEl: "Ο οξύρρυγχος", nameEs: "Esturión", icon: "🐟", scientificName: "Acipenser spp.",
         photoId: 81,
         category: "KORUMA",
         protected: true,
@@ -1608,7 +1608,7 @@ const SPECIES_DB = {
     },
 
     "aterin": {
-        name: "Aterin-Gümüş", nameEn: "Big-scale Sand Smelt", nameEl: "Sand Smelt μεγάλης κλίμακας", nameEs: "Big-scale Sand Smelt", icon: "🐟", scientificName: "Atherina boyeri",
+        name: "Aterin-Gümüş", nameEn: "Big-scale Sand Smelt", nameEl: "Αθερίνα", nameEs: "Pejerrey de laguna", icon: "🐟", scientificName: "Atherina boyeri",
         photoId: 30,
         category: "PELAJIK",
         huntingMode: "visual",
@@ -1633,7 +1633,7 @@ const SPECIES_DB = {
     },
 
     "dulger": {
-        name: "Dülger-Peygamber Balığı", nameEn: "John Dory", nameEl: "Τζον Ντόρι", nameEs: "John Dory", icon: "🐟", scientificName: "Zeus faber",
+        name: "Dülger-Peygamber Balığı", nameEn: "John Dory", nameEl: "Τζον Ντόρι", nameEs: "Pez de San Pedro", icon: "🐟", scientificName: "Zeus faber",
         photoId: 56,
         category: "DIP_DERIN",
         huntingMode: "ambush",
@@ -1656,7 +1656,7 @@ const SPECIES_DB = {
     },
 
     "papalina": {
-        name: "Papalina", nameEn: "European Sprat", nameEl: "ευρωπαϊκή παπαλίνα", nameEs: "European Sprat", icon: "🐟", scientificName: "Sprattus sprattus", /* [2026-08-03] Bu kayıt MARMARA'ya ayrıldığında "Black Sea Sprat"/"phalericus" etiketi ters kaldı: phalericus KARADENİZ alt türüdür (GBIF/WoRMS) ve o ad artık `caca` kaydında. Marmara kaydına tür adının kendisi bırakıldı. scientificName aynı zamanda dedüplikasyon anahtarı (server.js) olduğu için iki kayıt farklı dizge taşımalı. */
+        name: "Papalina", nameEn: "European Sprat", nameEl: "ευρωπαϊκή παπαλίνα", nameEs: "Espadín", icon: "🐟", scientificName: "Sprattus sprattus", /* [2026-08-03] Bu kayıt MARMARA'ya ayrıldığında "Black Sea Sprat"/"phalericus" etiketi ters kaldı: phalericus KARADENİZ alt türüdür (GBIF/WoRMS) ve o ad artık `caca` kaydında. Marmara kaydına tür adının kendisi bırakıldı. scientificName aynı zamanda dedüplikasyon anahtarı (server.js) olduğu için iki kayıt farklı dizge taşımalı. */
         photoId: 60,
         category: "PELAJIK",
         huntingMode: "visual",
@@ -1681,7 +1681,7 @@ const SPECIES_DB = {
     },
 
     "caca": {
-        name: "Çaça", nameEn: "Black Sea Sprat", nameEl: "Παπαλίνα Μαύρης Θάλασσας", nameEs: "Black Sea Sprat", icon: "🐟", scientificName: "Sprattus sprattus phalericus", /* [2026-08-03] Karadeniz kaydı olduğu için Karadeniz alt türü adını taşır (S. s. phalericus, Risso 1827 = Black Sea sprat). NOT: WoRMS alt tür ayrımının zayıf tanımlandığını belirtiyor; ikisi de aynı türdür, ayrım halk adı (çaça=Karadeniz, papalina=Marmara) için korunuyor. */
+        name: "Çaça", nameEn: "Black Sea Sprat", nameEl: "Παπαλίνα", nameEs: "Espadín del mar Negro", icon: "🐟", scientificName: "Sprattus sprattus phalericus", /* [2026-08-03] Karadeniz kaydı olduğu için Karadeniz alt türü adını taşır (S. s. phalericus, Risso 1827 = Black Sea sprat). NOT: WoRMS alt tür ayrımının zayıf tanımlandığını belirtiyor; ikisi de aynı türdür, ayrım halk adı (çaça=Karadeniz, papalina=Marmara) için korunuyor. */
         photoId: 61,
         category: "PELAJIK",
         huntingMode: "visual",
@@ -1705,7 +1705,7 @@ const SPECIES_DB = {
     },
 
     "tirsi": {
-        name: "Tirsi", nameEn: "Twaite Shad", nameEl: "Τουέιτ Σαντ", nameEs: "Twaite Shad", icon: "🐟", scientificName: "Alosa fallax",
+        name: "Tirsi", nameEn: "Twaite Shad", nameEl: "Τουέιτ Σαντ", nameEs: "Saboga", icon: "🐟", scientificName: "Alosa fallax",
         photoId: 62,
         category: "PELAJIK",
         huntingMode: "visual",
@@ -1735,7 +1735,7 @@ const SPECIES_DB = {
     },
 
     "mirlan": {
-        name: "Mezgit (Mırlan)", nameEn: "Whiting", nameEl: "Νταούκι", nameEs: "Whiting", icon: "🐟", scientificName: "Merlangius merlangus euxinus",
+        name: "Mezgit (Mırlan)", nameEn: "Whiting", nameEl: "Νταούκι", nameEs: "Merlán del mar Negro", icon: "🐟", scientificName: "Merlangius merlangus euxinus",
         photoId: 63,
         category: "DIP_DERIN",
         huntingMode: "chemosensory",
@@ -1757,7 +1757,7 @@ const SPECIES_DB = {
     },
 
     "deniz_ignesi": {
-        name: "Deniz İğnesi", nameEn: "Greater Pipefish", nameEl: "Greater Pipefish", nameEs: "Greater Pipefish", icon: "🐟", scientificName: "Syngnathus acus",
+        name: "Deniz İğnesi", nameEn: "Greater Pipefish", nameEl: "Σακοράφα", nameEs: "Aguja mula", icon: "🐟", scientificName: "Syngnathus acus",
         photoId: 64,
         category: "KIYI",
         huntingMode: "visual",
@@ -1778,7 +1778,7 @@ const SPECIES_DB = {
     },
 
     "lapin": {
-        name: "Lapin", nameEn: "Wrasse", nameEl: "Wrasse", nameEs: "Wrasse", icon: "🐟", scientificName: "Labrus spp.",
+        name: "Lapin", nameEn: "Wrasse", nameEl: "Χειλούδες", nameEs: "Tordos y maragotas", icon: "🐟", scientificName: "Labrus spp.",
         photoId: 65,
         category: "KAYALIK",
         
@@ -1799,7 +1799,7 @@ const SPECIES_DB = {
     },
 
     "kizil_kirlangic": {
-        name: "Kızıl Kırlangıç", nameEn: "Red Gurnard", nameEl: "Red Gunard", nameEs: "Red Gurnard", icon: "🐟", scientificName: "Chelidonichthys cuculus",
+        name: "Kızıl Kırlangıç", nameEn: "Red Gurnard", nameEl: "Καπόνι κόκκινο", nameEs: "Arete", icon: "🐟", scientificName: "Chelidonichthys cuculus",
         photoId: 66,
         category: "DIP_DERIN",
         huntingMode: "chemosensory",
@@ -1821,7 +1821,7 @@ const SPECIES_DB = {
     },
 
     "yilan_baligi": {
-        name: "Yılan Balığı", nameEn: "European Eel", nameEl: "Ευρωπαϊκό Χέλι", nameEs: "European Eel", icon: "🐍", scientificName: "Anguilla anguilla",
+        name: "Yılan Balığı", nameEn: "European Eel", nameEl: "Χέλι", nameEs: "Anguila europea", icon: "🐍", scientificName: "Anguilla anguilla",
         photoId: 82,
         category: "LAGUN",
         
@@ -1844,7 +1844,7 @@ const SPECIES_DB = {
         noteEn: "Night predator. Found in lagoons, river mouths and shallow shores. In Turkey, legally fishable ONLY between Oct 1-Dec 31 under a quota system; banned outside that window. Min. size 50cm in inland waters, daily limit 3. Critically endangered across Europe — release if possible.", noteEl: "Night predator. In Turkey, legally fishable only Oct 1-Dec 31 under quota; banned outside that window. Critically endangered — release if possible.", noteEs: "Depredador nocturno. En Turquía, la pesca es legal solo del 1 de octubre al 31 de diciembre bajo cuota; prohibida fuera de ese período. En peligro crítico — libere si es posible."
     },
     "snook": {
-        name: "Snook", nameEn: "Common Snook", nameEl: "Κοινό Snook", nameEs: "Common Snook", icon: "🐟", scientificName: "Centropomus undecimalis",
+        name: "Snook", nameEn: "Common Snook", nameEl: "Ρομπάλο", nameEs: "Robalo común", icon: "🐟", scientificName: "Centropomus undecimalis",
         photoId: 101, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece ve akıntılı saatler",
@@ -1858,7 +1858,7 @@ const SPECIES_DB = {
         noteEn: "Florida's iconic fish. Loves bridges and mangroves.", noteEl: "Florida's iconic fish. Loves bridges and mangroves.", noteEs: "Florida's iconic fish. Loves bridges and mangroves."
     },
     "redfish": {
-        name: "Kızıl Davul", nameEn: "Red Drum", nameEl: "Κόκκινο τύμπανο", nameEs: "Red Drum", icon: "🐟", scientificName: "Sciaenops ocellatus",
+        name: "Kızıl Davul", nameEn: "Red Drum", nameEl: "Κόκκινο τύμπανο", nameEs: "Corvinón ocelado", icon: "🐟", scientificName: "Sciaenops ocellatus",
         photoId: 102, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığlıklar",
@@ -1872,7 +1872,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by the spot on its tail. Feeds in shallow mudflats.", noteEl: "Recognized by the spot on its tail. Feeds in shallow mudflats.", noteEs: "Recognized by the spot on its tail. Feeds in shallow mudflats."
     },
     "tarpon": {
-        name: "Tarpon", nameEn: "Tarpon", nameEl: "Tarpon", nameEs: "Tarpon", icon: "🦈", scientificName: "Megalops atlanticus",
+        name: "Tarpon", nameEn: "Tarpon", nameEl: "Ταρπόν", nameEs: "Tarpón", icon: "🦈", scientificName: "Megalops atlanticus",
         photoId: 103, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak ve akşam suyu",
@@ -1886,7 +1886,7 @@ const SPECIES_DB = {
         noteEn: "The Silver King. Very powerful, jumps out of the water.", noteEl: "The Silver King. Very powerful, jumps out of the water.", noteEs: "The Silver King. Very powerful, jumps out of the water."
     },
     "bonefish": {
-        name: "Kemik Balığı", nameEn: "Bonefish", nameEl: "Οστεόψαρο", nameEs: "Bonefish", icon: "🐟", scientificName: "Albula vulpes",
+        name: "Kemik Balığı", nameEn: "Bonefish", nameEl: "Οστεόψαρο", nameEs: "Macabí", icon: "🐟", scientificName: "Albula vulpes",
         photoId: 104, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığlıklar",
@@ -1900,7 +1900,7 @@ const SPECIES_DB = {
         noteEn: "Ghost fish. Very fast, hunts in shallow flats.", noteEl: "Ghost fish. Very fast, hunts in shallow flats.", noteEs: "Ghost fish. Very fast, hunts in shallow flats."
     },
     "permit": {
-        name: "Permit", nameEn: "Permit", nameEl: "Άδεια", nameEs: "Permit", icon: "🐟", scientificName: "Trachinotus falcatus",
+        name: "Permit", nameEn: "Permit", nameEl: "Άδεια", nameEs: "Pámpano palometa", icon: "🐟", scientificName: "Trachinotus falcatus",
         photoId: 105, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz akıntılı sığlıklar",
@@ -1914,7 +1914,7 @@ const SPECIES_DB = {
         noteEn: "One of the most challenging fish to catch. Very selective.", noteEl: "One of the most challenging fish to catch. Very selective.", noteEs: "One of the most challenging fish to catch. Very selective."
     },
     "spotted_seatrout": {
-        name: "Benekli Alabalık", nameEn: "Spotted Seatrout", nameEl: "Spotted Seatrout", nameEs: "Spotted Seatrout", icon: "🐟", scientificName: "Cynoscion nebulosus",
+        name: "Benekli Alabalık", nameEn: "Spotted Seatrout", nameEl: "Κορβίνα στικτή", nameEs: "Corvinata pinta", icon: "🐟", scientificName: "Cynoscion nebulosus",
         photoId: 106, category: "KIYI_AVCI",
         huntingMode: "chemosensory",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah ve akşam suyu",
@@ -1928,7 +1928,7 @@ const SPECIES_DB = {
         noteEn: "Loves seagrass beds and shallow bays.", noteEl: "Loves seagrass beds and shallow bays.", noteEs: "Loves seagrass beds and shallow bays."
     },
     "goliath_grouper": {
-        name: "Dev Lagos", nameEn: "Goliath Grouper", nameEl: "Γκόλιαθ Σφυρίδα", nameEs: "Goliath Grouper", icon: "🐟", scientificName: "Epinephelus itajara",
+        name: "Dev Lagos", nameEn: "Goliath Grouper", nameEl: "Γκόλιαθ Σφυρίδα", nameEs: "Mero guasa", icon: "🐟", scientificName: "Epinephelus itajara",
         photoId: 107, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gün boyu batıklar",
@@ -1942,7 +1942,7 @@ const SPECIES_DB = {
         noteEn: "Can reach up to 300kg. Protected, removal from water is prohibited.", noteEl: "Can reach up to 300kg. Protected, removal from water is prohibited.", noteEs: "Can reach up to 300kg. Protected, removal from water is prohibido."
     },
     "sailfish": {
-        name: "Yelken Balığı", nameEn: "Sailfish", nameEl: "Ιστιοφόρο", nameEs: "Sailfish", icon: "⛵", scientificName: "Istiophorus platypterus",
+        name: "Yelken Balığı", nameEn: "Sailfish", nameEl: "Ιστιοφόρο", nameEs: "Pez vela", icon: "⛵", scientificName: "Istiophorus platypterus",
         photoId: 108, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
@@ -1956,7 +1956,7 @@ const SPECIES_DB = {
         noteEn: "Florida's official state fish. Very fast and acrobatic.", noteEl: "Florida's official state fish. Very fast and acrobatic.", noteEs: "Florida's official state fish. Very fast and acrobatic."
     },
     "king_mackerel": {
-        name: "Kral Uskumru", nameEn: "King Mackerel", nameEl: "Βασιλιάς Σκουμπρί", nameEs: "King Mackerel", icon: "🐟", scientificName: "Scomberomorus cavalla",
+        name: "Kral Uskumru", nameEn: "King Mackerel", nameEl: "Βασιλιάς Σκουμπρί", nameEs: "Carite lucio", icon: "🐟", scientificName: "Scomberomorus cavalla",
         photoId: 109, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabahın erken saatleri",
@@ -1970,7 +1970,7 @@ const SPECIES_DB = {
         noteEn: "Sharp teeth, requires wire leader. Schools.", noteEl: "Sharp teeth, requires wire leader. Schools.", noteEs: "Sharp teeth, requires wire leader. Schools."
     },
     "florida_mahi_mahi": {
-        name: "Lambuka/Mahi Mahi", nameEn: "Dolphin Fish", nameEl: "Δελφίνι Ψάρια", nameEs: "Dolphin Fish", icon: "🐠", scientificName: "Coryphaena hippurus",
+        name: "Lambuka/Mahi Mahi", nameEn: "Dolphin Fish", nameEl: "Δελφίνι Ψάρια", nameEs: "Dorado", icon: "🐠", scientificName: "Coryphaena hippurus",
         photoId: 110, category: "PELAJIK",
         huntingMode: "visual",
         isGlobal: false,
@@ -1985,7 +1985,7 @@ const SPECIES_DB = {
         noteEn: "World's fastest-growing fish. Found under floating debris (weed lines).", noteEl: "World's fastest-growing fish. Found under floating debris (weed lines).", noteEs: "World's fastest-growing fish. Found under floating debris (weed lines)."
     },
     "mangrove_snapper": {
-        name: "Mangrov Snapper", nameEn: "Gray Snapper", nameEl: "Grey Snapper", nameEs: "Gray Snapper", icon: "🐟", scientificName: "Lutjanus griseus",
+        name: "Mangrov Snapper", nameEn: "Gray Snapper", nameEl: "Λουτσάνος γκρίζος", nameEs: "Pargo mangle", icon: "🐟", scientificName: "Lutjanus griseus",
         photoId: 111, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece ve kapalı hava",
@@ -1999,7 +1999,7 @@ const SPECIES_DB = {
         noteEn: "Very intelligent and cautious. Requires light tackle.", noteEl: "Very intelligent and cautious. Requires light tackle.", noteEs: "Very intelligent and cautious. Requires light tackle."
     },
     "yellowtail_snapper": {
-        name: "Sarı Kuyruk Snapper", nameEn: "Yellowtail Snapper", nameEl: "Yellowtail Snapper", nameEs: "Yellowtail Snapper", icon: "🐟", scientificName: "Ocyurus chrysurus",
+        name: "Sarı Kuyruk Snapper", nameEn: "Yellowtail Snapper", nameEl: "Λουτσάνος κίτρινης ουράς", nameEs: "Rabirrubia", icon: "🐟", scientificName: "Ocyurus chrysurus",
         photoId: 112, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz ve gün batımı",
@@ -2013,7 +2013,7 @@ const SPECIES_DB = {
         noteEn: "Found in schools over reefs. Can be drawn to the surface by chumming.", noteEl: "Found in schools over reefs. Can be drawn to the surface by chumming.", noteEs: "Found in schools over reefs. Can be drawn to the surface by chumming."
     },
     "sheepshead": {
-        name: "Koyunbaş Balığı", nameEn: "Sheepshead", nameEl: "Προβατοκέφαλος", nameEs: "Sheepshead", icon: "🐟", scientificName: "Archosargus probatocephalus",
+        name: "Koyunbaş Balığı", nameEn: "Sheepshead", nameEl: "Προβατοκέφαλος", nameEs: "Sargo chopa", icon: "🐟", scientificName: "Archosargus probatocephalus",
         photoId: 113, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz ve gel-git saatleri",
@@ -2027,7 +2027,7 @@ const SPECIES_DB = {
         noteEn: "Has human-like teeth. Feeds on mussels on pier pilings.", noteEl: "Has human-like teeth. Feeds on mussels on pier pilings.", noteEs: "Has human-like teeth. Feeds on mussels on pier pilings."
     },
     "cobia": {
-        name: "Kobya", nameEn: "Cobia", nameEl: "Cobia", nameEs: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
+        name: "Kobya", nameEn: "Cobia", nameEl: "Κόμπια", nameEs: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
         photoId: 114, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
@@ -2041,7 +2041,7 @@ const SPECIES_DB = {
         noteEn: "Likes to follow rays and sharks. A very strong fighter.", noteEl: "Likes to follow rays and sharks. A very strong fighter.", noteEs: "Likes to follow rays and sharks. A very strong fighter."
     },
     "great_barracuda": {
-        name: "Büyük Baracuda", nameEn: "Great Barracuda", nameEl: "Great Barracuda", nameEs: "Great Barracuda", icon: "🦈", scientificName: "Sphyraena barracuda",
+        name: "Büyük Baracuda", nameEn: "Great Barracuda", nameEl: "Λούτσος γίγας", nameEs: "Barracuda gigante", icon: "🦈", scientificName: "Sphyraena barracuda",
         photoId: 115, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz ve güneşli hava",
@@ -2055,7 +2055,7 @@ const SPECIES_DB = {
         noteEn: "Very fast and aggressive. Attacks shiny objects. Wire leader mandatory.", noteEl: "Very fast and aggressive. Attacks shiny objects. Wire leader mandatory.", noteEs: "Very fast and aggressive. Attacks shiny objects. Wire leader mandatory."
     },
     "amberjack": {
-        name: "Akya/Amberjack", nameEn: "Greater Amberjack", nameEl: "Greater Amberjack", nameEs: "Greater Amberjack", icon: "🐟", scientificName: "Seriola dumerili",
+        name: "Akya/Amberjack", nameEn: "Greater Amberjack", nameEl: "Μαγιάτικο", nameEs: "Pez limón", icon: "🐟", scientificName: "Seriola dumerili",
         photoId: 116, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gün boyu derin resifler",
@@ -2069,7 +2069,7 @@ const SPECIES_DB = {
         noteEn: "Reef Donkey. Found in wrecks, pulls hard to the bottom.", noteEl: "Reef Donkey. Found in wrecks, pulls hard to the bottom.", noteEs: "Reef Donkey. Found in wrecks, pulls hard to the bottom."
     },
     "black_grouper": {
-        name: "Siyah Lagos", nameEn: "Black Grouper", nameEl: "Μαύρη σφυρίδα", nameEs: "Black Grouper", icon: "🐟", scientificName: "Mycteroperca bonaci",
+        name: "Siyah Lagos", nameEn: "Black Grouper", nameEl: "Μαύρη σφυρίδα", nameEs: "Cuna bonací", icon: "🐟", scientificName: "Mycteroperca bonaci",
         photoId: 117, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları",
@@ -2083,7 +2083,7 @@ const SPECIES_DB = {
         noteEn: "One of the tastiest and strongest Grouper species in Florida.", noteEl: "One of the tastiest and strongest Grouper species in Florida.", noteEs: "One of the tastiest and strongest Grouper species in Florida."
     },
     "mutton_snapper": {
-        name: "Koyun Snapper", nameEn: "Mutton Snapper", nameEl: "Προβατίνα", nameEs: "Mutton Snapper", icon: "🐟", scientificName: "Lutjanus analis",
+        name: "Koyun Snapper", nameEn: "Mutton Snapper", nameEl: "Προβατίνα", nameEs: "Pargo criollo", icon: "🐟", scientificName: "Lutjanus analis",
         photoId: 118, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk alanlar",
@@ -2097,7 +2097,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by the small spot under its eye. Very tough fighter.", noteEl: "Recognized by the small spot under its eye. Very tough fighter.", noteEs: "Recognized by the small spot under its eye. Very tough fighter."
     },
     "florida_pompano": {
-        name: "Pompano", nameEn: "Florida Pompano", nameEl: "Φλόριντα Πομπάνο", nameEs: "Florida Pompano", icon: "🐟", scientificName: "Trachinotus carolinus",
+        name: "Pompano", nameEn: "Florida Pompano", nameEl: "Φλόριντα Πομπάνο", nameEs: "Pámpano de Florida", icon: "🐟", scientificName: "Trachinotus carolinus",
         photoId: 119, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Dalga kıran ve kumsallar",
@@ -2111,7 +2111,7 @@ const SPECIES_DB = {
         noteEn: "Hunts in shallow surf. Highly valued meat.", noteEl: "Hunts in shallow surf. Highly valued meat.", noteEs: "Caza in shallow surf. Highly valued meat."
     },
     "spanish_mackerel": {
-        name: "İspanyol Uskumru", nameEn: "Spanish Mackerel", nameEl: "Ισπανικό σκουμπρί", nameEs: "Spanish Mackerel", icon: "🐟", scientificName: "Scomberomorus maculatus",
+        name: "İspanyol Uskumru", nameEn: "Spanish Mackerel", nameEl: "Ισπανικό σκουμπρί", nameEs: "Carite atlántico", icon: "🐟", scientificName: "Scomberomorus maculatus",
         photoId: 120, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak ve gün batımı",
@@ -2125,7 +2125,7 @@ const SPECIES_DB = {
         noteEn: "Very fast, hunts in surface schools.", noteEl: "Very fast, hunts in surface schools.", noteEs: "Very fast, hunts in surface schools."
     },
     "red_snapper": {
-        name: "Kızıl Snapper", nameEn: "Red Snapper", nameEl: "Red Snapper", nameEs: "Red Snapper", icon: "🐟", scientificName: "Lutjanus campechanus",
+        name: "Kızıl Snapper", nameEn: "Red Snapper", nameEl: "Λουτσάνος κόκκινος", nameEs: "Huachinango del Golfo", icon: "🐟", scientificName: "Lutjanus campechanus",
         photoId: 121, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler",
@@ -2139,7 +2139,7 @@ const SPECIES_DB = {
         noteEn: "Florida's most iconic Snapper. Highly valued meat. Mind the seasons.", noteEl: "Florida's most iconic Snapper. Highly valued meat. Mind the seasons.", noteEs: "Florida's most iconic Snapper. Highly valued meat. Mind the seasons."
     },
     "wahoo": {
-        name: "Vahoo", nameEn: "Wahoo", nameEl: "Ουάχου", nameEs: "Wahoo", icon: "🐟", scientificName: "Acanthocybium solandri",
+        name: "Vahoo", nameEn: "Wahoo", nameEl: "Ουάχου", nameEs: "Peto", icon: "🐟", scientificName: "Acanthocybium solandri",
         photoId: 122, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak ve gün batımı",
@@ -2153,7 +2153,7 @@ const SPECIES_DB = {
         noteEn: "One of the ocean's fastest (90 km/h). Very sharp teeth.", noteEl: "One of the ocean's fastest (90 km/h). Very sharp teeth.", noteEs: "One of the ocean's fastest (90 km/h). Very sharp teeth."
     },
     "blackfin_tuna": {
-        name: "Siyah Yüzgeç Orkinos", nameEn: "Blackfin Tuna", nameEl: "Μαύρος τόνος", nameEs: "Blackfin Tuna", icon: "🐟", scientificName: "Thunnus atlanticus",
+        name: "Siyah Yüzgeç Orkinos", nameEn: "Blackfin Tuna", nameEl: "Μαύρος τόνος", nameEs: "Atún aletinegro", icon: "🐟", scientificName: "Thunnus atlanticus",
         photoId: 123, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak vakti ve akşam suyu",
@@ -2167,7 +2167,7 @@ const SPECIES_DB = {
         noteEn: "Florida's local tuna. Schools, very strong.", noteEl: "Florida's local tuna. Schools, very strong.", noteEs: "Florida's local tuna. Schools, very strong."
     },
     "swordfish": {
-        name: "Kılıç Balığı", nameEn: "Swordfish", nameEl: "Ξιφία", nameEs: "Swordfish", icon: "⚔️", scientificName: "Xiphias gladius",
+        name: "Kılıç Balığı", nameEn: "Swordfish", nameEl: "Ξιφία", nameEs: "Pez espada", icon: "⚔️", scientificName: "Xiphias gladius",
         photoId: 124, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece derin su (100-300m)",
@@ -2181,7 +2181,7 @@ const SPECIES_DB = {
         noteEn: "Approaches surface at night. The pinnacle of deep-sea fishing.", noteEl: "Approaches surface at night. The pinnacle of deep-sea fishing.", noteEs: "Approaches surface at night. The pinnacle of deep-sea fishing."
     },
     "tripletail": {
-        name: "Üçkuyruk", nameEn: "Tripletail", nameEl: "Τριπλή ουρά", nameEs: "Tripletail", icon: "🐟", scientificName: "Lobotes surinamensis",
+        name: "Üçkuyruk", nameEn: "Tripletail", nameEl: "Τριπλή ουρά", nameEs: "Dormilona", icon: "🐟", scientificName: "Lobotes surinamensis",
         photoId: 125, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz güneşli saatler",
@@ -2195,7 +2195,7 @@ const SPECIES_DB = {
         noteEn: "Hovers on its side under buoys and debris. Meat is excellent.", noteEl: "Hovers on its side under buoys and debris. Meat is excellent.", noteEs: "Hovers on its side under buoys and debris. Meat is excellent."
     },
     "hogfish": {
-        name: "Domuz Balığı", nameEn: "Hogfish", nameEl: "Γουρουνόψαρο", nameEs: "Hogfish", icon: "🐟", scientificName: "Lachnolaimus maximus",
+        name: "Domuz Balığı", nameEn: "Hogfish", nameEl: "Γουρουνόψαρο", nameEs: "Doncella de pluma", icon: "🐟", scientificName: "Lachnolaimus maximus",
         photoId: 126, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz resif tabanı",
@@ -2209,7 +2209,7 @@ const SPECIES_DB = {
         noteEn: "Digs in the sand with its snout. Considered Florida's tastiest reef fish.", noteEl: "Digs in the sand with its snout. Considered Florida's tastiest reef fish.", noteEs: "Digs in the sand with its snout. Considered Florida's tastiest reef fish."
     },
     "red_grouper": {
-        name: "Kızıl Lagos", nameEn: "Red Grouper", nameEl: "Κόκκινη σφυρίδα", nameEs: "Red Grouper", icon: "🐟", scientificName: "Epinephelus morio",
+        name: "Kızıl Lagos", nameEn: "Red Grouper", nameEl: "Κόκκινη σφυρίδα", nameEs: "Mero americano", icon: "🐟", scientificName: "Epinephelus morio",
         photoId: 127, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gün boyu kumluk-kayalık sınırları",
@@ -2223,7 +2223,7 @@ const SPECIES_DB = {
         noteEn: "Digs its own burrows. Florida's most common Grouper.", noteEl: "Digs its own burrows. Florida's most common Grouper.", noteEs: "Digs its own burrows. Florida's most common Grouper."
     },
     "vermilion_snapper": {
-        name: "Vermilyon Snapper", nameEn: "Vermilion Snapper", nameEl: "Βεραμίλιον Snapper", nameEs: "Vermilion Snapper", icon: "🐟", scientificName: "Rhomboplites aurorubens",
+        name: "Vermilyon Snapper", nameEn: "Vermilion Snapper", nameEl: "Λουτσάνος βερμιγιόν", nameEs: "Pargo cunaro", icon: "🐟", scientificName: "Rhomboplites aurorubens",
         photoId: 128, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gün boyu derin resifler",
@@ -2237,7 +2237,7 @@ const SPECIES_DB = {
         noteEn: "Also known as Beeliner. Found in large schools in deep waters.", noteEl: "Also known as Beeliner. Found in large schools in deep waters.", noteEs: "Also known as Beeliner. Found in large schools in deep waters."
     },
     "gray_triggerfish": {
-        name: "Gri Çütre", nameEn: "Gray Triggerfish", nameEl: "Grey Triggerfish", nameEs: "Gray Triggerfish", icon: "🐟", scientificName: "Balistes capriscus",
+        name: "Gri Çütre", nameEn: "Gray Triggerfish", nameEl: "Γουρουνόψαρο γκρι", nameEs: "Pejepuerco blanco", icon: "🐟", scientificName: "Balistes capriscus",
         photoId: 129, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz resif ve batıklar",
@@ -2251,7 +2251,7 @@ const SPECIES_DB = {
         noteEn: "Known as bait thief, tough mouth structure. Meat is pure white.", noteEl: "Known as bait thief, tough mouth structure. Meat is pure white.", noteEs: "Known as bait thief, tough mouth structure. Meat is pure white."
     },
     "yellowfin_tuna": {
-        name: "Sarı Yüzgeç Orkinos", nameEn: "Yellowfin Tuna", nameEl: "Κιτρινόπτερος τόνος", nameEs: "Yellowfin Tuna", icon: "🐟", scientificName: "Thunnus albacares",
+        name: "Sarı Yüzgeç Orkinos", nameEn: "Yellowfin Tuna", nameEl: "Κιτρινόπτερος τόνος", nameEs: "Rabil", icon: "🐟", scientificName: "Thunnus albacares",
         photoId: 130, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak ve akşam okyanus akıntıları",
@@ -2265,7 +2265,7 @@ const SPECIES_DB = {
         noteEn: "One of the strongest fighters in the open sea. Schools.", noteEl: "One of the strongest fighters in the open sea. Schools.", noteEs: "One of the strongest fighters in the open sea. Schools."
     },
     "blue_marlin": {
-        name: "Mavi Marlin", nameEn: "Blue Marlin", nameEl: "Μπλε Μάρλιν", nameEs: "Blue Marlin", icon: "🦈", scientificName: "Makaira nigricans",
+        name: "Mavi Marlin", nameEn: "Blue Marlin", nameEl: "Μπλε Μάρλιν", nameEs: "Aguja azul", icon: "🦈", scientificName: "Makaira nigricans",
         photoId: 134, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz açık okyanus akıntıları",
@@ -2279,7 +2279,7 @@ const SPECIES_DB = {
         noteEn: "One of the ocean's largest predators. Very powerful.", noteEl: "One of the ocean's largest predators. Very powerful.", noteEs: "One of the ocean's largest predators. Very powerful."
     },
     "white_marlin": {
-        name: "Beyaz Marlin", nameEn: "White Marlin", nameEl: "White Marlin", nameEs: "White Marlin", icon: "🦈", scientificName: "Kajikia albida",
+        name: "Beyaz Marlin", nameEn: "White Marlin", nameEl: "Λευκό μάρλιν", nameEs: "Aguja blanca", icon: "🦈", scientificName: "Kajikia albida",
         photoId: 135, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz akıntılı hatlar",
@@ -2293,7 +2293,7 @@ const SPECIES_DB = {
         noteEn: "Smaller than Blue Marlin but very acrobatic and fast.", noteEl: "Smaller than Blue Marlin but very acrobatic and fast.", noteEs: "Smaller than Blue Marlin but very acrobatic and fast."
     },
     "golden_tilefish": {
-        name: "Altın Karoser", nameEn: "Golden Tilefish", nameEl: "Golden Tilefish", nameEs: "Golden Tilefish", icon: "🐟", scientificName: "Lopholatilus chamaeleonticeps",
+        name: "Altın Karoser", nameEn: "Golden Tilefish", nameEl: "Ψάρι καμήλα", nameEs: "Blanquillo camello", icon: "🐟", scientificName: "Lopholatilus chamaeleonticeps",
         photoId: 136, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin çamurlu dipler",
@@ -2307,7 +2307,7 @@ const SPECIES_DB = {
         noteEn: "Digs burrows in deep sand. Meat tastes like lobster.", noteEl: "Digs burrows in deep sand. Meat tastes like lobster.", noteEs: "Digs burrows in deep sand. Meat tastes like lobster."
     },
     "snowy_grouper": {
-        name: "Karlı Orfoz", nameEn: "Snowy Grouper", nameEl: "Snowy σφυρίδα", nameEs: "Snowy Grouper", icon: "🐟", scientificName: "Hyporthodus niveatus",
+        name: "Karlı Orfoz", nameEn: "Snowy Grouper", nameEl: "Ροφός χιονισμένος", nameEs: "Mero nevado", icon: "🐟", scientificName: "Hyporthodus niveatus",
         photoId: 137, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalıklar",
@@ -2321,7 +2321,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by white spots on its body. Florida's most valuable deep-water grouper.", noteEl: "Recognized by white spots on its body. Florida's most valuable deep-water grouper.", noteEs: "Recognized by white spots on its body. Florida's most valuable deep-water grouper."
     },
     "lane_snapper": {
-        name: "Lane Snapper", nameEn: "Lane Snapper", nameEl: "Lane Snapper", nameEs: "Lane Snapper", icon: "🐟", scientificName: "Lutjanus synagris",
+        name: "Lane Snapper", nameEn: "Lane Snapper", nameEl: "Λουτσάνος ραβδωτός", nameEs: "Pargo biajaiba", icon: "🐟", scientificName: "Lutjanus synagris",
         photoId: 138, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ resifler",
@@ -2335,7 +2335,7 @@ const SPECIES_DB = {
         noteEn: "Known as 'Candy Snapper' in North Florida. Very delicious.", noteEl: "Known as 'Candy Snapper' in North Florida. Very delicious.", noteEs: "Known as 'Candy Snapper' in North Florida. Very delicious."
     },
     "scamp_grouper": {
-        name: "Skamp Orfoz", nameEn: "Scamp Grouper", nameEl: "Scamp Grouper", nameEs: "Scamp Grouper", icon: "🐟", scientificName: "Mycteroperca phenax",
+        name: "Skamp Orfoz", nameEn: "Scamp Grouper", nameEl: "Ροφός σκαμπ", nameEs: "Cuna garopa", icon: "🐟", scientificName: "Mycteroperca phenax",
         photoId: 139, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları",
@@ -2349,7 +2349,7 @@ const SPECIES_DB = {
         noteEn: "Considered the most delicious of the grouper family. Distinguished by its tail structure.", noteEl: "Considered the most delicious of the grouper family. Distinguished by its tail structure.", noteEs: "Considered the most delicious of the grouper family. Distinguished by its tail structure."
     },
     "southern_flounder": {
-        name: "Güneş Pisi Balığı", nameEn: "Southern Flounder", nameEl: "Southern Flounder", nameEs: "Southern Flounder", icon: "🐟", scientificName: "Paralichthys lethostigma",
+        name: "Güneş Pisi Balığı", nameEn: "Southern Flounder", nameEl: "Γλώσσα νότια", nameEs: "Lenguado del sur", icon: "🐟", scientificName: "Paralichthys lethostigma",
         photoId: 140, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece gel-git alanları ve sığlıklar",
@@ -2363,7 +2363,7 @@ const SPECIES_DB = {
         noteEn: "Night gigging is popular. Master of camouflage.", noteEl: "Night gigging is popular. Master of camouflage.", noteEs: "Night gigging is popular. Master of camouflage."
     },
     "hammerhead_shark": {
-        name: "Çekiçbaş Köpekbalığı", nameEn: "Great Hammerhead", nameEl: "Μεγάλος Σφυροκέφαλος", nameEs: "Great Hammerhead", icon: "🦈", scientificName: "Sphyrna mokarran",
+        name: "Çekiçbaş Köpekbalığı", nameEn: "Great Hammerhead", nameEl: "Μεγάλος Σφυροκέφαλος", nameEs: "Cornuda gigante", icon: "🦈", scientificName: "Sphyrna mokarran",
         photoId: 141, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece akıntılı kanallar",
@@ -2377,7 +2377,7 @@ const SPECIES_DB = {
         noteEn: "One of the most acrobatic sharks. Popular to catch from Florida beaches.", noteEl: "One of the most acrobatic sharks. Popular to catch from Florida beaches.", noteEs: "One of the most acrobatic sharks. Popular to catch from Florida beaches."
     },
     "bull_shark": {
-        name: "Boğa Köpekbalığı", nameEn: "Bull Shark", nameEl: "Καρχαρίας ταύρος", nameEs: "Bull Shark", icon: "🦈", scientificName: "Carcharhinus leucas",
+        name: "Boğa Köpekbalığı", nameEn: "Bull Shark", nameEl: "Καρχαρίας ταύρος", nameEs: "Tiburón toro", icon: "🦈", scientificName: "Carcharhinus leucas",
         photoId: 142, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak/Akşam ve nehir ağızları",
@@ -2391,7 +2391,7 @@ const SPECIES_DB = {
         noteEn: "One of the rare sharks that can enter freshwater. Very aggressive.", noteEl: "One of the rare sharks that can enter freshwater. Very aggressive.", noteEs: "One of the rare sharks that can enter freshwater. Very aggressive."
     },
     "speckled_hind": {
-        name: "Benekli Orfoz", nameEn: "Speckled Hind", nameEl: "Στίγματα Hind", nameEs: "Speckled Hind", icon: "🐟", scientificName: "Epinephelus drummondhayi",
+        name: "Benekli Orfoz", nameEn: "Speckled Hind", nameEl: "Ροφός στιγματιστός", nameEs: "Mero pintado", icon: "🐟", scientificName: "Epinephelus drummondhayi",
         photoId: 143, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalıklar",
@@ -2405,7 +2405,7 @@ const SPECIES_DB = {
         noteEn: "Rare and highly valuable species. Recognized by star-like spots on its body.", noteEl: "Rare and highly valuable species. Recognized by star-like spots on its body.", noteEs: "Rare and highly valuable species. Recognized by star-like spots on its body."
     },
     "madai": {
-        name: "Madai", nameEn: "Red Sea Bream", nameEl: "Τσιπούρα Ερυθράς Θάλασσας", nameEs: "Red Sea Bream", icon: "🐟", scientificName: "Pagrus major",
+        name: "Madai", nameEn: "Red Sea Bream", nameEl: "Τσιπούρα Ερυθράς Θάλασσας", nameEs: "Besugo japonés (madai)", icon: "🐟", scientificName: "Pagrus major",
         photoId: 201, category: "KIYI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak ve gün batımı",
@@ -2419,7 +2419,7 @@ const SPECIES_DB = {
         noteEn: "Japan's celebratory fish. Highly intelligent and strong. The Tai-Rubber discipline was born for this fish.", noteEl: "Japan's celebratory fish. Highly intelligent and strong. The Tai-Rubber discipline was born for this fish.", noteEs: "Japan's celebratory fish. Highly intelligent and strong. The Tai-Rubber discipline was born for this fish."
     },
     "suzuki": {
-        name: "Suzuki", nameEn: "Japanese Sea Bass", nameEl: "Ιαπωνικό λαβράκι", nameEs: "Japanese Sea Bass", icon: "🐟", scientificName: "Lateolabrax japonicus",
+        name: "Suzuki", nameEn: "Japanese Sea Bass", nameEl: "Ιαπωνικό λαβράκι", nameEs: "Lubina japonesa (suzuki)", icon: "🐟", scientificName: "Lateolabrax japonicus",
         photoId: 202, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece ve akıntılı nehir ağızları",
@@ -2433,7 +2433,7 @@ const SPECIES_DB = {
         noteEn: "Japanese Sea Bass. Loves river mouths and harbor areas. Night fishing is highly productive.", noteEl: "Japanese Sea Bass. Loves river mouths and harbor areas. Night fishing is highly productive.", noteEs: "Japanese Sea Bass. Loves river mouths and harbor areas. Night fishing is highly productive."
     },
     "buri": {
-        name: "Buri/Hamachi", nameEn: "Japanese Amberjack", nameEl: "Γιαπωνέζικο Amberjack", nameEs: "Japanese Amberjack", icon: "🐟", scientificName: "Seriola quinqueradiata",
+        name: "Buri/Hamachi", nameEn: "Japanese Amberjack", nameEl: "Μαγιάτικο Ιαπωνίας", nameEs: "Medregal japonés (hamachi)", icon: "🐟", scientificName: "Seriola quinqueradiata",
         photoId: 203, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz akıntıları",
@@ -2447,7 +2447,7 @@ const SPECIES_DB = {
         noteEn: "Japan's winter fish (Kan-Buri). Grows fast and is exceptionally strong.", noteEl: "Japan's winter fish (Kan-Buri). Grows fast and is exceptionally strong.", noteEs: "Japan's winter fish (Kan-Buri). Grows fast and is exceptionally strong."
     },
     "aji": {
-        name: "Aji", nameEn: "Japanese Horse Mackerel", nameEl: "Ιαπωνικό σκουμπρί", nameEs: "Japanese Horse Mackerel", icon: "🐟", scientificName: "Trachurus japonicus",
+        name: "Aji", nameEn: "Japanese Horse Mackerel", nameEl: "Ιαπωνικό σκουμπρί", nameEs: "Jurel japonés", icon: "🐟", scientificName: "Trachurus japonicus",
         photoId: 204, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece ışıklı limanlar",
@@ -2461,7 +2461,7 @@ const SPECIES_DB = {
         noteEn: "Ajing discipline is very popular in Japan. Caught at harbor lights at night.", noteEl: "Ajing discipline is very popular in Japan. Caught at harbor lights at night.", noteEs: "Ajing discipline is very popular in Japan. Caught at harbor lights at night."
     },
     "saba": {
-        name: "Saba", nameEn: "Chub Mackerel", nameEl: "Τσουμπ Σκουμπρί", nameEs: "Chub Mackerel", icon: "🐟", scientificName: "Scomber japonicus",
+        name: "Saba", nameEn: "Chub Mackerel", nameEl: "Τσουμπ Σκουμπρί", nameEs: "Estornino del Pacífico", icon: "🐟", scientificName: "Scomber japonicus",
         photoId: 205, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sürüler halinde",
@@ -2475,7 +2475,7 @@ const SPECIES_DB = {
         noteEn: "Schooling fish. Has a very important place in Japanese cuisine.", noteEl: "Schooling fish. Has a very important place in Japanese cuisine.", noteEs: "Schooling fish. Has a very important place in Japanese cuisine."
     },
     "sawara": {
-        name: "Sawara", nameEn: "Japanese Spanish Mackerel", nameEl: "Ιαπωνικό ισπανικό σκουμπρί", nameEs: "Japanese Spanish Mackerel", icon: "🐟", scientificName: "Scomberomorus niphonius",
+        name: "Sawara", nameEn: "Japanese Spanish Mackerel", nameEl: "Ιαπωνικό ισπανικό σκουμπρί", nameEs: "Carite japonés", icon: "🐟", scientificName: "Scomberomorus niphonius",
         photoId: 206, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Sabahın ilk ışıkları",
@@ -2489,7 +2489,7 @@ const SPECIES_DB = {
         noteEn: "Known as the harbinger of spring. Has very sharp teeth.", noteEl: "Known as the harbinger of spring. Has very sharp teeth.", noteEs: "Known as the harbinger of spring. Has very sharp teeth."
     },
     "maguro": {
-        name: "Maguro", nameEn: "Pacific Bluefin Tuna", nameEl: "Ειρηνικός τόνος", nameEs: "Pacific Bluefin Tuna", icon: "🦈", scientificName: "Thunnus orientalis",
+        name: "Maguro", nameEn: "Pacific Bluefin Tuna", nameEl: "Ειρηνικός τόνος", nameEs: "Atún rojo del Pacífico", icon: "🦈", scientificName: "Thunnus orientalis",
         photoId: 207, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
@@ -2503,7 +2503,7 @@ const SPECIES_DB = {
         noteEn: "One of the most valuable fish in the world. Reaches massive sizes off the coast of Japan.", noteEl: "One of the most valuable fish in the world. Reaches massive sizes off the coast of Japan.", noteEs: "One of the most valuable fish in the world. Reaches massive sizes off the coast of Japan."
     },
     "katsuo": {
-        name: "Katsuo", nameEn: "Skipjack Tuna", nameEl: "Τόνος skipjack", nameEs: "Skipjack Tuna", icon: "🐟", scientificName: "Katsuwonus pelamis",
+        name: "Katsuo", nameEn: "Skipjack Tuna", nameEl: "Παλαμίδα ωκεανού", nameEs: "Listado", icon: "🐟", scientificName: "Katsuwonus pelamis",
         photoId: 208, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey akıntıları",
@@ -2517,7 +2517,7 @@ const SPECIES_DB = {
         noteEn: "A staple of Japanese cuisine when eaten fresh or dried (Katsuobushi) for soups.", noteEl: "A staple of Japanese cuisine when eaten fresh or dried (Katsuobushi) for soups.", noteEs: "A staple of Japanese cuisine when eaten fresh or dried (Katsuobushi) for soups."
     },
     "tachiuo": {
-        name: "Tachiuo", nameEn: "Largehead Hairtail", nameEl: "Μεγάλη Μαλλιά", nameEs: "Largehead Hairtail", icon: "⚔️", scientificName: "Trichiurus lepturus",
+        name: "Tachiuo", nameEn: "Largehead Hairtail", nameEl: "Μεγάλη Μαλλιά", nameEs: "Pez cinto cabezón", icon: "⚔️", scientificName: "Trichiurus lepturus",
         photoId: 209, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece yüzeye yaklaşır",
@@ -2531,7 +2531,7 @@ const SPECIES_DB = {
         noteEn: "Swims vertically like a sword. Hunts in light-polluted areas at night.", noteEl: "Swims vertically like a sword. Hunts in light-polluted areas at night.", noteEs: "Swims vertically like a sword. Caza in light-polluted areas at night."
     },
     "kasago": {
-        name: "Kasago", nameEn: "Marble Rockfish", nameEl: "Marble Rockfish", nameEs: "Marble Rockfish", icon: "🐟", scientificName: "Sebastiscus marmoratus",
+        name: "Kasago", nameEn: "Marble Rockfish", nameEl: "Σκορπίνα μαρμάρινη", nameEs: "Gallineta jaspeada (kasago)", icon: "🐟", scientificName: "Sebastiscus marmoratus",
         photoId: 210, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece kayalık dipler",
@@ -2545,7 +2545,7 @@ const SPECIES_DB = {
         noteEn: "Most popular target for LRF in Japan. Found among the rocks.", noteEl: "Most popular target for LRF in Japan. Found among the rocks.", noteEs: "Most popular target for LRF in Japan. Found among the rocks."
     },
     "mebaru": {
-        name: "Mebaru", nameEn: "Dark-banded Rockfish", nameEl: "Rockfish με σκούρα ζώνη", nameEs: "Dark-banded Rockfish", icon: "🐟", scientificName: "Sebastes inermis",
+        name: "Mebaru", nameEn: "Dark-banded Rockfish", nameEl: "Σκορπίνα μεμπάρου", nameEs: "Gallineta mebaru", icon: "🐟", scientificName: "Sebastes inermis",
         photoId: 211, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece ve alacakaranlık",
@@ -2559,7 +2559,7 @@ const SPECIES_DB = {
         noteEn: "There is a special night fishing discipline called 'Mebaring' in Japan. Very delicious.", noteEl: "There is a special night fishing discipline called 'Mebaring' in Japan. Very delicious.", noteEs: "There is a special night fishing discipline called 'Mebaring' in Japan. Very delicious."
     },
     "sayori": {
-        name: "Sayori", nameEn: "Japanese Halfbeak", nameEl: "Ιαπωνικό Halfbeak", nameEs: "Japanese Halfbeak", icon: "🐟", scientificName: "Hyporhamphus sajori",
+        name: "Sayori", nameEn: "Japanese Halfbeak", nameEl: "Ζαργάνα Ιαπωνίας", nameEs: "Aguja japonesa", icon: "🐟", scientificName: "Hyporhamphus sajori",
         photoId: 212, category: "KIYI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz ve güneşli hava",
@@ -2573,7 +2573,7 @@ const SPECIES_DB = {
         noteEn: "Known for its thin and long structure. Travels in schools on the surface.", noteEl: "Known for its thin and long structure. Travels in schools on the surface.", noteEs: "Known for its thin and long structure. Travels in schools on the surface."
     },
     "kisu": {
-        name: "Kisu", nameEn: "Japanese Sillago", nameEl: "Ιαπωνικό Sillago", nameEs: "Japanese Sillago", icon: "🐟", scientificName: "Sillago japonica",
+        name: "Kisu", nameEn: "Japanese Sillago", nameEl: "Σιλάγκο Ιαπωνίας", nameEs: "Sillago japonés (kisu)", icon: "🐟", scientificName: "Sillago japonica",
         photoId: 213, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumsallar",
@@ -2587,7 +2587,7 @@ const SPECIES_DB = {
         noteEn: "Symbol of Japanese beach fishing. Essential for tempura cuisine.", noteEl: "Symbol of Japanese beach fishing. Essential for tempura cuisine.", noteEs: "Symbol of Japanese beach fishing. Esencial for tempura cuisine."
     },
     "amadai": {
-        name: "Amadai", nameEn: "Red Tilefish", nameEl: "Κόκκινο κεραμίδι", nameEs: "Red Tilefish", icon: "🐟", scientificName: "Branchiostegus japonicus",
+        name: "Amadai", nameEn: "Red Tilefish", nameEl: "Κόκκινο κεραμίδι", nameEs: "Blanquillo rojo", icon: "🐟", scientificName: "Branchiostegus japonicus",
         photoId: 214, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin çamurlu dip",
@@ -2601,7 +2601,7 @@ const SPECIES_DB = {
         noteEn: "Highly valued in Kyoto cuisine. Distinguished by its square head and bright red color.", noteEl: "Highly valued in Kyoto cuisine. Distinguished by its square head and bright red color.", noteEs: "Highly valued in Kyoto cuisine. Distinguished by its square head and bright red color."
     },
     "ishidai": {
-        name: "Ishidai", nameEn: "Striped Beakfish", nameEl: "Ριγέ ράμφος", nameEs: "Striped Beakfish", icon: "🐟", scientificName: "Oplegnathus fasciatus",
+        name: "Ishidai", nameEn: "Striped Beakfish", nameEl: "Ριγέ ράμφος", nameEs: "Pez loro rayado (ishidai)", icon: "🐟", scientificName: "Oplegnathus fasciatus",
         photoId: 215, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sert kayalıklar",
@@ -2615,7 +2615,7 @@ const SPECIES_DB = {
         noteEn: "The 'Stone Bream' of the rocks. Has a very hard beak and pulls with massive force.", noteEl: "The 'Stone Bream' of the rocks. Has a very hard beak and pulls with massive force.", noteEs: "The 'Stone Bream' of the rocks. Has a very hard beak and pulls with massive force."
     },
     "kue": {
-        name: "Kue", nameEn: "Longtooth Grouper", nameEl: "Σφυρίδα μακρόδοντων", nameEs: "Longtooth Grouper", icon: "🐟", scientificName: "Epinephelus bruneus",
+        name: "Kue", nameEn: "Longtooth Grouper", nameEl: "Σφυρίδα μακρόδοντων", nameEs: "Mero de diente largo (kue)", icon: "🐟", scientificName: "Epinephelus bruneus",
         photoId: 216, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece ve alacakaranlık",
@@ -2629,7 +2629,7 @@ const SPECIES_DB = {
         noteEn: "Japan's most prestigious grouper. Giant Kue caught in winter fetch very high prices.", noteEl: "Japan's most prestigious grouper. Giant Kue caught in winter fetch very high prices.", noteEs: "Japan's most prestigious grouper. Giant Kue caught in winter fetch very high prices."
     },
     "isaki": {
-        name: "Isaki", nameEn: "Chicken Grunt", nameEl: "Κοτόπουλο Grunt", nameEs: "Chicken Grunt", icon: "🐟", scientificName: "Parapristipoma trilineatum",
+        name: "Isaki", nameEn: "Chicken Grunt", nameEl: "Ροχθόψαρο ισάκι", nameEs: "Roncador isaki", icon: "🐟", scientificName: "Parapristipoma trilineatum",
         photoId: 217, category: "KAYALIK",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece ve şafak vakti",
@@ -2643,7 +2643,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by three lines on its back. One of the tastiest fish of summer.", noteEl: "Recognized by three lines on its back. One of the tastiest fish of summer.", noteEs: "Recognized by three lines on its back. One of the tastiest fish of summer."
     },
     "shima_aji": {
-        name: "Shima Aji", nameEn: "Striped Jack", nameEl: "Ριγέ Τζακ", nameEs: "Striped Jack", icon: "🐟", scientificName: "Pseudocaranx dentex",
+        name: "Shima Aji", nameEn: "Striped Jack", nameEl: "Ριγέ Τζακ", nameEs: "Jurel dentón", icon: "🐟", scientificName: "Pseudocaranx dentex",
         photoId: 218, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz akıntılı resifler",
@@ -2657,7 +2657,7 @@ const SPECIES_DB = {
         noteEn: "Known as the 'Aristocrat' of the jack family. Unique for sashimi due to its oily and firm meat.", noteEl: "Known as the 'Aristocrat' of the jack family. Unique for sashimi due to its oily and firm meat.", noteEs: "Known as the 'Aristocrat' of the jack family. Unique for sashimi due to its oily and firm meat."
     },
     "chinu": {
-        name: "Chinu", nameEn: "Black Sea Bream", nameEl: "Τσιπούρα Μαύρης Θάλασσας", nameEs: "Black Sea Bream", icon: "🐟", scientificName: "Acanthopagrus schlegelii",
+        name: "Chinu", nameEn: "Black Sea Bream", nameEl: "Τσιπούρα Μαύρης Θάλασσας", nameEs: "Sargo negro japonés (kurodai)", icon: "🐟", scientificName: "Acanthopagrus schlegelii",
         photoId: 219, category: "KIYI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak/Akşam ve liman içleri",
@@ -2671,7 +2671,7 @@ const SPECIES_DB = {
         noteEn: "Also known as 'Kurodai' in Japan. Very cautious, requires great skill to catch.", noteEl: "Also known as 'Kurodai' in Japan. Very cautious, requires great skill to catch.", noteEs: "Also known as 'Kurodai' in Japan. Very cautious, requires great skill to catch."
     },
     "kawahagi": {
-        name: "Kawahagi", nameEn: "Threadsail Filefish", nameEl: "Threadsail Filefish", nameEs: "Threadsail Filefish", icon: "🐟", scientificName: "Stephanolepis cirrhifer",
+        name: "Kawahagi", nameEn: "Threadsail Filefish", nameEl: "Γουρουνόψαρο", nameEs: "Pez lija (kawahagi)", icon: "🐟", scientificName: "Stephanolepis cirrhifer",
         photoId: 220, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz resif tabanı",
@@ -2685,7 +2685,7 @@ const SPECIES_DB = {
         noteEn: "Bait thief. Its liver is referred to as 'Sea Foie Gras' in Japanese cuisine.", noteEl: "Bait thief. Its liver is referred to as 'Sea Foie Gras' in Japanese cuisine.", noteEs: "Bait thief. Its liver is referred to as 'Sea Foie Gras' in Japanese cuisine."
     },
     "hirame": {
-        name: "Hirame", nameEn: "Japanese Flounder", nameEl: "Γιαπωνέζικο Χαλόνι", nameEs: "Japanese Flounder", icon: "🐟", scientificName: "Paralichthys olivaceus",
+        name: "Hirame", nameEn: "Japanese Flounder", nameEl: "Γιαπωνέζικο Χαλόνι", nameEs: "Lenguado japonés (hirame)", icon: "🐟", scientificName: "Paralichthys olivaceus",
         photoId: 221, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece sığlıklar, gündüz derin",
@@ -2699,7 +2699,7 @@ const SPECIES_DB = {
         noteEn: "Left-eyed flounder. One of Japan's premier bottom predators. Meat is firm and highly delicious.", noteEl: "Left-eyed flounder. One of Japan's premier bottom predators. Meat is firm and highly delicious.", noteEs: "Left-eyed flounder. One of Japan's premier bottom predators. Meat is firm and highly delicious."
     },
     "karei": {
-        name: "Karei", nameEn: "Righteye Flounder", nameEl: "Righteye Flounder", nameEs: "Righteye Flounder", icon: "🐟", scientificName: "Pleuronectidae family",
+        name: "Karei", nameEn: "Righteye Flounder", nameEl: "Γλωσσοειδή", nameEs: "Platija (karei)", icon: "🐟", scientificName: "Pleuronectidae family",
         photoId: 222, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumlu dip",
@@ -2713,7 +2713,7 @@ const SPECIES_DB = {
         noteEn: "Right-eyed flounder. Smaller than Hirame and typically caught with bait.", noteEl: "Right-eyed flounder. Smaller than Hirame and typically caught with bait.", noteEs: "Right-eyed flounder. Smaller than Hirame and typically caught with bait."
     },
     "kijihata": {
-        name: "Kijihata", nameEn: "Red-spotted Grouper", nameEl: "Σφυρίδα με κόκκινες κηλίδες", nameEs: "Red-spotted Grouper", icon: "🐟", scientificName: "Epinephelus akaara",
+        name: "Kijihata", nameEn: "Red-spotted Grouper", nameEl: "Σφυρίδα με κόκκινες κηλίδες", nameEs: "Mero de puntos rojos", icon: "🐟", scientificName: "Epinephelus akaara",
         photoId: 223, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık kayalıklar",
@@ -2727,7 +2727,7 @@ const SPECIES_DB = {
         noteEn: "Highly prized red-spotted grouper. Often targets rocky structures in summer.", noteEl: "Highly prized red-spotted grouper. Often targets rocky structures in summer.", noteEs: "Highly prized red-spotted grouper. Often targets rocky structures in summer."
     },
     "shiramadai": {
-        name: "Shirama-dai", nameEn: "White Tilefish", nameEl: "Λευκό κεραμίδι", nameEs: "White Tilefish", icon: "🐟", scientificName: "Branchiostegus albus",
+        name: "Shirama-dai", nameEn: "White Tilefish", nameEl: "Λευκό κεραμίδι", nameEs: "Blanquillo blanco", icon: "🐟", scientificName: "Branchiostegus albus",
         photoId: 224, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin çamurlu dipler",
@@ -2741,7 +2741,7 @@ const SPECIES_DB = {
         noteEn: "The rarest and most expensive Tilefish. A crown jewel for high-end Japanese restaurants.", noteEl: "The rarest and most expensive Tilefish. A crown jewel for high-end Japanese restaurants.", noteEs: "The rarest and most expensive Tilefish. A crown jewel for high-end Japanese restaurants."
     },
     "tara": {
-        name: "Tara", nameEn: "Pacific Cod", nameEl: "Pacific Cod", nameEs: "Pacific Cod", icon: "🐟", scientificName: "Gadus macrocephalus",
+        name: "Tara", nameEn: "Pacific Cod", nameEl: "Μπακαλιάρος Ειρηνικού", nameEs: "Bacalao del Pacífico", icon: "🐟", scientificName: "Gadus macrocephalus",
         photoId: 225, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin ve soğuk dipler",
@@ -2755,7 +2755,7 @@ const SPECIES_DB = {
         noteEn: "Inhabits the freezing waters of Northern Japan. Its liver and milt (Shirako) are prized delicacies.", noteEl: "Inhabits the freezing waters of Northern Japan. Its liver and milt (Shirako) are prized delicacies.", noteEs: "Inhabits the freezing waters of Northern Japan. Its liver and milt (Shirako) are prized delicacies."
     },
     "sanma": {
-        name: "Sanma", nameEn: "Pacific Saury", nameEl: "Pacific Saury", nameEs: "Pacific Saury", icon: "🐟", scientificName: "Cololabis saira",
+        name: "Sanma", nameEn: "Pacific Saury", nameEl: "Σαύρα Ειρηνικού", nameEs: "Paparda del Pacífico", icon: "🐟", scientificName: "Cololabis saira",
         photoId: 226, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece ışıklı alanlar",
@@ -2769,7 +2769,7 @@ const SPECIES_DB = {
         noteEn: "The herald of autumn in Japan. Typically targeted at night using bright floodlights.", noteEl: "The herald of autumn in Japan. Typically targeted at night using bright floodlights.", noteEs: "The herald of autumn in Japan. Typically targeted at night using bright floodlights."
     },
     "sakuramasu": {
-        name: "Sakura Masu", nameEn: "Cherry Salmon", nameEl: "Σολομός Cherry", nameEs: "Cherry Salmon", icon: "🐟", scientificName: "Oncorhynchus masou",
+        name: "Sakura Masu", nameEn: "Cherry Salmon", nameEl: "Σολομός κερασιάς", nameEs: "Salmón cereza", icon: "🐟", scientificName: "Oncorhynchus masou",
         photoId: 227, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz nehir ağızları ve kıyılar",
@@ -2783,7 +2783,7 @@ const SPECIES_DB = {
         noteEn: "Named after cherry blossoms (Sakura), as it arrives at the coast during their blooming season.", noteEl: "Named after cherry blossoms (Sakura), as it arrives at the coast during their blooming season.", noteEs: "Named after cherry blossoms (Sakura), as it arrives at the coast during their blooming season."
     },
     "hamo": {
-        name: "Hamo", nameEn: "Daggertooth Pike Conger", nameEl: "Daggertooth Pike Conger", nameEs: "Daggertooth Pike Conger", icon: "🐍", scientificName: "Muraenesox cinereus",
+        name: "Hamo", nameEn: "Daggertooth Pike Conger", nameEl: "Μουγγρί οξύρρυγχο", nameEs: "Congrio dentón (hamo)", icon: "🐍", scientificName: "Muraenesox cinereus",
         photoId: 228, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece kayalık dipler",
@@ -2797,7 +2797,7 @@ const SPECIES_DB = {
         noteEn: "Iconic Kyoto summer delicacy. Requires specialized bone-cutting (Hone-kiri) due to its fine bones.", noteEl: "Iconic Kyoto summer delicacy. Requires specialized bone-cutting (Hone-kiri) due to its fine bones.", noteEs: "Iconic Kyoto summer delicacy. Requires specialized bone-cutting (Hone-kiri) due to its fine bones."
     },
     "unagi": {
-        name: "Unagi", nameEn: "Japanese Eel", nameEl: "Γιαπωνέζικο χέλι", nameEs: "Japanese Eel", icon: "🐍", scientificName: "Anguilla japonica",
+        name: "Unagi", nameEn: "Japanese Eel", nameEl: "Γιαπωνέζικο χέλι", nameEs: "Anguila japonesa", icon: "🐍", scientificName: "Anguilla japonica",
         photoId: 229, category: "LAGUN",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece nehir ağızları ve çamurlu dipler",
@@ -2811,7 +2811,7 @@ const SPECIES_DB = {
         noteEn: "Traditionally consumed on 'Doyo no Ushi no Hi' in summer to restore vitality.", noteEl: "Traditionally consumed on 'Doyo no Ushi no Hi' in summer to restore vitality.", noteEs: "Traditionally consumed on 'Doyo no Ushi no Hi' in summer to restore vitality."
     },
     "anago": {
-        name: "Anago", nameEn: "Whitespotted Conger", nameEl: "Whitespotted Conger", nameEs: "Whitespotted Conger", icon: "🐍", scientificName: "Conger myriaster",
+        name: "Anago", nameEn: "Whitespotted Conger", nameEl: "Μουγγρί ανάγκο", nameEs: "Congrio anago", icon: "🐍", scientificName: "Conger myriaster",
         photoId: 230, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece kumlu ve çamurlu dipler",
@@ -2825,7 +2825,7 @@ const SPECIES_DB = {
         noteEn: "Ocean-dwelling cousin of the Unagi. The most popular eel variety for tempura.", noteEl: "Ocean-dwelling cousin of the Unagi. The most popular eel variety for tempura.", noteEs: "Ocean-dwelling cousin of the Unagi. The most popular eel variety for tempura."
     },
     "fugu": {
-        name: "Fugu", nameEn: "Tiger Puffer", nameEl: "Tiger Puffer", nameEs: "Tiger Puffer", icon: "🐡", scientificName: "Takifugu rubripes",
+        name: "Fugu", nameEn: "Tiger Puffer", nameEl: "Λαγοκέφαλος τίγρης", nameEs: "Pez globo tigre (fugu)", icon: "🐡", scientificName: "Takifugu rubripes",
         photoId: 231, category: "İSTİLACI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz ve sığ resifler",
@@ -2839,7 +2839,7 @@ const SPECIES_DB = {
         noteEn: "CAUTION: Highly poisonous! Must be prepared by licensed chefs. The pinnacle of winter cuisine.", noteEl: "CAUTION: Highly poisonous! Must be prepared by licensed chefs. The pinnacle of winter cuisine.", noteEs: "CAUTION: Highly poisonous! Must be prepared by licensed chefs. The pinnacle of winter cuisine."
     },
     "ayu": {
-        name: "Ayu", nameEn: "Sweetfish", nameEl: "Γλυκόψαρο", nameEs: "Sweetfish", icon: "🐟", scientificName: "Plecoglossus altivelis",
+        name: "Ayu", nameEn: "Sweetfish", nameEl: "Γλυκόψαρο", nameEs: "Pez dulce ayu", icon: "🐟", scientificName: "Plecoglossus altivelis",
         photoId: 232, category: "LAGUN",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz berrak akarsular ve nehir ağızları",
@@ -2853,7 +2853,7 @@ const SPECIES_DB = {
         noteEn: "Famous for watermelon-scented meat. The 'Tomozuri' live-decoy method is a traditional Japanese art.", noteEl: "Famous for watermelon-scented meat. The 'Tomozuri' live-decoy method is a traditional Japanese art.", noteEs: "Famous for watermelon-scented meat. The 'Tomozuri' live-decoy method is a traditional Japanese art."
     },
     "nishin": {
-        name: "Nishin", nameEn: "Pacific Herring", nameEl: "Ρέγγα Ειρηνικού", nameEs: "Pacific Herring", icon: "🐟", scientificName: "Clupea pallasii",
+        name: "Nishin", nameEn: "Pacific Herring", nameEl: "Ρέγγα Ειρηνικού", nameEs: "Arenque del Pacífico", icon: "🐟", scientificName: "Clupea pallasii",
         photoId: 233, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sürüler halinde",
@@ -2867,7 +2867,7 @@ const SPECIES_DB = {
         noteEn: "Historic staple of Hokkaido. Its roe (Kazunoko) is an essential Japanese New Year delicacy.", noteEl: "Historic staple of Hokkaido. Its roe (Kazunoko) is an essential Japanese New Year delicacy.", noteEs: "Historic staple of Hokkaido. Its roe (Kazunoko) is an essential Japanese New Year delicacy."
     },
     "hokke": {
-        name: "Hokke", nameEn: "Okhotsk Atka Mackerel", nameEl: "Σκουμπρί Okhotsk Atka", nameEs: "Okhotsk Atka Mackerel", icon: "🐟", scientificName: "Pleurogrammus azonus",
+        name: "Hokke", nameEn: "Okhotsk Atka Mackerel", nameEl: "Πρασινόψαρο χόκε", nameEs: "Caballa de Atka (hokke)", icon: "🐟", scientificName: "Pleurogrammus azonus",
         photoId: 234, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz kayalık resifler",
@@ -2881,7 +2881,7 @@ const SPECIES_DB = {
         noteEn: "One of the most consumed fish in Japan as dried (Hokke-no-hiraki).", noteEl: "One of the most consumed fish in Japan as dried (Hokke-no-hiraki).", noteEs: "One of the most consumed fish in Japan as dried (Hokke-no-hiraki)."
     },
     "kinki": {
-        name: "Kinki", nameEn: "Broadfin Thornyhead", nameEl: "Πλατύ πτερύγιο Θόρνιχεντ", nameEs: "Broadfin Thornyhead", icon: "🐟", scientificName: "Sebastolobus macrochir",
+        name: "Kinki", nameEn: "Broadfin Thornyhead", nameEl: "Πλατύ πτερύγιο Θόρνιχεντ", nameEs: "Cabracho de aleta ancha (kinki)", icon: "🐟", scientificName: "Sebastolobus macrochir",
         photoId: 235, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin kayalıklar",
@@ -2895,7 +2895,7 @@ const SPECIES_DB = {
         noteEn: "Top-tier Hokkaido luxury fish. Extremely high fat content; famous when simmered (Nitsuke).", noteEl: "Top-tier Hokkaido luxury fish. Extremely high fat content; famous when simmered (Nitsuke).", noteEs: "Top-tier Hokkaido luxury fish. Extremely high fat content; famous when simmered (Nitsuke)."
     },
     "mejina": {
-        name: "Mejina", nameEn: "Large-scale Blackfish", nameEl: "Μαυρόψαρο μεγάλης κλίμακας", nameEs: "Large-scale Blackfish", icon: "🐟", scientificName: "Girella punctata",
+        name: "Mejina", nameEn: "Large-scale Blackfish", nameEl: "Μαυρόψαρο μεγάλης κλίμακας", nameEs: "Chopa japonesa (mejina)", icon: "🐟", scientificName: "Girella punctata",
         photoId: 236, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz kayalık kıyılar",
@@ -2909,7 +2909,7 @@ const SPECIES_DB = {
         noteEn: "The primary target for Japanese rock fishing (Iso-furi). Winter catches (Kan-Mejina) are exceptionally oily.", noteEl: "The primary target for Japanese rock fishing (Iso-furi). Winter catches (Kan-Mejina) are exceptionally oily.", noteEs: "The primary target for Japanese rock fishing (Iso-furi). Winter catches (Kan-Mejina) are exceptionally oily."
     },
     "gure": {
-        name: "Gure", nameEn: "Smallscale Blackfish", nameEl: "Μαυρόψαρο μικρού μεγέθους", nameEs: "Smallscale Blackfish", icon: "🐟", scientificName: "Girella leonina",
+        name: "Gure", nameEn: "Smallscale Blackfish", nameEl: "Μαυρόψαρο μικρού μεγέθους", nameEs: "Chopa de escama fina", icon: "🐟", scientificName: "Girella leonina",
         photoId: 237, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz akıntılı burunlar",
@@ -2923,7 +2923,7 @@ const SPECIES_DB = {
         noteEn: "Similar to Mejina but more aggressive and inhabits deeper coastal waters.", noteEl: "Similar to Mejina but more aggressive and inhabits deeper coastal waters.", noteEs: "Similar to Mejina but more aggressive and inhabits deeper coastal waters."
     },
     "gochi": {
-        name: "Gochi", nameEn: "Bartail Flathead", nameEl: "Bartail Flathead", nameEs: "Bartail Flathead", icon: "🐟", scientificName: "Platycephalus sp.",
+        name: "Gochi", nameEn: "Bartail Flathead", nameEl: "Πλατυκέφαλος ραβδωτός", nameEs: "Cabezón de cola barrada", icon: "🐟", scientificName: "Platycephalus sp.",
         photoId: 238, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluklar",
@@ -2937,7 +2937,7 @@ const SPECIES_DB = {
         noteEn: "A camouflage predator of the sands. Highly active in shallows during summer with light, lean meat.", noteEl: "A camouflage predator of the sands. Highly active in shallows during summer with light, lean meat.", noteEs: "A camouflage predator of the sands. Highly active in shallows during summer with light, lean meat."
     },
     "oniokoze": {
-        name: "Oniokoze", nameEn: "Devil Stinger", nameEl: "Διάβολος Στίνγκερ", nameEs: "Devil Stinger", icon: "🐟", scientificName: "Inimicus japonicus",
+        name: "Oniokoze", nameEn: "Devil Stinger", nameEl: "Διάβολος Στίνγκερ", nameEs: "Pez diablo japonés (oni-okoze)", icon: "🐟", scientificName: "Inimicus japonicus",
         photoId: 239, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece kayalık dipler",
@@ -2951,7 +2951,7 @@ const SPECIES_DB = {
         noteEn: "WARNING: Venomous spines! Despite its fearsome looks, it is a prized gourmet species in Japan.", noteEl: "WARNING: Venomous spines! Despite its fearsome looks, it is a prized gourmet species in Japan.", noteEs: "WARNING: Venomous spines! Despite its fearsome looks, it is a prized gourmet species in Japan."
     },
     "umitanago": {
-        name: "Umitanago", nameEn: "Japanese Surfperch", nameEl: "Ιαπωνικό Surfperch", nameEs: "Japanese Surfperch", icon: "🐟", scientificName: "Ditrema temminckii",
+        name: "Umitanago", nameEn: "Japanese Surfperch", nameEl: "Πέρκα κυμάτων Ιαπωνίας", nameEs: "Perca de surf japonesa", icon: "🐟", scientificName: "Ditrema temminckii",
         photoId: 240, category: "KIYI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz kayalık ve liman içleri",
@@ -2965,7 +2965,7 @@ const SPECIES_DB = {
         noteEn: "A rare live-bearing fish. Extremely abundant on coasts during the spring months.", noteEl: "A rare live-bearing fish. Extremely abundant on coasts during the spring months.", noteEs: "A rare live-bearing fish. Extremely abundant on coasts during the spring months."
     },
     "kidai": {
-        name: "Kidai", nameEn: "Yellowback Seabream", nameEl: "Yellowback Seabream", nameEs: "Yellowback Seabream", icon: "🐟", scientificName: "Dentex hypselosomus",
+        name: "Kidai", nameEn: "Yellowback Seabream", nameEl: "Συναγρίδα κιτρινόραχη", nameEs: "Dentón de lomo amarillo", icon: "🐟", scientificName: "Dentex hypselosomus",
         photoId: 241, category: "KIYI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz ve kayalık dip",
@@ -2979,7 +2979,7 @@ const SPECIES_DB = {
         noteEn: "Resembles Madai but distinguished by a yellow back spot. Often called 'Kasugo' in culinary circles.", noteEl: "Resembles Madai but distinguished by a yellow back spot. Often called 'Kasugo' in culinary circles.", noteEs: "Resembles Madai but distinguished by a yellow back spot. Often called 'Kasugo' in culinary circles."
     },
     "chidai": {
-        name: "Chidai", nameEn: "Crimson Seabream", nameEl: "Κατακόκκινη τσιπούρα", nameEs: "Crimson Seabream", icon: "🐟", scientificName: "Evynnis tumifrons",
+        name: "Chidai", nameEn: "Crimson Seabream", nameEl: "Κατακόκκινη τσιπούρα", nameEs: "Besugo carmesí", icon: "🐟", scientificName: "Evynnis tumifrons",
         photoId: 242, category: "KIYI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz ve resif kenarları",
@@ -2993,7 +2993,7 @@ const SPECIES_DB = {
         noteEn: "Identified by a black tail border and vivid red color. Highly prized during spring.", noteEl: "Identified by a black tail border and vivid red color. Highly prized during spring.", noteEs: "Identified by a black tail border and vivid red color. Highly prized during spring."
     },
     "shima_hokke": {
-        name: "Shima Hokke", nameEn: "Arabesque Greenling", nameEl: "Arabesque Greenling", nameEs: "Arabesque Greenling", icon: "🐟", scientificName: "Pleurogrammus monopterygius",
+        name: "Shima Hokke", nameEn: "Arabesque Greenling", nameEl: "Πρασινόψαρο αραβούργημα", nameEs: "Greenling arabesco", icon: "🐟", scientificName: "Pleurogrammus monopterygius",
         photoId: 243, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz kayalık resifler",
@@ -3007,7 +3007,7 @@ const SPECIES_DB = {
         noteEn: "Known for distinct black stripes. The most popular grilled fish specialty in Hokkaido.", noteEl: "Known for distinct black stripes. The most popular grilled fish specialty in Hokkaido.", noteEs: "Known for distinct black stripes. The most popular grilled fish specialty in Hokkaido."
     },
     "manda": {
-        name: "Manda", nameEn: "Ocean Sunfish", nameEl: "Ocean Sunfish", nameEs: "Ocean Sunfish", icon: "🐟", scientificName: "Mola mola",
+        name: "Manda", nameEn: "Ocean Sunfish", nameEl: "Φεγγαρόψαρο", nameEs: "Pez luna", icon: "🐟", scientificName: "Mola mola",
         photoId: 244, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz okyanus yüzeyi",
@@ -3021,7 +3021,7 @@ const SPECIES_DB = {
         noteEn: "One of the world's heaviest bony fish. Frequently seen sunbathing on the surface off Japan's coast.", noteEl: "One of the world's heaviest bony fish. Frequently seen sunbathing on the surface off Japan's coast.", noteEs: "One of the world's heaviest bony fish. Frequently seen sunbathing on the surface off Japan's coast."
     },
     "ankou": {
-        name: "Ankou", nameEn: "Japanese Goosefish", nameEl: "Γιαπωνέζικο ψάρι χήνας", nameEs: "Japanese Goosefish", icon: "🐟", scientificName: "Lophius litulon",
+        name: "Ankou", nameEn: "Japanese Goosefish", nameEl: "Γιαπωνέζικο ψάρι χήνας", nameEs: "Rape japonés", icon: "🐟", scientificName: "Lophius litulon",
         photoId: 245, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin çamurlu dip",
@@ -3035,7 +3035,7 @@ const SPECIES_DB = {
         noteEn: "The star of winter 'Ankou Nabe'. Its liver (Ankimo) is known as the foie gras of the sea.", noteEl: "The star of winter 'Ankou Nabe'. Its liver (Ankimo) is known as the foie gras of the sea.", noteEs: "The star of winter 'Ankou Nabe'. Its liver (Ankimo) is known as the foie gras of the sea."
     },
     "meitagarei": {
-        name: "Meita-garei", nameEn: "Frog Flounder", nameEl: "Frog Flounder", nameEs: "Frog Flounder", icon: "🐟", scientificName: "Pleuronichthys cornutus",
+        name: "Meita-garei", nameEn: "Frog Flounder", nameEl: "Γλώσσα κερασφόρος", nameEs: "Platija cornuda", icon: "🐟", scientificName: "Pleuronichthys cornutus",
         photoId: 246, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumlu dip",
@@ -3049,7 +3049,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by horn-like projections between the eyes. Boasts exceptionally white, sweet meat.", noteEl: "Recognized by horn-like projections between the eyes. Boasts exceptionally white, sweet meat.", noteEs: "Recognized by horn-like projections between the eyes. Boasts exceptionally white, sweet meat."
     },
     "kanpachi": {
-        name: "Kanpachi", nameEn: "Greater Amberjack", nameEl: "Greater Amberjack", nameEs: "Greater Amberjack", icon: "🐟", scientificName: "Seriola dumerili",
+        name: "Kanpachi", nameEn: "Greater Amberjack", nameEl: "Μαγιάτικο", nameEs: "Pez limón", icon: "🐟", scientificName: "Seriola dumerili",
         photoId: 247, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin resif kenarları",
@@ -3063,7 +3063,7 @@ const SPECIES_DB = {
         noteEn: "Named for the 'Eight' (Kanji: 八) mark on its forehead. A notoriously powerful fighter.", noteEl: "Named for the 'Eight' (Kanji: 八) mark on its forehead. A notoriously powerful fighter.", noteEs: "Named for the 'Eight' (Kanji: 八) mark on its forehead. A notoriously powerful fighter."
     },
     "hirasa": {
-        name: "Hirasa", nameEn: "Yellowtail Amberjack", nameEl: "Yellowtail Amberjack", nameEs: "Yellowtail Amberjack", icon: "🐟", scientificName: "Seriola lalandi",
+        name: "Hirasa", nameEn: "Yellowtail Amberjack", nameEl: "Μαγιάτικο λεμονί", nameEs: "Medregal limón", icon: "🐟", scientificName: "Seriola lalandi",
         photoId: 248, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ resifler ve akıntılar",
@@ -3077,7 +3077,7 @@ const SPECIES_DB = {
         noteEn: "Closely resembles Buri but with a flatter body. A top-tier summer trophy target.", noteEl: "Closely resembles Buri but with a flatter body. A top-tier summer trophy target.", noteEs: "Closely resembles Buri but with a flatter body. A top-tier summer trophy target."
     },
     "karasu": {
-        name: "Karasu-garei", nameEn: "Greenland Halibut", nameEl: "Ιππόγλωσσα Γροιλανδίας", nameEs: "Greenland Halibut", icon: "🐟", scientificName: "Reinhardtius hippoglossoides",
+        name: "Karasu-garei", nameEn: "Greenland Halibut", nameEl: "Ιππόγλωσσα Γροιλανδίας", nameEs: "Fletán negro", icon: "🐟", scientificName: "Reinhardtius hippoglossoides",
         photoId: 249, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin soğuk sular",
@@ -3091,7 +3091,7 @@ const SPECIES_DB = {
         noteEn: "The giant flatfish of the North Pacific. Oily meat; its 'Engawa' fin muscle is highly prized.", noteEl: "The giant flatfish of the North Pacific. Oily meat; its 'Engawa' fin muscle is highly prized.", noteEs: "The giant flatfish of the North Pacific. Oily meat; its 'Engawa' fin muscle is highly prized."
     },
     "akahata": {
-        name: "Akahata", nameEn: "Blacktip Grouper", nameEl: "Blacktip σφυρίδα", nameEs: "Blacktip Grouper", icon: "🐟", scientificName: "Epinephelus fasciatus",
+        name: "Akahata", nameEn: "Blacktip Grouper", nameEl: "Ροφός μαυροκόρυφος", nameEs: "Mero de puntas negras", icon: "🐟", scientificName: "Epinephelus fasciatus",
         photoId: 250, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ resifler",
@@ -3105,7 +3105,7 @@ const SPECIES_DB = {
         noteEn: "Icon of southern reefs with its bright red hue. Excellent when simmered or steamed.", noteEl: "Icon of southern reefs with its bright red hue. Excellent when simmered or steamed.", noteEs: "Icon of southern reefs with its bright red hue. Excellent when simmered or steamed."
     },
     "skrei": {
-        name: "Skrei", nameEn: "Arctic Cod", nameEl: "Arctic Cod", nameEs: "Arctic Cod", icon: "🐟", scientificName: "Gadus morhua",
+        name: "Skrei", nameEn: "Arctic Cod", nameEl: "Μπακαλιάρος Ατλαντικού", nameEs: "Bacalao del Atlántico", icon: "🐟", scientificName: "Gadus morhua",
         photoId: 301, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz ve akıntılı fiyort ağızları",
@@ -3119,7 +3119,7 @@ const SPECIES_DB = {
         noteEn: "Legendary Arctic Cod that migrates from the Barents Sea to the Norwegian coast to spawn. Highly prized for its white, flaky meat.", noteEl: "Legendary Arctic Cod that migrates from the Barents Sea to the Norwegian coast to spawn. Highly prized for its white, flaky meat.", noteEs: "Legendary Arctic Cod that migrates from the Barents Sea to the Norwegian coast to spawn. Highly prized for its white, flaky meat."
     },
     "kveite": {
-        name: "Kveite", nameEn: "Atlantic Halibut", nameEl: "Ατλαντικός ιππόγλωσσος", nameEs: "Atlantic Halibut", icon: "🐟", scientificName: "Hippoglossus hippoglossus",
+        name: "Kveite", nameEn: "Atlantic Halibut", nameEl: "Ατλαντικός ιππόγλωσσος", nameEs: "Fletán atlántico", icon: "🐟", scientificName: "Hippoglossus hippoglossus",
         photoId: 302, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk platolar",
@@ -3133,7 +3133,7 @@ const SPECIES_DB = {
         noteEn: "The king of the northern seas. Can exceed 300 kg. Requires patience and heavy-duty gear.", noteEl: "The king of the northern seas. Can exceed 300 kg. Requires patience and heavy-duty gear.", noteEs: "The king of the northern seas. Can exceed 300 kg. Requires patience and heavy-duty gear."
     },
     "sei": {
-        name: "Sei", nameEn: "Saithe / Pollock", nameEl: "Saithe / Pollock", nameEs: "Saithe / Pollock", icon: "🐟", scientificName: "Pollachius virens",
+        name: "Sei", nameEn: "Saithe / Pollock", nameEl: "Μαυρομπακαλιάρος", nameEs: "Carbonero", icon: "🐟", scientificName: "Pollachius virens",
         photoId: 303, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık ve hızlı akıntılar",
@@ -3147,7 +3147,7 @@ const SPECIES_DB = {
         noteEn: "Very fast and strong. Often called the 'Tuna of the North'. Attacks fast-retrieved jigs.", noteEl: "Very fast and strong. Often called the 'Tuna of the North'. Attacks fast-retrieved jigs.", noteEs: "Very fast and strong. Often called the 'Tuna of the North'. Attacks fast-retrieved jigs."
     },
     "lyr": {
-        name: "Lyr", nameEn: "Pollack", nameEl: "Pollack", nameEs: "Pollack", icon: "🐟", scientificName: "Pollachius pollachius",
+        name: "Lyr", nameEn: "Pollack", nameEl: "Μπακαλιάρος κίτρινος", nameEs: "Abadejo", icon: "🐟", scientificName: "Pollachius pollachius",
         photoId: 304, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık ve dik kayalıklar",
@@ -3161,7 +3161,7 @@ const SPECIES_DB = {
         noteEn: "Loves rocky points and shallows. Highly sporting on light spinning tackle.", noteEl: "Loves rocky points and shallows. Highly sporting on light spinning tackle.", noteEs: "Loves rocky points and shallows. Highly sporting on light spinning tackle."
     },
     "uer": {
-        name: "Uer", nameEn: "Redfish", nameEl: "Κοκκινόψαρο", nameEs: "Redfish", icon: "🐟", scientificName: "Sebastes marinus",
+        name: "Uer", nameEn: "Redfish", nameEl: "Κοκκινόψαρο", nameEs: "Gallineta del Atlántico", icon: "🐟", scientificName: "Sebastes marinus",
         photoId: 305, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin yamaçlar",
@@ -3175,7 +3175,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its bright red color and large eyes. Grows very slowly and is a deep-water delicacy.", noteEl: "Recognized by its bright red color and large eyes. Grows very slowly and is a deep-water delicacy.", noteEs: "Recognized by its bright red color and large eyes. Grows very slowly and is a deep-water delicacy."
     },
     "steinbit": {
-        name: "Steinbit", nameEn: "Atlantic Wolffish", nameEl: "Λύκος του Ατλαντικού", nameEs: "Atlantic Wolffish", icon: "🐟", scientificName: "Anarhichas lupus",
+        name: "Steinbit", nameEn: "Atlantic Wolffish", nameEl: "Λύκος του Ατλαντικού", nameEs: "Perro del norte", icon: "🐟", scientificName: "Anarhichas lupus",
         photoId: 306, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz kayalık yarıklar",
@@ -3189,7 +3189,7 @@ const SPECIES_DB = {
         noteEn: "Fearsome teeth used for crushing shellfish. Its meat is often compared to lobster.", noteEl: "Fearsome teeth used for crushing shellfish. Its meat is often compared to lobster.", noteEs: "Fearsome teeth used for crushing shellfish. Its meat is often compared to lobster."
     },
     "laks": {
-        name: "Laks", nameEn: "Atlantic Salmon", nameEl: "Σολομός Ατλαντικού", nameEs: "Atlantic Salmon", icon: "🐟", scientificName: "Salmo salar",
+        name: "Laks", nameEn: "Atlantic Salmon", nameEl: "Σολομός Ατλαντικού", nameEs: "Salmón atlántico", icon: "🐟", scientificName: "Salmo salar",
         photoId: 307, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz nehir ağızları ve fiyortlar",
@@ -3203,7 +3203,7 @@ const SPECIES_DB = {
         noteEn: "The most famous fish of Norway. Feeds in the ocean and returns to rivers to spawn.", noteEl: "The most famous fish of Norway. Feeds in the ocean and returns to rivers to spawn.", noteEs: "The most famous fish of Norway. Feeds in the ocean and returns to rivers to spawn."
     },
     "makrell": {
-        name: "Makrell", nameEn: "Atlantic Mackerel", nameEl: "Σκουμπρί Ατλαντικού", nameEs: "Atlantic Mackerel", icon: "🐟", scientificName: "Scomber scombrus",
+        name: "Makrell", nameEn: "Atlantic Mackerel", nameEl: "Σκουμπρί Ατλαντικού", nameEs: "Caballa", icon: "🐟", scientificName: "Scomber scombrus",
         photoId: 308, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey sürüler",
@@ -3217,7 +3217,7 @@ const SPECIES_DB = {
         noteEn: "Enters Norwegian fjords in massive schools during summer. Oily and rich in flavor.", noteEl: "Enters Norwegian fjords in massive schools during summer. Oily and rich in flavor.", noteEs: "Enters Norwegian fjords in massive schools during summer. Oily and rich in flavor."
     },
     "hyse": {
-        name: "Hyse", nameEn: "Haddock", nameEl: "Χάντοκ", nameEs: "Haddock", icon: "🐟", scientificName: "Melanogrammus aeglefinus",
+        name: "Hyse", nameEn: "Haddock", nameEl: "Χάντοκ", nameEs: "Eglefino", icon: "🐟", scientificName: "Melanogrammus aeglefinus",
         photoId: 309, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumlu-çamurlu dipler",
@@ -3231,7 +3231,7 @@ const SPECIES_DB = {
         noteEn: "Member of the cod family. Easily recognized by the 'thumbprint' black spot on its side.", noteEl: "Member of the cod family. Easily recognized by the 'thumbprint' black spot on its side.", noteEs: "Member of the cod family. Easily recognized by the 'thumbprint' black spot on its side."
     },
     "brosme": {
-        name: "Brosme", nameEn: "Tusk", nameEl: "Τουσκ", nameEs: "Tusk", icon: "🐟", scientificName: "Brosme brosme",
+        name: "Brosme", nameEn: "Tusk", nameEl: "Τουσκ", nameEs: "Brosmio", icon: "🐟", scientificName: "Brosme brosme",
         photoId: 310, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalık dipler",
@@ -3246,7 +3246,7 @@ const SPECIES_DB = {
     },
 
     "lange": {
-        name: "Lange", nameEn: "Common Ling", nameEl: "Κοινός Πνεύμονας", nameEs: "Common Ling", icon: "🐟", scientificName: "Molva molva",
+        name: "Lange", nameEn: "Common Ling", nameEl: "Κοινός Πνεύμονας", nameEs: "Maruca", icon: "🐟", scientificName: "Molva molva",
         photoId: 311, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin resif kenarları",
@@ -3260,7 +3260,7 @@ const SPECIES_DB = {
         noteEn: "The longest member of the cod family. A powerful predator that prefers large baits.", noteEl: "The longest member of the cod family. A powerful predator that prefers large baits.", noteEs: "The longest member of the cod family. A powerful predator that prefers large baits."
     },
     "blalange": {
-        name: "Blålange", nameEn: "Blue Ling", nameEl: "Μπλε Φτερού", nameEs: "Blue Ling", icon: "🐟", scientificName: "Molva dypterygia",
+        name: "Blålange", nameEn: "Blue Ling", nameEl: "Μπλε Φτερού", nameEs: "Maruca azul", icon: "🐟", scientificName: "Molva dypterygia",
         photoId: 312, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz aşırı derin çukurlar",
@@ -3274,7 +3274,7 @@ const SPECIES_DB = {
         noteEn: "Inhabits deeper waters than the common ling. Features very large eyes and a more slender body.", noteEl: "Inhabits deeper waters than the common ling. Features very large eyes and a more slender body.", noteEs: "Inhabits deeper waters than the common ling. Features very large eyes and a more slender body."
     },
     "lysing": {
-        name: "Lysing", nameEn: "European Hake", nameEl: "Ευρωπαϊκός Μερλούκος", nameEs: "European Hake", icon: "🐟", scientificName: "Merluccius merluccius",
+        name: "Lysing", nameEn: "European Hake", nameEl: "Ευρωπαϊκός Μερλούκος", nameEs: "Merluza", icon: "🐟", scientificName: "Merluccius merluccius",
         photoId: 313, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "NIGHT", peakHoursDesc: "Gece yüzeye yaklaşır",
@@ -3288,7 +3288,7 @@ const SPECIES_DB = {
         noteEn: "Equipped with very sharp teeth. Moves up the water column at night to feed.", noteEl: "Equipped with very sharp teeth. Moves up the water column at night to feed.", noteEs: "Equipped with very sharp teeth. Moves up the water column at night to feed."
     },
     "rodspette": {
-        name: "Rødspette", nameEn: "Plaice", nameEl: "Χωματίδα", nameEs: "Plaice", icon: "🐟", scientificName: "Pleuronectes platessa",
+        name: "Rødspette", nameEn: "Plaice", nameEl: "Χωματίδα", nameEs: "Solla", icon: "🐟", scientificName: "Pleuronectes platessa",
         photoId: 314, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumlu sığlıklar",
@@ -3302,7 +3302,7 @@ const SPECIES_DB = {
         noteEn: "Recognizable by the bright orange spots on its back. One of the tastiest flatfish along the Norwegian coast.", noteEl: "Recognizable by the bright orange spots on its back. One of the tastiest flatfish along the Norwegian coast.", noteEs: "Recognizable by the bright orange spots on its back. One of the tastiest flatfish along the Norwegian coast."
     },
     "piggvar": {
-        name: "Piggvar", nameEn: "Turbot", nameEl: "Καλκάνι", nameEs: "Turbot", icon: "🐟", scientificName: "Scophthalmus maximus",
+        name: "Piggvar", nameEn: "Turbot", nameEl: "Καλκάνι", nameEs: "Rodaballo", icon: "🐟", scientificName: "Scophthalmus maximus",
         photoId: 315, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk-çakıllık dipler",
@@ -3316,7 +3316,7 @@ const SPECIES_DB = {
         noteEn: "The most prized of the flatfish. Features small bony tubercles (pigg) on its body.", noteEl: "The most prized of the flatfish. Features small bony tubercles (pigg) on its body.", noteEs: "The most prized of the flatfish. Features small bony tubercles (pigg) on its body."
     },
     "slettvar": {
-        name: "Slettvar", nameEn: "Brill", nameEl: "Brill", nameEs: "Brill", icon: "🐟", scientificName: "Scophthalmus rhombus",
+        name: "Slettvar", nameEn: "Brill", nameEl: "Πησσί", nameEs: "Rémol", icon: "🐟", scientificName: "Scophthalmus rhombus",
         photoId: 316, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumlu dipler",
@@ -3330,7 +3330,7 @@ const SPECIES_DB = {
         noteEn: "Similar to Turbot but with smooth skin. A very delicious and valuable species.", noteEl: "Similar to Turbot but with smooth skin. A very delicious and valuable species.", noteEs: "Similar to Turbot but with smooth skin. A very delicious and valuable species."
     },
     "lomre": {
-        name: "Lomre", nameEn: "Lemon Sole", nameEl: "Σόλα λεμονιού", nameEs: "Lemon Sole", icon: "🐟", scientificName: "Microstomus kitt",
+        name: "Lomre", nameEn: "Lemon Sole", nameEl: "Σόλα λεμονιού", nameEs: "Mendo limón", icon: "🐟", scientificName: "Microstomus kitt",
         photoId: 317, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk-kayalık karma dipler",
@@ -3344,7 +3344,7 @@ const SPECIES_DB = {
         noteEn: "Has a small head. A master of camouflage on mixed seabeds.", noteEl: "Has a small head. A master of camouflage on mixed seabeds.", noteEs: "Has a small head. A master of camouflage on mixed seabeds."
     },
     "knorre": {
-        name: "Knorre", nameEn: "Gurnard", nameEl: "Γκάρναρντ", nameEs: "Gurnard", icon: "🐟", scientificName: "Eutrigla gurnardus",
+        name: "Knorre", nameEn: "Gurnard", nameEl: "Γκάρναρντ", nameEs: "Borracho", icon: "🐟", scientificName: "Eutrigla gurnardus",
         photoId: 318, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumlu dipler",
@@ -3358,7 +3358,7 @@ const SPECIES_DB = {
         noteEn: "Uses its pectoral fins like legs to walk on the seabed. Produces a grunting sound when taken out of the water.", noteEl: "Uses its pectoral fins like legs to walk on the seabed. Produces a grunting sound when taken out of the water.", noteEs: "Uses its pectoral fins like legs to walk on the seabed. Produces a grunting sound when taken out of the water."
     },
     "piggha": {
-        name: "Pigghå", nameEn: "Spiny Dogfish", nameEl: "Αγκαθωτό σκυλόψαρο", nameEs: "Spiny Dogfish", icon: "🦈", scientificName: "Squalus acanthias",
+        name: "Pigghå", nameEn: "Spiny Dogfish", nameEl: "Αγκαθωτό σκυλόψαρο", nameEs: "Mielga", icon: "🦈", scientificName: "Squalus acanthias",
         photoId: 319, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "NIGHT", peakHoursDesc: "Gece ve akıntılı bölgeler",
@@ -3372,7 +3372,7 @@ const SPECIES_DB = {
         noteEn: "Features a sharp spine in front of its dorsal fin. Travels in schools.", noteEl: "Features a sharp spine in front of its dorsal fin. Travels in schools.", noteEs: "Features a sharp spine in front of its dorsal fin. Travels in schools."
     },
     "hagjel": {
-        name: "Hågjel", nameEn: "Blackmouth Catshark", nameEl: "Blackmouth Catshark", nameEs: "Blackmouth Catshark", icon: "🦈", scientificName: "Galeus melastomus",
+        name: "Hågjel", nameEn: "Blackmouth Catshark", nameEl: "Γαλέος μαυρόστομος", nameEs: "Pintarroja bocanegra", icon: "🦈", scientificName: "Galeus melastomus",
         photoId: 320, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece derin çamurlu dipler",
@@ -3387,7 +3387,7 @@ const SPECIES_DB = {
     },
 
     "makrellstorje": {
-        name: "Makrellstørje", nameEn: "Atlantic Bluefin Tuna", nameEl: "Τόνος Ατλαντικού", nameEs: "Atlantic Bluefin Tuna", icon: "🦈", scientificName: "Thunnus thynnus",
+        name: "Makrellstørje", nameEn: "Atlantic Bluefin Tuna", nameEl: "Τόνος Ατλαντικού", nameEs: "Atún rojo", icon: "🦈", scientificName: "Thunnus thynnus",
         photoId: 321, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey sürüler",
@@ -3401,7 +3401,7 @@ const SPECIES_DB = {
         noteEn: "The giant of the ocean, recently returned to Norwegian waters. A symbol of incredible power and speed.", noteEl: "The giant of the ocean, recently returned to Norwegian waters. A symbol of incredible power and speed.", noteEs: "The giant of the ocean, recently returned to Norwegian waters. A symbol of incredible power and speed."
     },
     "sild": {
-        name: "Sild", nameEn: "Atlantic Herring", nameEl: "Ρέγγα Ατλαντικού", nameEs: "Atlantic Herring", icon: "🐟", scientificName: "Clupea harengus",
+        name: "Sild", nameEn: "Atlantic Herring", nameEl: "Ρέγγα Ατλαντικού", nameEs: "Arenque atlántico", icon: "🐟", scientificName: "Clupea harengus",
         photoId: 322, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sürüler halinde",
@@ -3415,7 +3415,7 @@ const SPECIES_DB = {
         noteEn: "The foundation of Norway's economy and ecosystem. Enters fjords in billions during winter.", noteEl: "The foundation of Norway's economy and ecosystem. Enters fjords in billions during winter.", noteEs: "The foundation of Norway's economy and ecosystem. Enters fjords in billions during winter."
     },
     "hvitting": {
-        name: "Hvitting", nameEn: "Whiting", nameEl: "Νταούκι", nameEs: "Whiting", icon: "🐟", scientificName: "Merlangius merlangus",
+        name: "Hvitting", nameEn: "Whiting", nameEl: "Νταούκι", nameEs: "Merlán", icon: "🐟", scientificName: "Merlangius merlangus",
         photoId: 323, category: "KIYI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve derin bölgeler",
@@ -3429,7 +3429,7 @@ const SPECIES_DB = {
         noteEn: "Part of the cod family. Features very soft and tasty meat. Commonly found on deep fjord bottoms.", noteEl: "Part of the cod family. Features very soft and tasty meat. Commonly found on deep fjord bottoms.", noteEs: "Part of the cod family. Features very soft and tasty meat. Commonly found on deep fjord bottoms."
     },
     "sandflyndre": {
-        name: "Sandflyndre", nameEn: "Dab", nameEl: "Ταμπ", nameEs: "Dab", icon: "🐟", scientificName: "Limanda limanda",
+        name: "Sandflyndre", nameEn: "Dab", nameEl: "Ταμπ", nameEs: "Limanda", icon: "🐟", scientificName: "Limanda limanda",
         photoId: 324, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluklar",
@@ -3443,7 +3443,7 @@ const SPECIES_DB = {
         noteEn: "The most common flatfish in Norway. Features a rough skin and sand-like coloration.", noteEl: "The most common flatfish in Norway. Features a rough skin and sand-like coloration.", noteEs: "The most common flatfish in Norway. Features a rough skin and sand-like coloration."
     },
     "gapeflyndre": {
-        name: "Gapeflyndre", nameEn: "Long Rough Dab", nameEl: "Long Rough Dab", nameEs: "Long Rough Dab", icon: "🐟", scientificName: "Hippoglossoides platessoides",
+        name: "Gapeflyndre", nameEn: "Long Rough Dab", nameEl: "Χωματίδα", nameEs: "Platija americana", icon: "🐟", scientificName: "Hippoglossoides platessoides",
         photoId: 325, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin çamurlu dipler",
@@ -3457,7 +3457,7 @@ const SPECIES_DB = {
         noteEn: "Named for its large mouth. More common in deep waters compared to other flatfish species.", noteEl: "Named for its large mouth. More common in deep waters compared to other flatfish species.", noteEs: "Named for its large mouth. More common in deep waters compared to other flatfish species."
     },
     "horngjel": {
-        name: "Horngjel", nameEn: "Garfish", nameEl: "Garfish", nameEs: "Garfish", icon: "🐟", scientificName: "Belone belone",
+        name: "Horngjel", nameEn: "Garfish", nameEl: "Ζαργάνα", nameEs: "Aguja", icon: "🐟", scientificName: "Belone belone",
         photoId: 326, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey",
@@ -3471,7 +3471,7 @@ const SPECIES_DB = {
         noteEn: "Exotic-looking fish that visits Norwegian coasts in summer. Famous for its green bones.", noteEl: "Exotic-looking fish that visits Norwegian coasts in summer. Famous for its green bones.", noteEs: "Exotic-looking fish that visits Norwegian coasts in summer. Famous for its green bones."
     },
     "rognkjeks": {
-        name: "Rognkjeks", nameEn: "Lumpsucker", nameEl: "Λαμπρός", nameEs: "Lumpsucker", icon: "🐟", scientificName: "Cyclopterus lumpus",
+        name: "Rognkjeks", nameEn: "Lumpsucker", nameEl: "Λαμπρός", nameEs: "Ciclóptero", icon: "🐟", scientificName: "Cyclopterus lumpus",
         photoId: 327, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz kayalık yamaçlar",
@@ -3485,7 +3485,7 @@ const SPECIES_DB = {
         noteEn: "Uses its suction disk to attach to rocks. Its roe is highly valued as a caviar substitute.", noteEl: "Uses its suction disk to attach to rocks. Its roe is highly valued as a caviar substitute.", noteEs: "Uses its suction disk to attach to rocks. Its roe is highly valued as a caviar substitute."
     },
     "haibrisling": {
-        name: "Haibrisling", nameEn: "Greater Silver Smelt", nameEl: "Greater Silver Smelt", nameEs: "Greater Silver Smelt", icon: "🐟", scientificName: "Argentina silus",
+        name: "Haibrisling", nameEn: "Greater Silver Smelt", nameEl: "Γουρλομάτα", nameEs: "Pez plata", icon: "🐟", scientificName: "Argentina silus",
         photoId: 328, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin açık deniz",
@@ -3499,7 +3499,7 @@ const SPECIES_DB = {
         noteEn: "Bright silver color with large eyes. Often caught as a byproduct during deep-water cod fishing.", noteEl: "Bright silver color with large eyes. Often caught as a byproduct during deep-water cod fishing.", noteEs: "Bright silver color with large eyes. Often caught as a byproduct during deep-water cod fishing."
     },
     "ulk": {
-        name: "Ulk", nameEn: "Sculpin", nameEl: "Sculpin", nameEs: "Sculpin", icon: "🐟", scientificName: "Myoxocephalus scorpius",
+        name: "Ulk", nameEn: "Sculpin", nameEl: "Σκορπιός βόρειος", nameEs: "Cabote escorpión", icon: "🐟", scientificName: "Myoxocephalus scorpius",
         photoId: 329, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ kayalıklar",
@@ -3513,7 +3513,7 @@ const SPECIES_DB = {
         noteEn: "A spiny fish with a large head. Part of the sculpin family, but non-venomous.", noteEl: "A spiny fish with a large head. Part of the sculpin family, but non-venomous.", noteEs: "A spiny fish with a large head. Part of the sculpin family, but non-venomous."
     },
     "kloskoyte": {
-        name: "Kloskøyte", nameEn: "Thorny Skate", nameEl: "Αγκαθωτό πατίνι", nameEs: "Thorny Skate", icon: "🐟", scientificName: "Amblyraja radiata",
+        name: "Kloskøyte", nameEn: "Thorny Skate", nameEl: "Αγκαθωτό πατίνι", nameEs: "Raya radiante", icon: "🐟", scientificName: "Amblyraja radiata",
         photoId: 330, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk dipler",
@@ -3528,7 +3528,7 @@ const SPECIES_DB = {
     },
 
     "hakjerring": {
-        name: "Håkjerring", nameEn: "Greenland Shark", nameEl: "Καρχαρίας Γροιλανδίας", nameEs: "Greenland Shark", icon: "🦈", scientificName: "Somniosus microcephalus",
+        name: "Håkjerring", nameEn: "Greenland Shark", nameEl: "Καρχαρίας Γροιλανδίας", nameEs: "Tiburón de Groenlandia", icon: "🦈", scientificName: "Somniosus microcephalus",
         photoId: 331, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece derin soğuk sular",
@@ -3542,7 +3542,7 @@ const SPECIES_DB = {
         noteEn: "The longest-living vertebrate in the world (400+ years). Moves slowly but reaches massive sizes.", noteEl: "The longest-living vertebrate in the world (400+ years). Moves slowly but reaches massive sizes.", noteEs: "The longest-living vertebrate in the world (400+ years). Moves slowly but reaches massive sizes."
     },
     "sjoorret": {
-        name: "Sjøørret", nameEn: "Sea Trout", nameEl: "Θαλάσσια Πέστροφα", nameEs: "Sea Trout", icon: "🐟", scientificName: "Salmo trutta morpha trutta",
+        name: "Sjøørret", nameEn: "Sea Trout", nameEl: "Θαλάσσια Πέστροφα", nameEs: "Trucha marisca", icon: "🐟", scientificName: "Salmo trutta morpha trutta",
         photoId: 332, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak/Akşam sığ kıyılar",
@@ -3556,7 +3556,7 @@ const SPECIES_DB = {
         noteEn: "The most popular target for coastal fishing in Norway. Very feisty and silver-colored.", noteEl: "The most popular target for coastal fishing in Norway. Very feisty and silver-colored.", noteEs: "The most popular target for coastal fishing in Norway. Very feisty and silver-colored."
     },
     "blakveite": {
-        name: "Blåkveite", nameEn: "Greenland Halibut", nameEl: "Ιππόγλωσσα Γροιλανδίας", nameEs: "Greenland Halibut", icon: "🐟", scientificName: "Reinhardtius hippoglossoides",
+        name: "Blåkveite", nameEn: "Greenland Halibut", nameEl: "Ιππόγλωσσα Γροιλανδίας", nameEs: "Fletán negro", icon: "🐟", scientificName: "Reinhardtius hippoglossoides",
         photoId: 333, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin yamaçlar",
@@ -3570,7 +3570,7 @@ const SPECIES_DB = {
         noteEn: "Smaller than common halibut but much oilier. Its color is nearly black.", noteEl: "Smaller than common halibut but much oilier. Its color is nearly black.", noteEs: "Smaller than common halibut but much oilier. Its color is nearly black."
     },
     "havmus": {
-        name: "Havmus", nameEn: "Rabbitfish", nameEl: "Κουνελόψαρο", nameEs: "Rabbitfish", icon: "🐟", scientificName: "Chimaera monstrosa",
+        name: "Havmus", nameEn: "Rabbitfish", nameEl: "Κουνελόψαρο", nameEs: "Quimera", icon: "🐟", scientificName: "Chimaera monstrosa",
         photoId: 334, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece derin çamurlu dipler",
@@ -3584,7 +3584,7 @@ const SPECIES_DB = {
         noteEn: "Has a very strange appearance with large eyes and a long tail. The dorsal spine is venomous.", noteEl: "Has a very strange appearance with large eyes and a long tail. The dorsal spine is venomous.", noteEs: "Has a very strange appearance with large eyes and a long tail. The dorsal spine is venomous."
     },
     "berggylte": {
-        name: "Berggylte", nameEn: "Ballan Wrasse", nameEl: "Ballan Wrasse", nameEs: "Ballan Wrasse", icon: "🐟", scientificName: "Labrus bergylta",
+        name: "Berggylte", nameEn: "Ballan Wrasse", nameEl: "Χειλού", nameEs: "Maragota", icon: "🐟", scientificName: "Labrus bergylta",
         photoId: 335, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz yosunlu kayalıklar",
@@ -3598,7 +3598,7 @@ const SPECIES_DB = {
         noteEn: "The most colorful and strong fish of the rocks. Likes to hide in vegetated areas.", noteEl: "The most colorful and strong fish of the rocks. Likes to hide in vegetated areas.", noteEs: "The most colorful and strong fish of the rocks. Likes to hide in vegetated areas."
     },
     "skolest": {
-        name: "Skolest", nameEn: "Roundnose Grenadier", nameEl: "Στρογγυλός Γρεναδιέρης", nameEs: "Roundnose Grenadier", icon: "🐟", scientificName: "Coryphaenoides rupestris",
+        name: "Skolest", nameEn: "Roundnose Grenadier", nameEl: "Στρογγυλός Γρεναδιέρης", nameEs: "Granadero", icon: "🐟", scientificName: "Coryphaenoides rupestris",
         photoId: 336, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin okyanus yamaçları",
@@ -3612,7 +3612,7 @@ const SPECIES_DB = {
         noteEn: "Resembles a rat with its large head and tapering body. A resident of very deep waters.", noteEl: "Resembles a rat with its large head and tapering body. A resident of very deep waters.", noteEs: "Resembles a rat with its large head and tapering body. A resident of very deep waters."
     },
     "brugde": {
-        name: "Brugde", nameEn: "Basking Shark", nameEl: "Καρχαρίας που κολυμπάει", nameEs: "Basking Shark", icon: "🦈", scientificName: "Cetorhinus maximus",
+        name: "Brugde", nameEn: "Basking Shark", nameEl: "Καρχαρίας που κολυμπάει", nameEs: "Peregrino", icon: "🦈", scientificName: "Cetorhinus maximus",
         photoId: 337, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzeyde plankton beslenmesi",
@@ -3626,7 +3626,7 @@ const SPECIES_DB = {
         noteEn: "The second-largest fish in the world. Harmless; travels with its mouth open to filter plankton.", noteEl: "The second-largest fish in the world. Harmless; travels with its mouth open to filter plankton.", noteEs: "The second-largest fish in the world. Harmless; travels with its mouth open to filter plankton."
     },
     "oyepal": {
-        name: "Øyepål", nameEn: "Norway Pout", nameEl: "Νορβηγία Πουτ", nameEs: "Norway Pout", icon: "🐟", scientificName: "Trisopterus esmarkii",
+        name: "Øyepål", nameEn: "Norway Pout", nameEl: "Νορβηγία Πουτ", nameEs: "Faneca noruega", icon: "🐟", scientificName: "Trisopterus esmarkii",
         photoId: 338, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin sürüler",
@@ -3640,7 +3640,7 @@ const SPECIES_DB = {
         noteEn: "A small cod-like fish. An important baitfish for larger predators.", noteEl: "A small cod-like fish. An important baitfish for larger predators.", noteEs: "A small cod-like fish. An important baitfish for larger predators."
     },
     "laksesild": {
-        name: "Laksesild", nameEn: "Pearlsides", nameEl: "Μαργαριτάρια", nameEs: "Pearlsides", icon: "🐟", scientificName: "Maurolicus muelleri",
+        name: "Laksesild", nameEn: "Pearlsides", nameEl: "Μαργαριτάρια", nameEs: "Pez perla", icon: "🐟", scientificName: "Maurolicus muelleri",
         photoId: 339, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece yüzeye yaklaşan sürüler",
@@ -3654,7 +3654,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its light organs (photophores). A critical part of the deep-sea food chain.", noteEl: "Recognized by its light organs (photophores). A critical part of the deep-sea food chain.", noteEs: "Recognized by its light organs (photophores). A critical part of the deep-sea food chain."
     },
     "blastal": {
-        name: "Blåstål / Rødnebb", nameEn: "Cuckoo Wrasse", nameEl: "Κούκος Wrasse", nameEs: "Cuckoo Wrasse", icon: "🐟", scientificName: "Labrus mixtus",
+        name: "Blåstål / Rødnebb", nameEn: "Cuckoo Wrasse", nameEl: "Χειλού κούκος", nameEs: "Gallano", icon: "🐟", scientificName: "Labrus mixtus",
         photoId: 340, category: "KAYALIK",
         huntingMode: "visual",
         
@@ -3670,7 +3670,7 @@ const SPECIES_DB = {
     },
 
     "havabbor": {
-        name: "Havabbor", nameEn: "European Bass", nameEl: "Ευρωπαϊκό μπάσο", nameEs: "European Bass", icon: "🐟", scientificName: "Dicentrarchus labrax",
+        name: "Havabbor", nameEn: "European Bass", nameEl: "Ευρωπαϊκό μπάσο", nameEs: "Lubina", icon: "🐟", scientificName: "Dicentrarchus labrax",
         photoId: 341, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık kıyı sığlıkları",
@@ -3684,7 +3684,7 @@ const SPECIES_DB = {
         noteEn: "Population has increased in Southern Norway recently. A very strong and intelligent predator.", noteEl: "Population has increased in Southern Norway recently. A very strong and intelligent predator.", noteEs: "Population has increased in Southern Norway recently. A very strong and intelligent predator."
     },
     "taggmakrell": {
-        name: "Taggmakrell", nameEn: "Horse Mackerel", nameEl: "Σκουμπρί", nameEs: "Horse Mackerel", icon: "🐟", scientificName: "Trachurus trachurus",
+        name: "Taggmakrell", nameEn: "Horse Mackerel", nameEl: "Σκουμπρί", nameEs: "Jurel", icon: "🐟", scientificName: "Trachurus trachurus",
         photoId: 342, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece ışıklı bölgeler ve fiyortlar",
@@ -3698,7 +3698,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by the hard scutes along its side. Extremely abundant around harbors on summer nights.", noteEl: "Recognized by the hard scutes along its side. Extremely abundant around harbors on summer nights.", noteEs: "Recognized by the hard scutes along its side. Extremely abundant around harbors on summer nights."
     },
     "sjokreps": {
-        name: "Sjøkreps", nameEn: "Norway Lobster", nameEl: "Αστακός της Νορβηγίας", nameEs: "Norway Lobster", icon: "🦞", scientificName: "Nephrops norvegicus",
+        name: "Sjøkreps", nameEn: "Norway Lobster", nameEl: "Αστακός της Νορβηγίας", nameEs: "Cigala", icon: "🦞", scientificName: "Nephrops norvegicus",
         photoId: 343, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece çamurlu derin zemin",
@@ -3712,7 +3712,7 @@ const SPECIES_DB = {
         noteEn: "One of the world's most delicious crustaceans. Burrows in the depths of Norwegian fjords.", noteEl: "One of the world's most delicious crustaceans. Burrows in the depths of Norwegian fjords.", noteEs: "One of the world's most delicious crustaceans. Burrows in the depths of Norwegian fjords."
     },
     "taskekrabbe": {
-        name: "Taskekrabbe", nameEn: "Edible Crab", nameEl: "Βρώσιμο Καβούρι", nameEs: "Edible Crab", icon: "🦀", scientificName: "Cancer pagurus",
+        name: "Taskekrabbe", nameEn: "Edible Crab", nameEl: "Βρώσιμο Καβούρι", nameEs: "Buey de mar", icon: "🦀", scientificName: "Cancer pagurus",
         photoId: 344, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece sığ kayalıklar",
@@ -3726,7 +3726,7 @@ const SPECIES_DB = {
         noteEn: "Very popular along the Norwegian coast in autumn. Possesses very powerful claws.", noteEl: "Very popular along the Norwegian coast in autumn. Possesses very powerful claws.", noteEs: "Very popular along the Norwegian coast in autumn. Possesses very powerful claws."
     },
     "stamsild": {
-        name: "Stamsild", nameEn: "Twaite Shad", nameEl: "Τουέιτ Σαντ", nameEs: "Twaite Shad", icon: "🐟", scientificName: "Alosa fallax",
+        name: "Stamsild", nameEn: "Twaite Shad", nameEl: "Τουέιτ Σαντ", nameEs: "Saboga", icon: "🐟", scientificName: "Alosa fallax",
         photoId: 345, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz haliçler ve nehir ağızları",
@@ -3740,7 +3740,7 @@ const SPECIES_DB = {
         noteEn: "Part of the herring family but enters rivers to spawn. Bony but provides good sport.", noteEl: "Part of the herring family but enters rivers to spawn. Bony but provides good sport.", noteEs: "Part of the herring family but enters rivers to spawn. Bony but provides good sport."
     },
     "maisild": {
-        name: "Maisild", nameEn: "Allis Shad", nameEl: "Άλις Σαντ", nameEs: "Allis Shad", icon: "🐟", scientificName: "Alosa alosa",
+        name: "Maisild", nameEn: "Allis Shad", nameEl: "Άλις Σαντ", nameEs: "Sábalo", icon: "🐟", scientificName: "Alosa alosa",
         photoId: 346, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz açık kıyılar",
@@ -3754,7 +3754,7 @@ const SPECIES_DB = {
         noteEn: "Larger than Twaite Shad and rarer in Norway. It is a protected species.", noteEl: "Larger than Twaite Shad and rarer in Norway. It is a protected species.", noteEs: "Larger than Twaite Shad and rarer in Norway. It is a protected species."
     },
     "sverdfisk": {
-        name: "Sverdfisk", nameEn: "Swordfish", nameEl: "Ξιφία", nameEs: "Swordfish", icon: "🐟", scientificName: "Xiphias gladius",
+        name: "Sverdfisk", nameEn: "Swordfish", nameEl: "Ξιφία", nameEs: "Pez espada", icon: "🐟", scientificName: "Xiphias gladius",
         photoId: 347, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",isGlobal: false,
@@ -3769,7 +3769,7 @@ const SPECIES_DB = {
         noteEn: "Can reach Norwegian offshore areas in summer via warm currents. Catching one is a major trophy.", noteEl: "Can reach Norwegian offshore areas in summer via warm currents. Catching one is a major trophy.", noteEs: "Can reach Norwegian offshore areas in summer via warm currents. Catching one is a major trophy."
     },
     "tangsprell": {
-        name: "Tangsprell", nameEn: "Butterfish", nameEl: "Πεταλούδα", nameEs: "Butterfish", icon: "🐟", scientificName: "Pholis gunnellus",
+        name: "Tangsprell", nameEn: "Butterfish", nameEl: "Πεταλούδα", nameEs: "Blenio mantequilla", icon: "🐟", scientificName: "Pholis gunnellus",
         photoId: 348, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz yosunlu sığlıklar",
@@ -3783,7 +3783,7 @@ const SPECIES_DB = {
         noteEn: "Eel-like, slippery and hard to hold like butter. Hides under stones and seaweed.", noteEl: "Eel-like, slippery and hard to hold like butter. Hides under stones and seaweed.", noteEs: "Eel-like, slippery and hard to hold like butter. Hides under stones and seaweed."
     },
     "longspined_ulk": {
-        name: "Uzun Dikenli İskorpit", nameEn: "Long-spined Bullhead", nameEl: "Μακριά ράχη Bullhead", nameEs: "Long-spined Bullhead", icon: "🐟", scientificName: "Taurulus bubalis",
+        name: "Uzun Dikenli İskorpit", nameEn: "Long-spined Bullhead", nameEl: "Σκορπιός ακανθωτός", nameEs: "Cabote espinoso", icon: "🐟", scientificName: "Taurulus bubalis",
         photoId: 349, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ yosunlu kayalıklar",
@@ -3797,7 +3797,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its long facial spines. Very common along the Norwegian coastline.", noteEl: "Recognized by its long facial spines. Very common along the Norwegian coastline.", noteEs: "Recognized by its long facial spines. Very common along the Norwegian coastline."
     },
     "hork": {
-        name: "Hork", nameEn: "Ruffe", nameEl: "Ρουφ", nameEs: "Ruffe", icon: "🐟", scientificName: "Gymnocephalus cernua",
+        name: "Hork", nameEn: "Ruffe", nameEl: "Ρουφ", nameEs: "Acerina", icon: "🐟", scientificName: "Gymnocephalus cernua",
         photoId: 350, category: "LAGUN",
         
         huntingMode: "visual",peakHours: "NIGHT", peakHoursDesc: "Gece acı su ve haliçler",
@@ -3811,7 +3811,7 @@ const SPECIES_DB = {
         noteEn: "Favors brackish waters. Its eyes are highly sensitive to light, making it a nocturnal hunter.", noteEl: "Favors brackish waters. Its eyes are highly sensitive to light, making it a nocturnal hunter.", noteEs: "Favors brackish waters. Its eyes are highly sensitive to light, making it a nocturnal hunter."
     },
     "gt_trevally": {
-        name: "GT (Giant Trevally)", nameEn: "Giant Trevally", nameEl: "Γίγαντας Trevally", nameEs: "Giant Trevally", icon: "🐟", scientificName: "Caranx ignobilis",
+        name: "GT (Giant Trevally)", nameEn: "Giant Trevally", nameEl: "Τρεβάλι γίγας", nameEs: "Jurel gigante", icon: "🐟", scientificName: "Caranx ignobilis",
         photoId: 401, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz ve akıntılı resif kenarları",
@@ -3839,7 +3839,7 @@ const SPECIES_DB = {
         noteEn: "Iconic Australian species. Moves between fresh and salt water. Famous for acrobatic jumps.", noteEl: "Iconic Australian species. Moves between fresh and salt water. Famous for acrobatic jumps.", noteEs: "Iconic Australian species. Moves between fresh and salt water. Famous for acrobatic jumps."
     },
     "aus_snapper": {
-        name: "Australasian Snapper", nameEn: "Australasian Snapper", nameEl: "Αυστραλιανός Σάπερ", nameEs: "Australasian Snapper", icon: "🐟", scientificName: "Chrysophrys auratus",
+        name: "Australasian Snapper", nameEn: "Australasian Snapper", nameEl: "Αυστραλιανός Σάπερ", nameEs: "Pargo australiano", icon: "🐟", scientificName: "Chrysophrys auratus",
         photoId: 403, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak ve akşam resif yapıları",
@@ -3853,7 +3853,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its prominent forehead hump. The most favorite table fish for Australian anglers.", noteEl: "Recognized by its prominent forehead hump. The most favorite table fish for Australian anglers.", noteEs: "Recognized by its prominent forehead hump. The most favorite table fish for Australian anglers."
     },
     "yellowtail_kingfish": {
-        name: "Yellowtail Kingfish", nameEn: "Yellowtail Kingfish", nameEl: "Kingfish Yellowtail", nameEs: "Yellowtail Kingfish", icon: "🐟", scientificName: "Seriola lalandi",
+        name: "Yellowtail Kingfish", nameEn: "Yellowtail Kingfish", nameEl: "Μαγιάτικο λεμονί", nameEs: "Medregal limón", icon: "🐟", scientificName: "Seriola lalandi",
         photoId: 404, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz ve akıntılı burunlar",
@@ -3867,7 +3867,7 @@ const SPECIES_DB = {
         noteEn: "A notoriously powerful and stubborn fighter. Known for diving into reefs to snap lines.", noteEl: "A notoriously powerful and stubborn fighter. Known for diving into reefs to snap lines.", noteEs: "A notoriously powerful and stubborn fighter. Known for diving into reefs to snap lines."
     },
     "dusky_flathead": {
-        name: "Dusky Flathead", nameEn: "Dusky Flathead", nameEl: "Dusky Flathead", nameEs: "Dusky Flathead", icon: "🐟", scientificName: "Platycephalus fuscus",
+        name: "Dusky Flathead", nameEn: "Dusky Flathead", nameEl: "Πλατυκέφαλος", nameEs: "Cabezón de estuario", icon: "🐟", scientificName: "Platycephalus fuscus",
         photoId: 405, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz haliç sığlıkları",
@@ -3881,7 +3881,7 @@ const SPECIES_DB = {
         noteEn: "A master of camouflage hiding in the sand. Locally called 'Flatty'. Highly delicious.", noteEl: "A master of camouflage hiding in the sand. Locally called 'Flatty'. Highly delicious.", noteEs: "A master of camouflage hiding in the sand. Locally called 'Flatty'. Highly delicious."
     },
     "yellowfin_bream": {
-        name: "Yellowfin Bream", nameEn: "Yellowfin Bream", nameEl: "Τσιπούρα κιτρινόπτερου", nameEs: "Yellowfin Bream", icon: "🐟", scientificName: "Acanthopagrus australis",
+        name: "Yellowfin Bream", nameEn: "Yellowfin Bream", nameEl: "Τσιπούρα κιτρινόπτερου", nameEs: "Sargo australiano de aletas amarillas", icon: "🐟", scientificName: "Acanthopagrus australis",
         photoId: 406, category: "KIYI",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece iskele ayakları ve kayalıklar",
@@ -3895,7 +3895,7 @@ const SPECIES_DB = {
         noteEn: "Popular coastal fish known for its yellow fins. Very wary; requires light tackle.", noteEl: "Popular coastal fish known for its yellow fins. Very wary; requires light tackle.", noteEs: "Popular coastal fish known for its yellow fins. Very wary; requires light tackle."
     },
     "mulloway": {
-        name: "Mulloway", nameEn: "Mulloway", nameEl: "Mulloway", nameEs: "Mulloway", icon: "🐟", scientificName: "Argyrosomus japonicus",
+        name: "Mulloway", nameEn: "Mulloway", nameEl: "Κορβίνα Ιαπωνίας", nameEs: "Corvina japonesa", icon: "🐟", scientificName: "Argyrosomus japonicus",
         photoId: 407, category: "PELAJIK_AVCI",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece köprü ayakları ve derin çukurlar",
@@ -3909,7 +3909,7 @@ const SPECIES_DB = {
         noteEn: "Also known as 'Jewfish' for its silver shine. One of the most challenging trophies to catch.", noteEl: "Also known as 'Jewfish' for its silver shine. One of the most challenging trophies to catch.", noteEs: "Also known as 'Jewfish' for its silver shine. One of the most challenging trophies to catch."
     },
     "aus_spanish_mackerel": {
-        name: "Spanish Mackerel", nameEn: "Spanish Mackerel", nameEl: "Ισπανικό σκουμπρί", nameEs: "Spanish Mackerel", icon: "🐟", scientificName: "Scomberomorus commerson",
+        name: "Spanish Mackerel", nameEn: "Spanish Mackerel", nameEl: "Ισπανικό σκουμπρί", nameEs: "Carite estriado", icon: "🐟", scientificName: "Scomberomorus commerson",
         photoId: 408, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN", peakHoursDesc: "Şafak ve yüzey aksiyonu",
@@ -3923,7 +3923,7 @@ const SPECIES_DB = {
         noteEn: "Known for striped body and razor-sharp teeth. Extremely fast; often attacks with acrobatic leaps.", noteEl: "Known for striped body and razor-sharp teeth. Extremely fast; often attacks with acrobatic leaps.", noteEs: "Known for striped body and razor-sharp teeth. Extremely fast; often attacks with acrobatic leaps."
     },
     "kg_whiting": {
-        name: "King George Whiting", nameEn: "King George Whiting", nameEl: "Βασιλιάς Τζορτζ Γουάιτινγκ", nameEs: "King George Whiting", icon: "🐟", scientificName: "Sillaginodes punctatus",
+        name: "King George Whiting", nameEn: "King George Whiting", nameEl: "Βασιλιάς Τζορτζ Γουάιτινγκ", nameEs: "Sillago rey Jorge", icon: "🐟", scientificName: "Sillaginodes punctatus",
         photoId: 409, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz yosunlu/kumlu dipler",
@@ -3937,7 +3937,7 @@ const SPECIES_DB = {
         noteEn: "The largest and tastiest of the whiting family. Recognized by its spotted back.", noteEl: "The largest and tastiest of the whiting family. Recognized by its spotted back.", noteEs: "The largest and tastiest of the whiting family. Recognized by its spotted back."
     },
     "tailor": {
-        name: "Tailor", nameEn: "Tailor / Bluefish", nameEl: "Ράφτης / Bluefish", nameEs: "Tailor / Bluefish", icon: "🐟", scientificName: "Pomatomus saltatrix",
+        name: "Tailor", nameEn: "Tailor / Bluefish", nameEl: "Γοφάρι", nameEs: "Anjova", icon: "🐟", scientificName: "Pomatomus saltatrix",
         photoId: 410, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak ve akşam yüzey",
@@ -3951,7 +3951,7 @@ const SPECIES_DB = {
         noteEn: "Close relative of the Bluefish (Lüfer). Forms very aggressive schools and known for cutting lines.", noteEl: "Close relative of the Bluefish (Lüfer). Forms very aggressive schools and known for cutting lines.", noteEs: "Close relative of the Bluefish (Lüfer). Forms very aggressive schools and known for cutting lines."
     },
     "mangrove_jack": {
-        name: "Mangrove Jack", nameEn: "Mangrove Red Snapper", nameEl: "Mangrove Red Snapper", nameEs: "Mangrove Red Snapper", icon: "🐟", scientificName: "Lutjanus argentimaculatus",
+        name: "Mangrove Jack", nameEn: "Mangrove Red Snapper", nameEl: "Λουτσάνος μαγγρόβιου", nameEs: "Pargo de manglar", icon: "🐟", scientificName: "Lutjanus argentimaculatus",
         photoId: 411, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "NIGHT", peakHoursDesc: "Gece ve mangrov kökleri",
@@ -3965,7 +3965,7 @@ const SPECIES_DB = {
         noteEn: "A highly aggressive ambush predator. Known for its 'dog teeth' and tendency to dive for cover when hooked.", noteEl: "A highly aggressive ambush predator. Known for its 'dog teeth' and tendency to dive for cover when hooked.", noteEs: "A highly aggressive ambush predator. Known for its 'dog teeth' and tendency to dive for cover when hooked."
     },
     "coral_trout": {
-        name: "Coral Trout", nameEn: "Leopard Coral Grouper", nameEl: "Λεοπάρ Κοραλί Σφυρίδα", nameEs: "Leopard Coral Grouper", icon: "🐟", scientificName: "Plectropomus leopardus",
+        name: "Coral Trout", nameEn: "Leopard Coral Grouper", nameEl: "Λεοπάρ Κοραλί Σφυρίδα", nameEs: "Mero leopardo de coral", icon: "🐟", scientificName: "Plectropomus leopardus",
         photoId: 412, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -3979,7 +3979,7 @@ const SPECIES_DB = {
         noteEn: "One of the most prized species on the Great Barrier Reef. Famous for its vivid colors and excellent eating quality.", noteEl: "One of the most prized species on the Great Barrier Reef. Famous for its vivid colors and excellent eating quality.", noteEs: "One of the most prized species on the Great Barrier Reef. Famous for its vivid colors and excellent eating quality."
     },
     "aus_salmon": {
-        name: "Australian Salmon", nameEn: "Eastern Australian Salmon", nameEl: "Σολομός Ανατολικής Αυστραλίας", nameEs: "Eastern Australian Salmon", icon: "🐟", scientificName: "Arripis trutta",
+        name: "Australian Salmon", nameEn: "Eastern Australian Salmon", nameEl: "Σολομός Ανατολικής Αυστραλίας", nameEs: "Salmón australiano", icon: "🐟", scientificName: "Arripis trutta",
         photoId: 413, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sörf bölgeleri (kıyı)",
@@ -3993,7 +3993,7 @@ const SPECIES_DB = {
         noteEn: "Not a true salmon but an incredibly strong sport fish. Travels in large coastal schools and leaps frequently.", noteEl: "Not a true salmon but an incredibly strong sport fish. Travels in large coastal schools and leaps frequently.", noteEs: "Not a true salmon but an incredibly strong sport fish. Travels in large coastal schools and leaps frequently."
     },
     "samson_fish": {
-        name: "Samson Fish", nameEn: "Samson Fish", nameEl: "Samson Fish", nameEs: "Samson Fish", icon: "🐟", scientificName: "Seriola hippos",
+        name: "Samson Fish", nameEn: "Samson Fish", nameEl: "Μαγιάτικο Σαμψών", nameEs: "Medregal sansón", icon: "🐟", scientificName: "Seriola hippos",
         photoId: 414, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve batıklar",
@@ -4007,7 +4007,7 @@ const SPECIES_DB = {
         noteEn: "Australia's ultimate 'brute force' fish. Known for its relentless stamina and heavy runs.", noteEl: "Australia's ultimate 'brute force' fish. Known for its relentless stamina and heavy runs.", noteEs: "Australia's ultimate 'brute force' fish. Known for its relentless stamina and heavy runs."
     },
     "red_emperor": {
-        name: "Red Emperor", nameEn: "Red Emperor", nameEl: "Κόκκινος Αυτοκράτορας", nameEs: "Red Emperor", icon: "🐟", scientificName: "Lutjanus sebae",
+        name: "Red Emperor", nameEn: "Red Emperor", nameEl: "Κόκκινος Αυτοκράτορας", nameEs: "Pargo emperador rojo", icon: "🐟", scientificName: "Lutjanus sebae",
         photoId: 415, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "NIGHT", peakHoursDesc: "Gece derin resif kenarları",
@@ -4021,7 +4021,7 @@ const SPECIES_DB = {
         noteEn: "A prestigious species recognized by three red bands. Highly esteemed for its incredible eating quality.", noteEl: "A prestigious species recognized by three red bands. Highly esteemed for its incredible eating quality.", noteEs: "A prestigious species recognized by three red bands. Highly esteemed for its incredible eating quality."
     },
     "fingermark": {
-        name: "Fingermark", nameEn: "Golden Snapper", nameEl: "Golden Snapper", nameEs: "Golden Snapper", icon: "🐟", scientificName: "Lutjanus johnii",
+        name: "Fingermark", nameEn: "Golden Snapper", nameEl: "Λουτσάνος χρυσός", nameEs: "Pargo dorado de John", icon: "🐟", scientificName: "Lutjanus johnii",
         photoId: 416, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "NIGHT", peakHoursDesc: "Gece derin çukurlar ve resifler",
@@ -4035,7 +4035,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by the 'fingerprint' black spot on its side. Extremely aggressive during night sessions.", noteEl: "Recognized by the 'fingerprint' black spot on its side. Extremely aggressive during night sessions.", noteEs: "Recognized by the 'fingerprint' black spot on its side. Extremely aggressive during night sessions."
     },
     "estuary_perch": {
-        name: "Estuary Perch", nameEn: "Estuary Perch", nameEl: "Εκβολές Πέρχ", nameEs: "Estuary Perch", icon: "🐟", scientificName: "Macquaria colonorum",
+        name: "Estuary Perch", nameEn: "Estuary Perch", nameEl: "Εκβολές Πέρχ", nameEs: "Perca de estuario", icon: "🐟", scientificName: "Macquaria colonorum",
         photoId: 417, category: "LAGUN",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık gölgelik alanlar",
@@ -4049,7 +4049,7 @@ const SPECIES_DB = {
         noteEn: "The mysterious fish of the estuaries. Very wary; only moves into shallows under cover of dusk or cloud.", noteEl: "The mysterious fish of the estuaries. Very wary; only moves into shallows under cover of dusk or cloud.", noteEs: "The mysterious fish of the estuaries. Very wary; only moves into shallows under cover of dusk or cloud."
     },
     "aus_bass": {
-        name: "Australian Bass", nameEn: "Australian Bass", nameEl: "Αυστραλιανό μπάσο", nameEs: "Australian Bass", icon: "🐟", scientificName: "Macquaria novemaculeata",
+        name: "Australian Bass", nameEn: "Australian Bass", nameEl: "Αυστραλιανό μπάσο", nameEs: "Perca australiana", icon: "🐟", scientificName: "Macquaria novemaculeata",
         photoId: 418, category: "LAGUN",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık kıyı yapısı",
@@ -4063,7 +4063,7 @@ const SPECIES_DB = {
         noteEn: "The premier freshwater-estuarine sport fish of Australia. Famous for smashing surface lures.", noteEl: "The premier freshwater-estuarine sport fish of Australia. Famous for smashing surface lures.", noteEs: "The premier freshwater-estuarine sport fish of Australia. Famous for smashing surface lures."
     },
     "murray_cod": {
-        name: "Murray Cod", nameEn: "Murray Cod", nameEl: "Murray Cod", nameEs: "Murray Cod", icon: "🐟", scientificName: "Maccullochella peelii",
+        name: "Murray Cod", nameEn: "Murray Cod", nameEl: "Μπακαλιάρος Μάρεϊ", nameEs: "Bacalao de Murray", icon: "🐟", scientificName: "Maccullochella peelii",
         photoId: 419, category: "LAGUN",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin çukurlar",
@@ -4077,7 +4077,7 @@ const SPECIES_DB = {
         noteEn: "Australia's largest freshwater fish. A legendary apex predator known to eat small water birds.", noteEl: "Australia's largest freshwater fish. A legendary apex predator known to eat small water birds.", noteEs: "Australia's largest freshwater fish. A legendary apex predator known to eat small water birds."
     },
     "golden_perch": {
-        name: "Golden Perch", nameEn: "Golden Perch", nameEl: "Χρυσή Πέρκα", nameEs: "Golden Perch", icon: "🐟", scientificName: "Macquaria ambigua",
+        name: "Golden Perch", nameEn: "Golden Perch", nameEl: "Χρυσή Πέρκα", nameEs: "Perca dorada", icon: "🐟", scientificName: "Macquaria ambigua",
         photoId: 420, category: "LAGUN",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz batık ağaçlar ve yapılar",
@@ -4091,7 +4091,7 @@ const SPECIES_DB = {
         noteEn: "Commonly called 'Yellowbelly'. An icon of Australia's inland waters with its golden hue.", noteEl: "Commonly called 'Yellowbelly'. An icon of Australia's inland waters with its golden hue.", noteEs: "Commonly called 'Yellowbelly'. An icon of Australia's inland waters with its golden hue."
     },
     "giant_mud_crab": {
-        name: "Giant Mud Crab", nameEn: "Giant Mud Crab", nameEl: "Γιγαντιαίος Καβούρι λάσπης", nameEs: "Giant Mud Crab", icon: "🦀", scientificName: "Scylla serrata",
+        name: "Giant Mud Crab", nameEn: "Giant Mud Crab", nameEl: "Γιγαντιαίος Καβούρι λάσπης", nameEs: "Cangrejo de manglar gigante", icon: "🦀", scientificName: "Scylla serrata",
         photoId: 421, category: "LAGUN",
         
         huntingMode: "visual",peakHours: "NIGHT", peakHoursDesc: "Gece mangrov sığlıkları",
@@ -4105,7 +4105,7 @@ const SPECIES_DB = {
         noteEn: "Australia's premier gourmet crustacean. Its massive claws can crush bone; handle with extreme care.", noteEl: "Australia's premier gourmet crustacean. Its massive claws can crush bone; handle with extreme care.", noteEs: "Australia's premier gourmet crustacean. Its massive claws can crush bone; handle with extreme care."
     },
     "blue_swimmer_crab": {
-        name: "Blue Swimmer Crab", nameEn: "Blue Swimmer Crab", nameEl: "Μπλε κολυμβητής καβούρι", nameEs: "Blue Swimmer Crab", icon: "🦀", scientificName: "Portunus armatus",
+        name: "Blue Swimmer Crab", nameEn: "Blue Swimmer Crab", nameEl: "Μπλε κολυμβητής καβούρι", nameEs: "Jaiba azul australiana", icon: "🦀", scientificName: "Portunus armatus",
         photoId: 422, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluklar ve haliçler",
@@ -4119,7 +4119,7 @@ const SPECIES_DB = {
         noteEn: "Known for its bright blue color. A staple weekend activity for many Australian families.", noteEl: "Known for its bright blue color. A staple weekend activity for many Australian families.", noteEs: "Known for its bright blue color. A staple weekend activity for many Australian families."
     },
     "balmain_bug": {
-        name: "Balmain Bug", nameEn: "Balmain Bug", nameEl: "Balmain Bug", nameEs: "Balmain Bug", icon: "🦞", scientificName: "Ibacus peronii",
+        name: "Balmain Bug", nameEn: "Balmain Bug", nameEl: "Καραβίδα πεταλούδα", nameEs: "Cigarra de mar", icon: "🦞", scientificName: "Ibacus peronii",
         photoId: 423, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece çamurlu ve kumlu dipler",
@@ -4133,7 +4133,7 @@ const SPECIES_DB = {
         noteEn: "A type of fan lobster with eyes on the side. Its meat is exceptionally sweet and prized.", noteEl: "A type of fan lobster with eyes on the side. Its meat is exceptionally sweet and prized.", noteEs: "A type of fan lobster with eyes on the side. Its meat is exceptionally sweet and prized."
     },
     "black_jewfish": {
-        name: "Black Jewfish", nameEn: "Black Jewfish", nameEl: "Μαύρο Εβραίο", nameEs: "Black Jewfish", icon: "🐟", scientificName: "Protonibea diacanthus",
+        name: "Black Jewfish", nameEn: "Black Jewfish", nameEl: "Μαύρο Εβραίο", nameEs: "Corvina negra", icon: "🐟", scientificName: "Protonibea diacanthus",
         photoId: 424, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece derin çukurlar ve batıklar",
@@ -4147,7 +4147,7 @@ const SPECIES_DB = {
         noteEn: "One of Northern Australia's strongest bottom predators. Its swim bladder is highly valued.", noteEl: "One of Northern Australia's strongest bottom predators. Its swim bladder is highly valued.", noteEs: "One of Northern Australia's strongest bottom predators. Its swim bladder is highly valued."
     },
     "queenfish": {
-        name: "Queenfish", nameEn: "Giant Queenfish", nameEl: "Γιγαντιαία βασίλισσα", nameEs: "Giant Queenfish", icon: "🐟", scientificName: "Scomberoides commersonnianus",
+        name: "Queenfish", nameEn: "Giant Queenfish", nameEl: "Γιγαντιαία βασίλισσα", nameEs: "Pez reina", icon: "🐟", scientificName: "Scomberoides commersonnianus",
         photoId: 425, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz ve akıntılı sığlıklar",
@@ -4161,7 +4161,7 @@ const SPECIES_DB = {
         noteEn: "Famous for its acrobatic leaps. Recognized by dark spots on its side. Meat is best consumed fresh.", noteEl: "Famous for its acrobatic leaps. Recognized by dark spots on its side. Meat is best consumed fresh.", noteEs: "Famous for its acrobatic leaps. Recognized by dark spots on its side. Meat is best consumed fresh."
     },
     "aus_cobia": {
-        name: "Cobia", nameEn: "Cobia", nameEl: "Cobia", nameEs: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
+        name: "Cobia", nameEn: "Cobia", nameEl: "Κόμπια", nameEs: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
         photoId: 426, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve şamandıralar",
@@ -4175,7 +4175,7 @@ const SPECIES_DB = {
         noteEn: "Features a shark-like silhouette. Very curious species often seen approaching boats.", noteEl: "Features a shark-like silhouette. Very curious species often seen approaching boats.", noteEs: "Features a shark-like silhouette. Very curious species often seen approaching boats."
     },
     "dogtooth_tuna": {
-        name: "Dogtooth Tuna", nameEn: "Dogtooth Tuna", nameEl: "Τόνος σκυλόδοντων", nameEs: "Dogtooth Tuna", icon: "🐟", scientificName: "Gymnosarda unicolor",
+        name: "Dogtooth Tuna", nameEn: "Dogtooth Tuna", nameEl: "Τόνος σκυλόδοντων", nameEs: "Atún dientes de perro", icon: "🐟", scientificName: "Gymnosarda unicolor",
         photoId: 427, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN", peakHoursDesc: "Şafak vakti dik resif yamaçları",
@@ -4189,7 +4189,7 @@ const SPECIES_DB = {
         noteEn: "One of the ocean's most ferocious predators. Named for its fearsome canine teeth.", noteEl: "One of the ocean's most ferocious predators. Named for its fearsome canine teeth.", noteEs: "One of the ocean's most ferocious predators. Named for its fearsome canine teeth."
     },
     "longtail_tuna": {
-        name: "Longtail Tuna", nameEn: "Longtail Tuna", nameEl: "Τόνος Longtail", nameEs: "Longtail Tuna", icon: "🐟", scientificName: "Thunnus tonggol",
+        name: "Longtail Tuna", nameEn: "Longtail Tuna", nameEl: "Τόνος τονγκόλ", nameEs: "Atún tongol", icon: "🐟", scientificName: "Thunnus tonggol",
         photoId: 428, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz kıyıya yakın sürüler",
@@ -4203,7 +4203,7 @@ const SPECIES_DB = {
         noteEn: "The most popular tuna targeted from the coast. Smaller than bluefin but exceptionally fast.", noteEl: "The most popular tuna targeted from the coast. Smaller than bluefin but exceptionally fast.", noteEs: "The most popular tuna targeted from the coast. Smaller than bluefin but exceptionally fast."
     },
     "aus_mahi_mahi": {
-        name: "Mahi Mahi", nameEn: "Dolphin Fish", nameEl: "Δελφίνι Ψάρια", nameEs: "Dolphin Fish", icon: "🐟", scientificName: "Coryphaena hippurus",
+        name: "Mahi Mahi", nameEn: "Dolphin Fish", nameEl: "Δελφίνι Ψάρια", nameEs: "Dorado", icon: "🐟", scientificName: "Coryphaena hippurus",
         photoId: 429, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",isGlobal: false,
@@ -4218,7 +4218,7 @@ const SPECIES_DB = {
         noteEn: "Famous for its vibrant color changes when caught. The fastest-growing fish in the ocean.", noteEl: "Famous for its vibrant color changes when caught. The fastest-growing fish in the ocean.", noteEs: "Famous for its vibrant color changes when caught. The fastest-growing fish in the ocean."
     },
     "aus_wahoo": {
-        name: "Wahoo", nameEn: "Wahoo", nameEl: "Ουάχου", nameEs: "Wahoo", icon: "🐟", scientificName: "Acanthocybium solandri",
+        name: "Wahoo", nameEn: "Wahoo", nameEl: "Ουάχου", nameEs: "Peto", icon: "🐟", scientificName: "Acanthocybium solandri",
         photoId: 430, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN", peakHoursDesc: "Şafak vakti açık deniz yüzey",
@@ -4232,7 +4232,7 @@ const SPECIES_DB = {
         noteEn: "The bullet of the ocean. Can reach speeds of 80 km/h. Wire trace is essential for its sharp teeth.", noteEl: "The bullet of the ocean. Can reach speeds of 80 km/h. Wire trace is essential for its sharp teeth.", noteEs: "The bullet of the ocean. Can reach speeds of 80 km/h. Wire trace is essential for its sharp teeth."
     },
     "gummy_shark": {
-        name: "Gummy Shark", nameEn: "Gummy Shark", nameEl: "Gummy Shark", nameEs: "Gummy Shark", icon: "🦈", scientificName: "Mustelus antarcticus",
+        name: "Gummy Shark", nameEn: "Gummy Shark", nameEl: "Γαλέος Αυστραλίας", nameEs: "Musola australiana", icon: "🦈", scientificName: "Mustelus antarcticus",
         photoId: 431, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ kumluklar",
@@ -4246,7 +4246,7 @@ const SPECIES_DB = {
         noteEn: "Has crushing plates instead of sharp teeth. The most consumed fish in Australia, sold as 'Flake'.", noteEl: "Has crushing plates instead of sharp teeth. The most consumed fish in Australia, sold as 'Flake'.", noteEs: "Has crushing plates instead of sharp teeth. The most consumed fish in Australia, sold as 'Flake'."
     },
     "potato_cod": {
-        name: "Potato Cod", nameEn: "Potato Cod", nameEl: "Πατάτα μπακαλιάρος", nameEs: "Potato Cod", icon: "🐟", scientificName: "Epinephelus tukula",
+        name: "Potato Cod", nameEn: "Potato Cod", nameEl: "Πατάτα μπακαλιάρος", nameEs: "Mero patata", icon: "🐟", scientificName: "Epinephelus tukula",
         photoId: 432, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -4260,7 +4260,7 @@ const SPECIES_DB = {
         noteEn: "A massive (110kg+) and curious grouper species. Fully protected; must be released if caught.", noteEl: "A massive (110kg+) and curious grouper species. Fully protected; must be released if caught.", noteEs: "A massive (110kg+) and curious grouper species. Fully protected; must be released if caught."
     },
     "pearl_perch": {
-        name: "Pearl Perch", nameEn: "Pearl Perch", nameEl: "Pearl Perch", nameEs: "Pearl Perch", icon: "🐟", scientificName: "Glaucosoma scapulare",
+        name: "Pearl Perch", nameEn: "Pearl Perch", nameEl: "Πέρκα μαργαριταριού", nameEs: "Perca perla", icon: "🐟", scientificName: "Glaucosoma scapulare",
         photoId: 433, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin resif yapıları",
@@ -4274,7 +4274,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by the silvery 'pearl' spot on its gill cover. Highly prized for its superb eating quality.", noteEl: "Recognized by the silvery 'pearl' spot on its gill cover. Highly prized for its superb eating quality.", noteEs: "Recognized by the silvery 'pearl' spot on its gill cover. Highly prized for its superb eating quality."
     },
     "sweetlip_emperor": {
-        name: "Sweetlip", nameEn: "Redthroat Emperor", nameEl: "Κόκκινο αυτοκράτορα", nameEs: "Redthroat Emperor", icon: "🐟", scientificName: "Lethrinus miniatus",
+        name: "Sweetlip", nameEn: "Redthroat Emperor", nameEl: "Κόκκινο αυτοκράτορα", nameEs: "Emperador de garganta roja", icon: "🐟", scientificName: "Lethrinus miniatus",
         photoId: 434, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sığ resif düzlükleri",
@@ -4288,7 +4288,7 @@ const SPECIES_DB = {
         noteEn: "Known for the red color inside its mouth and thick lips. A staple species for reef fishing.", noteEl: "Known for the red color inside its mouth and thick lips. A staple species for reef fishing.", noteEs: "Known for the red color inside its mouth and thick lips. A staple species for reef fishing."
     },
     "john_dory_aus": {
-        name: "John Dory", nameEn: "John Dory", nameEl: "Τζον Ντόρι", nameEs: "John Dory", icon: "🐟", scientificName: "Zeus faber",
+        name: "John Dory", nameEn: "John Dory", nameEl: "Τζον Ντόρι", nameEs: "Pez de San Pedro", icon: "🐟", scientificName: "Zeus faber",
         photoId: 435, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz batıklar ve derin resifler",
@@ -4302,7 +4302,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by the black 'thumbprint' on its side. Moves slowly but captures prey by vacuuming.", noteEl: "Recognized by the black 'thumbprint' on its side. Moves slowly but captures prey by vacuuming.", noteEs: "Recognized by the black 'thumbprint' on its side. Moves slowly but captures prey by vacuuming."
     },
     "aus_snook": {
-        name: "Australian Snook", nameEn: "Australian Snook", nameEl: "Αυστραλιανό Σνούκ", nameEs: "Australian Snook", icon: "🐟", scientificName: "Sphyraena novaehollandiae",
+        name: "Australian Snook", nameEn: "Australian Snook", nameEl: "Αυστραλιανό Σνούκ", nameEs: "Espetón australiano", icon: "🐟", scientificName: "Sphyraena novaehollandiae",
         photoId: 436, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Şafak ve akşam yüzey",
@@ -4316,7 +4316,7 @@ const SPECIES_DB = {
         noteEn: "Resembles barracuda but smaller and tastier. Found in large schools in southern waters.", noteEl: "Resembles barracuda but smaller and tastier. Found in large schools in southern waters.", noteEs: "Resembles barracuda but smaller and tastier. Found in large schools in southern waters."
     },
     "teraglin": {
-        name: "Teraglin", nameEn: "Teraglin", nameEl: "Τεργαλίνη", nameEs: "Teraglin", icon: "🐟", scientificName: "Atractoscion aequidens",
+        name: "Teraglin", nameEn: "Teraglin", nameEl: "Τεργαλίνη", nameEs: "Corvina teraglin", icon: "🐟", scientificName: "Atractoscion aequidens",
         photoId: 437, category: "KAYALIK",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece açık deniz resifleri",
@@ -4330,7 +4330,7 @@ const SPECIES_DB = {
         noteEn: "Often confused with Mulloway but has an inverse curved tail. Primarily targeted from boats at night.", noteEl: "Often confused with Mulloway but has an inverse curved tail. Primarily targeted from boats at night.", noteEs: "Often confused with Mulloway but has an inverse curved tail. Primarily targeted from boats at night."
     },
     "school_shark": {
-        name: "School Shark", nameEn: "School Shark", nameEl: "Σχολικός Καρχαρίας", nameEs: "School Shark", icon: "🦈", scientificName: "Galeorhinus galeus",
+        name: "School Shark", nameEn: "School Shark", nameEl: "Σχολικός Καρχαρίας", nameEs: "Cazón", icon: "🦈", scientificName: "Galeorhinus galeus",
         photoId: 438, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk alanlar",
@@ -4344,7 +4344,7 @@ const SPECIES_DB = {
         noteEn: "Known for traveling in schools. Like the Gummy Shark, it has high-quality meat and commercial value.", noteEl: "Known for traveling in schools. Like the Gummy Shark, it has high-quality meat and commercial value.", noteEs: "Known for traveling in schools. Like the Gummy Shark, it has high-quality meat and commercial value."
     },
     "aus_bonito": {
-        name: "Australian Bonito", nameEn: "Australian Bonito", nameEl: "Αυστραλιανή παλαμίδα", nameEs: "Australian Bonito", icon: "🐟", scientificName: "Sarda australis",
+        name: "Australian Bonito", nameEn: "Australian Bonito", nameEl: "Αυστραλιανή παλαμίδα", nameEs: "Bonito australiano", icon: "🐟", scientificName: "Sarda australis",
         photoId: 439, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAWN", peakHoursDesc: "Şafak vakti yüzey köpükleri",
@@ -4358,7 +4358,7 @@ const SPECIES_DB = {
         noteEn: "A very fast and aggressive bonito species. Exciting to catch from the shore on light tackle.", noteEl: "A very fast and aggressive bonito species. Exciting to catch from the shore on light tackle.", noteEs: "A very fast and aggressive bonito species. Exciting to catch from the shore on light tackle."
     },
     "barramundi_cod": {
-        name: "Barramundi Cod", nameEn: "Barramundi Cod", nameEl: "Barramundi Cod", nameEs: "Barramundi Cod", icon: "🐟", scientificName: "Cromileptes altivelis",
+        name: "Barramundi Cod", nameEn: "Barramundi Cod", nameEl: "Ροφός καμπούρης", nameEs: "Mero jorobado", icon: "🐟", scientificName: "Cromileptes altivelis",
         photoId: 440, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ mercan resifleri",
@@ -4372,7 +4372,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its unique polka-dot pattern. Grows slowly and is popular in the aquarium trade.", noteEl: "Recognized by its unique polka-dot pattern. Grows slowly and is popular in the aquarium trade.", noteEs: "Recognized by its unique polka-dot pattern. Grows slowly and is popular in the aquarium trade."
     },
     "black_marlin": {
-        name: "Black Marlin", nameEn: "Black Marlin", nameEl: "Μαύρος Μάρλιν", nameEs: "Black Marlin", icon: "🐟", scientificName: "Istiompax indica",
+        name: "Black Marlin", nameEn: "Black Marlin", nameEl: "Μαύρος Μάρλιν", nameEs: "Aguja negra", icon: "🐟", scientificName: "Istiompax indica",
         photoId: 441, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve açık deniz",
@@ -4386,7 +4386,7 @@ const SPECIES_DB = {
         noteEn: "The holy grail of Australian fishing. The Cairns region is world-famous for its 'Grander' Marlins.", noteEl: "The holy grail of Australian fishing. The Cairns region is world-famous for its 'Grander' Marlins.", noteEs: "The holy grail of Australian fishing. The Cairns region is world-famous for its 'Grander' Marlins."
     },
     "blue_marlin_aus": {
-        name: "Blue Marlin", nameEn: "Blue Marlin", nameEl: "Μπλε Μάρλιν", nameEs: "Blue Marlin", icon: "🐟", scientificName: "Makaira nigricans",
+        name: "Blue Marlin", nameEn: "Blue Marlin", nameEl: "Μπλε Μάρλιν", nameEs: "Aguja azul", icon: "🐟", scientificName: "Makaira nigricans",
         photoId: 442, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık okyanus",
@@ -4400,7 +4400,7 @@ const SPECIES_DB = {
         noteEn: "King of the deep blue. Known for its incredible speed and spectacular aerial displays.", noteEl: "King of the deep blue. Known for its incredible speed and spectacular aerial displays.", noteEs: "King of the deep blue. Known for its incredible speed and spectacular aerial displays."
     },
     "sailfish_pacific": {
-        name: "Pacific Sailfish", nameEn: "Pacific Sailfish", nameEl: "Sailfish του Ειρηνικού", nameEs: "Pacific Sailfish", icon: "🐟", scientificName: "Istiophorus platypterus",
+        name: "Pacific Sailfish", nameEn: "Pacific Sailfish", nameEl: "Ιστιοφόρο", nameEs: "Pez vela", icon: "🐟", scientificName: "Istiophorus platypterus",
         photoId: 443, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz yüzey akıntıları",
@@ -4414,7 +4414,7 @@ const SPECIES_DB = {
         noteEn: "One of the fastest fish in the world, characterized by its massive dorsal fin (sail).", noteEl: "One of the fastest fish in the world, characterized by its massive dorsal fin (sail).", noteEs: "One of the fastest fish in the world, characterized by its massive dorsal fin (sail)."
     },
     "blueeye_trevalla": {
-        name: "Blue-eye Trevalla", nameEn: "Blue-eye Trevalla", nameEl: "Τρεβάλα με μπλε μάτια", nameEs: "Blue-eye Trevalla", icon: "🐟", scientificName: "Hyperoglyphe antarctica",
+        name: "Blue-eye Trevalla", nameEn: "Blue-eye Trevalla", nameEl: "Τρεβάλα με μπλε μάτια", nameEs: "Rufo antártico", icon: "🐟", scientificName: "Hyperoglyphe antarctica",
         photoId: 444, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kıta sahanlığı yamaçları",
@@ -4428,7 +4428,7 @@ const SPECIES_DB = {
         noteEn: "One of the finest eating fish from the deep. Highly valued for its oily, white flesh.", noteEl: "One of the finest eating fish from the deep. Highly valued for its oily, white flesh.", noteEs: "One of the finest eating fish from the deep. Highly valued for its oily, white flesh."
     },
     "nannygai": {
-        name: "Nannygai", nameEn: "Redfish / Nannygai", nameEl: "Κοκκινόψαρο / Nannygai", nameEs: "Redfish / Nannygai", icon: "🐟", scientificName: "Centroberyx affinis",
+        name: "Nannygai", nameEn: "Redfish / Nannygai", nameEl: "Μπερίτσα Αυστραλίας", nameEs: "Alfonsino australiano", icon: "🐟", scientificName: "Centroberyx affinis",
         photoId: 445, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece kayalık yapılar",
@@ -4442,7 +4442,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its bright red color and large eyes. A staple of night fishing sessions.", noteEl: "Recognized by its bright red color and large eyes. A staple of night fishing sessions.", noteEs: "Recognized by its bright red color and large eyes. A staple of night fishing sessions."
     },
     "luderrick": {
-        name: "Luderrick", nameEn: "Luderrick / Blackfish", nameEl: "Luderrick / Blackfish", nameEs: "Luderrick / Blackfish", icon: "🐟", scientificName: "Girella tricuspidata",
+        name: "Luderrick", nameEn: "Luderrick / Blackfish", nameEl: "Σκαθάρι Αυστραλίας", nameEs: "Chopa australiana", icon: "🐟", scientificName: "Girella tricuspidata",
         photoId: 446, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz yosunlu iskele ve kayalıklar",
@@ -4456,7 +4456,7 @@ const SPECIES_DB = {
         noteEn: "One of the few herbivorous species. Requires specific techniques and weed bait to catch.", noteEl: "One of the few herbivorous species. Requires specific techniques and weed bait to catch.", noteEs: "One of the few herbivorous species. Requires specific techniques and weed bait to catch."
     },
     "silver_trevally_aus": {
-        name: "Silver Trevally", nameEn: "Silver Trevally", nameEl: "Silver Trevally", nameEs: "Silver Trevally", icon: "🐟", scientificName: "Pseudocaranx georgianus",
+        name: "Silver Trevally", nameEn: "Silver Trevally", nameEl: "Τρεβάλι ασημένιο", nameEs: "Jurel plateado", icon: "🐟", scientificName: "Pseudocaranx georgianus",
         photoId: 447, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz haliç girişleri ve resifler",
@@ -4470,7 +4470,7 @@ const SPECIES_DB = {
         noteEn: "Incredibly strong for its size. Known as 'Blurters'. One of the most fun estuary species to target.", noteEl: "Incredibly strong for its size. Known as 'Blurters'. One of the most fun estuary species to target.", noteEs: "Incredibly strong for its size. Known as 'Blurters'. One of the most fun estuary species to target."
     },
     "bight_redfish": {
-        name: "Bight Redfish", nameEn: "Bight Redfish", nameEl: "Κοκκινόψαρο Bight", nameEs: "Bight Redfish", icon: "🐟", scientificName: "Centroberyx gerrardi",
+        name: "Bight Redfish", nameEn: "Bight Redfish", nameEl: "Μπερίτσα δυτική", nameEs: "Alfonsino del oeste", icon: "🐟", scientificName: "Centroberyx gerrardi",
         photoId: 448, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler",
@@ -4484,7 +4484,7 @@ const SPECIES_DB = {
         noteEn: "A key reef species of the Great Australian Bight. Features very large eyes and firm scales.", noteEl: "A key reef species of the Great Australian Bight. Features very large eyes and firm scales.", noteEs: "A key reef species of the Great Australian Bight. Features very large eyes and firm scales."
     },
     "swordfish_aus": {
-        name: "Broadbill Swordfish", nameEn: "Broadbill Swordfish", nameEl: "Broadbill Swordfish", nameEs: "Broadbill Swordfish", icon: "🐟", scientificName: "Xiphias gladius",
+        name: "Broadbill Swordfish", nameEn: "Broadbill Swordfish", nameEl: "Ξιφίας", nameEs: "Pez espada", icon: "🐟", scientificName: "Xiphias gladius",
         photoId: 449, category: "DERİN",
         huntingMode: "chemosensory",
         isGlobal: false,
@@ -4499,7 +4499,7 @@ const SPECIES_DB = {
         noteEn: "The gladiator of the night. Trophy sizes are caught along Australia's east coast (Tasman Sea).", noteEl: "The gladiator of the night. Trophy sizes are caught along Australia's east coast (Tasman Sea).", noteEs: "The gladiator of the night. Trophy sizes are caught along Australia's east coast (Tasman Sea)."
     },
     "australian_sawfish": {
-        name: "Australian Sawfish", nameEn: "Freshwater Sawfish", nameEl: "Πριονόψαρο γλυκού νερού", nameEs: "Freshwater Sawfish", icon: "🐟", scientificName: "Pristis pristis",
+        name: "Australian Sawfish", nameEn: "Freshwater Sawfish", nameEl: "Πριονόψαρο γλυκού νερού", nameEs: "Pez sierra de agua dulce", icon: "🐟", scientificName: "Pristis pristis",
         photoId: 450, category: "LAGUN",
         huntingMode: "visual",
         
@@ -4515,7 +4515,7 @@ const SPECIES_DB = {
     },
 
     "cali_yellowtail": {
-        name: "California Yellowtail", nameEn: "California Yellowtail", nameEl: "California Yellowtail", nameEs: "California Yellowtail", icon: "🐟", scientificName: "Seriola dorsalis",
+        name: "California Yellowtail", nameEn: "California Yellowtail", nameEl: "Μαγιάτικο Καλιφόρνιας", nameEs: "Jurel de California", icon: "🐟", scientificName: "Seriola dorsalis",
         photoId: 501, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz ve akıntılı adalar",
@@ -4529,7 +4529,7 @@ const SPECIES_DB = {
         noteEn: "The king of California sportfishing. Extremely fast and known for diving into reefs. Locally called 'Yellow'.", noteEl: "The king of California sportfishing. Extremely fast and known for diving into reefs. Locally called 'Yellow'.", noteEs: "The king of California sportfishing. Extremely fast and known for diving into reefs. Locally called 'Yellow'."
     },
     "white_seabass": {
-        name: "White Seabass", nameEn: "White Seabass", nameEl: "Λευκό Λαβράκι", nameEs: "White Seabass", icon: "🐟", scientificName: "Atractoscion nobilis",
+        name: "White Seabass", nameEn: "White Seabass", nameEl: "Λευκό Λαβράκι", nameEs: "Corvina blanca", icon: "🐟", scientificName: "Atractoscion nobilis",
         photoId: 502, category: "PELAJIK_AVCI",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece Kelp ormanları kenarı",
@@ -4543,7 +4543,7 @@ const SPECIES_DB = {
         noteEn: "Known as the 'ghost' for its elusive nature. Highly prestigious trophy. Follows squid runs in spring.", noteEl: "Known as the 'ghost' for its elusive nature. Highly prestigious trophy. Follows squid runs in spring.", noteEs: "Known as the 'ghost' for its elusive nature. Highly prestigious trophy. Follows squid runs in spring."
     },
     "cali_halibut": {
-        name: "California Halibut", nameEn: "California Halibut", nameEl: "ιππόγλωσσα Καλιφόρνια", nameEs: "California Halibut", icon: "🐟", scientificName: "Paralichthys californicus",
+        name: "California Halibut", nameEn: "California Halibut", nameEl: "ιππόγλωσσα Καλιφόρνια", nameEs: "Lenguado de California", icon: "🐟", scientificName: "Paralichthys californicus",
         photoId: 503, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluklar",
@@ -4557,7 +4557,7 @@ const SPECIES_DB = {
         noteEn: "Unlike its giant northern relative, can be brown on both sides. A very cunning ambush predator.", noteEl: "Unlike its giant northern relative, can be brown on both sides. A very cunning ambush predator.", noteEs: "Unlike its giant northern relative, can be brown on both sides. A very cunning ambush predator."
     },
     "calico_bass": {
-        name: "Calico Bass", nameEn: "Kelp Bass", nameEl: "Kelp Bass", nameEs: "Kelp Bass", icon: "🐟", scientificName: "Paralabrax clathratus",
+        name: "Calico Bass", nameEn: "Kelp Bass", nameEl: "Πέρκα φυκιών", nameEs: "Cabrilla de sargazo", icon: "🐟", scientificName: "Paralabrax clathratus",
         photoId: 504, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz Kelp ormanları (yosunlar)",
@@ -4571,7 +4571,7 @@ const SPECIES_DB = {
         noteEn: "The most iconic inshore fish of California. Lives among kelp forests and is highly territorial.", noteEl: "The most iconic inshore fish of California. Lives among kelp forests and is highly territorial.", noteEs: "The most iconic inshore fish of California. Lives among kelp forests and is highly territorial."
     },
     "sand_bass": {
-        name: "Barred Sand Bass", nameEn: "Barred Sand Bass", nameEl: "Κραγιασμένο μπάσο άμμου", nameEs: "Barred Sand Bass", icon: "🐟", scientificName: "Paralabrax nebulifer",
+        name: "Barred Sand Bass", nameEn: "Barred Sand Bass", nameEl: "Κραγιασμένο μπάσο άμμου", nameEs: "Cabrilla de arena barrada", icon: "🐟", scientificName: "Paralabrax nebulifer",
         photoId: 505, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve yapı çevreleri",
@@ -4585,7 +4585,7 @@ const SPECIES_DB = {
         noteEn: "The sand-dwelling cousin of the Calico Bass. Forms large spawning schools on deep sand flats in summer.", noteEl: "The sand-dwelling cousin of the Calico Bass. Forms large spawning schools on deep sand flats in summer.", noteEs: "The sand-dwelling cousin of the Calico Bass. Forms large desove schools on deep sand flats in summer."
     },
     "pac_barracuda": {
-        name: "Pacific Barracuda", nameEn: "Pacific Barracuda", nameEl: "Pacific Barracuda", nameEs: "Pacific Barracuda", icon: "🐟", scientificName: "Sphyraena argentea",
+        name: "Pacific Barracuda", nameEn: "Pacific Barracuda", nameEl: "Λούτσος Ειρηνικού", nameEs: "Barracuda del Pacífico", icon: "🐟", scientificName: "Sphyraena argentea",
         photoId: 506, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey aksiyonu",
@@ -4599,7 +4599,7 @@ const SPECIES_DB = {
         noteEn: "Smaller than its tropical relatives but puts up a great fight when reaching 'log' sizes.", noteEl: "Smaller than its tropical relatives but puts up a great fight when reaching 'log' sizes.", noteEs: "Smaller than its tropical relatives but puts up a great fight when reaching 'log' sizes."
     },
     "lingcod": {
-        name: "Lingcod", nameEn: "Lingcod", nameEl: "Lingcod", nameEs: "Lingcod", icon: "🐟", scientificName: "Ophiodon elongatus",
+        name: "Lingcod", nameEn: "Lingcod", nameEl: "Λινγκκοντ", nameEs: "Bacalao lingcod", icon: "🐟", scientificName: "Ophiodon elongatus",
         photoId: 507, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalık yapılar",
@@ -4613,7 +4613,7 @@ const SPECIES_DB = {
         noteEn: "Famous for its fearsome teeth and occasional blue flesh (turns white when cooked). Aggressive bottom dweller.", noteEl: "Famous for its fearsome teeth and occasional blue flesh (turns white when cooked). Aggressive bottom dweller.", noteEs: "Famous for its fearsome teeth and occasional blue flesh (turns white when cooked). Aggressive bottom dweller."
     },
     "vermilion_rockfish": {
-        name: "Vermilion Rockfish", nameEn: "Vermilion Rockfish", nameEl: "Vermilion Rockfish", nameEs: "Vermilion Rockfish", icon: "🐟", scientificName: "Sebastes miniatus",
+        name: "Vermilion Rockfish", nameEn: "Vermilion Rockfish", nameEl: "Σκορπίνα βερμιγιόν", nameEs: "Rocote bermellón", icon: "🐟", scientificName: "Sebastes miniatus",
         photoId: 508, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler",
@@ -4627,7 +4627,7 @@ const SPECIES_DB = {
         noteEn: "Known as 'Reds'. One of the largest and most prize-worthy of the rockfish species.", noteEl: "Known as 'Reds'. One of the largest and most prize-worthy of the rockfish species.", noteEs: "Known as 'Reds'. One of the largest and most prize-worthy of the rockfish species."
     },
     "cali_sheephead": {
-        name: "California Sheephead", nameEn: "California Sheephead", nameEl: "Προβατίνα Καλιφόρνια", nameEs: "California Sheephead", icon: "🐟", scientificName: "Semicossyphus pulcher",
+        name: "California Sheephead", nameEn: "California Sheephead", nameEl: "Προβατίνα Καλιφόρνια", nameEs: "Vieja de California", icon: "🐟", scientificName: "Semicossyphus pulcher",
         photoId: 509, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz Kelp dipleri",
@@ -4641,7 +4641,7 @@ const SPECIES_DB = {
         noteEn: "Striking colors: black head, red middle, and white chin. Powerful teeth used to crush crustaceans.", noteEl: "Striking colors: black head, red middle, and white chin. Powerful teeth used to crush crustaceans.", noteEs: "Striking colors: black head, red middle, and white chin. Powerful teeth used to crush crustaceans."
     },
     "cabezon": {
-        name: "Cabezon", nameEn: "Cabezon", nameEl: "Cabezon", nameEs: "Cabezon", icon: "🐟", scientificName: "Scorpaenichthys marmoratus",
+        name: "Cabezon", nameEn: "Cabezon", nameEl: "Κεφαλάς", nameEs: "Cabezón", icon: "🐟", scientificName: "Scorpaenichthys marmoratus",
         photoId: 510, category: "KAYALIK",
         huntingMode: "ambush",
         
@@ -4657,7 +4657,7 @@ const SPECIES_DB = {
     },
 
     "giant_sea_bass": {
-        name: "Giant Sea Bass", nameEn: "Giant Sea Bass", nameEl: "Γιγαντιαίο λαβράκι", nameEs: "Giant Sea Bass", icon: "🐟", scientificName: "Stereolepis gigas",
+        name: "Giant Sea Bass", nameEn: "Giant Sea Bass", nameEl: "Γιγαντιαίο λαβράκι", nameEs: "Mero gigante de California", icon: "🐟", scientificName: "Stereolepis gigas",
         photoId: 511, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin Kelp ormanları",
@@ -4671,7 +4671,7 @@ const SPECIES_DB = {
         noteEn: "The giant of the Pacific (250kg+). Fully protected. Known for being curious and approaching divers.", noteEl: "The giant of the Pacific (250kg+). Fully protected. Known for being curious and approaching divers.", noteEs: "The giant of the Pacific (250kg+). Fully protected. Known for being curious and approaching divers."
     },
     "bocaccio_rockfish": {
-        name: "Bocaccio Rockfish", nameEn: "Bocaccio Rockfish", nameEl: "Bocaccio Rockfish", nameEs: "Bocaccio Rockfish", icon: "🐟", scientificName: "Sebastes paucispinis",
+        name: "Bocaccio Rockfish", nameEn: "Bocaccio Rockfish", nameEl: "Σκορπίνα μπακάτσιο", nameEs: "Rocote bocaccio", icon: "🐟", scientificName: "Sebastes paucispinis",
         photoId: 512, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalıklar",
@@ -4685,7 +4685,7 @@ const SPECIES_DB = {
         noteEn: "Deep-sea rockfish known for its large mouth. Often referred to as 'Salmon Grouper'.", noteEl: "Deep-sea rockfish known for its large mouth. Often referred to as 'Salmon Grouper'.", noteEs: "Deep-sea rockfish known for its large mouth. Often referred to as 'Salmon Grouper'."
     },
     "copper_rockfish": {
-        name: "Copper Rockfish", nameEn: "Copper Rockfish", nameEl: "Copper Rockfish", nameEs: "Copper Rockfish", icon: "🐟", scientificName: "Sebastes caurinus",
+        name: "Copper Rockfish", nameEn: "Copper Rockfish", nameEl: "Σκορπίνα χάλκινη", nameEs: "Rocote cobrizo", icon: "🐟", scientificName: "Sebastes caurinus",
         photoId: 513, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ/orta derinlikte resifler",
@@ -4699,7 +4699,7 @@ const SPECIES_DB = {
         noteEn: "Beautiful copper-colored body. Highly prized for its delicious white flesh.", noteEl: "Beautiful copper-colored body. Highly prized for its delicious white flesh.", noteEs: "Beautiful copper-colored body. Highly prized for its delicious white flesh."
     },
     "black_rockfish": {
-        name: "Black Rockfish", nameEn: "Black Rockfish", nameEl: "Black Rockfish", nameEs: "Black Rockfish", icon: "🐟", scientificName: "Sebastes melanops",
+        name: "Black Rockfish", nameEn: "Black Rockfish", nameEl: "Σκορπίνα μαύρη", nameEs: "Rocote negro", icon: "🐟", scientificName: "Sebastes melanops",
         photoId: 514, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz orta su ve Kelp üstü",
@@ -4713,7 +4713,7 @@ const SPECIES_DB = {
         noteEn: "Unlike other rockfish, forms schools near the surface. Can even be targeted with fly fishing.", noteEl: "Unlike other rockfish, forms schools near the surface. Can even be targeted with fly fishing.", noteEs: "Unlike other rockfish, forms schools near the surface. Can even be targeted with fly fishing."
     },
     "blue_rockfish": {
-        name: "Blue Rockfish", nameEn: "Blue Rockfish", nameEl: "Blue Rockfish", nameEs: "Blue Rockfish", icon: "🐟", scientificName: "Sebastes mystinus",
+        name: "Blue Rockfish", nameEn: "Blue Rockfish", nameEl: "Σκορπίνα γαλάζια", nameEs: "Rocote azul", icon: "🐟", scientificName: "Sebastes mystinus",
         photoId: 515, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz Kelp ormanları",
@@ -4727,7 +4727,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its blue-grey mottled pattern. A very common resident of kelp forests.", noteEl: "Recognized by its blue-grey mottled pattern. A very common resident of kelp forests.", noteEs: "Recognized by its blue-grey mottled pattern. A very common resident of kelp forests."
     },
     "pacific_mackerel": {
-        name: "Pasifik Uskumrusu", nameEn: "Pacific Mackerel", nameEl: "Σκουμπρί Ειρηνικού", nameEs: "Pacific Mackerel", icon: "🐟", scientificName: "Scomber japonicus",
+        name: "Pasifik Uskumrusu", nameEn: "Pacific Mackerel", nameEl: "Σκουμπρί Ειρηνικού", nameEs: "Estornino del Pacífico", icon: "🐟", scientificName: "Scomber japonicus",
         photoId: 516, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey sürüler",
@@ -4741,7 +4741,7 @@ const SPECIES_DB = {
         noteEn: "Fast and aggressive schooling fish. Excellent bait for larger predators.", noteEl: "Fast and aggressive schooling fish. Excellent bait for larger predators.", noteEs: "Fast and aggressive schooling fish. Excellent bait for larger predators."
     },
     "pacific_sardine": {
-        name: "Pasifik Sardalyası", nameEn: "Pacific Sardine", nameEl: "Σαρδέλα Ειρηνικού", nameEs: "Pacific Sardine", icon: "🐟", scientificName: "Sardinops sagax",
+        name: "Pasifik Sardalyası", nameEn: "Pacific Sardine", nameEl: "Σαρδέλα Ειρηνικού", nameEs: "Sardina del Pacífico", icon: "🐟", scientificName: "Sardinops sagax",
         photoId: 517, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece yüzey sürüler",
@@ -4755,7 +4755,7 @@ const SPECIES_DB = {
         noteEn: "A cornerstone of the ecosystem. The foundation of California's historic 'Cannery Row' industry.", noteEl: "A cornerstone of the ecosystem. The foundation of California's historic 'Cannery Row' industry.", noteEs: "A cornerstone of the ecosystem. The foundation of California's historic 'Cannery Row' industry."
     },
     "cali_grunion": {
-        name: "California Grunion", nameEn: "California Grunion", nameEl: "Καλιφόρνια Grunion", nameEs: "California Grunion", icon: "🐟", scientificName: "Leuresthes tenuis",
+        name: "California Grunion", nameEn: "California Grunion", nameEl: "Αθερίνα Καλιφόρνιας", nameEs: "Pejerrey californiano (grunión)", icon: "🐟", scientificName: "Leuresthes tenuis",
         photoId: 518, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece kumsalda yumurtlama (Yeniay/Dolunay)",
@@ -4769,7 +4769,7 @@ const SPECIES_DB = {
         noteEn: "Famous for emerging onto beaches to spawn during spring nights. Hand-catching is a local tradition.", noteEl: "Famous for emerging onto beaches to spawn during spring nights. Hand-catching is a local tradition.", noteEs: "Famous for emerging onto beaches to spawn during spring nights. Hand-catching is a local tradition."
     },
     "ocean_whitefish": {
-        name: "Ocean Whitefish", nameEn: "Ocean Whitefish", nameEl: "Ωκεανό Whitefish", nameEs: "Ocean Whitefish", icon: "🐟", scientificName: "Caulolatilus princeps",
+        name: "Ocean Whitefish", nameEn: "Ocean Whitefish", nameEl: "Ψάρι λευκό ωκεανού", nameEs: "Blanquillo del Pacífico", icon: "🐟", scientificName: "Caulolatilus princeps",
         photoId: 519, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalık ve kumluk sınırları",
@@ -4783,7 +4783,7 @@ const SPECIES_DB = {
         noteEn: "A strong fighter with very tasty meat. Often caught as a welcome bycatch during rockfish trips.", noteEl: "A strong fighter with very tasty meat. Often caught as a welcome bycatch during rockfish trips.", noteEs: "A strong fighter with very tasty meat. Often caught as a welcome bycatch during rockfish trips."
     },
     "spotted_sand_bass": {
-        name: "Spotted Sand Bass", nameEn: "Spotted Sand Bass", nameEl: "Λεπτό μπάσο άμμου", nameEs: "Spotted Sand Bass", icon: "🐟", scientificName: "Paralabrax maculatofasciatus",
+        name: "Spotted Sand Bass", nameEn: "Spotted Sand Bass", nameEl: "Λεπτό μπάσο άμμου", nameEs: "Cabrilla de arena pinta", icon: "🐟", scientificName: "Paralabrax maculatofasciatus",
         photoId: 520, category: "LAGUN",
         huntingMode: "ambush",
         
@@ -4799,7 +4799,7 @@ const SPECIES_DB = {
     },
 
     "leopard_shark": {
-        name: "Leopard Shark", nameEn: "Leopard Shark", nameEl: "Λεοπάρ Καρχαρίας", nameEs: "Leopard Shark", icon: "🦈", scientificName: "Triakis semifasciata",
+        name: "Leopard Shark", nameEn: "Leopard Shark", nameEl: "Λεοπάρ Καρχαρίας", nameEs: "Tiburón leopardo", icon: "🦈", scientificName: "Triakis semifasciata",
         photoId: 521, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluklar ve haliçler",
@@ -4813,7 +4813,7 @@ const SPECIES_DB = {
         noteEn: "A harmless shark recognized by its striking leopard-like spots. Very common along California beaches.", noteEl: "A harmless shark recognized by its striking leopard-like spots. Very common along California beaches.", noteEs: "A harmless shark recognized by its striking leopard-like spots. Very common along California beaches."
     },
     "monkeyface_prickleback": {
-        name: "Monkeyface Prickleback", nameEn: "Monkeyface Prickleback", nameEl: "Μαϊμούπροσωπο Prickleback", nameEs: "Monkeyface Prickleback", icon: "🐟", scientificName: "Cebidichthys violaceus",
+        name: "Monkeyface Prickleback", nameEn: "Monkeyface Prickleback", nameEl: "Μαϊμουδόψαρο", nameEs: "Pez cara de mono", icon: "🐟", scientificName: "Cebidichthys violaceus",
         photoId: 522, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ kayalık delikleri",
@@ -4827,7 +4827,7 @@ const SPECIES_DB = {
         noteEn: "Eel-like in appearance. Targeted in narrow rock crevices using the 'poke poling' technique.", noteEl: "Eel-like in appearance. Targeted in narrow rock crevices using the 'poke poling' technique.", noteEs: "Eel-like in appearance. Targeted in narrow rock crevices using the 'poke poling' technique."
     },
     "cali_spiny_lobster": {
-        name: "California Spiny Lobster", nameEn: "California Spiny Lobster", nameEl: "Αστακός της Καλιφόρνια", nameEs: "California Spiny Lobster", icon: "🦞", scientificName: "Panulirus interruptus",
+        name: "California Spiny Lobster", nameEn: "California Spiny Lobster", nameEl: "Αστακός της Καλιφόρνια", nameEs: "Langosta roja de California", icon: "🦞", scientificName: "Panulirus interruptus",
         photoId: 523, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece sığ kayalıklar ve Kelp dipleri",
@@ -4841,7 +4841,7 @@ const SPECIES_DB = {
         noteEn: "A clawless lobster species. One of California's most valuable and sought-after seafood items.", noteEl: "A clawless lobster species. One of California's most valuable and sought-after seafood items.", noteEs: "A clawless lobster species. One of California's most valuable and sought-after seafood items."
     },
     "striped_bass_pac": {
-        name: "Striped Bass", nameEn: "Striped Bass (Pacific)", nameEl: "Ριγέ μπάσο (Ειρηνικός)", nameEs: "Striped Bass (Pacific)", icon: "🐟", scientificName: "Morone saxatilis",
+        name: "Striped Bass", nameEn: "Striped Bass (Pacific)", nameEl: "Ριγέ μπάσο (Ειρηνικός)", nameEs: "Lubina rayada", icon: "🐟", scientificName: "Morone saxatilis",
         photoId: 524, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ kumsallar ve nehir ağızları",
@@ -4855,7 +4855,7 @@ const SPECIES_DB = {
         noteEn: "Introduced from the East Coast in 1879. Now thrives in the Pacific, especially in the SF Bay Area.", noteEl: "Introduced from the East Coast in 1879. Now thrives in the Pacific, especially in the SF Bay Area.", noteEs: "Introduced from the East Coast in 1879. Now thrives in the Pacific, especially in the SF Bay Area."
     },
     "kelp_greenling": {
-        name: "Kelp Greenling", nameEn: "Kelp Greenling", nameEl: "Kelp Greenling", nameEs: "Kelp Greenling", icon: "🐟", scientificName: "Hexagrammos decagrammus",
+        name: "Kelp Greenling", nameEn: "Kelp Greenling", nameEl: "Πρασινόψαρο φυκιών", nameEs: "Greenling de sargazo", icon: "🐟", scientificName: "Hexagrammos decagrammus",
         photoId: 525, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz Kelp ormanları",
@@ -4869,7 +4869,7 @@ const SPECIES_DB = {
         noteEn: "Males and females look so different they were long thought to be separate species. Meat can be bluish.", noteEl: "Males and females look so different they were long thought to be separate species. Meat can be bluish.", noteEs: "Males and females look so different they were long thought to be separate species. Meat can be bluish."
     },
     "cali_moray": {
-        name: "California Moray", nameEn: "California Moray", nameEl: "Καλιφόρνια Moray", nameEs: "California Moray", icon: "🐍", scientificName: "Gymnothorax mordax",
+        name: "California Moray", nameEn: "California Moray", nameEl: "Σμέρνα Καλιφόρνιας", nameEs: "Morena de California", icon: "🐍", scientificName: "Gymnothorax mordax",
         photoId: 526, category: "KAYALIK",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece kayalık yarıklar",
@@ -4883,7 +4883,7 @@ const SPECIES_DB = {
         noteEn: "The only moray species in California. Possesses a second set of jaws; can be quite aggressive.", noteEl: "The only moray species in California. Possesses a second set of jaws; can be quite aggressive.", noteEs: "The only moray species in California. Possesses a second set of jaws; can be quite aggressive."
     },
     "mako_shark_pac": {
-        name: "Mako Shark", nameEn: "Shortfin Mako Shark", nameEl: "Κοντόπτερος καρχαρίας Mako", nameEs: "Shortfin Mako Shark", icon: "🦈", scientificName: "Isurus oxyrinchus",
+        name: "Mako Shark", nameEn: "Shortfin Mako Shark", nameEl: "Καρχαρίας κοντόπτερος", nameEs: "Marrajo dientuso", icon: "🦈", scientificName: "Isurus oxyrinchus",
         photoId: 527, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey",
@@ -4897,7 +4897,7 @@ const SPECIES_DB = {
         noteEn: "The bullet of the sea. Can reach 70 km/h and perform massive leaps. A top-tier sportfishing target.", noteEl: "The bullet of the sea. Can reach 70 km/h and perform massive leaps. A top-tier sportfishing target.", noteEs: "The bullet of the sea. Can reach 70 km/h and perform massive leaps. A top-tier sportfishing target."
     },
     "blue_shark_pac": {
-        name: "Mavi Köpekbalığı", nameEn: "Blue Shark", nameEl: "Μπλε καρχαρίας", nameEs: "Blue Shark", icon: "🦈", scientificName: "Prionace glauca",
+        name: "Mavi Köpekbalığı", nameEn: "Blue Shark", nameEl: "Μπλε καρχαρίας", nameEs: "Tintorera", icon: "🦈", scientificName: "Prionace glauca",
         photoId: 528, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey",
@@ -4911,7 +4911,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its slender body and deep blue color. Highly curious; often follows boats for miles.", noteEl: "Recognized by its slender body and deep blue color. Highly curious; often follows boats for miles.", noteEs: "Recognized by its slender body and deep blue color. Highly curious; often follows boats for miles."
     },
     "soupfin_shark": {
-        name: "Soupfin Shark", nameEn: "Soupfin Shark", nameEl: "Σουππινοκαρχαρίας", nameEs: "Soupfin Shark", icon: "🦈", scientificName: "Galeorhinus galeus",
+        name: "Soupfin Shark", nameEn: "Soupfin Shark", nameEl: "Σουππινοκαρχαρίας", nameEs: "Cazón", icon: "🦈", scientificName: "Galeorhinus galeus",
         photoId: 529, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece orta derinlikte kumluklar",
@@ -4925,7 +4925,7 @@ const SPECIES_DB = {
         noteEn: "Named for historical exploitation of its fins. A very powerful fighter with excellent meat quality.", noteEl: "Named for historical exploitation of its fins. A very powerful fighter with excellent meat quality.", noteEs: "Named for historical exploitation of its fins. A very powerful fighter with excellent meat quality."
     },
     "rock_greenling": {
-        name: "Rock Greenling", nameEn: "Rock Greenling", nameEl: "Rock Greenling", nameEs: "Rock Greenling", icon: "🐟", scientificName: "Hexagrammos lagocephalus",
+        name: "Rock Greenling", nameEn: "Rock Greenling", nameEl: "Πρασινόψαρο βράχου", nameEs: "Greenling de roca", icon: "🐟", scientificName: "Hexagrammos lagocephalus",
         photoId: 530, category: "KAYALIK",
         huntingMode: "visual",
         
@@ -4941,7 +4941,7 @@ const SPECIES_DB = {
     },
 
     "cali_sculpin": {
-        name: "California Scorpionfish", nameEn: "California Scorpionfish", nameEl: "Σκορπιόψαρο Καλιφόρνια", nameEs: "California Scorpionfish", icon: "🐟", scientificName: "Scorpaena guttata",
+        name: "California Scorpionfish", nameEn: "California Scorpionfish", nameEl: "Σκορπιόψαρο Καλιφόρνια", nameEs: "Escorpión de California", icon: "🐟", scientificName: "Scorpaena guttata",
         photoId: 531, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece sığ kayalık ve kumluk sınırları",
@@ -4955,7 +4955,7 @@ const SPECIES_DB = {
         noteEn: "Locally called 'Sculpin'. Possesses venomous spines but is highly prized for its excellent eating quality.", noteEl: "Locally called 'Sculpin'. Possesses venomous spines but is highly prized for its excellent eating quality.", noteEs: "Locally called 'Sculpin'. Possesses venomous spines but is highly prized for its excellent eating quality."
     },
     "grass_rockfish": {
-        name: "Grass Rockfish", nameEn: "Grass Rockfish", nameEl: "Grass Rockfish", nameEs: "Grass Rockfish", icon: "🐟", scientificName: "Sebastes rastrelliger",
+        name: "Grass Rockfish", nameEn: "Grass Rockfish", nameEl: "Σκορπίνα χλόης", nameEs: "Rocote de hierba", icon: "🐟", scientificName: "Sebastes rastrelliger",
         photoId: 532, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ yosunlu (Kelp) alanlar",
@@ -4969,7 +4969,7 @@ const SPECIES_DB = {
         noteEn: "Perfectly camouflaged in kelp with its dark green-black color. Found in very shallow waters.", noteEl: "Perfectly camouflaged in kelp with its dark green-black color. Found in very shallow waters.", noteEs: "Perfectly camouflaged in kelp with its dark green-black color. Found in very shallow waters."
     },
     "treefish": {
-        name: "Treefish", nameEn: "Treefish", nameEl: "Δεντρόψαρο", nameEs: "Treefish", icon: "🐟", scientificName: "Sebastes serriceps",
+        name: "Treefish", nameEn: "Treefish", nameEl: "Δεντρόψαρο", nameEs: "Rocote arborícola", icon: "🐟", scientificName: "Sebastes serriceps",
         photoId: 533, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ kayalık yarıklar",
@@ -4983,7 +4983,7 @@ const SPECIES_DB = {
         noteEn: "Resembles a zebra with its vertical dark bands and yellowish lips. Highly territorial.", noteEl: "Resembles a zebra with its vertical dark bands and yellowish lips. Highly territorial.", noteEs: "Resembles a zebra with its vertical dark bands and yellowish lips. Highly territorial."
     },
     "gopher_rockfish": {
-        name: "Gopher Rockfish", nameEn: "Gopher Rockfish", nameEl: "Gopher Rockfish", nameEs: "Gopher Rockfish", icon: "🐟", scientificName: "Sebastes carnatus",
+        name: "Gopher Rockfish", nameEn: "Gopher Rockfish", nameEl: "Σκορπίνα γκόφερ", nameEs: "Rocote gopher", icon: "🐟", scientificName: "Sebastes carnatus",
         photoId: 534, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz kayalık dipler",
@@ -4997,7 +4997,7 @@ const SPECIES_DB = {
         noteEn: "Identified by light spots on a brown body. Prefers living in rocky holes and crevices.", noteEl: "Identified by light spots on a brown body. Prefers living in rocky holes and crevices.", noteEs: "Identified by light spots on a brown body. Prefiere living in rocky holes and crevices."
     },
     "kelp_rockfish": {
-        name: "Kelp Rockfish", nameEn: "Kelp Rockfish", nameEl: "Kelp Rockfish", nameEs: "Kelp Rockfish", icon: "🐟", scientificName: "Sebastes atrovirens",
+        name: "Kelp Rockfish", nameEn: "Kelp Rockfish", nameEl: "Σκορπίνα φυκιών", nameEs: "Rocote de sargazo", icon: "🐟", scientificName: "Sebastes atrovirens",
         photoId: 535, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz Kelp yosunu sütunları",
@@ -5011,7 +5011,7 @@ const SPECIES_DB = {
         noteEn: "Often hovers vertically among kelp to ambush prey. Color varies from brown to olive.", noteEl: "Often hovers vertically among kelp to ambush prey. Color varies from brown to olive.", noteEs: "Often hovers vertically among kelp to ambush prey. Color varies from brown to olive."
     },
     "brown_rockfish": {
-        name: "Brown Rockfish", nameEn: "Brown Rockfish", nameEl: "Brown Rockfish", nameEs: "Brown Rockfish", icon: "🐟", scientificName: "Sebastes auriculatus",
+        name: "Brown Rockfish", nameEn: "Brown Rockfish", nameEl: "Σκορπίνα καστανή", nameEs: "Rocote pardo", icon: "🐟", scientificName: "Sebastes auriculatus",
         photoId: 536, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece sığ iskele ve kayalıklar",
@@ -5025,7 +5025,7 @@ const SPECIES_DB = {
         noteEn: "Identified by a dark spot on the operculum. The most common rockfish caught from city piers.", noteEl: "Identified by a dark spot on the operculum. The most common rockfish caught from city piers.", noteEs: "Identified by a dark spot on the operculum. The most common rockfish caught from city piers."
     },
     "starry_rockfish": {
-        name: "Starry Rockfish", nameEn: "Starry Rockfish", nameEl: "Starry Rockfish", nameEs: "Starry Rockfish", icon: "🐟", scientificName: "Sebastes constellatus",
+        name: "Starry Rockfish", nameEn: "Starry Rockfish", nameEl: "Σκορπίνα αστερωτή", nameEs: "Rocote estrellado", icon: "🐟", scientificName: "Sebastes constellatus",
         photoId: 537, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalıklar",
@@ -5039,7 +5039,7 @@ const SPECIES_DB = {
         noteEn: "Resembles a 'starry sky' with tiny white spots over an orange body. A visually stunning species.", noteEl: "Resembles a 'starry sky' with tiny white spots over an orange body. A visually stunning species.", noteEs: "Resembles a 'starry sky' with tiny white spots over an orange body. A visually stunning species."
     },
     "yellowtail_rockfish": {
-        name: "Yellowtail Rockfish", nameEn: "Yellowtail Rockfish", nameEl: "Rockfish Yellowtail", nameEs: "Yellowtail Rockfish", icon: "🐟", scientificName: "Sebastes flavidus",
+        name: "Yellowtail Rockfish", nameEn: "Yellowtail Rockfish", nameEl: "Σκορπίνα κιτρινόουρη", nameEs: "Rocote de cola amarilla", icon: "🐟", scientificName: "Sebastes flavidus",
         photoId: 538, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz orta su derin resifler",
@@ -5053,7 +5053,7 @@ const SPECIES_DB = {
         noteEn: "Resembles California Yellowtail with its yellow tail but is a rockfish. Forms large schools.", noteEl: "Resembles California Yellowtail with its yellow tail but is a rockfish. Forms large schools.", noteEs: "Resembles California Yellowtail with its yellow tail but is a rockfish. Forms large schools."
     },
     "china_rockfish": {
-        name: "China Rockfish", nameEn: "China Rockfish", nameEl: "Κίνα Rockfish", nameEs: "China Rockfish", icon: "🐟", scientificName: "Sebastes nebulosus",
+        name: "China Rockfish", nameEn: "China Rockfish", nameEl: "Σκορπίνα Κίνας", nameEs: "Rocote de China", icon: "🐟", scientificName: "Sebastes nebulosus",
         photoId: 539, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalık yarıklar",
@@ -5067,7 +5067,7 @@ const SPECIES_DB = {
         noteEn: "Highly distinctive with a yellow stripe along its black body. One of the most prized rockfish.", noteEl: "Highly distinctive with a yellow stripe along its black body. One of the most prized rockfish.", noteEs: "Highly distinctive with a yellow stripe along its black body. One of the most prized rockfish."
     },
     "quillback_rockfish": {
-        name: "Quillback Rockfish", nameEn: "Quillback Rockfish", nameEl: "Quillback Rockfish", nameEs: "Quillback Rockfish", icon: "🐟", scientificName: "Sebastes maliger",
+        name: "Quillback Rockfish", nameEn: "Quillback Rockfish", nameEl: "Σκορπίνα ακανθωτή", nameEs: "Rocote de espina larga", icon: "🐟", scientificName: "Sebastes maliger",
         photoId: 540, category: "KAYALIK",
         huntingMode: "ambush",
         
@@ -5083,7 +5083,7 @@ const SPECIES_DB = {
     },
 
     "opah": {
-        name: "Opah", nameEn: "Opah / Moonfish", nameEl: "Opah / Φεγγαρόψαρο", nameEs: "Opah / Moonfish", icon: "🐟", scientificName: "Lampris guttatus",
+        name: "Opah", nameEn: "Opah / Moonfish", nameEl: "Όπα", nameEs: "Opa", icon: "🐟", scientificName: "Lampris guttatus",
         photoId: 541, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz derin su",
@@ -5097,7 +5097,7 @@ const SPECIES_DB = {
         noteEn: "Visually stunning. The only known fully warm-blooded fish. Extremely rare and prized catch.", noteEl: "Visually stunning. The only known fully warm-blooded fish. Extremely rare and prized catch.", noteEs: "Visually stunning. The only known fully warm-blooded fish. Extremely rare and prized catch."
     },
     "thresher_shark": {
-        name: "Thresher Shark", nameEn: "Common Thresher Shark", nameEl: "Κοινός Αλωνιστής Καρχαρίας", nameEs: "Common Thresher Shark", icon: "🦈", scientificName: "Alopias vulpinus",
+        name: "Thresher Shark", nameEn: "Common Thresher Shark", nameEl: "Κοινός Αλωνιστής Καρχαρίας", nameEs: "Zorro común", icon: "🦈", scientificName: "Alopias vulpinus",
         photoId: 542, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey",
@@ -5111,7 +5111,7 @@ const SPECIES_DB = {
         noteEn: "Famous for its scythe-like tail, used as a whip to stun prey before consuming.", noteEl: "Famous for its scythe-like tail, used as a whip to stun prey before consuming.", noteEs: "Famous for its scythe-like tail, used as a whip to stun prey before consuming."
     },
     "salmon_shark": {
-        name: "Salmon Shark", nameEn: "Salmon Shark", nameEl: "Καρχαρίας σολομού", nameEs: "Salmon Shark", icon: "🦈", scientificName: "Lamna ditropis",
+        name: "Salmon Shark", nameEn: "Salmon Shark", nameEl: "Καρχαρίας σολομού", nameEs: "Marrajo salmón", icon: "🦈", scientificName: "Lamna ditropis",
         photoId: 543, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz soğuk akıntılar",
@@ -5125,7 +5125,7 @@ const SPECIES_DB = {
         noteEn: "Resembles a Great White. Found in cold northern waters following salmon migrations.", noteEl: "Resembles a Great White. Found in cold northern waters following salmon migrations.", noteEs: "Resembles a Great White. Found in cold northern waters following salmon migrations."
     },
     "pac_sanddab": {
-        name: "Pacific Sanddab", nameEn: "Pacific Sanddab", nameEl: "Pacific Sanddab", nameEs: "Pacific Sanddab", icon: "🐟", scientificName: "Citharichthys sordidus",
+        name: "Pacific Sanddab", nameEn: "Pacific Sanddab", nameEl: "Γλώσσα Ειρηνικού", nameEs: "Lenguadito del Pacífico", icon: "🐟", scientificName: "Citharichthys sordidus",
         photoId: 544, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk dipler",
@@ -5139,7 +5139,7 @@ const SPECIES_DB = {
         noteEn: "Small but legendary for its flavor. A staple on menus across California.", noteEl: "Small but legendary for its flavor. A staple on menus across California.", noteEs: "Small but legendary for its flavor. A staple on menus across California."
     },
     "petrale_sole": {
-        name: "Petrale Sole", nameEn: "Petrale Sole", nameEl: "Σόλα Petrale", nameEs: "Petrale Sole", icon: "🐟", scientificName: "Eopsetta jordani",
+        name: "Petrale Sole", nameEn: "Petrale Sole", nameEl: "Γλώσσα πετράλε", nameEs: "Lenguado petrale", icon: "🐟", scientificName: "Eopsetta jordani",
         photoId: 545, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz kumluklar",
@@ -5153,7 +5153,7 @@ const SPECIES_DB = {
         noteEn: "Considered the premier sole species in California waters. Very delicate and sweet flesh.", noteEl: "Considered the premier sole species in California waters. Very delicate and sweet flesh.", noteEs: "Considered the premier sole species in California waters. Very delicate and sweet flesh."
     },
     "starry_flounder_pac": {
-        name: "Starry Flounder", nameEn: "Starry Flounder", nameEl: "Starry Flounder", nameEs: "Starry Flounder", icon: "🐟", scientificName: "Platichthys stellatus",
+        name: "Starry Flounder", nameEn: "Starry Flounder", nameEl: "Χωματίδα αστερωτή", nameEs: "Platija estrellada", icon: "🐟", scientificName: "Platichthys stellatus",
         photoId: 546, category: "LAGUN",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ haliçler ve nehir ağızları",
@@ -5167,7 +5167,7 @@ const SPECIES_DB = {
         noteEn: "Distinctive black and orange striped fins. Often enters brackish and fresh waters.", noteEl: "Distinctive black and orange striped fins. Often enters brackish and fresh waters.", noteEs: "Distinctive black and orange striped fins. Often enters brackish and fresh waters."
     },
     "bat_ray": {
-        name: "Bat Ray", nameEn: "Bat Ray", nameEl: "Bat Ray", nameEs: "Bat Ray", icon: "🐟", scientificName: "Myliobatis californica",
+        name: "Bat Ray", nameEn: "Bat Ray", nameEl: "Σαλάχι νυχτερίδα", nameEs: "Raya murciélago", icon: "🐟", scientificName: "Myliobatis californica",
         photoId: 547, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ kumluklar ve çamurlu dipler",
@@ -5181,7 +5181,7 @@ const SPECIES_DB = {
         noteEn: "Known for its massive wingspan and raw power. Often called 'Mud Marlin' by shore anglers.", noteEl: "Known for its massive wingspan and raw power. Often called 'Mud Marlin' by shore anglers.", noteEs: "Known for its massive wingspan and raw power. Often called 'Mud Marlin' by shore anglers."
     },
     "shovelnose_guitarfish": {
-        name: "Shovelnose Guitarfish", nameEn: "Shovelnose Guitarfish", nameEl: "Κιθαρόψαρο φτυαριού", nameEs: "Shovelnose Guitarfish", icon: "🐟", scientificName: "Rhinobatos productus",
+        name: "Shovelnose Guitarfish", nameEn: "Shovelnose Guitarfish", nameEl: "Κιθαρόψαρο φτυαριού", nameEs: "Pez guitarra hocicudo", icon: "🐟", scientificName: "Rhinobatos productus",
         photoId: 548, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ surf bölgeleri",
@@ -5195,7 +5195,7 @@ const SPECIES_DB = {
         noteEn: "Resembles a cross between a ray and a shark. Prized for the meat in its tail.", noteEl: "Resembles a cross between a ray and a shark. Prized for the meat in its tail.", noteEs: "Resembles a cross between a ray and a shark. Prized for the meat in its tail."
     },
     "california_skate": {
-        name: "California Skate", nameEn: "California Skate", nameEl: "Καλιφόρνια Skate", nameEs: "California Skate", icon: "🐟", scientificName: "Raja inornata",
+        name: "California Skate", nameEn: "California Skate", nameEl: "Ράγια Καλιφόρνιας", nameEs: "Raya de California", icon: "🐟", scientificName: "Raja inornata",
         photoId: 549, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz orta derinlikte kumluklar",
@@ -5209,7 +5209,7 @@ const SPECIES_DB = {
         noteEn: "A slender, diamond-shaped skate. Often caught as bycatch while targeting other bottom species.", noteEl: "A slender, diamond-shaped skate. Often caught as bycatch while targeting other bottom species.", noteEs: "A slender, diamond-shaped skate. Often caught as bycatch while targeting other bottom species."
     },
     "big_skate_pac": {
-        name: "Big Skate", nameEn: "Big Skate", nameEl: "Big Skate", nameEs: "Big Skate", icon: "🐟", scientificName: "Beringraja binoculata",
+        name: "Big Skate", nameEn: "Big Skate", nameEl: "Ράγια μεγάλη", nameEs: "Raya grande del Pacífico", icon: "🐟", scientificName: "Beringraja binoculata",
         photoId: 550, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk alanlar",
@@ -5224,7 +5224,7 @@ const SPECIES_DB = {
     },
 
     "ice_cod": {
-        name: "Atlantic Cod", nameEn: "Atlantic Cod (Iceland)", nameEl: "Atlantic Cod (Ισλανδία)", nameEs: "Atlantic Cod (Iceland)", icon: "🐟", scientificName: "Gadus morhua",
+        name: "Atlantic Cod", nameEn: "Atlantic Cod (Iceland)", nameEl: "Μπακαλιάρος Ατλαντικού", nameEs: "Bacalao del Atlántico", icon: "🐟", scientificName: "Gadus morhua",
         photoId: 601, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve kumluklar",
@@ -5238,7 +5238,7 @@ const SPECIES_DB = {
         noteEn: "The cornerstone of Iceland's economy. Giant specimens reaching 30-40 kg are commonly caught here.", noteEl: "The cornerstone of Iceland's economy. Giant specimens reaching 30-40 kg are commonly caught here.", noteEs: "The cornerstone of Iceland's economy. Giant specimens reaching 30-40 kg are commonly caught here."
     },
     "ice_wolf_fish": {
-        name: "Atlantic Wolf-fish", nameEn: "Atlantic Wolf-fish", nameEl: "Λύκος-ψάρι του Ατλαντικού", nameEs: "Atlantic Wolf-fish", icon: "🐟", scientificName: "Anarhichas lupus",
+        name: "Atlantic Wolf-fish", nameEn: "Atlantic Wolf-fish", nameEl: "Λύκος-ψάρι του Ατλαντικού", nameEs: "Perro del norte", icon: "🐟", scientificName: "Anarhichas lupus",
         photoId: 602, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz kayalık yarıklar",
@@ -5252,7 +5252,7 @@ const SPECIES_DB = {
         noteEn: "Uses fearsome teeth to crush shellfish. An iconic Icelandic species with very firm, tasty meat.", noteEl: "Uses fearsome teeth to crush shellfish. An iconic Icelandic species with very firm, tasty meat.", noteEs: "Uses fearsome teeth to crush shellfish. An iconic Icelandic species with very firm, tasty meat."
     },
     "spotted_wolf_fish": {
-        name: "Spotted Wolf-fish", nameEn: "Spotted Wolf-fish", nameEl: "Λύκος-ψάρι με στίγματα", nameEs: "Spotted Wolf-fish", icon: "🐟", scientificName: "Anarhichas minor",
+        name: "Spotted Wolf-fish", nameEn: "Spotted Wolf-fish", nameEl: "Λύκος-ψάρι με στίγματα", nameEs: "Perro pintado", icon: "🐟", scientificName: "Anarhichas minor",
         photoId: 603, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin çamurlu dipler",
@@ -5266,7 +5266,7 @@ const SPECIES_DB = {
         noteEn: "Lives deeper than its Atlantic relative and is marked by spots. Its meat is richer and oilier.", noteEl: "Lives deeper than its Atlantic relative and is marked by spots. Its meat is richer and oilier.", noteEs: "Lives deeper than its Atlantic relative and is marked by spots. Its meat is richer and oilier."
     },
     "haddock_ice": {
-        name: "Haddock", nameEn: "Haddock", nameEl: "Χάντοκ", nameEs: "Haddock", icon: "🐟", scientificName: "Melanogrammus aeglefinus",
+        name: "Haddock", nameEn: "Haddock", nameEl: "Χάντοκ", nameEs: "Eglefino", icon: "🐟", scientificName: "Melanogrammus aeglefinus",
         photoId: 604, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk düzlükler",
@@ -5280,7 +5280,7 @@ const SPECIES_DB = {
         noteEn: "Identified by the black 'devil's thumbprint' on its side. The most popular fish for fresh consumption in Iceland.", noteEl: "Identified by the black 'devil's thumbprint' on its side. The most popular fish for fresh consumption in Iceland.", noteEs: "Identified by the black 'devil's thumbprint' on its side. The most popular fish for fresh consumption in Iceland."
     },
     "saithe_ice": {
-        name: "Saithe", nameEn: "Saithe / Coalfish", nameEl: "Saithe / Coalfish", nameEs: "Saithe / Coalfish", icon: "🐟", scientificName: "Pollachius virens",
+        name: "Saithe", nameEn: "Saithe / Coalfish", nameEl: "Μαυρομπακαλιάρος", nameEs: "Carbonero", icon: "🐟", scientificName: "Pollachius virens",
         photoId: 605, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz akıntılı sular ve resifler",
@@ -5294,7 +5294,7 @@ const SPECIES_DB = {
         noteEn: "The speed demon of the north. A powerful fighter that travels in massive schools.", noteEl: "The speed demon of the north. A powerful fighter that travels in massive schools.", noteEs: "The speed demon of the north. A powerful fighter that travels in massive schools."
     },
     "golden_redfish": {
-        name: "Golden Redfish", nameEn: "Golden Redfish", nameEl: "Χρυσό Κοκκινόψαρο", nameEs: "Golden Redfish", icon: "🐟", scientificName: "Sebastes norvegicus",
+        name: "Golden Redfish", nameEn: "Golden Redfish", nameEl: "Χρυσό Κοκκινόψαρο", nameEs: "Gallineta nórdica", icon: "🐟", scientificName: "Sebastes norvegicus",
         photoId: 606, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalık yamaçlar",
@@ -5308,7 +5308,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its bright orange color. Grows very slowly and can live up to 60 years.", noteEl: "Recognized by its bright orange color. Grows very slowly and can live up to 60 years.", noteEs: "Recognized by its bright orange color. Grows very slowly and can live up to 60 years."
     },
     "lumpfish": {
-        name: "Lumpfish", nameEn: "Lumpfish / Lump-sucker", nameEl: "Λαμπρόψαρο / Κοτσαδόρο", nameEs: "Lumpfish / Lump-sucker", icon: "🐟", scientificName: "Cyclopterus lumpus",
+        name: "Lumpfish", nameEn: "Lumpfish / Lump-sucker", nameEl: "Λαμπρόψαρο / Κοτσαδόρο", nameEs: "Ciclóptero", icon: "🐟", scientificName: "Cyclopterus lumpus",
         photoId: 607, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ yosunlu kayalıklar (Bahar)",
@@ -5322,7 +5322,7 @@ const SPECIES_DB = {
         noteEn: "Uses a suction disk to attach to rocks. Its roe (caviar) is world-famous and highly valuable.", noteEl: "Uses a suction disk to attach to rocks. Its roe (caviar) is world-famous and highly valuable.", noteEs: "Uses a suction disk to attach to rocks. Its roe (caviar) is world-famous and highly valuable."
     },
     "ling_ice": {
-        name: "Ling", nameEn: "Ling", nameEl: "Ling", nameEs: "Ling", icon: "🐟", scientificName: "Molva molva",
+        name: "Ling", nameEn: "Ling", nameEl: "Μουρούνα", nameEs: "Maruca", icon: "🐟", scientificName: "Molva molva",
         photoId: 608, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin batıklar ve kayalıklar",
@@ -5336,7 +5336,7 @@ const SPECIES_DB = {
         noteEn: "Eel-like long body. A very aggressive predator that can reach 2 meters in Icelandic waters.", noteEl: "Eel-like long body. A very aggressive predator that can reach 2 meters in Icelandic waters.", noteEs: "Eel-like long body. A very aggressive predator that can reach 2 meters in Icelandic waters."
     },
     "blue_ling_ice": {
-        name: "Blue Ling", nameEn: "Blue Ling", nameEl: "Μπλε Φτερού", nameEs: "Blue Ling", icon: "🐟", scientificName: "Molva dypterygia",
+        name: "Blue Ling", nameEn: "Blue Ling", nameEl: "Μπλε Φτερού", nameEs: "Maruca azul", icon: "🐟", scientificName: "Molva dypterygia",
         photoId: 609, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kıta sahanlığı yamaçları",
@@ -5350,7 +5350,7 @@ const SPECIES_DB = {
         noteEn: "Slenderer and longer than common ling, with a bluish tint. Lives at extreme depths.", noteEl: "Slenderer and longer than common ling, with a bluish tint. Lives at extreme depths.", noteEs: "Slenderer and longer than common ling, with a bluish tint. Lives at extreme depths."
     },
     "tusk_ice": {
-        name: "Tusk", nameEn: "Tusk / Cusk", nameEl: "Τουσκός / Κουσκ", nameEs: "Tusk / Cusk", icon: "🐟", scientificName: "Brosme brosme",
+        name: "Tusk", nameEn: "Tusk / Cusk", nameEl: "Τουσκός / Κουσκ", nameEs: "Brosmio", icon: "🐟", scientificName: "Brosme brosme",
         photoId: 610, category: "KAYALIK",
         huntingMode: "visual",
         
@@ -5366,7 +5366,7 @@ const SPECIES_DB = {
     },
 
     "ice_halibut": {
-        name: "Atlantic Halibut", nameEn: "Atlantic Halibut", nameEl: "Ατλαντικός ιππόγλωσσος", nameEs: "Atlantic Halibut", icon: "🐟", scientificName: "Hippoglossus hippoglossus",
+        name: "Atlantic Halibut", nameEn: "Atlantic Halibut", nameEl: "Ατλαντικός ιππόγλωσσος", nameEs: "Fletán atlántico", icon: "🐟", scientificName: "Hippoglossus hippoglossus",
         photoId: 611, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk yamaçlar",
@@ -5380,7 +5380,7 @@ const SPECIES_DB = {
         noteEn: "The giant of the north, reaching up to 300 kg. The most prestigious and challenging flatfish to catch.", noteEl: "The giant of the north, reaching up to 300 kg. The most prestigious and challenging flatfish to catch.", noteEs: "The giant of the north, reaching up to 300 kg. The most prestigious and challenging flatfish to catch."
     },
     "greenland_halibut_ice": {
-        name: "Greenland Halibut", nameEn: "Greenland Halibut", nameEl: "Ιππόγλωσσα Γροιλανδίας", nameEs: "Greenland Halibut", icon: "🐟", scientificName: "Reinhardtius hippoglossoides",
+        name: "Greenland Halibut", nameEn: "Greenland Halibut", nameEl: "Ιππόγλωσσα Γροιλανδίας", nameEs: "Fletán negro", icon: "🐟", scientificName: "Reinhardtius hippoglossoides",
         photoId: 612, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin su",
@@ -5394,7 +5394,7 @@ const SPECIES_DB = {
         noteEn: "Darker than common halibut, with both sides pigmented. Exceptionally oily and flavorful.", noteEl: "Darker than common halibut, with both sides pigmented. Exceptionally oily and flavorful.", noteEs: "Darker than common halibut, with both sides pigmented. Exceptionally oily and flavorful."
     },
     "anglerfish_ice": {
-        name: "Fener Balığı", nameEn: "European Anglerfish", nameEl: "Ευρωπαϊκή πεσκανδρίτσα", nameEs: "European Anglerfish", icon: "🐟", scientificName: "Lophius piscatorius",
+        name: "Fener Balığı", nameEn: "European Anglerfish", nameEl: "Ευρωπαϊκή πεσκανδρίτσα", nameEs: "Rape", icon: "🐟", scientificName: "Lophius piscatorius",
         photoId: 613, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalık ve kum geçişleri",
@@ -5408,7 +5408,7 @@ const SPECIES_DB = {
         noteEn: "Fearsome appearance but meat is nicknamed 'poor man's lobster'. Head makes up half its body.", noteEl: "Fearsome appearance but meat is nicknamed 'poor man's lobster'. Head makes up half its body.", noteEs: "Fearsome appearance but meat is nicknamed 'poor man's lobster'. Head makes up half its body."
     },
     "whiting_ice": {
-        name: "Mezgit", nameEn: "Whiting", nameEl: "Νταούκι", nameEs: "Whiting", icon: "🐟", scientificName: "Merlangius merlangus",
+        name: "Mezgit", nameEn: "Whiting", nameEl: "Νταούκι", nameEs: "Merlán", icon: "🐟", scientificName: "Merlangius merlangus",
         photoId: 614, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ/orta derinlikte kumluklar",
@@ -5422,7 +5422,7 @@ const SPECIES_DB = {
         noteEn: "Similar to haddock but with a different lateral line. Abundant in Icelandic waters.", noteEl: "Similar to haddock but with a different lateral line. Abundant in Icelandic waters.", noteEs: "Similar to haddock but with a different lateral line. Abundant in Icelandic waters."
     },
     "norway_pout_ice": {
-        name: "Norveç Mezgitçiği", nameEn: "Norway Pout", nameEl: "Νορβηγία Πουτ", nameEs: "Norway Pout", icon: "🐟", scientificName: "Trisopterus esmarkii",
+        name: "Norveç Mezgitçiği", nameEn: "Norway Pout", nameEl: "Νορβηγία Πουτ", nameEs: "Faneca noruega", icon: "🐟", scientificName: "Trisopterus esmarkii",
         photoId: 615, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz orta su derinlikleri",
@@ -5436,7 +5436,7 @@ const SPECIES_DB = {
         noteEn: "A very small species but a vital food source for giant Cod and Haddock.", noteEl: "A very small species but a vital food source for giant Cod and Haddock.", noteEs: "A very small species but a vital food source for giant Cod and Haddock."
     },
     "blue_whiting_ice": {
-        name: "Mavi Mezgit", nameEn: "Blue Whiting", nameEl: "Blue Whiting", nameEs: "Blue Whiting", icon: "🐟", scientificName: "Micromesistius poutassou",
+        name: "Mavi Mezgit", nameEn: "Blue Whiting", nameEl: "Προσφυγάκι", nameEs: "Bacaladilla", icon: "🐟", scientificName: "Micromesistius poutassou",
         photoId: 616, category: "PELAJIK",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz orta su",
@@ -5450,7 +5450,7 @@ const SPECIES_DB = {
         noteEn: "One of Iceland's largest fish stocks. Primarily targeted by industrial fisheries.", noteEl: "One of Iceland's largest fish stocks. Primarily targeted by industrial fisheries.", noteEs: "One of Iceland's largest fish stocks. Primarily targeted by industrial fisheries."
     },
     "capelin_ice": {
-        name: "Kapelin", nameEn: "Capelin", nameEl: "Capelin", nameEs: "Capelin", icon: "🐟", scientificName: "Mallotus villosus",
+        name: "Kapelin", nameEn: "Capelin", nameEl: "Καπελάνος", nameEs: "Capelán", icon: "🐟", scientificName: "Mallotus villosus",
         photoId: 617, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece yüzey sürüler (Kış/Bahar)",
@@ -5464,7 +5464,7 @@ const SPECIES_DB = {
         noteEn: "The 'fuel' of the Icelandic ecosystem. Its migration dictates all marine life and fishing activity.", noteEl: "The 'fuel' of the Icelandic ecosystem. Its migration dictates all marine life and fishing activity.", noteEs: "The 'fuel' of the Icelandic ecosystem. Its migration dictates all marine life and fishing activity."
     },
     "arctic_charr_ice": {
-        name: "Arktik Alabalığı", nameEn: "Arctic Charr", nameEl: "Arctic Charr", nameEs: "Arctic Charr", icon: "🐟", scientificName: "Salvelinus alpinus",
+        name: "Arktik Alabalığı", nameEn: "Arctic Charr", nameEl: "Σαλβελίνος αρκτικός", nameEs: "Salvelino ártico", icon: "🐟", scientificName: "Salvelinus alpinus",
         photoId: 618, category: "LAGUN",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz haliçler ve kıyı sığlıkları",
@@ -5478,7 +5478,7 @@ const SPECIES_DB = {
         noteEn: "Iceland's most beloved sport fish. Can be caught in both freshwater and coastal areas.", noteEl: "Iceland's most beloved sport fish. Can be caught in both freshwater and coastal areas.", noteEs: "Iceland's most beloved sport fish. Can be caught in both freshwater and coastal areas."
     },
     "european_eel_ice": {
-        name: "Yılan Balığı", nameEn: "European Eel", nameEl: "Ευρωπαϊκό Χέλι", nameEs: "European Eel", icon: "🐍", scientificName: "Anguilla anguilla",
+        name: "Yılan Balığı", nameEn: "European Eel", nameEl: "Ευρωπαϊκό Χέλι", nameEs: "Anguila europea", icon: "🐍", scientificName: "Anguilla anguilla",
         photoId: 619, category: "LAGUN",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece çamurlu dipler ve haliçler",
@@ -5492,7 +5492,7 @@ const SPECIES_DB = {
         noteEn: "Features a complex life cycle. Common in Icelandic river estuaries.", noteEl: "Features a complex life cycle. Common in Icelandic river estuaries.", noteEs: "Features a complex life cycle. Common in Icelandic river estuaries."
     },
     "starry_ray_ice": {
-        name: "Yıldızlı Vatoz", nameEn: "Starry Ray / Thorny Skate", nameEl: "Starry Ray / Thorny Skate", nameEs: "Starry Ray / Thorny Skate", icon: "🐟", scientificName: "Amblyraja radiata",
+        name: "Yıldızlı Vatoz", nameEn: "Starry Ray / Thorny Skate", nameEl: "Ράγια ακανθωτή", nameEs: "Raya radiante", icon: "🐟", scientificName: "Amblyraja radiata",
         photoId: 620, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk alanlar",
@@ -5507,7 +5507,7 @@ const SPECIES_DB = {
     },
 
     "greenland_shark_ice": {
-        name: "Grönland Köpekbalığı", nameEn: "Greenland Shark", nameEl: "Καρχαρίας Γροιλανδίας", nameEs: "Greenland Shark", icon: "🦈", scientificName: "Somniosus microcephalus",
+        name: "Grönland Köpekbalığı", nameEn: "Greenland Shark", nameEl: "Καρχαρίας Γροιλανδίας", nameEs: "Tiburón de Groenlandia", icon: "🦈", scientificName: "Somniosus microcephalus",
         photoId: 621, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin soğuk sular",
@@ -5521,7 +5521,7 @@ const SPECIES_DB = {
         noteEn: "The longest-living vertebrate (400 years+). Meat is toxic fresh but becomes the delicacy 'Hákarl' after months of fermentation.", noteEl: "The longest-living vertebrate (400 years+). Meat is toxic fresh but becomes the delicacy 'Hákarl' after months of fermentation.", noteEs: "The longest-living vertebrate (400 years+). Meat is toxic fresh but becomes the delicacy 'Hákarl' after months of fermentation."
     },
     "porbeagle_shark_ice": {
-        name: "Dikburun Köpekbalığı", nameEn: "Porbeagle Shark", nameEl: "Καρχαρίας Porbeagle", nameEs: "Porbeagle Shark", icon: "🦈", scientificName: "Lamna nasus",
+        name: "Dikburun Köpekbalığı", nameEn: "Porbeagle Shark", nameEl: "Καρχαρίας λάμια", nameEs: "Marrajo sardinero", icon: "🦈", scientificName: "Lamna nasus",
         photoId: 622, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve resif kenarları",
@@ -5535,7 +5535,7 @@ const SPECIES_DB = {
         noteEn: "Resembles a small Great White. A powerful fighter and the fastest shark in cold waters.", noteEl: "Resembles a small Great White. A powerful fighter and the fastest shark in cold waters.", noteEs: "Resembles a small Great White. A powerful fighter and the fastest shark in cold waters."
     },
     "velvet_belly_ice": {
-        name: "Kadife Karınlı Fener K.", nameEn: "Velvet Belly Lanternshark", nameEl: "Velvet Belly Lanternshark", nameEs: "Velvet Belly Lanternshark", icon: "🦈", scientificName: "Etmopterus spinax",
+        name: "Kadife Karınlı Fener K.", nameEn: "Velvet Belly Lanternshark", nameEl: "Μαύρο σκυλόψαρο", nameEs: "Negrito", icon: "🦈", scientificName: "Etmopterus spinax",
         photoId: 623, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece orta derinlik / Gündüz çok derin",
@@ -5549,7 +5549,7 @@ const SPECIES_DB = {
         noteEn: "Emits light from its underside (bioluminescence) to glow in the deep dark.", noteEl: "Emits light from its underside (bioluminescence) to glow in the deep dark.", noteEs: "Emits light from its underside (bioluminescence) to glow in the deep dark."
     },
     "black_dogfish_ice": {
-        name: "Siyah Köpekbalığı", nameEn: "Black Dogfish", nameEl: "Μαύρο σκυλόψαρο", nameEs: "Black Dogfish", icon: "🦈", scientificName: "Centroscyllium fabricii",
+        name: "Siyah Köpekbalığı", nameEn: "Black Dogfish", nameEl: "Μαύρο σκυλόψαρο", nameEs: "Tollo negro", icon: "🦈", scientificName: "Centroscyllium fabricii",
         photoId: 624, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin yamaçlar",
@@ -5563,7 +5563,7 @@ const SPECIES_DB = {
         noteEn: "The most common deep-sea shark around Iceland. Completely black in color.", noteEl: "The most common deep-sea shark around Iceland. Completely black in color.", noteEs: "The most common deep-sea shark around Iceland. Completely black in color."
     },
     "great_lanternshark_ice": {
-        name: "Büyük Fener Köpekbalığı", nameEn: "Great Lanternshark", nameEl: "Μεγάλος Φαναραράς", nameEs: "Great Lanternshark", icon: "🦈", scientificName: "Etmopterus princeps",
+        name: "Büyük Fener Köpekbalığı", nameEn: "Great Lanternshark", nameEl: "Μεγάλος Φαναραράς", nameEs: "Tollo lucero grande", icon: "🦈", scientificName: "Etmopterus princeps",
         photoId: 625, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz aşırı derin su",
@@ -5577,7 +5577,7 @@ const SPECIES_DB = {
         noteEn: "Features massive eyes specialized for gathering light in the pitch-black deep sea.", noteEl: "Features massive eyes specialized for gathering light in the pitch-black deep sea.", noteEs: "Features massive eyes specialized for gathering light in the pitch-black deep sea."
     },
     "ratfish_ice": {
-        name: "Tavşan Balığı", nameEn: "Ratfish / Rabbitfish", nameEl: "Κουνελόψαρο / Κουνελόψαρο", nameEs: "Ratfish / Rabbitfish", icon: "🐟", scientificName: "Chimaera monstrosa",
+        name: "Tavşan Balığı", nameEn: "Ratfish / Rabbitfish", nameEl: "Κουνελόψαρο / Κουνελόψαρο", nameEs: "Quimera", icon: "🐟", scientificName: "Chimaera monstrosa",
         photoId: 626, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin çamurlu dipler",
@@ -5591,7 +5591,7 @@ const SPECIES_DB = {
         noteEn: "Resembles a rat in the tail and a rabbit in the head. A distant relative of sharks.", noteEl: "Resembles a rat in the tail and a rabbit in the head. A distant relative of sharks.", noteEs: "Resembles a rat in the tail and a rabbit in the head. A distant relative of sharks."
     },
     "common_skate_ice": {
-        name: "Büyük Vatoz", nameEn: "Common Skate / Blue Skate", nameEl: "Common Skate / Blue Skate", nameEs: "Common Skate / Blue Skate", icon: "🐟", scientificName: "Dipturus batis",
+        name: "Büyük Vatoz", nameEn: "Common Skate / Blue Skate", nameEl: "Ράγια γαλάζια", nameEs: "Raya noriega", icon: "🐟", scientificName: "Dipturus batis",
         photoId: 627, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk yamaçlar",
@@ -5605,7 +5605,7 @@ const SPECIES_DB = {
         noteEn: "One of the world's largest skates. Critically endangered; conservation efforts are ongoing in Iceland.", noteEl: "One of the world's largest skates. Critically endangered; conservation efforts are ongoing in Iceland.", noteEs: "One of the world's largest skates. Critically endangered; conservation efforts are ongoing in Iceland."
     },
     "shagreen_ray_ice": {
-        name: "Pürüzlü Vatoz", nameEn: "Shagreen Ray", nameEl: "Shagreen Ray", nameEs: "Shagreen Ray", icon: "🐟", scientificName: "Leucoraja fullonica",
+        name: "Pürüzlü Vatoz", nameEn: "Shagreen Ray", nameEl: "Ράγια τραχιά", nameEs: "Raya cardadora", icon: "🐟", scientificName: "Leucoraja fullonica",
         photoId: 628, category: "KAYALIK",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalık ve kum karışımı",
@@ -5619,7 +5619,7 @@ const SPECIES_DB = {
         noteEn: "Identified by the rough and thorny texture on the upper part of its body.", noteEl: "Identified by the rough and thorny texture on the upper part of its body.", noteEs: "Identified by the rough and thorny texture on the upper part of its body."
     },
     "sailray_ice": {
-        name: "Yelken Vatoz", nameEn: "Sailray", nameEl: "Sailray", nameEs: "Sailray", icon: "🐟", scientificName: "Rajella lintea",
+        name: "Yelken Vatoz", nameEn: "Sailray", nameEl: "Ράγια πανί", nameEs: "Raya vela", icon: "🐟", scientificName: "Rajella lintea",
         photoId: 629, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin çamurlu alanlar",
@@ -5633,7 +5633,7 @@ const SPECIES_DB = {
         noteEn: "Camouflages on the deep sea floor with its pale grey-brown color.", noteEl: "Camouflages on the deep sea floor with its pale grey-brown color.", noteEs: "Camouflages on the deep sea floor with its pale grey-brown color."
     },
     "long_nosed_skate_ice": {
-        name: "Uzun Burunlu Vatoz", nameEn: "Long-nosed Skate", nameEl: "Μακρυμύτη Skate", nameEs: "Long-nosed Skate", icon: "🐟", scientificName: "Dipturus oxyrinchus",
+        name: "Uzun Burunlu Vatoz", nameEn: "Long-nosed Skate", nameEl: "Ράγια μυτερή", nameEs: "Picón", icon: "🐟", scientificName: "Dipturus oxyrinchus",
         photoId: 630, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz orta ve derin kumluklar",
@@ -5648,7 +5648,7 @@ const SPECIES_DB = {
     },
 
     "ice_salmon": {
-        name: "Atlantik Somonu", nameEn: "Atlantic Salmon", nameEl: "Σολομός Ατλαντικού", nameEs: "Atlantic Salmon", icon: "🐟", scientificName: "Salmo salar",
+        name: "Atlantik Somonu", nameEn: "Atlantic Salmon", nameEl: "Σολομός Ατλαντικού", nameEs: "Salmón atlántico", icon: "🐟", scientificName: "Salmo salar",
         photoId: 631, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık haliçler ve nehir ağızları",
@@ -5662,7 +5662,7 @@ const SPECIES_DB = {
         noteEn: "The king of Icelandic waters. Their migration from ocean to rivers is legendary. Extremely powerful fighter.", noteEl: "The king of Icelandic waters. Their migration from ocean to rivers is legendary. Extremely powerful fighter.", noteEs: "The king of Icelandic waters. Their migration from ocean to rivers is legendary. Extremely powerful fighter."
     },
     "ice_sea_trout": {
-        name: "Deniz Alabalığı", nameEn: "Sea Trout", nameEl: "Θαλάσσια Πέστροφα", nameEs: "Sea Trout", icon: "🐟", scientificName: "Salmo trutta",
+        name: "Deniz Alabalığı", nameEn: "Sea Trout", nameEl: "Θαλάσσια Πέστροφα", nameEs: "Trucha marisca", icon: "🐟", scientificName: "Salmo trutta",
         photoId: 632, category: "LAGUN",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ kıyılar ve haliçler",
@@ -5676,7 +5676,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its silver color. Highly sought after along Icelandic surf beaches and estuaries.", noteEl: "Recognized by its silver color. Highly sought after along Icelandic surf beaches and estuaries.", noteEs: "Recognized by its silver color. Highly sought after along Icelandic surf beaches and estuaries."
     },
     "arctic_cod_ice": {
-        name: "Arktik Morinası", nameEn: "Arctic Cod / Polar Cod", nameEl: "Arctic Cod / Polar Cod", nameEs: "Arctic Cod / Polar Cod", icon: "🐟", scientificName: "Boreogadus saida",
+        name: "Arktik Morinası", nameEn: "Arctic Cod / Polar Cod", nameEl: "Γάδος πολικός", nameEs: "Bacalao polar", icon: "🐟", scientificName: "Boreogadus saida",
         photoId: 633, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz soğuk kuzey akıntıları",
@@ -5690,7 +5690,7 @@ const SPECIES_DB = {
         noteEn: "Smaller than Atlantic cod. A true native of the icy waters in northern Iceland.", noteEl: "Smaller than Atlantic cod. A true native of the icy waters in northern Iceland.", noteEs: "Smaller than Atlantic cod. A true native of the icy waters in northern Iceland."
     },
     "four_bearded_rockling_ice": {
-        name: "Dört Bıyıklı Gelincik", nameEn: "Four-bearded Rockling", nameEl: "Ρόκλινγκ με τέσσερα γένια", nameEs: "Four-bearded Rockling", icon: "🐟", scientificName: "Enchelyopus cimbrius",
+        name: "Dört Bıyıklı Gelincik", nameEn: "Four-bearded Rockling", nameEl: "Ρόκλινγκ με τέσσερα γένια", nameEs: "Lota de cuatro barbas", icon: "🐟", scientificName: "Enchelyopus cimbrius",
         photoId: 634, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece sığ kayalık ve çamurlu dipler",
@@ -5704,7 +5704,7 @@ const SPECIES_DB = {
         noteEn: "Uses barbels on its chin and nose to locate prey in the dark.", noteEl: "Uses barbels on its chin and nose to locate prey in the dark.", noteEs: "Uses barbels on its chin and nose to locate prey in the dark."
     },
     "five_bearded_rockling_ice": {
-        name: "Beş Bıyıklı Gelincik", nameEn: "Five-bearded Rockling", nameEl: "Πεντάγενειος Rockling", nameEs: "Five-bearded Rockling", icon: "🐟", scientificName: "Ciliata mustela",
+        name: "Beş Bıyıklı Gelincik", nameEn: "Five-bearded Rockling", nameEl: "Γαϊδουρόψαρο πεντάγενο", nameEs: "Lota de cinco barbas", icon: "🐟", scientificName: "Ciliata mustela",
         photoId: 635, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece sığ kıyı kayalıkları",
@@ -5718,7 +5718,7 @@ const SPECIES_DB = {
         noteEn: "Found in very shallow waters, even in tide pools.", noteEl: "Found in very shallow waters, even in tide pools.", noteEs: "Found in very shallow waters, even in tide pools."
     },
     "snake_blenny_ice": {
-        name: "Yılan Horozbina", nameEn: "Snake Blenny", nameEl: "Snake Blenny", nameEs: "Snake Blenny", icon: "🐟", scientificName: "Lumpenus lampretaeformis",
+        name: "Yılan Horozbina", nameEn: "Snake Blenny", nameEl: "Φιδοσάλπα", nameEs: "Blenio serpiente", icon: "🐟", scientificName: "Lumpenus lampretaeformis",
         photoId: 636, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin çamurlu dipler",
@@ -5732,7 +5732,7 @@ const SPECIES_DB = {
         noteEn: "Eel-like long body. Excavates burrows in muddy sea floors.", noteEl: "Eel-like long body. Excavates burrows in muddy sea floors.", noteEs: "Eel-like long body. Excavates burrows in muddy sea floors."
     },
     "greater_eelpout_ice": {
-        name: "Büyük Yılan Balığımsı", nameEn: "Greater Eelpout", nameEl: "Greater Eelpout", nameEs: "Greater Eelpout", icon: "🐟", scientificName: "Lycodes esmarkii",
+        name: "Büyük Yılan Balığımsı", nameEn: "Greater Eelpout", nameEl: "Λυκόψαρο", nameEs: "Anguila lobo de Esmark", icon: "🐟", scientificName: "Lycodes esmarkii",
         photoId: 637, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kıta sahanlığı yamaçları",
@@ -5746,7 +5746,7 @@ const SPECIES_DB = {
         noteEn: "A characteristic inhabitant of cold, deep waters with an eel-like fin structure.", noteEl: "A characteristic inhabitant of cold, deep waters with an eel-like fin structure.", noteEs: "A characteristic inhabitant of cold, deep waters with an eel-like fin structure."
     },
     "lesser_sand_eel_ice": {
-        name: "Küçük Kum Yılanı", nameEn: "Lesser Sand-eel", nameEl: "Μικρό αμμόχελο", nameEs: "Lesser Sand-eel", icon: "🐟", scientificName: "Ammodytes tobianus",
+        name: "Küçük Kum Yılanı", nameEn: "Lesser Sand-eel", nameEl: "Μικρό αμμόχελο", nameEs: "Lanzón", icon: "🐟", scientificName: "Ammodytes tobianus",
         photoId: 638, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk sığlıklar",
@@ -5760,7 +5760,7 @@ const SPECIES_DB = {
         noteEn: "Vital for seabirds and large fish. Has the ability to bury itself in the sand.", noteEl: "Vital for seabirds and large fish. Has the ability to bury itself in the sand.", noteEs: "Vital for seabirds and large fish. Has the ability to bury itself in the sand."
     },
     "great_sand_eel_ice": {
-        name: "Büyük Kum Yılanı", nameEn: "Great Sand-eel", nameEl: "Μεγάλο αμμόχελο", nameEs: "Great Sand-eel", icon: "🐟", scientificName: "Hyperoplus lanceolatus",
+        name: "Büyük Kum Yılanı", nameEn: "Great Sand-eel", nameEl: "Μεγάλο αμμόχελο", nameEs: "Lanzón mayor", icon: "🐟", scientificName: "Hyperoplus lanceolatus",
         photoId: 639, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk alanlar",
@@ -5774,7 +5774,7 @@ const SPECIES_DB = {
         noteEn: "Larger than its small cousin (35cm+) and an aggressive predator.", noteEl: "Larger than its small cousin (35cm+) and an aggressive predator.", noteEs: "Larger than its small cousin (35cm+) and an aggressive predator."
     },
     "blue_mouth_ice": {
-        name: "Mavi Ağızlı Balık", nameEn: "Blue Mouth / Blackbelly Rosefish", nameEl: "Blue Mouth / Blackbelly Rosefish", nameEs: "Blue Mouth / Blackbelly Rosefish", icon: "🐟", scientificName: "Helicolenus dactylopterus",
+        name: "Mavi Ağızlı Balık", nameEn: "Blue Mouth / Blackbelly Rosefish", nameEl: "Σκορπίνα βαθέων", nameEs: "Gallineta de boca negra", icon: "🐟", scientificName: "Helicolenus dactylopterus",
         photoId: 640, category: "KAYALIK",
         huntingMode: "ambush",
         
@@ -5790,7 +5790,7 @@ const SPECIES_DB = {
     },
 
     "deepwater_redfish_ice": {
-        name: "Derin Deniz Kırmızı Balığı", nameEn: "Deepwater Redfish", nameEl: "Κοκκινόψαρο βαθέων υδάτων", nameEs: "Deepwater Redfish", icon: "🐟", scientificName: "Sebastes mentella",
+        name: "Derin Deniz Kırmızı Balığı", nameEn: "Deepwater Redfish", nameEl: "Κοκκινόψαρο βαθέων υδάτων", nameEs: "Gallineta de aguas profundas", icon: "🐟", scientificName: "Sebastes mentella",
         photoId: 641, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz çok derin su",
@@ -5804,7 +5804,7 @@ const SPECIES_DB = {
         noteEn: "Very similar to Golden Redfish but lives deeper and has larger eyes.", noteEl: "Very similar to Golden Redfish but lives deeper and has larger eyes.", noteEs: "Very similar to Golden Redfish but lives deeper and has larger eyes."
     },
     "roundnose_grenadier_ice": {
-        name: "Yuvarlak Burunlu Farebalığı", nameEn: "Roundnose Grenadier", nameEl: "Στρογγυλός Γρεναδιέρης", nameEs: "Roundnose Grenadier", icon: "🐟", scientificName: "Coryphaenoides rupestris",
+        name: "Yuvarlak Burunlu Farebalığı", nameEn: "Roundnose Grenadier", nameEl: "Στρογγυλός Γρεναδιέρης", nameEs: "Granadero", icon: "🐟", scientificName: "Coryphaenoides rupestris",
         photoId: 642, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kıta sahanlığı yamaçları",
@@ -5818,7 +5818,7 @@ const SPECIES_DB = {
         noteEn: "Features a very slender, rat-like tail. An interesting target for deep-sea anglers.", noteEl: "Features a very slender, rat-like tail. An interesting target for deep-sea anglers.", noteEs: "Features a very slender, rat-like tail. An interesting target for deep-sea anglers."
     },
     "roughhead_grenadier_ice": {
-        name: "Pürüzlü Farebalığı", nameEn: "Roughhead Grenadier", nameEl: "Τραχιά γρεναδιέρης", nameEs: "Roughhead Grenadier", icon: "🐟", scientificName: "Macrourus berglax",
+        name: "Pürüzlü Farebalığı", nameEn: "Roughhead Grenadier", nameEl: "Τραχιά γρεναδιέρης", nameEs: "Granadero de roca", icon: "🐟", scientificName: "Macrourus berglax",
         photoId: 643, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin çamurlu dipler",
@@ -5832,7 +5832,7 @@ const SPECIES_DB = {
         noteEn: "Identified by hard, rough scales on its head. Features white, tasty flesh.", noteEl: "Identified by hard, rough scales on its head. Features white, tasty flesh.", noteEs: "Identified by hard, rough scales on its head. Features white, tasty flesh."
     },
     "witch_flounder_ice": {
-        name: "Cadı Pisi Balığı", nameEn: "Witch Flounder", nameEl: "Μαγισσίδα", nameEs: "Witch Flounder", icon: "🐟", scientificName: "Glyptocephalus cynoglossus",
+        name: "Cadı Pisi Balığı", nameEn: "Witch Flounder", nameEl: "Μαγισσίδα", nameEs: "Mendo", icon: "🐟", scientificName: "Glyptocephalus cynoglossus",
         photoId: 644, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin çamurlu ve kumluk alanlar",
@@ -5846,7 +5846,7 @@ const SPECIES_DB = {
         noteEn: "Features a very slender body. Also known as 'Torbay Sole'.", noteEl: "Features a very slender body. Also known as 'Torbay Sole'.", noteEs: "Features a very slender body. Also known as 'Torbay Sole'."
     },
     "lemon_sole_ice": {
-        name: "Limon Dil Balığı", nameEn: "Lemon Sole", nameEl: "Σόλα λεμονιού", nameEs: "Lemon Sole", icon: "🐟", scientificName: "Microstomus kitt",
+        name: "Limon Dil Balığı", nameEn: "Lemon Sole", nameEl: "Σόλα λεμονιού", nameEs: "Mendo limón", icon: "🐟", scientificName: "Microstomus kitt",
         photoId: 645, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ/orta kumluk alanlar",
@@ -5860,7 +5860,7 @@ const SPECIES_DB = {
         noteEn: "Identified by its lemon-shaped body and small mouth. Features very soft and delicate flesh.", noteEl: "Identified by its lemon-shaped body and small mouth. Features very soft and delicate flesh.", noteEs: "Identified by its lemon-shaped body and small mouth. Features very soft and delicate flesh."
     },
     "megrim_ice": {
-        name: "Işıldak Pisi Balığı", nameEn: "Megrim", nameEl: "Megrim", nameEs: "Megrim", icon: "🐟", scientificName: "Lepidorhombus whiffiagonis",
+        name: "Işıldak Pisi Balığı", nameEn: "Megrim", nameEl: "Ζαγκέτα", nameEs: "Gallo", icon: "🐟", scientificName: "Lepidorhombus whiffiagonis",
         photoId: 646, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk alanlar",
@@ -5874,7 +5874,7 @@ const SPECIES_DB = {
         noteEn: "Distinguished from other flatfish by its large mouth and big eyes.", noteEl: "Distinguished from other flatfish by its large mouth and big eyes.", noteEs: "Distinguished from other flatfish by its large mouth and big eyes."
     },
     "plaice_ice": {
-        name: "Pisi Balığı", nameEn: "European Plaice", nameEl: "Ευρωπαϊκή Χωματίδα", nameEs: "European Plaice", icon: "🐟", scientificName: "Pleuronectes platessa",
+        name: "Pisi Balığı", nameEn: "European Plaice", nameEl: "Ευρωπαϊκή Χωματίδα", nameEs: "Solla", icon: "🐟", scientificName: "Pleuronectes platessa",
         photoId: 647, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk dipler",
@@ -5888,7 +5888,7 @@ const SPECIES_DB = {
         noteEn: "Easily identified by bright orange spots. The most popular flatfish for Icelandic coastal fishing.", noteEl: "Easily identified by bright orange spots. The most popular flatfish for Icelandic coastal fishing.", noteEs: "Easily identified by bright orange spots. The most popular flatfish for Icelandic coastal fishing."
     },
     "dab_ice": {
-        name: "Dere Pisisi", nameEn: "Common Dab", nameEl: "Κοινή Ταμπ", nameEs: "Common Dab", icon: "🐟", scientificName: "Limanda limanda",
+        name: "Dere Pisisi", nameEn: "Common Dab", nameEl: "Κοινή Ταμπ", nameEs: "Limanda", icon: "🐟", scientificName: "Limanda limanda",
         photoId: 648, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk alanlar",
@@ -5902,7 +5902,7 @@ const SPECIES_DB = {
         noteEn: "Similar to plaice but the lateral line makes a distinct curve over the pectoral fin.", noteEl: "Similar to plaice but the lateral line makes a distinct curve over the pectoral fin.", noteEs: "Similar to plaice but the lateral line makes a distinct curve over the pectoral fin."
     },
     "long_rough_dab_ice": {
-        name: "Amerikan Pisisi", nameEn: "Long Rough Dab / American Plaice", nameEl: "Long Rough Dab / American Plaice", nameEs: "Long Rough Dab / American Plaice", icon: "🐟", scientificName: "Hippoglossoides platessoides",
+        name: "Amerikan Pisisi", nameEn: "Long Rough Dab / American Plaice", nameEl: "Χωματίδα", nameEs: "Platija americana", icon: "🐟", scientificName: "Hippoglossoides platessoides",
         photoId: 649, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz orta derinlikte kumluklar",
@@ -5916,7 +5916,7 @@ const SPECIES_DB = {
         noteEn: "Distinguished by rougher scales and a slender body. Highly cold-tolerant.", noteEl: "Distinguished by rougher scales and a slender body. Highly cold-tolerant.", noteEs: "Distinguished by rougher scales and a slender body. Highly cold-tolerant."
     },
     "spurdog_ice": {
-        name: "Mahmuzlu Köpekbalığı", nameEn: "Spurdog / Spiny Dogfish", nameEl: "Spurdog / Spiny Dogfish", nameEs: "Spurdog / Spiny Dogfish", icon: "🦈", scientificName: "Squalus acanthias",
+        name: "Mahmuzlu Köpekbalığı", nameEn: "Spurdog / Spiny Dogfish", nameEl: "Σκυλόψαρο ακανθίας", nameEs: "Mielga", icon: "🦈", scientificName: "Squalus acanthias",
         photoId: 650, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ/orta derinlikte sürüler",
@@ -6866,7 +6866,7 @@ const SPECIES_DB = {
         noteEn: "One of the most valuable sea breams in the Canaries. Old males develop a pronounced forehead hump, which gives the fish its name.", noteEl: "One of the most valuable sea breams in the Canaries. Old males develop a pronounced forehead hump, which gives the fish its name.", noteEs: "Uno de los espáridos más valiosos de Canarias. Los machos viejos desarrollan una joroba frontal marcada, de donde toma su nombre."
     },
     "brazil_common_snook": {
-        name: "Robalo Flecha", nameEn: "Common Snook", nameEl: "Κοινό Snook", nameEs: "Common Snook", icon: "🐟", scientificName: "Centropomus undecimalis",
+        name: "Robalo Flecha", nameEn: "Common Snook", nameEl: "Ρομπάλο", nameEs: "Robalo común", icon: "🐟", scientificName: "Centropomus undecimalis",
         photoId: 801, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık nehir ağızları ve mangrovlar",
@@ -6880,7 +6880,7 @@ const SPECIES_DB = {
         noteEn: "The most popular sport fish in Brazil. Identified by a prominent lateral black line. Known for its intelligence.", noteEl: "The most popular sport fish in Brazil. Identified by a prominent lateral black line. Known for its intelligence.", noteEs: "The most popular sport fish in Brazil. Identified by a prominent lateral black line. Known for its intelligence."
     },
     "brazil_fat_snook": {
-        name: "Robalo Peva", nameEn: "Fat Snook", nameEl: "Χοντρός Σνούκ", nameEs: "Fat Snook", icon: "🐟", scientificName: "Centropomus parallelus",
+        name: "Robalo Peva", nameEn: "Fat Snook", nameEl: "Χοντρός Σνούκ", nameEs: "Robalo chucumite", icon: "🐟", scientificName: "Centropomus parallelus",
         photoId: 802, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ haliçler",
@@ -6894,7 +6894,7 @@ const SPECIES_DB = {
         noteEn: "Smaller and stockier than common snook. Frequently migrates into freshwater systems.", noteEl: "Smaller and stockier than common snook. Frequently migrates into freshwater systems.", noteEs: "Smaller and stockier than common snook. Frequently migrates into freshwater systems."
     },
     "brazil_tarpon": {
-        name: "Camurupim / Tarpon", nameEn: "Tarpon", nameEl: "Tarpon", nameEs: "Tarpon", icon: "🐟", scientificName: "Megalops atlanticus",
+        name: "Camurupim / Tarpon", nameEn: "Tarpon", nameEl: "Ταρπόν", nameEs: "Tarpón", icon: "🐟", scientificName: "Megalops atlanticus",
         photoId: 803, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece nehir ağızları ve aydınlatılmış kıyılar",
@@ -6908,7 +6908,7 @@ const SPECIES_DB = {
         noteEn: "Known as the Silver King. Famous for its acrobatic leaps and massive silver scales.", noteEl: "Known as the Silver King. Famous for its acrobatic leaps and massive silver scales.", noteEs: "Known as the Silver King. Famous for its acrobatic leaps and massive silver scales."
     },
     "brazil_crevalle_jack": {
-        name: "Xaréu", nameEn: "Crevalle Jack", nameEl: "Κρεβάλ Τζακ", nameEs: "Crevalle Jack", icon: "🐟", scientificName: "Caranx hippos",
+        name: "Xaréu", nameEn: "Crevalle Jack", nameEl: "Κρεβάλ Τζακ", nameEs: "Jurel común", icon: "🐟", scientificName: "Caranx hippos",
         photoId: 804, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz kıyı yapıları ve akıntılı bölgeler",
@@ -6922,7 +6922,7 @@ const SPECIES_DB = {
         noteEn: "The brawler of Brazilian waters. Known for its relentless energy and power.", noteEl: "The brawler of Brazilian waters. Known for its relentless energy and power.", noteEs: "The brawler of Brazilian waters. Known for its relentless energy and power."
     },
     "brazil_horse_eye_jack": {
-        name: "Xarelete", nameEn: "Horse-eye Jack", nameEl: "Τζακ με άλογο", nameEs: "Horse-eye Jack", icon: "🐟", scientificName: "Caranx latus",
+        name: "Xarelete", nameEn: "Horse-eye Jack", nameEl: "Τζακ με άλογο", nameEs: "Jurel ojón", icon: "🐟", scientificName: "Caranx latus",
         photoId: 805, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece resif kenarları ve yapay ışıklar",
@@ -6936,7 +6936,7 @@ const SPECIES_DB = {
         noteEn: "Identified by its large eyes and yellow tail. Typically hunts in large schools.", noteEl: "Identified by its large eyes and yellow tail. Typically hunts in large schools.", noteEs: "Identified by its large eyes and yellow tail. Typically hunts in large schools."
     },
     "brazil_blue_runner": {
-        name: "Guaivira", nameEn: "Blue Runner", nameEl: "Blue Runner", nameEs: "Blue Runner", icon: "🐟", scientificName: "Caranx crysos",
+        name: "Guaivira", nameEn: "Blue Runner", nameEl: "Κοκάλι", nameEs: "Cojinúa negra", icon: "🐟", scientificName: "Caranx crysos",
         photoId: 806, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey sürüler",
@@ -6950,7 +6950,7 @@ const SPECIES_DB = {
         noteEn: "Very common along the Brazilian coast. Caught for both bait and sport.", noteEl: "Very common along the Brazilian coast. Caught for both bait and sport.", noteEs: "Very common along the Brazilian coast. Caught for both bait and sport."
     },
     "brazil_acoupa_weakfish": {
-        name: "Pescada Amarela", nameEn: "Acoupa Weakfish", nameEl: "Acoupa Weakfish", nameEs: "Acoupa Weakfish", icon: "🐟", scientificName: "Cynoscion acoupa",
+        name: "Pescada Amarela", nameEn: "Acoupa Weakfish", nameEl: "Κορβίνα ακουπά", nameEs: "Corvinata acoupa", icon: "🐟", scientificName: "Cynoscion acoupa",
         photoId: 807, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin haliçler ve kumluklar",
@@ -6964,7 +6964,7 @@ const SPECIES_DB = {
         noteEn: "Stunning golden-yellow color. Its meat is highly prized in Brazilian cuisine.", noteEl: "Stunning golden-yellow color. Its meat is highly prized in Brazilian cuisine.", noteEs: "Stunning golden-yellow color. Its meat is highly prized in Brazilian cuisine."
     },
     "brazil_king_mackerel": {
-        name: "Cavala", nameEn: "King Mackerel", nameEl: "Βασιλιάς Σκουμπρί", nameEs: "King Mackerel", icon: "🐟", scientificName: "Scomberomorus cavalla",
+        name: "Cavala", nameEn: "King Mackerel", nameEl: "Βασιλιάς Σκουμπρί", nameEs: "Carite lucio", icon: "🐟", scientificName: "Scomberomorus cavalla",
         photoId: 808, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık açık deniz ve resif kenarları",
@@ -6978,7 +6978,7 @@ const SPECIES_DB = {
         noteEn: "Known for its speed and razor-sharp teeth. A primary target for trolling in Brazil.", noteEl: "Known for its speed and razor-sharp teeth. A primary target for trolling in Brazil.", noteEs: "Known for its speed and razor-sharp teeth. A primary target for trolling in Brazil."
     },
     "brazil_great_barracuda": {
-        name: "Barracuda", nameEn: "Great Barracuda", nameEl: "Great Barracuda", nameEs: "Great Barracuda", icon: "🦈", scientificName: "Sphyraena barracuda",
+        name: "Barracuda", nameEn: "Great Barracuda", nameEl: "Λούτσος γίγας", nameEs: "Barracuda gigante", icon: "🦈", scientificName: "Sphyraena barracuda",
         photoId: 809, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz resifler ve sığlıklar",
@@ -6992,7 +6992,7 @@ const SPECIES_DB = {
         noteEn: "Famous for its fearsome appearance and ambush tactics. Capable of explosive attacks.", noteEl: "Famous for its fearsome appearance and ambush tactics. Capable of explosive attacks.", noteEs: "Famous for its fearsome appearance and ambush tactics. Capable of explosive attacks."
     },
     "brazil_permit": {
-        name: "Sernambiguara / Permit", nameEn: "Permit", nameEl: "Άδεια", nameEs: "Permit", icon: "🐟", scientificName: "Trachinotus falcatus",
+        name: "Sernambiguara / Permit", nameEn: "Permit", nameEl: "Άδεια", nameEs: "Pámpano palometa", icon: "🐟", scientificName: "Trachinotus falcatus",
         photoId: 810, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluklar ve düzlükler (flats)",
@@ -7007,7 +7007,7 @@ const SPECIES_DB = {
     },
 
     "brazil_mahi_mahi": {
-        name: "Dourado / Mahi Mahi", nameEn: "Dolphin Fish", nameEl: "Δελφίνι Ψάρια", nameEs: "Dolphin Fish", icon: "🐟", scientificName: "Coryphaena hippurus",
+        name: "Dourado / Mahi Mahi", nameEn: "Dolphin Fish", nameEl: "Δελφίνι Ψάρια", nameEs: "Dorado", icon: "🐟", scientificName: "Coryphaena hippurus",
         photoId: 811, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey akıntı çizgileri",
@@ -7021,7 +7021,7 @@ const SPECIES_DB = {
         noteEn: "The golden beauty of Brazilian offshore waters. Fast-growing and an extremely aggressive predator.", noteEl: "The golden beauty of Brazilian offshore waters. Fast-growing and an extremely aggressive predator.", noteEs: "The golden beauty of Brazilian offshore waters. Fast-growing and an extremely aggressive predator."
     },
     "brazil_sailfish": {
-        name: "Yelken Balığı", nameEn: "Sailfish / Agulhão Vela", nameEl: "Ιστιοφόρο / Agulhão Vela", nameEs: "Sailfish / Agulhão Vela", icon: "🐟", scientificName: "Istiophorus platypterus",
+        name: "Yelken Balığı", nameEn: "Sailfish / Agulhão Vela", nameEl: "Ιστιοφόρο", nameEs: "Pez vela", icon: "🐟", scientificName: "Istiophorus platypterus",
         photoId: 812, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
@@ -7035,7 +7035,7 @@ const SPECIES_DB = {
         noteEn: "Famous for its massive dorsal fin. One of the fastest fish in the ocean.", noteEl: "Famous for its massive dorsal fin. One of the fastest fish in the ocean.", noteEs: "Famous for its massive dorsal fin. One of the fastest fish in the ocean."
     },
     "brazil_blue_marlin": {
-        name: "Mavi Marlin", nameEn: "Blue Marlin / Agulhão Negro", nameEl: "Blue Marlin / Agulhão Negro", nameEs: "Blue Marlin / Agulhão Negro", icon: "🐟", scientificName: "Makaira nigricans",
+        name: "Mavi Marlin", nameEn: "Blue Marlin / Agulhão Negro", nameEl: "Μπλε μάρλιν", nameEs: "Aguja azul", icon: "🐟", scientificName: "Makaira nigricans",
         photoId: 813, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz derin mavi sular",
@@ -7049,7 +7049,7 @@ const SPECIES_DB = {
         noteEn: "The pinnacle of sport fishing. Brazilian offshore waters host world-record sized Marlins.", noteEl: "The pinnacle of sport fishing. Brazilian offshore waters host world-record sized Marlins.", noteEs: "The pinnacle of sport fishing. Brazilian offshore waters host world-record sized Marlins."
     },
     "brazil_white_marlin": {
-        name: "Beyaz Marlin", nameEn: "White Marlin / Agulhão Branco", nameEl: "White Marlin / Agulhão Branco", nameEs: "White Marlin / Agulhão Branco", icon: "🐟", scientificName: "Kajikia albida",
+        name: "Beyaz Marlin", nameEn: "White Marlin / Agulhão Branco", nameEl: "Λευκό μάρλιν", nameEs: "Aguja blanca", icon: "🐟", scientificName: "Kajikia albida",
         photoId: 814, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
@@ -7063,7 +7063,7 @@ const SPECIES_DB = {
         noteEn: "Smaller than Blue Marlin but possesses incredible agility and speed.", noteEl: "Smaller than Blue Marlin but possesses incredible agility and speed.", noteEs: "Smaller than Blue Marlin but possesses incredible agility and speed."
     },
     "brazil_yellowfin_tuna": {
-        name: "Sarı Yüzgeçli Orkinos", nameEn: "Yellowfin Tuna / Atum Amarelo", nameEl: "Κιτρινόπτερος τόνος / Atum Amarelo", nameEs: "Yellowfin Tuna / Atum Amarelo", icon: "🐟", scientificName: "Thunnus albacares",
+        name: "Sarı Yüzgeçli Orkinos", nameEn: "Yellowfin Tuna / Atum Amarelo", nameEl: "Τόνος κιτρινόπτερος", nameEs: "Rabil", icon: "🐟", scientificName: "Thunnus albacares",
         photoId: 815, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
@@ -7077,7 +7077,7 @@ const SPECIES_DB = {
         noteEn: "Known for its yellow fins and immense power. Forms large schools along the Brazilian coast.", noteEl: "Known for its yellow fins and immense power. Forms large schools along the Brazilian coast.", noteEs: "Known for its yellow fins and immense power. Forms large schools along the Brazilian coast."
     },
     "brazil_wahoo": {
-        name: "Wahoo / Cavala Empata", nameEn: "Wahoo", nameEl: "Ουάχου", nameEs: "Wahoo", icon: "🐟", scientificName: "Acanthocybium solandri",
+        name: "Wahoo / Cavala Empata", nameEn: "Wahoo", nameEl: "Ουάχου", nameEs: "Peto", icon: "🐟", scientificName: "Acanthocybium solandri",
         photoId: 816, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık açık deniz resifleri",
@@ -7091,7 +7091,7 @@ const SPECIES_DB = {
         noteEn: "Known as the bullet of the ocean. Features razor-sharp teeth and incredible speed.", noteEl: "Known as the bullet of the ocean. Features razor-sharp teeth and incredible speed.", noteEs: "Known as the bullet of the ocean. Features razor-sharp teeth and incredible speed."
     },
     "brazil_cobia": {
-        name: "Bijupirá / Cobia", nameEn: "Cobia", nameEl: "Cobia", nameEs: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
+        name: "Bijupirá / Cobia", nameEn: "Cobia", nameEl: "Κόμπια", nameEs: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
         photoId: 817, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz şamandıra ve batık çevreleri",
@@ -7105,7 +7105,7 @@ const SPECIES_DB = {
         noteEn: "Beloved in Brazil as 'Bijupirá'. Fast-growing with high-quality meat.", noteEl: "Beloved in Brazil as 'Bijupirá'. Fast-growing with high-quality meat.", noteEs: "Beloved in Brazil as 'Bijupirá'. Fast-growing with high-quality meat."
     },
     "brazil_goliath_grouper": {
-        name: "Mero / Dev Orfoz", nameEn: "Goliath Grouper", nameEl: "Γκόλιαθ Σφυρίδα", nameEs: "Goliath Grouper", icon: "🐟", scientificName: "Epinephelus itajara",
+        name: "Mero / Dev Orfoz", nameEn: "Goliath Grouper", nameEl: "Γκόλιαθ Σφυρίδα", nameEs: "Mero guasa", icon: "🐟", scientificName: "Epinephelus itajara",
         photoId: 818, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve mangrov kökleri",
@@ -7119,7 +7119,7 @@ const SPECIES_DB = {
         noteEn: "The giant of Brazil. Can reach 400 kg. Protected due to its endangered status.", noteEl: "The giant of Brazil. Can reach 400 kg. Protected due to its endangered status.", noteEs: "The giant of Brazil. Can reach 400 kg. Protected due to its endangered status."
     },
     "brazil_snowy_grouper": {
-        name: "Karakulak Lagos", nameEn: "Snowy Grouper", nameEl: "Snowy σφυρίδα", nameEs: "Snowy Grouper", icon: "🐟", scientificName: "Hyporthodus niveatus",
+        name: "Karakulak Lagos", nameEn: "Snowy Grouper", nameEl: "Ροφός χιονισμένος", nameEs: "Mero nevado", icon: "🐟", scientificName: "Hyporthodus niveatus",
         photoId: 819, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin kayalık yamaçlar",
@@ -7133,7 +7133,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by snowy white spots. A tasty inhabitant of very deep waters.", noteEl: "Recognized by snowy white spots. A tasty inhabitant of very deep waters.", noteEs: "Recognized by snowy white spots. A tasty inhabitant of very deep waters."
     },
     "brazil_southern_red_snapper": {
-        name: "Pargo / Kırmızı Mercan", nameEn: "Southern Red Snapper", nameEl: "South Red Snapper", nameEs: "Southern Red Snapper", icon: "🐟", scientificName: "Lutjanus purpureus",
+        name: "Pargo / Kırmızı Mercan", nameEn: "Southern Red Snapper", nameEl: "Λουτσάνος πορφυρός", nameEs: "Pargo del Caribe", icon: "🐟", scientificName: "Lutjanus purpureus",
         photoId: 820, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz orta derinlikteki resifler",
@@ -7147,7 +7147,7 @@ const SPECIES_DB = {
         noteEn: "Known as 'Pargo' in Brazil. The most popular commercial fish due to its bright red color and premium meat.", noteEl: "Known as 'Pargo' in Brazil. The most popular commercial fish due to its bright red color and premium meat.", noteEs: "Known as 'Pargo' in Brazil. The most popular commercial fish due to its bright red color and premium meat."
     },
     "brazil_mutton_snapper": {
-        name: "Cioba / Mutton Snapper", nameEn: "Mutton Snapper", nameEl: "Προβατίνα", nameEs: "Mutton Snapper", icon: "🐟", scientificName: "Lutjanus analis",
+        name: "Cioba / Mutton Snapper", nameEn: "Mutton Snapper", nameEl: "Προβατίνα", nameEs: "Pargo criollo", icon: "🐟", scientificName: "Lutjanus analis",
         photoId: 821, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve kumluklar",
@@ -7161,7 +7161,7 @@ const SPECIES_DB = {
         noteEn: "Identified by a small black spot on its flank and pinkish-red color. Very wary and difficult to hook.", noteEl: "Identified by a small black spot on its flank and pinkish-red color. Very wary and difficult to hook.", noteEs: "Identified by a small black spot on its flank and pinkish-red color. Very wary and difficult to hook."
     },
     "brazil_lane_snapper": {
-        name: "Ariocó / Lane Snapper", nameEn: "Lane Snapper", nameEl: "Lane Snapper", nameEs: "Lane Snapper", icon: "🐟", scientificName: "Lutjanus synagris",
+        name: "Ariocó / Lane Snapper", nameEn: "Lane Snapper", nameEl: "Λουτσάνος ραβδωτός", nameEs: "Pargo biajaiba", icon: "🐟", scientificName: "Lutjanus synagris",
         photoId: 822, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sığ ve orta derinlikteki resifler",
@@ -7175,7 +7175,7 @@ const SPECIES_DB = {
         noteEn: "Characterized by horizontal yellow lines. The most common snapper species along the Brazilian coast.", noteEl: "Characterized by horizontal yellow lines. The most common snapper species along the Brazilian coast.", noteEs: "Characterized by horizontal yellow lines. The most common snapper species along the Brazilian coast."
     },
     "brazil_yellowtail_snapper": {
-        name: "Guaiúba", nameEn: "Yellowtail Snapper", nameEl: "Yellowtail Snapper", nameEs: "Yellowtail Snapper", icon: "🐟", scientificName: "Ocyurus chrysurus",
+        name: "Guaiúba", nameEn: "Yellowtail Snapper", nameEl: "Λουτσάνος κίτρινης ουράς", nameEs: "Rabirrubia", icon: "🐟", scientificName: "Ocyurus chrysurus",
         photoId: 823, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece resif üstü sürüler",
@@ -7189,7 +7189,7 @@ const SPECIES_DB = {
         noteEn: "Stunning yellow tail and lateral stripe. Feeds in large schools above reefs.", noteEl: "Stunning yellow tail and lateral stripe. Feeds in large schools above reefs.", noteEs: "Stunning yellow tail and lateral stripe. Feeds in large schools above reefs."
     },
     "brazil_dog_snapper": {
-        name: "Caranha-de-laje", nameEn: "Dog Snapper", nameEl: "Snapper σκύλου", nameEs: "Dog Snapper", icon: "🐟", scientificName: "Lutjanus jocu",
+        name: "Caranha-de-laje", nameEn: "Dog Snapper", nameEl: "Λουτσάνος σκύλος", nameEs: "Pargo perro", icon: "🐟", scientificName: "Lutjanus jocu",
         photoId: 824, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin resifler",
@@ -7203,7 +7203,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by a white triangular patch under the eye and sharp canine teeth. An aggressive fighter.", noteEl: "Recognized by a white triangular patch under the eye and sharp canine teeth. An aggressive fighter.", noteEs: "Recognized by a white triangular patch under the eye and sharp canine teeth. An aggressive fighter."
     },
     "brazil_gray_snapper": {
-        name: "Caranha / Gray Snapper", nameEn: "Gray Snapper", nameEl: "Grey Snapper", nameEs: "Gray Snapper", icon: "🐟", scientificName: "Lutjanus griseus",
+        name: "Caranha / Gray Snapper", nameEn: "Gray Snapper", nameEl: "Λουτσάνος γκρίζος", nameEs: "Pargo mangle", icon: "🐟", scientificName: "Lutjanus griseus",
         photoId: 825, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "NIGHT", peakHoursDesc: "Gece sığ resifler ve mangrovlar",
@@ -7217,7 +7217,7 @@ const SPECIES_DB = {
         noteEn: "Found in schools among mangrove roots. Highly curious yet cautious towards hooks.", noteEl: "Found in schools among mangrove roots. Highly curious yet cautious towards hooks.", noteEs: "Found in schools among mangrove roots. Highly curious yet cautious towards hooks."
     },
     "brazil_cubera_snapper": {
-        name: "Caranha / Dev Snapper", nameEn: "Cubera Snapper", nameEl: "Cubera Snapper", nameEs: "Cubera Snapper", icon: "🐟", scientificName: "Lutjanus cyanopterus",
+        name: "Caranha / Dev Snapper", nameEn: "Cubera Snapper", nameEl: "Λουτσάνος κουμπέρα", nameEs: "Pargo cubera", icon: "🐟", scientificName: "Lutjanus cyanopterus",
         photoId: 826, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "NIGHT", peakHoursDesc: "Gece derin resifler ve batıklar",
@@ -7231,7 +7231,7 @@ const SPECIES_DB = {
         noteEn: "The King of snappers. Can exceed 50 kg. Requires the heaviest gear to stop.", noteEl: "The King of snappers. Can exceed 50 kg. Requires the heaviest gear to stop.", noteEs: "The King of snappers. Can exceed 50 kg. Requires the heaviest gear to stop."
     },
     "brazil_queen_snapper": {
-        name: "Etióro", nameEn: "Queen Snapper", nameEl: "Queen Snapper", nameEs: "Queen Snapper", icon: "🐟", scientificName: "Etelis oculatus",
+        name: "Etióro", nameEn: "Queen Snapper", nameEl: "Λουτσάνος βαθέων", nameEs: "Pargo cachucho", icon: "🐟", scientificName: "Etelis oculatus",
         photoId: 827, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin kayalık yamaçlar",
@@ -7245,7 +7245,7 @@ const SPECIES_DB = {
         noteEn: "Prestigious deep-water fish identified by its slender body and deeply forked tail.", noteEl: "Prestigious deep-water fish identified by its slender body and deeply forked tail.", noteEs: "Prestigious deep-water fish identified by its slender body and deeply forked tail."
     },
     "brazil_vermilion_snapper": {
-        name: "Cioba-baiana", nameEn: "Vermilion Snapper", nameEl: "Βεραμίλιον Snapper", nameEs: "Vermilion Snapper", icon: "🐟", scientificName: "Rhomboplites aurorubens",
+        name: "Cioba-baiana", nameEn: "Vermilion Snapper", nameEl: "Λουτσάνος βερμιγιόν", nameEs: "Pargo cunaro", icon: "🐟", scientificName: "Rhomboplites aurorubens",
         photoId: 828, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz orta derinlikteki resifler",
@@ -7259,7 +7259,7 @@ const SPECIES_DB = {
         noteEn: "Smaller but very tasty. Usually found in large schools over deep reefs.", noteEl: "Smaller but very tasty. Usually found in large schools over deep reefs.", noteEs: "Smaller but very tasty. Usually found in large schools over deep reefs."
     },
     "brazil_schoolmaster_snapper": {
-        name: "Sargo-de-dente", nameEn: "Schoolmaster Snapper", nameEl: "Σχολάρχης Snapper", nameEs: "Schoolmaster Snapper", icon: "🐟", scientificName: "Lutjanus apodus",
+        name: "Sargo-de-dente", nameEn: "Schoolmaster Snapper", nameEl: "Λουτσάνος κίτρινος", nameEs: "Pargo amarillo", icon: "🐟", scientificName: "Lutjanus apodus",
         photoId: 829, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sığ mangrov ve resif alanları",
@@ -7273,7 +7273,7 @@ const SPECIES_DB = {
         noteEn: "Identified by yellow fins and blue spots around eyes. Juveniles inhabit mangroves.", noteEl: "Identified by yellow fins and blue spots around eyes. Juveniles inhabit mangroves.", noteEs: "Identified by yellow fins and blue spots around eyes. Juveniles inhabit mangroves."
     },
     "brazil_hogfish": {
-        name: "Bodião-papagaio", nameEn: "Brazilian Hogfish", nameEl: "Βραζιλιάνικο γουρουνόψαρο", nameEs: "Brazilian Hogfish", icon: "🐟", scientificName: "Lachnolaimus maximus",
+        name: "Bodião-papagaio", nameEn: "Brazilian Hogfish", nameEl: "Βραζιλιάνικο γουρουνόψαρο", nameEs: "Doncella de pluma", icon: "🐟", scientificName: "Lachnolaimus maximus",
         photoId: 830, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ ve orta derinlikte resifler",
@@ -7287,7 +7287,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its unique face and long dorsal spines. Features exceptionally tasty meat.", noteEl: "Recognized by its unique face and long dorsal spines. Features exceptionally tasty meat.", noteEs: "Recognized by its unique face and long dorsal spines. Features exceptionally tasty meat."
     },
     "brazil_black_grouper": {
-        name: "Badejo-quadrado", nameEn: "Black Grouper", nameEl: "Μαύρη σφυρίδα", nameEs: "Black Grouper", icon: "🐟", scientificName: "Mycteroperca bonaci",
+        name: "Badejo-quadrado", nameEn: "Black Grouper", nameEl: "Μαύρη σφυρίδα", nameEs: "Cuna bonací", icon: "🐟", scientificName: "Mycteroperca bonaci",
         photoId: 831, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve mercanlar",
@@ -7301,7 +7301,7 @@ const SPECIES_DB = {
         noteEn: "Identified by square dark patterns. One of the most prestigious and powerful reef fish in Brazil.", noteEl: "Identified by square dark patterns. One of the most prestigious and powerful reef fish in Brazil.", noteEs: "Identified by square dark patterns. One of the most prestigious and powerful reef fish in Brazil."
     },
     "brazil_yellowmouth_grouper": {
-        name: "Badejo-limão", nameEn: "Yellowmouth Grouper", nameEl: "Σφυρίδα Yellowmouth", nameEs: "Yellowmouth Grouper", icon: "🐟", scientificName: "Mycteroperca interstitialis",
+        name: "Badejo-limão", nameEn: "Yellowmouth Grouper", nameEl: "Ροφός κιτρινόστομος", nameEs: "Cuna boca amarilla", icon: "🐟", scientificName: "Mycteroperca interstitialis",
         photoId: 832, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz orta derinlikteki resifler",
@@ -7315,7 +7315,7 @@ const SPECIES_DB = {
         noteEn: "Characterized by the yellow color around its mouth. Ambush predator in rocky areas.", noteEl: "Characterized by the yellow color around its mouth. Ambush predator in rocky areas.", noteEs: "Characterized by the yellow color around its mouth. Ambush predator in rocky areas."
     },
     "brazil_comb_grouper": {
-        name: "Badejo-sapateiro", nameEn: "Comb Grouper", nameEl: "Σφυρίδα χτενιού", nameEs: "Comb Grouper", icon: "🐟", scientificName: "Mycteroperca acutirostris",
+        name: "Badejo-sapateiro", nameEn: "Comb Grouper", nameEl: "Σφυρίδα χτενιού", nameEs: "Cuna comba", icon: "🐟", scientificName: "Mycteroperca acutirostris",
         photoId: 833, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz kıyı kayalıklar",
@@ -7329,7 +7329,7 @@ const SPECIES_DB = {
         noteEn: "A smaller but feisty grouper species found even in shallow Brazilian waters.", noteEl: "A smaller but feisty grouper species found even in shallow Brazilian waters.", noteEs: "A smaller but feisty grouper species found even in shallow Brazilian waters."
     },
     "brazil_scamp_grouper": {
-        name: "Badejo-vassoura", nameEn: "Scamp Grouper", nameEl: "Scamp Grouper", nameEs: "Scamp Grouper", icon: "🐟", scientificName: "Mycteroperca phenax",
+        name: "Badejo-vassoura", nameEn: "Scamp Grouper", nameEl: "Ροφός σκαμπ", nameEs: "Cuna garopa", icon: "🐟", scientificName: "Mycteroperca phenax",
         photoId: 834, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin resif yamaçları",
@@ -7343,7 +7343,7 @@ const SPECIES_DB = {
         noteEn: "Identified by its irregular, broom-like tail fin. Highly valued for its meat.", noteEl: "Identified by its irregular, broom-like tail fin. Highly valued for its meat.", noteEs: "Identified by its irregular, broom-like tail fin. Highly valued for its meat."
     },
     "brazil_red_hind": {
-        name: "Garoupa-são-tomé", nameEn: "Red Hind", nameEl: "Red Hind", nameEs: "Red Hind", icon: "🐟", scientificName: "Epinephelus guttatus",
+        name: "Garoupa-são-tomé", nameEn: "Red Hind", nameEl: "Ροφός στικτός", nameEs: "Cabrilla roja", icon: "🐟", scientificName: "Epinephelus guttatus",
         photoId: 835, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ mercan resifleri",
@@ -7357,7 +7357,7 @@ const SPECIES_DB = {
         noteEn: "Identified by red spots and a dark margin on the tail fin. Very photogenic.", noteEl: "Identified by red spots and a dark margin on the tail fin. Very photogenic.", noteEs: "Identified by red spots and a dark margin on the tail fin. Very photogenic."
     },
     "brazil_graysby": {
-        name: "Garoupa-mármore", nameEn: "Graysby", nameEl: "Γκρέισμπι", nameEs: "Graysby", icon: "🐟", scientificName: "Cephalopholis cruentata",
+        name: "Garoupa-mármore", nameEn: "Graysby", nameEl: "Γκρέισμπι", nameEs: "Enjambre", icon: "🐟", scientificName: "Cephalopholis cruentata",
         photoId: 836, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ resif çatlakları",
@@ -7371,7 +7371,7 @@ const SPECIES_DB = {
         noteEn: "A small grouper species. Waits for prey while hiding in reef crevices.", noteEl: "A small grouper species. Waits for prey while hiding in reef crevices.", noteEs: "A small grouper species. Waits for prey while hiding in reef crevices."
     },
     "brazil_coney": {
-        name: "Garoupa-chita", nameEn: "Coney", nameEl: "Coney", nameEs: "Coney", icon: "🐟", scientificName: "Cephalopholis fulva",
+        name: "Garoupa-chita", nameEn: "Coney", nameEl: "Ροφός κίτρινος", nameEs: "Guativere", icon: "🐟", scientificName: "Cephalopholis fulva",
         photoId: 837, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -7385,7 +7385,7 @@ const SPECIES_DB = {
         noteEn: "Can display various color phases (red, yellow, brown). Two black spots on the lower lip are diagnostic.", noteEl: "Can display various color phases (red, yellow, brown). Two black spots on the lower lip are diagnostic.", noteEs: "Can display various color phases (red, yellow, brown). Two black spots on the lower lip are diagnostic."
     },
     "brazil_rock_hind": {
-        name: "Garoupa-pintada", nameEn: "Rock Hind", nameEl: "Rock Hind", nameEs: "Rock Hind", icon: "🐟", scientificName: "Epinephelus adscensionis",
+        name: "Garoupa-pintada", nameEn: "Rock Hind", nameEl: "Ροφός βραχώδης", nameEs: "Cabrilla de roca", icon: "🐟", scientificName: "Epinephelus adscensionis",
         photoId: 838, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ kayalıklar ve gelgit havuzları",
@@ -7399,7 +7399,7 @@ const SPECIES_DB = {
         noteEn: "Identified by brown spots and a black saddle on the tail base. Fun to catch from the shore.", noteEl: "Identified by brown spots and a black saddle on the tail base. Fun to catch from the shore.", noteEs: "Identified by brown spots and a black saddle on the tail base. Fun to catch from the shore."
     },
     "brazil_marbled_grouper": {
-        name: "Garoupa-verdadeira", nameEn: "Marbled Grouper", nameEl: "Μαρμαρωμένη Σφυρίδα", nameEs: "Marbled Grouper", icon: "🐟", scientificName: "Dermatolepis inermis",
+        name: "Garoupa-verdadeira", nameEn: "Marbled Grouper", nameEl: "Μαρμαρωμένη Σφυρίδα", nameEs: "Mero jaspeado", icon: "🐟", scientificName: "Dermatolepis inermis",
         photoId: 839, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin mercan resifleri",
@@ -7413,7 +7413,7 @@ const SPECIES_DB = {
         noteEn: "A noble fish with marble-patterned body. A rare and prestigious catch.", noteEl: "A noble fish with marble-patterned body. A rare and prestigious catch.", noteEs: "A noble fish with marble-patterned body. A rare and prestigious catch."
     },
     "brazil_spotted_goatfish": {
-        name: "Trilha", nameEn: "Spotted Goatfish", nameEl: "στίγματα κατσικίσια", nameEs: "Spotted Goatfish", icon: "🐟", scientificName: "Pseudupeneus maculatus",
+        name: "Trilha", nameEn: "Spotted Goatfish", nameEl: "στίγματα κατσικίσια", nameEs: "Salmonete manchado", icon: "🐟", scientificName: "Pseudupeneus maculatus",
         photoId: 840, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve resif sınırları",
@@ -7428,7 +7428,7 @@ const SPECIES_DB = {
     },
 
     "brazil_sand_tilefish": {
-        name: "Batata-da-areia", nameEn: "Sand Tilefish", nameEl: "Sand Tilefish", nameEs: "Sand Tilefish", icon: "🐟", scientificName: "Malacanthus plumieri",
+        name: "Batata-da-areia", nameEn: "Sand Tilefish", nameEl: "Ψάρι της άμμου", nameEs: "Matajuelo blanco", icon: "🐟", scientificName: "Malacanthus plumieri",
         photoId: 841, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve çakıllık dipler",
@@ -7442,7 +7442,7 @@ const SPECIES_DB = {
         noteEn: "Lives in tunnels it digs in sandy areas. Recognized by its slender body and colorful tail.", noteEl: "Lives in tunnels it digs in sandy areas. Recognized by its slender body and colorful tail.", noteEs: "Lives in tunnels it digs in sandy areas. Recognized by its slender body and colorful tail."
     },
     "brazil_golden_tilefish": {
-        name: "Batata", nameEn: "Golden Tilefish", nameEl: "Golden Tilefish", nameEs: "Golden Tilefish", icon: "🐟", scientificName: "Lopholatilus chamaeleonticeps",
+        name: "Batata", nameEn: "Golden Tilefish", nameEl: "Ψάρι καμήλα", nameEs: "Blanquillo camello", icon: "🐟", scientificName: "Lopholatilus chamaeleonticeps",
         photoId: 842, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin yumuşak dipler",
@@ -7456,7 +7456,7 @@ const SPECIES_DB = {
         noteEn: "One of the tastiest deep-water fish off Brazil. Identified by a prominent crest on its head.", noteEl: "One of the tastiest deep-water fish off Brazil. Identified by a prominent crest on its head.", noteEs: "One of the tastiest deep-water fish off Brazil. Identified by a prominent crest on its head."
     },
     "brazil_gray_triggerfish": {
-        name: "Peroá / Çütre", nameEn: "Gray Triggerfish", nameEl: "Grey Triggerfish", nameEs: "Gray Triggerfish", icon: "🐟", scientificName: "Balistes capriscus",
+        name: "Peroá / Çütre", nameEn: "Gray Triggerfish", nameEl: "Γουρουνόψαρο γκρι", nameEs: "Pejepuerco blanco", icon: "🐟", scientificName: "Balistes capriscus",
         photoId: 843, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz resifler ve batıklar",
@@ -7470,7 +7470,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its tough skin and lockable dorsal spine. Very popular fried in Brazil.", noteEl: "Recognized by its tough skin and lockable dorsal spine. Very popular fried in Brazil.", noteEs: "Recognized by its tough skin and lockable dorsal spine. Very popular fried in Brazil."
     },
     "brazil_queen_triggerfish": {
-        name: "Cangulo-rei", nameEn: "Queen Triggerfish", nameEl: "Βασίλισσα Triggerfish", nameEs: "Queen Triggerfish", icon: "🐟", scientificName: "Balistes vetula",
+        name: "Cangulo-rei", nameEn: "Queen Triggerfish", nameEl: "Γουρουνόψαρο βασίλισσα", nameEs: "Pejepuerco cachúo", icon: "🐟", scientificName: "Balistes vetula",
         photoId: 844, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -7484,7 +7484,7 @@ const SPECIES_DB = {
         noteEn: "One of the most beautiful triggerfish in the world with stunning colors and trailing fins.", noteEl: "One of the most beautiful triggerfish in the world with stunning colors and trailing fins.", noteEs: "One of the most beautiful triggerfish in the world with stunning colors and trailing fins."
     },
     "brazil_ocean_triggerfish": {
-        name: "Cangulo-negro", nameEn: "Ocean Triggerfish", nameEl: "Ocean Triggerfish", nameEs: "Ocean Triggerfish", icon: "🐟", scientificName: "Canthidermis sufflamen",
+        name: "Cangulo-negro", nameEn: "Ocean Triggerfish", nameEl: "Γουρουνόψαρο ωκεανού", nameEs: "Pejepuerco oceánico", icon: "🐟", scientificName: "Canthidermis sufflamen",
         photoId: 845, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz resifleri ve şamandıralar",
@@ -7498,7 +7498,7 @@ const SPECIES_DB = {
         noteEn: "Can be found in schools in open water. Distinguished by its dark gray-black color.", noteEl: "Can be found in schools in open water. Distinguished by its dark gray-black color.", noteEs: "Can be found in schools in open water. Distinguished by its dark gray-black color."
     },
     "brazil_blue_tang": {
-        name: "Doktor Balığı", nameEn: "Blue Tang", nameEl: "Μπλε Τανγκ", nameEs: "Blue Tang", icon: "🐟", scientificName: "Acanthurus coeruleus",
+        name: "Doktor Balığı", nameEn: "Blue Tang", nameEl: "Μπλε Τανγκ", nameEs: "Navajón azul", icon: "🐟", scientificName: "Acanthurus coeruleus",
         photoId: 846, category: "OTLUK",
         
         huntingMode: "filter",peakHours: "DAY", peakHoursDesc: "Gündüz sığ mercan resifleri",
@@ -7512,7 +7512,7 @@ const SPECIES_DB = {
         noteEn: "Yellow when juvenile, bright blue as adult. Known for the scalpel-like spine on its tail.", noteEl: "Yellow when juvenile, bright blue as adult. Known for the scalpel-like spine on its tail.", noteEs: "Yellow when juvenile, bright blue as adult. Known for the scalpel-like spine on its tail."
     },
     "brazil_queen_angelfish": {
-        name: "Peixe-anjo-rainha", nameEn: "Queen Angelfish", nameEl: "Βασίλισσα Αγγελόψαρο", nameEs: "Queen Angelfish", icon: "🐟", scientificName: "Holacanthus ciliaris",
+        name: "Peixe-anjo-rainha", nameEn: "Queen Angelfish", nameEl: "Βασίλισσα Αγγελόψαρο", nameEs: "Isabelita reina", icon: "🐟", scientificName: "Holacanthus ciliaris",
         photoId: 847, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz renkli mercan resifleri",
@@ -7526,7 +7526,7 @@ const SPECIES_DB = {
         noteEn: "Identified by the crown-like pattern on its head. Considered one of the world's most beautiful reef fish.", noteEl: "Identified by the crown-like pattern on its head. Considered one of the world's most beautiful reef fish.", noteEs: "Identified by the crown-like pattern on its head. Considered one of the world's most beautiful reef fish."
     },
     "brazil_french_angelfish": {
-        name: "Peixe-anjo-francês", nameEn: "French Angelfish", nameEl: "Γαλλικά Αγγελόψαρα", nameEs: "French Angelfish", icon: "🐟", scientificName: "Pomacanthus paru",
+        name: "Peixe-anjo-francês", nameEn: "French Angelfish", nameEl: "Γαλλικά Αγγελόψαρα", nameEs: "Cachama negra", icon: "🐟", scientificName: "Pomacanthus paru",
         photoId: 848, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ ve orta derinlikte resifler",
@@ -7540,7 +7540,7 @@ const SPECIES_DB = {
         noteEn: "Identified by golden-yellow scales on a black body. Usually seen in pairs.", noteEl: "Identified by golden-yellow scales on a black body. Usually seen in pairs.", noteEs: "Identified by golden-yellow scales on a black body. Usually seen in pairs."
     },
     "brazil_porkfish": {
-        name: "Ancorado / Porkfish", nameEn: "Porkfish", nameEl: "Χοιρινό ψάρι", nameEs: "Porkfish", icon: "🐟", scientificName: "Anisotremus virginicus",
+        name: "Ancorado / Porkfish", nameEn: "Porkfish", nameEl: "Χοιρινό ψάρι", nameEs: "Burro catalina", icon: "🐟", scientificName: "Anisotremus virginicus",
         photoId: 849, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece resif ve kayalık dipler",
@@ -7554,7 +7554,7 @@ const SPECIES_DB = {
         noteEn: "Identified by two vertical black bands on the head and yellow body stripes. Highly active at night.", noteEl: "Identified by two vertical black bands on the head and yellow body stripes. Highly active at night.", noteEs: "Identified by two vertical black bands on the head and yellow body stripes. Highly active at night."
     },
     "brazil_nurse_shark": {
-        name: "Tubarão-lixa", nameEn: "Nurse Shark", nameEl: "Καρχαρίας νοσοκόμα", nameEs: "Nurse Shark", icon: "🦈", scientificName: "Ginglymostoma cirratum",
+        name: "Tubarão-lixa", nameEn: "Nurse Shark", nameEl: "Καρχαρίας νοσοκόμα", nameEs: "Tiburón gata", icon: "🦈", scientificName: "Ginglymostoma cirratum",
         photoId: 850, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece sığ resifler and kumluklar",
@@ -7568,7 +7568,7 @@ const SPECIES_DB = {
         noteEn: "The gentle giant of the Brazilian coast. Rests in caves by day and hunts on the sand at night.", noteEl: "The gentle giant of the Brazilian coast. Rests in caves by day and hunts on the sand at night.", noteEs: "The gentle giant of the Brazilian coast. Rests in caves by day and hunts on the sand at night."
     },
     "redsea_napoleon_wrasse": {
-        name: "Napolyon Balığı", nameEn: "Napoleon Wrasse", nameEl: "Napoleon Wrasse", nameEs: "Napoleon Wrasse", icon: "🐟", scientificName: "Cheilinus undulatus",
+        name: "Napolyon Balığı", nameEn: "Napoleon Wrasse", nameEl: "Χείλωνας Ναπολέων", nameEs: "Napoleón", icon: "🐟", scientificName: "Cheilinus undulatus",
         photoId: 901, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri ve dış yamaçlar",
@@ -7582,7 +7582,7 @@ const SPECIES_DB = {
         noteEn: "One of the largest and friendliest inhabitants of the Red Sea. Identified by the hump on its forehead.", noteEl: "One of the largest and friendliest inhabitants of the Red Sea. Identified by the hump on its forehead.", noteEs: "One of the largest and friendliest inhabitants of the Red Sea. Identified by the hump on its forehead."
     },
     "redsea_giant_trevally": {
-        name: "Dev Akya / GT", nameEn: "Giant Trevally", nameEl: "Γίγαντας Trevally", nameEs: "Giant Trevally", icon: "🐟", scientificName: "Caranx ignobilis",
+        name: "Dev Akya / GT", nameEn: "Giant Trevally", nameEl: "Τρεβάλι γίγας", nameEs: "Jurel gigante", icon: "🐟", scientificName: "Caranx ignobilis",
         photoId: 902, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ resif kenarları",
@@ -7596,7 +7596,7 @@ const SPECIES_DB = {
         noteEn: "The beast of the Red Sea. Famous for its explosive surface strikes on poppers.", noteEl: "The beast of the Red Sea. Famous for its explosive surface strikes on poppers.", noteEs: "The beast of the Red Sea. Famous for its explosive surface strikes on poppers."
     },
     "redsea_bluefin_trevally": {
-        name: "Mavi Yüzgeçli Akya", nameEn: "Bluefin Trevally", nameEl: "Bluefin Trevally", nameEs: "Bluefin Trevally", icon: "🐟", scientificName: "Caranx melampygus",
+        name: "Mavi Yüzgeçli Akya", nameEn: "Bluefin Trevally", nameEl: "Τρεβάλι μπλε πτερυγίου", nameEs: "Jurel de aletas azules", icon: "🐟", scientificName: "Caranx melampygus",
         photoId: 903, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz resif üstleri ve kanallar",
@@ -7610,7 +7610,7 @@ const SPECIES_DB = {
         noteEn: "Stunning neon blue fins and spotted body. An extremely aggressive hunter.", noteEl: "Stunning neon blue fins and spotted body. An extremely aggressive hunter.", noteEs: "Stunning neon blue fins and spotted body. An extremely aggressive hunter."
     },
     "redsea_dogtooth_tuna": {
-        name: "Köpekdiş Orkinos", nameEn: "Dogtooth Tuna", nameEl: "Τόνος σκυλόδοντων", nameEs: "Dogtooth Tuna", icon: "🐟", scientificName: "Gymnosarda unicolor",
+        name: "Köpekdiş Orkinos", nameEn: "Dogtooth Tuna", nameEl: "Τόνος σκυλόδοντων", nameEs: "Atún dientes de perro", icon: "🐟", scientificName: "Gymnosarda unicolor",
         photoId: 904, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin resif duvarları",
@@ -7624,7 +7624,7 @@ const SPECIES_DB = {
         noteEn: "Not a true tuna but a giant mackerel. The ultimate jigging challenge with fearsome teeth.", noteEl: "Not a true tuna but a giant mackerel. The ultimate jigging challenge with fearsome teeth.", noteEs: "Not a true tuna but a giant mackerel. The ultimate jigging challenge with fearsome teeth."
     },
     "redsea_anemonefish": {
-        name: "Kızıldeniz Palyaço Balığı", nameEn: "Red Sea Anemonefish", nameEl: "Anemonefish της Ερυθράς Θάλασσας", nameEs: "Red Sea Anemonefish", icon: "🐟", scientificName: "Amphiprion bicinctus",
+        name: "Kızıldeniz Palyaço Balığı", nameEn: "Red Sea Anemonefish", nameEl: "Ψάρι κλόουν Ερυθράς", nameEs: "Pez payaso del mar Rojo", icon: "🐟", scientificName: "Amphiprion bicinctus",
         photoId: 905, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz anemone yuvaları",
@@ -7638,7 +7638,7 @@ const SPECIES_DB = {
         noteEn: "Endemic to the Red Sea. Always found in a symbiotic relationship with an anemone.", noteEl: "Endemic to the Red Sea. Always found in a symbiotic relationship with an anemone.", noteEs: "Endemic to the Red Sea. Always found in a symbiotic relationship with an anemone."
     },
     "redsea_coral_grouper": {
-        name: "Mercan Orfozu", nameEn: "Coral Grouper", nameEl: "Σφυρίδα κοραλλιών", nameEs: "Coral Grouper", icon: "🐟", scientificName: "Cephalopholis miniata",
+        name: "Mercan Orfozu", nameEn: "Coral Grouper", nameEl: "Σφυρίδα κοραλλιών", nameEs: "Mero de coral", icon: "🐟", scientificName: "Cephalopholis miniata",
         photoId: 906, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz mercan blokları",
@@ -7652,7 +7652,7 @@ const SPECIES_DB = {
         noteEn: "The jewel of the Red Sea, with bright blue spots over a vibrant orange-red body.", noteEl: "The jewel of the Red Sea, with bright blue spots over a vibrant orange-red body.", noteEs: "The jewel of the Red Sea, with bright blue spots over a vibrant orange-red body."
     },
     "redsea_rubberlip": {
-        name: "Tatlıdudak", nameEn: "Blackspotted Rubberlip", nameEl: "Καουτσούκ με μαύρες κηλίδες", nameEs: "Blackspotted Rubberlip", icon: "🐟", scientificName: "Plectorhinchus gaterinus",
+        name: "Tatlıdudak", nameEn: "Blackspotted Rubberlip", nameEl: "Καουτσούκ με μαύρες κηλίδες", nameEs: "Burro de puntos negros", icon: "🐟", scientificName: "Plectorhinchus gaterinus",
         photoId: 907, category: "KAYALIK",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece resif kenarları",
@@ -7666,7 +7666,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by thick lips and spotted patterns. Rests in schools under coral shade during the day.", noteEl: "Recognized by thick lips and spotted patterns. Rests in schools under coral shade during the day.", noteEs: "Recognized by thick lips and spotted patterns. Rests in schools under coral shade during the day."
     },
     "redsea_ribbontail_ray": {
-        name: "Mavi Benekli Vatoz", nameEn: "Bluespotted Ribbontail Ray", nameEl: "Bluespotted Ribbontail Ray", nameEs: "Bluespotted Ribbontail Ray", icon: "🐟", scientificName: "Taeniura lymma",
+        name: "Mavi Benekli Vatoz", nameEn: "Bluespotted Ribbontail Ray", nameEl: "Σαλάχι γαλαζόστικτο", nameEs: "Raya de puntos azules", icon: "🐟", scientificName: "Taeniura lymma",
         photoId: 908, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluklar ve resif sınırları",
@@ -7680,7 +7680,7 @@ const SPECIES_DB = {
         noteEn: "A stunning ray with electric blue spots. The spine on its tail is highly venomous.", noteEl: "A stunning ray with electric blue spots. The spine on its tail is highly venomous.", noteEs: "A stunning ray with electric blue spots. The spine on its tail is highly venomous."
     },
     "redsea_lionfish": {
-        name: "Aslan Balığı", nameEn: "Lionfish", nameEl: "Λεοντόψαρο", nameEs: "Lionfish", icon: "🐟", scientificName: "Pterois miles",
+        name: "Aslan Balığı", nameEn: "Lionfish", nameEl: "Λεοντόψαρο", nameEs: "Pez león", icon: "🐟", scientificName: "Pterois miles",
         photoId: 909, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık resif çıkıntıları",
@@ -7694,7 +7694,7 @@ const SPECIES_DB = {
         noteEn: "Native to the Red Sea. Has spread to the Mediterranean as an invasive species. Very venomous spines.", noteEl: "Native to the Red Sea. Has spread to the Mediterranean as an invasive species. Very venomous spines.", noteEs: "Native to the Red Sea. Has spread to the Mediterranean as an invasive species. Very venomous spines."
     },
     "redsea_sohal_surgeon": {
-        name: "Sohal Cerrah Balığı", nameEn: "Sohal Surgeonfish", nameEl: "Sohal Surgeonfish", nameEs: "Sohal Surgeonfish", icon: "🐟", scientificName: "Acanthurus sohal",
+        name: "Sohal Cerrah Balığı", nameEn: "Sohal Surgeonfish", nameEl: "Χειρουργός σοχάλ", nameEs: "Navajón sohal", icon: "🐟", scientificName: "Acanthurus sohal",
         photoId: 910, category: "OTLUK",
         huntingMode: "filter",
         
@@ -7710,7 +7710,7 @@ const SPECIES_DB = {
     },
 
     "redsea_whitetip_shark": {
-        name: "Beyaz Yüzgeçli Resif Köpekbalığı", nameEn: "Whitetip Reef Shark", nameEl: "Καρχαρίας Whitetip Reef", nameEs: "Whitetip Reef Shark", icon: "🦈", scientificName: "Triaenodon obesus",
+        name: "Beyaz Yüzgeçli Resif Köpekbalığı", nameEn: "Whitetip Reef Shark", nameEl: "Καρχαρίας λευκοπτέρυγος υφάλου", nameEs: "Tiburón de puntas blancas de arrecife", icon: "🦈", scientificName: "Triaenodon obesus",
         photoId: 911, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece resif çatlakları ve mağaralar",
@@ -7724,7 +7724,7 @@ const SPECIES_DB = {
         noteEn: "Often seen resting inside reef caves. Recognized by its slender body and white-tipped fins.", noteEl: "Often seen resting inside reef caves. Recognized by its slender body and white-tipped fins.", noteEs: "Often seen resting inside reef caves. Recognized by its slender body and white-tipped fins."
     },
     "redsea_blacktip_shark": {
-        name: "Siyah Yüzgeçli Resif Köpekbalığı", nameEn: "Blacktip Reef Shark", nameEl: "Blacktip Reef Shark", nameEs: "Blacktip Reef Shark", icon: "🦈", scientificName: "Carcharhinus melanopterus",
+        name: "Siyah Yüzgeçli Resif Köpekbalığı", nameEn: "Blacktip Reef Shark", nameEl: "Καρχαρίας μαυροπτέρυγος υφάλου", nameEs: "Tiburón de punta negra de arrecife", icon: "🦈", scientificName: "Carcharhinus melanopterus",
         photoId: 912, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ resif düzlükleri",
@@ -7738,7 +7738,7 @@ const SPECIES_DB = {
         noteEn: "Favors shallow waters. The prominent black tips on its fins are its most diagnostic feature.", noteEl: "Favors shallow waters. The prominent black tips on its fins are its most diagnostic feature.", noteEs: "Favors shallow waters. The prominent black tips on its fins are its most diagnostic feature."
     },
     "redsea_grey_reef_shark": {
-        name: "Gri Resif Köpekbalığı", nameEn: "Grey Reef Shark", nameEl: "Καρχαρίας γκρίζος ύφαλος", nameEs: "Grey Reef Shark", icon: "🦈", scientificName: "Carcharhinus amblyrhynchos",
+        name: "Gri Resif Köpekbalığı", nameEn: "Grey Reef Shark", nameEl: "Καρχαρίας γκρίζος ύφαλος", nameEs: "Tiburón gris de arrecife", icon: "🦈", scientificName: "Carcharhinus amblyrhynchos",
         photoId: 913, category: "KAYALIK",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz resif dış yamaçları ve kanallar",
@@ -7752,7 +7752,7 @@ const SPECIES_DB = {
         noteEn: "The most dominant shark on Red Sea reefs. Territorial and highly curious.", noteEl: "The most dominant shark on Red Sea reefs. Territorial and highly curious.", noteEs: "The most dominant shark on Red Sea reefs. Territorial and highly curious."
     },
     "redsea_oceanic_whitetip": {
-        name: "Uzunkanat Köpekbalığı / Longimanus", nameEn: "Oceanic Whitetip Shark", nameEl: "Ωκεάνιος καρχαρίας λευκής άκρης", nameEs: "Oceanic Whitetip Shark", icon: "🦈", scientificName: "Carcharhinus longimanus",
+        name: "Uzunkanat Köpekbalığı / Longimanus", nameEn: "Oceanic Whitetip Shark", nameEl: "Ωκεάνιος καρχαρίας λευκής άκρης", nameEs: "Tiburón oceánico de puntas blancas", icon: "🦈", scientificName: "Carcharhinus longimanus",
         photoId: 914, category: "PELAJIK_AVCI",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
@@ -7766,7 +7766,7 @@ const SPECIES_DB = {
         noteEn: "Famous for its massive long fins and fearless attitude. The most iconic pelagic predator of the Red Sea.", noteEl: "Famous for its massive long fins and fearless attitude. The most iconic pelagic predator of the Red Sea.", noteEs: "Famous for its massive long fins and fearless attitude. The most iconic pelagic predator of the Red Sea."
     },
     "redsea_hammerhead": {
-        name: "Büyük Çekiçbaş", nameEn: "Great Hammerhead Shark", nameEl: "Μεγάλος Σφυροκέφαλος Καρχαρίας", nameEs: "Great Hammerhead Shark", icon: "🦈", scientificName: "Sphyrna mokarran",
+        name: "Büyük Çekiçbaş", nameEn: "Great Hammerhead Shark", nameEl: "Μεγάλος Σφυροκέφαλος Καρχαρίας", nameEs: "Cornuda gigante", icon: "🦈", scientificName: "Sphyrna mokarran",
         photoId: 915, category: "PELAJIK_AVCI",
         
         huntingMode: "chemosensory",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin resif duvarları ve açık su",
@@ -7780,7 +7780,7 @@ const SPECIES_DB = {
         noteEn: "One of the world's most unique and powerful predators with its massive hammer-shaped head.", noteEl: "One of the world's most unique and powerful predators with its massive hammer-shaped head.", noteEs: "One of the world's most unique and powerful predators with its massive hammer-shaped head."
     },
     "redsea_manta_ray": {
-        name: "Manta Vatozu", nameEn: "Reef Manta Ray", nameEl: "Reef Manta Ray", nameEs: "Reef Manta Ray", icon: "🐟", scientificName: "Mobula alfredi",
+        name: "Manta Vatozu", nameEn: "Reef Manta Ray", nameEl: "Μάντα υφάλου", nameEs: "Manta de arrecife", icon: "🐟", scientificName: "Mobula alfredi",
         photoId: 916, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz temizleme istasyonları ve akıntılı kanallar",
@@ -7794,7 +7794,7 @@ const SPECIES_DB = {
         noteEn: "One of the most noble creatures under water. Feeds on plankton and is harmless to humans.", noteEl: "One of the most noble creatures under water. Feeds on plankton and is harmless to humans.", noteEs: "One of the most noble creatures under water. Feeds on plankton and is harmless to humans."
     },
     "redsea_whale_shark": {
-        name: "Balina Köpekbalığı", nameEn: "Whale Shark", nameEl: "Καρχαρίας φαλαινών", nameEs: "Whale Shark", icon: "🦈", scientificName: "Rhincodon typus",
+        name: "Balina Köpekbalığı", nameEn: "Whale Shark", nameEl: "Καρχαρίας φαλαινών", nameEs: "Tiburón ballena", icon: "🦈", scientificName: "Rhincodon typus",
         photoId: 917, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey",
@@ -7808,7 +7808,7 @@ const SPECIES_DB = {
         noteEn: "The largest fish in the world. Frequently spotted in the Red Sea during spring months.", noteEl: "The largest fish in the world. Frequently spotted in the Red Sea during spring months.", noteEs: "The largest fish in the world. Frequently spotted in the Red Sea during spring months."
     },
     "redsea_eagle_ray": {
-        name: "Benekli Kartal Vatozu", nameEn: "Spotted Eagle Ray", nameEl: "Spotted Eagle Ray", nameEs: "Spotted Eagle Ray", icon: "🐟", scientificName: "Aetobatus narinari",
+        name: "Benekli Kartal Vatozu", nameEn: "Spotted Eagle Ray", nameEl: "Σαλάχι αετός", nameEs: "Raya águila moteada", icon: "🐟", scientificName: "Aetobatus narinari",
         photoId: 918, category: "PELAJIK_AVCI",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve açık su",
@@ -7822,7 +7822,7 @@ const SPECIES_DB = {
         noteEn: "Identified by white spots and a long tail. Often seen leaping out of the water in acrobatic displays.", noteEl: "Identified by white spots and a long tail. Often seen leaping out of the water in acrobatic displays.", noteEs: "Identified by white spots and a long tail. Often seen leaping out of the water in acrobatic displays."
     },
     "redsea_green_turtle": {
-        name: "Yeşil Deniz Kaplumbağası", nameEn: "Green Sea Turtle", nameEl: "Πράσινη θαλάσσια χελώνα", nameEs: "Green Sea Turtle", icon: "🐢", scientificName: "Chelonia mydas",
+        name: "Yeşil Deniz Kaplumbağası", nameEn: "Green Sea Turtle", nameEl: "Πράσινη θαλάσσια χελώνα", nameEs: "Tortuga verde", icon: "🐢", scientificName: "Chelonia mydas",
         photoId: 919, category: "OTLUK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sığ yosunluk alanlar",
@@ -7836,7 +7836,7 @@ const SPECIES_DB = {
         noteEn: "The most common turtle species in the Red Sea. Often seen feeding on seagrass in shallow waters.", noteEl: "The most common turtle species in the Red Sea. Often seen feeding on seagrass in shallow waters.", noteEs: "The most common turtle species in the Red Sea. Often seen feeding on seagrass in shallow waters."
     },
     "redsea_hawksbill_turtle": {
-        name: "Şahin Gagalı Kaplumbağa", nameEn: "Hawksbill Turtle", nameEl: "Χελώνα Hawksbill", nameEs: "Hawksbill Turtle", icon: "🐢", scientificName: "Eretmochelys imbricata",
+        name: "Şahin Gagalı Kaplumbağa", nameEn: "Hawksbill Turtle", nameEl: "Χελώνα καρέτα-καρέτα γερακομύτη", nameEs: "Tortuga carey", icon: "🐢", scientificName: "Eretmochelys imbricata",
         photoId: 920, category: "KAYALIK",
         huntingMode: "visual",
         
@@ -7852,7 +7852,7 @@ const SPECIES_DB = {
     },
 
     "redsea_malabar_grouper": {
-        name: "Malabar Orfozu", nameEn: "Malabar Grouper", nameEl: "Σφυρίδα Malabar", nameEs: "Malabar Grouper", icon: "🐟", scientificName: "Epinephelus malabaricus",
+        name: "Malabar Orfozu", nameEn: "Malabar Grouper", nameEl: "Ροφός Μαλαμπάρ", nameEs: "Mero de Malabar", icon: "🐟", scientificName: "Epinephelus malabaricus",
         photoId: 921, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz resif çatlakları ve mağaralar",
@@ -7866,7 +7866,7 @@ const SPECIES_DB = {
         noteEn: "Identified by brown spotted patterns and large size. One of the most common groupers in the Red Sea.", noteEl: "Identified by brown spotted patterns and large size. One of the most common groupers in the Red Sea.", noteEs: "Identified by brown spotted patterns and large size. One of the most common groupers in the Red Sea."
     },
     "redsea_brownspotted_grouper": {
-        name: "Benekli Orfoz", nameEn: "Brownspotted Grouper", nameEl: "Σφυρίδα με καφέ κηλίδες", nameEs: "Brownspotted Grouper", icon: "🐟", scientificName: "Epinephelus chlorostigma",
+        name: "Benekli Orfoz", nameEn: "Brownspotted Grouper", nameEl: "Σφυρίδα με καφέ κηλίδες", nameEs: "Mero de puntos pardos", icon: "🐟", scientificName: "Epinephelus chlorostigma",
         photoId: 922, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler",
@@ -7880,7 +7880,7 @@ const SPECIES_DB = {
         noteEn: "Characterized by small, dense brown spots covering the body. Prefers deeper waters.", noteEl: "Characterized by small, dense brown spots covering the body. Prefers deeper waters.", noteEs: "Characterized by small, dense brown spots covering the body. Prefiere deeper waters."
     },
     "redsea_areolate_grouper": {
-        name: "Bal Peteği Orfozu", nameEn: "Areolate Grouper", nameEl: "Αρεολάτη Σφυρίδα", nameEs: "Areolate Grouper", icon: "🐟", scientificName: "Epinephelus areolatus",
+        name: "Bal Peteği Orfozu", nameEn: "Areolate Grouper", nameEl: "Αρεολάτη Σφυρίδα", nameEs: "Mero areolado", icon: "🐟", scientificName: "Epinephelus areolatus",
         photoId: 923, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve kayalık karışımı dipler",
@@ -7894,7 +7894,7 @@ const SPECIES_DB = {
         noteEn: "Hexagonal spots resemble a honeycomb. Frequently found around reef areas.", noteEl: "Hexagonal spots resemble a honeycomb. Frequently found around reef areas.", noteEs: "Hexagonal spots resemble a honeycomb. Frequently found around reef areas."
     },
     "redsea_greasy_grouper": {
-        name: "Yağlı Orfoz", nameEn: "Greasy Grouper", nameEl: "Λιπαρός σφυρίδα", nameEs: "Greasy Grouper", icon: "🐟", scientificName: "Epinephelus tauvina",
+        name: "Yağlı Orfoz", nameEn: "Greasy Grouper", nameEl: "Λιπαρός σφυρίδα", nameEs: "Mero grasiento", icon: "🐟", scientificName: "Epinephelus tauvina",
         photoId: 924, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ ve orta derinlikteki resifler",
@@ -7908,7 +7908,7 @@ const SPECIES_DB = {
         noteEn: "Named for its thick, greasy skin. A very strong and resilient fish.", noteEl: "Named for its thick, greasy skin. A very strong and resilient fish.", noteEs: "Named for its thick, greasy skin. A very strong and resilient fish."
     },
     "redsea_potato_grouper": {
-        name: "Patates Orfozu", nameEn: "Potato Grouper", nameEl: "Σφυρίδα πατάτας", nameEs: "Potato Grouper", icon: "🐟", scientificName: "Epinephelus tukula",
+        name: "Patates Orfozu", nameEn: "Potato Grouper", nameEl: "Σφυρίδα πατάτας", nameEs: "Mero patata", icon: "🐟", scientificName: "Epinephelus tukula",
         photoId: 925, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin resif duvarları ve açık su",
@@ -7922,7 +7922,7 @@ const SPECIES_DB = {
         noteEn: "Massive oval spots on its body resemble potatoes. Highly curious and often approaches divers.", noteEl: "Massive oval spots on its body resemble potatoes. Highly curious and often approaches divers.", noteEs: "Massive oval spots on its body resemble potatoes. Highly curious and often approaches divers."
     },
     "redsea_redmouth_grouper": {
-        name: "Kızıl Ağızlı Orfoz", nameEn: "Redmouth Grouper", nameEl: "Σφυρίδα Redmouth", nameEs: "Redmouth Grouper", icon: "🐟", scientificName: "Aethaloperca rogaa",
+        name: "Kızıl Ağızlı Orfoz", nameEn: "Redmouth Grouper", nameEl: "Ροφός κοκκινόστομος", nameEs: "Mero boca roja", icon: "🐟", scientificName: "Aethaloperca rogaa",
         photoId: 926, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri ve mağaralar",
@@ -7936,7 +7936,7 @@ const SPECIES_DB = {
         noteEn: "Identified by its dark body and bright orange-red color inside its mouth.", noteEl: "Identified by its dark body and bright orange-red color inside its mouth.", noteEs: "Identified by its dark body and bright orange-red color inside its mouth."
     },
     "redsea_lyretail_grouper": {
-        name: "Ay Kuyruk Orfoz", nameEn: "Lyretail Grouper", nameEl: "Σφυρίδα λιανικής", nameEs: "Lyretail Grouper", icon: "🐟", scientificName: "Variola louti",
+        name: "Ay Kuyruk Orfoz", nameEn: "Lyretail Grouper", nameEl: "Σφυρίδα λιανικής", nameEs: "Mero cola de lira", icon: "🐟", scientificName: "Variola louti",
         photoId: 927, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz resif üstleri ve dış yamaçlar",
@@ -7950,7 +7950,7 @@ const SPECIES_DB = {
         noteEn: "The most aesthetic and colorful grouper of the Red Sea, with a yellow-edged lyre-shaped tail.", noteEl: "The most aesthetic and colorful grouper of the Red Sea, with a yellow-edged lyre-shaped tail.", noteEs: "The most aesthetic and colorful grouper of the Red Sea, with a yellow-edged lyre-shaped tail."
     },
     "redsea_yellow_lyretail": {
-        name: "Sarı Kenarlı Ay Kuyruk", nameEn: "Yellow-edged Lyretail", nameEl: "Lyretail με κίτρινες άκρες", nameEs: "Yellow-edged Lyretail", icon: "🐟", scientificName: "Variola albimarginata",
+        name: "Sarı Kenarlı Ay Kuyruk", nameEn: "Yellow-edged Lyretail", nameEl: "Ροφός λευκόλυρα", nameEs: "Mero cola de lira de borde blanco", icon: "🐟", scientificName: "Variola albimarginata",
         photoId: 928, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin resif duvarları",
@@ -7964,7 +7964,7 @@ const SPECIES_DB = {
         noteEn: "Very similar to the lyretail grouper but with a thinner tail margin. Prefers deeper waters.", noteEl: "Very similar to the lyretail grouper but with a thinner tail margin. Prefers deeper waters.", noteEs: "Very similar to the lyretail grouper but with a thinner tail margin. Prefiere deeper waters."
     },
     "redsea_peacock_hind": {
-        name: "Tavuskuşu Hanisi", nameEn: "Peacock Hind", nameEl: "Peacock Hind", nameEs: "Peacock Hind", icon: "🐟", scientificName: "Cephalopholis argus",
+        name: "Tavuskuşu Hanisi", nameEn: "Peacock Hind", nameEl: "Ροφός παγώνι", nameEs: "Mero pavo real", icon: "🐟", scientificName: "Cephalopholis argus",
         photoId: 929, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ ve orta derinlikteki mercanlar",
@@ -7978,7 +7978,7 @@ const SPECIES_DB = {
         noteEn: "Resembles a peacock with small electric blue spots over its dark body.", noteEl: "Resembles a peacock with small electric blue spots over its dark body.", noteEs: "Resembles a peacock with small electric blue spots over its dark body."
     },
     "redsea_bluespotted_hind": {
-        name: "Mavi Benekli Hani", nameEn: "Blue-spotted Hind", nameEl: "Μπλε κηλίδες Hind", nameEs: "Blue-spotted Hind", icon: "🐟", scientificName: "Cephalopholis cyanostigma",
+        name: "Mavi Benekli Hani", nameEn: "Blue-spotted Hind", nameEl: "Ροφός γαλαζόστικτος", nameEs: "Mero de puntos azules", icon: "🐟", scientificName: "Cephalopholis cyanostigma",
         photoId: 930, category: "KAYALIK",
         huntingMode: "ambush",
         
@@ -7994,7 +7994,7 @@ const SPECIES_DB = {
     },
 
     "redsea_bannerfish": {
-        name: "Kızıldeniz Flama Balığı", nameEn: "Red Sea Bannerfish", nameEl: "Πανό της Ερυθράς Θάλασσας", nameEs: "Red Sea Bannerfish", icon: "🐟", scientificName: "Heniochus intermedius",
+        name: "Kızıldeniz Flama Balığı", nameEn: "Red Sea Bannerfish", nameEl: "Πανό της Ερυθράς Θάλασσας", nameEs: "Pez banderín del mar Rojo", icon: "🐟", scientificName: "Heniochus intermedius",
         photoId: 931, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -8008,7 +8008,7 @@ const SPECIES_DB = {
         noteEn: "Resembles a banner with its long white dorsal filament. Endemic to the Red Sea.", noteEl: "Resembles a banner with its long white dorsal filament. Endemic to the Red Sea.", noteEs: "Resembles a banner with its long white dorsal filament. Endemic to the Red Sea."
     },
     "redsea_masked_butterflyfish": {
-        name: "Maskeli Kelebek Balığı", nameEn: "Masked Butterflyfish", nameEl: "Μασκοφόρο πεταλούδα", nameEs: "Masked Butterflyfish", icon: "🐟", scientificName: "Chaetodon semilarvatus",
+        name: "Maskeli Kelebek Balığı", nameEn: "Masked Butterflyfish", nameEl: "Μασκοφόρο πεταλούδα", nameEs: "Pez mariposa enmascarado", icon: "🐟", scientificName: "Chaetodon semilarvatus",
         photoId: 932, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -8022,7 +8022,7 @@ const SPECIES_DB = {
         noteEn: "The most iconic species of the Red Sea with its bright yellow color and dark blue mask around the eyes.", noteEl: "The most iconic species of the Red Sea with its bright yellow color and dark blue mask around the eyes.", noteEs: "The most iconic species of the Red Sea with its bright yellow color and dark blue mask around the eyes."
     },
     "redsea_exquisite_butterflyfish": {
-        name: "Zarif Kelebek Balığı", nameEn: "Exquisite Butterflyfish", nameEl: "Εξαιρετικό πεταλούδα", nameEs: "Exquisite Butterflyfish", icon: "🐟", scientificName: "Chaetodon austriacus",
+        name: "Zarif Kelebek Balığı", nameEn: "Exquisite Butterflyfish", nameEl: "Εξαιρετικό πεταλούδα", nameEs: "Pez mariposa exquisito", icon: "🐟", scientificName: "Chaetodon austriacus",
         photoId: 933, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -8036,7 +8036,7 @@ const SPECIES_DB = {
         noteEn: "Found only in the Red Sea and Gulf of Aden. A delicate species that feeds on coral polyps.", noteEl: "Found only in the Red Sea and Gulf of Aden. A delicate species that feeds on coral polyps.", noteEs: "Found only in the Red Sea and Gulf of Aden. A delicate species that feeds on coral polyps."
     },
     "redsea_orangeface_butterflyfish": {
-        name: "Turuncu Yüzlü Kelebek", nameEn: "Orange-face Butterflyfish", nameEl: "Πεταλούδα με πορτοκαλί πρόσωπο", nameEs: "Orange-face Butterflyfish", icon: "🐟", scientificName: "Chaetodon larvatus",
+        name: "Turuncu Yüzlü Kelebek", nameEn: "Orange-face Butterflyfish", nameEl: "Πεταλούδα με πορτοκαλί πρόσωπο", nameEs: "Pez mariposa cara naranja", icon: "🐟", scientificName: "Chaetodon larvatus",
         photoId: 934, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -8050,7 +8050,7 @@ const SPECIES_DB = {
         noteEn: "Distinguished by its orange head and blue-white body. Another stunning butterflyfish endemic to the Red Sea.", noteEl: "Distinguished by its orange head and blue-white body. Another stunning butterflyfish endemic to the Red Sea.", noteEs: "Distinguished by its orange head and blue-white body. Another stunning butterflyfish endemic to the Red Sea."
     },
     "redsea_crown_butterflyfish": {
-        name: "Taçlı Kelebek Balığı", nameEn: "Crown Butterflyfish", nameEl: "Crown Butterflyfish", nameEs: "Crown Butterflyfish", icon: "🐟", scientificName: "Chaetodon paucifasciatus",
+        name: "Taçlı Kelebek Balığı", nameEn: "Crown Butterflyfish", nameEl: "Πεταλουδόψαρο στέμμα", nameEs: "Pez mariposa de corona", icon: "🐟", scientificName: "Chaetodon paucifasciatus",
         photoId: 935, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ mercan resifleri",
@@ -8064,7 +8064,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by the red-orange patch on its posterior and chevron patterns.", noteEl: "Recognized by the red-orange patch on its posterior and chevron patterns.", noteEs: "Recognized by the red-orange patch on its posterior and chevron patterns."
     },
     "redsea_striped_butterflyfish": {
-        name: "Çizgili Kelebek Balığı", nameEn: "Striped Butterflyfish", nameEl: "Ριγέ πεταλούδα", nameEs: "Striped Butterflyfish", icon: "🐟", scientificName: "Chaetodon fasciatus",
+        name: "Çizgili Kelebek Balığı", nameEn: "Striped Butterflyfish", nameEl: "Ριγέ πεταλούδα", nameEs: "Pez mariposa rayado", icon: "🐟", scientificName: "Chaetodon fasciatus",
         photoId: 936, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -8078,7 +8078,7 @@ const SPECIES_DB = {
         noteEn: "A classic Red Sea beauty with vertical black stripes and a yellow body.", noteEl: "A classic Red Sea beauty with vertical black stripes and a yellow body.", noteEs: "A classic Red Sea beauty with vertical black stripes and a yellow body."
     },
     "redsea_picasso_triggerfish": {
-        name: "Picasso Tetik Balığı", nameEn: "Picasso Triggerfish", nameEl: "Πικάσο Triggerfish", nameEs: "Picasso Triggerfish", icon: "🐟", scientificName: "Rhinecanthus assasi",
+        name: "Picasso Tetik Balığı", nameEn: "Picasso Triggerfish", nameEl: "Γουρουνόψαρο Πικάσο", nameEs: "Pez ballesta picasso árabe", icon: "🐟", scientificName: "Rhinecanthus assasi",
         photoId: 937, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk ve resif alanları",
@@ -8092,7 +8092,7 @@ const SPECIES_DB = {
         noteEn: "Identified by colors and patterns that resemble an abstract painting. Endemic to the Red Sea.", noteEl: "Identified by colors and patterns that resemble an abstract painting. Endemic to the Red Sea.", noteEs: "Identified by colors and patterns that resemble an abstract painting. Endemic to the Red Sea."
     },
     "redsea_titan_triggerfish": {
-        name: "Dev Tetik Balığı", nameEn: "Titan Triggerfish", nameEl: "Titan Triggerfish", nameEs: "Titan Triggerfish", icon: "🐟", scientificName: "Balistoides viridescens",
+        name: "Dev Tetik Balığı", nameEn: "Titan Triggerfish", nameEl: "Γουρουνόψαρο τιτάνας", nameEs: "Pez ballesta titán", icon: "🐟", scientificName: "Balistoides viridescens",
         photoId: 938, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve kumluklar",
@@ -8106,7 +8106,7 @@ const SPECIES_DB = {
         noteEn: "One of the world's most aggressive triggerfish. Known to attack divers while guarding its nest.", noteEl: "One of the world's most aggressive triggerfish. Known to attack divers while guarding its nest.", noteEs: "One of the world's most aggressive triggerfish. Known to attack divers while guarding its nest."
     },
     "redsea_yellowmargin_triggerfish": {
-        name: "Sarı Kenarlı Tetik Balığı", nameEn: "Yellowmargin Triggerfish", nameEl: "Yellowmargin Triggerfish", nameEs: "Yellowmargin Triggerfish", icon: "🐟", scientificName: "Pseudobalistes flavimarginatus",
+        name: "Sarı Kenarlı Tetik Balığı", nameEn: "Yellowmargin Triggerfish", nameEl: "Γουρουνόψαρο κιτρινόχειλο", nameEs: "Pez ballesta de borde amarillo", icon: "🐟", scientificName: "Pseudobalistes flavimarginatus",
         photoId: 939, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz kumluk alanlar ve resifler",
@@ -8120,7 +8120,7 @@ const SPECIES_DB = {
         noteEn: "Identified by pale spots on its body and yellow-orange margins on its fins.", noteEl: "Identified by pale spots on its body and yellow-orange margins on its fins.", noteEs: "Identified by pale spots on its body and yellow-orange margins on its fins."
     },
     "redsea_blue_triggerfish": {
-        name: "Mavi Tetik Balığı", nameEn: "Blue Triggerfish", nameEl: "Blue Triggerfish", nameEs: "Blue Triggerfish", icon: "🐟", scientificName: "Pseudobalistes fuscus",
+        name: "Mavi Tetik Balığı", nameEn: "Blue Triggerfish", nameEl: "Γουρουνόψαρο μπλε", nameEs: "Pez ballesta azul", icon: "🐟", scientificName: "Pseudobalistes fuscus",
         photoId: 940, category: "KAYALIK",
         huntingMode: "visual",
         
@@ -8136,7 +8136,7 @@ const SPECIES_DB = {
     },
 
     "redsea_goatfish": {
-        name: "Kızıldeniz Barbunu", nameEn: "Red Sea Goatfish", nameEl: "Κατσικίσιο Ερυθράς Θάλασσας", nameEs: "Red Sea Goatfish", icon: "🐟", scientificName: "Parupeneus forsskali",
+        name: "Kızıldeniz Barbunu", nameEn: "Red Sea Goatfish", nameEl: "Κατσικίσιο Ερυθράς Θάλασσας", nameEs: "Salmonete del mar Rojo", icon: "🐟", scientificName: "Parupeneus forsskali",
         photoId: 941, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve resif sınırları",
@@ -8150,7 +8150,7 @@ const SPECIES_DB = {
         noteEn: "A goatfish endemic to the Red Sea, identified by its black tail spot and lateral stripe.", noteEl: "A goatfish endemic to the Red Sea, identified by its black tail spot and lateral stripe.", noteEs: "A goatfish endemic to the Red Sea, identified by its black tail spot and lateral stripe."
     },
     "redsea_yellowstripe_goatfish": {
-        name: "Sarı Şeritli Barbun", nameEn: "Yellowstripe Goatfish", nameEl: "Γιδόψαρο Yellowstripe", nameEs: "Yellowstripe Goatfish", icon: "🐟", scientificName: "Mulloides flavolineatus",
+        name: "Sarı Şeritli Barbun", nameEn: "Yellowstripe Goatfish", nameEl: "Μπαρμπούνι κιτρινόγραμμο", nameEs: "Salmonete de raya amarilla", icon: "🐟", scientificName: "Mulloides flavolineatus",
         photoId: 942, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk alanlar",
@@ -8164,7 +8164,7 @@ const SPECIES_DB = {
         noteEn: "Found in large schools in shallow waters. Identified by a single yellow stripe on its body.", noteEl: "Found in large schools in shallow waters. Identified by a single yellow stripe on its body.", noteEs: "Found in large schools in shallow waters. Identified by a single yellow stripe on its body."
     },
     "redsea_spangled_emperor": {
-        name: "Yıldızlı İmparator", nameEn: "Spangled Emperor", nameEl: "Σπαρμένος αυτοκράτορας", nameEs: "Spangled Emperor", icon: "🐟", scientificName: "Lethrinus nebulosus",
+        name: "Yıldızlı İmparator", nameEn: "Spangled Emperor", nameEl: "Σπαρμένος αυτοκράτορας", nameEs: "Emperador de manchas azules", icon: "🐟", scientificName: "Lethrinus nebulosus",
         photoId: 943, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve kumluklar",
@@ -8178,7 +8178,7 @@ const SPECIES_DB = {
         noteEn: "A powerful fish with shimmering blue-silver scales. Its meat is highly valued along the Red Sea.", noteEl: "A powerful fish with shimmering blue-silver scales. Its meat is highly valued along the Red Sea.", noteEs: "A powerful fish with shimmering blue-silver scales. Its meat is highly valued along the Red Sea."
     },
     "redsea_blackspot_emperor": {
-        name: "Kara Benekli İmparator", nameEn: "Blackspot Emperor", nameEl: "Blackspot Emperor", nameEs: "Blackspot Emperor", icon: "🐟", scientificName: "Lethrinus harak",
+        name: "Kara Benekli İmparator", nameEn: "Blackspot Emperor", nameEl: "Λυθρίνι μαυροστίκτης", nameEs: "Emperador de mancha negra", icon: "🐟", scientificName: "Lethrinus harak",
         photoId: 944, category: "OTLUK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sığ yosunluk ve resif alanları",
@@ -8192,7 +8192,7 @@ const SPECIES_DB = {
         noteEn: "Easily identified by a large, distinct black spot on its flank. Common in shallow waters.", noteEl: "Easily identified by a large, distinct black spot on its flank. Common in shallow waters.", noteEs: "Easily identified by a large, distinct black spot on its flank. Common in shallow waters."
     },
     "redsea_squirrelfish": {
-        name: "Kızıldeniz Asker Balığı", nameEn: "Red Sea Squirrelfish", nameEl: "Σκίουρος Ερυθράς Θάλασσας", nameEs: "Red Sea Squirrelfish", icon: "🐟", scientificName: "Sargocentron caudimaculatum",
+        name: "Kızıldeniz Asker Balığı", nameEn: "Red Sea Squirrelfish", nameEl: "Σκίουρος Ερυθράς Θάλασσας", nameEs: "Candil del mar Rojo", icon: "🐟", scientificName: "Sargocentron caudimaculatum",
         photoId: 945, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece resif duvarları ve çatlaklar",
@@ -8206,7 +8206,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its bright red color and large eyes. Hunts on the reef at night.", noteEl: "Recognized by its bright red color and large eyes. Hunts on the reef at night.", noteEs: "Recognized by its bright red color and large eyes. Caza on the reef at night."
     },
     "redsea_sabre_squirrel": {
-        name: "Kılıçlı Asker Balığı", nameEn: "Sabre Squirrelfish", nameEl: "Sabre Squirrelfish", nameEs: "Sabre Squirrelfish", icon: "🐟", scientificName: "Sargocentron spiniferum",
+        name: "Kılıçlı Asker Balığı", nameEn: "Sabre Squirrelfish", nameEl: "Καντήλι σπαθί", nameEs: "Candil sable", icon: "🐟", scientificName: "Sargocentron spiniferum",
         photoId: 946, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece mercan mağaraları",
@@ -8220,7 +8220,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by the venomous spine on its gill cover. The largest of the squirrelfish.", noteEl: "Recognized by the venomous spine on its gill cover. The largest of the squirrelfish.", noteEs: "Recognized by the venomous spine on its gill cover. The largest of the squirrelfish."
     },
     "redsea_arabian_angelfish": {
-        name: "Arap Melek Balığı", nameEn: "Arabian Angelfish", nameEl: "Αραβικό Αγγελόψαρο", nameEs: "Arabian Angelfish", icon: "🐟", scientificName: "Pomacanthus asfur",
+        name: "Arap Melek Balığı", nameEn: "Arabian Angelfish", nameEl: "Αραβικό Αγγελόψαρο", nameEs: "Pez ángel árabe", icon: "🐟", scientificName: "Pomacanthus asfur",
         photoId: 947, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri ve mağaralar",
@@ -8234,7 +8234,7 @@ const SPECIES_DB = {
         noteEn: "The most noble fish of the Red Sea with its dark blue body, broad yellow band, and yellow tail.", noteEl: "The most noble fish of the Red Sea with its dark blue body, broad yellow band, and yellow tail.", noteEs: "The most noble fish of the Red Sea with its dark blue body, broad yellow band, and yellow tail."
     },
     "redsea_yellowbar_angelfish": {
-        name: "Sarı Bantlı Melek Balığı", nameEn: "Yellowbar Angelfish", nameEl: "Yellowbar Angelfish", nameEs: "Yellowbar Angelfish", icon: "🐟", scientificName: "Pomacanthus maculosus",
+        name: "Sarı Bantlı Melek Balığı", nameEn: "Yellowbar Angelfish", nameEl: "Αγγελόψαρο κίτρινο", nameEs: "Pez ángel de barra amarilla", icon: "🐟", scientificName: "Pomacanthus maculosus",
         photoId: 948, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz resifler ve liman yapıları",
@@ -8248,7 +8248,7 @@ const SPECIES_DB = {
         noteEn: "Very similar to Asfur but with a more irregular yellow patch. Much more common and curious.", noteEl: "Very similar to Asfur but with a more irregular yellow patch. Much more common and curious.", noteEs: "Very similar to Asfur but with a more irregular yellow patch. Much more common and curious."
     },
     "redsea_royal_angelfish": {
-        name: "Kral Melek Balığı", nameEn: "Royal Angelfish", nameEl: "Βασιλικό Αγγελόψαρο", nameEs: "Royal Angelfish", icon: "🐟", scientificName: "Pygoplites diacanthus",
+        name: "Kral Melek Balığı", nameEn: "Royal Angelfish", nameEl: "Βασιλικό Αγγελόψαρο", nameEs: "Pez ángel real", icon: "🐟", scientificName: "Pygoplites diacanthus",
         photoId: 949, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz zengin mercan resifleri",
@@ -8262,7 +8262,7 @@ const SPECIES_DB = {
         noteEn: "Resembles a work of art with its blue, white, and orange vertical stripes. A very shy species.", noteEl: "Resembles a work of art with its blue, white, and orange vertical stripes. A very shy species.", noteEs: "Resembles a work of art with its blue, white, and orange vertical stripes. A very shy species."
     },
     "redsea_dugong": {
-        name: "Dugong / Deniz İneği", nameEn: "Dugong", nameEl: "Dugong", nameEs: "Dugong", icon: "🧜‍♀️", scientificName: "Dugong dugon",
+        name: "Dugong / Deniz İneği", nameEn: "Dugong", nameEl: "Δουγκόνγκ", nameEs: "Dugongo", icon: "🧜‍♀️", scientificName: "Dugong dugon",
         photoId: 950, category: "OTLUK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sığ deniz çayırları",
@@ -8276,7 +8276,7 @@ const SPECIES_DB = {
         noteEn: "Said to be the origin of mermaid legends. The rarest and most protected mammal of the Red Sea.", noteEl: "Said to be the origin of mermaid legends. The rarest and most protected mammal of the Red Sea.", noteEs: "Said to be the origin of mermaid legends. The rarest and most protected mammal of the Red Sea."
     },
     "thailand_giant_snakehead": {
-        name: "Dev Yılanbaş", nameEn: "Giant Snakehead", nameEl: "Giant Snakehead", nameEs: "Giant Snakehead", icon: "🐟", scientificName: "Channa micropeltes",
+        name: "Dev Yılanbaş", nameEn: "Giant Snakehead", nameEl: "Φιδοκέφαλος γίγας", nameEs: "Cabeza de serpiente gigante", icon: "🐟", scientificName: "Channa micropeltes",
         photoId: 1001, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz nehir ağızları ve bataklık kıyıları",
@@ -8304,7 +8304,7 @@ const SPECIES_DB = {
         noteEn: "The king of Thai cuisine. A legendary fighter capable of living in both rivers and the sea.", noteEl: "The king of Thai cuisine. A legendary fighter capable of living in both rivers and the sea.", noteEs: "The king of Thai cuisine. A legendary fighter capable of living in both rivers and the sea."
     },
     "thailand_mud_crab": {
-        name: "Dev Çamur Yengeci", nameEn: "Giant Mud Crab", nameEl: "Γιγαντιαίος Καβούρι λάσπης", nameEs: "Giant Mud Crab", icon: "🦀", scientificName: "Scylla serrata",
+        name: "Dev Çamur Yengeci", nameEn: "Giant Mud Crab", nameEl: "Γιγαντιαίος Καβούρι λάσπης", nameEs: "Cangrejo de manglar gigante", icon: "🦀", scientificName: "Scylla serrata",
         photoId: 1003, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece mangrov kökleri ve çamurluklar",
@@ -8318,7 +8318,7 @@ const SPECIES_DB = {
         noteEn: "Famous for its powerful claws. The most valuable prize of the mangroves along Thai coasts.", noteEl: "Famous for its powerful claws. The most valuable prize of the mangroves along Thai coasts.", noteEs: "Famous for its powerful claws. The most valuable prize of the mangroves along Thai coasts."
     },
     "thailand_sailfish": {
-        name: "Yelken Balığı", nameEn: "Indo-Pacific Sailfish", nameEl: "Ιστιόψαρο Ινδο-Ειρηνικού", nameEs: "Indo-Pacific Sailfish", icon: "🐟", scientificName: "Istiophorus platypterus",
+        name: "Yelken Balığı", nameEn: "Indo-Pacific Sailfish", nameEl: "Ιστιόψαρο Ινδο-Ειρηνικού", nameEs: "Pez vela", icon: "🐟", scientificName: "Istiophorus platypterus",
         photoId: 1004, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey",
@@ -8332,7 +8332,7 @@ const SPECIES_DB = {
         noteEn: "One of the fastest fish in the world. Frequently spotted around Phuket and Similan islands.", noteEl: "One of the fastest fish in the world. Frequently spotted around Phuket and Similan islands.", noteEs: "One of the fastest fish in the world. Frequently spotted around Phuket and Similan islands."
     },
     "thailand_spanish_mackerel": {
-        name: "Tenggiri", nameEn: "Narrow-barred Spanish Mackerel", nameEl: "Ισπανικό σκουμπρί με στενό φραγμό", nameEs: "Narrow-barred Spanish Mackerel", icon: "🐟", scientificName: "Scomberomorus commerson",
+        name: "Tenggiri", nameEn: "Narrow-barred Spanish Mackerel", nameEl: "Ισπανικό σκουμπρί με στενό φραγμό", nameEs: "Carite estriado", icon: "🐟", scientificName: "Scomberomorus commerson",
         photoId: 1005, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık açık su ve resif kenarları",
@@ -8346,7 +8346,7 @@ const SPECIES_DB = {
         noteEn: "Known for sharp teeth and speed. Very popular grilled in Asian cuisine.", noteEl: "Known for sharp teeth and speed. Very popular grilled in Asian cuisine.", noteEs: "Known for sharp teeth and speed. Very popular grilled in Asian cuisine."
     },
     "thailand_longtail_tuna": {
-        name: "Uzunkuyruk Orkinos", nameEn: "Longtail Tuna", nameEl: "Τόνος Longtail", nameEs: "Longtail Tuna", icon: "🐟", scientificName: "Thunnus tonggol",
+        name: "Uzunkuyruk Orkinos", nameEn: "Longtail Tuna", nameEl: "Τόνος τονγκόλ", nameEs: "Atún tongol", icon: "🐟", scientificName: "Thunnus tonggol",
         photoId: 1006, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz",
@@ -8360,7 +8360,7 @@ const SPECIES_DB = {
         noteEn: "More slender than other tunas. The most common tuna species in the Gulf of Thailand.", noteEl: "More slender than other tunas. The most common tuna species in the Gulf of Thailand.", noteEs: "More slender than other tunas. The most common tuna species in the Gulf of Thailand."
     },
     "thailand_barracuda": {
-        name: "Çizgili Iskarmoz", nameEn: "Pickhandle Barracuda", nameEl: "Pickhandle Barracuda", nameEs: "Pickhandle Barracuda", icon: "🐟", scientificName: "Sphyraena jello",
+        name: "Çizgili Iskarmoz", nameEn: "Pickhandle Barracuda", nameEl: "Λούτσος ραβδωτός", nameEs: "Barracuda jello", icon: "🐟", scientificName: "Sphyraena jello",
         photoId: 1007, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece ışıklı iskeleler ve resifler",
@@ -8374,7 +8374,7 @@ const SPECIES_DB = {
         noteEn: "Dark vertical bars are its most distinct feature. Highly active during night fishing.", noteEl: "Dark vertical bars are its most distinct feature. Highly active during night fishing.", noteEs: "Dark vertical bars are its most distinct feature. Highly active during night fishing."
     },
     "thailand_cobia": {
-        name: "Kobia", nameEn: "Cobia", nameEl: "Cobia", nameEs: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
+        name: "Kobia", nameEn: "Cobia", nameEl: "Κόμπια", nameEs: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
         photoId: 1008, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz şamandıralar ve batıklar",
@@ -8388,7 +8388,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its shark-like silhouette. Incredibly strong and grows very fast.", noteEl: "Recognized by its shark-like silhouette. Incredibly strong and grows very fast.", noteEs: "Recognized by its shark-like silhouette. Incredibly strong and grows very fast."
     },
     "thailand_mangrove_snapper": {
-        name: "Mangrov Mercanı", nameEn: "Mangrove Red Snapper", nameEl: "Mangrove Red Snapper", nameEs: "Mangrove Red Snapper", icon: "🐟", scientificName: "Lutjanus argentimaculatus",
+        name: "Mangrov Mercanı", nameEn: "Mangrove Red Snapper", nameEl: "Λουτσάνος μαγγρόβιου", nameEs: "Pargo de manglar", icon: "🐟", scientificName: "Lutjanus argentimaculatus",
         photoId: 1009, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "NIGHT", peakHoursDesc: "Gece mangrov kökleri ve iskele ayakları",
@@ -8402,7 +8402,7 @@ const SPECIES_DB = {
         noteEn: "Likes to hide among mangrove roots. Has a very strong jaw and sharp teeth.", noteEl: "Likes to hide among mangrove roots. Has a very strong jaw and sharp teeth.", noteEs: "Likes to hide among mangrove roots. Has a very strong jaw and sharp teeth."
     },
     "thailand_threadfin": {
-        name: "Dört Parmaklı Balık", nameEn: "Threadfin Salmon", nameEl: "Σολομός με κλωστή", nameEs: "Threadfin Salmon", icon: "🐟", scientificName: "Eleutheronema tetradactylum",
+        name: "Dört Parmaklı Balık", nameEn: "Threadfin Salmon", nameEl: "Σολομός με κλωστή", nameEs: "Barbudo de cuatro dedos", icon: "🐟", scientificName: "Eleutheronema tetradactylum",
         photoId: 1010, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ çamurluk ve kumluk kıyılar",
@@ -8417,7 +8417,7 @@ const SPECIES_DB = {
     },
 
     "thailand_malabar_grouper": {
-        name: "Malabar Orfozu", nameEn: "Malabar Grouper", nameEl: "Σφυρίδα Malabar", nameEs: "Malabar Grouper", icon: "🐟", scientificName: "Epinephelus malabaricus",
+        name: "Malabar Orfozu", nameEn: "Malabar Grouper", nameEl: "Ροφός Μαλαμπάρ", nameEs: "Mero de Malabar", icon: "🐟", scientificName: "Epinephelus malabaricus",
         photoId: 1011, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz resif çatlakları ve mağaralar",
@@ -8431,7 +8431,7 @@ const SPECIES_DB = {
         noteEn: "One of the most common and powerful groupers in SE Asian waters. Known for its large size.", noteEl: "One of the most common and powerful groupers in SE Asian waters. Known for its large size.", noteEs: "One of the most common and powerful groupers in SE Asian waters. Known for its large size."
     },
     "thailand_orange_spotted_grouper": {
-        name: "Turuncu Benekli Orfoz", nameEn: "Orange-spotted Grouper", nameEl: "Σφυρίδα με πορτοκαλί κηλίδες", nameEs: "Orange-spotted Grouper", icon: "🐟", scientificName: "Epinephelus coioides",
+        name: "Turuncu Benekli Orfoz", nameEn: "Orange-spotted Grouper", nameEl: "Σφυρίδα με πορτοκαλί κηλίδες", nameEs: "Mero de puntos naranjas", icon: "🐟", scientificName: "Epinephelus coioides",
         photoId: 1012, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz nehir ağızları ve mangrovlar",
@@ -8445,7 +8445,7 @@ const SPECIES_DB = {
         noteEn: "Identified by orange-brown spots on its body. A species capable of living in brackish waters.", noteEl: "Identified by orange-brown spots on its body. A species capable of living in brackish waters.", noteEs: "Identified by orange-brown spots on its body. A species capable of living in brackish waters."
     },
     "thailand_chocolate_hind": {
-        name: "Çikolata Hanisi", nameEn: "Chocolate Hind", nameEl: "Σοκολάτα Hind", nameEs: "Chocolate Hind", icon: "🐟", scientificName: "Cephalopholis boenak",
+        name: "Çikolata Hanisi", nameEn: "Chocolate Hind", nameEl: "Ροφός σοκολατί", nameEs: "Mero chocolate", icon: "🐟", scientificName: "Cephalopholis boenak",
         photoId: 1013, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz kıyı resifleri",
@@ -8459,7 +8459,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its dark chocolate-brown color. Inhabits crevices in shallow reefs.", noteEl: "Recognized by its dark chocolate-brown color. Inhabits crevices in shallow reefs.", noteEs: "Recognized by its dark chocolate-brown color. Inhabits crevices in shallow reefs."
     },
     "thailand_coral_trout": {
-        name: "Mercan Alabalığı", nameEn: "Coral Trout", nameEl: "Πέστροφα κοραλλιών", nameEs: "Coral Trout", icon: "🐟", scientificName: "Plectropomus leopardus",
+        name: "Mercan Alabalığı", nameEn: "Coral Trout", nameEl: "Πέστροφα κοραλλιών", nameEs: "Mero leopardo de coral", icon: "🐟", scientificName: "Plectropomus leopardus",
         photoId: 1014, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz zengin mercan resifleri",
@@ -8473,7 +8473,7 @@ const SPECIES_DB = {
         noteEn: "One of the most valuable reef fish in SE Asia. Known for its vibrant color and blue spots.", noteEl: "One of the most valuable reef fish in SE Asia. Known for its vibrant color and blue spots.", noteEs: "One of the most valuable reef fish in SE Asia. Known for its vibrant color and blue spots."
     },
     "thailand_red_grouper": {
-        name: "Kırmızı Orfoz", nameEn: "Red Grouper", nameEl: "Κόκκινη σφυρίδα", nameEs: "Red Grouper", icon: "🐟", scientificName: "Epinephelus akaara",
+        name: "Kırmızı Orfoz", nameEn: "Red Grouper", nameEl: "Κόκκινη σφυρίδα", nameEs: "Mero de puntos rojos", icon: "🐟", scientificName: "Epinephelus akaara",
         photoId: 1015, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz kayalık yamaçlar",
@@ -8487,7 +8487,7 @@ const SPECIES_DB = {
         noteEn: "Known for its reddish color and tasty meat. A popular target for reef anglers.", noteEl: "Known for its reddish color and tasty meat. A popular target for reef anglers.", noteEs: "Known for its reddish color and tasty meat. A popular target for reef anglers."
     },
     "thailand_giant_grouper": {
-        name: "Dev Orfoz", nameEn: "Giant Grouper", nameEl: "Γίγαντας σφυρίδα", nameEs: "Giant Grouper", icon: "🐟", scientificName: "Epinephelus lanceolatus",
+        name: "Dev Orfoz", nameEn: "Giant Grouper", nameEl: "Γίγαντας σφυρίδα", nameEs: "Mero gigante", icon: "🐟", scientificName: "Epinephelus lanceolatus",
         photoId: 1016, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler, batıklar ve mağaralar",
@@ -8501,7 +8501,7 @@ const SPECIES_DB = {
         noteEn: "The largest bony fish found in coral reefs. Can exceed 400 kg. Highly respected in Thailand.", noteEl: "The largest bony fish found in coral reefs. Can exceed 400 kg. Highly respected in Thailand.", noteEs: "The largest bony fish found in coral reefs. Can exceed 400 kg. Highly respected in Thailand."
     },
     "thailand_yellowtail_snapper": {
-        name: "Sarı Kuyruk Mercan", nameEn: "Yellowtail Snapper", nameEl: "Yellowtail Snapper", nameEs: "Yellowtail Snapper", icon: "🐟", scientificName: "Lutjanus lemniscatus",
+        name: "Sarı Kuyruk Mercan", nameEn: "Yellowtail Snapper", nameEl: "Λουτσάνος κιτρινόουρος", nameEs: "Pargo de cola amarilla", icon: "🐟", scientificName: "Lutjanus lemniscatus",
         photoId: 1017, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz resif üstleri",
@@ -8515,7 +8515,7 @@ const SPECIES_DB = {
         noteEn: "Identified by yellow color on the tail and dark lines on the body. Found in schools.", noteEl: "Identified by yellow color on the tail and dark lines on the body. Found in schools.", noteEs: "Identified by yellow color on the tail and dark lines on the body. Found in schools."
     },
     "thailand_checkered_snapper": {
-        name: "Damalı Mercan", nameEn: "Checkered Snapper", nameEl: "Καρό Snapper", nameEs: "Checkered Snapper", icon: "🐟", scientificName: "Lutjanus decussatus",
+        name: "Damalı Mercan", nameEn: "Checkered Snapper", nameEl: "Λουτσάνος καρό", nameEs: "Pargo ajedrezado", icon: "🐟", scientificName: "Lutjanus decussatus",
         photoId: 1018, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -8529,7 +8529,7 @@ const SPECIES_DB = {
         noteEn: "Identified by checkered patterns on its back. A very photogenic snapper species.", noteEl: "Identified by checkered patterns on its back. A very photogenic snapper species.", noteEs: "Identified by checkered patterns on its back. A very photogenic snapper species."
     },
     "thailand_johns_snapper": {
-        name: "John'un Mercanı", nameEn: "John's Snapper", nameEl: "John's Snapper", nameEs: "John's Snapper", icon: "🐟", scientificName: "Lutjanus johnii",
+        name: "John'un Mercanı", nameEn: "John's Snapper", nameEl: "Λουτσάνος χρυσός", nameEs: "Pargo dorado de John", icon: "🐟", scientificName: "Lutjanus johnii",
         photoId: 1019, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "NIGHT", peakHoursDesc: "Gece nehir ağızları ve iskeleler",
@@ -8543,7 +8543,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by a single large black spot and golden-bronze color. Known for strong headshakes.", noteEl: "Recognized by a single large black spot and golden-bronze color. Known for strong headshakes.", noteEs: "Recognized by a single large black spot and golden-bronze color. Known for strong headshakes."
     },
     "thailand_russells_snapper": {
-        name: "Russell'ın Mercanı", nameEn: "Russell's Snapper", nameEl: "Ο Σάπερ του Ράσελ", nameEs: "Russell's Snapper", icon: "🐟", scientificName: "Lutjanus russellii",
+        name: "Russell'ın Mercanı", nameEn: "Russell's Snapper", nameEl: "Ο Σάπερ του Ράσελ", nameEs: "Pargo de Russell", icon: "🐟", scientificName: "Lutjanus russellii",
         photoId: 1020, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sığ resifler ve mangrovlar",
@@ -8558,7 +8558,7 @@ const SPECIES_DB = {
     },
 
     "thailand_giant_mottled_eel": {
-        name: "Dev Benekli Yılan Balığı", nameEn: "Giant Mottled Eel", nameEl: "Γιγαντιαίο Στιχτό Χέλι", nameEs: "Giant Mottled Eel", icon: "🐍", scientificName: "Anguilla marmorata",
+        name: "Dev Benekli Yılan Balığı", nameEn: "Giant Mottled Eel", nameEl: "Γιγαντιαίο Στιχτό Χέλι", nameEs: "Anguila jaspeada gigante", icon: "🐍", scientificName: "Anguilla marmorata",
         photoId: 1021, category: "KAYALIK",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece nehir ağızları ve kaya kovukları",
@@ -8572,7 +8572,7 @@ const SPECIES_DB = {
         noteEn: "The largest fresh/saltwater eel in Thailand. Identified by its mottled skin and massive size.", noteEl: "The largest fresh/saltwater eel in Thailand. Identified by its mottled skin and massive size.", noteEs: "The largest fresh/saltwater eel in Thailand. Identified by its mottled skin and massive size."
     },
     "thailand_giant_moray": {
-        name: "Dev Müren", nameEn: "Giant Moray", nameEl: "Γίγαντας Μόρεϊ", nameEs: "Giant Moray", icon: "🐍", scientificName: "Gymnothorax javanicus",
+        name: "Dev Müren", nameEn: "Giant Moray", nameEl: "Γίγαντας Μόρεϊ", nameEs: "Morena gigante", icon: "🐍", scientificName: "Gymnothorax javanicus",
         photoId: 1022, category: "KAYALIK",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece resif duvarları ve mağaralar",
@@ -8586,7 +8586,7 @@ const SPECIES_DB = {
         noteEn: "The heaviest moray eel in the world. Has a very powerful bite and is a top predator of the reef.", noteEl: "The heaviest moray eel in the world. Has a very powerful bite and is a top predator of the reef.", noteEs: "The heaviest moray eel in the world. Has a very powerful bite and is a top predator of the reef."
     },
     "thailand_honeycomb_moray": {
-        name: "Bal Peteği Müreni", nameEn: "Honeycomb Moray", nameEl: "Honeycomb Moray", nameEs: "Honeycomb Moray", icon: "🐍", scientificName: "Gymnothorax favagineus",
+        name: "Bal Peteği Müreni", nameEn: "Honeycomb Moray", nameEl: "Σμέρνα κηρήθρα", nameEs: "Morena panal", icon: "🐍", scientificName: "Gymnothorax favagineus",
         photoId: 1023, category: "KAYALIK",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece mercan resifleri",
@@ -8600,7 +8600,7 @@ const SPECIES_DB = {
         noteEn: "Stunning appearance with honeycomb-like black spots on a white background.", noteEl: "Stunning appearance with honeycomb-like black spots on a white background.", noteEs: "Stunning appearance with honeycomb-like black spots on a white background."
     },
     "thailand_zebra_moray": {
-        name: "Zebra Müreni", nameEn: "Zebra Moray", nameEl: "Ζέβρα Μοράι", nameEs: "Zebra Moray", icon: "🐍", scientificName: "Gymnomuraena zebra",
+        name: "Zebra Müreni", nameEn: "Zebra Moray", nameEl: "Ζέβρα Μοράι", nameEs: "Morena cebra", icon: "🐍", scientificName: "Gymnomuraena zebra",
         photoId: 1024, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece sığ resif alanları",
@@ -8614,7 +8614,7 @@ const SPECIES_DB = {
         noteEn: "Identified by black and white ringed patterns. Unlike other morays, it feeds on crustaceans.", noteEl: "Identified by black and white ringed patterns. Unlike other morays, it feeds on crustaceans.", noteEs: "Identified by black and white ringed patterns. Unlike other morays, it feeds on crustaceans."
     },
     "thailand_fimbriated_moray": {
-        name: "Benekli Müren", nameEn: "Fimbriated Moray", nameEl: "Fimbriated Moray", nameEs: "Fimbriated Moray", icon: "🐍", scientificName: "Gymnothorax fimbriatus",
+        name: "Benekli Müren", nameEn: "Fimbriated Moray", nameEl: "Σμέρνα κροσσωτή", nameEs: "Morena fimbriada", icon: "🐍", scientificName: "Gymnothorax fimbriatus",
         photoId: 1025, category: "KAYALIK",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece kıyı resifleri",
@@ -8628,7 +8628,7 @@ const SPECIES_DB = {
         noteEn: "Identified by its yellow head and dark spots on the body. Common in shallow reefs.", noteEl: "Identified by its yellow head and dark spots on the body. Common in shallow reefs.", noteEs: "Identified by its yellow head and dark spots on the body. Common in shallow reefs."
     },
     "thailand_giant_catfish": {
-        name: "Dev Yayın Balığı", nameEn: "Giant Catfish", nameEl: "Γιγαντιαίο γατόψαρο", nameEs: "Giant Catfish", icon: "🐟", scientificName: "Pangasianodon gigas",
+        name: "Dev Yayın Balığı", nameEn: "Giant Catfish", nameEl: "Γιγαντιαίο γατόψαρο", nameEs: "Pez gato gigante del Mekong", icon: "🐟", scientificName: "Pangasianodon gigas",
         photoId: 1026, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz büyük nehir ağızları",
@@ -8642,7 +8642,7 @@ const SPECIES_DB = {
         noteEn: "One of the largest freshwater fish in the world. Highly significant culturally and sportingly in Thailand.", noteEl: "One of the largest freshwater fish in the world. Highly significant culturally and sportingly in Thailand.", noteEs: "One of the largest freshwater fish in the world. Highly significant culturally and sportingly in Thailand."
     },
     "thailand_walking_catfish": {
-        name: "Yürüyen Yayın Balığı", nameEn: "Walking Catfish", nameEl: "Γατόψαρο που περπατάει", nameEs: "Walking Catfish", icon: "🐟", scientificName: "Clarias batrachus",
+        name: "Yürüyen Yayın Balığı", nameEn: "Walking Catfish", nameEl: "Γατόψαρο που περπατάει", nameEs: "Pez gato caminante", icon: "🐟", scientificName: "Clarias batrachus",
         photoId: 1027, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ bataklıklar ve su birikintileri",
@@ -8656,7 +8656,7 @@ const SPECIES_DB = {
         noteEn: "Can travel short distances on land using its pectoral fins. A staple of Thai street food.", noteEl: "Can travel short distances on land using its pectoral fins. A staple of Thai street food.", noteEs: "Can travel short distances on land using its pectoral fins. A staple of Thai street food."
     },
     "thailand_striped_catfish": {
-        name: "Çizgili Yayın Balığı", nameEn: "Striped Catfish", nameEl: "Ριγέ γατόψαρο", nameEs: "Striped Catfish", icon: "🐟", scientificName: "Pangasianodon hypophthalmus",
+        name: "Çizgili Yayın Balığı", nameEn: "Striped Catfish", nameEl: "Ριγέ γατόψαρο", nameEs: "Panga", icon: "🐟", scientificName: "Pangasianodon hypophthalmus",
         photoId: 1028, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz nehirler ve kanallar",
@@ -8670,7 +8670,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its vertical stripes. Seen in large schools in waters around Thai temples.", noteEl: "Recognized by its vertical stripes. Seen in large schools in waters around Thai temples.", noteEs: "Recognized by its vertical stripes. Seen in large schools in waters around Thai temples."
     },
     "thailand_indian_threadfin": {
-        name: "Hint Parmaklı Balığı", nameEn: "Indian Threadfin", nameEl: "Ινδικό κλωστή", nameEs: "Indian Threadfin", icon: "🐟", scientificName: "Leptomelanosoma indicum",
+        name: "Hint Parmaklı Balığı", nameEn: "Indian Threadfin", nameEl: "Ινδικό κλωστή", nameEs: "Barbudo índico", icon: "🐟", scientificName: "Leptomelanosoma indicum",
         photoId: 1029, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk kıyılar",
@@ -8684,7 +8684,7 @@ const SPECIES_DB = {
         noteEn: "Uses long finger-like filaments to scan the sand for food. A highly valued food fish.", noteEl: "Uses long finger-like filaments to scan the sand for food. A highly valued food fish.", noteEs: "Uses long finger-like filaments to scan the sand for food. A highly valued food fish."
     },
     "thailand_serrated_mud_crab": {
-        name: "Tırtıklı Çamur Yengeci", nameEn: "Serrated Mud Crab", nameEl: "οδοντωτό καβούρι λάσπης", nameEs: "Serrated Mud Crab", icon: "🦀", scientificName: "Scylla olivacea",
+        name: "Tırtıklı Çamur Yengeci", nameEn: "Serrated Mud Crab", nameEl: "οδοντωτό καβούρι λάσπης", nameEs: "Cangrejo de manglar dentado", icon: "🦀", scientificName: "Scylla olivacea",
         photoId: 1030, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece mangrov ormanları",
@@ -8699,7 +8699,7 @@ const SPECIES_DB = {
     },
 
     "thailand_hammerhead_shark": {
-        name: "Dev Çekiçbaş Köpekbalığı", nameEn: "Great Hammerhead Shark", nameEl: "Μεγάλος Σφυροκέφαλος Καρχαρίας", nameEs: "Great Hammerhead Shark", icon: "🦈", scientificName: "Sphyrna mokarran",
+        name: "Dev Çekiçbaş Köpekbalığı", nameEn: "Great Hammerhead Shark", nameEl: "Μεγάλος Σφυροκέφαλος Καρχαρίας", nameEs: "Cornuda gigante", icon: "🦈", scientificName: "Sphyrna mokarran",
         photoId: 1031, category: "PELAJIK_AVCI",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve derin resifler",
@@ -8713,7 +8713,7 @@ const SPECIES_DB = {
         noteEn: "One of the world's most interesting predators with its characteristic head shape. Found in Thai deep waters.", noteEl: "One of the world's most interesting predators with its characteristic head shape. Found in Thai deep waters.", noteEs: "One of the world's most interesting predators with its characteristic head shape. Found in Thai deep waters."
     },
     "thailand_blacktip_reef_shark": {
-        name: "Siyah Yüzgeçli Resif Köpekbalığı", nameEn: "Blacktip Reef Shark", nameEl: "Blacktip Reef Shark", nameEs: "Blacktip Reef Shark", icon: "🦈", scientificName: "Carcharhinus melanopterus",
+        name: "Siyah Yüzgeçli Resif Köpekbalığı", nameEn: "Blacktip Reef Shark", nameEl: "Καρχαρίας μαυροπτέρυγος υφάλου", nameEs: "Tiburón de punta negra de arrecife", icon: "🦈", scientificName: "Carcharhinus melanopterus",
         photoId: 1032, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ resifler ve lagünler",
@@ -8727,7 +8727,7 @@ const SPECIES_DB = {
         noteEn: "The most frequently seen shark in shallow waters and reef tops. Black fin tips are distinctive.", noteEl: "The most frequently seen shark in shallow waters and reef tops. Black fin tips are distinctive.", noteEs: "The most frequently seen shark in shallow waters and reef tops. Black fin tips are distinctive."
     },
     "thailand_whitetip_reef_shark": {
-        name: "Beyaz Yüzgeçli Resif Köpekbalığı", nameEn: "Whitetip Reef Shark", nameEl: "Καρχαρίας Whitetip Reef", nameEs: "Whitetip Reef Shark", icon: "🦈", scientificName: "Triaenodon obesus",
+        name: "Beyaz Yüzgeçli Resif Köpekbalığı", nameEn: "Whitetip Reef Shark", nameEl: "Καρχαρίας λευκοπτέρυγος υφάλου", nameEs: "Tiburón de puntas blancas de arrecife", icon: "🦈", scientificName: "Triaenodon obesus",
         photoId: 1033, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece resif mağaraları ve çatlaklar",
@@ -8741,7 +8741,7 @@ const SPECIES_DB = {
         noteEn: "Rests in caves during the day and becomes one of the most active reef hunters at night.", noteEl: "Rests in caves during the day and becomes one of the most active reef hunters at night.", noteEs: "Rests in caves during the day and becomes one of the most active reef hunters at night."
     },
     "thailand_grey_reef_shark": {
-        name: "Gri Resif Köpekbalığı", nameEn: "Grey Reef Shark", nameEl: "Καρχαρίας γκρίζος ύφαλος", nameEs: "Grey Reef Shark", icon: "🦈", scientificName: "Carcharhinus amblyrhynchos",
+        name: "Gri Resif Köpekbalığı", nameEn: "Grey Reef Shark", nameEl: "Καρχαρίας γκρίζος ύφαλος", nameEs: "Tiburón gris de arrecife", icon: "🦈", scientificName: "Carcharhinus amblyrhynchos",
         photoId: 1034, category: "PELAJIK_AVCI",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve açık su",
@@ -8755,7 +8755,7 @@ const SPECIES_DB = {
         noteEn: "Patrols in schools along reef walls. A highly social shark species.", noteEl: "Patrols in schools along reef walls. A highly social shark species.", noteEs: "Patrols in schools along reef walls. A highly social shark species."
     },
     "thailand_leopard_shark": {
-        name: "Leopar Köpekbalığı", nameEn: "Leopard Shark", nameEl: "Λεοπάρ Καρχαρίας", nameEs: "Leopard Shark", icon: "🦈", scientificName: "Stegostoma tigrinum",
+        name: "Leopar Köpekbalığı", nameEn: "Leopard Shark", nameEl: "Λεοπάρ Καρχαρίας", nameEs: "Tiburón cebra", icon: "🦈", scientificName: "Stegostoma tigrinum",
         photoId: 1035, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk resif tabanları",
@@ -8769,7 +8769,7 @@ const SPECIES_DB = {
         noteEn: "The gentlest resident of Thai waters. Has a stunning appearance with spotted skin and a long tail.", noteEl: "The gentlest resident of Thai waters. Has a stunning appearance with spotted skin and a long tail.", noteEs: "The gentlest resident of Thai waters. Has a stunning appearance with spotted skin and a long tail."
     },
     "thailand_bamboo_shark": {
-        name: "Bambu Köpekbalığı", nameEn: "Bamboo Shark", nameEl: "Μπαμπού Καρχαρίας", nameEs: "Bamboo Shark", icon: "🦈", scientificName: "Chiloscyllium punctatum",
+        name: "Bambu Köpekbalığı", nameEn: "Bamboo Shark", nameEl: "Μπαμπού Καρχαρίας", nameEs: "Tiburón bambú", icon: "🦈", scientificName: "Chiloscyllium punctatum",
         photoId: 1036, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece sığ mercan ve kayalık alanlar",
@@ -8783,7 +8783,7 @@ const SPECIES_DB = {
         noteEn: "Moves easily in narrow spaces between reefs with its slender body. Very small.", noteEl: "Moves easily in narrow spaces between reefs with its slender body. Very small.", noteEs: "Moves easily in narrow spaces between reefs with its slender body. Very small."
     },
     "thailand_nurse_shark": {
-        name: "Kahverengi Uysal Köpekbalığı", nameEn: "Tawny Nurse Shark", nameEl: "Tawny Nurse Shark", nameEs: "Tawny Nurse Shark", icon: "🦈", scientificName: "Nebrius ferrugineus",
+        name: "Kahverengi Uysal Köpekbalığı", nameEn: "Tawny Nurse Shark", nameEl: "Καρχαρίας νοσοκόμα", nameEs: "Tiburón gata leonado", icon: "🦈", scientificName: "Nebrius ferrugineus",
         photoId: 1037, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece kaya altları ve mağara girişleri",
@@ -8797,7 +8797,7 @@ const SPECIES_DB = {
         noteEn: "Usually stays motionless in caves during the day. Not aggressive but should not be touched.", noteEl: "Usually stays motionless in caves during the day. Not aggressive but should not be touched.", noteEs: "Usually stays motionless in caves during the day. Not aggressive but should not be touched."
     },
     "thailand_manta_ray": {
-        name: "Reef Manta Ray", nameEn: "Reef Manta Ray", nameEl: "Reef Manta Ray", nameEs: "Reef Manta Ray", icon: "🐟", scientificName: "Mobula alfredi",
+        name: "Reef Manta Ray", nameEn: "Reef Manta Ray", nameEl: "Μάντα υφάλου", nameEs: "Manta de arrecife", icon: "🐟", scientificName: "Mobula alfredi",
         photoId: 1038, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz temizlik istasyonları ve açık su",
@@ -8811,7 +8811,7 @@ const SPECIES_DB = {
         noteEn: "The most magnificent resident of the Similan islands and Andaman sea. Glides like flying with its massive fins.", noteEl: "The most magnificent resident of the Similan islands and Andaman sea. Glides like flying with its massive fins.", noteEs: "The most magnificent resident of the Similan islands and Andaman sea. Glides like flying with its massive fins."
     },
     "thailand_eagle_ray": {
-        name: "Benekli Kartal Vatozu", nameEn: "Spotted Eagle Ray", nameEl: "Spotted Eagle Ray", nameEs: "Spotted Eagle Ray", icon: "🐟", scientificName: "Aetobatus narinari",
+        name: "Benekli Kartal Vatozu", nameEn: "Spotted Eagle Ray", nameEl: "Σαλάχι αετός", nameEs: "Raya águila moteada", icon: "🐟", scientificName: "Aetobatus narinari",
         photoId: 1039, category: "PELAJIK_AVCI",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz açık su ve resif yamaçları",
@@ -8825,7 +8825,7 @@ const SPECIES_DB = {
         noteEn: "One of the most aesthetic ray species with white spots on its black body and a long tail.", noteEl: "One of the most aesthetic ray species with white spots on its black body and a long tail.", noteEs: "One of the most aesthetic ray species with white spots on its black body and a long tail."
     },
     "thailand_ribbontail_ray": {
-        name: "Mavi Benekli Vatoz", nameEn: "Blue-spotted Ribbontail Ray", nameEl: "Ακτίνα Ribbontail Ray με μπλε στίγματα", nameEs: "Blue-spotted Ribbontail Ray", icon: "🐟", scientificName: "Taeniura lymma",
+        name: "Mavi Benekli Vatoz", nameEn: "Blue-spotted Ribbontail Ray", nameEl: "Σαλάχι γαλαζόστικτο", nameEs: "Raya de puntos azules", icon: "🐟", scientificName: "Taeniura lymma",
         photoId: 1040, category: "KAYALIK",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri altları",
@@ -8840,7 +8840,7 @@ const SPECIES_DB = {
     },
 
     "thailand_whale_shark": {
-        name: "Balina Köpekbalığı", nameEn: "Whale Shark", nameEl: "Καρχαρίας φαλαινών", nameEs: "Whale Shark", icon: "🦈", scientificName: "Rhincodon typus",
+        name: "Balina Köpekbalığı", nameEn: "Whale Shark", nameEl: "Καρχαρίας φαλαινών", nameEs: "Tiburón ballena", icon: "🦈", scientificName: "Rhincodon typus",
         photoId: 1041, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve plankton zengin alanlar",
@@ -8854,7 +8854,7 @@ const SPECIES_DB = {
         noteEn: "The largest fish in the world. The ultimate dream encounter for divers in Thai waters.", noteEl: "The largest fish in the world. The ultimate dream encounter for divers in Thai waters.", noteEs: "The largest fish in the world. The ultimate dream encounter for divers in Thai waters."
     },
     "thailand_longtail_ray": {
-        name: "Uzunkuyruk Vatoz", nameEn: "Long-tail Ray", nameEl: "Long-tail Ray", nameEs: "Long-tail Ray", icon: "🐟", scientificName: "Himantura uarnak",
+        name: "Uzunkuyruk Vatoz", nameEn: "Long-tail Ray", nameEl: "Σαλάχι μακρύουρο", nameEs: "Raya de cola larga", icon: "🐟", scientificName: "Himantura uarnak",
         photoId: 1042, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluklar ve lagünler",
@@ -8868,7 +8868,7 @@ const SPECIES_DB = {
         noteEn: "Identified by leopard-like spots and a tail three times its body length.", noteEl: "Identified by leopard-like spots and a tail three times its body length.", noteEs: "Identified by leopard-like spots and a tail three times its body length."
     },
     "thailand_cowtail_stingray": {
-        name: "İnek Kuyruklu Vatoz", nameEn: "Cowtail Stingray", nameEl: "Cowtail Stingray", nameEs: "Cowtail Stingray", icon: "🐟", scientificName: "Pastinachus sephen",
+        name: "İnek Kuyruklu Vatoz", nameEn: "Cowtail Stingray", nameEl: "Σαλάχι αγελαδοουρό", nameEs: "Raya cola de vaca", icon: "🐟", scientificName: "Pastinachus sephen",
         photoId: 1043, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çamurluk ve kumluk tabanlar",
@@ -8882,7 +8882,7 @@ const SPECIES_DB = {
         noteEn: "Identified by a broad skin fold (sail) on its tail. A very powerful ray species.", noteEl: "Identified by a broad skin fold (sail) on its tail. A very powerful ray species.", noteEs: "Identified by a broad skin fold (sail) on its tail. A very powerful ray species."
     },
     "thailand_guitarfish": {
-        name: "Gitar Balığı", nameEn: "Bowmouth Guitarfish", nameEl: "Bowmouth Guitarfish", nameEs: "Bowmouth Guitarfish", icon: "🐟", scientificName: "Rhina ancylostoma",
+        name: "Gitar Balığı", nameEn: "Bowmouth Guitarfish", nameEl: "Κιθαρόψαρο", nameEs: "Pez guitarra cabeza de arco", icon: "🐟", scientificName: "Rhina ancylostoma",
         photoId: 1044, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve kumluklar",
@@ -8896,7 +8896,7 @@ const SPECIES_DB = {
         noteEn: "Stunning mix of ray and shark features. Characterized by bony ridges on its head.", noteEl: "Stunning mix of ray and shark features. Characterized by bony ridges on its head.", noteEs: "Stunning mix of ray and shark features. Characterized by bony ridges on its head."
     },
     "thailand_giant_freshwater_stingray": {
-        name: "Dev Tatlısu Vatozu", nameEn: "Giant Freshwater Stingray", nameEl: "Giant Stingray γλυκού νερού", nameEs: "Giant Freshwater Stingray", icon: "🐟", scientificName: "Urogymnus polylepis",
+        name: "Dev Tatlısu Vatozu", nameEn: "Giant Freshwater Stingray", nameEl: "Σαλάχι γλυκού νερού γίγας", nameEs: "Raya gigante de agua dulce", icon: "🐟", scientificName: "Urogymnus polylepis",
         photoId: 1045, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz büyük nehirlerin denizle birleştiği noktalar",
@@ -8910,7 +8910,7 @@ const SPECIES_DB = {
         noteEn: "The hidden giant of Thai estuaries. Can reach 2 meters in width and 600 kg in weight.", noteEl: "The hidden giant of Thai estuaries. Can reach 2 meters in width and 600 kg in weight.", noteEs: "The hidden giant of Thai estuaries. Can reach 2 meters in width and 600 kg in weight."
     },
     "thailand_pilot_whale": {
-        name: "Pilot Balina", nameEn: "Short-finned Pilot Whale", nameEl: "Φάλαινα πιλότου με κοντό πτερύγιο", nameEs: "Short-finned Pilot Whale", icon: "🐋", scientificName: "Globicephala macrorhynchus",
+        name: "Pilot Balina", nameEn: "Short-finned Pilot Whale", nameEl: "Φάλαινα πιλότου με κοντό πτερύγιο", nameEs: "Calderón tropical", icon: "🐋", scientificName: "Globicephala macrorhynchus",
         photoId: 1046, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve derin sular",
@@ -8924,7 +8924,7 @@ const SPECIES_DB = {
         noteEn: "A global species often seen in social groups in Thai waters.", noteEl: "A global species often seen in social groups in Thai waters.", noteEs: "A global species often seen in social groups in Thai waters."
     },
     "thailand_irrawaddy_dolphin": {
-        name: "Irrawaddy Yunusu", nameEn: "Irrawaddy Dolphin", nameEl: "Irrawaddy Dolphin", nameEs: "Irrawaddy Dolphin", icon: "🐬", scientificName: "Orcaella brevirostris",
+        name: "Irrawaddy Yunusu", nameEn: "Irrawaddy Dolphin", nameEl: "Δελφίνι Ιραβάδι", nameEs: "Delfín del Irrawaddy", icon: "🐬", scientificName: "Orcaella brevirostris",
         photoId: 1047, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz nehir ağızları ve kıyı suları",
@@ -8938,7 +8938,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its smiling expression and rounded head. Critically endangered in Thailand.", noteEl: "Recognized by its smiling expression and rounded head. Critically endangered in Thailand.", noteEs: "Recognized by its smiling expression and rounded head. Critically endangered in Thailand."
     },
     "thailand_humpback_dolphin": {
-        name: "Kambur Yunus", nameEn: "Indo-Pacific Humpback Dolphin", nameEl: "Ινδο-Ειρηνικό Humpback Dolphin", nameEs: "Indo-Pacific Humpback Dolphin", icon: "🐬", scientificName: "Sousa chinensis",
+        name: "Kambur Yunus", nameEn: "Indo-Pacific Humpback Dolphin", nameEl: "Δελφίνι καμπούρα Ινδο-Ειρηνικού", nameEs: "Delfín jorobado del Indo-Pacífico", icon: "🐬", scientificName: "Sousa chinensis",
         photoId: 1048, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kıyı suları ve mangrovlar",
@@ -8952,7 +8952,7 @@ const SPECIES_DB = {
         noteEn: "Its color can turn from grey to pink as it ages. One of Thailand's exotic mammals.", noteEl: "Its color can turn from grey to pink as it ages. One of Thailand's exotic mammals.", noteEs: "Its color can turn from grey to pink as it ages. One of Thailand's exotic mammals."
     },
     "thailand_green_turtle": {
-        name: "Yeşil Deniz Kaplumbağası", nameEn: "Green Sea Turtle", nameEl: "Πράσινη θαλάσσια χελώνα", nameEs: "Green Sea Turtle", icon: "🐢", scientificName: "Chelonia mydas",
+        name: "Yeşil Deniz Kaplumbağası", nameEn: "Green Sea Turtle", nameEl: "Πράσινη θαλάσσια χελώνα", nameEs: "Tortuga verde", icon: "🐢", scientificName: "Chelonia mydas",
         photoId: 1049, category: "OTLUK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz deniz çayırları ve resifler",
@@ -8966,7 +8966,7 @@ const SPECIES_DB = {
         noteEn: "The most loyal guest of Thai islands. A gentle giant that feeds on seagrass.", noteEl: "The most loyal guest of Thai islands. A gentle giant that feeds on seagrass.", noteEs: "The most loyal guest of Thai islands. A gentle giant that feeds on seagrass."
     },
     "thailand_hawksbill_turtle": {
-        name: "Şahin Gagalı Kaplumbağa", nameEn: "Hawksbill Turtle", nameEl: "Χελώνα Hawksbill", nameEs: "Hawksbill Turtle", icon: "🐢", scientificName: "Eretmochelys imbricata",
+        name: "Şahin Gagalı Kaplumbağa", nameEn: "Hawksbill Turtle", nameEl: "Χελώνα καρέτα-καρέτα γερακομύτη", nameEs: "Tortuga carey", icon: "🐢", scientificName: "Eretmochelys imbricata",
         photoId: 1050, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -9361,7 +9361,7 @@ const SPECIES_DB = {
         noteEn: "Highly tolerant of salinity and runs well into fresh water. A mainstay of the Chilika and Pulicat lagoons; its roe is dried and sold as a premium product.", noteEl: "Highly tolerant of salinity and runs well into fresh water. A mainstay of the Chilika and Pulicat lagoons; its roe is dried and sold as a premium product.", noteEs: "Muy tolerante a la salinidad, remonta hasta el agua dulce. Base de las lagunas de Chilika y Pulicat; sus huevas se secan y se venden como producto de lujo."
     },
     "safrica_great_white_shark": {
-        name: "Büyük Beyaz Köpekbalığı", nameEn: "Great White Shark", nameEl: "Μεγάλος Λευκός Καρχαρίας", nameEs: "Great White Shark", icon: "🦈", scientificName: "Carcharodon carcharias",
+        name: "Büyük Beyaz Köpekbalığı", nameEn: "Great White Shark", nameEl: "Μεγάλος Λευκός Καρχαρίας", nameEs: "Tiburón blanco", icon: "🦈", scientificName: "Carcharodon carcharias",
         photoId: 1101, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve mühür kolonileri çevresi",
@@ -9375,7 +9375,7 @@ const SPECIES_DB = {
         noteEn: "Gansbaai in South Africa is the world capital for these giants. Extremely powerful and dangerous.", noteEl: "Gansbaai in South Africa is the world capital for these giants. Extremely powerful and dangerous.", noteEs: "Gansbaai in South Africa is the world capital for these giants. Extremely powerful and dangerous."
     },
     "safrica_yellowtail": {
-        name: "Sarı Kuyruk", nameEn: "Yellowtail", nameEl: "Yellowtail", nameEs: "Yellowtail", icon: "🐟", scientificName: "Seriola lalandi",
+        name: "Sarı Kuyruk", nameEn: "Yellowtail", nameEl: "Μαγιάτικο λεμονί", nameEs: "Medregal limón", icon: "🐟", scientificName: "Seriola lalandi",
         photoId: 1102, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık burunlar ve akıntılı bölgeler",
@@ -9389,7 +9389,7 @@ const SPECIES_DB = {
         noteEn: "A favorite fighter for Cape Town anglers. Known for very strong headshakes.", noteEl: "A favorite fighter for Cape Town anglers. Known for very strong headshakes.", noteEs: "A favorite fighter for Cape Town anglers. Known for very strong headshakes."
     },
     "safrica_garrick": {
-        name: "Akya / Garrick", nameEn: "Garrick", nameEl: "Γκάρικ", nameEs: "Garrick", icon: "🐟", scientificName: "Lichia amia",
+        name: "Akya / Garrick", nameEn: "Garrick", nameEl: "Γκάρικ", nameEs: "Palometón", icon: "🐟", scientificName: "Lichia amia",
         photoId: 1103, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz köpüklü sığ kıyılar ve nehir ağızları",
@@ -9403,7 +9403,7 @@ const SPECIES_DB = {
         noteEn: "One of South Africa's noblest sport fish. Primarily targeted with live bait.", noteEl: "One of South Africa's noblest sport fish. Primarily targeted with live bait.", noteEs: "One of South Africa's noblest sport fish. Primarily targeted with live bait."
     },
     "safrica_silver_kob": {
-        name: "Gümüş Kob", nameEn: "Silver Kob", nameEl: "Silver Kob", nameEs: "Silver Kob", icon: "🐟", scientificName: "Argyrosomus inodorus",
+        name: "Gümüş Kob", nameEn: "Silver Kob", nameEl: "Κορβίνα ασημένια", nameEs: "Corvina plateada", icon: "🐟", scientificName: "Argyrosomus inodorus",
         photoId: 1104, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece çalkantılı sığ kıyılar",
@@ -9417,7 +9417,7 @@ const SPECIES_DB = {
         noteEn: "Considered the 'seabass' of South Africa. Loves hunting in murky and turbulent waters.", noteEl: "Considered the 'seabass' of South Africa. Loves hunting in murky and turbulent waters.", noteEs: "Considered the 'seabass' of South Africa. Loves hunting in murky and turbulent waters."
     },
     "safrica_snoek": {
-        name: "Yılan Makrelyası / Snoek", nameEn: "Snoek", nameEl: "Snoek", nameEs: "Snoek", icon: "🐟", scientificName: "Thyrsites atun",
+        name: "Yılan Makrelyası / Snoek", nameEn: "Snoek", nameEl: "Σνουκ", nameEs: "Sierra snoek", icon: "🐟", scientificName: "Thyrsites atun",
         photoId: 1105, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve kıyı yamaçları",
@@ -9431,7 +9431,7 @@ const SPECIES_DB = {
         noteEn: "A staple of Cape Town cuisine. Has razor-sharp teeth; caution is required when handling.", noteEl: "A staple of Cape Town cuisine. Has razor-sharp teeth; caution is required when handling.", noteEs: "A staple of Cape Town cuisine. Has razor-sharp teeth; caution is required when handling."
     },
     "safrica_red_roman": {
-        name: "Kırmızı Roman", nameEn: "Red Roman", nameEl: "Red Roman", nameEs: "Red Roman", icon: "🐟", scientificName: "Chrysoblephus laticeps",
+        name: "Kırmızı Roman", nameEn: "Red Roman", nameEl: "Φαγκρί κόκκινο Αφρικής", nameEs: "Pargo roman rojo", icon: "🐟", scientificName: "Chrysoblephus laticeps",
         photoId: 1106, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz resifler ve kaya altları",
@@ -9445,7 +9445,7 @@ const SPECIES_DB = {
         noteEn: "A sea bream species known for its vibrant red color. Slow-growing and under protection.", noteEl: "A sea bream species known for its vibrant red color. Slow-growing and under protection.", noteEs: "A sea bream species known for its vibrant red color. Slow-growing and under protection."
     },
     "safrica_geelbek": {
-        name: "Sarıağız / Geelbek", nameEn: "Geelbek", nameEl: "Geelbek", nameEs: "Geelbek", icon: "🐟", scientificName: "Atractoscion aequidens",
+        name: "Sarıağız / Geelbek", nameEn: "Geelbek", nameEl: "Κορβίνα τεραγκλίν", nameEs: "Corvina teraglin", icon: "🐟", scientificName: "Atractoscion aequidens",
         photoId: 1107, category: "PELAJIK_AVCI",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece derin resifler ve burunlar",
@@ -9459,7 +9459,7 @@ const SPECIES_DB = {
         noteEn: "Name means 'Yellow Mouth' in Afrikaans. Its meat is of very high quality.", noteEl: "Name means 'Yellow Mouth' in Afrikaans. Its meat is of very high quality.", noteEs: "Name means 'Yellow Mouth' in Afrikaans. Its meat is of very high quality."
     },
     "safrica_black_musselcracker": {
-        name: "Siyah İstiridye Kıran", nameEn: "Black Musselcracker", nameEl: "Μαύρη μυδοθραύστη", nameEs: "Black Musselcracker", icon: "🐟", scientificName: "Cymatoceps nasutus",
+        name: "Siyah İstiridye Kıran", nameEn: "Black Musselcracker", nameEl: "Μαύρη μυδοθραύστη", nameEs: "Pargo negro rompemejillones", icon: "🐟", scientificName: "Cymatoceps nasutus",
         photoId: 1108, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sert kaya resifleri",
@@ -9473,7 +9473,7 @@ const SPECIES_DB = {
         noteEn: "One of South Africa's strongest and most stubborn fish. Named for their ability to crush hard shells.", noteEl: "One of South Africa's strongest and most stubborn fish. Named for their ability to crush hard shells.", noteEs: "One of South Africa's strongest and most stubborn fish. Named for their ability to crush hard shells."
     },
     "safrica_galjoen": {
-        name: "Galjoen", nameEn: "Galjoen", nameEl: "Galjoen", nameEs: "Galjoen", icon: "🐟", scientificName: "Dichistius capensis",
+        name: "Galjoen", nameEn: "Galjoen", nameEl: "Γκαλγιούν", nameEs: "Galjoen del Cabo", icon: "🐟", scientificName: "Dichistius capensis",
         photoId: 1109, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz çok dalgalı ve köpüklü kıyılar",
@@ -9487,7 +9487,7 @@ const SPECIES_DB = {
         noteEn: "The National Fish of South Africa. Found only in very rough, surfy 'white water' areas.", noteEl: "The National Fish of South Africa. Found only in very rough, surfy 'white water' areas.", noteEs: "The National Fish of South Africa. Found only in very rough, surfy 'white water' areas."
     },
     "safrica_bronze_whaler": {
-        name: "Bronz Köpekbalığı", nameEn: "Bronze Whaler Shark", nameEl: "Bronze Whaler Shark", nameEs: "Bronze Whaler Shark", icon: "🦈", scientificName: "Carcharhinus brachyurus",
+        name: "Bronz Köpekbalığı", nameEn: "Bronze Whaler Shark", nameEl: "Καρχαρίας χάλκινος", nameEs: "Tiburón cobrizo", icon: "🦈", scientificName: "Carcharhinus brachyurus",
         photoId: 1110, category: "PELAJIK_AVCI",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz kıyıya yakın açık sular",
@@ -9502,7 +9502,7 @@ const SPECIES_DB = {
     },
 
     "safrica_bull_shark": {
-        name: "Boğa Köpekbalığı / Zambezi", nameEn: "Bull Shark", nameEl: "Καρχαρίας ταύρος", nameEs: "Bull Shark", icon: "🦈", scientificName: "Carcharhinus leucas",
+        name: "Boğa Köpekbalığı / Zambezi", nameEn: "Bull Shark", nameEl: "Καρχαρίας ταύρος", nameEs: "Tiburón toro", icon: "🦈", scientificName: "Carcharhinus leucas",
         photoId: 1111, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz nehir ağızları ve bulanık kıyılar",
@@ -9516,7 +9516,7 @@ const SPECIES_DB = {
         noteEn: "Known as 'Zambezi' in South Africa. The only shark species that can enter freshwater; highly aggressive.", noteEl: "Known as 'Zambezi' in South Africa. The only shark species that can enter freshwater; highly aggressive.", noteEs: "Known as 'Zambezi' in South Africa. The only shark species that can enter freshwater; highly aggressive."
     },
     "safrica_ragged_tooth": {
-        name: "Kum Kaplanı Köpekbalığı", nameEn: "Ragged-tooth Shark", nameEl: "Καρχαρίας με κουρελιασμένα δόντια", nameEs: "Ragged-tooth Shark", icon: "🦈", scientificName: "Carcharias taurus",
+        name: "Kum Kaplanı Köpekbalığı", nameEn: "Ragged-tooth Shark", nameEl: "Καρχαρίας με κουρελιασμένα δόντια", nameEs: "Toro bacota", icon: "🦈", scientificName: "Carcharias taurus",
         photoId: 1112, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece kaya kovukları ve resifler",
@@ -9530,7 +9530,7 @@ const SPECIES_DB = {
         noteEn: "Despite its protruding sharp teeth, it's actually very docile. A guardian of South African reefs.", noteEl: "Despite its protruding sharp teeth, it's actually very docile. A guardian of South African reefs.", noteEs: "Despite its protruding sharp teeth, it's actually very docile. A guardian of South African reefs."
     },
     "safrica_white_edged_rockcod": {
-        name: "Beyaz Kenarlı Orfoz", nameEn: "White-edged Rockcod", nameEl: "Rockcod με λευκή άκρη", nameEs: "White-edged Rockcod", icon: "🐟", scientificName: "Epinephelus albomarginatus",
+        name: "Beyaz Kenarlı Orfoz", nameEn: "White-edged Rockcod", nameEl: "Ροφός λευκόχειλος", nameEs: "Mero de borde blanco", icon: "🐟", scientificName: "Epinephelus albomarginatus",
         photoId: 1113, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler",
@@ -9544,7 +9544,7 @@ const SPECIES_DB = {
         noteEn: "Identified by a thin white margin on its fins. A rockcod species endemic to South Africa.", noteEl: "Identified by a thin white margin on its fins. A rockcod species endemic to South Africa.", noteEs: "Identified by a thin white margin on its fins. A rockcod species endemic to South Africa."
     },
     "safrica_yellowbelly_rockcod": {
-        name: "Sarı Karınlı Orfoz", nameEn: "Yellowbelly Rockcod", nameEl: "Yellowbelly Rockcod", nameEs: "Yellowbelly Rockcod", icon: "🐟", scientificName: "Epinephelus marginatus",
+        name: "Sarı Karınlı Orfoz", nameEn: "Yellowbelly Rockcod", nameEl: "Ροφός", nameEs: "Mero", icon: "🐟", scientificName: "Epinephelus marginatus",
         photoId: 1114, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz kaya altları ve mağaralar",
@@ -9558,7 +9558,7 @@ const SPECIES_DB = {
         noteEn: "Close relative of the Mediterranean dusky grouper. Very strong and tends to dive into crevices.", noteEl: "Close relative of the Mediterranean dusky grouper. Very strong and tends to dive into crevices.", noteEs: "Close relative of the Mediterranean dusky grouper. Very strong and tends to dive into crevices."
     },
     "safrica_catface_rockcod": {
-        name: "Kedi Yüzlü Orfoz", nameEn: "Catface Rockcod", nameEl: "Catface Rockcod", nameEs: "Catface Rockcod", icon: "🐟", scientificName: "Epinephelus andersoni",
+        name: "Kedi Yüzlü Orfoz", nameEn: "Catface Rockcod", nameEl: "Ροφός γατόμουτρος", nameEs: "Mero cara de gato", icon: "🐟", scientificName: "Epinephelus andersoni",
         photoId: 1115, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ ve orta resifler",
@@ -9572,7 +9572,7 @@ const SPECIES_DB = {
         noteEn: "Named for its cat-like facial structure. Covered in brown spots.", noteEl: "Named for its cat-like facial structure. Covered in brown spots.", noteEs: "Named for its cat-like facial structure. Covered in brown spots."
     },
     "safrica_daggerhead_seabream": {
-        name: "Hançerbaş Mercan", nameEn: "Daggerhead Seabream", nameEl: "Στιλέτο τσιπούρα", nameEs: "Daggerhead Seabream", icon: "🐟", scientificName: "Chrysoblephus puniceus",
+        name: "Hançerbaş Mercan", nameEn: "Daggerhead Seabream", nameEl: "Στιλέτο τσιπούρα", nameEs: "Pargo cabeza de daga", icon: "🐟", scientificName: "Chrysoblephus puniceus",
         photoId: 1116, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları",
@@ -9586,7 +9586,7 @@ const SPECIES_DB = {
         noteEn: "Dorsal spine structure resembles a dagger. A very tasty species.", noteEl: "Dorsal spine structure resembles a dagger. A very tasty species.", noteEs: "Dorsal spine structure resembles a dagger. A very tasty species."
     },
     "safrica_scotsman": {
-        name: "İskoç Mercanı", nameEn: "Scotsman Seabream", nameEl: "Σκωτσέζος Seabream", nameEs: "Scotsman Seabream", icon: "🐟", scientificName: "Polysteganus praeorbitalis",
+        name: "İskoç Mercanı", nameEn: "Scotsman Seabream", nameEl: "Φαγκρί Σκωτσέζος", nameEs: "Pargo escocés", icon: "🐟", scientificName: "Polysteganus praeorbitalis",
         photoId: 1117, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalık alanlar",
@@ -9600,7 +9600,7 @@ const SPECIES_DB = {
         noteEn: "Common on the east coast of South Africa. Identified by its pink-red color.", noteEl: "Common on the east coast of South Africa. Identified by its pink-red color.", noteEs: "Common on the east coast of South Africa. Identified by its pink-red color."
     },
     "safrica_seventy_four": {
-        name: "Yetmiş Dört Mercanı", nameEn: "Seventy-four Seabream", nameEl: "Εβδομήντα τέσσερα Seabream", nameEs: "Seventy-four Seabream", icon: "🐟", scientificName: "Polysteganus undulosus",
+        name: "Yetmiş Dört Mercanı", nameEn: "Seventy-four Seabream", nameEl: "Φαγκρί εβδομήντα τέσσερα", nameEs: "Pargo setenta y cuatro", icon: "🐟", scientificName: "Polysteganus undulosus",
         photoId: 1118, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin açık deniz resifleri",
@@ -9614,7 +9614,7 @@ const SPECIES_DB = {
         noteEn: "Named after the vertical lines resembling the number 74. Endangered and highly prized.", noteEl: "Named after the vertical lines resembling the number 74. Endangered and highly prized.", noteEs: "Named after the vertical lines resembling the number 74. Endangered and highly prized."
     },
     "safrica_englishman": {
-        name: "İngiliz Mercanı", nameEn: "Englishman Seabream", nameEl: "Άγγλος Seabream", nameEs: "Englishman Seabream", icon: "🐟", scientificName: "Chrysoblephus anglicus",
+        name: "İngiliz Mercanı", nameEn: "Englishman Seabream", nameEl: "Φαγκρί Άγγλος", nameEs: "Pargo inglés", icon: "🐟", scientificName: "Chrysoblephus anglicus",
         photoId: 1119, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz mercan ve kaya resifleri",
@@ -9628,7 +9628,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its blunt head and vibrant pink color. Has a powerful dental structure.", noteEl: "Recognized by its blunt head and vibrant pink color. Has a powerful dental structure.", noteEs: "Recognized by its blunt head and vibrant pink color. Has a powerful dental structure."
     },
     "safrica_pajama_shark": {
-        name: "Pijama Balığı / Cape Knifejaw", nameEn: "Cape Knifejaw", nameEl: "Cape Knifejaw", nameEs: "Cape Knifejaw", icon: "🐟", scientificName: "Dichistius multifasciatus",
+        name: "Pijama Balığı / Cape Knifejaw", nameEn: "Cape Knifejaw", nameEl: "Γκαλγιούν ραβδωτό", nameEs: "Galjoen rayado", icon: "🐟", scientificName: "Dichistius multifasciatus",
         photoId: 1120, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ çalkantılı kayalıklar",
@@ -9643,7 +9643,7 @@ const SPECIES_DB = {
     },
 
     "safrica_blue_marlin": {
-        name: "Mavi Marlin", nameEn: "Blue Marlin", nameEl: "Μπλε Μάρλιν", nameEs: "Blue Marlin", icon: "🐟", scientificName: "Makaira nigricans",
+        name: "Mavi Marlin", nameEn: "Blue Marlin", nameEl: "Μπλε Μάρλιν", nameEs: "Aguja azul", icon: "🐟", scientificName: "Makaira nigricans",
         photoId: 1121, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
@@ -9657,7 +9657,7 @@ const SPECIES_DB = {
         noteEn: "The most prestigious prize in the ocean. Can reach massive sizes off the KwaZulu-Natal coast.", noteEl: "The most prestigious prize in the ocean. Can reach massive sizes off the KwaZulu-Natal coast.", noteEs: "The most prestigious prize in the ocean. Can reach massive sizes off the KwaZulu-Natal coast."
     },
     "safrica_black_marlin": {
-        name: "Siyah Marlin", nameEn: "Black Marlin", nameEl: "Μαύρος Μάρλιν", nameEs: "Black Marlin", icon: "🐟", scientificName: "Istiompax indica",
+        name: "Siyah Marlin", nameEn: "Black Marlin", nameEl: "Μαύρος Μάρλιν", nameEs: "Aguja negra", icon: "🐟", scientificName: "Istiompax indica",
         photoId: 1122, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz kıta sahanlığı kenarları",
@@ -9671,7 +9671,7 @@ const SPECIES_DB = {
         noteEn: "Known as a stronger and more aggressive fighter than the Blue Marlin. Its pectoral fins are rigid.", noteEl: "Known as a stronger and more aggressive fighter than the Blue Marlin. Its pectoral fins are rigid.", noteEs: "Known as a stronger and more aggressive fighter than the Blue Marlin. Its pectoral fins are rigid."
     },
     "safrica_swordfish": {
-        name: "Kılıç Balığı", nameEn: "Broadbill Swordfish", nameEl: "Broadbill Swordfish", nameEs: "Broadbill Swordfish", icon: "🐟", scientificName: "Xiphias gladius",
+        name: "Kılıç Balığı", nameEn: "Broadbill Swordfish", nameEl: "Ξιφίας", nameEs: "Pez espada", icon: "🐟", scientificName: "Xiphias gladius",
         photoId: 1123, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",isGlobal: false,
@@ -9686,7 +9686,7 @@ const SPECIES_DB = {
         noteEn: "The 'gladiator of the seas' hunted at night off Cape Town. Possesses incredible stamina.", noteEl: "The 'gladiator of the seas' hunted at night off Cape Town. Possesses incredible stamina.", noteEs: "The 'gladiator of the seas' hunted at night off Cape Town. Possesses incredible stamina."
     },
     "safrica_yellowfin_tuna": {
-        name: "Sarıkanat Orkinos", nameEn: "Yellowfin Tuna", nameEl: "Κιτρινόπτερος τόνος", nameEs: "Yellowfin Tuna", icon: "🐟", scientificName: "Thunnus albacares",
+        name: "Sarıkanat Orkinos", nameEn: "Yellowfin Tuna", nameEl: "Κιτρινόπτερος τόνος", nameEs: "Rabil", icon: "🐟", scientificName: "Thunnus albacares",
         photoId: 1124, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz akıntı çizgileri ve kuş sürüsü altları",
@@ -9700,7 +9700,7 @@ const SPECIES_DB = {
         noteEn: "The most popular game fish in the canyons off Cape Town. Famous for its speed and power.", noteEl: "The most popular game fish in the canyons off Cape Town. Famous for its speed and power.", noteEs: "The most popular game fish in the canyons off Cape Town. Famous for its speed and power."
     },
     "safrica_bigeye_tuna": {
-        name: "Kocagöz Orkinos", nameEn: "Bigeye Tuna", nameEl: "Μεγαλόφθαλμος τόνος", nameEs: "Bigeye Tuna", icon: "🐟", scientificName: "Thunnus obesus",
+        name: "Kocagöz Orkinos", nameEn: "Bigeye Tuna", nameEl: "Μεγαλόφθαλμος τόνος", nameEs: "Patudo", icon: "🐟", scientificName: "Thunnus obesus",
         photoId: 1125, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin sular",
@@ -9714,7 +9714,7 @@ const SPECIES_DB = {
         noteEn: "Prefers cooler and deeper waters. Very similar to yellowfin tuna but with larger eyes.", noteEl: "Prefers cooler and deeper waters. Very similar to yellowfin tuna but with larger eyes.", noteEs: "Prefiere cooler and deeper waters. Very similar to yellowfin tuna but with larger eyes."
     },
     "safrica_albacore": {
-        name: "Ak Orkinos / Longfin", nameEn: "Albacore", nameEl: "Albacore", nameEs: "Albacore", icon: "🐟", scientificName: "Thunnus alalunga",
+        name: "Ak Orkinos / Longfin", nameEn: "Albacore", nameEl: "Τόνος μακρύπτερος", nameEs: "Bonito del norte", icon: "🐟", scientificName: "Thunnus alalunga",
         photoId: 1126, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz serin açık deniz suları",
@@ -9728,7 +9728,7 @@ const SPECIES_DB = {
         noteEn: "Identified by very long pectoral fins. Has white meat and is highly valued for canning.", noteEl: "Identified by very long pectoral fins. Has white meat and is highly valued for canning.", noteEs: "Identified by very long pectoral fins. Has white meat and is highly valued for canning."
     },
     "safrica_skipjack_tuna": {
-        name: "Çizgili Orkinos / Skipjack", nameEn: "Skipjack Tuna", nameEl: "Τόνος skipjack", nameEs: "Skipjack Tuna", icon: "🐟", scientificName: "Katsuwonus pelamis",
+        name: "Çizgili Orkinos / Skipjack", nameEn: "Skipjack Tuna", nameEl: "Παλαμίδα ωκεανού", nameEs: "Listado", icon: "🐟", scientificName: "Katsuwonus pelamis",
         photoId: 1127, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz yüzeydeki kuş hareketleri",
@@ -9742,7 +9742,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by horizontal stripes on the lower body. Highly active and travels in large schools.", noteEl: "Recognized by horizontal stripes on the lower body. Highly active and travels in large schools.", noteEs: "Recognized by horizontal stripes on the lower body. Highly active and travels in large schools."
     },
     "safrica_king_mackerel": {
-        name: "Couta / King Mackerel", nameEn: "King Mackerel", nameEl: "Βασιλιάς Σκουμπρί", nameEs: "King Mackerel", icon: "🐟", scientificName: "Scomberomorus commerson",
+        name: "Couta / King Mackerel", nameEn: "King Mackerel", nameEl: "Βασιλιάς Σκουμπρί", nameEs: "Carite estriado", icon: "🐟", scientificName: "Scomberomorus commerson",
         photoId: 1128, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık resif kenarları ve kıyı yamaçları",
@@ -9756,7 +9756,7 @@ const SPECIES_DB = {
         noteEn: "The most targeted fish on the east coast (KwaZulu-Natal). Possesses razor-sharp teeth.", noteEl: "The most targeted fish on the east coast (KwaZulu-Natal). Possesses razor-sharp teeth.", noteEs: "The most targeted fish on the east coast (KwaZulu-Natal). Possesses razor-sharp teeth."
     },
     "safrica_queen_mackerel": {
-        name: "Kraliçe Makrelya / Natal Snoek", nameEn: "Queen Mackerel", nameEl: "Βασίλισσα Σκουμπρί", nameEs: "Queen Mackerel", icon: "🐟", scientificName: "Scomberomorus plurilineatus",
+        name: "Kraliçe Makrelya / Natal Snoek", nameEn: "Queen Mackerel", nameEl: "Βασίλισσα Σκουμπρί", nameEs: "Carite reina", icon: "🐟", scientificName: "Scomberomorus plurilineatus",
         photoId: 1129, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ resifler ve kıyılar",
@@ -9770,7 +9770,7 @@ const SPECIES_DB = {
         noteEn: "Identified by small dark spots and lines on its body. Smaller than the King Mackerel.", noteEl: "Identified by small dark spots and lines on its body. Smaller than the King Mackerel.", noteEs: "Identified by small dark spots and lines on its body. Smaller than the King Mackerel."
     },
     "safrica_wahoo": {
-        name: "Vahu / Wahoo", nameEn: "Wahoo", nameEl: "Ουάχου", nameEs: "Wahoo", icon: "🐟", scientificName: "Acanthocybium solandri",
+        name: "Vahu / Wahoo", nameEn: "Wahoo", nameEl: "Ουάχου", nameEs: "Peto", icon: "🐟", scientificName: "Acanthocybium solandri",
         photoId: 1130, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz akıntıları",
@@ -9785,7 +9785,7 @@ const SPECIES_DB = {
     },
 
     "safrica_great_barracuda": {
-        name: "Dev Barrakuda", nameEn: "Great Barracuda", nameEl: "Great Barracuda", nameEs: "Great Barracuda", icon: "🐟", scientificName: "Sphyraena barracuda",
+        name: "Dev Barrakuda", nameEn: "Great Barracuda", nameEl: "Λούτσος γίγας", nameEs: "Barracuda gigante", icon: "🐟", scientificName: "Sphyraena barracuda",
         photoId: 1131, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz resif yamaçları ve sığlıklar",
@@ -9799,7 +9799,7 @@ const SPECIES_DB = {
         noteEn: "The silver giant of the east coast (Natal). A very aggressive predator with razor-sharp teeth.", noteEl: "The silver giant of the east coast (Natal). A very aggressive predator with razor-sharp teeth.", noteEs: "The silver giant of the east coast (Natal). A very aggressive predator with razor-sharp teeth."
     },
     "safrica_pickhandle_barracuda": {
-        name: "Çizgili Barrakuda", nameEn: "Pickhandle Barracuda", nameEl: "Pickhandle Barracuda", nameEs: "Pickhandle Barracuda", icon: "🐟", scientificName: "Sphyraena jello",
+        name: "Çizgili Barrakuda", nameEn: "Pickhandle Barracuda", nameEl: "Λούτσος ραβδωτός", nameEs: "Barracuda jello", icon: "🐟", scientificName: "Sphyraena jello",
         photoId: 1132, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık büyük sürüler",
@@ -9813,7 +9813,7 @@ const SPECIES_DB = {
         noteEn: "Identified by dark vertical stripes on its body. Usually travels in large schools.", noteEl: "Identified by dark vertical stripes on its body. Usually travels in large schools.", noteEs: "Identified by dark vertical stripes on its body. Usually travels in large schools."
     },
     "safrica_giant_trevally": {
-        name: "Dev Akya / GT", nameEn: "Giant Trevally", nameEl: "Γίγαντας Trevally", nameEs: "Giant Trevally", icon: "🐟", scientificName: "Caranx ignobilis",
+        name: "Dev Akya / GT", nameEn: "Giant Trevally", nameEl: "Τρεβάλι γίγας", nameEs: "Jurel gigante", icon: "🐟", scientificName: "Caranx ignobilis",
         photoId: 1133, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık resif kenarları ve sığlıklar",
@@ -9827,7 +9827,7 @@ const SPECIES_DB = {
         noteEn: "The strongest fighter in KwaZulu-Natal. Considered the ultimate target for popper fishing.", noteEl: "The strongest fighter in KwaZulu-Natal. Considered the ultimate target for popper fishing.", noteEs: "The strongest fighter in KwaZulu-Natal. Considered the ultimate target for popper fishing."
     },
     "safrica_bluefin_trevally": {
-        name: "Mavi Yüzgeçli Akya", nameEn: "Bluefin Trevally", nameEl: "Bluefin Trevally", nameEs: "Bluefin Trevally", icon: "🐟", scientificName: "Caranx melampygus",
+        name: "Mavi Yüzgeçli Akya", nameEn: "Bluefin Trevally", nameEl: "Τρεβάλι μπλε πτερυγίου", nameEs: "Jurel de aletas azules", icon: "🐟", scientificName: "Caranx melampygus",
         photoId: 1134, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz mercan ve kaya resifleri",
@@ -9841,7 +9841,7 @@ const SPECIES_DB = {
         noteEn: "Stunningly beautiful with electric blue fins and spots. A very cunning predator.", noteEl: "Stunningly beautiful with electric blue fins and spots. A very cunning predator.", noteEs: "Stunningly beautiful with electric blue fins and spots. A very cunning predator."
     },
     "safrica_bigeye_trevally": {
-        name: "Kocagöz Akya", nameEn: "Bigeye Trevally", nameEl: "Bigeye Trevally", nameEs: "Bigeye Trevally", icon: "🐟", scientificName: "Caranx sexfasciatus",
+        name: "Kocagöz Akya", nameEn: "Bigeye Trevally", nameEl: "Τρεβάλι μεγαλομάτικο", nameEs: "Jurel ojón", icon: "🐟", scientificName: "Caranx sexfasciatus",
         photoId: 1135, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ koylar ve resifler",
@@ -9855,7 +9855,7 @@ const SPECIES_DB = {
         noteEn: "Highly active at night. Its large eyes help it hunt in the dark.", noteEl: "Highly active at night. Its large eyes help it hunt in the dark.", noteEs: "Highly active at night. Its large eyes help it hunt in the dark."
     },
     "safrica_yellow_spotted_trevally": {
-        name: "Sarı Benekli Akya", nameEn: "Yellow-spotted Trevally", nameEl: "Κίτρινα στίγματα Trevally", nameEs: "Yellow-spotted Trevally", icon: "🐟", scientificName: "Carangoides fulvoguttatus",
+        name: "Sarı Benekli Akya", nameEn: "Yellow-spotted Trevally", nameEl: "Τρεβάλι κιτρινόστικτο", nameEs: "Jurel de puntos amarillos", icon: "🐟", scientificName: "Carangoides fulvoguttatus",
         photoId: 1136, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk resif alanları",
@@ -9869,7 +9869,7 @@ const SPECIES_DB = {
         noteEn: "Identified by small yellow/orange spots on its body. Feeds on crustaceans in sandy areas.", noteEl: "Identified by small yellow/orange spots on its body. Feeds on crustaceans in sandy areas.", noteEs: "Identified by small yellow/orange spots on its body. Feeds on crustaceans in sandy areas."
     },
     "safrica_bludger_trevally": {
-        name: "Gümüş Akya", nameEn: "Bludger Trevally", nameEl: "Μπλάτζερ Τρέβαλι", nameEs: "Bludger Trevally", icon: "🐟", scientificName: "Carangoides gymnostethus",
+        name: "Gümüş Akya", nameEn: "Bludger Trevally", nameEl: "Μπλάτζερ Τρέβαλι", nameEs: "Jurel bludger", icon: "🐟", scientificName: "Carangoides gymnostethus",
         photoId: 1137, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz derin resif kenarları",
@@ -9883,7 +9883,7 @@ const SPECIES_DB = {
         noteEn: "A trevally species that prefers deeper waters. Very resilient.", noteEl: "A trevally species that prefers deeper waters. Very resilient.", noteEs: "A trevally species that prefers deeper waters. Very resilient."
     },
     "safrica_talang_queenfish": {
-        name: "Kraliçe Balığı", nameEn: "Talang Queenfish", nameEl: "Βασίλισσα Ταλάνγκ", nameEs: "Talang Queenfish", icon: "🐟", scientificName: "Scomberoides commersonnianus",
+        name: "Kraliçe Balığı", nameEn: "Talang Queenfish", nameEl: "Βασίλισσα Ταλάνγκ", nameEs: "Pez reina", icon: "🐟", scientificName: "Scomberoides commersonnianus",
         photoId: 1138, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kıyılar ve köpüklü bölgeler",
@@ -9897,7 +9897,7 @@ const SPECIES_DB = {
         noteEn: "Famous for its acrobatic leaps when hooked. Its 'fingerprint' spots on the sides are distinctive.", noteEl: "Famous for its acrobatic leaps when hooked. Its 'fingerprint' spots on the sides are distinctive.", noteEs: "Famous for its acrobatic leaps when hooked. Its 'fingerprint' spots on the sides are distinctive."
     },
     "safrica_needle_scaled_queenfish": {
-        name: "İnce Kraliçe", nameEn: "Needle-scaled Queenfish", nameEl: "Queenfish με βελόνα", nameEs: "Needle-scaled Queenfish", icon: "🐟", scientificName: "Scomberoides tol",
+        name: "İnce Kraliçe", nameEn: "Needle-scaled Queenfish", nameEl: "Ψάρι βασίλισσα λεπτολέπιδο", nameEs: "Talán de escamas finas", icon: "🐟", scientificName: "Scomberoides tol",
         photoId: 1139, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ resif üstleri",
@@ -9911,7 +9911,7 @@ const SPECIES_DB = {
         noteEn: "Smaller and slenderer than the Talang. Moves very fast in shallow waters.", noteEl: "Smaller and slenderer than the Talang. Moves very fast in shallow waters.", noteEs: "Smaller and slenderer than the Talang. Moves very fast in shallow waters."
     },
     "safrica_greater_amberjack": {
-        name: "Büyük Akya", nameEn: "Greater Amberjack", nameEl: "Greater Amberjack", nameEs: "Greater Amberjack", icon: "🐟", scientificName: "Seriola dumerili",
+        name: "Büyük Akya", nameEn: "Greater Amberjack", nameEl: "Μαγιάτικο", nameEs: "Pez limón", icon: "🐟", scientificName: "Seriola dumerili",
         photoId: 1140, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve batıklar",
@@ -9926,7 +9926,7 @@ const SPECIES_DB = {
     },
 
     "safrica_spotted_grunter": {
-        name: "Benekli Grunter", nameEn: "Spotted Grunter", nameEl: "Spotted Grunter", nameEs: "Spotted Grunter", icon: "🐟", scientificName: "Pomadasys commersonnii",
+        name: "Benekli Grunter", nameEn: "Spotted Grunter", nameEl: "Ροχθόψαρο στικτό", nameEs: "Roncador manchado", icon: "🐟", scientificName: "Pomadasys commersonnii",
         photoId: 1141, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz nehir ağızları ve sığ kumluklar",
@@ -9940,7 +9940,7 @@ const SPECIES_DB = {
         noteEn: "One of South Africa's most technical catches. Famous for 'tailing' in shallow waters while feeding.", noteEl: "One of South Africa's most technical catches. Famous for 'tailing' in shallow waters while feeding.", noteEs: "One of South Africa's most technical catches. Famous for 'tailing' in shallow waters while feeding."
     },
     "safrica_white_musselcracker": {
-        name: "Beyaz İstiridye Kıran", nameEn: "White Musselcracker", nameEl: "Λευκή μυδοθραύστη", nameEs: "White Musselcracker", icon: "🐟", scientificName: "Sparodon durbanensis",
+        name: "Beyaz İstiridye Kıran", nameEn: "White Musselcracker", nameEl: "Λευκή μυδοθραύστη", nameEs: "Pargo blanco rompemejillones", icon: "🐟", scientificName: "Sparodon durbanensis",
         photoId: 1142, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ kayalık ve köpüklü bölgeler",
@@ -9954,7 +9954,7 @@ const SPECIES_DB = {
         noteEn: "Found in shallower waters than the black musselcracker. Possesses a very powerful jaw.", noteEl: "Found in shallower waters than the black musselcracker. Possesses a very powerful jaw.", noteEs: "Found in shallower waters than the black musselcracker. Possesses a very powerful jaw."
     },
     "safrica_baardman": {
-        name: "Sakallı Balık / Baardman", nameEn: "Baardman", nameEl: "Μπάαρντμαν", nameEs: "Baardman", icon: "🐟", scientificName: "Umbrina robinsoni",
+        name: "Sakallı Balık / Baardman", nameEn: "Baardman", nameEl: "Μπάαρντμαν", nameEs: "Verrugato baardman", icon: "🐟", scientificName: "Umbrina robinsoni",
         photoId: 1143, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece çalkantılı kum tabanlı kıyılar",
@@ -9968,7 +9968,7 @@ const SPECIES_DB = {
         noteEn: "Identified by a small barbel under its chin. A close relative of the Corvina/Brown Meagre.", noteEl: "Identified by a small barbel under its chin. A close relative of the Corvina/Brown Meagre.", noteEs: "Identified by a small barbel under its chin. A close relative of the Corvina/Brown Meagre."
     },
     "safrica_west_coast_steenbras": {
-        name: "Batı Kıyısı Mırmırı", nameEn: "West Coast Steenbras", nameEl: "West Coast Steenbras", nameEs: "West Coast Steenbras", icon: "🐟", scientificName: "Lithognathus aureti",
+        name: "Batı Kıyısı Mırmırı", nameEn: "West Coast Steenbras", nameEl: "Μουρμούρα δυτικής ακτής", nameEs: "Herrera de la costa oeste", icon: "🐟", scientificName: "Lithognathus aureti",
         photoId: 1144, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz Namibya ve Batı Cape kumlukları",
@@ -9982,7 +9982,7 @@ const SPECIES_DB = {
         noteEn: "Prefers cold waters. Very similar to white steenbras but more robust.", noteEl: "Prefers cold waters. Very similar to white steenbras but more robust.", noteEs: "Prefiere cold waters. Very similar to white steenbras but more robust."
     },
     "safrica_white_steenbras": {
-        name: "Beyaz Mırmır", nameEn: "White Steenbras", nameEl: "Λευκά Steenbras", nameEs: "White Steenbras", icon: "🐟", scientificName: "Lithognathus lithognathus",
+        name: "Beyaz Mırmır", nameEn: "White Steenbras", nameEl: "Μουρμούρα λευκή Ακρωτηρίου", nameEs: "Herrera blanca del Cabo", icon: "🐟", scientificName: "Lithognathus lithognathus",
         photoId: 1145, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk kıyılar ve nehir ağızları",
@@ -9996,7 +9996,7 @@ const SPECIES_DB = {
         noteEn: "Known as the 'Prince' of the sands. Feeds by sucking prawns out of the sand with its long snout.", noteEl: "Known as the 'Prince' of the sands. Feeds by sucking prawns out of the sand with its long snout.", noteEs: "Known as the 'Prince' of the sands. Feeds by sucking prawns out of the sand with its long snout."
     },
     "safrica_fur_seal": {
-        name: "Güney Afrika Kürklü Foku", nameEn: "Cape Fur Seal", nameEl: "Σφραγίδα γούνας ακρωτηρίου", nameEs: "Cape Fur Seal", icon: "🦭", scientificName: "Arctocephalus pusillus",
+        name: "Güney Afrika Kürklü Foku", nameEn: "Cape Fur Seal", nameEl: "Σφραγίδα γούνας ακρωτηρίου", nameEs: "Lobo marino del Cabo", icon: "🦭", scientificName: "Arctocephalus pusillus",
         photoId: 1146, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz kıyı adaları ve koloniler",
@@ -10010,7 +10010,7 @@ const SPECIES_DB = {
         noteEn: "The most energetic and social resident of South African coasts. The primary food source for Great Whites.", noteEl: "The most energetic and social resident of South African coasts. The primary food source for Great Whites.", noteEs: "The most energetic and social resident of South African coasts. The primary food source for Great Whites."
     },
     "safrica_right_whale": {
-        name: "Güney Gerçek Balinası", nameEn: "Southern Right Whale", nameEl: "Νότια Δεξιά Φάλαινα", nameEs: "Southern Right Whale", icon: "🐋", scientificName: "Eubalaena australis",
+        name: "Güney Gerçek Balinası", nameEn: "Southern Right Whale", nameEl: "Νότια Δεξιά Φάλαινα", nameEs: "Ballena franca austral", icon: "🐋", scientificName: "Eubalaena australis",
         photoId: 1147, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sığ koylar (Hermanus)",
@@ -10024,7 +10024,7 @@ const SPECIES_DB = {
         noteEn: "Come very close to shore for breeding in winter. Hermanus is the capital for whale watching.", noteEl: "Come very close to shore for breeding in winter. Hermanus is the capital for whale watching.", noteEs: "Come very close to shore for breeding in winter. Hermanus is the capital for whale watching."
     },
     "safrica_humpback_whale": {
-        name: "Kambur Balina", nameEn: "Humpback Whale", nameEl: "Καμπούρα Φάλαινα", nameEs: "Humpback Whale", icon: "🐋", scientificName: "Megaptera novaeangliae",
+        name: "Kambur Balina", nameEn: "Humpback Whale", nameEl: "Καμπούρα Φάλαινα", nameEs: "Ballena jorobada", icon: "🐋", scientificName: "Megaptera novaeangliae",
         photoId: 1148, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz göç yolları",
@@ -10038,7 +10038,7 @@ const SPECIES_DB = {
         noteEn: "Famous for their breaching behaviors. South Africa is on their migration route.", noteEl: "Famous for their breaching behaviors. South Africa is on their migration route.", noteEs: "Famous for their breaching behaviors. South Africa is on their migration route."
     },
     "safrica_african_penguin": {
-        name: "Afrika Pengueni", nameEn: "African Penguin", nameEl: "Αφρικανικός πιγκουίνος", nameEs: "African Penguin", icon: "🐧", scientificName: "Spheniscus demersus",
+        name: "Afrika Pengueni", nameEn: "African Penguin", nameEl: "Αφρικανικός πιγκουίνος", nameEs: "Pingüino del Cabo", icon: "🐧", scientificName: "Spheniscus demersus",
         photoId: 1149, category: "OTLUK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sığ kıyılar ve plajlar",
@@ -10052,7 +10052,7 @@ const SPECIES_DB = {
         noteEn: "The only penguin species endemic to Africa. Live closely with humans at Boulders Beach.", noteEl: "The only penguin species endemic to Africa. Live closely with humans at Boulders Beach.", noteEs: "The only penguin species endemic to Africa. Live closely with humans at Boulders Beach."
     },
     "safrica_clawless_otter": {
-        name: "Pencesiz Su Samuru", nameEn: "Cape Clawless Otter", nameEl: "Cape Clawless Otter", nameEs: "Cape Clawless Otter", icon: "🦦", scientificName: "Aonyx capensis",
+        name: "Pencesiz Su Samuru", nameEn: "Cape Clawless Otter", nameEl: "Βίδρα Ακρωτηρίου", nameEs: "Nutria del Cabo", icon: "🦦", scientificName: "Aonyx capensis",
         photoId: 1150, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık nehir ağızları ve kıyılar",
@@ -10067,7 +10067,7 @@ const SPECIES_DB = {
     },
 
     "uae_king_mackerel_kanaad": {
-        name: "Kanaad / Kral Makrelya", nameEn: "King Mackerel (Kanaad)", nameEl: "Βασιλιάς Σκουμπρί (Καναάντ)", nameEs: "King Mackerel (Kanaad)", icon: "🐟", scientificName: "Scomberomorus commerson",
+        name: "Kanaad / Kral Makrelya", nameEn: "King Mackerel (Kanaad)", nameEl: "Βασιλιάς Σκουμπρί (Καναάντ)", nameEs: "Carite estriado", icon: "🐟", scientificName: "Scomberomorus commerson",
         photoId: 1201, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin su akıntıları",
@@ -10081,7 +10081,7 @@ const SPECIES_DB = {
         noteEn: "The most popular and economically valued fish in the UAE. Known locally as 'Kanaad'.", noteEl: "The most popular and economically valued fish in the UAE. Known locally as 'Kanaad'.", noteEs: "The most popular and economically valued fish in the UAE. Known locally as 'Kanaad'."
     },
     "uae_hamour_grouper": {
-        name: "Hamour / Turuncu Benekli Orfoz", nameEn: "Hamour (Orange-spotted Grouper)", nameEl: "Χαμούρ (Σφυρίδα με πορτοκαλί κηλίδες)", nameEs: "Hamour (Orange-spotted Grouper)", icon: "🐟", scientificName: "Epinephelus coioides",
+        name: "Hamour / Turuncu Benekli Orfoz", nameEn: "Hamour (Orange-spotted Grouper)", nameEl: "Χαμούρ (Σφυρίδα με πορτοκαλί κηλίδες)", nameEs: "Mero de puntos naranjas", icon: "🐟", scientificName: "Epinephelus coioides",
         photoId: 1202, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz resifler ve batıklar",
@@ -10095,7 +10095,7 @@ const SPECIES_DB = {
         noteEn: "The symbol of Dubai's culinary culture. Highly popular but under protection due to overfishing.", noteEl: "The symbol of Dubai's culinary culture. Highly popular but under protection due to overfishing.", noteEs: "The symbol of Dubai's culinary culture. Highly popular but under protection due to overfishing."
     },
     "uae_queenfish_talang": {
-        name: "Talang / Kraliçe Balığı", nameEn: "Talang Queenfish", nameEl: "Βασίλισσα Ταλάνγκ", nameEs: "Talang Queenfish", icon: "🐟", scientificName: "Scomberoides commersonnianus",
+        name: "Talang / Kraliçe Balığı", nameEn: "Talang Queenfish", nameEl: "Βασίλισσα Ταλάνγκ", nameEs: "Pez reina", icon: "🐟", scientificName: "Scomberoides commersonnianus",
         photoId: 1203, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kıyılar ve mendirekler",
@@ -10109,7 +10109,7 @@ const SPECIES_DB = {
         noteEn: "A favorite for sport anglers. Known for jumping out of the water when hooked.", noteEl: "A favorite for sport anglers. Known for jumping out of the water when hooked.", noteEs: "A favorite for sport anglers. Known for jumping out of the water when hooked."
     },
     "uae_sheri_emperor": {
-        name: "Sheri / Mercan Balığı", nameEn: "Sheri (Spangled Emperor)", nameEl: "Sheri (Spangled Emperor)", nameEs: "Sheri (Spangled Emperor)", icon: "🐟", scientificName: "Lethrinus nebulosus",
+        name: "Sheri / Mercan Balığı", nameEn: "Sheri (Spangled Emperor)", nameEl: "Λυθρίνι στικτό", nameEs: "Emperador de manchas azules", icon: "🐟", scientificName: "Lethrinus nebulosus",
         photoId: 1204, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve resif geçişleri",
@@ -10123,7 +10123,7 @@ const SPECIES_DB = {
         noteEn: "The most common fish in local markets. Known as 'Sheri' and has very tasty meat.", noteEl: "The most common fish in local markets. Known as 'Sheri' and has very tasty meat.", noteEs: "The most common fish in local markets. Known as 'Sheri' and has very tasty meat."
     },
     "uae_shaam_seabream": {
-        name: "Shaam / Sarı Yüzgeçli Karagöz", nameEn: "Shaam (Yellowfin Seabream)", nameEl: "Shaam (Yellowfin Seabream)", nameEs: "Shaam (Yellowfin Seabream)", icon: "🐟", scientificName: "Acanthopagrus latus",
+        name: "Shaam / Sarı Yüzgeçli Karagöz", nameEn: "Shaam (Yellowfin Seabream)", nameEl: "Τσιπούρα κιτρινοπτέρυγη", nameEs: "Sargo de aletas amarillas", icon: "🐟", scientificName: "Acanthopagrus latus",
         photoId: 1206, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ kayalıklar",
@@ -10137,7 +10137,7 @@ const SPECIES_DB = {
         noteEn: "One of the most caught species by shore anglers. A very cunning fish.", noteEl: "One of the most caught species by shore anglers. A very cunning fish.", noteEs: "One of the most caught species by shore anglers. A very cunning fish."
     },
     "uae_yanaam_sweetlips": {
-        name: "Yanaam / Tatlıdudak", nameEn: "Yanaam (Sordid Sweetlips)", nameEl: "Yanaam (Sordid Sweetlips)", nameEs: "Yanaam (Sordid Sweetlips)", icon: "🐟", scientificName: "Plectorhinchus sordidus",
+        name: "Yanaam / Tatlıdudak", nameEn: "Yanaam (Sordid Sweetlips)", nameEl: "Γλυκοχείλης θαμπός", nameEs: "Burro sordo", icon: "🐟", scientificName: "Plectorhinchus sordidus",
         photoId: 1207, category: "KAYALIK",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -10151,7 +10151,7 @@ const SPECIES_DB = {
         noteEn: "Identified by thick lips. Usually travels in small groups in rocky areas.", noteEl: "Identified by thick lips. Usually travels in small groups in rocky areas.", noteEs: "Identified by thick lips. Usually travels in small groups in rocky areas."
     },
     "uae_sakhla_cobia": {
-        name: "Sakhla / Cobia", nameEn: "Sakhla (Cobia)", nameEl: "Sakhla (Cobia)", nameEs: "Sakhla (Cobia)", icon: "🐟", scientificName: "Rachycentron canadum",
+        name: "Sakhla / Cobia", nameEn: "Sakhla (Cobia)", nameEl: "Κόμπια", nameEs: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
         photoId: 1208, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz şamandıralar ve batıklar",
@@ -10165,7 +10165,7 @@ const SPECIES_DB = {
         noteEn: "Has a swimming style that resembles a shark from a distance. A very strong fighter.", noteEl: "Has a swimming style that resembles a shark from a distance. A very strong fighter.", noteEs: "Has a swimming style that resembles a shark from a distance. A very strong fighter."
     },
     "uae_blacktip_shark": {
-        name: "Siyah Yüzgeçli Köpekbalığı", nameEn: "Blacktip Shark", nameEl: "Blacktip Shark", nameEs: "Blacktip Shark", icon: "🦈", scientificName: "Carcharhinus limbatus",
+        name: "Siyah Yüzgeçli Köpekbalığı", nameEn: "Blacktip Shark", nameEl: "Καρχαρίας μαυροπτέρυγος", nameEs: "Tiburón macuira", icon: "🦈", scientificName: "Carcharhinus limbatus",
         photoId: 1209, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz açık kıyılar",
@@ -10179,7 +10179,7 @@ const SPECIES_DB = {
         noteEn: "The most common shark species in Gulf waters. Black fin tips are distinctive.", noteEl: "The most common shark species in Gulf waters. Black fin tips are distinctive.", noteEs: "The most common shark species in Gulf waters. Black fin tips are distinctive."
     },
     "uae_malabar_grouper": {
-        name: "Malabar Orfozu", nameEn: "Malabar Grouper", nameEl: "Σφυρίδα Malabar", nameEs: "Malabar Grouper", icon: "🐟", scientificName: "Epinephelus malabaricus",
+        name: "Malabar Orfozu", nameEn: "Malabar Grouper", nameEl: "Ροφός Μαλαμπάρ", nameEs: "Mero de Malabar", icon: "🐟", scientificName: "Epinephelus malabaricus",
         photoId: 1210, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler",
@@ -10194,7 +10194,7 @@ const SPECIES_DB = {
     },
 
     "uae_sailfish": {
-        name: "Yelken Balığı", nameEn: "Indo-Pacific Sailfish", nameEl: "Ιστιόψαρο Ινδο-Ειρηνικού", nameEs: "Indo-Pacific Sailfish", icon: "🐟", scientificName: "Istiophorus platypterus",
+        name: "Yelken Balığı", nameEn: "Indo-Pacific Sailfish", nameEl: "Ιστιόψαρο Ινδο-Ειρηνικού", nameEs: "Pez vela", icon: "🐟", scientificName: "Istiophorus platypterus",
         photoId: 1211, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzeyi",
@@ -10208,7 +10208,7 @@ const SPECIES_DB = {
         noteEn: "One of the most prestigious catches in UAE waters. Known for its incredible speed and massive dorsal fin.", noteEl: "One of the most prestigious catches in UAE waters. Known for its incredible speed and massive dorsal fin.", noteEs: "One of the most prestigious catches in UAE waters. Known for its incredible speed and massive dorsal fin."
     },
     "uae_jesh_trevally": {
-        name: "Jesh / Siyah Yüzgeçli Akya", nameEn: "Jesh (Black-tip Trevally)", nameEl: "Jesh (Trevally με μαύρη άκρη)", nameEs: "Jesh (Black-tip Trevally)", icon: "🐟", scientificName: "Caranx heberi",
+        name: "Jesh / Siyah Yüzgeçli Akya", nameEn: "Jesh (Black-tip Trevally)", nameEl: "Τρεβάλι μαυροπτέρυγο", nameEs: "Jurel de punta negra", icon: "🐟", scientificName: "Caranx heberi",
         photoId: 1212, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık kıyı yamaçları",
@@ -10222,7 +10222,7 @@ const SPECIES_DB = {
         noteEn: "Locally called 'Jesh'. A very strong and aggressive fighter.", noteEl: "Locally called 'Jesh'. A very strong and aggressive fighter.", noteEs: "Locally called 'Jesh'. A very strong and aggressive fighter."
     },
     "uae_bluefin_trevally": {
-        name: "Mavi Yüzgeçli Akya", nameEn: "Bluefin Trevally", nameEl: "Bluefin Trevally", nameEs: "Bluefin Trevally", icon: "🐟", scientificName: "Caranx melampygus",
+        name: "Mavi Yüzgeçli Akya", nameEn: "Bluefin Trevally", nameEl: "Τρεβάλι μπλε πτερυγίου", nameEs: "Jurel de aletas azules", icon: "🐟", scientificName: "Caranx melampygus",
         photoId: 1213, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -10250,7 +10250,7 @@ const SPECIES_DB = {
         noteEn: "Found in some mangrove areas and aquaculture zones in the UAE. Its meat is highly valued.", noteEl: "Found in some mangrove areas and aquaculture zones in the UAE. Its meat is highly valued.", noteEs: "Found in some mangrove areas and aquaculture zones in the UAE. Its meat is highly valued."
     },
     "uae_shamshoom_bream": {
-        name: "Shamshoom / Arap Mercanı", nameEn: "Shamshoom (Arabian Monocle Bream)", nameEl: "Shamshoom (αραβική τσιπούρα)", nameEs: "Shamshoom (Arabian Monocle Bream)", icon: "🐟", scientificName: "Scolopsis ghanam",
+        name: "Shamshoom / Arap Mercanı", nameEn: "Shamshoom (Arabian Monocle Bream)", nameEl: "Τσιπούρα αραβική", nameEs: "Escólopsis árabe", icon: "🐟", scientificName: "Scolopsis ghanam",
         photoId: 1215, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sığ resifler",
@@ -10264,7 +10264,7 @@ const SPECIES_DB = {
         noteEn: "One of the most common small fish on the UAE coast. Identified by the horizontal line under its eye.", noteEl: "One of the most common small fish on the UAE coast. Identified by the horizontal line under its eye.", noteEs: "One of the most common small fish on the UAE coast. Identified by the horizontal line under its eye."
     },
     "uae_small_tooth_sheri": {
-        name: "Küçük Dişli Sheri", nameEn: "Small-tooth Emperor", nameEl: "Αυτοκράτορας μικροδόντι", nameEs: "Small-tooth Emperor", icon: "🐟", scientificName: "Lethrinus microdon",
+        name: "Küçük Dişli Sheri", nameEn: "Small-tooth Emperor", nameEl: "Αυτοκράτορας μικροδόντι", nameEs: "Emperador de diente pequeño", icon: "🐟", scientificName: "Lethrinus microdon",
         photoId: 1216, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk alanlar",
@@ -10278,7 +10278,7 @@ const SPECIES_DB = {
         noteEn: "Very similar to the Spangled Emperor (Sheri) but has a longer snout.", noteEl: "Very similar to the Spangled Emperor (Sheri) but has a longer snout.", noteEs: "Very similar to the Spangled Emperor (Sheri) but has a longer snout."
     },
     "uae_shoninu_hind": {
-        name: "Shoninu / Sarı Yüzgeçli Hani", nameEn: "Shoninu (Yellow-finned Hind)", nameEl: "Shoninu (Κίτρινο Πτερύγιο Hind)", nameEs: "Shoninu (Yellow-finned Hind)", icon: "🐟", scientificName: "Cephalopholis hemistiktos",
+        name: "Shoninu / Sarı Yüzgeçli Hani", nameEn: "Shoninu (Yellow-finned Hind)", nameEl: "Ροφός κιτρινοπτέρυγος", nameEs: "Mero de aletas amarillas", icon: "🐟", scientificName: "Cephalopholis hemistiktos",
         photoId: 1217, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz kaya altları",
@@ -10292,7 +10292,7 @@ const SPECIES_DB = {
         noteEn: "The most colorful hind in UAE reefs. Identified by blue spots on its red body.", noteEl: "The most colorful hind in UAE reefs. Identified by blue spots on its red body.", noteEs: "The most colorful hind in UAE reefs. Identified by blue spots on its red body."
     },
     "uae_brown_spotted_cod": {
-        name: "Kahverengi Benekli Orfoz", nameEn: "Brown-spotted Reef Cod", nameEl: "Ύφαλος με καφέ κηλίδες Cod", nameEs: "Brown-spotted Reef Cod", icon: "🐟", scientificName: "Epinephelus chlorostigma",
+        name: "Kahverengi Benekli Orfoz", nameEn: "Brown-spotted Reef Cod", nameEl: "Ύφαλος με καφέ κηλίδες Cod", nameEs: "Mero de puntos pardos", icon: "🐟", scientificName: "Epinephelus chlorostigma",
         photoId: 1218, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler",
@@ -10306,7 +10306,7 @@ const SPECIES_DB = {
         noteEn: "A member of the Hamour family. Characterized by hexagonal brown spots.", noteEl: "A member of the Hamour family. Characterized by hexagonal brown spots.", noteEs: "A member of the Hamour family. Characterized by hexagonal brown spots."
     },
     "uae_farsh_sweetlips": {
-        name: "Farsh / Boyalı Tatlıdudak", nameEn: "Farsh (Painted Sweetlips)", nameEl: "Farsh (Ζωγραφισμ  να γλυκά)", nameEs: "Farsh (Painted Sweetlips)", icon: "🐟", scientificName: "Plectorhinchus pictus",
+        name: "Farsh / Boyalı Tatlıdudak", nameEn: "Farsh (Painted Sweetlips)", nameEl: "Γλυκοχείλης ζωγραφιστός", nameEs: "Burro pintado", icon: "🐟", scientificName: "Plectorhinchus pictus",
         photoId: 1219, category: "KAYALIK",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -10320,7 +10320,7 @@ const SPECIES_DB = {
         noteEn: "Known in the UAE as 'Farsh'. Yellowish spots on its body turn grey as it ages.", noteEl: "Known in the UAE as 'Farsh'. Yellowish spots on its body turn grey as it ages.", noteEs: "Known in the UAE as 'Farsh'. Yellowish spots on its body turn grey as it ages."
     },
     "uae_picasso_triggerfish": {
-        name: "Picasso Balığı", nameEn: "Picasso Triggerfish", nameEl: "Πικάσο Triggerfish", nameEs: "Picasso Triggerfish", icon: "🐟", scientificName: "Rhinecanthus assasi",
+        name: "Picasso Balığı", nameEn: "Picasso Triggerfish", nameEl: "Γουρουνόψαρο Πικάσο", nameEs: "Pez ballesta picasso árabe", icon: "🐟", scientificName: "Rhinecanthus assasi",
         photoId: 1220, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ resif alanları",
@@ -10335,7 +10335,7 @@ const SPECIES_DB = {
     },
 
     "uae_blue_marlin": {
-        name: "Mavi Marlin", nameEn: "Blue Marlin", nameEl: "Μπλε Μάρλιν", nameEs: "Blue Marlin", icon: "🐟", scientificName: "Makaira nigricans",
+        name: "Mavi Marlin", nameEn: "Blue Marlin", nameEl: "Μπλε Μάρλιν", nameEs: "Aguja azul", icon: "🐟", scientificName: "Makaira nigricans",
         photoId: 1221, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
@@ -10349,7 +10349,7 @@ const SPECIES_DB = {
         noteEn: "Found in the depths of the Gulf of Oman off the east coast of UAE (Fujairah).", noteEl: "Found in the depths of the Gulf of Oman off the east coast of UAE (Fujairah).", noteEs: "Found in the depths of the Gulf of Oman off the east coast of UAE (Fujairah)."
     },
     "uae_black_marlin": {
-        name: "Siyah Marlin", nameEn: "Black Marlin", nameEl: "Μαύρος Μάρλιν", nameEs: "Black Marlin", icon: "🐟", scientificName: "Istiompax indica",
+        name: "Siyah Marlin", nameEn: "Black Marlin", nameEl: "Μαύρος Μάρλιν", nameEs: "Aguja negra", icon: "🐟", scientificName: "Istiompax indica",
         photoId: 1222, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz kıta sahanlığı kenarları",
@@ -10363,7 +10363,7 @@ const SPECIES_DB = {
         noteEn: "Rarer than the Blue Marlin but has been reported off the coast of Fujairah.", noteEl: "Rarer than the Blue Marlin but has been reported off the coast of Fujairah.", noteEs: "Rarer than the Blue Marlin but has been reported off the coast of Fujairah."
     },
     "uae_yellowfin_tuna": {
-        name: "Sarıkanat Orkinos", nameEn: "Yellowfin Tuna", nameEl: "Κιτρινόπτερος τόνος", nameEs: "Yellowfin Tuna", icon: "🐟", scientificName: "Thunnus albacares",
+        name: "Sarıkanat Orkinos", nameEn: "Yellowfin Tuna", nameEl: "Κιτρινόπτερος τόνος", nameEs: "Rabil", icon: "🐟", scientificName: "Thunnus albacares",
         photoId: 1223, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz akıntı çizgileri ve açık deniz",
@@ -10377,7 +10377,7 @@ const SPECIES_DB = {
         noteEn: "The primary target for sport anglers in Fujairah. Very fast and resilient.", noteEl: "The primary target for sport anglers in Fujairah. Very fast and resilient.", noteEs: "The primary target for sport anglers in Fujairah. Very fast and resilient."
     },
     "uae_longtail_tuna": {
-        name: "Uzun Kuyruklu Orkinos", nameEn: "Longtail Tuna", nameEl: "Τόνος Longtail", nameEs: "Longtail Tuna", icon: "🐟", scientificName: "Thunnus tonggol",
+        name: "Uzun Kuyruklu Orkinos", nameEn: "Longtail Tuna", nameEl: "Τόνος τονγκόλ", nameEs: "Atún tongol", icon: "🐟", scientificName: "Thunnus tonggol",
         photoId: 1224, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz kıyıya yakın açık sular",
@@ -10391,7 +10391,7 @@ const SPECIES_DB = {
         noteEn: "The most common tuna species in UAE Gulf waters (Dubai/Abu Dhabi).", noteEl: "The most common tuna species in UAE Gulf waters (Dubai/Abu Dhabi).", noteEs: "The most common tuna species in UAE Gulf waters (Dubai/Abu Dhabi)."
     },
     "uae_bullet_tuna": {
-        name: "Mermi Orkinos", nameEn: "Bullet Tuna", nameEl: "Bullet Tuna", nameEs: "Bullet Tuna", icon: "🐟", scientificName: "Thunnus rochei",
+        name: "Mermi Orkinos", nameEn: "Bullet Tuna", nameEl: "Τόνος σφαίρα", nameEs: "Melva bala", icon: "🐟", scientificName: "Thunnus rochei",
         photoId: 1225, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz yüzeydeki kuş hareketleri",
@@ -10405,7 +10405,7 @@ const SPECIES_DB = {
         noteEn: "A very small and fast tuna species. Often used as bait for larger tuna.", noteEl: "A very small and fast tuna species. Often used as bait for larger tuna.", noteEs: "A very small and fast tuna species. Often used as bait for larger tuna."
     },
     "uae_frigate_tuna": {
-        name: "Gemi Orkinosu", nameEn: "Frigate Tuna", nameEl: "Φρεγάτα Τόνος", nameEs: "Frigate Tuna", icon: "🐟", scientificName: "Auxis thazard",
+        name: "Gemi Orkinosu", nameEn: "Frigate Tuna", nameEl: "Φρεγάτα Τόνος", nameEs: "Melva", icon: "🐟", scientificName: "Auxis thazard",
         photoId: 1226, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
@@ -10419,7 +10419,7 @@ const SPECIES_DB = {
         noteEn: "Very similar to the bullet tuna. Travels in schools and changes location rapidly.", noteEl: "Very similar to the bullet tuna. Travels in schools and changes location rapidly.", noteEs: "Very similar to the bullet tuna. Travels in schools and changes location rapidly."
     },
     "uae_mahi_mahi": {
-        name: "Mahi Mahi / Dolphin Fish", nameEn: "Mahi Mahi", nameEl: "Μάχι Μάχι", nameEs: "Mahi Mahi", icon: "🐟", scientificName: "Coryphaena hippurus",
+        name: "Mahi Mahi / Dolphin Fish", nameEn: "Mahi Mahi", nameEl: "Μάχι Μάχι", nameEs: "Dorado", icon: "🐟", scientificName: "Coryphaena hippurus",
         photoId: 1227, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz yüzen nesneler ve şamandıralar altı",
@@ -10433,7 +10433,7 @@ const SPECIES_DB = {
         noteEn: "The most sought-after fish in UAE waters during summer. Famous for its stunning colors and taste.", noteEl: "The most sought-after fish in UAE waters during summer. Famous for its stunning colors and taste.", noteEs: "The most sought-after fish in UAE waters during summer. Famous for its stunning colors and taste."
     },
     "uae_kabbad_mackerel": {
-        name: "Kabbad / Benekli Makrelya", nameEn: "Kabbad (Spotted Spanish Mackerel)", nameEl: "Kabbad (Σκουμπρί με στίγματα)", nameEs: "Kabbad (Spotted Spanish Mackerel)", icon: "🐟", scientificName: "Scomberomorus guttatus",
+        name: "Kabbad / Benekli Makrelya", nameEn: "Kabbad (Spotted Spanish Mackerel)", nameEl: "Σκουμπρί στικτό Ινδικού", nameEs: "Carite moteado índico", icon: "🐟", scientificName: "Scomberomorus guttatus",
         photoId: 1229, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ kıyılar",
@@ -10447,7 +10447,7 @@ const SPECIES_DB = {
         noteEn: "Known in the UAE as 'Kabbad'. Distinguished from Kingfish by dark spots on its body.", noteEl: "Known in the UAE as 'Kabbad'. Distinguished from Kingfish by dark spots on its body.", noteEs: "Known in the UAE as 'Kabbad'. Distinguished from Kingfish by dark spots on its body."
     },
     "uae_sada_tunny": {
-        name: "Sada / Kavaklı Palamut", nameEn: "Sada (Little Tunny)", nameEl: "Sada (Little Tunny)", nameEs: "Sada (Little Tunny)", icon: "🐟", scientificName: "Euthynnus affinis",
+        name: "Sada / Kavaklı Palamut", nameEn: "Sada (Little Tunny)", nameEl: "Καβακάβα", nameEs: "Bacoreta oriental", icon: "🐟", scientificName: "Euthynnus affinis",
         photoId: 1230, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz kıyıya yakın yüzey hareketleri",
@@ -10462,7 +10462,7 @@ const SPECIES_DB = {
     },
 
     "uae_great_barracuda": {
-        name: "Dev Barrakuda", nameEn: "Great Barracuda", nameEl: "Great Barracuda", nameEs: "Great Barracuda", icon: "🐟", scientificName: "Sphyraena barracuda",
+        name: "Dev Barrakuda", nameEn: "Great Barracuda", nameEl: "Λούτσος γίγας", nameEs: "Barracuda gigante", icon: "🐟", scientificName: "Sphyraena barracuda",
         photoId: 1231, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz resif yamaçları",
@@ -10476,7 +10476,7 @@ const SPECIES_DB = {
         noteEn: "The silver rocket of the reefs. A very aggressive predator that reaches large sizes in the UAE.", noteEl: "The silver rocket of the reefs. A very aggressive predator that reaches large sizes in the UAE.", noteEs: "The silver rocket of the reefs. A very aggressive predator that reaches large sizes in the UAE."
     },
     "uae_yellowtail_barracuda": {
-        name: "Sarı Kuyruklu Barrakuda", nameEn: "Yellowtail Barracuda", nameEl: "Yellowtail Barracuda", nameEs: "Yellowtail Barracuda", icon: "🐟", scientificName: "Sphyraena flavicauda",
+        name: "Sarı Kuyruklu Barrakuda", nameEn: "Yellowtail Barracuda", nameEl: "Λούτσος κιτρινόουρος", nameEs: "Barracuda de cola amarilla", icon: "🐟", scientificName: "Sphyraena flavicauda",
         photoId: 1232, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ sular",
@@ -10490,7 +10490,7 @@ const SPECIES_DB = {
         noteEn: "Smaller and schools more than the Great Barracuda. Its tail is bright yellow.", noteEl: "Smaller and schools more than the Great Barracuda. Its tail is bright yellow.", noteEs: "Smaller and schools more than the Great Barracuda. Its tail is bright yellow."
     },
     "uae_giant_trevally": {
-        name: "Dev Akya / GT", nameEn: "Giant Trevally", nameEl: "Γίγαντας Trevally", nameEs: "Giant Trevally", icon: "🐟", scientificName: "Caranx ignobilis",
+        name: "Dev Akya / GT", nameEn: "Giant Trevally", nameEl: "Τρεβάλι γίγας", nameEs: "Jurel gigante", icon: "🐟", scientificName: "Caranx ignobilis",
         photoId: 1233, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık kayalık burunlar",
@@ -10504,7 +10504,7 @@ const SPECIES_DB = {
         noteEn: "The strongest topwater target off Fujairah. Possesses incredible power.", noteEl: "The strongest topwater target off Fujairah. Possesses incredible power.", noteEs: "The strongest topwater target off Fujairah. Possesses incredible power."
     },
     "uae_bigeye_trevally": {
-        name: "Kocagöz Akya", nameEn: "Bigeye Trevally", nameEl: "Bigeye Trevally", nameEs: "Bigeye Trevally", icon: "🐟", scientificName: "Caranx sexfasciatus",
+        name: "Kocagöz Akya", nameEn: "Bigeye Trevally", nameEl: "Τρεβάλι μεγαλομάτικο", nameEs: "Jurel ojón", icon: "🐟", scientificName: "Caranx sexfasciatus",
         photoId: 1235, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece batıklar ve derin resifler",
@@ -10518,7 +10518,7 @@ const SPECIES_DB = {
         noteEn: "Hunts in schools at night. Has large light-sensitive eyes.", noteEl: "Hunts in schools at night. Has large light-sensitive eyes.", noteEs: "Caza in schools at night. Has large light-sensitive eyes."
     },
     "uae_yellow_spotted_trevally": {
-        name: "Sarı Benekli Akya", nameEn: "Yellow-spotted Trevally", nameEl: "Κίτρινα στίγματα Trevally", nameEs: "Yellow-spotted Trevally", icon: "🐟", scientificName: "Carangoides fulvoguttatus",
+        name: "Sarı Benekli Akya", nameEn: "Yellow-spotted Trevally", nameEl: "Τρεβάλι κιτρινόστικτο", nameEs: "Jurel de puntos amarillos", icon: "🐟", scientificName: "Carangoides fulvoguttatus",
         photoId: 1236, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk kanyonlar",
@@ -10532,7 +10532,7 @@ const SPECIES_DB = {
         noteEn: "Known as a member of the 'Jesh' family in UAE waters. Feeds in sandy areas.", noteEl: "Known as a member of the 'Jesh' family in UAE waters. Feeds in sandy areas.", noteEs: "Known as a member of the 'Jesh' family in UAE waters. Feeds in sandy areas."
     },
     "uae_bludger_trevally": {
-        name: "Gümüş Akya", nameEn: "Bludger Trevally", nameEl: "Μπλάτζερ Τρέβαλι", nameEs: "Bludger Trevally", icon: "🐟", scientificName: "Carangoides gymnostethus",
+        name: "Gümüş Akya", nameEn: "Bludger Trevally", nameEl: "Μπλάτζερ Τρέβαλι", nameEs: "Jurel bludger", icon: "🐟", scientificName: "Carangoides gymnostethus",
         photoId: 1237, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz derin resif kenarları",
@@ -10546,7 +10546,7 @@ const SPECIES_DB = {
         noteEn: "Prefers deeper waters. Frequently encountered in the deep wrecks of the UAE.", noteEl: "Prefers deeper waters. Frequently encountered in the deep wrecks of the UAE.", noteEs: "Prefiere deeper waters. Frequently encountered in the deep wrecks of the UAE."
     },
     "uae_greater_amberjack": {
-        name: "Büyük Akya", nameEn: "Greater Amberjack", nameEl: "Greater Amberjack", nameEs: "Greater Amberjack", icon: "🐟", scientificName: "Seriola dumerili",
+        name: "Büyük Akya", nameEn: "Greater Amberjack", nameEl: "Μαγιάτικο", nameEs: "Pez limón", icon: "🐟", scientificName: "Seriola dumerili",
         photoId: 1238, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve petrol platformları",
@@ -10560,7 +10560,7 @@ const SPECIES_DB = {
         noteEn: "The strongest 'bull' fish in UAE's deep waters. Large schools can be found around oil platforms.", noteEl: "The strongest 'bull' fish in UAE's deep waters. Large schools can be found around oil platforms.", noteEs: "The strongest 'bull' fish in UAE's deep waters. Large schools can be found around oil platforms."
     },
     "uae_almaco_jack": {
-        name: "Derin Su Akyası", nameEn: "Almaco Jack", nameEl: "Αλμάκο Τζακ", nameEs: "Almaco Jack", icon: "🐟", scientificName: "Seriola rivoliana",
+        name: "Derin Su Akyası", nameEn: "Almaco Jack", nameEl: "Αλμάκο Τζακ", nameEs: "Medregal limón", icon: "🐟", scientificName: "Seriola rivoliana",
         photoId: 1239, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz çok derin resifler",
@@ -10574,7 +10574,7 @@ const SPECIES_DB = {
         noteEn: "Very similar to Amberjack but darker in color and has a longer dorsal fin.", noteEl: "Very similar to Amberjack but darker in color and has a longer dorsal fin.", noteEs: "Very similar to Amberjack but darker in color and has a longer dorsal fin."
     },
     "uae_rainbow_runner": {
-        name: "Gökkuşağı Balığı", nameEn: "Rainbow Runner", nameEl: "Rainbow Runner", nameEs: "Rainbow Runner", icon: "🐟", scientificName: "Elagatis bipinnulata",
+        name: "Gökkuşağı Balığı", nameEn: "Rainbow Runner", nameEl: "Ουράνιο τόξο", nameEs: "Macarela salmón", icon: "🐟", scientificName: "Elagatis bipinnulata",
         photoId: 1240, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
@@ -10589,7 +10589,7 @@ const SPECIES_DB = {
     },
 
     "uae_spotted_dart": {
-        name: "Jesh Um Al-Hula", nameEn: "Small-spotted Dart", nameEl: "Βέλος με μικρά στίγματα", nameEs: "Small-spotted Dart", icon: "🐟", scientificName: "Trachinotus baillonii",
+        name: "Jesh Um Al-Hula", nameEn: "Small-spotted Dart", nameEl: "Βέλος με μικρά στίγματα", nameEs: "Pámpano de puntos", icon: "🐟", scientificName: "Trachinotus baillonii",
         photoId: 1241, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kıyılar ve çalkantılı sular",
@@ -10603,7 +10603,7 @@ const SPECIES_DB = {
         noteEn: "Known in the UAE as 'Jesh Um Al-Hula'. The small black spots on its body are characteristic.", noteEl: "Known in the UAE as 'Jesh Um Al-Hula'. The small black spots on its body are characteristic.", noteEs: "Known in the UAE as 'Jesh Um Al-Hula'. The small black spots on its body are characteristic."
     },
     "uae_indian_threadfin": {
-        name: "Sultan Ibrahim / İplik yüzgeçli", nameEn: "Indian Threadfin", nameEl: "Ινδικό κλωστή", nameEs: "Indian Threadfin", icon: "🐟", scientificName: "Nemipterus japonicus",
+        name: "Sultan Ibrahim / İplik yüzgeçli", nameEn: "Indian Threadfin", nameEl: "Ινδικό κλωστή", nameEs: "Escolar japonés de hilo", icon: "🐟", scientificName: "Nemipterus japonicus",
         photoId: 1242, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk alanlar",
@@ -10617,7 +10617,7 @@ const SPECIES_DB = {
         noteEn: "The most popular fish in UAE markets. Called 'Sultan Ibrahim' and is very tasty.", noteEl: "The most popular fish in UAE markets. Called 'Sultan Ibrahim' and is very tasty.", noteEs: "The most popular fish in UAE markets. Called 'Sultan Ibrahim' and is very tasty."
     },
     "uae_rubberlip_farsh": {
-        name: "Farsh / Siyah Benekli Tatlıdudak", nameEn: "Black-spotted Rubberlip", nameEl: "Καουτσούκ με μαύρες κηλίδες", nameEs: "Black-spotted Rubberlip", icon: "🐟", scientificName: "Plectorhinchus gaterinus",
+        name: "Farsh / Siyah Benekli Tatlıdudak", nameEn: "Black-spotted Rubberlip", nameEl: "Καουτσούκ με μαύρες κηλίδες", nameEs: "Burro de puntos negros", icon: "🐟", scientificName: "Plectorhinchus gaterinus",
         photoId: 1243, category: "KAYALIK",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları",
@@ -10631,7 +10631,7 @@ const SPECIES_DB = {
         noteEn: "The most showy member of the 'Farsh' family with black spots on its yellow body.", noteEl: "The most showy member of the 'Farsh' family with black spots on its yellow body.", noteEs: "The most showy member of the 'Farsh' family with black spots on its yellow body."
     },
     "uae_malabar_snapper": {
-        name: "Naiser / Malabar Snapper", nameEn: "Malabar Snapper (Naiser)", nameEl: "Malabar Snapper (Naiser)", nameEs: "Malabar Snapper (Naiser)", icon: "🐟", scientificName: "Lutjanus malabaricus",
+        name: "Naiser / Malabar Snapper", nameEn: "Malabar Snapper (Naiser)", nameEl: "Λουτσάνος Μαλαμπάρ", nameEs: "Pargo rojo de Malabar", icon: "🐟", scientificName: "Lutjanus malabaricus",
         photoId: 1244, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve batıklar",
@@ -10645,7 +10645,7 @@ const SPECIES_DB = {
         noteEn: "Known in the UAE as 'Naiser'. Easily recognized by its bright red color.", noteEl: "Known in the UAE as 'Naiser'. Easily recognized by its bright red color.", noteEs: "Known in the UAE as 'Naiser'. Easily recognized by its bright red color."
     },
     "uae_ehrenbergs_snapper": {
-        name: "Habbar / Snapper", nameEn: "Ehrenberg's Snapper", nameEl: "Το Snapper του Ehrenberg", nameEs: "Ehrenberg's Snapper", icon: "🐟", scientificName: "Lutjanus ehrenbergii",
+        name: "Habbar / Snapper", nameEn: "Ehrenberg's Snapper", nameEl: "Λουτσάνος Έρενμπεργκ", nameEs: "Pargo de Ehrenberg", icon: "🐟", scientificName: "Lutjanus ehrenbergii",
         photoId: 1245, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -10659,7 +10659,7 @@ const SPECIES_DB = {
         noteEn: "Known in the UAE as 'Habbar'. The horizontal yellow stripes on its body are prominent.", noteEl: "Known in the UAE as 'Habbar'. The horizontal yellow stripes on its body are prominent.", noteEs: "Known in the UAE as 'Habbar'. The horizontal yellow stripes on its body are prominent."
     },
     "uae_green_turtle": {
-        name: "Yeşil Deniz Kaplumbağası", nameEn: "Green Sea Turtle", nameEl: "Πράσινη θαλάσσια χελώνα", nameEs: "Green Sea Turtle", icon: "🐢", scientificName: "Chelonia mydas",
+        name: "Yeşil Deniz Kaplumbağası", nameEn: "Green Sea Turtle", nameEl: "Πράσινη θαλάσσια χελώνα", nameEs: "Tortuga verde", icon: "🐢", scientificName: "Chelonia mydas",
         photoId: 1246, category: "OTLUK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sığ yosunluk alanlar",
@@ -10673,7 +10673,7 @@ const SPECIES_DB = {
         noteEn: "Commonly seen on UAE coasts. Feeds on seagrasses.", noteEl: "Commonly seen on UAE coasts. Feeds on seagrasses.", noteEs: "Commonly seen on UAE coasts. Feeds on seagrasses."
     },
     "uae_hawksbill_turtle": {
-        name: "Şahin Gagalı Kaplumbağa", nameEn: "Hawksbill Turtle", nameEl: "Χελώνα Hawksbill", nameEs: "Hawksbill Turtle", icon: "🐢", scientificName: "Eretmochelys imbricata",
+        name: "Şahin Gagalı Kaplumbağa", nameEn: "Hawksbill Turtle", nameEl: "Χελώνα καρέτα-καρέτα γερακομύτη", nameEs: "Tortuga carey", icon: "🐢", scientificName: "Eretmochelys imbricata",
         photoId: 1247, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -10687,7 +10687,7 @@ const SPECIES_DB = {
         noteEn: "Nest on the shores of Saadiyat Island in Abu Dhabi. Very rare and precious.", noteEl: "Nest on the shores of Saadiyat Island in Abu Dhabi. Very rare and precious.", noteEs: "Nest on the shores of Saadiyat Island in Abu Dhabi. Very rare and precious."
     },
     "uae_dugong": {
-        name: "Dugong / Deniz İneği", nameEn: "Dugong", nameEl: "Dugong", nameEs: "Dugong", icon: "🦦", scientificName: "Dugong dugon",
+        name: "Dugong / Deniz İneği", nameEn: "Dugong", nameEl: "Δουγκόνγκ", nameEs: "Dugongo", icon: "🦦", scientificName: "Dugong dugon",
         photoId: 1248, category: "OTLUK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sığ deniz çayırları",
@@ -10701,7 +10701,7 @@ const SPECIES_DB = {
         noteEn: "Abu Dhabi hosts the second-largest population of Dugongs in the world.", noteEl: "Abu Dhabi hosts the second-largest population of Dugongs in the world.", noteEs: "Abu Dhabi hosts the second-largest population of Dugongs in the world."
     },
     "uae_bottlenose_dolphin": {
-        name: "Afalina Yunus", nameEn: "Indo-Pacific Bottlenose Dolphin", nameEl: "Ρινδοδελφίνι Ινδο-Ειρηνικού", nameEs: "Indo-Pacific Bottlenose Dolphin", icon: "🐬", scientificName: "Tursiops aduncus",
+        name: "Afalina Yunus", nameEn: "Indo-Pacific Bottlenose Dolphin", nameEl: "Ρινδοδελφίνι Ινδο-Ειρηνικού", nameEs: "Delfín mular índico", icon: "🐬", scientificName: "Tursiops aduncus",
         photoId: 1249, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz kıyı suları ve Dubai kanalı",
@@ -10715,7 +10715,7 @@ const SPECIES_DB = {
         noteEn: "Frequently seen accompanying boats off the coasts of Dubai and Abu Dhabi.", noteEl: "Frequently seen accompanying boats off the coasts of Dubai and Abu Dhabi.", noteEs: "Frequently seen accompanying boats off the coasts of Dubai and Abu Dhabi."
     },
     "uae_whale_shark": {
-        name: "Balina Köpekbalığı", nameEn: "Whale Shark", nameEl: "Καρχαρίας φαλαινών", nameEs: "Whale Shark", icon: "🐋", scientificName: "Rhincodon typus",
+        name: "Balina Köpekbalığı", nameEn: "Whale Shark", nameEl: "Καρχαρίας φαλαινών", nameEs: "Tiburón ballena", icon: "🐋", scientificName: "Rhincodon typus",
         photoId: 1250, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve Dubai Marina çevresi",
@@ -10729,7 +10729,7 @@ const SPECIES_DB = {
         noteEn: "Can even enter inland areas like Dubai Marina in summer. The largest fish in the world.", noteEl: "Can even enter inland areas like Dubai Marina in summer. The largest fish in the world.", noteEs: "Can even enter inland areas like Dubai Marina in summer. The largest fish in the world."
     },
     "sa_yellowfin_tuna": {
-        name: "Sarıkanat Orkinos (SA)", nameEn: "Yellowfin Tuna", nameEl: "Κιτρινόπτερος τόνος", nameEs: "Yellowfin Tuna", icon: "🐟", scientificName: "Thunnus albacares",
+        name: "Sarıkanat Orkinos (SA)", nameEn: "Yellowfin Tuna", nameEl: "Κιτρινόπτερος τόνος", nameEs: "Rabil", icon: "🐟", scientificName: "Thunnus albacares",
         photoId: 1301, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz akıntı çizgileri",
@@ -10743,7 +10743,7 @@ const SPECIES_DB = {
         noteEn: "Reaches giant sizes off the west and south coasts of SA. Extremely powerful.", noteEl: "Reaches giant sizes off the west and south coasts of SA. Extremely powerful.", noteEs: "Reaches giant sizes off the west and south coasts of SA. Extremely powerful."
     },
     "sa_longfin_tuna": {
-        name: "Albakor / Uzun Kanat Orkinos", nameEn: "Longfin Tuna (Albacore)", nameEl: "Μακρύπτερος τόνος (Albacore)", nameEs: "Longfin Tuna (Albacore)", icon: "🐟", scientificName: "Thunnus alalunga",
+        name: "Albakor / Uzun Kanat Orkinos", nameEn: "Longfin Tuna (Albacore)", nameEl: "Μακρύπτερος τόνος (Albacore)", nameEs: "Bonito del norte", icon: "🐟", scientificName: "Thunnus alalunga",
         photoId: 1302, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz derin ve serin sular",
@@ -10757,7 +10757,7 @@ const SPECIES_DB = {
         noteEn: "Abundant in cold currents off Cape Town.", noteEl: "Abundant in cold currents off Cape Town.", noteEs: "Abundant in cold currents off Cape Town."
     },
     "sa_black_marlin": {
-        name: "Siyah Marlin (SA)", nameEn: "Black Marlin", nameEl: "Μαύρος Μάρλιν", nameEs: "Black Marlin", icon: "🐟", scientificName: "Istiompax indica",
+        name: "Siyah Marlin (SA)", nameEn: "Black Marlin", nameEl: "Μαύρος Μάρλιν", nameEs: "Aguja negra", icon: "🐟", scientificName: "Istiompax indica",
         photoId: 1303, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz resifleri",
@@ -10771,7 +10771,7 @@ const SPECIES_DB = {
         noteEn: "Caught along the east coast (Durban) in summer. Incredible speed.", noteEl: "Caught along the east coast (Durban) in summer. Incredible speed.", noteEs: "Caught along the east coast (Durban) in summer. Incredible speed."
     },
     "sa_yellowtail": {
-        name: "Güney Akyası", nameEn: "Cape Yellowtail", nameEl: "Cape Yellowtail", nameEs: "Cape Yellowtail", icon: "🐟", scientificName: "Seriola lalandi",
+        name: "Güney Akyası", nameEn: "Cape Yellowtail", nameEl: "Μαγιάτικο λεμονί", nameEs: "Medregal limón", icon: "🐟", scientificName: "Seriola lalandi",
         photoId: 1304, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz burun başları ve adalar çevresi",
@@ -10785,7 +10785,7 @@ const SPECIES_DB = {
         noteEn: "One of the most popular game fish species in South Africa. Shows very strong resistance.", noteEl: "One of the most popular game fish species in South Africa. Shows very strong resistance.", noteEs: "One of the most popular game fish species in South Africa. Shows very strong resistance."
     },
     "sa_snoek": {
-        name: "Snoek / Uzun Barrakuda", nameEn: "Snoek", nameEl: "Snoek", nameEs: "Snoek", icon: "🐟", scientificName: "Thyrsites atun",
+        name: "Snoek / Uzun Barrakuda", nameEn: "Snoek", nameEl: "Σνουκ", nameEs: "Sierra snoek", icon: "🐟", scientificName: "Thyrsites atun",
         photoId: 1305, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sürü halinde orta su", peakHoursDescEn: "Midwater schools by day", peakHoursDescEl: "Κοπάδια στα μεσόνερα την ημέρα", peakHoursDescEs: "Bancos en media agua de día",
@@ -10799,7 +10799,7 @@ const SPECIES_DB = {
         noteEn: "Cultural icon of the West Coast. Known for its sharp teeth and hard hits.", noteEl: "Cultural icon of the West Coast. Known for its sharp teeth and hard hits.", noteEs: "Cultural icon of the West Coast. Known for its sharp teeth and hard hits."
     },
     "sa_galjoen": {
-        name: "Galjoen", nameEn: "Galjoen", nameEl: "Galjoen", nameEs: "Galjoen", icon: "🐟", scientificName: "Dichistius capensis",
+        name: "Galjoen", nameEn: "Galjoen", nameEl: "Γκαλγιούν", nameEs: "Galjoen del Cabo", icon: "🐟", scientificName: "Dichistius capensis",
         photoId: 1306, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ, çalkantılı kayalıklar",
@@ -10813,7 +10813,7 @@ const SPECIES_DB = {
         noteEn: "National fish of South Africa. Only caught in very rough and foamy waters.", noteEl: "National fish of South Africa. Only caught in very rough and foamy waters.", noteEs: "National fish of South Africa. Only caught in very rough and foamy waters."
     },
     "sa_blacktail": {
-        name: "Dassie / Karagöz (SA)", nameEn: "Blacktail", nameEl: "Blacktail", nameEs: "Blacktail", icon: "🐟", scientificName: "Diplodus capensis",
+        name: "Dassie / Karagöz (SA)", nameEn: "Blacktail", nameEl: "Σαργός Ακρωτηρίου", nameEs: "Sargo del Cabo", icon: "🐟", scientificName: "Diplodus capensis",
         photoId: 1307, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz kayalık kıyılar",
@@ -10827,7 +10827,7 @@ const SPECIES_DB = {
         noteEn: "The most common catch for shore anglers. Very cunning.", noteEl: "The most common catch for shore anglers. Very cunning.", noteEs: "The most common catch for shore anglers. Very cunning."
     },
     "sa_dusky_kob": {
-        name: "Dusky Kob / Dev Minekop", nameEn: "Dusky Kob", nameEl: "Dusky Kob", nameEs: "Dusky Kob", icon: "🐟", scientificName: "Argyrosomus japonicus",
+        name: "Dusky Kob / Dev Minekop", nameEn: "Dusky Kob", nameEl: "Κορβίνα Ιαπωνίας", nameEs: "Corvina japonesa", icon: "🐟", scientificName: "Argyrosomus japonicus",
         photoId: 1308, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece ve alacakaranlık nehir ağızları",
@@ -10841,7 +10841,7 @@ const SPECIES_DB = {
         noteEn: "A giant predator that can exceed 50 kg. The king of night surf fishing.", noteEl: "A giant predator that can exceed 50 kg. The king of night surf fishing.", noteEs: "A giant predator that can exceed 50 kg. The king of night surf fishing."
     },
     "sa_garrick": {
-        name: "Leervis / Garrick", nameEn: "Garrick", nameEl: "Γκάρικ", nameEs: "Garrick", icon: "🐟", scientificName: "Lichia amia",
+        name: "Leervis / Garrick", nameEn: "Garrick", nameEl: "Γκάρικ", nameEs: "Palometón", icon: "🐟", scientificName: "Lichia amia",
         photoId: 1309, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sörf bölgesi ve burunlar",
@@ -10855,7 +10855,7 @@ const SPECIES_DB = {
         noteEn: "An incredible fighter. Exciting to watch it track prey on the surface.", noteEl: "An incredible fighter. Exciting to watch it track prey on the surface.", noteEs: "An incredible fighter. Exciting to watch it track prey on the surface."
     },
     "sa_white_steenbras": {
-        name: "Beyaz Mırmır (SA)", nameEn: "White Steenbras", nameEl: "Λευκά Steenbras", nameEs: "White Steenbras", icon: "🐟", scientificName: "Lithognathus lithognathus",
+        name: "Beyaz Mırmır (SA)", nameEn: "White Steenbras", nameEl: "Μουρμούρα λευκή Ακρωτηρίου", nameEs: "Herrera blanca del Cabo", icon: "🐟", scientificName: "Lithognathus lithognathus",
         photoId: 1310, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk alanlar ve lagünler",
@@ -10869,7 +10869,7 @@ const SPECIES_DB = {
         noteEn: "One of the most valuable fish in sandy areas. Has very delicate hits.", noteEl: "One of the most valuable fish in sandy areas. Has very delicate hits.", noteEs: "One of the most valuable fish in sandy areas. Has very delicate hits."
     },
     "sa_spotted_grunter": {
-        name: "Benekli Grunter", nameEn: "Spotted Grunter", nameEl: "Spotted Grunter", nameEs: "Spotted Grunter", icon: "🐟", scientificName: "Pomadasys commersonnii",
+        name: "Benekli Grunter", nameEn: "Spotted Grunter", nameEl: "Ροχθόψαρο στικτό", nameEs: "Roncador manchado", icon: "🐟", scientificName: "Pomadasys commersonnii",
         photoId: 1311, category: "LAGUN",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz lagünler ve nehir ağızları",
@@ -10883,7 +10883,7 @@ const SPECIES_DB = {
         noteEn: "Famous for 'tailing'—sticking their tails out of the water while feeding in shallow water.", noteEl: "Famous for 'tailing'—sticking their tails out of the water while feeding in shallow water.", noteEs: "Famous for 'tailing'—sticking their tails out of the water while feeding in shallow water."
     },
     "sa_shad": {
-        name: "Elf / Lüfer (SA)", nameEn: "Shad (Elf)", nameEl: "Shad (Ξωτικό)", nameEs: "Shad (Elf)", icon: "🐟", scientificName: "Pomatomus saltatrix",
+        name: "Elf / Lüfer (SA)", nameEn: "Shad (Elf)", nameEl: "Γοφάρι", nameEs: "Anjova", icon: "🐟", scientificName: "Pomatomus saltatrix",
         photoId: 1312, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Sabah ve akşam suyu sörf bölgesi",
@@ -10897,7 +10897,7 @@ const SPECIES_DB = {
         noteEn: "The most targeted species in South Africa. Has a closed season in certain months.", noteEl: "The most targeted species in South Africa. Has a closed season in certain months.", noteEs: "The most targeted species in South Africa. Has a closed season in certain months."
     },
     "sa_black_musselcracker": {
-        name: "Siyah Dişli / Musselcracker", nameEn: "Black Musselcracker", nameEl: "Μαύρη μυδοθραύστη", nameEs: "Black Musselcracker", icon: "🐟", scientificName: "Cymatoceps nasutus",
+        name: "Siyah Dişli / Musselcracker", nameEn: "Black Musselcracker", nameEl: "Μαύρη μυδοθραύστη", nameEs: "Pargo negro rompemejillones", icon: "🐟", scientificName: "Cymatoceps nasutus",
         photoId: 1313, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalık resifler",
@@ -10911,7 +10911,7 @@ const SPECIES_DB = {
         noteEn: "Has incredibly powerful jaws. The master of the rocks.", noteEl: "Has incredibly powerful jaws. The master of the rocks.", noteEs: "Has incredibly powerful jaws. The master of the rocks."
     },
     "sa_white_musselcracker": {
-        name: "Beyaz Dişli / Brusher", nameEn: "White Musselcracker", nameEl: "Λευκή μυδοθραύστη", nameEs: "White Musselcracker", icon: "🐟", scientificName: "Sparodon durbanensis",
+        name: "Beyaz Dişli / Brusher", nameEn: "White Musselcracker", nameEl: "Λευκή μυδοθραύστη", nameEs: "Pargo blanco rompemejillones", icon: "🐟", scientificName: "Sparodon durbanensis",
         photoId: 1314, category: "KIYI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz dalgalı kayalıklar",
@@ -10925,7 +10925,7 @@ const SPECIES_DB = {
         noteEn: "A very popular shore target on the east coast (KwaZulu-Natal).", noteEl: "A very popular shore target on the east coast (KwaZulu-Natal).", noteEs: "A very popular shore target on the east coast (KwaZulu-Natal)."
     },
     "sa_bronze_bream": {
-        name: "Bronz Mercan (SA)", nameEn: "Bronze Bream", nameEl: "Χάλκινη Τσιπούρα", nameEs: "Bronze Bream", icon: "🐟", scientificName: "Pachymetopon grande",
+        name: "Bronz Mercan (SA)", nameEn: "Bronze Bream", nameEl: "Χάλκινη Τσιπούρα", nameEs: "Chopa bronce", icon: "🐟", scientificName: "Pachymetopon grande",
         photoId: 1315, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ yosunlu kayalıklar",
@@ -10939,7 +10939,7 @@ const SPECIES_DB = {
         noteEn: "Feeds by hiding among rocks. Has tasty flesh.", noteEl: "Feeds by hiding among rocks. Has tasty flesh.", noteEs: "Feeds by hiding among rocks. Has tasty flesh."
     },
     "sa_red_stumpnose": {
-        name: "Kızıl Stumpnose (Miss Lucy)", nameEn: "Red Stumpnose", nameEl: "Κόκκινο κούτσουρο", nameEs: "Red Stumpnose", icon: "🐟", scientificName: "Chrysoblephus gibbiceps",
+        name: "Kızıl Stumpnose (Miss Lucy)", nameEn: "Red Stumpnose", nameEl: "Κόκκινο κούτσουρο", nameEs: "Pargo morro rojo", icon: "🐟", scientificName: "Chrysoblephus gibbiceps",
         photoId: 1316, category: "DIP_DERIN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin mercan resifleri",
@@ -10953,7 +10953,7 @@ const SPECIES_DB = {
         noteEn: "Also known as 'Miss Lucy' due to the prominent bump on its forehead. Its status is vulnerable.", noteEl: "Also known as 'Miss Lucy' due to the prominent bump on its forehead. Its status is vulnerable.", noteEs: "Also known as 'Miss Lucy' due to the prominent bump on its forehead. Its status is vulnerable."
     },
     "sa_white_stumpnose": {
-        name: "Beyaz Stumpnose", nameEn: "White Stumpnose", nameEl: "Λευκό Stumpnose", nameEs: "White Stumpnose", icon: "🐟", scientificName: "Rhabdosargus globiceps",
+        name: "Beyaz Stumpnose", nameEn: "White Stumpnose", nameEl: "Σαργός λευκόμυτος", nameEs: "Sargo morro blanco", icon: "🐟", scientificName: "Rhabdosargus globiceps",
         photoId: 1317, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk körfezler",
@@ -10967,7 +10967,7 @@ const SPECIES_DB = {
         noteEn: "One of the most important commercial and sport species on the West Coast (Saldanha Bay).", noteEl: "One of the most important commercial and sport species on the West Coast (Saldanha Bay).", noteEs: "One of the most important commercial and sport species on the West Coast (Saldanha Bay)."
     },
     "sa_zebra": {
-        name: "Zebra (SA)", nameEn: "Zebra", nameEl: "Ζέβρα", nameEs: "Zebra", icon: "🐟", scientificName: "Diplodus hottentotus",
+        name: "Zebra (SA)", nameEn: "Zebra", nameEl: "Ζέβρα", nameEs: "Sargo cebra del Cabo", icon: "🐟", scientificName: "Diplodus hottentotus",
         photoId: 1318, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sığ kayalıklar",
@@ -10981,7 +10981,7 @@ const SPECIES_DB = {
         noteEn: "Easily recognized by the vertical black stripes on its body. Prefers rocky habitats.", noteEl: "Easily recognized by the vertical black stripes on its body. Prefers rocky habitats.", noteEs: "Easily recognized by the vertical black stripes on its body. Prefiere rocky habitats."
     },
     "sa_baardman": {
-        name: "Baardman / Sakallı Minekop", nameEn: "Baardman (Belman)", nameEl: "Baardman (Belman)", nameEs: "Baardman (Belman)", icon: "🐟", scientificName: "Umbrina robinsoni",
+        name: "Baardman / Sakallı Minekop", nameEn: "Baardman (Belman)", nameEl: "Μυλοκόπι Αφρικής", nameEs: "Verrugato baardman", icon: "🐟", scientificName: "Umbrina robinsoni",
         photoId: 1319, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz dalgalı kumluk plajlar",
@@ -10995,7 +10995,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by the small whisker-like structure on its chin. Feeds in the surf line.", noteEl: "Recognized by the small whisker-like structure on its chin. Feeds in the surf line.", noteEs: "Recognized by the small whisker-like structure on its chin. Feeds in the surf line."
     },
     "sa_wahoo": {
-        name: "Vahoo (SA)", nameEn: "Wahoo", nameEl: "Ουάχου", nameEs: "Wahoo", icon: "🐟", scientificName: "Acanthocybium solandri",
+        name: "Vahoo (SA)", nameEn: "Wahoo", nameEl: "Ουάχου", nameEs: "Peto", icon: "🐟", scientificName: "Acanthocybium solandri",
         photoId: 1320, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
@@ -11009,7 +11009,7 @@ const SPECIES_DB = {
         noteEn: "One of the fastest fish in the ocean. Found off the east coast.", noteEl: "One of the fastest fish in the ocean. Found off the east coast.", noteEs: "One of the fastest fish in the ocean. Found off the east coast."
     },
     "uae_golden_trevally": {
-        name: "Altın Akya", nameEn: "Golden Trevally", nameEl: "Golden Trevally", nameEs: "Golden Trevally", icon: "🐟", scientificName: "Gnathanodon speciosus",
+        name: "Altın Akya", nameEn: "Golden Trevally", nameEl: "Χρυσό τρεβάλι", nameEs: "Jurel dorado", icon: "🐟", scientificName: "Gnathanodon speciosus",
         photoId: 1255, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk ve resif alanları",
@@ -11023,7 +11023,7 @@ const SPECIES_DB = {
         noteEn: "Juveniles are bright yellow. Has a unique protractile mouth structure.", noteEl: "Juveniles are bright yellow. Has a unique protractile mouth structure.", noteEs: "Juveniles are bright yellow. Has a unique protractile mouth structure."
     },
     "uae_blacktip_reef_shark": {
-        name: "Siyah Yüzgeçli Resif Köpekbalığı", nameEn: "Blacktip Reef Shark", nameEl: "Blacktip Reef Shark", nameEs: "Blacktip Reef Shark", icon: "🦈", scientificName: "Carcharhinus melanopterus",
+        name: "Siyah Yüzgeçli Resif Köpekbalığı", nameEn: "Blacktip Reef Shark", nameEl: "Καρχαρίας μαυροπτέρυγος υφάλου", nameEs: "Tiburón de punta negra de arrecife", icon: "🦈", scientificName: "Carcharhinus melanopterus",
         photoId: 1256, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ resif alanları",
@@ -11037,7 +11037,7 @@ const SPECIES_DB = {
         noteEn: "The most commonly seen shark in UAE's shallow waters. Harmless to humans.", noteEl: "The most commonly seen shark in UAE's shallow waters. Harmless to humans.", noteEs: "The most commonly seen shark in UAE's shallow waters. Harmless to humans."
     },
     "uae_sohal_surgeonfish": {
-        name: "Sohal Cerrah Balığı", nameEn: "Sohal Surgeonfish", nameEl: "Sohal Surgeonfish", nameEs: "Sohal Surgeonfish", icon: "🐟", scientificName: "Acanthurus sohal",
+        name: "Sohal Cerrah Balığı", nameEn: "Sohal Surgeonfish", nameEl: "Χειρουργός σοχάλ", nameEs: "Navajón sohal", icon: "🐟", scientificName: "Acanthurus sohal",
         photoId: 1257, category: "KAYALIK",
         
         huntingMode: "filter",peakHours: "DAY", peakHoursDesc: "Gündüz resif üstleri",
@@ -11051,7 +11051,7 @@ const SPECIES_DB = {
         noteEn: "Endemic to the Gulf region with stunning patterns. Can be very aggressive.", noteEl: "Endemic to the Gulf region with stunning patterns. Can be very aggressive.", noteEs: "Endemic to the Gulf region with stunning patterns. Can be very aggressive."
     },
     "uae_arabian_butterflyfish": {
-        name: "Arap Kelebek Balığı", nameEn: "Arabian Butterflyfish", nameEl: "Αραβικό πεταλούδα", nameEs: "Arabian Butterflyfish", icon: "🐟", scientificName: "Chaetodon melapterus",
+        name: "Arap Kelebek Balığı", nameEn: "Arabian Butterflyfish", nameEl: "Αραβικό πεταλούδα", nameEs: "Pez mariposa arábigo", icon: "🐟", scientificName: "Chaetodon melapterus",
         photoId: 1258, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz mercan resifleri",
@@ -11065,7 +11065,7 @@ const SPECIES_DB = {
         noteEn: "One of the symbolic reef fish of the Gulf. They travel in pairs.", noteEl: "One of the symbolic reef fish of the Gulf. They travel in pairs.", noteEs: "One of the symbolic reef fish of the Gulf. They travel in pairs."
     },
     "nz_snapper": {
-        name: "Yeni Zelanda Mercanı / Snapper", nameEn: "Snapper (Tamure)", nameEl: "Snapper (Tamure)", nameEs: "Snapper (Tamure)", icon: "🐟", scientificName: "Chrysophrys auratus",
+        name: "Yeni Zelanda Mercanı / Snapper", nameEn: "Snapper (Tamure)", nameEl: "Φαγκρί Αυστραλίας", nameEs: "Pargo australiano", icon: "🐟", scientificName: "Chrysophrys auratus",
         photoId: 1401, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık kayalık ve kumluk geçişleri",
@@ -11079,7 +11079,7 @@ const SPECIES_DB = {
         noteEn: "NZ's most popular fish. Also known as 'Tamure'. Very intelligent and wary.", noteEl: "NZ's most popular fish. Also known as 'Tamure'. Very intelligent and wary.", noteEs: "NZ's most popular fish. Also known as 'Tamure'. Very intelligent and wary."
     },
     "nz_kingfish": {
-        name: "Kral Balığı / Kingfish (NZ)", nameEn: "Yellowtail Kingfish (Haku)", nameEl: "Kingfish Yellowtail (Haku)", nameEs: "Yellowtail Kingfish (Haku)", icon: "🐟", scientificName: "Seriola lalandi",
+        name: "Kral Balığı / Kingfish (NZ)", nameEn: "Yellowtail Kingfish (Haku)", nameEl: "Μαγιάτικο λεμονί", nameEs: "Medregal limón", icon: "🐟", scientificName: "Seriola lalandi",
         photoId: 1402, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz burun başları ve akıntılı bölgeler",
@@ -11093,7 +11093,7 @@ const SPECIES_DB = {
         noteEn: "NZ's strongest fighter. Reaches giant sizes. Also called 'Haku'.", noteEl: "NZ's strongest fighter. Reaches giant sizes. Also called 'Haku'.", noteEs: "NZ's strongest fighter. Reaches giant sizes. Also called 'Haku'."
     },
     "nz_blue_cod": {
-        name: "Mavi Morina / Blue Cod", nameEn: "Blue Cod (Rawaru)", nameEl: "Μπλε μπακαλιάρος (Rawaru)", nameEs: "Blue Cod (Rawaru)", icon: "🐟", scientificName: "Parapercis colias",
+        name: "Mavi Morina / Blue Cod", nameEn: "Blue Cod (Rawaru)", nameEl: "Μπλε μπακαλιάρος (Rawaru)", nameEs: "Bacalao azul de Nueva Zelanda", icon: "🐟", scientificName: "Parapercis colias",
         photoId: 1403, category: "KAYALIK",
         huntingMode: "visual",
         
@@ -11122,7 +11122,7 @@ const SPECIES_DB = {
         noteEn: "A staple of NZ tables. Recognized by the black band behind the gill cover.", noteEl: "A staple of NZ tables. Recognized by the black band behind the gill cover.", noteEs: "A staple of NZ tables. Recognized by the black band behind the gill cover."
     },
     "nz_kahawai": {
-        name: "Kahawai / NZ Somonu", nameEn: "Kahawai", nameEl: "Καχαουάι", nameEs: "Kahawai", icon: "🐟", scientificName: "Arripis trutta",
+        name: "Kahawai / NZ Somonu", nameEn: "Kahawai", nameEl: "Καχαουάι", nameEs: "Salmón australiano", icon: "🐟", scientificName: "Arripis trutta",
         photoId: 1405, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz yüzeydeki kuş hareketleri ve nehir ağızları",
@@ -11136,7 +11136,7 @@ const SPECIES_DB = {
         noteEn: "The people's fish. Very athletic and jumps out of water. Excellent bait fish.", noteEl: "The people's fish. Very athletic and jumps out of water. Excellent bait fish.", noteEs: "The people's fish. Very athletic and jumps out of water. Excellent bait fish."
     },
     "nz_gurnard": {
-        name: "Kırlangıç / Red Gurnard (NZ)", nameEn: "Red Gurnard (Kumukumu)", nameEl: "Red Gunard (Kumukumu)", nameEs: "Red Gurnard (Kumukumu)", icon: "🐟", scientificName: "Chelidonichthys kumu",
+        name: "Kırlangıç / Red Gurnard (NZ)", nameEn: "Red Gurnard (Kumukumu)", nameEl: "Καπόνι κουμού", nameEs: "Rubio kumu", icon: "🐟", scientificName: "Chelidonichthys kumu",
         photoId: 1406, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk dipler",
@@ -11150,7 +11150,7 @@ const SPECIES_DB = {
         noteEn: "Has wing-like fins used to 'walk' on the seabed. Known to make a grunting sound.", noteEl: "Has wing-like fins used to 'walk' on the seabed. Known to make a grunting sound.", noteEs: "Has wing-like fins used to 'walk' on the seabed. Known to make a grunting sound."
     },
     "nz_john_dory": {
-        name: "Dülger / John Dory (NZ)", nameEn: "John Dory (Kuparu)", nameEl: "Τζον Ντόρι (Κουπάρου)", nameEs: "John Dory (Kuparu)", icon: "🐟", scientificName: "Zeus faber",
+        name: "Dülger / John Dory (NZ)", nameEn: "John Dory (Kuparu)", nameEl: "Τζον Ντόρι (Κουπάρου)", nameEs: "Pez de San Pedro", icon: "🐟", scientificName: "Zeus faber",
         photoId: 1407, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz iskele ayakları ve resif kenarları",
@@ -11164,7 +11164,7 @@ const SPECIES_DB = {
         noteEn: "The black spot on its side is known as 'St. Peter's thumbprint'. A gourmet choice.", noteEl: "The black spot on its side is known as 'St. Peter's thumbprint'. A gourmet choice.", noteEs: "The black spot on its side is known as 'St. Peter's thumbprint'. A gourmet choice."
     },
     "nz_hapuka": {
-        name: "Hapuka / Groper", nameEn: "Hapuka (Groper)", nameEl: "Hapuka (Groper)", nameEs: "Hapuka (Groper)", icon: "🐟", scientificName: "Polyprion oxygeneios",
+        name: "Hapuka / Groper", nameEn: "Hapuka (Groper)", nameEl: "Βλάχος χαπούκα", nameEs: "Cherna hapuka", icon: "🐟", scientificName: "Polyprion oxygeneios",
         photoId: 1408, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin su resifleri ve kanyonlar",
@@ -11178,7 +11178,7 @@ const SPECIES_DB = {
         noteEn: "The giant of the deep. Meat is exceptionally valuable. Requires heavy gear.", noteEl: "The giant of the deep. Meat is exceptionally valuable. Requires heavy gear.", noteEs: "The giant of the deep. Meat is exceptionally valuable. Requires heavy gear."
     },
     "uk_sea_bass": {
-        name: "Avrupa Levreği (UK)", nameEn: "European Sea Bass", nameEl: "Ευρωπαϊκό λαβράκι", nameEs: "European Sea Bass", icon: "🐟", scientificName: "Dicentrarchus labrax",
+        name: "Avrupa Levreği (UK)", nameEn: "European Sea Bass", nameEl: "Ευρωπαϊκό λαβράκι", nameEs: "Lubina", icon: "🐟", scientificName: "Dicentrarchus labrax",
         photoId: 1501, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık çalkantılı sığ kıyılar",
@@ -11192,7 +11192,7 @@ const SPECIES_DB = {
         noteEn: "UK's favorite shore catch. Cunning and difficult to catch.", noteEl: "UK's favorite shore catch. Cunning and difficult to catch.", noteEs: "UK's favorite shore catch. Cunning and difficult to catch."
     },
     "uk_cod": {
-        name: "Atlantik Morinası (UK)", nameEn: "Atlantic Cod", nameEl: "Atlantic Cod", nameEs: "Atlantic Cod", icon: "🐟", scientificName: "Gadus morhua",
+        name: "Atlantik Morinası (UK)", nameEn: "Atlantic Cod", nameEl: "Μπακαλιάρος Ατλαντικού", nameEs: "Bacalao del Atlántico", icon: "🐟", scientificName: "Gadus morhua",
         photoId: 1502, category: "DIP",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz derin ve soğuk sular",
@@ -11206,7 +11206,7 @@ const SPECIES_DB = {
         noteEn: "A winter essential. Abundant especially in the North Sea.", noteEl: "A winter essential. Abundant especially in the North Sea.", noteEs: "A winter essential. Abundant especially in the North Sea."
     },
     "uk_plaice": {
-        name: "Pisi Balığı / Plaice", nameEn: "Plaice", nameEl: "Χωματίδα", nameEs: "Plaice", icon: "🐟", scientificName: "Pleuronectes platessa",
+        name: "Pisi Balığı / Plaice", nameEn: "Plaice", nameEl: "Χωματίδα", nameEs: "Solla", icon: "🐟", scientificName: "Pleuronectes platessa",
         photoId: 1503, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumlu ve çakıllı dipler",
@@ -11220,7 +11220,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by red spots. Responds well to beaded rigs.", noteEl: "Recognized by red spots. Responds well to beaded rigs.", noteEs: "Recognized by red spots. Responds well to beaded rigs."
     },
     "uk_pollack": {
-        name: "Sarı Mezgit / Pollack", nameEn: "Pollack", nameEl: "Pollack", nameEs: "Pollack", icon: "🐟", scientificName: "Pollachius pollachius",
+        name: "Sarı Mezgit / Pollack", nameEn: "Pollack", nameEl: "Μπακαλιάρος κίτρινος", nameEs: "Abadejo", icon: "🐟", scientificName: "Pollachius pollachius",
         photoId: 1504, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık kayalık ve batıklar",
@@ -11234,7 +11234,7 @@ const SPECIES_DB = {
         noteEn: "Lower jaw is longer than the upper jaw. Hits very hard.", noteEl: "Lower jaw is longer than the upper jaw. Hits very hard.", noteEs: "Lower jaw is longer than the upper jaw. Hits very hard."
     },
     "uk_mackerel": {
-        name: "Uskumru (UK)", nameEn: "Atlantic Mackerel", nameEl: "Σκουμπρί Ατλαντικού", nameEs: "Atlantic Mackerel", icon: "🐟", scientificName: "Scomber scombrus",
+        name: "Uskumru (UK)", nameEn: "Atlantic Mackerel", nameEl: "Σκουμπρί Ατλαντικού", nameEs: "Caballa", icon: "🐟", scientificName: "Scomber scombrus",
         photoId: 1505, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey sürüler",
@@ -11248,7 +11248,7 @@ const SPECIES_DB = {
         noteEn: "Millions come to the shores in summer. Valuable as both bait and food.", noteEl: "Millions come to the shores in summer. Valuable as both bait and food.", noteEs: "Millions come to the shores in summer. Valuable as both bait and food."
     },
     "usne_striped_bass": {
-        name: "Çizgili Levrek / Striped Bass", nameEn: "Striped Bass (Striper)", nameEl: "Ριγέ μπάσο (Striper)", nameEs: "Striped Bass (Striper)", icon: "🐟", scientificName: "Morone saxatilis",
+        name: "Çizgili Levrek / Striped Bass", nameEn: "Striped Bass (Striper)", nameEl: "Ριγέ μπάσο (Striper)", nameEs: "Lubina rayada", icon: "🐟", scientificName: "Morone saxatilis",
         photoId: 1601, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık ve gece sığ kıyılar, akıntılı boğazlar",
@@ -11262,7 +11262,7 @@ const SPECIES_DB = {
         noteEn: "The most iconic fish of the US Northeast. Night fishing is very popular.", noteEl: "The most iconic fish of the US Northeast. Night fishing is very popular.", noteEs: "The most iconic fish of the US Northeast. Night fishing is very popular."
     },
     "usne_bluefish": {
-        name: "Lüfer (US) / Bluefish", nameEn: "Bluefish", nameEl: "Bluefish", nameEs: "Bluefish", icon: "🐟", scientificName: "Pomatomus saltatrix",
+        name: "Lüfer (US) / Bluefish", nameEn: "Bluefish", nameEl: "Γοφάρι", nameEs: "Anjova", icon: "🐟", scientificName: "Pomatomus saltatrix",
         photoId: 1602, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz her türlü su katmanı",
@@ -11276,7 +11276,7 @@ const SPECIES_DB = {
         noteEn: "Known as the piranha of the seas. Very aggressive and will attack anything.", noteEl: "Known as the piranha of the seas. Very aggressive and will attack anything.", noteEs: "Known as the piranha of the seas. Very aggressive and will attack anything."
     },
     "usne_tautog": {
-        name: "Tautog / Siyah Balık", nameEn: "Tautog (Blackfish)", nameEl: "Tautog (Μαύροψαρο)", nameEs: "Tautog (Blackfish)", icon: "🐟", scientificName: "Tautoga onitis",
+        name: "Tautog / Siyah Balık", nameEn: "Tautog (Blackfish)", nameEl: "Ταουτόγκ", nameEs: "Tautog", icon: "🐟", scientificName: "Tautoga onitis",
         photoId: 1603, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz kayalıklar, batıklar ve iskele ayakları",
@@ -11290,7 +11290,7 @@ const SPECIES_DB = {
         noteEn: "Has a very powerful jaw and feeds on crabs. Famous for diving into rocks.", noteEl: "Has a very powerful jaw and feeds on crabs. Famous for diving into rocks.", noteEs: "Has a very powerful jaw and feeds on crabs. Famous for diving into rocks."
     },
     "usne_summer_flounder": {
-        name: "Yaz Dil Balığı / Fluke", nameEn: "Summer Flounder (Fluke)", nameEl: "Summer Flounder (Fluke)", nameEs: "Summer Flounder (Fluke)", icon: "🐟", scientificName: "Paralichthys dentatus",
+        name: "Yaz Dil Balığı / Fluke", nameEn: "Summer Flounder (Fluke)", nameEl: "Γλώσσα καλοκαιρινή", nameEs: "Lenguado de verano", icon: "🐟", scientificName: "Paralichthys dentatus",
         photoId: 1604, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk kanallar ve sığlıklar",
@@ -11304,7 +11304,7 @@ const SPECIES_DB = {
         noteEn: "Eyes are on the left side of its body. Hunts by camouflaging in sandy areas.", noteEl: "Eyes are on the left side of its body. Hunts by camouflaging in sandy areas.", noteEs: "Eyes are on the left side of its body. Caza by camouflaging in sandy areas."
     },
     "usne_black_sea_bass": {
-        name: "Siyah Deniz Levreği", nameEn: "Black Sea Bass", nameEl: "Λαβράκι Μαύρης Θάλασσας", nameEs: "Black Sea Bass", icon: "🐟", scientificName: "Centropristis striata",
+        name: "Siyah Deniz Levreği", nameEn: "Black Sea Bass", nameEl: "Λαβράκι Μαύρης Θάλασσας", nameEs: "Serrano estriado", icon: "🐟", scientificName: "Centropristis striata",
         photoId: 1605, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve batıklar",
@@ -11318,7 +11318,7 @@ const SPECIES_DB = {
         noteEn: "Males display bright blue colors during spawning. A very tasty fish.", noteEl: "Males display bright blue colors during spawning. A very tasty fish.", noteEs: "Males display bright blue colors during desove. A very tasty fish."
     },
     "nz_trevally": {
-        name: "Akya (NZ) / Trevally", nameEn: "Trevally (Araara)", nameEl: "Trevally (Araara)", nameEs: "Trevally (Araara)", icon: "🐟", scientificName: "Pseudocaranx georgianus",
+        name: "Akya (NZ) / Trevally", nameEn: "Trevally (Araara)", nameEl: "Τρεβάλι ασημένιο", nameEs: "Jurel plateado", icon: "🐟", scientificName: "Pseudocaranx georgianus",
         photoId: 1409, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları ve kumluk alanlar",
@@ -11332,7 +11332,7 @@ const SPECIES_DB = {
         noteEn: "Known as 'Araara' in NZ. Has a soft mouth, requiring careful handling.", noteEl: "Known as 'Araara' in NZ. Has a soft mouth, requiring careful handling.", noteEs: "Known as 'Araara' in NZ. Has a soft mouth, requiring careful handling."
     },
     "nz_blue_moki": {
-        name: "Mavi Moki", nameEn: "Blue Moki", nameEl: "Μπλε Μόκι", nameEs: "Blue Moki", icon: "🐟", scientificName: "Latridopsis ciliaris",
+        name: "Mavi Moki", nameEn: "Blue Moki", nameEl: "Μπλε Μόκι", nameEs: "Moki azul", icon: "🐟", scientificName: "Latridopsis ciliaris",
         photoId: 1410, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz yosunlu kayalık alanlar",
@@ -11346,7 +11346,7 @@ const SPECIES_DB = {
         noteEn: "Very popular in the South Island. A migratory species.", noteEl: "Very popular in the South Island. A migratory species.", noteEs: "Very popular in the South Island. A migratory species."
     },
     "nz_elephant_fish": {
-        name: "Fil Balığı", nameEn: "Elephant Fish (Reperepe)", nameEl: "Elephant Fish (Reperepe)", nameEs: "Elephant Fish (Reperepe)", icon: "🐟", scientificName: "Callorhinchus milii",
+        name: "Fil Balığı", nameEn: "Elephant Fish (Reperepe)", nameEl: "Ελεφαντόψαρο", nameEs: "Pez elefante", icon: "🐟", scientificName: "Callorhinchus milii",
         photoId: 1411, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk alanlar (yazın)",
@@ -11360,7 +11360,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its unusual snout. Moves to shallow waters in summer to spawn.", noteEl: "Recognized by its unusual snout. Moves to shallow waters in summer to spawn.", noteEs: "Recognized by its unusual snout. Moves to shallow waters in summer to spawn."
     },
     "nz_rig": {
-        name: "Benekli Köpekbalığı / Rig", nameEn: "Rig (Spotted Dogfish)", nameEl: "Rig (Spotted Dogfish)", nameEs: "Rig (Spotted Dogfish)", icon: "🦈", scientificName: "Mustelus lenticulatus",
+        name: "Benekli Köpekbalığı / Rig", nameEn: "Rig (Spotted Dogfish)", nameEl: "Γαλέος στικτός", nameEs: "Musola pintada", icon: "🦈", scientificName: "Mustelus lenticulatus",
         photoId: 1412, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ kumluklar ve çamurluklar",
@@ -11374,7 +11374,7 @@ const SPECIES_DB = {
         noteEn: "Feeds on crabs, often sold as 'Lemon Fish'. Has crushing plates instead of teeth.", noteEl: "Feeds on crabs, often sold as 'Lemon Fish'. Has crushing plates instead of teeth.", noteEs: "Feeds on crabs, often sold as 'Lemon Fish'. Has crushing plates instead of teeth."
     },
     "nz_school_shark": {
-        name: "Okul Köpekbalığı", nameEn: "School Shark (Tupere)", nameEl: "Σχολικός Καρχαρίας (Tupere)", nameEs: "School Shark (Tupere)", icon: "🦈", scientificName: "Galeorhinus galeus",
+        name: "Okul Köpekbalığı", nameEn: "School Shark (Tupere)", nameEl: "Σχολικός Καρχαρίας (Tupere)", nameEs: "Cazón", icon: "🦈", scientificName: "Galeorhinus galeus",
         photoId: 1413, category: "DIP",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece derin kumluk yamaçlar",
@@ -11388,7 +11388,7 @@ const SPECIES_DB = {
         noteEn: "Capable of long migrations. Very common in NZ waters.", noteEl: "Capable of long migrations. Very common in NZ waters.", noteEs: "Capable of long migrations. Very common in NZ waters."
     },
     "nz_bluenose": {
-        name: "Mavi Burun / Bluenose", nameEn: "Bluenose (Matiri)", nameEl: "Bluenose (Matiri)", nameEs: "Bluenose (Matiri)", icon: "🐟", scientificName: "Hyperoglyphe antarctica",
+        name: "Mavi Burun / Bluenose", nameEn: "Bluenose (Matiri)", nameEl: "Ρούφος ανταρκτικός", nameEs: "Rufo antártico", icon: "🐟", scientificName: "Hyperoglyphe antarctica",
         photoId: 1414, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin su tepeleri",
@@ -11402,7 +11402,7 @@ const SPECIES_DB = {
         noteEn: "Highly valued by deep-water anglers. Meat is similar to Hapuka.", noteEl: "Highly valued by deep-water anglers. Meat is similar to Hapuka.", noteEs: "Highly valued by deep-water anglers. Meat is similar to Hapuka."
     },
     "nz_albacore_tuna": {
-        name: "Albakor / Ak Orkinos (NZ)", nameEn: "Albacore Tuna", nameEl: "Τόνος Albacore", nameEs: "Albacore Tuna", icon: "🐟", scientificName: "Thunnus alalunga",
+        name: "Albakor / Ak Orkinos (NZ)", nameEn: "Albacore Tuna", nameEl: "Τόνος μακρύπτερος", nameEs: "Bonito del norte", icon: "🐟", scientificName: "Thunnus alalunga",
         photoId: 1415, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz akıntı çizgileri",
@@ -11416,7 +11416,7 @@ const SPECIES_DB = {
         noteEn: "Abundant off the west coast in summer. Sometimes called the 'chicken of the sea'.", noteEl: "Abundant off the west coast in summer. Sometimes called the 'chicken of the sea'.", noteEs: "Abundant off the west coast in summer. Sometimes called the 'chicken of the sea'."
     },
     "nz_skipjack_tuna": {
-        name: "Çizgili Orkinos / Skipjack (NZ)", nameEn: "Skipjack Tuna", nameEl: "Τόνος skipjack", nameEs: "Skipjack Tuna", icon: "🐟", scientificName: "Katsuwonus pelamis",
+        name: "Çizgili Orkinos / Skipjack (NZ)", nameEn: "Skipjack Tuna", nameEl: "Παλαμίδα ωκεανού", nameEs: "Listado", icon: "🐟", scientificName: "Katsuwonus pelamis",
         photoId: 1416, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz yüzeydeki kuş hareketleri",
@@ -11430,7 +11430,7 @@ const SPECIES_DB = {
         noteEn: "The best live bait for Marlin and Large Tuna.", noteEl: "The best live bait for Marlin and Large Tuna.", noteEs: "The best live bait for Marlin and Large Tuna."
     },
     "nz_jack_mackerel": {
-        name: "İstavrit (NZ)", nameEn: "Jack Mackerel", nameEl: "Τζακ Σκουμπρί", nameEs: "Jack Mackerel", icon: "🐟", scientificName: "Trachurus novaezelandiae",
+        name: "İstavrit (NZ)", nameEn: "Jack Mackerel", nameEl: "Τζακ Σκουμπρί", nameEs: "Jurel de Nueva Zelanda", icon: "🐟", scientificName: "Trachurus novaezelandiae",
         photoId: 1417, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz iskele çevresi ve kumluklar",
@@ -11444,7 +11444,7 @@ const SPECIES_DB = {
         noteEn: "The primary bait fish for Snapper and Kingfish.", noteEl: "The primary bait fish for Snapper and Kingfish.", noteEs: "The primary bait fish for Snapper and Kingfish."
     },
     "nz_sea_perch": {
-        name: "Deniz Levreği / Sea Perch", nameEn: "Sea Perch (Jock Stewart)", nameEl: "Sea Perch (Jock Stewart)", nameEs: "Sea Perch (Jock Stewart)", icon: "🐟", scientificName: "Helicolenus percoides",
+        name: "Deniz Levreği / Sea Perch", nameEn: "Sea Perch (Jock Stewart)", nameEl: "Σκορπίνα νότια", nameEs: "Perca de mar del sur", icon: "🐟", scientificName: "Helicolenus percoides",
         photoId: 1418, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz kayalık dipler",
@@ -11458,7 +11458,7 @@ const SPECIES_DB = {
         noteEn: "Caught almost everywhere from shore and boat. Flesh is surprisingly tasty.", noteEl: "Caught almost everywhere from shore and boat. Flesh is surprisingly tasty.", noteEs: "Caught almost everywhere from shore and boat. Flesh is surprisingly tasty."
     },
     "nz_striped_marlin": {
-        name: "Çizgili Marlin (NZ)", nameEn: "Striped Marlin", nameEl: "Ριγέ Μάρλιν", nameEs: "Striped Marlin", icon: "🐟", scientificName: "Kajikia audax",
+        name: "Çizgili Marlin (NZ)", nameEn: "Striped Marlin", nameEl: "Ριγέ Μάρλιν", nameEs: "Marlín rayado", icon: "🐟", scientificName: "Kajikia audax",
         photoId: 1419, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
@@ -11472,7 +11472,7 @@ const SPECIES_DB = {
         noteEn: "NZ hosts the world's largest striped marlin. Centered around the North Island (Bay of Islands).", noteEl: "NZ hosts the world's largest striped marlin. Centered around the North Island (Bay of Islands).", noteEs: "NZ hosts the world's largest striped marlin. Centered around the North Island (Bay of Islands)."
     },
     "nz_blue_marlin": {
-        name: "Mavi Marlin (NZ)", nameEn: "Blue Marlin", nameEl: "Μπλε Μάρλιν", nameEs: "Blue Marlin", icon: "🐟", scientificName: "Makaira nigricans",
+        name: "Mavi Marlin (NZ)", nameEn: "Blue Marlin", nameEl: "Μπλε Μάρλιν", nameEs: "Aguja azul", icon: "🐟", scientificName: "Makaira nigricans",
         photoId: 1420, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz akıntı sınırları",
@@ -11486,7 +11486,7 @@ const SPECIES_DB = {
         noteEn: "Arrives with warm currents in summer. Rare and highly prized.", noteEl: "Arrives with warm currents in summer. Rare and highly prized.", noteEs: "Arrives with warm currents in summer. Rare and highly prized."
     },
     "nz_black_marlin": {
-        name: "Siyah Marlin (NZ)", nameEn: "Black Marlin", nameEl: "Μαύρος Μάρλιν", nameEs: "Black Marlin", icon: "🐟", scientificName: "Istiompax indica",
+        name: "Siyah Marlin (NZ)", nameEn: "Black Marlin", nameEl: "Μαύρος Μάρλιν", nameEs: "Aguja negra", icon: "🐟", scientificName: "Istiompax indica",
         photoId: 1421, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve sığlık kenarları",
@@ -11500,7 +11500,7 @@ const SPECIES_DB = {
         noteEn: "Can be caught in shallower waters compared to Blue Marlin.", noteEl: "Can be caught in shallower waters compared to Blue Marlin.", noteEs: "Can be caught in shallower waters compared to Blue Marlin."
     },
     "nz_mahimahi": {
-        name: "Mahi Mahi (NZ)", nameEn: "Mahimahi", nameEl: "Μαχιμάχι", nameEs: "Mahimahi", icon: "🐟", scientificName: "Coryphaena hippurus",
+        name: "Mahi Mahi (NZ)", nameEn: "Mahimahi", nameEl: "Μαχιμάχι", nameEs: "Dorado", icon: "🐟", scientificName: "Coryphaena hippurus",
         photoId: 1422, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz yüzen nesneler altı",
@@ -11514,7 +11514,7 @@ const SPECIES_DB = {
         noteEn: "Seen only in northern NZ waters during the warmest summer months.", noteEl: "Seen only in northern NZ waters during the warmest summer months.", noteEs: "Seen only in northern NZ waters during the warmest summer months."
     },
     "nz_swordfish": {
-        name: "Kılıç Balığı (NZ)", nameEn: "Broadbill Swordfish", nameEl: "Broadbill Swordfish", nameEs: "Broadbill Swordfish", icon: "🐟", scientificName: "Xiphias gladius",
+        name: "Kılıç Balığı (NZ)", nameEn: "Broadbill Swordfish", nameEl: "Ξιφίας", nameEs: "Pez espada", icon: "🐟", scientificName: "Xiphias gladius",
         photoId: 1423, category: "DERİN",
         huntingMode: "chemosensory",
         isGlobal: false,
@@ -11529,7 +11529,7 @@ const SPECIES_DB = {
         noteEn: "The pinnacle of NZ deep-water fishing. Can also be caught trolling at night.", noteEl: "The pinnacle of NZ deep-water fishing. Can also be caught trolling at night.", noteEs: "The pinnacle of NZ deep-water fishing. Can also be caught trolling at night."
     },
     "nz_gemfish": {
-        name: "Mücevher Balığı", nameEn: "Gemfish (Tikati)", nameEl: "Gemfish (Tikati)", nameEs: "Gemfish (Tikati)", icon: "🐟", scientificName: "Rexea solandri",
+        name: "Mücevher Balığı", nameEn: "Gemfish (Tikati)", nameEl: "Εσκολάρ νότιος", nameEs: "Escolar del sur", icon: "🐟", scientificName: "Rexea solandri",
         photoId: 1424, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kıta sahanlığı yamaçları",
@@ -11543,7 +11543,7 @@ const SPECIES_DB = {
         noteEn: "Similar to Barracouta but lives deeper and has more valuable meat.", noteEl: "Similar to Barracouta but lives deeper and has more valuable meat.", noteEs: "Similar to Barracouta but lives deeper and has more valuable meat."
     },
     "nz_barracouta": {
-        name: "Snoek (NZ) / Barracouta", nameEn: "Barracouta (Ono)", nameEl: "Barracouta (Ono)", nameEs: "Barracouta (Ono)", icon: "🐟", scientificName: "Thyrsites atun",
+        name: "Snoek (NZ) / Barracouta", nameEn: "Barracouta (Ono)", nameEl: "Σνουκ", nameEs: "Sierra snoek", icon: "🐟", scientificName: "Thyrsites atun",
         photoId: 1425, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz orta su sürüler",
@@ -11557,7 +11557,7 @@ const SPECIES_DB = {
         noteEn: "Has razor-sharp teeth and can cut lines. A strong fighter.", noteEl: "Has razor-sharp teeth and can cut lines. A strong fighter.", noteEs: "Has razor-sharp teeth and can cut lines. A strong fighter."
     },
     "nz_porae": {
-        name: "Porae", nameEn: "Porae", nameEl: "Porae", nameEs: "Porae", icon: "🐟", scientificName: "Nemadactylus douglasii",
+        name: "Porae", nameEn: "Porae", nameEl: "Πόραϊ", nameEs: "Porae", icon: "🐟", scientificName: "Nemadactylus douglasii",
         photoId: 1427, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz resif kenarları",
@@ -11571,7 +11571,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its silvery-green color. Tastes similar to Tarakihi.", noteEl: "Recognized by its silvery-green color. Tastes similar to Tarakihi.", noteEs: "Recognized by its silvery-green color. Tastes similar to Tarakihi."
     },
     "nz_koheru": {
-        name: "Koheru", nameEn: "Koheru", nameEl: "Koheru", nameEs: "Koheru", icon: "🐟", scientificName: "Decapterus koheru",
+        name: "Koheru", nameEn: "Koheru", nameEl: "Κοχέρου", nameEs: "Macarela koheru", icon: "🐟", scientificName: "Decapterus koheru",
         photoId: 1428, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz kıyı suları ve resif üstleri",
@@ -11585,7 +11585,7 @@ const SPECIES_DB = {
         noteEn: "A very fast and tasty small fish. Often used as bait.", noteEl: "A very fast and tasty small fish. Often used as bait.", noteEs: "A very fast and tasty small fish. Often used as bait."
     },
     "nz_scorp": {
-        name: "Akrep Balığı / Grandfather Hapuka", nameEn: "Red Rock Cod", nameEl: "Red Rock Cod", nameEs: "Red Rock Cod", icon: "🐟", scientificName: "Scorpaena papillosa",
+        name: "Akrep Balığı / Grandfather Hapuka", nameEn: "Red Rock Cod", nameEl: "Σκορπίνα κόκκινη", nameEs: "Escorpión rojo de roca", icon: "🐟", scientificName: "Scorpaena papillosa",
         photoId: 1429, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ kayalık çatlaklar",
@@ -11599,7 +11599,7 @@ const SPECIES_DB = {
         noteEn: "Spines can be venomous, handle with care. Master of camouflage.", noteEl: "Spines can be venomous, handle with care. Master of camouflage.", noteEs: "Spines can be venomous, handle with care. Master of camouflage."
     },
     "nz_spiny_dogfish": {
-        name: "Dikenli Camgöz (NZ)", nameEn: "Spiny Dogfish (Koinga)", nameEl: "Spiny Dogfish (Koinga)", nameEs: "Spiny Dogfish (Koinga)", icon: "🦈", scientificName: "Squalus acanthias",
+        name: "Dikenli Camgöz (NZ)", nameEn: "Spiny Dogfish (Koinga)", nameEl: "Σκυλόψαρο ακανθίας", nameEs: "Mielga", icon: "🦈", scientificName: "Squalus acanthias",
         photoId: 1430, category: "DIP",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece soğuk derin sular",
@@ -11613,7 +11613,7 @@ const SPECIES_DB = {
         noteEn: "Has a sharp spine in front of the dorsal fin. Travels in schools.", noteEl: "Has a sharp spine in front of the dorsal fin. Travels in schools.", noteEs: "Has a sharp spine in front of the dorsal fin. Travels in schools."
     },
     "uk_whiting": {
-        name: "Mezgit (UK) / Whiting", nameEn: "Whiting", nameEl: "Νταούκι", nameEs: "Whiting", icon: "🐟", scientificName: "Merlangius merlangus",
+        name: "Mezgit (UK) / Whiting", nameEn: "Whiting", nameEl: "Νταούκι", nameEs: "Merlán", icon: "🐟", scientificName: "Merlangius merlangus",
         photoId: 1506, category: "DIP",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve çamurluk dipler",
@@ -11627,7 +11627,7 @@ const SPECIES_DB = {
         noteEn: "One of the most caught fish on UK shores in winter. Flesh is very soft.", noteEl: "One of the most caught fish on UK shores in winter. Flesh is very soft.", noteEs: "One of the most caught fish on UK shores in winter. Flesh is very soft."
     },
     "uk_haddock": {
-        name: "Mezgit (UK) / Haddock", nameEn: "Haddock", nameEl: "Χάντοκ", nameEs: "Haddock", icon: "🐟", scientificName: "Melanogrammus aeglefinus",
+        name: "Mezgit (UK) / Haddock", nameEn: "Haddock", nameEl: "Χάντοκ", nameEs: "Eglefino", icon: "🐟", scientificName: "Melanogrammus aeglefinus",
         photoId: 1507, category: "DIP",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk dipler",
@@ -11641,7 +11641,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by the black 'thumbprint' on its side. Very popular for Fish and Chips.", noteEl: "Recognized by the black 'thumbprint' on its side. Very popular for Fish and Chips.", noteEs: "Recognized by the black 'thumbprint' on its side. Very popular for Fish and Chips."
     },
     "uk_coalie": {
-        name: "Kömür Balığı / Saithe", nameEn: "Coalie (Saithe)", nameEl: "Coalie (Saithe)", nameEs: "Coalie (Saithe)", icon: "🐟", scientificName: "Pollachius virens",
+        name: "Kömür Balığı / Saithe", nameEn: "Coalie (Saithe)", nameEl: "Μαυρομπακαλιάρος", nameEs: "Carbonero", icon: "🐟", scientificName: "Pollachius virens",
         photoId: 1508, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık iskeleler ve derin kayalıklar",
@@ -11655,7 +11655,7 @@ const SPECIES_DB = {
         noteEn: "Similar to Pollack but darker in color with a less prominent jaw.", noteEl: "Similar to Pollack but darker in color with a less prominent jaw.", noteEs: "Similar to Pollack but darker in color with a less prominent jaw."
     },
     "uk_ling": {
-        name: "Gelincik (UK) / Ling", nameEn: "Ling", nameEl: "Ling", nameEs: "Ling", icon: "🐟", scientificName: "Molva molva",
+        name: "Gelincik (UK) / Ling", nameEn: "Ling", nameEl: "Μουρούνα", nameEs: "Maruca", icon: "🐟", scientificName: "Molva molva",
         photoId: 1509, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin batıklar ve kayalıklar",
@@ -11669,7 +11669,7 @@ const SPECIES_DB = {
         noteEn: "Has a very long body and sharp teeth. A favorite of UK deep-sea fishing.", noteEl: "Has a very long body and sharp teeth. A favorite of UK deep-sea fishing.", noteEs: "Has a very long body and sharp teeth. A favorite of UK deep-sea fishing."
     },
     "uk_dab": {
-        name: "Yassı Balık / Dab", nameEn: "Dab", nameEl: "Ταμπ", nameEs: "Dab", icon: "🐟", scientificName: "Limanda limanda",
+        name: "Yassı Balık / Dab", nameEn: "Dab", nameEl: "Ταμπ", nameEs: "Limanda", icon: "🐟", scientificName: "Limanda limanda",
         photoId: 1510, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk alanlar",
@@ -11683,7 +11683,7 @@ const SPECIES_DB = {
         noteEn: "Similar to Plaice but smaller and its skin feels rough like sandpaper.", noteEl: "Similar to Plaice but smaller and its skin feels rough like sandpaper.", noteEs: "Similar to Plaice but smaller and its skin feels rough like sandpaper."
     },
     "uk_grey_mullet": {
-        name: "Kefal (UK) / Grey Mullet", nameEn: "Thick-lipped Grey Mullet", nameEl: "Γκρίζο κέφαλο με χοντρά χείλη", nameEs: "Thick-lipped Grey Mullet", icon: "🐟", scientificName: "Chelon labrosus",
+        name: "Kefal (UK) / Grey Mullet", nameEn: "Thick-lipped Grey Mullet", nameEl: "Γκρίζο κέφαλο με χοντρά χείλη", nameEs: "Lisa de labio grueso", icon: "🐟", scientificName: "Chelon labrosus",
         photoId: 1511, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz liman içleri ve nehir ağızları",
@@ -11697,7 +11697,7 @@ const SPECIES_DB = {
         noteEn: "Often called the 'British Bonefish' due to being extremely hard to catch.", noteEl: "Often called the 'British Bonefish' due to being extremely hard to catch.", noteEs: "Often called the 'British Bonefish' due to being extremely hard to catch."
     },
     "uk_smooth_hound": {
-        name: "Pürüzsüz Camgöz (UK)", nameEn: "Smooth-hound", nameEl: "Smooth-Hound", nameEs: "Smooth-hound", icon: "🦈", scientificName: "Mustelus mustelus",
+        name: "Pürüzsüz Camgöz (UK)", nameEn: "Smooth-hound", nameEl: "Γαλέος λείος", nameEs: "Musola", icon: "🦈", scientificName: "Mustelus mustelus",
         photoId: 1512, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ çakıllı ve kumlu kıyılar",
@@ -11711,7 +11711,7 @@ const SPECIES_DB = {
         noteEn: "Has crushing plates instead of teeth, feeds on crustaceans. Popular in summer.", noteEl: "Has crushing plates instead of teeth, feeds on crustaceans. Popular in summer.", noteEs: "Has crushing plates instead of teeth, feeds on crustaceans. Popular in summer."
     },
     "uk_dogfish": {
-        name: "Kedi Balığı / Dogfish (UK)", nameEn: "Lesser Spotted Dogfish", nameEl: "Μικρά στίγματα σκυλόψαρα", nameEs: "Lesser Spotted Dogfish", icon: "🦈", scientificName: "Scyliorhinus canicula",
+        name: "Kedi Balığı / Dogfish (UK)", nameEn: "Lesser Spotted Dogfish", nameEl: "Μικρά στίγματα σκυλόψαρα", nameEs: "Pintarroja", icon: "🦈", scientificName: "Scyliorhinus canicula",
         photoId: 1513, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece her türlü deniz tabanı",
@@ -11725,7 +11725,7 @@ const SPECIES_DB = {
         noteEn: "The most common small shark on UK shores. Will attack any bait.", noteEl: "The most common small shark on UK shores. Will attack any bait.", noteEs: "The most common small shark on UK shores. Will attack any bait."
     },
     "uk_turbot": {
-        name: "Kalkan (UK) / Turbot", nameEn: "Turbot", nameEl: "Καλκάνι", nameEs: "Turbot", icon: "🐟", scientificName: "Scophthalmus maximus",
+        name: "Kalkan (UK) / Turbot", nameEn: "Turbot", nameEl: "Καλκάνι", nameEs: "Rodaballo", icon: "🐟", scientificName: "Scophthalmus maximus",
         photoId: 1514, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve çakıllı dipler",
@@ -11739,7 +11739,7 @@ const SPECIES_DB = {
         noteEn: "The king of UK flatfish. Flesh is highly valued with high market price.", noteEl: "The king of UK flatfish. Flesh is highly valued with high market price.", noteEs: "The king of UK flatfish. Flesh is highly valued with high market price."
     },
     "uk_brill": {
-        name: "Çivisiz Kalkan / Brill", nameEn: "Brill", nameEl: "Brill", nameEs: "Brill", icon: "🐟", scientificName: "Scophthalmus rhombus",
+        name: "Çivisiz Kalkan / Brill", nameEn: "Brill", nameEl: "Πησσί", nameEs: "Rémol", icon: "🐟", scientificName: "Scophthalmus rhombus",
         photoId: 1515, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk alanlar",
@@ -11753,7 +11753,7 @@ const SPECIES_DB = {
         noteEn: "Similar to Turbot but smoother and has a more oval shape.", noteEl: "Similar to Turbot but smoother and has a more oval shape.", noteEs: "Similar to Turbot but smoother and has a more oval shape."
     },
     "uk_sole": {
-        name: "Dil Balığı (UK) / Sole", nameEn: "Dover Sole", nameEl: "Dover Sole", nameEs: "Dover Sole", icon: "🐟", scientificName: "Solea solea",
+        name: "Dil Balığı (UK) / Sole", nameEn: "Dover Sole", nameEl: "Γλώσσα", nameEs: "Lenguado común", icon: "🐟", scientificName: "Solea solea",
         photoId: 1516, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ kumluk ve çamurluklar",
@@ -11767,7 +11767,7 @@ const SPECIES_DB = {
         noteEn: "UK's most valuable commercial flatfish. Night fishing is more productive.", noteEl: "UK's most valuable commercial flatfish. Night fishing is more productive.", noteEs: "UK's most valuable commercial flatfish. Night fishing is more productive."
     },
     "uk_wrasse_ballan": {
-        name: "Çırçır (UK) / Ballan Wrasse", nameEn: "Ballan Wrasse", nameEl: "Ballan Wrasse", nameEs: "Ballan Wrasse", icon: "🐟", scientificName: "Labrus bergylta",
+        name: "Çırçır (UK) / Ballan Wrasse", nameEn: "Ballan Wrasse", nameEl: "Χειλού", nameEs: "Maragota", icon: "🐟", scientificName: "Labrus bergylta",
         photoId: 1517, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz yosunlu kayalar ve iskeleler",
@@ -11781,7 +11781,7 @@ const SPECIES_DB = {
         noteEn: "Very strong and colorful fish. Popular among LRF and spin anglers.", noteEl: "Very strong and colorful fish. Popular among LRF and spin anglers.", noteEs: "Very strong and colorful fish. Popular among LRF and spin anglers."
     },
     "uk_conger_eel": {
-        name: "Mığrı (UK) / Conger Eel", nameEn: "Conger Eel", nameEl: "Conger Eel", nameEs: "Conger Eel", icon: "🐟", scientificName: "Conger conger",
+        name: "Mığrı (UK) / Conger Eel", nameEn: "Conger Eel", nameEl: "Μουγγρί", nameEs: "Congrio", icon: "🐟", scientificName: "Conger conger",
         photoId: 1518, category: "KAYALIK",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece derin batıklar ve kayalık oyuklar",
@@ -11795,7 +11795,7 @@ const SPECIES_DB = {
         noteEn: "The giant eel of the seas. Possesses immense strength.", noteEl: "The giant eel of the seas. Possesses immense strength.", noteEs: "The giant eel of the seas. Possesses immense strength."
     },
     "usne_scup": {
-        name: "İskup / Scup", nameEn: "Scup (Porgy)", nameEl: "Scup (Porgy)", nameEs: "Scup (Porgy)", icon: "🐟", scientificName: "Stenotomus chrysops",
+        name: "İskup / Scup", nameEn: "Scup (Porgy)", nameEl: "Σκαπ", nameEs: "Sargo scup", icon: "🐟", scientificName: "Stenotomus chrysops",
         photoId: 1606, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz sığ kayalık ve kumluk alanlar",
@@ -11809,7 +11809,7 @@ const SPECIES_DB = {
         noteEn: "Fights hard for its size. Perfect for family fishing trips.", noteEl: "Fights hard for its size. Perfect for family fishing trips.", noteEs: "Fights hard for its size. Perfect for family fishing trips."
     },
     "usne_winter_flounder": {
-        name: "Kış Dil Balığı", nameEn: "Winter Flounder", nameEl: "Χειμερινός Χαλόνι", nameEs: "Winter Flounder", icon: "🐟", scientificName: "Pseudopleuronectes americanus",
+        name: "Kış Dil Balığı", nameEn: "Winter Flounder", nameEl: "Χειμερινός Χαλόνι", nameEs: "Platija de invierno", icon: "🐟", scientificName: "Pseudopleuronectes americanus",
         photoId: 1607, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk ve çamurluk körfezler",
@@ -11823,7 +11823,7 @@ const SPECIES_DB = {
         noteEn: "Unlike Summer Flounder, its eyes are on the right side and it has a tiny mouth.", noteEl: "Unlike Summer Flounder, its eyes are on the right side and it has a tiny mouth.", noteEs: "Unlike Summer Flounder, its eyes are on the right side and it has a tiny mouth."
     },
     "usne_weakfish": {
-        name: "Zayıf Balık / Weakfish", nameEn: "Weakfish (Sea Trout)", nameEl: "Αδύναμο ψάρι (Πέστροφα)", nameEs: "Weakfish (Sea Trout)", icon: "🐟", scientificName: "Cynoscion regalis",
+        name: "Zayıf Balık / Weakfish", nameEn: "Weakfish (Sea Trout)", nameEl: "Αδύναμο ψάρι (Πέστροφα)", nameEs: "Corvinata real", icon: "🐟", scientificName: "Cynoscion regalis",
         photoId: 1608, category: "KIYI_AVCI",
         huntingMode: "chemosensory",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ kanal kenarları",
@@ -11837,7 +11837,7 @@ const SPECIES_DB = {
         noteEn: "Named 'Weakfish' due to its delicate mouth. Has beautiful iridescent colors.", noteEl: "Named 'Weakfish' due to its delicate mouth. Has beautiful iridescent colors.", noteEs: "Named 'Weakfish' due to its delicate mouth. Has beautiful iridescent colors."
     },
     "usne_croaker": {
-        name: "Hırıldayan Balık / Croaker", nameEn: "Atlantic Croaker", nameEl: "Atlantic Croaker", nameEs: "Atlantic Croaker", icon: "🐟", scientificName: "Micropogonias undulatus",
+        name: "Hırıldayan Balık / Croaker", nameEn: "Atlantic Croaker", nameEl: "Κορβίνα κυματιστή", nameEs: "Corvinón ondulado", icon: "🐟", scientificName: "Micropogonias undulatus",
         photoId: 1609, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ kıyı şeridi",
@@ -11851,7 +11851,7 @@ const SPECIES_DB = {
         noteEn: "Makes a croaking sound when taken out of water. More common in southern NE.", noteEl: "Makes a croaking sound when taken out of water. More common in southern NE.", noteEs: "Makes a croaking sound when taken out of water. More common in southern NE."
     },
     "usne_kingfish": {
-        name: "Kral Balığı (US) / Kingfish", nameEn: "Northern Kingfish", nameEl: "Βόρεια Βασιλόψαρα", nameEs: "Northern Kingfish", icon: "🐟", scientificName: "Menticirrhus saxatilis",
+        name: "Kral Balığı (US) / Kingfish", nameEn: "Northern Kingfish", nameEl: "Βόρεια Βασιλόψαρα", nameEs: "Corvina de roca del norte", icon: "🐟", scientificName: "Menticirrhus saxatilis",
         photoId: 1610, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz dalgaların kırıldığı kumluk kıyılar",
@@ -11865,7 +11865,7 @@ const SPECIES_DB = {
         noteEn: "A favorite target for surf anglers. Meat is very delicious.", noteEl: "A favorite target for surf anglers. Meat is very delicious.", noteEs: "A favorite target for surf anglers. Meat is very delicious."
     },
     "usne_whiting": {
-        name: "Gümüş Mezgit / Whiting", nameEn: "Silver Hake (Whiting)", nameEl: "Ασημένιος Μερλούκος (Λευκάκι)", nameEs: "Silver Hake (Whiting)", icon: "🐟", scientificName: "Merluccius bilinearis",
+        name: "Gümüş Mezgit / Whiting", nameEn: "Silver Hake (Whiting)", nameEl: "Ασημένιος Μερλούκος (Λευκάκι)", nameEs: "Merluza plateada", icon: "🐟", scientificName: "Merluccius bilinearis",
         photoId: 1611, category: "DIP",
         
         huntingMode: "visual",peakHours: "NIGHT", peakHoursDesc: "Gece orta derinlikteki kumluklar",
@@ -11879,7 +11879,7 @@ const SPECIES_DB = {
         noteEn: "Features large eyes and sharp teeth. Can move closer to shore in winter.", noteEl: "Features large eyes and sharp teeth. Can move closer to shore in winter.", noteEs: "Features large eyes and sharp teeth. Can move closer to shore in winter."
     },
     "usne_bluefin_tuna": {
-        name: "Mavi Yüzgeçli Orkinos (US NE)", nameEn: "Atlantic Bluefin Tuna", nameEl: "Τόνος Ατλαντικού", nameEs: "Atlantic Bluefin Tuna", icon: "🐟", scientificName: "Thunnus thynnus",
+        name: "Mavi Yüzgeçli Orkinos (US NE)", nameEn: "Atlantic Bluefin Tuna", nameEl: "Τόνος Ατλαντικού", nameEs: "Atún rojo", icon: "🐟", scientificName: "Thunnus thynnus",
         photoId: 1612, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz akıntıları ve sığlık kenarları",
@@ -11893,7 +11893,7 @@ const SPECIES_DB = {
         noteEn: "World's most valuable fish. Cape Cod region is famous for giant bluefins.", noteEl: "World's most valuable fish. Cape Cod region is famous for giant bluefins.", noteEs: "World's most valuable fish. Cape Cod region is famous for giant bluefins."
     },
     "usne_false_albacore": {
-        name: "Yalancı Albakor / Little Tunny", nameEn: "False Albacore (Albie)", nameEl: "False Albacore (Albie)", nameEs: "False Albacore (Albie)", icon: "🐟", scientificName: "Euthynnus alletteratus",
+        name: "Yalancı Albakor / Little Tunny", nameEn: "False Albacore (Albie)", nameEl: "Καρβούνι", nameEs: "Bacoreta", icon: "🐟", scientificName: "Euthynnus alletteratus",
         photoId: 1613, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz yüzeydeki hızlı yem hareketleri",
@@ -11907,7 +11907,7 @@ const SPECIES_DB = {
         noteEn: "The most exciting fall target for shore anglers. Exceptionally fast.", noteEl: "The most exciting fall target for shore anglers. Exceptionally fast.", noteEs: "The most exciting fall target for shore anglers. Exceptionally fast."
     },
     "usne_cunner": {
-        name: "Kuner / Cunner", nameEn: "Cunner (Bergall)", nameEl: "Cunner (Bergall)", nameEs: "Cunner (Bergall)", icon: "🐟", scientificName: "Tautogolabrus adspersus",
+        name: "Kuner / Cunner", nameEn: "Cunner (Bergall)", nameEl: "Χειλού κάνερ", nameEs: "Tordo cunner", icon: "🐟", scientificName: "Tautogolabrus adspersus",
         photoId: 1615, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz iskele ayakları ve kayalıklar",
@@ -11921,7 +11921,7 @@ const SPECIES_DB = {
         noteEn: "Small cousin of the Tautog. Often known as a bait stealer but is tasty to eat.", noteEl: "Small cousin of the Tautog. Often known as a bait stealer but is tasty to eat.", noteEs: "Small cousin of the Tautog. Often known as a bait stealer but is tasty to eat."
     },
     "usne_menhaden": {
-        name: "Bunker / Menhaden", nameEn: "Atlantic Menhaden (Bunker)", nameEl: "Atlantic Menhaden (Bunker)", nameEs: "Atlantic Menhaden (Bunker)", icon: "🐟", scientificName: "Brevoortia tyrannus",
+        name: "Bunker / Menhaden", nameEn: "Atlantic Menhaden (Bunker)", nameEl: "Μενχάντεν", nameEs: "Lacha tirana", icon: "🐟", scientificName: "Brevoortia tyrannus",
         photoId: 1616, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzeydeki devasa sürüler",
@@ -11935,7 +11935,7 @@ const SPECIES_DB = {
         noteEn: "The most important bait fish in the ocean. Fed upon by everything from whales to gulls.", noteEl: "The most important bait fish in the ocean. Fed upon by everything from whales to gulls.", noteEs: "The most important bait fish in the ocean. Fed upon by everything from whales to gulls."
     },
     "usne_cod": {
-        name: "Atlantik Morinası (US NE)", nameEn: "Atlantic Cod", nameEl: "Atlantic Cod", nameEs: "Atlantic Cod", icon: "🐟", scientificName: "Gadus morhua",
+        name: "Atlantik Morinası (US NE)", nameEn: "Atlantic Cod", nameEl: "Μπακαλιάρος Ατλαντικού", nameEs: "Bacalao del Atlántico", icon: "🐟", scientificName: "Gadus morhua",
         photoId: 1617, category: "DIP",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz derin kanyonlar ve batıklar",
@@ -11949,7 +11949,7 @@ const SPECIES_DB = {
         noteEn: "Stellwagen Bank is one of the premier cod fishing grounds.", noteEl: "Stellwagen Bank is one of the premier cod fishing grounds.", noteEs: "Stellwagen Bank is one of the premier cod fishing grounds."
     },
     "usne_spiny_dogfish": {
-        name: "Dikenli Camgöz (US NE)", nameEn: "Spiny Dogfish", nameEl: "Αγκαθωτό σκυλόψαρο", nameEs: "Spiny Dogfish", icon: "🦈", scientificName: "Squalus acanthias",
+        name: "Dikenli Camgöz (US NE)", nameEn: "Spiny Dogfish", nameEl: "Αγκαθωτό σκυλόψαρο", nameEs: "Mielga", icon: "🦈", scientificName: "Squalus acanthias",
         photoId: 1618, category: "DIP",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece her türlü deniz tabanı",
@@ -11963,7 +11963,7 @@ const SPECIES_DB = {
         noteEn: "Sometimes arrives in plagues, making it impossible to catch other fish.", noteEl: "Sometimes arrives in plagues, making it impossible to catch other fish.", noteEs: "Sometimes arrives in plagues, making it impossible to catch other fish."
     },
     "uk_huss": {
-        name: "Büyük Kedi Balığı / Bull Huss", nameEn: "Bull Huss (Greater Spotted Dogfish)", nameEl: "Bull Huss (Greater Spotted Dogfish)", nameEs: "Bull Huss (Greater Spotted Dogfish)", icon: "🦈", scientificName: "Scyliorhinus stellaris",
+        name: "Büyük Kedi Balığı / Bull Huss", nameEn: "Bull Huss (Greater Spotted Dogfish)", nameEl: "Γατόψαρο μεγάλο", nameEs: "Alitán", icon: "🦈", scientificName: "Scyliorhinus stellaris",
         photoId: 1519, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece derin kayalıklar ve yosunluklar",
@@ -11977,7 +11977,7 @@ const SPECIES_DB = {
         noteEn: "Similar to lesser spotted dogfish but grows much larger with larger spots.", noteEl: "Similar to lesser spotted dogfish but grows much larger with larger spots.", noteEs: "Similar to lesser spotted dogfish but grows much larger with larger spots."
     },
     "uk_tope": {
-        name: "Camgöz (UK) / Tope", nameEn: "Tope Shark", nameEl: "Tope Shark", nameEs: "Tope Shark", icon: "🦈", scientificName: "Galeorhinus galeus",
+        name: "Camgöz (UK) / Tope", nameEn: "Tope Shark", nameEl: "Γαλέος", nameEs: "Cazón", icon: "🦈", scientificName: "Galeorhinus galeus",
         photoId: 1520, category: "PELAJIK_AVCI",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz orta su ve dip geçişleri",
@@ -11991,7 +11991,7 @@ const SPECIES_DB = {
         noteEn: "One of the fastest sharks in UK waters. Known for long, powerful runs.", noteEl: "One of the fastest sharks in UK waters. Known for long, powerful runs.", noteEs: "One of the fastest sharks in UK waters. Known for long, powerful runs."
     },
     "uk_blue_shark": {
-        name: "Mavi Köpekbalığı (UK)", nameEn: "Blue Shark", nameEl: "Μπλε καρχαρίας", nameEs: "Blue Shark", icon: "🦈", scientificName: "Prionace glauca",
+        name: "Mavi Köpekbalığı (UK)", nameEn: "Blue Shark", nameEl: "Μπλε καρχαρίας", nameEs: "Tintorera", icon: "🦈", scientificName: "Prionace glauca",
         photoId: 1521, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
@@ -12005,7 +12005,7 @@ const SPECIES_DB = {
         noteEn: "Thousands arrive off the southwest UK coast (Cornwall) in summer.", noteEl: "Thousands arrive off the southwest UK coast (Cornwall) in summer.", noteEs: "Thousands arrive off the southwest UK coast (Cornwall) in summer."
     },
     "uk_thornback_ray": {
-        name: "Dikenli Vatoz (UK)", nameEn: "Thornback Ray", nameEl: "Θόρνμπακ Ρέι", nameEs: "Thornback Ray", icon: "🐟", scientificName: "Raja clavata",
+        name: "Dikenli Vatoz (UK)", nameEn: "Thornback Ray", nameEl: "Θόρνμπακ Ρέι", nameEs: "Raya de clavos", icon: "🐟", scientificName: "Raja clavata",
         photoId: 1522, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece kumlu ve çamurlu dipler",
@@ -12019,7 +12019,7 @@ const SPECIES_DB = {
         noteEn: "The most common ray species on UK shores. Recognized by the spines on its back.", noteEl: "The most common ray species on UK shores. Recognized by the spines on its back.", noteEs: "The most common ray species on UK shores. Recognized by the spines on its back."
     },
     "uk_garfish": {
-        name: "Zargana (UK)", nameEn: "Garfish", nameEl: "Garfish", nameEs: "Garfish", icon: "🐟", scientificName: "Belone belone",
+        name: "Zargana (UK)", nameEn: "Garfish", nameEl: "Ζαργάνα", nameEs: "Aguja", icon: "🐟", scientificName: "Belone belone",
         photoId: 1523, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz yüzey katmanları",
@@ -12033,7 +12033,7 @@ const SPECIES_DB = {
         noteEn: "Features green bones. Arrives in summer along with mackerel.", noteEl: "Features green bones. Arrives in summer along with mackerel.", noteEs: "Features green bones. Arrives in summer along with mackerel."
     },
     "uk_bream_gilthead": {
-        name: "Çipura (UK)", nameEn: "Gilthead Bream", nameEl: "Τσιπούρα Gilthead", nameEs: "Gilthead Bream", icon: "🐟", scientificName: "Sparus aurata",
+        name: "Çipura (UK)", nameEn: "Gilthead Bream", nameEl: "Τσιπούρα", nameEs: "Dorada", icon: "🐟", scientificName: "Sparus aurata",
         photoId: 1524, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ lagünler ve nehir ağızları",
@@ -12047,7 +12047,7 @@ const SPECIES_DB = {
         noteEn: "Used to be rare but has become very common on southern UK shores in recent years.", noteEl: "Used to be rare but has become very common on southern UK shores in recent years.", noteEs: "Used to be rare but has become very common on southern UK shores in recent years."
     },
     "uk_bream_black": {
-        name: "Siyah Karagöz (UK)", nameEn: "Black Sea Bream", nameEl: "Τσιπούρα Μαύρης Θάλασσας", nameEs: "Black Sea Bream", icon: "🐟", scientificName: "Spondyliosoma cantharus",
+        name: "Siyah Karagöz (UK)", nameEn: "Black Sea Bream", nameEl: "Τσιπούρα Μαύρης Θάλασσας", nameEs: "Chopa", icon: "🐟", scientificName: "Spondyliosoma cantharus",
         photoId: 1525, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler ve sığlıklar",
@@ -12061,7 +12061,7 @@ const SPECIES_DB = {
         noteEn: "Found in schools over rocky areas. An excellent fighter.", noteEl: "Found in schools over rocky areas. An excellent fighter.", noteEs: "Found in schools over rocky areas. An excellent fighter."
     },
     "usne_shad_hickory": {
-        name: "Hickory Tirsi", nameEn: "Hickory Shad", nameEl: "Hickory Shad", nameEs: "Hickory Shad", icon: "🐟", scientificName: "Alosa mediocris",
+        name: "Hickory Tirsi", nameEn: "Hickory Shad", nameEl: "Σαρδελομάνα χίκορι", nameEs: "Sábalo hickory", icon: "🐟", scientificName: "Alosa mediocris",
         photoId: 1619, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz akıntılı nehir ağızları",
@@ -12075,7 +12075,7 @@ const SPECIES_DB = {
         noteEn: "Arrives in river mouths in spring to spawn. Often called 'poor man's tarpon'.", noteEl: "Arrives in river mouths in spring to spawn. Often called 'poor man's tarpon'.", noteEs: "Arrives in river mouths in spring to spawn. Often called 'poor man's tarpon'."
     },
     "usne_shad_american": {
-        name: "Amerikan Tirsi", nameEn: "American Shad", nameEl: "Αμερικανός Σαντ", nameEs: "American Shad", icon: "🐟", scientificName: "Alosa sapidissima",
+        name: "Amerikan Tirsi", nameEn: "American Shad", nameEl: "Αμερικανός Σαντ", nameEs: "Sábalo americano", icon: "🐟", scientificName: "Alosa sapidissima",
         photoId: 1620, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz büyük nehir sistemleri",
@@ -12089,7 +12089,7 @@ const SPECIES_DB = {
         noteEn: "One of the most important fish in US NE history. Highly valued for meat and roe.", noteEl: "One of the most important fish in US NE history. Highly valued for meat and roe.", noteEs: "One of the most important fish in US NE history. Highly valued for meat and roe."
     },
     "usne_pollock": {
-        name: "Atlantik Mezgit / Pollock", nameEn: "Pollock", nameEl: "Πόλοκ", nameEs: "Pollock", icon: "🐟", scientificName: "Pollachius virens",
+        name: "Atlantik Mezgit / Pollock", nameEn: "Pollock", nameEl: "Πόλοκ", nameEs: "Carbonero", icon: "🐟", scientificName: "Pollachius virens",
         photoId: 1623, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin su resifleri",
@@ -12103,7 +12103,7 @@ const SPECIES_DB = {
         noteEn: "Fights harder than Cod and can sometimes be caught in the upper water column.", noteEl: "Fights harder than Cod and can sometimes be caught in the upper water column.", noteEs: "Fights harder than Cod and can sometimes be caught in the upper water column."
     },
     "nz_bluefin_tuna": {
-        name: "Güney Mavi Yüzgeçli Orkinos", nameEn: "Southern Bluefin Tuna", nameEl: "Τόνος του Νότου", nameEs: "Southern Bluefin Tuna", icon: "Or", scientificName: "Thunnus maccoyii",
+        name: "Güney Mavi Yüzgeçli Orkinos", nameEn: "Southern Bluefin Tuna", nameEl: "Τόνος του Νότου", nameEs: "Atún rojo del sur", icon: "Or", scientificName: "Thunnus maccoyii",
         photoId: 1431, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz soğuk akıntı sınırları",
@@ -12117,7 +12117,7 @@ const SPECIES_DB = {
         noteEn: "NZ's most valuable tuna species. Primarily caught off the South Island's west coast in winter.", noteEl: "NZ's most valuable tuna species. Primarily caught off the South Island's west coast in winter.", noteEs: "NZ's most valuable tuna species. Primarily caught off the South Island's west coast in winter."
     },
     "nz_piper": {
-        name: "Piper / Zargana (NZ)", nameEn: "Piper (Garfish)", nameEl: "Piper (Garfish)", nameEs: "Piper (Garfish)", icon: "🐟", scientificName: "Hyporhamphus ihi",
+        name: "Piper / Zargana (NZ)", nameEn: "Piper (Garfish)", nameEl: "Ζαργάνα Νέας Ζηλανδίας", nameEs: "Aguja de Nueva Zelanda", icon: "🐟", scientificName: "Hyporhamphus ihi",
         photoId: 1432, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ körfezler ve limanlar",
@@ -12131,7 +12131,7 @@ const SPECIES_DB = {
         noteEn: "One of the best live baits for Kingfish. Also very tasty to eat.", noteEl: "One of the best live baits for Kingfish. Also very tasty to eat.", noteEs: "One of the best live baits for Kingfish. Also very tasty to eat."
     },
     "nz_grey_mullet": {
-        name: "Kefal (NZ) / Grey Mullet", nameEn: "Grey Mullet (Kanae)", nameEl: "Γκρίζο μπαρμπούνι (Kanae)", nameEs: "Grey Mullet (Kanae)", icon: "🐟", scientificName: "Mugil cephalus",
+        name: "Kefal (NZ) / Grey Mullet", nameEn: "Grey Mullet (Kanae)", nameEl: "Γκρίζο μπαρμπούνι (Kanae)", nameEs: "Lisa", icon: "🐟", scientificName: "Mugil cephalus",
         photoId: 1433, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz haliçler ve nehir ağızları",
@@ -12145,7 +12145,7 @@ const SPECIES_DB = {
         noteEn: "Commonly netted but requires great skill to catch on rod and reel.", noteEl: "Commonly netted but requires great skill to catch on rod and reel.", noteEs: "Commonly netted but requires great skill to catch on rod and reel."
     },
     "nz_bronze_whaler": {
-        name: "Bronz Balina Köpekbalığı", nameEn: "Bronze Whaler Shark", nameEl: "Bronze Whaler Shark", nameEs: "Bronze Whaler Shark", icon: "🦈", scientificName: "Carcharhinus brachyurus",
+        name: "Bronz Balina Köpekbalığı", nameEn: "Bronze Whaler Shark", nameEl: "Καρχαρίας χάλκινος", nameEs: "Tiburón cobrizo", icon: "🦈", scientificName: "Carcharhinus brachyurus",
         photoId: 1434, category: "PELAJIK_AVCI",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz sığ kıyı şeridi ve sörf bölgeleri",
@@ -12159,7 +12159,7 @@ const SPECIES_DB = {
         noteEn: "Comes very close to shore in summer, often seen on shallow beaches. Very powerful.", noteEl: "Comes very close to shore in summer, often seen on shallow beaches. Very powerful.", noteEs: "Comes very close to shore in summer, often seen on shallow beaches. Very powerful."
     },
     "nz_mako": {
-        name: "Mako Köpekbalığı (NZ)", nameEn: "Shortfin Mako Shark", nameEl: "Κοντόπτερος καρχαρίας Mako", nameEs: "Shortfin Mako Shark", icon: "🦈", scientificName: "Isurus oxyrinchus",
+        name: "Mako Köpekbalığı (NZ)", nameEn: "Shortfin Mako Shark", nameEl: "Καρχαρίας κοντόπτερος", nameEs: "Marrajo dientuso", icon: "🦈", scientificName: "Isurus oxyrinchus",
         photoId: 1435, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
@@ -12173,7 +12173,7 @@ const SPECIES_DB = {
         noteEn: "The fastest shark in the sea, capable of jumping up to 6 meters out of the water.", noteEl: "The fastest shark in the sea, capable of jumping up to 6 meters out of the water.", noteEs: "The fastest shark in the sea, capable of jumping up to 6 meters out of the water."
     },
     "nz_puka_bass": {
-        name: "Hapuka Bas / Puka", nameEn: "Bass (Puka)", nameEl: "Μπάσο (Πούκα)", nameEs: "Bass (Puka)", icon: "🐟", scientificName: "Polyprion americanus",
+        name: "Hapuka Bas / Puka", nameEn: "Bass (Puka)", nameEl: "Μπάσο (Πούκα)", nameEs: "Cherna", icon: "🐟", scientificName: "Polyprion americanus",
         photoId: 1436, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin su resifleri",
@@ -12187,7 +12187,7 @@ const SPECIES_DB = {
         noteEn: "Very similar to Hapuka but has a larger mouth and deeper body.", noteEl: "Very similar to Hapuka but has a larger mouth and deeper body.", noteEs: "Very similar to Hapuka but has a larger mouth and deeper body."
     },
     "nz_red_snapper": {
-        name: "Kırmızı Mercan (NZ)", nameEn: "Red Snapper (Golden Snapper)", nameEl: "Red Snapper (Golden Snapper)", nameEs: "Red Snapper (Golden Snapper)", icon: "🐟", scientificName: "Centroberyx affinis",
+        name: "Kırmızı Mercan (NZ)", nameEn: "Red Snapper (Golden Snapper)", nameEl: "Μπερίτσα Αυστραλίας", nameEs: "Alfonsino australiano", icon: "🐟", scientificName: "Centroberyx affinis",
         photoId: 1437, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece derin kayalık resifler",
@@ -12201,7 +12201,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its bright orange-red color. More active at night.", noteEl: "Recognized by its bright orange-red color. More active at night.", noteEs: "Recognized by its bright orange-red color. More active at night."
     },
     "nz_trumpeter": {
-        name: "Oluklu Balık / Trumpeter", nameEn: "Trumpeter (Kohari)", nameEl: "Τρομπετίστας (Κόχαρι)", nameEs: "Trumpeter (Kohari)", icon: "🐟", scientificName: "Latris lineata",
+        name: "Oluklu Balık / Trumpeter", nameEn: "Trumpeter (Kohari)", nameEl: "Τρομπετίστας (Κόχαρι)", nameEs: "Trompetero rayado", icon: "🐟", scientificName: "Latris lineata",
         photoId: 1438, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalık resifler",
@@ -12215,7 +12215,7 @@ const SPECIES_DB = {
         noteEn: "Found in deep waters of the South Island. An excellent eating fish.", noteEl: "Found in deep waters of the South Island. An excellent eating fish.", noteEs: "Found in deep waters of the South Island. An excellent eating fish."
     },
     "nz_frostfish": {
-        name: "Don Balığı / Frostfish", nameEn: "Frostfish (Para)", nameEl: "Παγετόψαρο (Παρά)", nameEs: "Frostfish (Para)", icon: "🐟", scientificName: "Lepidopus caudatus",
+        name: "Don Balığı / Frostfish", nameEn: "Frostfish (Para)", nameEl: "Παγετόψαρο (Παρά)", nameEs: "Pez cinto", icon: "🐟", scientificName: "Lepidopus caudatus",
         photoId: 1439, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece yüzey katmanları, Gündüz çok derin",
@@ -12229,7 +12229,7 @@ const SPECIES_DB = {
         noteEn: "Famous for its silvery color and being found 'frozen' on beaches on winter mornings.", noteEl: "Famous for its silvery color and being found 'frozen' on beaches on winter mornings.", noteEs: "Famous for its silvery color and being found 'frozen' on beaches on winter mornings."
     },
     "nz_yellowfin_tuna": {
-        name: "Sarı Yüzgeçli Orkinos (NZ)", nameEn: "Yellowfin Tuna", nameEl: "Κιτρινόπτερος τόνος", nameEs: "Yellowfin Tuna", icon: "🐟", scientificName: "Thunnus albacares",
+        name: "Sarı Yüzgeçli Orkinos (NZ)", nameEn: "Yellowfin Tuna", nameEl: "Κιτρινόπτερος τόνος", nameEs: "Rabil", icon: "🐟", scientificName: "Thunnus albacares",
         photoId: 1440, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yüzey katmanları",
@@ -12243,7 +12243,7 @@ const SPECIES_DB = {
         noteEn: "Arrives in northern regions in summer. An exceptionally fast and strong fighter.", noteEl: "Arrives in northern regions in summer. An exceptionally fast and strong fighter.", noteEs: "Arrives in northern regions in summer. An exceptionally fast and strong fighter."
     },
     "nz_red_cod": {
-        name: "Kırmızı Mezgit (NZ) / Red Cod", nameEn: "Red Cod (Hoka)", nameEl: "Κόκκινος μπακαλιάρος (Χόκα)", nameEs: "Red Cod (Hoka)", icon: "🐟", scientificName: "Pseudophycis bachus",
+        name: "Kırmızı Mezgit (NZ) / Red Cod", nameEn: "Red Cod (Hoka)", nameEl: "Κόκκινος μπακαλιάρος (Χόκα)", nameEs: "Bacalao rojo de Nueva Zelanda", icon: "🐟", scientificName: "Pseudophycis bachus",
         photoId: 1441, category: "DIP",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve çamurluk dipler",
@@ -12257,7 +12257,7 @@ const SPECIES_DB = {
         noteEn: "Very common in the South Island. Flesh is soft and best eaten fresh.", noteEl: "Very common in the South Island. Flesh is soft and best eaten fresh.", noteEs: "Very common in the South Island. Flesh is soft and best eaten fresh."
     },
     "nz_blue_warehou": {
-        name: "Mavi Warehou", nameEn: "Blue Warehou", nameEl: "Blue Warehou", nameEs: "Blue Warehou", icon: "🐟", scientificName: "Seriolella brama",
+        name: "Mavi Warehou", nameEn: "Blue Warehou", nameEl: "Παλομέτα γαλάζια", nameEs: "Palometa azul", icon: "🐟", scientificName: "Seriolella brama",
         photoId: 1442, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz kıyı suları ve resif kenarları",
@@ -12271,7 +12271,7 @@ const SPECIES_DB = {
         noteEn: "Highly targeted commercially due to its delicious flesh.", noteEl: "Highly targeted commercially due to its delicious flesh.", noteEs: "Highly targeted commercially due to its delicious flesh."
     },
     "nz_carpet_shark": {
-        name: "Halı Köpekbalığı / Carpet Shark", nameEn: "Carpet Shark (Mango Pare)", nameEl: "Carpet Shark (Mango Pare)", nameEs: "Carpet Shark (Mango Pare)", icon: "🦈", scientificName: "Cephaloscyllium isabellum",
+        name: "Halı Köpekbalığı / Carpet Shark", nameEn: "Carpet Shark (Mango Pare)", nameEl: "Γατόψαρο χαλί", nameEs: "Pejegato alfombra", icon: "🦈", scientificName: "Cephaloscyllium isabellum",
         photoId: 1443, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece sığ kayalık alanlar",
@@ -12285,7 +12285,7 @@ const SPECIES_DB = {
         noteEn: "Can swallow water to bloat when threatened. Usually caught as bycatch.", noteEl: "Can swallow water to bloat when threatened. Usually caught as bycatch.", noteEs: "Can swallow water to bloat when threatened. Usually caught as bycatch."
     },
     "nz_seven_gill": {
-        name: "Yedi Solungaçlı Köpekbalığı", nameEn: "Broadnose Seven Gill Shark", nameEl: "Broadnose Seven Gill Shark", nameEs: "Broadnose Seven Gill Shark", icon: "🦈", scientificName: "Notorynchus cepedianus",
+        name: "Yedi Solungaçlı Köpekbalığı", nameEn: "Broadnose Seven Gill Shark", nameEl: "Εξάγναθος", nameEs: "Cañabota gata", icon: "🦈", scientificName: "Notorynchus cepedianus",
         photoId: 1444, category: "DIP",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece sığ limanlar ve körfezler",
@@ -12299,7 +12299,7 @@ const SPECIES_DB = {
         noteEn: "An ancient species. Can be very aggressive in shallow waters.", noteEl: "An ancient species. Can be very aggressive in shallow waters.", noteEs: "An ancient species. Can be very aggressive in shallow waters."
     },
     "nz_thresher": {
-        name: "Sapan Balığı / Thresher (NZ)", nameEn: "Thresher Shark", nameEl: "Thresher Shark", nameEs: "Thresher Shark", icon: "🦈", scientificName: "Alopias vulpinus",
+        name: "Sapan Balığı / Thresher (NZ)", nameEn: "Thresher Shark", nameEl: "Αλεπόσκυλο", nameEs: "Zorro común", icon: "🦈", scientificName: "Alopias vulpinus",
         photoId: 1445, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz ve kıyı yamaçları",
@@ -12313,7 +12313,7 @@ const SPECIES_DB = {
         noteEn: "Uses its long tail to stun schools of fish.", noteEl: "Uses its long tail to stun schools of fish.", noteEs: "Uses its long tail to stun schools of fish."
     },
     "nz_hammerhead": {
-        name: "Çekiç Balığı (NZ)", nameEn: "Smooth Hammerhead Shark", nameEl: "Ομαλός καρχαρίας σφυροκέφαλος", nameEs: "Smooth Hammerhead Shark", icon: "🦈", scientificName: "Sphyrna zygaena",
+        name: "Çekiç Balığı (NZ)", nameEn: "Smooth Hammerhead Shark", nameEl: "Ομαλός καρχαρίας σφυροκέφαλος", nameEs: "Cornuda cruz", icon: "🦈", scientificName: "Sphyrna zygaena",
         photoId: 1446, category: "PELAJIK_AVCI",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz sıcak yüzey suları",
@@ -12327,7 +12327,7 @@ const SPECIES_DB = {
         noteEn: "Can be seen in schools in northern regions (Northland) during summer.", noteEl: "Can be seen in schools in northern regions (Northland) during summer.", noteEs: "Can be seen in schools in northern regions (Northland) during summer."
     },
     "nz_porbeagle": {
-        name: "Dikburun Camgöz (NZ)", nameEn: "Porbeagle Shark", nameEl: "Καρχαρίας Porbeagle", nameEs: "Porbeagle Shark", icon: "🦈", scientificName: "Lamna nasus",
+        name: "Dikburun Camgöz (NZ)", nameEn: "Porbeagle Shark", nameEl: "Καρχαρίας λάμια", nameEs: "Marrajo sardinero", icon: "🦈", scientificName: "Lamna nasus",
         photoId: 1447, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz soğuk sular",
@@ -12341,7 +12341,7 @@ const SPECIES_DB = {
         noteEn: "Prefers cold waters. Looks like a small great white shark.", noteEl: "Prefers cold waters. Looks like a small great white shark.", noteEs: "Prefiere cold waters. Looks like a small great white shark."
     },
     "nz_grand_hapuka": {
-        name: "Dev Hapuka", nameEn: "Wreckfish (Hapuka)", nameEl: "Wreckfish (Hapuka)", nameEs: "Wreckfish (Hapuka)", icon: "🐟", scientificName: "Polyprion oxygeneios",
+        name: "Dev Hapuka", nameEn: "Wreckfish (Hapuka)", nameEl: "Βλάχος χαπούκα", nameEs: "Cherna hapuka", icon: "🐟", scientificName: "Polyprion oxygeneios",
         photoId: 1448, category: "DERİN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz çok derin su resifleri",
@@ -12355,7 +12355,7 @@ const SPECIES_DB = {
         noteEn: "NZ's most iconic deep-water fish. Flesh is exceptionally valuable.", noteEl: "NZ's most iconic deep-water fish. Flesh is exceptionally valuable.", noteEs: "NZ's most iconic deep-water fish. Flesh is exceptionally valuable."
     },
     "nz_silver_warehou": {
-        name: "Gümüş Warehou", nameEn: "Silver Warehou", nameEl: "Ασημένια αποθήκη", nameEs: "Silver Warehou", icon: "🐟", scientificName: "Seriolella punctata",
+        name: "Gümüş Warehou", nameEn: "Silver Warehou", nameEl: "Ασημένια αποθήκη", nameEs: "Palometa plateada", icon: "🐟", scientificName: "Seriolella punctata",
         photoId: 1450, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz orta su derinlikleri",
@@ -12369,7 +12369,7 @@ const SPECIES_DB = {
         noteEn: "Mainly found in schools in deeper waters.", noteEl: "Mainly found in schools in deeper waters.", noteEs: "Mainly found in schools in deeper waters."
     },
     "uk_spurdog": {
-        name: "Dikenli Camgöz (UK)", nameEn: "Spurdog", nameEl: "Spurdog", nameEs: "Spurdog", icon: "🦈", scientificName: "Squalus acanthias",
+        name: "Dikenli Camgöz (UK)", nameEn: "Spurdog", nameEl: "Σκυλόψαρο ακανθίας", nameEs: "Mielga", icon: "🦈", scientificName: "Squalus acanthias",
         photoId: 1526, category: "DIP",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece derin soğuk sular",
@@ -12383,7 +12383,7 @@ const SPECIES_DB = {
         noteEn: "Features sharp spines in front of dorsal fins. Travels in schools.", noteEl: "Features sharp spines in front of dorsal fins. Travels in schools.", noteEs: "Features sharp spines in front of dorsal fins. Travels in schools."
     },
     "uk_monkfish": {
-        name: "Fener Balığı (UK)", nameEn: "Monkfish (Anglerfish)", nameEl: "Monkfish (Panglerfish)", nameEs: "Monkfish (Anglerfish)", icon: "🐟", scientificName: "Lophius piscatorius",
+        name: "Fener Balığı (UK)", nameEn: "Monkfish (Anglerfish)", nameEl: "Πεσκαντρίτσα", nameEs: "Rape", icon: "🐟", scientificName: "Lophius piscatorius",
         photoId: 1527, category: "DIP",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece derin kumluk ve kayalık dipler",
@@ -12397,7 +12397,7 @@ const SPECIES_DB = {
         noteEn: "Despite its scary appearance, its meat is considered one of the world's tastiest.", noteEl: "Despite its scary appearance, its meat is considered one of the world's tastiest.", noteEs: "Despite its scary appearance, its meat is considered one of the world's tastiest."
     },
     "uk_lemon_sole": {
-        name: "Limon Dil Balığı", nameEn: "Lemon Sole", nameEl: "Σόλα λεμονιού", nameEs: "Lemon Sole", icon: "🐟", scientificName: "Microstomus kitt",
+        name: "Limon Dil Balığı", nameEn: "Lemon Sole", nameEl: "Σόλα λεμονιού", nameEs: "Mendo limón", icon: "🐟", scientificName: "Microstomus kitt",
         photoId: 1528, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve taşlık dipler",
@@ -12411,7 +12411,7 @@ const SPECIES_DB = {
         noteEn: "Directly related neither to lemons nor true sole; name comes from French 'limande'.", noteEl: "Directly related neither to lemons nor true sole; name comes from French 'limande'.", noteEs: "Directly related neither to lemons nor true sole; name comes from French 'limande'."
     },
     "uk_red_gurnard": {
-        name: "Kırlangıç (UK) / Red Gurnard", nameEn: "Red Gurnard", nameEl: "Red Gunard", nameEs: "Red Gurnard", icon: "🐟", scientificName: "Chelidonichthys cuculus",
+        name: "Kırlangıç (UK) / Red Gurnard", nameEn: "Red Gurnard", nameEl: "Καπόνι κόκκινο", nameEs: "Arete", icon: "🐟", scientificName: "Chelidonichthys cuculus",
         photoId: 1529, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumlu ve çakıllı dipler",
@@ -12425,7 +12425,7 @@ const SPECIES_DB = {
         noteEn: "Makes grunting sounds when removed from water. Uses fins like feet to walk on bottom.", noteEl: "Makes grunting sounds when removed from water. Uses fins like feet to walk on bottom.", noteEs: "Makes grunting sounds when removed from water. Uses fins like feet to walk on bottom."
     },
     "uk_red_mullet": {
-        name: "Barbunya (UK) / Red Mullet", nameEn: "Red Mullet", nameEl: "Μπαρμπούνι", nameEs: "Red Mullet", icon: "🐟", scientificName: "Mullus surmuletus",
+        name: "Barbunya (UK) / Red Mullet", nameEn: "Red Mullet", nameEl: "Μπαρμπούνι", nameEs: "Salmonete de roca", icon: "🐟", scientificName: "Mullus surmuletus",
         photoId: 1530, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk alanlar",
@@ -12439,7 +12439,7 @@ const SPECIES_DB = {
         noteEn: "Mainly found on southern UK shores during summer months.", noteEl: "Mainly found on southern UK shores during summer months.", noteEs: "Mainly found on southern UK shores during summer months."
     },
     "uk_scad": {
-        name: "İstavrit (UK) / Scad", nameEn: "Scad (Horse Mackerel)", nameEl: "Scad (Σκουμπρί)", nameEs: "Scad (Horse Mackerel)", icon: "🐟", scientificName: "Trachurus trachurus",
+        name: "İstavrit (UK) / Scad", nameEn: "Scad (Horse Mackerel)", nameEl: "Σαυρίδι", nameEs: "Jurel", icon: "🐟", scientificName: "Trachurus trachurus",
         photoId: 1531, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "NIGHT", peakHoursDesc: "Gece yüzey katmanları ve iskele çevresi",
@@ -12453,7 +12453,7 @@ const SPECIES_DB = {
         noteEn: "Leaner meat than mackerel and more active at night.", noteEl: "Leaner meat than mackerel and more active at night.", noteEs: "Leaner meat than mackerel and more active at night."
     },
     "uk_salmon": {
-        name: "Atlantik Somonu (UK)", nameEn: "Atlantic Salmon", nameEl: "Σολομός Ατλαντικού", nameEs: "Atlantic Salmon", icon: "🐟", scientificName: "Salmo salar",
+        name: "Atlantik Somonu (UK)", nameEn: "Atlantic Salmon", nameEl: "Σολομός Ατλαντικού", nameEs: "Salmón atlántico", icon: "🐟", scientificName: "Salmo salar",
         photoId: 1532, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz nehir ağızları ve açık kıyılar",
@@ -12467,7 +12467,7 @@ const SPECIES_DB = {
         noteEn: "The pinnacle of UK angling. Caught during migration periods.", noteEl: "The pinnacle of UK angling. Caught during migration periods.", noteEs: "The pinnacle of UK angling. Caught during migration periods."
     },
     "uk_sea_trout": {
-        name: "Deniz Alası (UK)", nameEn: "Sea Trout", nameEl: "Θαλάσσια Πέστροφα", nameEs: "Sea Trout", icon: "🐟", scientificName: "Salmo trutta",
+        name: "Deniz Alası (UK)", nameEn: "Sea Trout", nameEl: "Θαλάσσια Πέστροφα", nameEs: "Trucha marisca", icon: "🐟", scientificName: "Salmo trutta",
         photoId: 1533, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "NIGHT", peakHoursDesc: "Gece nehir ağızları ve kıyı sığlıkları",
@@ -12481,7 +12481,7 @@ const SPECIES_DB = {
         noteEn: "Extremely shy fish; night fishing requires absolute stealth.", noteEl: "Extremely shy fish; night fishing requires absolute stealth.", noteEs: "Extremely shy fish; night fishing requires absolute stealth."
     },
     "uk_pouting": {
-        name: "Tavuk Balığı / Pouting", nameEn: "Pouting (Bib)", nameEl: "Σιλιά (Σαλιάρα)", nameEs: "Pouting (Bib)", icon: "🐟", scientificName: "Trisopterus luscus",
+        name: "Tavuk Balığı / Pouting", nameEn: "Pouting (Bib)", nameEl: "Σιλιά (Σαλιάρα)", nameEs: "Faneca", icon: "🐟", scientificName: "Trisopterus luscus",
         photoId: 1534, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz iskele ayakları ve kayalık dipler",
@@ -12495,7 +12495,7 @@ const SPECIES_DB = {
         noteEn: "One of the most common small fish on UK shores. Must be eaten very fresh.", noteEl: "One of the most common small fish on UK shores. Must be eaten very fresh.", noteEs: "One of the most common small fish on UK shores. Must be eaten very fresh."
     },
     "uk_halibut": {
-        name: "Atlantik Halibut (UK)", nameEn: "Atlantic Halibut", nameEl: "Ατλαντικός ιππόγλωσσος", nameEs: "Atlantic Halibut", icon: "🐟", scientificName: "Hippoglossus hippoglossus",
+        name: "Atlantik Halibut (UK)", nameEn: "Atlantic Halibut", nameEl: "Ατλαντικός ιππόγλωσσος", nameEs: "Fletán atlántico", icon: "🐟", scientificName: "Hippoglossus hippoglossus",
         photoId: 1536, category: "DIP",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz çok derin ve soğuk sular",
@@ -12509,7 +12509,7 @@ const SPECIES_DB = {
         noteEn: "The world's largest flatfish. Rarely caught in northern UK (Scotland).", noteEl: "The world's largest flatfish. Rarely caught in northern UK (Scotland).", noteEs: "The world's largest flatfish. Rarely caught in northern UK (Scotland)."
     },
     "uk_flounder": {
-        name: "Dere Pisisi (UK)", nameEn: "Flounder", nameEl: "Χυλώνας", nameEs: "Flounder", icon: "🐟", scientificName: "Platichthys flesus",
+        name: "Dere Pisisi (UK)", nameEn: "Flounder", nameEl: "Χυλώνας", nameEs: "Platija europea", icon: "🐟", scientificName: "Platichthys flesus",
         photoId: 1537, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz nehir ağızları ve çamurluklar",
@@ -12523,7 +12523,7 @@ const SPECIES_DB = {
         noteEn: "The most adaptable flatfish to fresh water. Can enter far into rivers.", noteEl: "The most adaptable flatfish to fresh water. Can enter far into rivers.", noteEs: "The most adaptable flatfish to fresh water. Can enter far into rivers."
     },
     "uk_gurnard_tub": {
-        name: "Mazak (UK) / Tub Gurnard", nameEn: "Tub Gurnard", nameEl: "Tub Gunard", nameEs: "Tub Gurnard", icon: "🐟", scientificName: "Chelidonichthys lucerna",
+        name: "Mazak (UK) / Tub Gurnard", nameEn: "Tub Gurnard", nameEl: "Καπόνι", nameEs: "Bejel", icon: "🐟", scientificName: "Chelidonichthys lucerna",
         photoId: 1538, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk alanlar",
@@ -12537,7 +12537,7 @@ const SPECIES_DB = {
         noteEn: "The largest of the UK gurnard species. Features very colorful fins.", noteEl: "The largest of the UK gurnard species. Features very colorful fins.", noteEs: "The largest of the UK gurnard species. Features very colorful fins."
     },
     "uk_gurnard_grey": {
-        name: "Gri Kırlangıç (UK)", nameEn: "Grey Gurnard", nameEl: "Γκρέυ Γκάρναρντ", nameEs: "Grey Gurnard", icon: "🐟", scientificName: "Eutrigla gurnardus",
+        name: "Gri Kırlangıç (UK)", nameEn: "Grey Gurnard", nameEl: "Γκρέυ Γκάρναρντ", nameEs: "Borracho", icon: "🐟", scientificName: "Eutrigla gurnardus",
         photoId: 1539, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve çamurluk dipler",
@@ -12551,7 +12551,7 @@ const SPECIES_DB = {
         noteEn: "Has a weaker flavor compared to other gurnards.", noteEl: "Has a weaker flavor compared to other gurnards.", noteEs: "Has a weaker flavor compared to other gurnards."
     },
     "uk_ray_spotted": {
-        name: "Benekli Vatoz (UK)", nameEn: "Spotted Ray", nameEl: "Spotted Ray", nameEs: "Spotted Ray", icon: "🐟", scientificName: "Raja montagui",
+        name: "Benekli Vatoz (UK)", nameEn: "Spotted Ray", nameEl: "Ράγια στικτή", nameEs: "Raya pintada", icon: "🐟", scientificName: "Raja montagui",
         photoId: 1540, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ kumluk alanlar",
@@ -12565,7 +12565,7 @@ const SPECIES_DB = {
         noteEn: "Spots do not reach the very edges of the wings (unlike the Blonde ray).", noteEl: "Spots do not reach the very edges of the wings (unlike the Blonde ray).", noteEs: "Spots do not reach the very edges of the wings (unlike the Blonde ray)."
     },
     "uk_ray_blonde": {
-        name: "Sarışın Vatoz (UK)", nameEn: "Blonde Ray", nameEl: "Ξανθή Ακτίνα", nameEs: "Blonde Ray", icon: "🐟", scientificName: "Raja brachyura",
+        name: "Sarışın Vatoz (UK)", nameEn: "Blonde Ray", nameEl: "Ξανθή Ακτίνα", nameEs: "Raya boca de rosa", icon: "🐟", scientificName: "Raja brachyura",
         photoId: 1541, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk yamaçlar",
@@ -12579,7 +12579,7 @@ const SPECIES_DB = {
         noteEn: "One of the largest ray species in the UK. Very powerful.", noteEl: "One of the largest ray species in the UK. Very powerful.", noteEs: "One of the largest ray species in the UK. Very powerful."
     },
     "uk_starry_smooth_hound": {
-        name: "Yıldızlı Camgöz (UK)", nameEn: "Starry Smooth-hound", nameEl: "Έναστρο Smooth-Hound", nameEs: "Starry Smooth-hound", icon: "🦈", scientificName: "Mustelus asterias",
+        name: "Yıldızlı Camgöz (UK)", nameEn: "Starry Smooth-hound", nameEl: "Γαλέος αστερίας", nameEs: "Musola estrellada", icon: "🦈", scientificName: "Mustelus asterias",
         photoId: 1542, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ çakıllı kıyılar",
@@ -12593,7 +12593,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by small white spots on its body. Primary bait is crab.", noteEl: "Recognized by small white spots on its body. Primary bait is crab.", noteEs: "Recognized by small white spots on its body. Primary bait is crab."
     },
     "uk_ray_small_eyed": {
-        name: "Küçük Gözlü Vatoz (UK)", nameEn: "Small-eyed Ray", nameEl: "Μικρόφθαλμος Ρέι", nameEs: "Small-eyed Ray", icon: "🐟", scientificName: "Raja microocellata",
+        name: "Küçük Gözlü Vatoz (UK)", nameEn: "Small-eyed Ray", nameEl: "Μικρόφθαλμος Ρέι", nameEs: "Raya ojos pequeños", icon: "🐟", scientificName: "Raja microocellata",
         photoId: 1543, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ kumluk sörf bölgeleri",
@@ -12607,7 +12607,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by parallel lines on its body. Popular with surf anglers.", noteEl: "Recognized by parallel lines on its body. Popular with surf anglers.", noteEs: "Recognized by parallel lines on its body. Popular with surf anglers."
     },
     "uk_ray_undulate": {
-        name: "Dalgalı Vatoz (UK)", nameEn: "Undulate Ray", nameEl: "Κυματιστή Ακτίνα", nameEs: "Undulate Ray", icon: "🐟", scientificName: "Raja undulata",
+        name: "Dalgalı Vatoz (UK)", nameEn: "Undulate Ray", nameEl: "Κυματιστή Ακτίνα", nameEs: "Raya mosaica", icon: "🐟", scientificName: "Raja undulata",
         photoId: 1544, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk ve çakıllıklar",
@@ -12621,7 +12621,7 @@ const SPECIES_DB = {
         noteEn: "One of the most beautiful rays, named for the wavy patterns on its body.", noteEl: "One of the most beautiful rays, named for the wavy patterns on its body.", noteEs: "One of the most beautiful rays, named for the wavy patterns on its body."
     },
     "uk_witch": {
-        name: "Cadı Balığı / Witch", nameEn: "Witch Flounder", nameEl: "Μαγισσίδα", nameEs: "Witch Flounder", icon: "🐟", scientificName: "Glyptocephalus cynoglossus",
+        name: "Cadı Balığı / Witch", nameEn: "Witch Flounder", nameEl: "Μαγισσίδα", nameEs: "Mendo", icon: "🐟", scientificName: "Glyptocephalus cynoglossus",
         photoId: 1545, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin çamurluk dipler",
@@ -12635,7 +12635,7 @@ const SPECIES_DB = {
         noteEn: "Has a very thin body and a small mouth.", noteEl: "Has a very thin body and a small mouth.", noteEs: "Has a very thin body and a small mouth."
     },
     "uk_poor_cod": {
-        name: "Küçük Mezgit (UK) / Poor Cod", nameEn: "Poor Cod", nameEl: "Κακή Cod", nameEs: "Poor Cod", icon: "🐟", scientificName: "Trisopterus minutus",
+        name: "Küçük Mezgit (UK) / Poor Cod", nameEn: "Poor Cod", nameEl: "Κακή Cod", nameEs: "Capellán", icon: "🐟", scientificName: "Trisopterus minutus",
         photoId: 1546, category: "DIP",
         
         huntingMode: "chemosensory",peakHours: "DAY", peakHoursDesc: "Gündüz derin kumluk ve çamurluklar",
@@ -12649,7 +12649,7 @@ const SPECIES_DB = {
         noteEn: "Very similar to Pouting but smaller and more yellowish.", noteEl: "Very similar to Pouting but smaller and more yellowish.", noteEs: "Very similar to Pouting but smaller and more yellowish."
     },
     "uk_rockling": {
-        name: "Gelincik (Küçük) / Rockling", nameEn: "Shore Rockling", nameEl: "Shore Rockling", nameEs: "Shore Rockling", icon: "🐟", scientificName: "Gaidropsarus mediterraneus",
+        name: "Gelincik (Küçük) / Rockling", nameEn: "Shore Rockling", nameEl: "Γαϊδουρόψαρο", nameEs: "Lota de roca", icon: "🐟", scientificName: "Gaidropsarus mediterraneus",
         photoId: 1547, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece sığ kayalık havuzlar",
@@ -12663,7 +12663,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by barbels under its chin. Hides among rocks.", noteEl: "Recognized by barbels under its chin. Hides among rocks.", noteEs: "Recognized by barbels under its chin. Hides among rocks."
     },
     "uk_wrasse_cuckoo": {
-        name: "Guguk Çırçırı / Cuckoo Wrasse", nameEn: "Cuckoo Wrasse", nameEl: "Κούκος Wrasse", nameEs: "Cuckoo Wrasse", icon: "🐟", scientificName: "Labrus mixtus",
+        name: "Guguk Çırçırı / Cuckoo Wrasse", nameEn: "Cuckoo Wrasse", nameEl: "Χειλού κούκος", nameEs: "Gallano", icon: "🐟", scientificName: "Labrus mixtus",
         photoId: 1548, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz derin resifler",
@@ -12677,7 +12677,7 @@ const SPECIES_DB = {
         noteEn: "One of the most colorful fish in UK waters. Males are bright blue and orange.", noteEl: "One of the most colorful fish in UK waters. Males are bright blue and orange.", noteEs: "One of the most colorful fish in UK waters. Males are bright blue and orange."
     },
     "uk_wrasse_corkwing": {
-        name: "Mantar Kanat Çırçırı", nameEn: "Corkwing Wrasse", nameEl: "Corkwing Wrasse", nameEs: "Corkwing Wrasse", icon: "🐟", scientificName: "Symphodus melops",
+        name: "Mantar Kanat Çırçırı", nameEn: "Corkwing Wrasse", nameEl: "Χειλού μελόπς", nameEs: "Porredana", icon: "🐟", scientificName: "Symphodus melops",
         photoId: 1549, category: "KAYALIK",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz yosunlu sığ kayalıklar",
@@ -12691,7 +12691,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by a black spot on the tail base. A great target for LRF.", noteEl: "Recognized by a black spot on the tail base. A great target for LRF.", noteEs: "Recognized by a black spot on the tail base. A great target for LRF."
     },
     "usne_white_hake": {
-        name: "Beyaz Mezgit / White Hake", nameEn: "White Hake", nameEl: "Λευκός Μερλούκος", nameEs: "White Hake", icon: "🐟", scientificName: "Urophycis tenuis",
+        name: "Beyaz Mezgit / White Hake", nameEn: "White Hake", nameEl: "Λευκός Μερλούκος", nameEs: "Locha blanca", icon: "🐟", scientificName: "Urophycis tenuis",
         photoId: 1624, category: "DIP",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece derin çamurluk dipler",
@@ -12705,7 +12705,7 @@ const SPECIES_DB = {
         noteEn: "Can reach much larger sizes than the Silver Hake (Whiting).", noteEl: "Can reach much larger sizes than the Silver Hake (Whiting).", noteEs: "Can reach much larger sizes than the Silver Hake (Whiting)."
     },
     "usne_red_hake": {
-        name: "Kırmızı Mezgit / Red Hake", nameEn: "Red Hake (Ling)", nameEl: "Red Hake (Ling)", nameEs: "Red Hake (Ling)", icon: "🐟", scientificName: "Urophycis chuss",
+        name: "Kırmızı Mezgit / Red Hake", nameEn: "Red Hake (Ling)", nameEl: "Μπακαλιάρος κόκκινος", nameEs: "Locha roja", icon: "🐟", scientificName: "Urophycis chuss",
         photoId: 1625, category: "DIP",
         
         huntingMode: "chemosensory",peakHours: "NIGHT", peakHoursDesc: "Gece derin kayalık ve çamurluklar",
@@ -12719,7 +12719,7 @@ const SPECIES_DB = {
         noteEn: "Commonly referred to as 'Ling'. Features a long filament on the first dorsal fin.", noteEl: "Commonly referred to as 'Ling'. Features a long filament on the first dorsal fin.", noteEs: "Commonly referred to as 'Ling'. Features a long filament on the first dorsal fin."
     },
     "usne_windowpane": {
-        name: "Pencere Camı Balığı", nameEn: "Windowpane Flounder", nameEl: "Πλαίσιο παραθύρου", nameEs: "Windowpane Flounder", icon: "🐟", scientificName: "Scophthalmus aquosus",
+        name: "Pencere Camı Balığı", nameEn: "Windowpane Flounder", nameEl: "Πλαίσιο παραθύρου", nameEs: "Rodaballo ventana", icon: "🐟", scientificName: "Scophthalmus aquosus",
         photoId: 1627, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluk alanlar",
@@ -12733,7 +12733,7 @@ const SPECIES_DB = {
         noteEn: "So thin that you can almost see through it when held up to the light.", noteEl: "So thin that you can almost see through it when held up to the light.", noteEs: "So thin that you can almost see through it when held up to the light."
     },
     "usne_monkfish": {
-        name: "Fener Balığı (US NE)", nameEn: "Monkfish (Goosefish)", nameEl: "Μοναχόψαρο (Χήνα)", nameEs: "Monkfish (Goosefish)", icon: "🐟", scientificName: "Lophius americanus",
+        name: "Fener Balığı (US NE)", nameEn: "Monkfish (Goosefish)", nameEl: "Μοναχόψαρο (Χήνα)", nameEs: "Rape americano", icon: "🐟", scientificName: "Lophius americanus",
         photoId: 1628, category: "DIP",
         
         huntingMode: "ambush",peakHours: "NIGHT", peakHoursDesc: "Gece derin deniz tabanı",
@@ -12747,7 +12747,7 @@ const SPECIES_DB = {
         noteEn: "Can swallow fish nearly its own size thanks to its massive mouth and stomach.", noteEl: "Can swallow fish nearly its own size thanks to its massive mouth and stomach.", noteEs: "Can swallow fish nearly its own size thanks to its massive mouth and stomach."
     },
     "usne_sea_robin": {
-        name: "Deniz Kırlangıcı (US NE)", nameEn: "Northern Sea Robin", nameEl: "Βόρεια Θάλασσα Robin", nameEs: "Northern Sea Robin", icon: "🐟", scientificName: "Prionotus carolinus",
+        name: "Deniz Kırlangıcı (US NE)", nameEn: "Northern Sea Robin", nameEl: "Καπόνι βόρειο", nameEs: "Rubio del norte", icon: "🐟", scientificName: "Prionotus carolinus",
         photoId: 1629, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz kumluk alanlar",
@@ -12761,7 +12761,7 @@ const SPECIES_DB = {
         noteEn: "Features wing-like pectoral fins and 'legs' used for walking on the bottom.", noteEl: "Features wing-like pectoral fins and 'legs' used for walking on the bottom.", noteEs: "Features wing-like pectoral fins and 'legs' used for walking on the bottom."
     },
     "usne_ocean_pout": {
-        name: "Okyanus Pout", nameEn: "Ocean Pout", nameEl: "Ocean Pout", nameEs: "Ocean Pout", icon: "🐟", scientificName: "Zoarces americanus",
+        name: "Okyanus Pout", nameEn: "Ocean Pout", nameEl: "Λυκόψαρο αμερικανικό", nameEs: "Anguila lobo americana", icon: "🐟", scientificName: "Zoarces americanus",
         photoId: 1630, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz kayalık ve engebeli dipler",
@@ -12775,7 +12775,7 @@ const SPECIES_DB = {
         noteEn: "Has an eel-like body and thick lips. Carries antifreeze proteins in its blood.", noteEl: "Has an eel-like body and thick lips. Carries antifreeze proteins in its blood.", noteEs: "Has an eel-like body and thick lips. Carries antifreeze proteins in its blood."
     },
     "usne_spanish_mackerel": {
-        name: "İspanyol Uskumrusu (US NE)", nameEn: "Spanish Mackerel", nameEl: "Ισπανικό σκουμπρί", nameEs: "Spanish Mackerel", icon: "🐟", scientificName: "Scomberomorus maculatus",
+        name: "İspanyol Uskumrusu (US NE)", nameEn: "Spanish Mackerel", nameEl: "Ισπανικό σκουμπρί", nameEs: "Carite atlántico", icon: "🐟", scientificName: "Scomberomorus maculatus",
         photoId: 1631, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz yüzeydeki yem hareketleri",
@@ -12789,7 +12789,7 @@ const SPECIES_DB = {
         noteEn: "Pushes as far north as US NE during the hottest summer months. Very fast.", noteEl: "Pushes as far north as US NE during the hottest summer months. Very fast.", noteEs: "Pushes as far north as US NE during the hottest summer months. Very fast."
     },
     "usne_cobia": {
-        name: "Kobya / Cobia (US NE)", nameEn: "Cobia", nameEl: "Cobia", nameEs: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
+        name: "Kobya / Cobia (US NE)", nameEn: "Cobia", nameEl: "Κόμπια", nameEs: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
         photoId: 1632, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz şamandıralar ve yapı çevreleri",
@@ -12803,7 +12803,7 @@ const SPECIES_DB = {
         noteEn: "Known for its shark-like swimming style. Seen in southern NE in summer.", noteEl: "Known for its shark-like swimming style. Seen in southern NE in summer.", noteEs: "Known for its shark-like swimming style. Seen in southern NE in summer."
     },
     "usne_sheepshead": {
-        name: "Koyunbaş Balığı", nameEn: "Sheepshead", nameEl: "Προβατοκέφαλος", nameEs: "Sheepshead", icon: "🐟", scientificName: "Archosargus probatocephalus",
+        name: "Koyunbaş Balığı", nameEn: "Sheepshead", nameEl: "Προβατοκέφαλος", nameEs: "Sargo chopa", icon: "🐟", scientificName: "Archosargus probatocephalus",
         photoId: 1633, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz köprü ayakları ve midyeli kayalıklar",
@@ -12817,7 +12817,7 @@ const SPECIES_DB = {
         noteEn: "Uses its human-like teeth to crush mussel and crab shells.", noteEl: "Uses its human-like teeth to crush mussel and crab shells.", noteEs: "Uses its human-like teeth to crush mussel and crab shells."
     },
     "usne_red_drum": {
-        name: "Kırmızı Davul Balığı / Red Drum", nameEn: "Red Drum (Redfish)", nameEl: "Red Drum (Κοκκινόψαρο)", nameEs: "Red Drum (Redfish)", icon: "🐟", scientificName: "Sciaenops ocellatus",
+        name: "Kırmızı Davul Balığı / Red Drum", nameEn: "Red Drum (Redfish)", nameEl: "Κορβίνα κόκκινη", nameEs: "Corvinón ocelado", icon: "🐟", scientificName: "Sciaenops ocellatus",
         photoId: 1634, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kumluklar ve sörf bölgeleri",
@@ -12831,7 +12831,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by a black spot on its tail base. 'Bull Reds' run in southern NE in fall.", noteEl: "Recognized by a black spot on its tail base. 'Bull Reds' run in southern NE in fall.", noteEs: "Recognized by a black spot on its tail base. 'Bull Reds' run in southern NE in fall."
     },
     "usne_black_drum": {
-        name: "Siyah Davul Balığı / Black Drum", nameEn: "Black Drum", nameEl: "Μαύρο τύμπανο", nameEs: "Black Drum", icon: "🐟", scientificName: "Pogonias cromis",
+        name: "Siyah Davul Balığı / Black Drum", nameEn: "Black Drum", nameEl: "Μαύρο τύμπανο", nameEs: "Corvinón negro", icon: "🐟", scientificName: "Pogonias cromis",
         photoId: 1635, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece köprü ayakları ve derin çukurlar",
@@ -12845,7 +12845,7 @@ const SPECIES_DB = {
         noteEn: "Can reach very large sizes. Makes 'drumming' sounds by vibrating its swim bladder.", noteEl: "Can reach very large sizes. Makes 'drumming' sounds by vibrating its swim bladder.", noteEs: "Can reach very large sizes. Makes 'drumming' sounds by vibrating its swim bladder."
     },
     "usne_spot": {
-        name: "Lekeli Davul / Spot", nameEn: "Spot", nameEl: "Σημείο", nameEs: "Spot", icon: "🐟", scientificName: "Leiostomus xanthurus",
+        name: "Lekeli Davul / Spot", nameEn: "Spot", nameEl: "Σημείο", nameEs: "Verrugato spot", icon: "🐟", scientificName: "Leiostomus xanthurus",
         photoId: 1636, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ iskeleler ve plajlar",
@@ -12859,7 +12859,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by a distinct spot on its shoulder. A very tasty small fish.", noteEl: "Recognized by a distinct spot on its shoulder. A very tasty small fish.", noteEs: "Recognized by a distinct spot on its shoulder. A very tasty small fish."
     },
     "usne_jack_crevalle": {
-        name: "Kriko Balığı / Jack Crevalle", nameEn: "Jack Crevalle", nameEl: "Τζακ Κρεβάλ", nameEs: "Jack Crevalle", icon: "🐟", scientificName: "Caranx hippos",
+        name: "Kriko Balığı / Jack Crevalle", nameEn: "Jack Crevalle", nameEl: "Τζακ Κρεβάλ", nameEs: "Jurel común", icon: "🐟", scientificName: "Caranx hippos",
         photoId: 1637, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz yüzeydeki patlamalar",
@@ -12873,7 +12873,7 @@ const SPECIES_DB = {
         noteEn: "One of the most aggressive fighters in the sea. Rarely visits US NE in summer.", noteEl: "One of the most aggressive fighters in the sea. Rarely visits US NE in summer.", noteEs: "One of the most aggressive fighters in the sea. Rarely visits US NE in summer."
     },
     "usne_tarpon": {
-        name: "Tarpon (US NE)", nameEn: "Tarpon", nameEl: "Tarpon", nameEs: "Tarpon", icon: "🐟", scientificName: "Megalops atlanticus",
+        name: "Tarpon (US NE)", nameEn: "Tarpon", nameEl: "Ταρπόν", nameEs: "Tarpón", icon: "🐟", scientificName: "Megalops atlanticus",
         photoId: 1638, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ haliçler",
@@ -12887,7 +12887,7 @@ const SPECIES_DB = {
         noteEn: "Known as the Silver King. Very rarely reaches as far north as NJ/NY.", noteEl: "Known as the Silver King. Very rarely reaches as far north as NJ/NY.", noteEs: "Known as the Silver King. Very rarely reaches as far north as NJ/NY."
     },
     "usne_yellowtail_flounder": {
-        name: "Sarı Kuyruk Pisi", nameEn: "Yellowtail Flounder", nameEl: "Χαλόνι Yellowtail", nameEs: "Yellowtail Flounder", icon: "🐟", scientificName: "Limanda ferruginea",
+        name: "Sarı Kuyruk Pisi", nameEn: "Yellowtail Flounder", nameEl: "Χωματίδα κιτρινόουρη", nameEs: "Limanda de cola amarilla", icon: "🐟", scientificName: "Limanda ferruginea",
         photoId: 1639, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz orta derinlikteki kumluklar",
@@ -12901,7 +12901,7 @@ const SPECIES_DB = {
         noteEn: "Easily distinguished from other flatfish by its yellow fins and tail.", noteEl: "Easily distinguished from other flatfish by its yellow fins and tail.", noteEs: "Easily distinguished from other flatfish by its yellow fins and tail."
     },
     "usne_witch_flounder": {
-        name: "Cadı Dil Balığı (US NE)", nameEn: "Witch Flounder", nameEl: "Μαγισσίδα", nameEs: "Witch Flounder", icon: "🐟", scientificName: "Glyptocephalus cynoglossus",
+        name: "Cadı Dil Balığı (US NE)", nameEn: "Witch Flounder", nameEl: "Μαγισσίδα", nameEs: "Mendo", icon: "🐟", scientificName: "Glyptocephalus cynoglossus",
         photoId: 1640, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin çamurluk dipler",
@@ -12915,7 +12915,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by its grey-brown color and very thin structure.", noteEl: "Recognized by its grey-brown color and very thin structure.", noteEs: "Recognized by its grey-brown color and very thin structure."
     },
     "usne_american_plaice": {
-        name: "Amerikan Pisisi", nameEn: "American Plaice", nameEl: "Αμερικανική Χωματίδα", nameEs: "American Plaice", icon: "🐟", scientificName: "Hippoglossoides platessoides",
+        name: "Amerikan Pisisi", nameEn: "American Plaice", nameEl: "Αμερικανική Χωματίδα", nameEs: "Platija americana", icon: "🐟", scientificName: "Hippoglossoides platessoides",
         photoId: 1641, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "DAY", peakHoursDesc: "Gündüz derin soğuk sular",
@@ -12929,7 +12929,7 @@ const SPECIES_DB = {
         noteEn: "Commonly referred to as 'Dab'. Prefers extremely cold waters.", noteEl: "Commonly referred to as 'Dab'. Prefers extremely cold waters.", noteEs: "Commonly referred to as 'Dab'. Prefiere extremely cold waters."
     },
     "usne_halibut": {
-        name: "Atlantik Halibut (US NE)", nameEn: "Atlantic Halibut", nameEl: "Ατλαντικός ιππόγλωσσος", nameEs: "Atlantic Halibut", icon: "🐟", scientificName: "Hippoglossus hippoglossus",
+        name: "Atlantik Halibut (US NE)", nameEn: "Atlantic Halibut", nameEl: "Ατλαντικός ιππόγλωσσος", nameEs: "Fletán atlántico", icon: "🐟", scientificName: "Hippoglossus hippoglossus",
         photoId: 1642, category: "DIP",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin kanyonlar",
@@ -12943,7 +12943,7 @@ const SPECIES_DB = {
         noteEn: "The ultimate prize of US NE deep-sea fishing.", noteEl: "The ultimate prize of US NE deep-sea fishing.", noteEs: "The ultimate prize of US NE deep-sea fishing."
     },
     "usne_mahimahi": {
-        name: "Mahi Mahi (US NE)", nameEn: "Mahi Mahi (Dolphin)", nameEl: "Mahi Mahi (Dolphin)", nameEs: "Mahi Mahi (Dolphin)", icon: "🐟", scientificName: "Coryphaena hippurus",
+        name: "Mahi Mahi (US NE)", nameEn: "Mahi Mahi (Dolphin)", nameEl: "Κυνηγός", nameEs: "Dorado", icon: "🐟", scientificName: "Coryphaena hippurus",
         photoId: 1643, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz yüzen yosunlar ve şamandıralar",
@@ -12957,7 +12957,7 @@ const SPECIES_DB = {
         noteEn: "Approaches US NE shores in summer along with warm currents (Gulf Stream).", noteEl: "Approaches US NE shores in summer along with warm currents (Gulf Stream).", noteEs: "Approaches US NE shores in summer along with warm currents (Gulf Stream)."
     },
     "usne_spotted_seatrout": {
-        name: "Benekli Deniz Alası (US)", nameEn: "Spotted Seatrout", nameEl: "Spotted Seatrout", nameEs: "Spotted Seatrout", icon: "🐟", scientificName: "Cynoscion nebulosus",
+        name: "Benekli Deniz Alası (US)", nameEn: "Spotted Seatrout", nameEl: "Κορβίνα στικτή", nameEs: "Corvinata pinta", icon: "🐟", scientificName: "Cynoscion nebulosus",
         photoId: 1644, category: "KIYI_AVCI",
         huntingMode: "chemosensory",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ otluk alanlar",
@@ -12971,7 +12971,7 @@ const SPECIES_DB = {
         noteEn: "Related to the Weakfish. Recognized by distinct black spots on its back.", noteEl: "Related to the Weakfish. Recognized by distinct black spots on its back.", noteEs: "Related to the Weakfish. Recognized by distinct black spots on its back."
     },
     "usne_blue_runner": {
-        name: "Mavi Koşucu / Blue Runner", nameEn: "Blue Runner", nameEl: "Blue Runner", nameEs: "Blue Runner", icon: "🐟", scientificName: "Caranx crysos",
+        name: "Mavi Koşucu / Blue Runner", nameEn: "Blue Runner", nameEl: "Κοκάλι", nameEs: "Cojinúa negra", icon: "🐟", scientificName: "Caranx crysos",
         photoId: 1645, category: "SÜRÜ",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz iskeleler ve şamandıralar",
@@ -12985,7 +12985,7 @@ const SPECIES_DB = {
         noteEn: "Commonly used as bait for larger predators. Very hardy.", noteEl: "Commonly used as bait for larger predators. Very hardy.", noteEs: "Commonly used as bait for larger predators. Very hardy."
     },
     "usne_sculpin": {
-        name: "Uzunboynuz İskorpit (US)", nameEn: "Longhorn Sculpin", nameEl: "Longhorn Sculpin", nameEs: "Longhorn Sculpin", icon: "🐟", scientificName: "Myoxocephalus octodecemspinosus",
+        name: "Uzunboynuz İskorpit (US)", nameEn: "Longhorn Sculpin", nameEl: "Σκορπιός μακρύκερως", nameEs: "Cabote de cuerno largo", icon: "🐟", scientificName: "Myoxocephalus octodecemspinosus",
         photoId: 1646, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz engebeli ve kayalık dipler",
@@ -12999,7 +12999,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by very long, sharp spines on the operculum. Handle with care.", noteEl: "Recognized by very long, sharp spines on the operculum. Handle with care.", noteEs: "Recognized by very long, sharp spines on the operculum. Handle with care."
     },
     "usne_sea_raven": {
-        name: "Deniz Kuzgunu / Sea Raven", nameEn: "Sea Raven", nameEl: "Sea Raven", nameEs: "Sea Raven", icon: "🐟", scientificName: "Hemitripterus americanus",
+        name: "Deniz Kuzgunu / Sea Raven", nameEn: "Sea Raven", nameEl: "Θαλάσσιο κοράκι", nameEs: "Cuervo de mar", icon: "🐟", scientificName: "Hemitripterus americanus",
         photoId: 1647, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz derin kayalık alanlar",
@@ -13013,7 +13013,7 @@ const SPECIES_DB = {
         noteEn: "Recognized by fleshy protrusions on its body and rough skin. A species of sculpin.", noteEl: "Recognized by fleshy protrusions on its body and rough skin. A species of sculpin.", noteEs: "Recognized by fleshy protrusions on its body and rough skin. A species of sculpin."
     },
     "usne_silver_perch": {
-        name: "Gümüş Levrek (US NE)", nameEn: "Silver Perch", nameEl: "Ασημένια Πέρκα", nameEs: "Silver Perch", icon: "🐟", scientificName: "Bairdiella chrysoura",
+        name: "Gümüş Levrek (US NE)", nameEn: "Silver Perch", nameEl: "Ασημένια Πέρκα", nameEs: "Corvineta plateada", icon: "🐟", scientificName: "Bairdiella chrysoura",
         photoId: 1648, category: "KUM_TABAN",
         huntingMode: "chemosensory",
         peakHours: "NIGHT", peakHoursDesc: "Gece sığ iskeleler ve kanallar",
@@ -13027,7 +13027,7 @@ const SPECIES_DB = {
         noteEn: "A small drum species. Often gathers under lighted piers at night.", noteEl: "A small drum species. Often gathers under lighted piers at night.", noteEs: "A small drum species. Often gathers under lighted piers at night."
     },
     "usne_sennet": {
-        name: "Kuzey Baraküdası / Sennet", nameEn: "Northern Sennet", nameEl: "Βόρειος Sennet", nameEs: "Northern Sennet", icon: "🐟", scientificName: "Sphyraena borealis",
+        name: "Kuzey Baraküdası / Sennet", nameEn: "Northern Sennet", nameEl: "Λούτσος βόρειος", nameEs: "Espetón del norte", icon: "🐟", scientificName: "Sphyraena borealis",
         photoId: 1649, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sığ kıyı suları",
@@ -13041,7 +13041,7 @@ const SPECIES_DB = {
         noteEn: "The smaller cousin of the Great Barracuda. Usually travels in schools.", noteEl: "The smaller cousin of the Great Barracuda. Usually travels in schools.", noteEs: "The smaller cousin of the Great Barracuda. Usually travels in schools."
     },
     "usne_king_mackerel": {
-        name: "Kral Uskumru (US NE)", nameEn: "King Mackerel", nameEl: "Βασιλιάς Σκουμπρί", nameEs: "King Mackerel", icon: "🐟", scientificName: "Scomberomorus cavalla",
+        name: "Kral Uskumru (US NE)", nameEn: "King Mackerel", nameEl: "Βασιλιάς Σκουμπρί", nameEs: "Carite lucio", icon: "🐟", scientificName: "Scomberomorus cavalla",
         photoId: 1650, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz açık deniz yamaçları",
