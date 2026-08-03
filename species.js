@@ -97,7 +97,7 @@ const SPECIES_DB = {
         currentPref: 0.3,
         salinityPref: "ANY",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 1, opt: 8, max: 100 },
+        depth: { min: 0, opt: 8, max: 100 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
         advice: {
             bait: "Canlı Teke (Gece), Yengeç",
             lure: "Silikon Karides (LRF)",
@@ -136,7 +136,7 @@ const SPECIES_DB = {
         // türü olduğu için doğru karşılığı "HIGH".
         salinityPref: "HIGH",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 1, opt: 15, max: 90 },
+        depth: { min: 0, opt: 15, max: 90 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
         advice: {
             bait: "Karides, Midye, Boru Kurdu, Küçük Kaya Kurdu",
             lure: "Micro Jig, Silikon Yemler",
@@ -170,7 +170,7 @@ const SPECIES_DB = {
         currentPref: 0.5,
         salinityPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
-        depth: { min: 1, opt: 8, max: 150 },
+        depth: { min: 0, opt: 8, max: 150 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
         advice: {
             bait: "Boru Kurdu, Sülünez, Sardalya",
             lure: "Silikon Yemler",
@@ -359,7 +359,7 @@ const SPECIES_DB = {
         currentPref: 0.5,
         salinityPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 1, opt: 10, max: 50 },
+        depth: { min: 0, opt: 10, max: 50 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
         advice: { bait: "Karides, Yengeç, Midye", lure: "LRF Silikon, Micro Jig", rig: "Dip Takımı, LRF", hook: "4 - 1 Güçlü", baitEn: "Shrimp, crab, mussel", baitEl: "Shrimp, crab, mussel", baitEs: "Camarón, Cangrejo, Mejillón", lureEn: "LRF soft plastic, micro jig", lureEl: "LRF soft plastic, micro jig", lureEs: "LRF Vinilo, Micro jig", rigEn: "Bottom rig, LRF", rigEl: "Bottom rig, LRF", rigEs: "Aparejo de fondo, LRF", hookEn: "4 - 1 strong", hookEl: "4 - 1 strong", hookEs: "4 - 1 Fuerte" },
         legalSize: "Yasal limit yok", legalSizeEn: "No legal limit", legalSizeEs: "Sin límite legal", legalSizeEl: "Χωρίς νόμιμο όριο",
         note: "Kayalık ve yosunluk bölgelerde yaşayan güçlü bir dip balığıdır. Kabukluları kırabilecek güçlü çenesi vardır.",
@@ -507,7 +507,7 @@ const SPECIES_DB = {
         planktonPref: "MEDIUM",
         moonPref: "bright",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
-        depth: { min: 1, opt: 8, max: 40 },
+        depth: { min: 0, opt: 8, max: 40 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
         advice: { bait: "Kurt, Fleto Balık", lure: "İpek (Turuncu)", rig: "Şamandıralı Top, İpek", hook: "6 - 10 İnce", baitEn: "Worm, fish strip", baitEl: "Worm, fish strip", baitEs: "Gusano, Tira de pescado", lureEn: "Silk feather (orange)", lureEl: "Silk feather (orange)", lureEs: "Silk feather (orange)", rigEn: "Float with bobber, silk", rigEl: "Float with bobber, silk", rigEs: "Float with bobber, silk", hookEn: "6 - 10 fine wire", hookEl: "6 - 10 fine wire", hookEs: "6 - 10 Alambre fino" },
         legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Güneşli havalarda yüzeyde. Berrak su sever.",
@@ -679,7 +679,7 @@ const SPECIES_DB = {
         salinityPref: "MEDIUM",
         planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 1, opt: 15, max: 40 },
+        depth: { min: 0, opt: 15, max: 40 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
         advice: { bait: "Ekmek, Midye, Kurt", lure: "Micro Jig", rig: "Şamandıralı, LRF", hook: "8 - 12", baitEn: "Bread, mussel, worm", baitEl: "Bread, mussel, worm", baitEs: "Pan, Mejillón, Gusano", lureEn: "Micro jig", lureEl: "Micro jig", lureEs: "Micro jig", rigEn: "Float, LRF", rigEl: "Float, LRF", rigEs: "Float, LRF", hookEn: "8 - 12", hookEl: "8 - 12", hookEs: "8 - 12" },
         legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Kuyruk sapındaki siyah benekle tanınır. Kayalık sever.",
@@ -719,7 +719,7 @@ const SPECIES_DB = {
         currentPref: 0.4,
         salinityPref: "ANY",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 1, opt: 15, max: 60 },
+        depth: { min: 0, opt: 15, max: 60 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
         advice: { bait: "Yengeç, Midye, Mamun", lure: "Silikon Karides", rig: "Şeytan Oltası, Dip Takımı", hook: "2 - 6", baitEn: "Crab, mussel, sand smelt", baitEl: "Crab, mussel, sand smelt", baitEs: "Cangrejo, Mejillón, Galera", lureEn: "Soft plastic shrimp", lureEl: "Soft plastic shrimp", lureEs: "Vinilo Camarón", rigEn: "Paternoster, bottom rig", rigEl: "Paternoster, bottom rig", rigEs: "Paternoster, Aparejo de fondo", hookEn: "2 - 6", hookEl: "2 - 6", hookEs: "2 - 6" },
         legalSize: "18 cm", legalSizeEn: "18 cm", legalSizeEs: "18 cm", legalSizeEl: "18 εκ.",
         note: "Sivri burunlu karagöz. Köpüklü su sever.",
@@ -740,7 +740,7 @@ const SPECIES_DB = {
         salinityPref: "MEDIUM",
         planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
-        depth: { min: 1, opt: 15, max: 50 },
+        depth: { min: 0, opt: 15, max: 50 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
         advice: { bait: "Midye, Yengeç, Mamun", lure: "Silikon", rig: "Şeytan Oltası, Dip", hook: "1 - 4", baitEn: "Mussel, crab, sand smelt", baitEl: "Mussel, crab, sand smelt", baitEs: "Mejillón, Cangrejo, Galera", lureEn: "Soft plastic", lureEl: "Soft plastic", lureEs: "Vinilo", rigEn: "Paternoster, bottom", rigEl: "Paternoster, bottom", rigEs: "Paternoster, bottom", hookEn: "1 - 4", hookEl: "1 - 4", hookEs: "1 - 4" },
         legalSize: "23 cm", legalSizeEn: "23 cm", legalSizeEs: "23 cm", legalSizeEl: "23 εκ.",
         note: "Karagözün büyük akrabası. Köpüklü, dalgalı su sever.",
@@ -950,7 +950,7 @@ const SPECIES_DB = {
         currentPref: 0.2,
         salinityPref: "MEDIUM",
         regions: ["MARMARA", "EGE", "AKDENİZ"],
-        depth: { min: 1, opt: 5, max: 15 },
+        depth: { min: 0, opt: 5, max: 15 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
         advice: { bait: "Ekmek, Yosun", lure: "Yok", rig: "Şamandıralı", hook: "10 - 14", baitEn: "Bread, seaweed", baitEl: "Bread, seaweed", baitEs: "Pan, seaweed", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Float rig", rigEl: "Float rig", rigEs: "Aparejo de flotador", hookEn: "10 - 14", hookEl: "10 - 14", hookEs: "10 - 14" },
         legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Otobur balık. Ekmekle kolay avlanır. Halüsinasyon yapabilir (dikkat!).",
@@ -1314,7 +1314,7 @@ const SPECIES_DB = {
         salinityPref: "HIGH",
         planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
-        depth: { min: 1, opt: 15, max: 50 },
+        depth: { min: 0, opt: 15, max: 50 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
         advice: { bait: "Ekmek, Kurt, Karides", lure: "Yok", rig: "Çapari, Dip", hook: "10 - 14", baitEn: "Bread, worm, shrimp", baitEl: "Bread, worm, shrimp", baitEs: "Pan, Gusano, Camarón", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Sabiki, bottom", rigEl: "Sabiki, bottom", rigEs: "Sabiki, bottom", hookEn: "10 - 14", hookEl: "10 - 14", hookEs: "10 - 14" },
         legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Sürü halinde gezer. Ekmek ile bereketle avlanır.",
@@ -1518,7 +1518,7 @@ const SPECIES_DB = {
         currentPref: 0.2,
         salinityPref: "MEDIUM",
         regions: ["KARADENİZ", "MARMARA"],
-        depth: { min: 1, opt: 15, max: 50 },
+        depth: { min: 0, opt: 15, max: 50 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
         advice: { bait: "Kurt, Midye", lure: "Yok", rig: "Dip", hook: "6 - 10", baitEn: "Worm, mussel", baitEl: "Worm, mussel", baitEs: "Gusano, Mejillón", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom", rigEl: "Bottom", rigEs: "Bottom", hookEn: "6 - 10", hookEl: "6 - 10", hookEs: "6 - 10" },
         legalSize: "20 cm", legalSizeEn: "20 cm", legalSizeEs: "20 cm", legalSizeEl: "20 εκ.",
         note: "Yassı balık. Kumluk diplerde gece avlanır.",
@@ -1770,7 +1770,7 @@ const SPECIES_DB = {
         currentPref: 0.3,
         salinityPref: "ANY",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
-        depth: { min: 1, opt: 3, max: 15 },
+        depth: { min: 0, opt: 3, max: 15 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
         advice: { bait: "Yok", lure: "Küçük İpek", rig: "Şamandıra", hook: "No:12-16", baitEn: "None", baitEl: "None", baitEs: "Ninguno", lureEn: "Small silk", lureEl: "Small silk", lureEs: "Small silk", rigEn: "Float", rigEl: "Float", rigEs: "Float", hookEn: "No:12-16", hookEl: "No:12-16", hookEs: "No:12-16" },
         legalSize: "-", legalSizeEn: "-", legalSizeEs: "-", legalSizeEl: "-",
         note: "Bitkilik alanlarda yaşar. Ekosistem göstergesidir.",
@@ -1791,7 +1791,7 @@ const SPECIES_DB = {
         currentPref: 0.3,
         salinityPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ"],
-        depth: { min: 1, opt: 10, max: 40 },
+        depth: { min: 0, opt: 10, max: 40 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
         advice: { bait: "Karides, Midye", lure: "LRF Silikon", rig: "LRF", hook: "No:8-12", baitEn: "Shrimp, mussel", baitEl: "Shrimp, mussel", baitEs: "Camarón, Mejillón", lureEn: "LRF soft plastic", lureEl: "LRF soft plastic", lureEs: "LRF Vinilo", rigEn: "LRF", rigEl: "LRF", rigEs: "LRF", hookEn: "No:8-12", hookEl: "No:8-12", hookEs: "No:8-12" },
         legalSize: "-", legalSizeEn: "-", legalSizeEs: "-", legalSizeEl: "-",
         note: "Kayalık bölgede küçük avcıdır.",
