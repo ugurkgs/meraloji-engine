@@ -1006,7 +1006,7 @@ const SPECIES_DB = {
         noteEn: "Can grow huge (2m+). Night predator. Prefers rocky crevices.", noteEl: "Can grow huge (2m+). Night predator. Prefers rocky crevices.", noteEs: "Can grow huge (2m+). Night predator. Prefiere rocky crevices."
     },
     "zurna": {
-        name: "İskarmoz (Zurna)", nameEn: "European Barracuda", nameEl: "Ευρωπαϊκό Barracuda", nameEs: "European Barracuda", icon: "🐟", scientificName: "Sphyraena sphyraena",
+        name: "İskarmoz" /* [2026-08-03] Sphyraena sphyraena Türkçe adı İSKARMOZ (deniz turnası). Kayıt anahtarı geçmişten "zurna" kaldı ama zurna balığı AYRI bir türdür (Scomberesox saurus, Scomberesocidae) ve bu veritabanında yok. Parantezle alias vermek iki türü karıştırıyordu. */, nameEn: "European Barracuda", nameEl: "Ευρωπαϊκό Barracuda", nameEs: "European Barracuda", icon: "🐟", scientificName: "Sphyraena sphyraena",
         photoId: 52,
         category: "AVCI",
         huntingMode: "visual",
