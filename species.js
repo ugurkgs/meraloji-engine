@@ -30,12 +30,18 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
         depth: { min: 0.5, opt: 5, max: 40 },
         advice: { bait: "Canlı Teke, Mamun, Boru Kurdu", lure: "WTD, 10-14cm Maket, Silikon", rig: "Gezer Kurşunlu Dip, Spin", hook: "1/0 - 4/0 Geniş Pala", baitEn: "Live sand smelt, lugworm, tube worm", baitEl: "Live sand smelt, lugworm, tube worm", baitEs: "Live Galera, Gusano de tubo, Gusano de tubo", lureEn: "Walk-the-dog, 10-14cm lure, soft plastic", lureEl: "Walk-the-dog, 10-14cm lure, soft plastic", lureEs: "Walk-the-dog, 10-14cm Señuelo, Vinilo", rigEn: "Running sinker bottom, spin", rigEl: "Running sinker bottom, spin", rigEs: "Plomo corrido bottom, Spinning", hookEn: "1/0 - 4/0 wide gape", hookEl: "1/0 - 4/0 wide gape", hookEs: "1/0 - 4/0 wide gape" },
-        legalSize: "25 cm",
+        legalSize: "25 cm", legalSizeEn: "25 cm", legalSizeEs: "25 cm", legalSizeEl: "25 εκ.",
         spawningBonus: {
             "MARMARA": { months: [11, 0, 1], bonus: 0.2, tempMin: 12, tempMax: 15 },
             "EGE": { months: [11, 0, 1], bonus: 0.15, tempMin: 14, tempMax: 17 },
             "AKDENİZ": { months: [10, 11, 0], bonus: 0.1, tempMin: 16, tempMax: 19 }
         },
+        // [TAŞINDI 2026-08-03] Bu iki kural server.js'te `key === "levrek"` diye gömülüydü.
+        // Köpüklü su: dalga kıyıyı dövüp suyu bulandırdığında levrek pusu avına geçer.
+        surfBonus: { waveMin: 0.7, clarityMax: 60, bonus: 2 },
+        // Baş-başa dalga: dalga kıyıya tam dik vurunca dip karışır — aynı mekanizmanın
+        // geliş açısına göre incelenmiş hâli. surfBonus ile birlikte tetiklenebilir.
+        headOnWaveBonus: { waveMin: 0.5, alignMin: 0.85, maxBonus: 1.5 },
         note: "Dalgalı ve köpüklü suyu sever ancak durgun sularda da av verir. Gürültüden kaçının. Vicdani limit 40 cm.", noteEn: "Prefers foamy water but also caught in calm seas. Avoid noise. Ethical limit 40cm.", noteEl: "Prefers foamy water but also caught in calm seas. Avoid noise. Ethical limit 40cm.", noteEs: "Prefiere foamy water but also caught in calm seas. Evitar noise. Ethical limit 40cm."
     },
     "lufer": {
@@ -54,6 +60,10 @@ const SPECIES_DB = {
             "MARMARA": { months: [9, 10, 11], bonus: 0.35 },
             "EGE": { months: [10, 11], bonus: 0.20 }
         },
+        // [TAŞINDI 2026-08-03] server.js'te `key === "lufer"` diye gömülüydü. Lodos/poyraz
+        // suyu karıştırıp yem balığını kıyıya sıkıştırır; lüfer bu koşulda vurur. Üst sınır
+        // fırtına başlangıcı: 35 kn üstünde zaten genel rüzgâr cezası devreye giriyor.
+        windBonus: { min: 15, max: 35, bonus: 2 },
         activity: "DAWN_DUSK",
         pressureSensitivity: 0.9,
         wavePref: 0.6, clarityPref: "CLEAR",
@@ -65,7 +75,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 1, opt: 8, max: 40 },
         advice: { bait: "Yaprak Zargana, İstavrit Fleto", lure: "Kaşık, Ağır Rapala, Poşhter", rig: "Uzun Olta, Mantarlı Çinekop, Hırsızlı Zoka", hook: "1 - 4/0 Uzun Pala + Çelik Tel", baitEn: "Garfish fillet, horse mackerel fillet", baitEl: "Garfish fillet, horse mackerel fillet", baitEs: "Garfish fillet, horse mackerel fillet", lureEn: "Metal spoon, heavy Rapala, feathered jig", lureEl: "Metal spoon, heavy Rapala, feathered jig", lureEs: "Cuchara metálica, Pesado Rapala, feathered Jig", rigEn: "Long trace, float rig, sabiki", rigEl: "Long trace, float rig, sabiki", rigEs: "Bajo de línea largo, Aparejo de flotador, Sabiki", hookEn: "1 - 4/0 long shank + wire trace", hookEl: "1 - 4/0 long shank + wire trace", hookEs: "1 - 4/0 Pata larga + wire trace" },
-        legalSize: "20 cm",
+        legalSize: "20 cm", legalSizeEn: "20 cm", legalSizeEs: "20 cm", legalSizeEl: "20 εκ.",
         note: "20cm altı (Defne Yaprağı) bırakın. Çelik tel zorunlu — keskin dişler misina keser.", noteEn: "Release fish under 20cm. Wire trace essential.", noteEl: "Release fish under 20cm. Wire trace essential.", noteEs: "Release fish under 20cm. Wire trace essential."
     },
     "eskina": {
@@ -98,7 +108,7 @@ const SPECIES_DB = {
             rigEn: "Float (Starlight), bottom rig", rigEl: "Float (Starlight), bottom rig", rigEs: "Flotador (Starlight), bottom rig",
             hookEn: "1 - 3", hookEl: "1 - 3", hookEs: "1 - 3"
         },
-        legalSize: "Asgari boy sınırı var — güncel tebliği kontrol edin (kayıttaki eski 25 cm değeri doğrulanamadı)",
+        legalSize: "Asgari boy sınırı var — güncel tebliği kontrol edin (kayıttaki eski 25 cm değeri doğrulanamadı)", legalSizeEn: "A minimum size applies — check the current regulation (the previous 25 cm entry could not be verified)", legalSizeEs: "Se aplica una talla mínima — consulte la normativa vigente (el valor anterior de 25 cm no pudo verificarse)", legalSizeEl: "Ισχύει ελάχιστο μέγεθος — ελέγξτε την ισχύουσα ρύθμιση (η παλαιότερη τιμή 25 εκ. δεν επιβεβαιώθηκε)",
         note: "Zifiri karanlıkta avlanır. Fosforlu şamandıra şart.",
         noteEn: "Hunts in pitch black darkness. Luminous float is essential.", noteEl: "Hunts in pitch black darkness. Luminous float is essential.", noteEs: "Analizando condiciones óptimas para esta especie en tiempo real."
     },
@@ -137,7 +147,7 @@ const SPECIES_DB = {
             rigEn: "Light bottom rig, LRF", rigEl: "Light bottom rig, LRF", rigEs: "Light bottom rig, LRF",
             hookEn: "4 - 8", hookEl: "4 - 8", hookEs: "4 - 8"
         },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Sadece gündüz av verir; gece kuma gömülür. Çok keskin dişleri vardır, misinayı kesebilir. Eti lezzetlidir. Kışın 150 m derinliğe kadar inebilir.",
         noteEn: "Diurnal species; buries in sand at night. Sharp teeth can cut lines. Delicious meat. Can descend to 150m in winter.", noteEl: "Diurnal species; buries in sand at night. Sharp teeth can cut lines. Delicious meat. Can descend to 150m in winter.", noteEs: "Analizando condiciones óptimas para esta especie en tiempo real."
     },
@@ -171,7 +181,7 @@ const SPECIES_DB = {
             rigEn: "Heavy bottom rig", rigEl: "Heavy bottom rig", rigEs: "Heavy bottom rig",
             hookEn: "1/0 - 2/0", hookEl: "1/0 - 2/0", hookEs: "1/0 - 2/0"
         },
-        legalSize: "45 cm (günlük 5 kg)",
+        legalSize: "45 cm (günlük 5 kg)", legalSizeEn: "45 cm (5 kg per day)", legalSizeEs: "45 cm (5 kg por día)", legalSizeEl: "45 εκ. (5 κιλά ημερησίως)",
         note: "Gece ve alacakaranlıkta aktif. Çalkantılı suyu sever.",
         noteEn: "Active during night and dusk. Prefers turbulent waters.", noteEl: "Active during night and dusk. Prefers turbulent waters.", noteEs: "Analizando condiciones óptimas para esta especie en tiempo real."
     },
@@ -205,7 +215,7 @@ const SPECIES_DB = {
             rigEn: "Multi-hook rig, float rig", rigEl: "Multi-hook rig, float rig", rigEs: "Multi-hook rig, float rig",
             hookEn: "8 - 12", hookEl: "8 - 12", hookEs: "8 - 12"
         },
-        legalSize: "11 cm",
+        legalSize: "11 cm", legalSizeEn: "11 cm", legalSizeEs: "11 cm", legalSizeEl: "11 εκ.",
         note: "Sürü halinde gezer. Küçük yem ve ince misina şart.",
         noteEn: "Travels in schools. Small bait and thin lines are essential.", noteEl: "Travels in schools. Small bait and thin lines are essential.", noteEs: "Analizando condiciones óptimas para esta especie en tiempo real."
     },
@@ -225,7 +235,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 0, opt: 10, max: 150 },
         advice: { bait: "Canlı Mamun, Yengeç, Midye", lure: "Micro Jig", rig: "Hırsızlı Dip Takımı", hook: "Chinu No:2-4", baitEn: "Live sand smelt, crab, mussel", baitEl: "Live sand smelt, crab, mussel", baitEs: "Live Galera, Cangrejo, Mejillón", lureEn: "Micro jig", lureEl: "Micro jig", lureEs: "Micro jig", rigEn: "Running bottom rig", rigEl: "Running bottom rig", rigEs: "Running Aparejo de fondo", hookEn: "Chinu No:2-4", hookEl: "Chinu No:2-4", hookEs: "Chinu No:2-4" },
-        legalSize: "20 cm",
+        legalSize: "20 cm", legalSizeEn: "20 cm", legalSizeEs: "20 cm", legalSizeEl: "20 εκ.",
         spawningBonus: {
             "EGE": { months: [9, 10, 11], bonus: 0.25, tempMin: 18, tempMax: 22 },
             "AKDENİZ": { months: [10, 11, 0], bonus: 0.2, tempMin: 19, tempMax: 23 }
@@ -250,7 +260,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 0, opt: 10, max: 160 },
         advice: { bait: "Mamun, Yengeç, Madya", lure: "Silikon Karides (Nadir)", rig: "Şeytan Oltası, Tek İğneli Dip", hook: "2 - 5 Sağlam Dövme", baitEn: "Sand smelt, crab, mussel", baitEl: "Sand smelt, crab, mussel", baitEs: "Galera, Cangrejo, Mejillón", lureEn: "Soft plastic shrimp (rare)", lureEl: "Soft plastic shrimp (rare)", lureEs: "Vinilo Camarón (rare)", rigEn: "Paternoster, single bottom hook", rigEl: "Paternoster, single bottom hook", rigEs: "Paternoster, single bottom Anzuelo", hookEn: "2 - 5 forged", hookEl: "2 - 5 forged", hookEs: "2 - 5 forged" },
-        legalSize: "18 cm",
+        legalSize: "18 cm", legalSizeEn: "18 cm", legalSizeEs: "18 cm", legalSizeEl: "18 εκ.",
         note: "Kayalık, köpüklü sularda. Misina sürtünmesine dikkat.",
         noteEn: "Rocky, foamy water. Watch for line friction.", noteEl: "Rocky, foamy water. Watch for line friction.", noteEs: "Rocky, foamy water. Watch for line friction."
     },
@@ -271,7 +281,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 0, opt: 5, max: 150 }, // Daha sığ sular opt seviyesine çekildi
         advice: { bait: "Boru Kurdu (Favori), Mamun, Kum Solucanı", lure: "Kokulu Silikon (Kurt/Yengeç)", rig: "Hafif Gezer Kurşunlu Dip", hook: "4 - 6 İnce Pala", baitEn: "Lugworm (favourite), ragworm", baitEl: "Lugworm (favourite), ragworm", baitEs: "Gusano de tubo (favourite), ragGusano", lureEn: "Scented soft plastic", lureEl: "Scented soft plastic", lureEs: "Scented Vinilo", rigEn: "Light running sinker bottom", rigEl: "Light running sinker bottom", rigEs: "Ligero Plomo corrido bottom", hookEn: "4 - 6 fine wire", hookEl: "4 - 6 fine wire", hookEs: "4 - 6 Alambre fino" },
-        legalSize: "20 cm (Etik)",
+        legalSize: "20 cm (Etik)", legalSizeEn: "20 cm (ethical)", legalSizeEs: "20 cm (ético)", legalSizeEl: "20 εκ. (ηθικό όριο)",
         note: "Gece kıyıya 1m'ye kadar yaklaşır. Işık tutmayın! Kumluk mera balığıdır.",
         noteEn: "Approaches within 1m of shore at night. No flashlights! Sand bottom specialist.", noteEl: "Approaches within 1m of shore at night. No flashlights! Sand bottom specialist.", noteEs: "Approaches within 1m of shore at night. No flashlights! Sand bottom specialist."
     },
@@ -293,8 +303,13 @@ const SPECIES_DB = {
         sstTrendPref: "STABLE",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 2, opt: 20, max: 150 },
+        // [TAŞINDI 2026-08-03] server.js'te `key === "kalamar"` diye gömülüydü. Kalamar
+        // zokası GÖRSEL bir tekniktir: bulanık suda kalamar zokayı seçemez, dalgalı suda
+        // zoka doğal hareketini kaybeder. Bu yüzden ceza tür tercihinden (clarityPref) ayrı
+        // ve çok daha serttir — teknik büsbütün çalışmaz hâle gelir.
+        hardLimits: { clarityMin: 60, clarityMult: 0.3, waveMax: 0.8, waveMult: 0.4 },
         advice: { bait: "Yok", lure: "Kalamar Zokası (Renkli/Fosforlu)", rig: "Zoka At-Çek (Whipping)", hook: "Özel Zoka İğnesi", baitEn: "None", baitEl: "None", baitEs: "Ninguno", lureEn: "Coloured/phosphorescent squid jig", lureEl: "Coloured/phosphorescent squid jig", lureEs: "Coloured/phosphorescent Calamar Jig", rigEn: "Eging (cast and retrieve)", rigEl: "Eging (cast and retrieve)", rigEs: "Eging (cast and retrieve)", hookEn: "Dedicated squid jig", hookEl: "Dedicated squid jig", hookEs: "Dedicated Calamar Jig" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Berrak su ve ay ışığında. Yaz başı üreme dönemi, avlamayın.",
         noteEn: "Clear water and moonlight. Avoid catching during early summer spawning.", noteEl: "Clear water and moonlight. Avoid catching during early summer spawning.", noteEs: "Clear water and moonlight. Evitar catching during early summer desove."
     },
@@ -321,7 +336,7 @@ const SPECIES_DB = {
         // sınırlı (>200m nadir). opt=20 yerine gerçek yoğunluk bölgesi olan ~10m'ye çekildi.
         depth: { min: 1, opt: 10, max: 120 },
         advice: { bait: "Yengeç, Tavuk But", lure: "Ahtapot Zokası, Plastik Yengeç", rig: "Çarpmalı Zoka", hook: "Özel Zoka", baitEn: "Crab, chicken leg", baitEl: "Crab, chicken leg", baitEs: "Cangrejo, chicken leg", lureEn: "Octopus jig, plastic crab", lureEl: "Octopus jig, plastic crab", lureEs: "Octopus Jig, plastic Cangrejo", rigEn: "Jigging with bounce", rigEl: "Jigging with bounce", rigEs: "Jigging with bounce", hookEn: "Dedicated jig", hookEl: "Dedicated jig", hookEs: "Dedicated Jig" },
-        legalSize: "1 kg",
+        legalSize: "1 kg", legalSizeEn: "1 kg", legalSizeEs: "1 kg", legalSizeEl: "1 κιλό",
         note: "Yemi sarıp yapışır. Ağırlık hissedince sert tasma.",
         noteEn: "Wraps around bait. Strike firmly when you feel weight.", noteEl: "Wraps around bait. Strike firmly when you feel weight.", noteEs: "Wraps around bait. Strike firmly when you feel weight."
     },
@@ -342,7 +357,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 1, opt: 10, max: 50 },
         advice: { bait: "Karides, Yengeç, Midye", lure: "LRF Silikon, Micro Jig", rig: "Dip Takımı, LRF", hook: "4 - 1 Güçlü", baitEn: "Shrimp, crab, mussel", baitEl: "Shrimp, crab, mussel", baitEs: "Camarón, Cangrejo, Mejillón", lureEn: "LRF soft plastic, micro jig", lureEl: "LRF soft plastic, micro jig", lureEs: "LRF Vinilo, Micro jig", rigEn: "Bottom rig, LRF", rigEl: "Bottom rig, LRF", rigEs: "Aparejo de fondo, LRF", hookEn: "4 - 1 strong", hookEl: "4 - 1 strong", hookEs: "4 - 1 Fuerte" },
-        legalSize: "Yasal limit yok",
+        legalSize: "Yasal limit yok", legalSizeEn: "No legal limit", legalSizeEs: "Sin límite legal", legalSizeEl: "Χωρίς νόμιμο όριο",
         note: "Kayalık ve yosunluk bölgelerde yaşayan güçlü bir dip balığıdır. Kabukluları kırabilecek güçlü çenesi vardır.",
         noteEn: "Lives in rocky and weedy areas. Strong jaw can crush crustaceans.", noteEl: "Lives in rocky and weedy areas. Strong jaw can crush crustaceans.", noteEs: "Lives in rocky and weedy areas. Strong jaw can crush crustaceans."
     },
@@ -373,7 +388,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 5, opt: 20, max: 250 },
         advice: { bait: "Karides Parçası, Tavuk Göğsü", lure: "Çapari, LRF Silikon, Micro Jig", rig: "Çapari, LRF", hook: "9 - 12 İnce", baitEn: "Shrimp piece, chicken breast", baitEl: "Shrimp piece, chicken breast", baitEs: "Camarón piece, Pechuga de pollo", lureEn: "Sabiki, LRF soft plastic, micro jig", lureEl: "Sabiki, LRF soft plastic, micro jig", lureEs: "Sabiki, LRF Vinilo, Micro jig", rigEn: "Sabiki, LRF", rigEl: "Sabiki, LRF", rigEs: "Sabiki, LRF", hookEn: "9 - 12 fine", hookEl: "9 - 12 fine", hookEs: "9 - 12 fine" },
-        legalSize: "13 cm",
+        legalSize: "13 cm", legalSizeEn: "13 cm", legalSizeEs: "13 cm", legalSizeEl: "13 εκ.",
         note: "Sürü halinde. Çapari ile kova doldurulur.",
         noteEn: "Schooling fish. Sabiki can fill a bucket quickly.", noteEl: "Schooling fish. Sabiki can fill a bucket quickly.", noteEs: "Schooling fish. Sabiki can fill a bucket quickly."
     },
@@ -398,7 +413,7 @@ const SPECIES_DB = {
         // daha derine (100-200m) iniyor ama olta avcılığında yoğunlukla sığda tutuluyor.
         depth: { min: 5, opt: 30, max: 200 },
         advice: { bait: "Karides, Kurt, Midye, Tavuk Göğsü", lure: "Genelde Yok", rig: "Üçlü Dip Oltası", hook: "9 - 11 İnce Telli", baitEn: "Shrimp, worm, mussel, chicken breast", baitEl: "Shrimp, worm, mussel, chicken breast", baitEs: "Camarón, Gusano, Mejillón, Pechuga de pollo", lureEn: "Rarely used", lureEl: "Rarely used", lureEs: "Raramente used", rigEn: "Three-hook bottom rig", rigEl: "Three-hook bottom rig", rigEs: "Three-Anzuelo Aparejo de fondo", hookEn: "9 - 11 fine wire", hookEl: "9 - 11 fine wire", hookEs: "9 - 11 Alambre fino" },
-        legalSize: "13 cm",
+        legalSize: "13 cm", legalSizeEn: "13 cm", legalSizeEs: "13 cm", legalSizeEl: "13 εκ.",
         note: "Yumuşak dudak yapısı var — ince telli küçük iğne (9-11 no) şart. Yemi emerek alır.",
         noteEn: "Soft lips — fine wire small hook (9-11) essential. Sucks bait in gently.", noteEl: "Soft lips — fine wire small hook (9-11) essential. Sucks bait in gently.", noteEs: "Soft lips — fine wire small hook (9-11) essential. Sucks bait in gently."
     },
@@ -420,7 +435,7 @@ const SPECIES_DB = {
         // aksine sığ kayalık/liman dibi türüdür — max=200m gerçek dışı derindi.
         depth: { min: 0, opt: 12, max: 60 },
         advice: { bait: "İstavrit Fleto, Karides", lure: "Kokulu Silikonlar (LRF)", rig: "Dip Takımı, LRF", hook: "4 - 6 Uzun Pala", baitEn: "Horse mackerel fillet, shrimp", baitEl: "Horse mackerel fillet, shrimp", baitEs: "Horse mackerel fillet, Camarón", lureEn: "Scented soft plastics (LRF)", lureEl: "Scented soft plastics (LRF)", lureEs: "Scented Vinilos (LRF)", rigEn: "Bottom rig, LRF", rigEl: "Bottom rig, LRF", rigEs: "Aparejo de fondo, LRF", hookEn: "4 - 6 long shank", hookEl: "4 - 6 long shank", hookEs: "4 - 6 Pata larga" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "⚠️ DİKENLERİ ZEHİRLİ! Dikkatli olun.",
         noteEn: "WARNING: VENOMOUS SPINES! Handle with extreme caution.", noteEl: "WARNING: VENOMOUS SPINES! Handle with extreme caution.", noteEs: "WARNING: VENOMOUS SPINES! Handle with extreme caution."
     },
@@ -444,7 +459,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 0, opt: 20, max: 50 },
         advice: { bait: "Hamsi, İstavrit", lure: "Metal Kaşık, Jig", rig: "Paternoster, Trolling", hook: "2 - 4", baitEn: "Anchovy, horse mackerel", baitEl: "Anchovy, horse mackerel", baitEs: "Boquerón, horse mackerel", lureEn: "Metal spoon, jig", lureEl: "Metal spoon, jig", lureEs: "Cuchara metálica, Jig", rigEn: "Paternoster, trolling", rigEl: "Paternoster, trolling", rigEs: "Paternoster, Curricán", hookEn: "2 - 4", hookEl: "2 - 4", hookEs: "2 - 4" },
-        legalSize: "18 cm",
+        legalSize: "18 cm", legalSizeEn: "18 cm", legalSizeEs: "18 cm", legalSizeEl: "18 εκ.",
         note: "Sürü halinde yüzer. Yaz aylarında Ege ve Akdeniz kıyılarında yoğun.",
         noteEn: "Schooling fish. Dense in Aegean and Mediterranean shores in summer.", noteEl: "Schooling fish. Dense in Aegean and Mediterranean shores in summer.", noteEs: "Schooling fish. Dense in Aegean and Mediterranean shores in summer."
     },
@@ -467,7 +482,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
         depth: { min: 0, opt: 5, max: 15 },
         advice: { bait: "Ekmek İçi, Kıbrıs Sarma", lure: "Yok", rig: "Kıbrıs Takımı, Şamandıralı", hook: "6 - 9", baitEn: "Bread dough, Cypriot rig bait", baitEl: "Bread dough, Cypriot rig bait", baitEs: "Pan Masa, Cypriot rig bait", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Cypriot rig, float rig", rigEl: "Cypriot rig, float rig", rigEs: "Cypriot rig, Aparejo de flotador", hookEn: "6 - 9", hookEl: "6 - 9", hookEs: "6 - 9" },
-        legalSize: "30 cm",
+        legalSize: "30 cm", legalSizeEn: "30 cm", legalSizeEs: "30 cm", legalSizeEl: "30 εκ.",
         note: "Lagün ve nehir ağızlarında. Düşük tuzluluğu sever.",
         noteEn: "Found in lagoons and river mouths. Tolerates low salinity.", noteEl: "Found in lagoons and river mouths. Tolerates low salinity.", noteEs: "Found in lagoons and river mouths. Tolerates low salinity."
     },
@@ -490,7 +505,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 1, opt: 8, max: 40 },
         advice: { bait: "Kurt, Fleto Balık", lure: "İpek (Turuncu)", rig: "Şamandıralı Top, İpek", hook: "6 - 10 İnce", baitEn: "Worm, fish strip", baitEl: "Worm, fish strip", baitEs: "Gusano, Tira de pescado", lureEn: "Silk feather (orange)", lureEl: "Silk feather (orange)", lureEs: "Silk feather (orange)", rigEn: "Float with bobber, silk", rigEl: "Float with bobber, silk", rigEs: "Float with bobber, silk", hookEn: "6 - 10 fine wire", hookEl: "6 - 10 fine wire", hookEs: "6 - 10 Alambre fino" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Güneşli havalarda yüzeyde. Berrak su sever.",
         noteEn: "Surface fish on sunny days. Prefers clear water.", noteEl: "Surface fish on sunny days. Prefers clear water.", noteEs: "Surface fish on sunny days. Prefiere clear water."
     },
@@ -515,7 +530,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 5, opt: 30, max: 200 },
         advice: { bait: "-", lure: "-", rig: "-", hook: "-", baitEn: "-", baitEl: "-", baitEs: "-", lureEn: "-", lureEl: "-", lureEs: "-", rigEn: "-", rigEl: "-", rigEs: "-", hookEn: "-", hookEl: "-", hookEs: "-" },
-        legalSize: "YASAK",
+        legalSize: "YASAK", legalSizeEn: "PROHIBITED", legalSizeEs: "PROHIBIDO", legalSizeEl: "ΑΠΑΓΟΡΕΥΕΤΑΙ",
         note: "🚫 AVLANMASI KESİNLİKLE YASAKTIR. IUCN Tehlike Altında (Endangered). 6/2 Numaralı Tebliğ. Görürsen bırak.",
         noteEn: "STRICTLY PROHIBITED to catch. IUCN Endangered. Regulation 6/2. Release immediately if caught.", noteEl: "STRICTLY PROHIBITED to catch. IUCN Endangered. Regulation 6/2. Release immediately if caught.", noteEs: "STRICTLY PROHIBITED to catch. IUCN Endangered. Regulation 6/2. Release immediately if caught."
     },
@@ -547,7 +562,7 @@ const SPECIES_DB = {
         // Türkiye'deki tipik jigging derinliğiyle (akıntılı burun başları) daha uyumlu.
         depth: { min: 10, opt: 40, max: 250 },
         advice: { bait: "Canlı İstavrit, Sardalya", lure: "Popper, Stickbait, Metal Jig", rig: "Trolling, Jigging, Popping", hook: "3/0 - 6/0 + Çelik Tel", baitEn: "Live horse mackerel, sardine", baitEl: "Live horse mackerel, sardine", baitEs: "Live horse mackerel, Sardina", lureEn: "Popper, stickbait, metal jig", lureEl: "Popper, stickbait, metal jig", lureEs: "Popper, Stickbait, metal Jig", rigEn: "Trolling, jigging, popping", rigEl: "Trolling, jigging, popping", rigEs: "Curricán, Jigging, popping", hookEn: "3/0 - 6/0 + wire trace", hookEl: "3/0 - 6/0 + wire trace", hookEs: "3/0 - 6/0 + wire trace" },
-        legalSize: "30 cm",
+        legalSize: "30 cm", legalSizeEn: "30 cm", legalSizeEs: "30 cm", legalSizeEl: "30 εκ.",
         note: "Güçlü avcı! Tekne gerektirir. Yaz aylarında açıklarda bollaşır.",
         noteEn: "Powerful predator! Boat required. Abundant offshore in summer.", noteEl: "Powerful predator! Boat required. Abundant offshore in summer.", noteEs: "Powerful predator! Boat required. Abundant offshore in summer."
     },
@@ -568,7 +583,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 15, opt: 30, max: 200 },
         advice: { bait: "Canlı Kalamar, Sübye, Karides", lure: "Metal Jig, Maket Balık", rig: "Jigging, Dip Sırtısı, Trolling", hook: "2/0 - 5/0", baitEn: "Live squid, cuttlefish, shrimp", baitEl: "Live squid, cuttlefish, shrimp", baitEs: "Live Calamar, Sepia, Camarón", lureEn: "Metal jig, swim bait", lureEl: "Metal jig, swim bait", lureEs: "Metal Jig, swim bait", rigEn: "Jigging, deep bottom rig, trolling", rigEl: "Jigging, deep bottom rig, trolling", rigEs: "Jigging, deep Aparejo de fondo, Curricán", hookEn: "2/0 - 5/0", hookEl: "2/0 - 5/0", hookEs: "2/0 - 5/0" },
-        legalSize: "35 cm",
+        legalSize: "35 cm", legalSizeEn: "35 cm", legalSizeEs: "35 cm", legalSizeEl: "35 εκ.",
         note: "Denizlerin padişahı. Kayalık dip sever. legalSize 35cm — bilimsel referans.",
         noteEn: "King of the sea. Prefers rocky bottom. Legal size 35cm — scientific reference.", noteEl: "King of the sea. Prefers rocky bottom. Legal size 35cm — scientific reference.", noteEs: "King of the sea. Prefiere rocky bottom. Legal size 35cm — scientific reference."
     },
@@ -590,7 +605,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 10, opt: 60, max: 250 },
         advice: { bait: "Karides, Kalamar, Midye, Sülünez", lure: "Jig, Silikon", rig: "Dip Takımı", hook: "2 - 6", baitEn: "Shrimp, squid, mussel, worm", baitEl: "Shrimp, squid, mussel, worm", baitEs: "Camarón, Calamar, Mejillón, Gusano", lureEn: "Jig, soft plastic", lureEl: "Jig, soft plastic", lureEs: "Jig, Vinilo", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "2 - 6", hookEl: "2 - 6", hookEs: "2 - 6" },
-        legalSize: "18 cm",
+        legalSize: "18 cm", legalSizeEn: "18 cm", legalSizeEs: "18 cm", legalSizeEl: "18 εκ.",
         note: "Kayalık-kumluk karışık dipte gezer. Yem dibe oturmalı. Hafif akıntıda daha istekli vurur.",
         noteEn: "Roams mixed rocky-sandy bottom. Bait must reach bottom. More active in light current.", noteEl: "Roams mixed rocky-sandy bottom. Bait must reach bottom. More active in light current.", noteEs: "Roams mixed rocky-sandy bottom. Bait must reach bottom. More active in light current."
     },
@@ -616,7 +631,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 50, opt: 150, max: 700 },
         advice: { bait: "Karides, Kurt, Kalamar", lure: "Yok", rig: "Derin Su Dip Takımı", hook: "4 - 8", baitEn: "Shrimp, worm, squid", baitEl: "Shrimp, worm, squid", baitEs: "Camarón, Gusano, Calamar", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Deep water bottom rig", rigEl: "Deep water bottom rig", rigEs: "Deep water Aparejo de fondo", hookEn: "4 - 8", hookEl: "4 - 8", hookEs: "4 - 8" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "⚠️ Derin suda (50-700m). Tekne ile parakete avı.",
         noteEn: "WARNING: Deep water (50-700m). Longline fishing from boat.", noteEl: "WARNING: Deep water (50-700m). Longline fishing from boat.", noteEs: "WARNING: Deep water (50-700m). Longline fishing from boat."
     },
@@ -641,7 +656,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 20, opt: 60, max: 150 },
         advice: { bait: "İstavrit Fleto, Karides, Kalamar", lure: "Kokulu Silikon (LRF)", rig: "Dip Takımı", hook: "2/0 - 4/0", baitEn: "Horse mackerel fillet, shrimp, squid", baitEl: "Horse mackerel fillet, shrimp, squid", baitEs: "Horse mackerel fillet, Camarón, Calamar", lureEn: "Scented soft plastic (LRF)", lureEl: "Scented soft plastic (LRF)", lureEs: "Scented Vinilo (LRF)", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "2/0 - 4/0", hookEl: "2/0 - 4/0", hookEs: "2/0 - 4/0" },
-        legalSize: "15 cm",
+        legalSize: "15 cm", legalSizeEn: "15 cm", legalSizeEs: "15 cm", legalSizeEl: "15 εκ.",
         note: "⚠️ DİKENLERİ ZEHİRLİ! Karadeniz'de bulunmaz. Kayalık ve taşlık diplerde pusu kurar. Yazın sığ kıyılara yaklaşır.",
         noteEn: "WARNING: VENOMOUS SPINES! Absent in Black Sea. Ambushes in rocky/stony bottoms. Approaches shallow shores in summer.", noteEl: "WARNING: VENOMOUS SPINES! Absent in Black Sea. Ambushes in rocky/stony bottoms. Approaches shallow shores in summer.", noteEs: "WARNING: VENOMOUS SPINES! Absent in Black Sea. Ambushes in rocky/stony bottoms. Approaches shallow shores in summer."
     },
@@ -662,7 +677,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 1, opt: 15, max: 40 },
         advice: { bait: "Ekmek, Midye, Kurt", lure: "Micro Jig", rig: "Şamandıralı, LRF", hook: "8 - 12", baitEn: "Bread, mussel, worm", baitEl: "Bread, mussel, worm", baitEs: "Pan, Mejillón, Gusano", lureEn: "Micro jig", lureEl: "Micro jig", lureEs: "Micro jig", rigEn: "Float, LRF", rigEl: "Float, LRF", rigEs: "Float, LRF", hookEn: "8 - 12", hookEl: "8 - 12", hookEs: "8 - 12" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Kuyruk sapındaki siyah benekle tanınır. Kayalık sever.",
         noteEn: "Identified by black spot at tail base. Prefers rocky areas.", noteEl: "Identified by black spot at tail base. Prefers rocky areas.", noteEs: "Identified by black spot at tail base. Prefiere rocky areas."
     },
@@ -682,7 +697,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
         depth: { min: 1, opt: 20, max: 100 },
         advice: { bait: "Ekmek, Hamur, Kurt", lure: "Çapari", rig: "Çapari, Şamandıralı", hook: "10 - 14", baitEn: "Bread, dough, worm", baitEl: "Bread, dough, worm", baitEs: "Pan, Masa, Gusano", lureEn: "Sabiki", lureEl: "Sabiki", lureEs: "Sabiki", rigEn: "Sabiki, float", rigEl: "Sabiki, float", rigEs: "Sabiki, float", hookEn: "10 - 14", hookEl: "10 - 14", hookEs: "10 - 14" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Sürü halinde. Çapari ile bol av. Canlı yem olarak kullanılır.",
         noteEn: "Schooling fish. Abundant with sabiki. Used as live bait.", noteEl: "Schooling fish. Abundant with sabiki. Used as live bait.", noteEs: "Schooling fish. Abundant with sabiki. Used as live bait."
     },
@@ -702,7 +717,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 1, opt: 15, max: 60 },
         advice: { bait: "Yengeç, Midye, Mamun", lure: "Silikon Karides", rig: "Şeytan Oltası, Dip Takımı", hook: "2 - 6", baitEn: "Crab, mussel, sand smelt", baitEl: "Crab, mussel, sand smelt", baitEs: "Cangrejo, Mejillón, Galera", lureEn: "Soft plastic shrimp", lureEl: "Soft plastic shrimp", lureEs: "Vinilo Camarón", rigEn: "Paternoster, bottom rig", rigEl: "Paternoster, bottom rig", rigEs: "Paternoster, Aparejo de fondo", hookEn: "2 - 6", hookEl: "2 - 6", hookEs: "2 - 6" },
-        legalSize: "18 cm",
+        legalSize: "18 cm", legalSizeEn: "18 cm", legalSizeEs: "18 cm", legalSizeEl: "18 εκ.",
         note: "Sivri burunlu karagöz. Köpüklü su sever.",
         noteEn: "Sharp-nosed bream. Prefers foamy water.", noteEl: "Sharp-nosed bream. Prefers foamy water.", noteEs: "Sharp-nosed bream. Prefiere foamy water."
     },
@@ -723,7 +738,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 1, opt: 15, max: 50 },
         advice: { bait: "Midye, Yengeç, Mamun", lure: "Silikon", rig: "Şeytan Oltası, Dip", hook: "1 - 4", baitEn: "Mussel, crab, sand smelt", baitEl: "Mussel, crab, sand smelt", baitEs: "Mejillón, Cangrejo, Galera", lureEn: "Soft plastic", lureEl: "Soft plastic", lureEs: "Vinilo", rigEn: "Paternoster, bottom", rigEl: "Paternoster, bottom", rigEs: "Paternoster, bottom", hookEn: "1 - 4", hookEl: "1 - 4", hookEs: "1 - 4" },
-        legalSize: "23 cm",
+        legalSize: "23 cm", legalSizeEn: "23 cm", legalSizeEs: "23 cm", legalSizeEl: "23 εκ.",
         note: "Karagözün büyük akrabası. Köpüklü, dalgalı su sever.",
         noteEn: "Larger relative of two-banded bream. Prefers foamy, choppy water.", noteEl: "Larger relative of two-banded bream. Prefers foamy, choppy water.", noteEs: "Larger relative of two-banded bream. Prefiere foamy, choppy water."
     },
@@ -744,8 +759,7 @@ const SPECIES_DB = {
         depth: { min: 2, opt: 25, max: 90 },
         advice: { bait: "Karides, Kurt, Midye", lure: "LRF Silikon", rig: "LRF, Dip Takımı", hook: "6 - 10", baitEn: "Shrimp, worm, mussel", baitEl: "Shrimp, worm, mussel", baitEs: "Camarón, Gusano, Mejillón", lureEn: "LRF soft plastic", lureEl: "LRF soft plastic", lureEs: "LRF Vinilo", rigEn: "LRF, bottom rig", rigEl: "LRF, bottom rig", rigEs: "LRF, Aparejo de fondo", hookEn: "6 - 10", hookEl: "6 - 10", hookEs: "6 - 10" },
         adviceEn: { bait: "Shrimp, Worm, Mussel", lure: "LRF Soft Plastic", rig: "LRF, Bottom Rig", hook: "6 - 10" },
-        legalSize: "Yok",
-        legalSizeEn: "None",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEl: "Καμία", legalSizeEs: "Ninguna",
         note: "Küçük ama lezzetli. Kayalık dip sever. LRF ile eğlenceli.",
         noteEn: "Small but tasty. Prefers rocky bottom. Fun with LRF.", noteEl: "Small but tasty. Prefers rocky bottom. Fun with LRF.", noteEs: "Small but tasty. Prefiere rocky bottom. Fun with LRF."
     },
@@ -765,7 +779,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
         depth: { min: 0, opt: 5, max: 20 },
         advice: { bait: "Ekmek, Kıbrıs Sarma", lure: "Yok", rig: "Kıbrıs Takımı, Şamandıralı", hook: "6 - 10", baitEn: "Bread, Cypriot rig bait", baitEl: "Bread, Cypriot rig bait", baitEs: "Pan, Cypriot rig bait", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Cypriot rig, float", rigEl: "Cypriot rig, float", rigEs: "Cypriot rig, float", hookEn: "6 - 10", hookEl: "6 - 10", hookEs: "6 - 10" },
-        legalSize: "30 cm",
+        legalSize: "30 cm", legalSizeEn: "30 cm", legalSizeEs: "30 cm", legalSizeEl: "30 εκ.",
         note: "Solungaç kapağındaki sarı lekeyle tanınır. Lagün sever.",
         noteEn: "Identified by yellow spot on gill cover. Likes lagoons.", noteEl: "Identified by yellow spot on gill cover. Likes lagoons.", noteEs: "Identified by yellow spot on gill cover. Likes lagoons."
     },
@@ -790,7 +804,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 30, opt: 60, max: 200 },
         advice: { bait: "Canlı Kalamar, Teke", lure: "Jig, Inchiku", rig: "Jig Takımı, Derin Dip", hook: "2/0 - 4/0", baitEn: "Live squid, sand smelt", baitEl: "Live squid, sand smelt", baitEs: "Live Calamar, Galera", lureEn: "Jig, inchiku", lureEl: "Jig, inchiku", lureEs: "Jig, inchiku", rigEn: "Jig setup, deep bottom", rigEl: "Jig setup, deep bottom", rigEs: "Jig setup, deep bottom", hookEn: "2/0 - 4/0", hookEl: "2/0 - 4/0", hookEs: "2/0 - 4/0" },
-        legalSize: "25 cm",
+        legalSize: "25 cm", legalSizeEn: "25 cm", legalSizeEs: "25 cm", legalSizeEl: "25 εκ.",
         note: "Derin suyun kralı. Jigging ile efsanevi av. Sert direnç gösterir.",
         noteEn: "King of the deep. Legendary catch on jigging. Fights hard.", noteEl: "King of the deep. Legendary catch on jigging. Fights hard.", noteEs: "King of the deep. Legendary catch on jigging. Fights hard."
     },
@@ -816,7 +830,7 @@ const SPECIES_DB = {
         // ilkbaharda üreme için sığa göç eder (bu türün kendi notu da bunu belirtiyor: "sığlaşır").
         depth: { min: 1, opt: 10, max: 100 },
         advice: { bait: "Kalamar Zokası", lure: "Egi 2.5-3.5", rig: "Eging Takımı", hook: "Zoka", baitEn: "Squid jig", baitEl: "Squid jig", baitEs: "Calamar Jig", lureEn: "Egi 2.5-3.5", lureEl: "Egi 2.5-3.5", lureEs: "Egi 2.5-3.5", rigEn: "Eging setup", rigEl: "Eging setup", rigEs: "Eging setup", hookEn: "Dedicated jig", hookEl: "Dedicated jig", hookEs: "Dedicated Jig" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Sonbahar favorisi. Eging ile keyifli av. Gece lambası çeker.",
         noteEn: "Autumn favourite. Fun eging. Attracted to light at night.", noteEl: "Autumn favourite. Fun eging. Attracted to light at night.", noteEs: "Autumn favourite. Fun eging. Attracted to light at night."
     },
@@ -837,7 +851,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 5, opt: 25, max: 60 },
         advice: { bait: "Canlı Teke, Sübye", lure: "Silikon 12-18cm", rig: "Dip, Spin", hook: "2/0 - 4/0", baitEn: "Live sand smelt, cuttlefish", baitEl: "Live sand smelt, cuttlefish", baitEs: "Live Galera, Sepia", lureEn: "Large soft plastic 12-18cm", lureEl: "Large soft plastic 12-18cm", lureEs: "Large Vinilo 12-18cm", rigEn: "Bottom, spin", rigEl: "Bottom, spin", rigEs: "Bottom, Spinning", hookEn: "2/0 - 4/0", hookEl: "2/0 - 4/0", hookEs: "2/0 - 4/0" },
-        legalSize: "42 cm",
+        legalSize: "42 cm", legalSizeEn: "42 cm", legalSizeEs: "42 cm", legalSizeEl: "42 εκ.",
         note: "Gece avcısı dev. 50kg'a ulaşabilir. Ses çıkarır (davul balığı).",
         noteEn: "Giant night predator. Can reach 50kg. Makes sounds (drumfish).", noteEl: "Giant night predator. Can reach 50kg. Makes sounds (drumfish).", noteEs: "Giant night predator. Can reach 50kg. Makes sounds (drumfish)."
     },
@@ -861,7 +875,7 @@ const SPECIES_DB = {
         regions: ["AKDENİZ", "EGE"],
         depth: { min: 0, opt: 10, max: 35 },
         advice: { bait: "Küçük balık", lure: "Popper, Sahte Balık", rig: "Trolling, Spin", hook: "2/0 - 4/0", baitEn: "Small fish", baitEl: "Small fish", baitEs: "Small fish", lureEn: "Popper, swim bait", lureEl: "Popper, swim bait", lureEs: "Popper, swim bait", rigEn: "Trolling, spin", rigEl: "Trolling, spin", rigEs: "Curricán, Spinning", hookEn: "2/0 - 4/0", hookEl: "2/0 - 4/0", hookEs: "2/0 - 4/0" },
-        legalSize: "50 cm",
+        legalSize: "50 cm", legalSizeEn: "50 cm", legalSizeEs: "50 cm", legalSizeEl: "50 εκ.",
         note: "Tropikal güzellik. Yüzen nesnelerin altında bulunur. Hızlı büyür.",
         noteEn: "Tropical beauty. Found under floating objects. Fast-growing.", noteEl: "Tropical beauty. Found under floating objects. Fast-growing.", noteEs: "Tropical beauty. Found under floating objects. Fast-growing."
     },
@@ -885,7 +899,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 5, opt: 20, max: 50 },
         advice: { bait: "Çapari", lure: "Küçük Kaşık", rig: "Çapari Takımı", hook: "6 - 10", baitEn: "Sabiki feathers", baitEl: "Sabiki feathers", baitEs: "Sabiki feathers", lureEn: "Small metal spoon", lureEl: "Small metal spoon", lureEs: "Small Cuchara metálica", rigEn: "Sabiki rig", rigEl: "Sabiki rig", rigEs: "Sabiki rig", hookEn: "6 - 10", hookEl: "6 - 10", hookEs: "6 - 10" },
-        legalSize: "20 cm",
+        legalSize: "20 cm", legalSizeEn: "20 cm", legalSizeEs: "20 cm", legalSizeEl: "20 εκ.",
         note: "Serin su sever. Sürü halinde. Lezzetli ve bereketli av.",
         noteEn: "Prefers cool water. Schooling fish. Tasty and plentiful catch.", noteEl: "Prefers cool water. Schooling fish. Tasty and plentiful catch.", noteEs: "Prefiere cool water. Schooling fish. Tasty and plentiful catch."
     },
@@ -914,7 +928,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 5, opt: 25, max: 50 },
         advice: { bait: "Çapari", lure: "Kaşık", rig: "Çapari Takımı, Spin", hook: "6 - 10", baitEn: "Sabiki feathers", baitEl: "Sabiki feathers", baitEs: "Sabiki feathers", lureEn: "Metal spoon", lureEl: "Metal spoon", lureEs: "Cuchara metálica", rigEn: "Sabiki rig, spin", rigEl: "Sabiki rig, spin", rigEs: "Sabiki rig, Spinning", hookEn: "6 - 10", hookEl: "6 - 10", hookEs: "6 - 10" },
-        legalSize: "18 cm",
+        legalSize: "18 cm", legalSizeEn: "18 cm", legalSizeEs: "18 cm", legalSizeEl: "18 εκ.",
         note: "Uskumruya benzer ama daha sıcak su sever. Yaz mevsimi balığı.",
         noteEn: "Similar to mackerel but prefers warmer water. Summer species.", noteEl: "Similar to mackerel but prefers warmer water. Summer species.", noteEs: "Similar to mackerel but prefers warmer water. Summer species."
     },
@@ -934,7 +948,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 1, opt: 5, max: 15 },
         advice: { bait: "Ekmek, Yosun", lure: "Yok", rig: "Şamandıralı", hook: "10 - 14", baitEn: "Bread, seaweed", baitEl: "Bread, seaweed", baitEs: "Pan, seaweed", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Float rig", rigEl: "Float rig", rigEs: "Aparejo de flotador", hookEn: "10 - 14", hookEl: "10 - 14", hookEs: "10 - 14" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Otobur balık. Ekmekle kolay avlanır. Halüsinasyon yapabilir (dikkat!).",
         noteEn: "Herbivore fish. Easily caught with bread. Can cause hallucinations (caution!).", noteEl: "Herbivore fish. Easily caught with bread. Can cause hallucinations (caution!).", noteEs: "Herbivore fish. Easily caught with bread. Can cause hallucinations (caution!)."
     },
@@ -960,7 +974,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 0, opt: 10, max: 70 },
         advice: { bait: "Karides, Solucan, Deniz kurdu", lure: "Küçük jig", rig: "Hafif dip", hook: "8 - 12", baitEn: "Shrimp, ragworm, lugworm", baitEl: "Shrimp, ragworm, lugworm", baitEs: "Camarón, ragGusano, Gusano de tubo", lureEn: "Small jig", lureEl: "Small jig", lureEs: "Small Jig", rigEn: "Light bottom", rigEl: "Light bottom", rigEs: "Ligero bottom", hookEn: "8 - 12", hookEl: "8 - 12", hookEs: "8 - 12" },
-        legalSize: "15 cm",
+        legalSize: "15 cm", legalSizeEn: "15 cm", legalSizeEs: "15 cm", legalSizeEl: "15 εκ.",
         note: "Lesepsiyen istilacı tür. Kumlu ve çamurlu sığ sularda sürü halinde. Yaz aylarında Akdeniz ve Ege kıyılarında çok yaygın. Dipte karides ve solucanla kolayca avlanır.",
         noteEn: "Lessepsian invasive species. Sandy and muddy shallow waters in schools. Very common in Aegean and Mediterranean shores in summer. Easily caught with shrimp and worm on bottom.", noteEl: "Lessepsian invasive species. Sandy and muddy shallow waters in schools. Very common in Aegean and Mediterranean shores in summer. Easily caught with shrimp and worm on bottom.", noteEs: "Lessepsian invasive species. Sandy and muddy shallow waters in schools. Very common in Aegean and Mediterranean shores in summer. Easily caught with shrimp and worm on bottom."
     },
@@ -980,7 +994,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 2, opt: 15, max: 40 },
         advice: { bait: "Balık Kafası, Kalamar", lure: "Yok", rig: "Ağır Dip", hook: "4/0 - 6/0", baitEn: "Fish head, squid", baitEl: "Fish head, squid", baitEs: "Fish head, Calamar", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Heavy bottom", rigEl: "Heavy bottom", rigEs: "Pesado bottom", hookEn: "4/0 - 6/0", hookEl: "4/0 - 6/0", hookEs: "4/0 - 6/0" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Keskin dişli! Dikkatli tutun. Gece avcısı. Kayalık kovuklarda yaşar.",
         noteEn: "Sharp teeth! Handle carefully. Night predator. Lives in rocky crevices.", noteEl: "Sharp teeth! Handle carefully. Night predator. Lives in rocky crevices.", noteEs: "Sharp teeth! Handle carefully. Night predator. Lives in rocky crevices."
     },
@@ -1001,7 +1015,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 5, opt: 25, max: 150 },
         advice: { bait: "Balık Eti, Kalamar", lure: "Yok", rig: "Ağır Dip", hook: "4/0 - 8/0", baitEn: "Fish strip, squid", baitEl: "Fish strip, squid", baitEs: "Tira de pescado, Calamar", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Heavy bottom", rigEl: "Heavy bottom", rigEs: "Pesado bottom", hookEn: "4/0 - 8/0", hookEl: "4/0 - 8/0", hookEs: "4/0 - 8/0" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Dev olabilir (2m+). Gece avcısı. Kayalık kovukları sever.",
         noteEn: "Can grow huge (2m+). Night predator. Prefers rocky crevices.", noteEl: "Can grow huge (2m+). Night predator. Prefers rocky crevices.", noteEs: "Can grow huge (2m+). Night predator. Prefiere rocky crevices."
     },
@@ -1022,7 +1036,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 0, opt: 5, max: 20 },
         advice: { bait: "İpek", lure: "Küçük Sahte Balık", rig: "Spin, LRF", hook: "6 - 2", baitEn: "Silk feather", baitEl: "Silk feather", baitEs: "Silk feather", lureEn: "Small swim bait", lureEl: "Small swim bait", lureEs: "Small swim bait", rigEn: "Spin, LRF", rigEl: "Spin, LRF", rigEs: "Spinning, LRF", hookEn: "6 - 2", hookEl: "6 - 2", hookEs: "6 - 2" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Hızlı avcı. Yüzeyde sürü halinde. Lüfer/Kofana yemi olarak kullanılır.",
         noteEn: "Fast predator. Schools at surface. Used as lure fish.", noteEl: "Fast predator. Schools at surface. Used as lure fish.", noteEs: "Fast predator. Schools at surface. Used as lure fish."
     },
@@ -1051,7 +1065,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 2, opt: 15, max: 40 },
         advice: { bait: "Yapay tercih", lure: "Uzun Sahte Balık", rig: "Spin", hook: "2/0 - 4/0", baitEn: "Artificial preferred", baitEl: "Artificial preferred", baitEs: "Artificial preferred", lureEn: "Long swim bait", lureEl: "Long swim bait", lureEs: "Long swim bait", rigEn: "Spin", rigEl: "Spin", rigEs: "Spinning", hookEn: "2/0 - 4/0", hookEl: "2/0 - 4/0", hookEs: "2/0 - 4/0" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Keskin dişli! Çelik tel şart. Alacakaranlıkta agresif avlanır.",
         noteEn: "Sharp teeth! Wire trace essential. Aggressively hunts at dusk.", noteEl: "Sharp teeth! Wire trace essential. Aggressively hunts at dusk.", noteEs: "Sharp teeth! Wire trace essential. Aggressively hunts at dusk."
     },
@@ -1071,7 +1085,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 15, opt: 35, max: 80 },
         advice: { bait: "Teke, İstavrit", lure: "Jig", rig: "Dip, Jig", hook: "2 - 2/0", baitEn: "Sand smelt, horse mackerel", baitEl: "Sand smelt, horse mackerel", baitEs: "Galera, horse mackerel", lureEn: "Jig", lureEl: "Jig", lureEs: "Jig", rigEn: "Bottom, jig", rigEl: "Bottom, jig", rigEs: "Bottom, Jig", hookEn: "2 - 2/0", hookEl: "2 - 2/0", hookEs: "2 - 2/0" },
-        legalSize: "18 cm",
+        legalSize: "18 cm", legalSizeEn: "18 cm", legalSizeEs: "18 cm", legalSizeEl: "18 εκ.",
         note: "Renkli yüzgeçlerle uçar gibi yüzer. Lezzetli eti var.",
         noteEn: "Swims as if flying with colourful fins. Tasty flesh.", noteEl: "Swims as if flying with colourful fins. Tasty flesh.", noteEs: "Swims as if flying with colourful fins. Tasty flesh."
     },
@@ -1091,7 +1105,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 3, opt: 15, max: 40 },
         advice: { bait: "Boru Kurdu", lure: "Yok", rig: "Dip", hook: "6 - 10", baitEn: "Lugworm", baitEl: "Lugworm", baitEs: "Gusano de tubo", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom", rigEl: "Bottom", rigEs: "Bottom", hookEn: "6 - 10", hookEl: "6 - 10", hookEs: "6 - 10" },
-        legalSize: "20 cm",
+        legalSize: "20 cm", legalSizeEn: "20 cm", legalSizeEs: "20 cm", legalSizeEl: "20 εκ.",
         note: "Gece aktif, gündüz kuma gömülür. Boru kurdu en iyi yem.",
         noteEn: "Active at night, buries in sand during day. Lugworm is best bait.", noteEl: "Active at night, buries in sand during day. Lugworm is best bait.", noteEs: "Activo at night, buries in sand during day. Lugworm is best bait."
     },
@@ -1111,7 +1125,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 3, opt: 15, max: 40 },
         advice: { bait: "Karides, Balık eti", lure: "Yok", rig: "Dip", hook: "4 - 8", baitEn: "Shrimp, fish strip", baitEl: "Shrimp, fish strip", baitEs: "Camarón, Tira de pescado", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom", rigEl: "Bottom", rigEs: "Bottom", hookEn: "4 - 8", hookEl: "4 - 8", hookEs: "4 - 8" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Yılan gibi görünür. Gece kayalık aralarında avlanır.",
         noteEn: "Snake-like appearance. Hunts in rocky crevices at night.", noteEl: "Snake-like appearance. Hunts in rocky crevices at night.", noteEs: "Snake-like appearance. Caza in rocky crevices at night."
     },
@@ -1131,7 +1145,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 2, opt: 20, max: 60 },
         advice: { bait: "Balık Eti", lure: "Yok", rig: "Ağır Dip", hook: "4/0 - 6/0", baitEn: "Fish strip", baitEl: "Fish strip", baitEs: "Tira de pescado", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Heavy bottom", rigEl: "Heavy bottom", rigEs: "Pesado bottom", hookEn: "4/0 - 6/0", hookEl: "4/0 - 6/0", hookEs: "4/0 - 6/0" },
-        legalSize: "Yasal boy sınırı yok — ticari değeri yoktur, tutan genellikle bırakır",
+        legalSize: "Yasal boy sınırı yok — ticari değeri yoktur, tutan genellikle bırakır", legalSizeEn: "No legal size limit — no commercial value, usually released", legalSizeEs: "Sin talla mínima legal — sin valor comercial, suele liberarse", legalSizeEl: "Χωρίς ελάχιστο νόμιμο μέγεθος — άνευ εμπορικής αξίας, συνήθως ελευθερώνεται",
         note: "DİKKAT: Zehirli dikeni var! Tutarken çok dikkatli olun.",
         noteEn: "CAUTION: Venomous spine! Handle with great care.", noteEl: "CAUTION: Venomous spine! Handle with great care.", noteEs: "CAUTION: Venomous spine! Handle with great care."
     },
@@ -1152,7 +1166,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 3, opt: 15, max: 40 },
         advice: { bait: "Karides, Midye", lure: "Yok", rig: "Dip", hook: "4 - 8", baitEn: "Shrimp, mussel", baitEl: "Shrimp, mussel", baitEs: "Camarón, Mejillón", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom", rigEl: "Bottom", rigEs: "Bottom", hookEn: "4 - 8", hookEl: "4 - 8", hookEs: "4 - 8" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Sert çeneli, iğneyi koparır. Güçlü bir tetik mekanizması var.",
         noteEn: "Hard-jawed; snaps hooks. Has a powerful trigger mechanism.", noteEl: "Hard-jawed; snaps hooks. Has a powerful trigger mechanism.", noteEs: "Hard-jawed; snaps hooks. Has a powerful trigger mechanism."
     },
@@ -1172,7 +1186,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 3, opt: 20, max: 50 },
         advice: { bait: "Balık Eti", lure: "Yok", rig: "Dip", hook: "2 - 4", baitEn: "Fish strip", baitEl: "Fish strip", baitEs: "Tira de pescado", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom", rigEl: "Bottom", rigEs: "Bottom", hookEn: "2 - 4", hookEl: "2 - 4", hookEs: "2 - 4" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "DİKKAT: Zehirli dikenleri var! Kuma gömülü bekler.",
         noteEn: "CAUTION: Venomous spines! Waits buried in sand.", noteEl: "CAUTION: Venomous spines! Waits buried in sand.", noteEs: "CAUTION: Venomous spines! Waits buried in sand."
     },
@@ -1196,7 +1210,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 20, opt: 80, max: 250 },
         advice: { bait: "Balık Eti", lure: "Yok", rig: "Ağır Dip", hook: "4/0 - 8/0", baitEn: "Fish strip", baitEl: "Fish strip", baitEs: "Tira de pescado", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Heavy bottom", rigEl: "Heavy bottom", rigEs: "Pesado bottom", hookEn: "4/0 - 8/0", hookEl: "4/0 - 8/0", hookEs: "4/0 - 8/0" },
-        legalSize: "30 cm",
+        legalSize: "30 cm", legalSizeEn: "30 cm", legalSizeEs: "30 cm", legalSizeEl: "30 εκ.",
         note: "Çirkin ama çok lezzetli. Derin suda yaşar. Kuyruk eti makbul.",
         noteEn: "Ugly but very tasty. Lives in deep water. Tail meat is prized.", noteEl: "Ugly but very tasty. Lives in deep water. Tail meat is prized.", noteEs: "Ugly but very tasty. Lives in deep water. Tail meat is prized."
     },
@@ -1226,7 +1240,7 @@ const SPECIES_DB = {
         regions: ["KARADENİZ", "MARMARA", "EGE"],
         depth: { min: 5, opt: 25, max: 60 },
         advice: { bait: "Çapari", lure: "İnce Çapari", rig: "Surf, Çapari", hook: "10 - 14", baitEn: "Sabiki feathers", baitEl: "Sabiki feathers", baitEs: "Sabiki feathers", lureEn: "Fine sabiki", lureEl: "Fine sabiki", lureEs: "Fine Sabiki", rigEn: "Surf, sabiki", rigEl: "Surf, sabiki", rigEs: "Surf, Sabiki", hookEn: "10 - 14", hookEl: "10 - 14", hookEs: "10 - 14" },
-        legalSize: "9 cm",
+        legalSize: "9 cm", legalSizeEn: "9 cm", legalSizeEs: "9 cm", legalSizeEl: "9 εκ.",
         note: "Karadeniz'in simgesi. Kış aylarında bollaşır. Tava için ideal.",
         noteEn: "Symbol of the Black Sea. Abundant in winter. Ideal for pan-frying.", noteEl: "Symbol of the Black Sea. Abundant in winter. Ideal for pan-frying.", noteEs: "Symbol of the Black Sea. Abundant in winter. Ideal for pan-frying."
     },
@@ -1247,7 +1261,7 @@ const SPECIES_DB = {
         regions: ["AKDENİZ", "EGE"],
         depth: { min: 2, opt: 20, max: 50 },
         advice: { bait: "Karides, Küçük balık", lure: "Micro Jig", rig: "LRF, Dip", hook: "4 - 8", baitEn: "Shrimp, small fish", baitEl: "Shrimp, small fish", baitEs: "Camarón, small fish", lureEn: "Micro jig", lureEl: "Micro jig", lureEs: "Micro jig", rigEn: "LRF, bottom", rigEl: "LRF, bottom", rigEs: "LRF, bottom", hookEn: "4 - 8", hookEl: "4 - 8", hookEs: "4 - 8" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "⚠️ İSTİLACI TÜR! ZEHİRLİ dikenleri var. Avladığınızda öldürün.",
         noteEn: "WARNING: INVASIVE SPECIES! Has VENOMOUS spines. Kill when caught.", noteEl: "WARNING: INVASIVE SPECIES! Has VENOMOUS spines. Kill when caught.", noteEs: "WARNING: INVASIVE SPECIES! Has VENOMOUS spines. Kill when caught."
     },
@@ -1268,7 +1282,7 @@ const SPECIES_DB = {
         regions: ["AKDENİZ", "EGE"],
         depth: { min: 1, opt: 20, max: 60 },
         advice: { bait: "Her yemi yer", lure: "Yok", rig: "Dip", hook: "2 - 6", baitEn: "Takes any bait", baitEl: "Takes any bait", baitEs: "Takes any bait", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom", rigEl: "Bottom", rigEs: "Bottom", hookEn: "2 - 6", hookEl: "2 - 6", hookEs: "2 - 6" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "⚠️ ÖLDÜRÜCÜ ZEHİRLİ! Kesinlikle yemeyin. İstilacı tür, avladığınızda öldürün.",
         noteEn: "WARNING: DEADLY VENOMOUS! Do not eat under any circumstances. Invasive species — kill when caught.", noteEl: "WARNING: DEADLY VENOMOUS! Do not eat under any circumstances. Invasive species — kill when caught.", noteEs: "WARNING: DEADLY VENOMOUS! Do not eat under any circumstances. Invasive species — kill when caught."
     },
@@ -1297,7 +1311,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 1, opt: 15, max: 50 },
         advice: { bait: "Ekmek, Kurt, Karides", lure: "Yok", rig: "Çapari, Dip", hook: "10 - 14", baitEn: "Bread, worm, shrimp", baitEl: "Bread, worm, shrimp", baitEs: "Pan, Gusano, Camarón", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Sabiki, bottom", rigEl: "Sabiki, bottom", rigEs: "Sabiki, bottom", hookEn: "10 - 14", hookEl: "10 - 14", hookEs: "10 - 14" },
-        legalSize: "Yok",
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Sürü halinde gezer. Ekmek ile bereketle avlanır.",
         noteEn: "Schools together. Easily caught with bread. Good yield.", noteEl: "Schools together. Easily caught with bread. Good yield.", noteEs: "Schools together. Easily caught with bread. Good yield."
     },
@@ -1326,7 +1340,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 5, opt: 50, max: 200 },
         advice: { bait: "Canlı balık, Sardalya", lure: "Rapala, Metal Jig", rig: "Trolling", hook: "2/0 - 4/0", baitEn: "Live fish, sardine", baitEl: "Live fish, sardine", baitEs: "Live fish, Sardina", lureEn: "Rapala, metal jig", lureEl: "Rapala, metal jig", lureEs: "Rapala, metal Jig", rigEn: "Trolling", rigEl: "Trolling", rigEs: "Curricán", hookEn: "2/0 - 4/0", hookEl: "2/0 - 4/0", hookEs: "2/0 - 4/0" },
-        legalSize: "45 cm",
+        legalSize: "45 cm", legalSizeEn: "45 cm", legalSizeEs: "45 cm", legalSizeEl: "45 εκ.",
         note: "Hızlı ve güçlü. Trolling ile avlanır.",
         noteEn: "Fast and powerful. Best caught by trolling.", noteEl: "Fast and powerful. Best caught by trolling.", noteEs: "Fast and powerful. Best caught by trolling."
     },
@@ -1357,7 +1371,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "KARADENİZ", "EGE", "AKDENİZ"],
         depth: { min: 5, opt: 30, max: 100 },
         advice: { bait: "İstavrit, Sardalya, Sahte Yem", lure: "Tüylü Çapari, Kaşık, Kaplamalı Jig", rig: "Çapari, Trolling, Sırtı", hook: "1/0 - 3/0", baitEn: "Horse mackerel, sardine, artificial", baitEl: "Horse mackerel, sardine, artificial", baitEs: "Horse mackerel, Sardina, artificial", lureEn: "Feathered sabiki, spoon, coated jig", lureEl: "Feathered sabiki, spoon, coated jig", lureEs: "Feathered Sabiki, spoon, coated Jig", rigEn: "Sabiki, trolling, drift", rigEl: "Sabiki, trolling, drift", rigEs: "Sabiki, Curricán, drift", hookEn: "1/0 - 3/0", hookEl: "1/0 - 3/0", hookEs: "1/0 - 3/0" },
-        legalSize: "25 cm",
+        legalSize: "25 cm", legalSizeEn: "25 cm", legalSizeEs: "25 cm", legalSizeEl: "25 εκ.",
         note: "Sonbahar balığı. Boğazlarda bol bulunur. Yamyamlık eğilimi — sürüye metal atar.",
         noteEn: "Autumn fish. Abundant in the Bosphorus. Cannibal tendencies — throw metal into the school.", noteEl: "Autumn fish. Abundant in the Bosphorus. Cannibal tendencies — throw metal into the school.", noteEs: "Autumn fish. Abundant in the Bosphorus. Cannibal tendencies — throw metal into the school."
     },
@@ -1386,7 +1400,7 @@ const SPECIES_DB = {
         // 18-20cm "sarıkanat") genç evresidir; tutulması ve satışı YASAKTIR. legalSize "20 cm"
         // tek başına yanıltıcıydı — not eklenerek 20cm altının serbest bırakılması gerektiği
         // (yasal olarak lüfer sayılmadığı) açıkça belirtildi.
-        legalSize: "20 cm",
+        legalSize: "20 cm", legalSizeEn: "20 cm", legalSizeEs: "20 cm", legalSizeEl: "20 εκ.",
         note: "Lüferin 20 cm altı yavru evresidir (15-18cm 'çinekop', 18-20cm 'sarıkanat'). 20 cm altındaki bireylerin tutulması ve satışı yasaktır — mutlaka serbest bırakın.",
         noteEn: "Juvenile bluefish under 20cm (15-18cm 'çinekop', 18-20cm 'sarıkanat'). Keeping or selling fish under 20cm is illegal — always release.", noteEl: "Juvenile bluefish under 20cm. Keeping or selling fish under 20cm is illegal — always release.", noteEs: "Juvenile bluefish under 20cm. Keeping or selling fish under 20cm is illegal — always release."
     },
@@ -1414,7 +1428,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 10, opt: 25, max: 100 },
         advice: { bait: "-", lure: "Tüylü Çapari", rig: "Çapari / Ağ", hook: "-", baitEn: "-", baitEl: "-", baitEs: "-", lureEn: "Feathered sabiki", lureEl: "Feathered sabiki", lureEs: "Feathered Sabiki", rigEn: "Sabiki / net", rigEl: "Sabiki / net", rigEs: "Sabiki / net", hookEn: "-", hookEl: "-", hookEs: "-" },
-        legalSize: "11 cm",
+        legalSize: "11 cm", legalSizeEn: "11 cm", legalSizeEs: "11 cm", legalSizeEl: "11 εκ.",
         note: "Dikey göç yapar: gündüz 25-100m derin, gece 10-35m yüzeye çıkar. Gece çapari ile tutulabilir.",
         noteEn: "Vertical migration: 25-100m deep during day, rises to 10-35m at night. Can be caught with sabiki at night.", noteEl: "Vertical migration: 25-100m deep during day, rises to 10-35m at night. Can be caught with sabiki at night.", noteEs: "Vertical migration: 25-100m deep during day, rises to 10-35m at night. Can be caught with sabiki at night."
     },
@@ -1436,7 +1450,7 @@ const SPECIES_DB = {
         regions: ["MARMARA"] /* [2026-08-03] mirlan ile mükerrerdi: aynı tür, aynı iki denizde iki kayıt, farklı skor. Anahtar silinmedi (favoriler), bölgeye göre ayrıldı. */,
         depth: { min: 20, opt: 60, max: 200 },
         advice: { bait: "Karides, Kurt, Midye, Tavuk Göğsü", lure: "Yok", rig: "Klasik Çapari, Üç Köstekli Dip Oltası", hook: "No: 2", baitEn: "Shrimp, worm, mussel, chicken breast", baitEl: "Shrimp, worm, mussel, chicken breast", baitEs: "Camarón, Gusano, Mejillón, Pechuga de pollo", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Three-hook bottom rig", rigEl: "Three-hook bottom rig", rigEs: "Three-Anzuelo Aparejo de fondo", hookEn: "No: 2", hookEl: "No: 2", hookEs: "No: 2" },
-        legalSize: "13 cm",
+        legalSize: "13 cm", legalSizeEn: "13 cm", legalSizeEs: "13 cm", legalSizeEl: "13 εκ.",
         note: "Karadeniz'in kış balığı. Soğuk suyu sever. İğne No:2 — bilimsel saha çalışmasıyla kanıtlandı.",
         noteEn: "Black Sea winter fish. Prefers cold water. Hook No:2 — proven by scientific field study.", noteEl: "Black Sea winter fish. Prefers cold water. Hook No:2 — proven by scientific field study.", noteEs: "Black Sea winter fish. Prefiere cold water. Hook No:2 — proven by scientific field study."
     },
@@ -1459,7 +1473,7 @@ const SPECIES_DB = {
         regions: ["KARADENİZ", "MARMARA"],
         depth: { min: 20, opt: 40, max: 70 },
         advice: { bait: "Canlı Hamsi, İstavrit, Balık Fleto", lure: "Yok", rig: "Uzun Köstekli Ağır Dip Oltası", hook: "2 - 6", baitEn: "Live anchovy, horse mackerel, fillet", baitEl: "Live anchovy, horse mackerel, fillet", baitEs: "Live Boquerón, horse mackerel, fillet", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Long trace heavy bottom rig", rigEl: "Long trace heavy bottom rig", rigEs: "Bajo de línea largo Pesado Aparejo de fondo", hookEn: "2 - 6", hookEl: "2 - 6", hookEs: "2 - 6" },
-        legalSize: "45 cm — ilkbaharda üreme dönemi av yasağı uygulanır, güncel tebliği kontrol edin",
+        legalSize: "45 cm — ilkbaharda üreme dönemi av yasağı uygulanır, güncel tebliği kontrol edin", legalSizeEn: "45 cm — closed season during spring spawning; check the current regulation", legalSizeEs: "45 cm — veda durante la freza de primavera; consulte la normativa vigente", legalSizeEl: "45 εκ. — απαγόρευση κατά την εαρινή αναπαραγωγή· ελέγξτε την ισχύουσα ρύθμιση",
         note: "Değerli ve nadir. Karadeniz'e özgü. Kumlu dibe kamufle olur — yavaş yem hareketi şart.",
         noteEn: "Valuable and rare. Endemic to Black Sea. Camouflages on sandy bottom — slow bait movement essential.", noteEl: "Valuable and rare. Endemic to Black Sea. Camouflages on sandy bottom — slow bait movement essential.", noteEs: "Valuable and rare. Endemic to Black Sea. Camouflages on sandy bottom — slow bait movement essential."
     },
@@ -1480,7 +1494,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 3, opt: 25, max: 80 },
         advice: { bait: "Kurt, Karides", lure: "Yok", rig: "Dip", hook: "8 - 12", baitEn: "Worm, shrimp", baitEl: "Worm, shrimp", baitEs: "Gusano, Camarón", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom", rigEl: "Bottom", rigEs: "Bottom", hookEn: "8 - 12", hookEl: "8 - 12", hookEs: "8 - 12" },
-        legalSize: "11 cm",
+        legalSize: "11 cm", legalSizeEn: "11 cm", legalSizeEs: "11 cm", legalSizeEl: "11 εκ.",
         note: "Barbunyaya benzer, çizgili. Kayalık kenarlarında.",
         noteEn: "Similar to red mullet but striped. Found along rocky edges.", noteEl: "Similar to red mullet but striped. Found along rocky edges.", noteEs: "Similar to red mullet but striped. Found along rocky edges."
     },
@@ -1501,7 +1515,7 @@ const SPECIES_DB = {
         regions: ["KARADENİZ", "MARMARA"],
         depth: { min: 1, opt: 15, max: 50 },
         advice: { bait: "Kurt, Midye", lure: "Yok", rig: "Dip", hook: "6 - 10", baitEn: "Worm, mussel", baitEl: "Worm, mussel", baitEs: "Gusano, Mejillón", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom", rigEl: "Bottom", rigEs: "Bottom", hookEn: "6 - 10", hookEl: "6 - 10", hookEs: "6 - 10" },
-        legalSize: "20 cm",
+        legalSize: "20 cm", legalSizeEn: "20 cm", legalSizeEs: "20 cm", legalSizeEl: "20 εκ.",
         note: "Yassı balık. Kumluk diplerde gece avlanır.",
         noteEn: "Flatfish. Nocturnal hunting on sandy bottoms.", noteEl: "Flatfish. Nocturnal hunting on sandy bottoms.", noteEs: "Flatfish. Nocturnal hunting on sandy bottoms."
     },
@@ -1529,7 +1543,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 20, opt: 50, max: 100 },
         advice: { bait: "Karides, Tavuk Göğsü, Kalamar", lure: "Yok", rig: "Üçlü Dip Takımı", hook: "4 - 8", baitEn: "Shrimp, chicken breast, squid", baitEl: "Shrimp, chicken breast, squid", baitEs: "Camarón, Pechuga de pollo, Calamar", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Three-hook bottom rig", rigEl: "Three-hook bottom rig", rigEs: "Three-Anzuelo Aparejo de fondo", hookEn: "4 - 8", hookEl: "4 - 8", hookEs: "4 - 8" },
-        legalSize: "15 cm",
+        legalSize: "15 cm", legalSizeEn: "15 cm", legalSizeEs: "15 cm", legalSizeEl: "15 εκ.",
         note: "Kırma mercan ailesi. Karides ve tavuk göğsü en etkili yemler.",
         noteEn: "Broken bream family. Shrimp and chicken breast are the most effective baits.", noteEl: "Broken bream family. Shrimp and chicken breast are the most effective baits.", noteEs: "Broken bream family. Shrimp and chicken breast are the most effective baits."
     },
@@ -1554,7 +1568,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 10, opt: 50, max: 200 },
         advice: { bait: "Canlı balık, Ahtapot", lure: "Büyük Silikon", rig: "Dip", hook: "4/0 - 6/0", baitEn: "Live fish, octopus", baitEl: "Live fish, octopus", baitEs: "Live fish, octopus", lureEn: "Large soft plastic", lureEl: "Large soft plastic", lureEs: "Large Vinilo", rigEn: "Bottom", rigEl: "Bottom", rigEs: "Bottom", hookEn: "4/0 - 6/0", hookEl: "4/0 - 6/0", hookEs: "4/0 - 6/0" },
-        legalSize: "50 cm — Haziran/Temmuz/Ağustos avı yasak. Günlük limit: 1 adet.",
+        legalSize: "50 cm — Haziran/Temmuz/Ağustos avı yasak. Günlük limit: 1 adet.", legalSizeEn: "50 cm — closed in June/July/August. Daily limit: 1 fish.", legalSizeEs: "50 cm — vedado en junio/julio/agosto. Límite diario: 1 ejemplar.", legalSizeEl: "50 εκ. — απαγόρευση Ιούνιο/Ιούλιο/Αύγουστο. Ημερήσιο όριο: 1 άτομο.",
         note: "⚠️ KORUMA ALTINDA. 1 Haziran - 31 Ağustos arası avlanması yasaktır. 45 cm altı tüm yıl yasak. Yakaladığınızda mutlaka serbest bırakın!",
         noteEn: "WARNING: PROTECTED. Fishing prohibited 1 June - 31 August. Fish under 45cm prohibited all year. Always release when caught!", noteEl: "WARNING: PROTECTED. Fishing prohibited 1 June - 31 August. Fish under 45cm prohibited all year. Always release when caught!", noteEs: "WARNING: PROTECTED. Fishing prohibido 1 June - 31 August. Fish under 45cm prohibido all year. Always release when caught!"
     },
@@ -1583,7 +1597,7 @@ const SPECIES_DB = {
         regions: ["KARADENİZ", "MARMARA"],
         depth: { min: 20, opt: 80, max: 200 },
         advice: { bait: "Yok — avı yasak", lure: "Yok", rig: "Yok", hook: "Yok", baitEn: "None — fishing prohibited", baitEl: "None — fishing prohibited", baitEs: "Ninguno — pesca prohibida", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "None", rigEl: "None", rigEs: "Ninguno", hookEn: "None", hookEl: "None", hookEs: "Ninguno" },
-        legalSize: "AVI YASAK",
+        legalSize: "AVI YASAK", legalSizeEn: "FISHING PROHIBITED", legalSizeEs: "PESCA PROHIBIDA", legalSizeEl: "ΑΠΑΓΟΡΕΥΕΤΑΙ Η ΑΛΙΕΙΑ",
         note: "🚫 KRİTİK NESLİ TÜKENMEKTE OLAN TÜR — 1992'den beri Türkiye'de avı tamamen yasaktır. Tarihi 6 Karadeniz mersin balığı türünden 3'ü zaten tükenmiştir, kalanlar IUCN kırmızı listesindedir. Yakalarsanız zarar vermeden derhal suya geri bırakın.",
         noteEn: "CRITICALLY ENDANGERED — fishing has been completely banned in Turkey since 1992. Of the 6 historic Black Sea sturgeon species, 3 are already extinct and the rest are IUCN Red List. If caught, release immediately without harm.", noteEl: "CRITICALLY ENDANGERED — fishing has been completely banned in Turkey since 1992. If caught, release immediately.", noteEs: "EN PELIGRO CRÍTICO — la pesca está totalmente prohibida en Turquía desde 1992. Si lo captura, libérelo de inmediato."
     },
@@ -1609,7 +1623,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 1, opt: 5, max: 30 },
         advice: { bait: "Ekmek İçi, Kurt", lure: "Micro Jig", rig: "Çoklu İğne", hook: "No:10-14", baitEn: "Bread, worm", baitEl: "Bread, worm", baitEs: "Pan, Gusano", lureEn: "Micro jig", lureEl: "Micro jig", lureEs: "Micro jig", rigEn: "Float", rigEl: "Float", rigEs: "Float", hookEn: "No:10-14", hookEl: "No:10-14", hookEs: "No:10-14" },
-        legalSize: "-",
+        legalSize: "-", legalSizeEn: "-", legalSizeEs: "-", legalSizeEl: "-",
         note: "Kıyıya çok yakın sürüler yapar. Levrek ve lüfer için önemli yem balığıdır.", noteEn: "Forms schools very close to shore. Important baitfish for sea bass and bluefish.", noteEl: "Forms schools very close to shore. Important baitfish for sea bass and bluefish.", noteEs: "Forms schools very close to shore. Important baitfish for sea bass and bluefish."
     },
 
@@ -1619,7 +1633,7 @@ const SPECIES_DB = {
         category: "DIP_DERIN",
         huntingMode: "ambush",
         shoreMonths: [4, 5, 6], // kıyıya yaklaşma ayları (0=Ocak)
-        peakHours: "DAY", peakHoursDesc: "Gündüz dipte aktif avcı",
+        peakHours: "DAY", peakHoursDesc: "Gündüz dipte aktif avcı", peakHoursDescEn: "Active bottom hunter by day", peakHoursDescEl: "Ενεργός θηρευτής βυθού την ημέρα", peakHoursDescEs: "Cazador de fondo activo de día",
         tempRange: { min: 12, opt: 18, max: 26 },
         seasons: { winter: 0.50, spring: 0.70, summer: 0.60, autumn: 0.80 },
         activity: "DAY",
@@ -1631,7 +1645,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 30, opt: 80, max: 250 },
         advice: { bait: "İstavrit, Sardalya", lure: "Metal Jig", rig: "Dip Takımı", hook: "No:1-3", baitEn: "Horse mackerel, sardine", baitEl: "Horse mackerel, sardine", baitEs: "Horse mackerel, Sardina", lureEn: "Metal jig", lureEl: "Metal jig", lureEs: "Metal Jig", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "No:1-3", hookEl: "No:1-3", hookEs: "No:1-3" },
-        legalSize: "-",
+        legalSize: "-", legalSizeEn: "-", legalSizeEs: "-", legalSizeEl: "-",
         note: "Yalnız gezen pusu avcısıdır. Kumluk ve çamurluk dipleri sever.",
         noteEn: "Solitary ambush predator. Prefers sandy and muddy bottoms.", noteEl: "Solitary ambush predator. Prefers sandy and muddy bottoms.", noteEs: "Solitary ambush predator. Prefiere sandy and muddy bottoms."
     },
@@ -1642,7 +1656,7 @@ const SPECIES_DB = {
         category: "PELAJIK",
         huntingMode: "visual",
         shoreMonths: [3, 4, 5, 9, 10], // kıyıya yaklaşma ayları (0=Ocak)
-        peakHours: "NIGHT", peakHoursDesc: "Gündüz sürü halinde orta su",
+        peakHours: "NIGHT", peakHoursDesc: "Gündüz sürü halinde orta su", peakHoursDescEn: "Midwater schools by day", peakHoursDescEl: "Κοπάδια στα μεσόνερα την ημέρα", peakHoursDescEs: "Bancos en media agua de día",
         tempRange: { min: 8, opt: 12, max: 20 },
         seasons: { winter: 0.80, spring: 0.85, summer: 0.40, autumn: 0.70 },
         monthlyActivity: [0.8, 0.75, 0.85, 0.85, 0.7, 0.45, 0.3, 0.3, 0.5, 0.65, 0.75, 0.8],
@@ -1656,7 +1670,7 @@ const SPECIES_DB = {
         regions: ["MARMARA"] /* [2026-08-03] caca ile mükerrerdi (ikisi de Sprattus sprattus). Bölgeye göre ayrıldı, anahtar silinmedi. */,
         depth: { min: 5, opt: 25, max: 120 },
         advice: { bait: "Yok", lure: "Çapari", rig: "Çapari", hook: "No:12-16", baitEn: "None", baitEl: "None", baitEs: "Ninguno", lureEn: "Sabiki", lureEl: "Sabiki", lureEs: "Sabiki", rigEn: "Sabiki", rigEl: "Sabiki", rigEs: "Sabiki", hookEn: "No:12-16", hookEl: "No:12-16", hookEs: "No:12-16" },
-        legalSize: "-",
+        legalSize: "-", legalSizeEn: "-", legalSizeEs: "-", legalSizeEl: "-",
         note: "Kışın Marmara'da yoğun sürüler yapar. İstavrit yemi olarak kritiktir.",
         noteEn: "Dense schools in Marmara in winter. Critical as bait fish for large predators.", noteEl: "Dense schools in Marmara in winter. Critical as bait fish for large predators.", noteEs: "Dense schools in Marmara in winter. Critical as bait fish for large predators."
     },
@@ -1667,7 +1681,7 @@ const SPECIES_DB = {
         category: "PELAJIK",
         huntingMode: "visual",
         shoreMonths: [10, 11, 0, 1], // kıyıya yaklaşma ayları (0=Ocak)
-        peakHours: "NIGHT", peakHoursDesc: "Gündüz sürü halinde",
+        peakHours: "NIGHT", peakHoursDesc: "Gündüz sürü halinde", peakHoursDescEn: "In schools by day", peakHoursDescEl: "Σε κοπάδια την ημέρα", peakHoursDescEs: "En bancos de día",
         tempRange: { min: 6, opt: 12, max: 18 },
         seasons: { winter: 0.90, spring: 0.80, summer: 0.30, autumn: 0.70 },
         monthlyActivity: [0.9, 0.85, 0.8, 0.65, 0.4, 0.25, 0.2, 0.25, 0.45, 0.65, 0.75, 0.85],
@@ -1680,7 +1694,7 @@ const SPECIES_DB = {
         regions: ["KARADENİZ"],
         depth: { min: 10, opt: 30, max: 100 },
         advice: { bait: "Yok", lure: "Çapari", rig: "Çapari", hook: "No:14-18", baitEn: "None", baitEl: "None", baitEs: "Ninguno", lureEn: "Sabiki", lureEl: "Sabiki", lureEs: "Sabiki", rigEn: "Sabiki", rigEl: "Sabiki", rigEs: "Sabiki", hookEn: "No:14-18", hookEl: "No:14-18", hookEs: "No:14-18" },
-        legalSize: "-",
+        legalSize: "-", legalSizeEn: "-", legalSizeEs: "-", legalSizeEl: "-",
         note: "Soğuk su sürü balığı. Büyük avcıların ana yem zinciridir.",
         noteEn: "Cold water schooling fish. Main food chain for large predators.", noteEl: "Cold water schooling fish. Main food chain for large predators.", noteEs: "Cold water schooling fish. Main food chain for large predators."
     },
@@ -1691,7 +1705,7 @@ const SPECIES_DB = {
         category: "PELAJIK",
         huntingMode: "visual",
         shoreMonths: [3, 4, 5], // kıyıya yaklaşma ayları (0=Ocak)
-        peakHours: "DAY", peakHoursDesc: "Göç döneminde gündüz aktif",
+        peakHours: "DAY", peakHoursDesc: "Göç döneminde gündüz aktif", peakHoursDescEn: "Active by day during migration", peakHoursDescEl: "Ενεργό την ημέρα κατά τη μετανάστευση", peakHoursDescEs: "Activo de día durante la migración",
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.20, spring: 0.90, summer: 0.40, autumn: 0.60 },
         
@@ -1710,7 +1724,7 @@ const SPECIES_DB = {
         regions: ["KARADENİZ", "MARMARA"],
         depth: { min: 2, opt: 15, max: 60 },
         advice: { bait: "Küçük Balık", lure: "Kaşık", rig: "Spin", hook: "No:4-8", baitEn: "Small fish", baitEl: "Small fish", baitEs: "Small fish", lureEn: "Spoon", lureEl: "Spoon", lureEs: "Spoon", rigEn: "Spin", rigEl: "Spin", rigEs: "Spinning", hookEn: "No:4-8", hookEl: "No:4-8", hookEs: "No:4-8" },
-        legalSize: "-",
+        legalSize: "-", legalSizeEn: "-", legalSizeEs: "-", legalSizeEl: "-",
         note: "İlkbahar göçünde kıyıya yaklaşır. Akıntıyı sever.",
         noteEn: "Approaches shore during spring migration. Likes currents.", noteEl: "Approaches shore during spring migration. Likes currents.", noteEs: "Approaches shore during spring migration. Likes currents."
     },
@@ -1721,7 +1735,7 @@ const SPECIES_DB = {
         category: "DIP_DERIN",
         huntingMode: "chemosensory",
         shoreMonths: [11, 0, 1, 2], // kıyıya yaklaşma ayları (0=Ocak)
-        peakHours: "DAY", peakHoursDesc: "Gündüz dipte aktif",
+        peakHours: "DAY", peakHoursDesc: "Gündüz dipte aktif", peakHoursDescEn: "Active on the bottom by day", peakHoursDescEl: "Ενεργό στον βυθό την ημέρα", peakHoursDescEs: "Activo en el fondo de día",
         tempRange: { min: 6, opt: 12, max: 18 },
         seasons: { winter: 0.85, spring: 0.70, summer: 0.30, autumn: 0.75 },
         activity: "DAY",
@@ -1732,7 +1746,7 @@ const SPECIES_DB = {
         regions: ["KARADENİZ"],
         depth: { min: 15, opt: 60, max: 200 },
         advice: { bait: "Karides, Kurt", lure: "Yok", rig: "Dip Takımı", hook: "No:4-6", baitEn: "Shrimp, worm", baitEl: "Shrimp, worm", baitEs: "Camarón, Gusano", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "No:4-6", hookEl: "No:4-6", hookEs: "No:4-6" },
-        legalSize: "-",
+        legalSize: "-", legalSizeEn: "-", legalSizeEs: "-", legalSizeEl: "-",
         note: "Soğuk su dip balığı. Kışın çok verimli.",
         noteEn: "Cold water bottom fish. Very productive in winter.", noteEl: "Cold water bottom fish. Very productive in winter.", noteEs: "Cold water bottom fish. Very productive in winter."
     },
@@ -1742,7 +1756,7 @@ const SPECIES_DB = {
         photoId: 64,
         category: "KIYI",
         huntingMode: "visual",
-        peakHours: "DAY", peakHoursDesc: "Gündüz yüzeye yakın",
+        peakHours: "DAY", peakHoursDesc: "Gündüz yüzeye yakın", peakHoursDescEn: "Near the surface by day", peakHoursDescEl: "Κοντά στην επιφάνεια την ημέρα", peakHoursDescEs: "Cerca de la superficie de día",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.40, spring: 0.70, summer: 0.85, autumn: 0.65 },
         activity: "DAY",
@@ -1753,7 +1767,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 1, opt: 3, max: 15 },
         advice: { bait: "Yok", lure: "Küçük İpek", rig: "Şamandıra", hook: "No:12-16", baitEn: "None", baitEl: "None", baitEs: "Ninguno", lureEn: "Small silk", lureEl: "Small silk", lureEs: "Small silk", rigEn: "Float", rigEl: "Float", rigEs: "Float", hookEn: "No:12-16", hookEl: "No:12-16", hookEs: "No:12-16" },
-        legalSize: "-",
+        legalSize: "-", legalSizeEn: "-", legalSizeEs: "-", legalSizeEl: "-",
         note: "Bitkilik alanlarda yaşar. Ekosistem göstergesidir.",
         noteEn: "Lives in vegetated areas. Ecosystem indicator species.", noteEl: "Lives in vegetated areas. Ecosystem indicator species.", noteEs: "Lives in vegetated areas. Ecosystem indicator species."
     },
@@ -1763,7 +1777,7 @@ const SPECIES_DB = {
         photoId: 65,
         category: "KAYALIK",
         
-        huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz kayalıkta",
+        huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz kayalıkta", peakHoursDescEn: "On rocky ground by day", peakHoursDescEl: "Σε βραχώδη βυθό την ημέρα", peakHoursDescEs: "En fondos rocosos de día",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.40, spring: 0.70, summer: 0.85, autumn: 0.60 },
         activity: "DAY",
@@ -1774,7 +1788,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 1, opt: 10, max: 40 },
         advice: { bait: "Karides, Midye", lure: "LRF Silikon", rig: "LRF", hook: "No:8-12", baitEn: "Shrimp, mussel", baitEl: "Shrimp, mussel", baitEs: "Camarón, Mejillón", lureEn: "LRF soft plastic", lureEl: "LRF soft plastic", lureEs: "LRF Vinilo", rigEn: "LRF", rigEl: "LRF", rigEs: "LRF", hookEn: "No:8-12", hookEl: "No:8-12", hookEs: "No:8-12" },
-        legalSize: "-",
+        legalSize: "-", legalSizeEn: "-", legalSizeEs: "-", legalSizeEl: "-",
         note: "Kayalık bölgede küçük avcıdır.",
         noteEn: "Small predator in rocky areas.", noteEl: "Small predator in rocky areas.", noteEs: "Small predator in rocky areas."
     },
@@ -1785,7 +1799,7 @@ const SPECIES_DB = {
         category: "DIP_DERIN",
         huntingMode: "chemosensory",
         shoreMonths: [], // kıyıya yaklaşma ayları (0=Ocak)
-        peakHours: "DAY", peakHoursDesc: "Gündüz dipte",
+        peakHours: "DAY", peakHoursDesc: "Gündüz dipte", peakHoursDescEn: "On the bottom by day", peakHoursDescEl: "Στον βυθό την ημέρα", peakHoursDescEs: "En el fondo de día",
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.60, spring: 0.70, summer: 0.50, autumn: 0.75 },
         activity: "DAY",
@@ -1796,7 +1810,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 20, opt: 80, max: 200 },
         advice: { bait: "Karides", lure: "Yok", rig: "Dip Takımı", hook: "No:2-4", baitEn: "Shrimp", baitEl: "Shrimp", baitEs: "Camarón", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "No:2-4", hookEl: "No:2-4", hookEs: "No:2-4" },
-        legalSize: "-",
+        legalSize: "-", legalSizeEn: "-", legalSizeEs: "-", legalSizeEl: "-",
         note: "Kumluk dipte gezinir.",
         noteEn: "Roams sandy bottoms.", noteEl: "Roams sandy bottoms.", noteEs: "Roams sandy bottoms."
     },
@@ -1820,7 +1834,7 @@ const SPECIES_DB = {
         // [DÜZELTME] Not, türün genel olarak "nesli tehlikede" olduğunu söylüyordu ama
         // Türkiye'ye özgü somut yasal av dönemini (1 Ekim-31 Aralık dışında avı yasak,
         // kota sistemi) belirtmiyordu — kullanıcının fiilen uyması gereken kural buydu.
-        legalSize: "50 cm — dönemsel av yasağı var; tarihler doğrulanamadı, güncel tebliği kontrol edin (IUCN: Kritik Tehlikede, CITES Ek-II)",
+        legalSize: "50 cm — dönemsel av yasağı var; tarihler doğrulanamadı, güncel tebliği kontrol edin (IUCN: Kritik Tehlikede, CITES Ek-II)", legalSizeEn: "50 cm — seasonal closure applies; dates unverified, check the current regulation (IUCN: Critically Endangered, CITES Appendix II)", legalSizeEs: "50 cm — veda estacional; fechas sin verificar, consulte la normativa vigente (UICN: En Peligro Crítico, CITES Apéndice II)", legalSizeEl: "50 εκ. — ισχύει εποχική απαγόρευση· οι ημερομηνίες δεν επιβεβαιώθηκαν, ελέγξτε την ισχύουσα ρύθμιση (IUCN: Κρισίμως Κινδυνεύον, CITES Παράρτημα II)",
         note: "Gece avcısı. Lagün, nehir ağzı ve sığ kıyılarda bulunur. Türkiye'de SADECE 1 Ekim-31 Aralık arasında, kota dahilinde avlanabilir; bu tarihler dışında avı yasaktır. İç sularda min. boy 50 cm, günlük limit 3 adet. Avrupa genelinde nesli kritik tehlike altında — mümkünse serbest bırakın.",
         noteEn: "Night predator. Found in lagoons, river mouths and shallow shores. In Turkey, legally fishable ONLY between Oct 1-Dec 31 under a quota system; banned outside that window. Min. size 50cm in inland waters, daily limit 3. Critically endangered across Europe — release if possible.", noteEl: "Night predator. In Turkey, legally fishable only Oct 1-Dec 31 under quota; banned outside that window. Critically endangered — release if possible.", noteEs: "Depredador nocturno. En Turquía, la pesca es legal solo del 1 de octubre al 31 de diciembre bajo cuota; prohibida fuera de ese período. En peligro crítico — libere si es posible."
     },
@@ -10176,7 +10190,7 @@ const SPECIES_DB = {
         name: "Snoek / Uzun Barrakuda", nameEn: "Snoek", nameEl: "Snoek", nameEs: "Snoek", icon: "🐟", scientificName: "Thyrsites atun",
         photoId: 1305, category: "PELAJIK_AVCI",
         
-        huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sürü halinde orta su",
+        huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz sürü halinde orta su", peakHoursDescEn: "Midwater schools by day", peakHoursDescEl: "Κοπάδια στα μεσόνερα την ημέρα", peakHoursDescEs: "Bancos en media agua de día",
         tempRange: { min: 12, opt: 16, max: 20 },
         seasons: { winter: 0.9, spring: 0.6, summer: 0.2, autumn: 0.7 },
         activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.5, currentPref: 0.7, salinityPref: "HIGH", clarityPref: "ANY",

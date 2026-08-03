@@ -3240,20 +3240,27 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             reason: i18n(lang).protected.reason
         };
     }
+    // [TEMİZLİK 2026-08-03] moonPhase, isInstant ve moonAltitude buradan kaldırıldı:
+    // üçü de destructure ediliyordu ama fonksiyon gövdesinde HİÇ okunmuyordu (moonAltitude
+    // yalnızca eski kodu anlatan bir yorumda geçiyordu). Listede durmaları "bu veri skoru
+    // etkiliyor" yanılgısı üretiyordu. Ay ışığının skora etkisi moonlightIntensity
+    // üzerinden gelir (yalnız timeMode==='NIGHT'), ay fazının ayrı bir etkisi yoktur.
     const {
-        tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
-        timeMode, solunar, region, targetDate, isInstant,
-        currentSpeed, pressureTrend, moonPhase,
+        tempWater, wave, windSpeed, windDir, clarity, rain,
+        pressure,           // [yalnız görüntü] skora girmez; basıncın etkisi pressureTrend.change üzerinden
+        timeMode, solunar, region, targetDate,
+        currentSpeed, pressureTrend,
         depthAvg, hour, salinity,
-        cloudCover, wavePeriod, swellHeight, oceanCurrent, tempShock, uvIndex,
+        cloudCover, wavePeriod, oceanCurrent, tempShock, uvIndex,
+        swellHeight,        // [yalnız görüntü] scoreDetails.wave.swell alanında raporlanır
         chlorophyll, thermoclineDepth, moonlightIntensity,
         isBoat,
         substrate = null,   // EMODnet dip yapısı: ROCK | SAND | MUD | SEAGRASS | MIXED | null
         // YENİ (1D)
         windGust = 0, precipProb = 0, visibility = 20000,
         waveDirection = 0, windWaveHeight = 0, swellPeriod = 0,
-        tideFlow = 0, moonAltitude = 0,
-        shoreBearing = null   // [YENİ] {onshoreBearing, distanceKm} veya null — kıyı açısı hesapları için
+        tideFlow = 0,
+        shoreBearing = null   // [YENİ] {onshoreBearing, distanceKm} veya null — yalnız levrek dalga-yönü bonusunda
     } = params;
 
     const season = getSeason(targetDate.getMonth(), params.lat);
@@ -3285,7 +3292,13 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     if (fish.monthlyActivity && fish.monthlyActivity.length === 12) {
         seasonalEff = fish.monthlyActivity[monthToUse];
     } else {
-        seasonalEff = fish.seasons[season] || 0.3;
+        // [DÜZELTME 2026-08-03] `|| 0.3` yerine `?? 0.3`. Eskisi MEŞRU SIFIRI eziyordu:
+        // seasons.summer === 0 ("bu türü yazın hiç arama") yazan bir kayıt 0.3'e yükseliyor,
+        // mevsim katmanı 22 puan olduğu için türe 6.6 puan hediye ediliyordu. `??` yalnızca
+        // alan gerçekten yoksa/null ise devreye girer. Şu an canlı bir türü etkilemiyor
+        // (sıfır mevsimli orfoz/mersin `protected` olduğu için zaten 0 döner, lahoz'un ise
+        // monthlyActivity'si var → bu dal hiç çalışmaz), ama tek düzenlemeyle canlanabilirdi.
+        seasonalEff = fish.seasons[season] ?? 0.3;
     }
 
     // Göç bonusu — tür + bölge + ay uyumuysa ekle
@@ -3745,22 +3758,33 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         scoreDetails.sstTrend = { trend: tempShock.trend, direction: td, pref };
     }
 
-    if (key === "levrek" && wave > 0.7 && clarity < 60) { s_trigger += 2; activeTriggers.push(i18n(lang).triggers.foamyWater); }
-    if (key === "lufer" && windSpeed > 15 && windSpeed < 35) { s_trigger += 2; activeTriggers.push(i18n(lang).triggers.windyGood); }
+    // [REFAKTÖR 2026-08-03] Bu iki kural `key === "levrek"` / `key === "lufer"` diye
+    // motora gömülüydü. Artık species.js'teki opsiyonel surfBonus/windBonus alanlarından
+    // okunuyor — eşikler türün kendi kaydında, yeni tür eklemek için motoru düzenlemek
+    // gerekmiyor. Alan yoksa blok hiç çalışmaz (davranış öncekiyle birebir aynı).
+    if (fish.surfBonus && wave > fish.surfBonus.waveMin && clarity < fish.surfBonus.clarityMax) {
+        s_trigger += fish.surfBonus.bonus;
+        activeTriggers.push(i18n(lang).triggers.foamyWater);
+    }
+    if (fish.windBonus && windSpeed > fish.windBonus.min && windSpeed < fish.windBonus.max) {
+        s_trigger += fish.windBonus.bonus;
+        activeTriggers.push(i18n(lang).triggers.windyGood);
+    }
 
-    // [YENİ] Levrek — dalga kıyıya TAM DİK (baş-başa) vuruyorsa ek bonus. Doğrudan
-    // dalga çarpması dip kumunu/küçük canlıları karıştırır, yerel köpük/bulanıklık
-    // yaratır — levrek gibi pusu avcıları için ideal av koşuludur. Bu, yukarıdaki
-    // foamyWater tetikleyicisiyle AYNI biyolojik mekanizmanın dalga geliş açısına göre
-    // incelenmiş, ayrı ve katkısı toplanabilir (additive) bir versiyonudur — ikisi
+    // Dalga kıyıya TAM DİK (baş-başa) vuruyorsa ek bonus. Doğrudan dalga çarpması dip
+    // kumunu/küçük canlıları karıştırır, yerel köpük/bulanıklık yaratır — pusu avcıları
+    // için ideal av koşuludur. Yukarıdaki surfBonus ile AYNI biyolojik mekanizmanın dalga
+    // geliş açısına göre incelenmiş, ayrı ve toplanabilir (additive) versiyonudur — ikisi
     // birlikte tetiklenebilir (baş-başa + bulanık su = en ideal koşul).
     // shoreBearing çözümlenemiyorsa (açık deniz, kıyıdan >8km, veri yoksa) bu blok
     // HİÇ ÇALIŞMAZ — mevcut kullanıcılar/skorlar hiçbir şekilde etkilenmez.
-    if (key === "levrek" && wave > 0.5 && waveDirection > 0 && shoreBearing && typeof shoreBearing.onshoreBearing === 'number') {
+    // [REFAKTÖR 2026-08-03] `key === "levrek"` yerine species.js'teki headOnWaveBonus alanı.
+    if (fish.headOnWaveBonus && wave > fish.headOnWaveBonus.waveMin && waveDirection > 0 &&
+        shoreBearing && typeof shoreBearing.onshoreBearing === 'number') {
         const offshoreBearing = (shoreBearing.onshoreBearing + 180) % 360;
         const headOnAlign = Math.max(0, Math.cos(angularDiff(waveDirection, offshoreBearing) * Math.PI / 180));
-        if (headOnAlign >= 0.85) { // ~±30° içinde — neredeyse tam dik
-            const headOnBonus = parseFloat((1.5 * headOnAlign).toFixed(1));
+        if (headOnAlign >= fish.headOnWaveBonus.alignMin) { // ~±30° içinde — neredeyse tam dik
+            const headOnBonus = parseFloat((fish.headOnWaveBonus.maxBonus * headOnAlign).toFixed(1));
             s_trigger += headOnBonus;
             activeTriggers.push(i18n(lang).triggers.headOnWave);
             scoreDetails.waveHeadOn = { align: parseFloat(headOnAlign.toFixed(2)), bonus: headOnBonus };
@@ -3947,8 +3971,14 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
 
     s_trigger = asymptoticTriggerSum(s_trigger);
 
+    // [NOT 2026-08-03] Bu katman İŞARETLİ: asymptoticTriggerSum sonucu -12 ile +12 arasında.
+    // `max: 12` doğrudur (fonksiyonun asimptotu), ama diğer katmanlar gibi 0..max değildir —
+    // ölçümde gözlenen aralık -12.00 … +8.40 (43.735 rastgele senaryo). Pozitif tarafın 12'ye
+    // yaklaşması zordur (bölen 18), negatif taraf hızla doyar (bölen 3); bu asimetri kasıtlı.
+    // Bir ilerleme çubuğu olarak çizilecekse min alanı da dikkate alınmalı.
     scoreDetails.trigger = {
         score: parseFloat(s_trigger.toFixed(1)),
+        min: -12,
         max: 12,
         triggers: activeTriggers
     };
@@ -4140,6 +4170,14 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     }
 
     // Dalga TEHLİKE
+    // [NOT 2026-08-03] Buradaki çarpanlar 1. katmandaki waveScore/windScore ile ÇAKIŞMAZ,
+    // çift sayım değildir — iki ayrı eksen ölçülüyor:
+    //   • waveScore/windScore (s_env) = TÜR TERCİHİ: bu balık çırpıntılı suyu sever mi?
+    //   • aşağıdaki çarpanlar        = FİZİKSEL YAPILABİLİRLİK: bu denizde olta atılabilir mi?
+    // 3 m dalgada dalgayı seven bir tür de avlanamaz; tercih yüksek kalsa bile skor düşmeli.
+    // Yukarıdaki "Cam Deniz" düzeltmesinde çift ceza kaldırıldı çünkü ORADA ikinci bir eksen
+    // yok — cam deniz yalnızca bir tercih uyumsuzluğudur, güvenlik sorunu değil. Bu blok
+    // bilinçli olarak korundu; "tutarlılık" adına kaldırılmamalı.
     if (wave > 2.5) { rawScore *= 0.15; penalties.push(i18n(lang).penalties.dangerWave); activeTriggers = [i18n(lang).penalties.dangerWaveTrigger]; }
     else if (wave > 2.0) { rawScore *= 0.35; penalties.push(i18n(lang).reasons.highWave); activeTriggers.push(i18n(lang).triggers.highWave); }
     else if (wave > 1.5) { rawScore *= 0.6; penalties.push(i18n(lang).penalties.wavyWater); }
@@ -4165,9 +4203,19 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         }
     }
 
-    if (key === "kalamar") {
-        if (clarity < 60) { rawScore *= 0.3; penalties.push(i18n(lang).penalties.murkyWater); }
-        if (wave > 0.8) { rawScore *= 0.4; penalties.push(i18n(lang).penalties.wavyWater); }
+    // [REFAKTÖR 2026-08-03] `key === "kalamar"` yerine species.js'teki hardLimits alanı.
+    // Türün tercihinden (clarityPref/wavePref) ayrı, çok daha sert bir kapı: kullanılan
+    // TEKNİĞİN büsbütün çalışmadığı koşulları temsil eder.
+    if (fish.hardLimits) {
+        const hl = fish.hardLimits;
+        if (hl.clarityMin !== undefined && clarity < hl.clarityMin) {
+            rawScore *= hl.clarityMult;
+            penalties.push(i18n(lang).penalties.murkyWater);
+        }
+        if (hl.waveMax !== undefined && wave > hl.waveMax) {
+            rawScore *= hl.waveMult;
+            penalties.push(i18n(lang).penalties.wavyWater);
+        }
     }
 
 
@@ -4213,8 +4261,14 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         finalScore = asymptote - diff * Math.exp(-(finalScore - startPoint) / 25);
     }
 
-    // Güvenlik amaçlı yuvarlama ve cap
-    finalScore = Math.min(99, finalScore);
+    // [ÖLÇÜM 2026-08-03] 98 gerçekten TEORİK sınırdır; pratikte ulaşılamaz. Her türün kendi
+    // optimum koşulu arandığında ulaşılabilen en yüksek skor 83.1 (ham ≈84.7), 72 türün 30'u
+    // 80'i geçebiliyor. Yani sıkıştırma yalnızca 80-83 bandında iş görüyor. Kalibrasyon
+    // yapacak olan bunu bilsin: skorlar 0-98 değil, fiilen 0-83 aralığına dağılır.
+    //
+    // Eski `Math.min(99, finalScore)` satırı kaldırıldı: ispatlanabilir şekilde ölü koddu.
+    // finalScore ya ≤80 (sıkıştırma dalına hiç girmez) ya da 98'e asimptotik yaklaşır —
+    // her iki durumda da 99'un altındadır, yani cap hiçbir girdide bağlamıyordu.
 
     let reason = "";
     if (finalScore < 25) reason = activeTriggers.length > 0 ? activeTriggers[0] : i18n(lang).score.badConditions;
