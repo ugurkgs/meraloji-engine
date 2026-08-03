@@ -706,7 +706,7 @@ const SPECIES_DB = {
         noteEn: "Schooling fish. Abundant with sabiki. Used as live bait.", noteEl: "Schooling fish. Abundant with sabiki. Used as live bait.", noteEs: "Schooling fish. Abundant with sabiki. Used as live bait."
     },
     "sivriburun": {
-        name: "Sivriburun", nameEn: "Sharpsnout Seabream", nameEl: "Αιχμηρή τσιπούρα", nameEs: "Sargo Picudo", icon: "🐟", scientificName: "Diplodus puntazzo",
+        name: "Sivriburun Karagöz", nameEn: "Sharpsnout Seabream", nameEl: "Αιχμηρή τσιπούρα", nameEs: "Sargo Picudo", icon: "🐟", scientificName: "Diplodus puntazzo",
         photoId: 17,
         category: "KIYI",
         huntingMode: "visual",
