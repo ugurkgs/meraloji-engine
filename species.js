@@ -10071,11 +10071,11 @@ const SPECIES_DB = {
         photoId: 1201, category: "PELAJIK_AVCI",
         
         huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin su akıntıları",
-        tempRange: { min: 22, opt: 28, max: 34 },
+        tempRange: { min: 22, opt: 27, max: 32 },
         seasons: { winter: 0.95, spring: 0.8, summer: 0.4, autumn: 0.7 },
         activity: "DAWN_DUSK", pressureSensitivity: 0.5, wavePref: 0.3, currentPref: 0.8, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 22.0, lon1: 51.0, lat2: 27.0, lon2: 57.0, name: "Birleşik Arap Emirlikleri & Körfez" }],
-        depth: { min: 5, opt: 20, max: 80 },
+        regions: [], habitatBboxes: [{ lat1: 22.0, lon1: 51.0, lat2: 27.0, lon2: 57.0, name: "Birleşik Arap Emirlikleri & Körfez" }, { lat1: -2.0, lon1: 62.0, lat2: 25.0, lon2: 95.0, name: "Hindistan & Bengal Körfezi" }],
+        depth: { min: 2, opt: 18, max: 80 },
         advice: { bait: "Canlı Sardalya, Fleto", lure: "Deep Diver Minnow, Spoon", rig: "Wire Trace Trolling", hook: "5/0 - 8/0", baitEn: "Live sardine, fillet", baitEl: "Live sardine, fillet", baitEs: "Live Sardina, fillet", lureEn: "Deep diver minnow, spoon", lureEl: "Deep diver minnow, spoon", lureEs: "Deep diver minnow, spoon", rigEn: "Wire trace trolling", rigEl: "Wire trace trolling", rigEs: "Wire trace Curricán", hookEn: "5/0 - 8/0", hookEl: "5/0 - 8/0", hookEs: "5/0 - 8/0" },
         note: "BAE'nin en popüler ve ekonomik değeri en yüksek balığıdır. Yerel halk tarafından 'Kanaad' olarak bilinir.",
         noteEn: "The most popular and economically valued fish in the UAE. Known locally as 'Kanaad'.", noteEl: "The most popular and economically valued fish in the UAE. Known locally as 'Kanaad'.", noteEs: "The most popular and economically valued fish in the UAE. Known locally as 'Kanaad'."
@@ -10085,11 +10085,11 @@ const SPECIES_DB = {
         photoId: 1202, category: "KAYALIK",
         
         huntingMode: "ambush",peakHours: "DAY", peakHoursDesc: "Gündüz resifler ve batıklar",
-        tempRange: { min: 24, opt: 29, max: 35 },
+        tempRange: { min: 22, opt: 28, max: 34 },
         seasons: { winter: 0.8, spring: 0.9, summer: 0.7, autumn: 0.9 },
         activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.2, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "ANY",
         regions: [], habitatBboxes: [{ lat1: 22.0, lon1: 51.0, lat2: 27.0, lon2: 57.0, name: "Birleşik Arap Emirlikleri & Körfez" }, { lat1: -2.0, lon1: 62.0, lat2: 25.0, lon2: 95.0, name: "Hindistan & Bengal Körfezi" }],
-        depth: { min: 2, opt: 15, max: 100 },
+        depth: { min: 2, opt: 20, max: 100 },
         advice: { bait: "Canlı Karides, Küçük Balık", lure: "Soft Plastic, Jig", rig: "Bottom Rig", hook: "4/0 - 7/0", baitEn: "Live shrimp, small fish", baitEl: "Live shrimp, small fish", baitEs: "Live Camarón, small fish", lureEn: "Soft plastic, jig", lureEl: "Soft plastic, jig", lureEs: "Vinilo, Jig", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "4/0 - 7/0", hookEl: "4/0 - 7/0", hookEs: "4/0 - 7/0" },
         note: "Dubai'nin mutfak kültürünün simgesidir. Aşırı avlanma nedeniyle koruma altındadır ancak çok popülerdir.",
         noteEn: "The symbol of Dubai's culinary culture. Highly popular but under protection due to overfishing.", noteEl: "The symbol of Dubai's culinary culture. Highly popular but under protection due to overfishing.", noteEs: "The symbol of Dubai's culinary culture. Highly popular but under protection due to overfishing."
@@ -10099,11 +10099,11 @@ const SPECIES_DB = {
         photoId: 1203, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz sığ kıyılar ve mendirekler",
-        tempRange: { min: 24, opt: 30, max: 36 },
+        tempRange: { min: 24, opt: 29, max: 34 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.95, autumn: 0.8 },
         activity: "DAY", pressureSensitivity: 0.3, wavePref: 0.4, currentPref: 0.4, salinityPref: "MEDIUM", clarityPref: "CLEAR",
         regions: [], habitatBboxes: [{ lat1: 22.0, lon1: 51.0, lat2: 27.0, lon2: 57.0, name: "Birleşik Arap Emirlikleri & Körfez" }, { lat1: -2.0, lon1: 62.0, lat2: 25.0, lon2: 95.0, name: "Hindistan & Bengal Körfezi" }],
-        depth: { min: 1, opt: 5, max: 20 },
+        depth: { min: 0.5, opt: 5, max: 20 },
         advice: { bait: "Canlı Küçük Balık", lure: "Surface Popper, Spoon", rig: "Spinning", hook: "3/0 - 5/0", baitEn: "Small live fish", baitEl: "Small live fish", baitEs: "Small live fish", lureEn: "Surface popper, spoon", lureEl: "Surface popper, spoon", lureEs: "Surface Popper, spoon", rigEn: "Spinning", rigEl: "Spinning", rigEs: "Spinningning", hookEn: "3/0 - 5/0", hookEl: "3/0 - 5/0", hookEs: "3/0 - 5/0" },
         note: "Sportif balıkçıların favorisidir. Kancaya takıldığında suyun dışına fırlar.",
         noteEn: "A favorite for sport anglers. Known for jumping out of the water when hooked.", noteEl: "A favorite for sport anglers. Known for jumping out of the water when hooked.", noteEs: "A favorite for sport anglers. Known for jumping out of the water when hooked."
@@ -10117,7 +10117,7 @@ const SPECIES_DB = {
         seasons: { winter: 0.9, spring: 0.8, summer: 0.7, autumn: 0.9 },
         activity: "DAY", pressureSensitivity: 0.3, wavePref: 0.2, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "ANY",
         regions: [], habitatBboxes: [{ lat1: 22.0, lon1: 51.0, lat2: 27.0, lon2: 57.0, name: "Birleşik Arap Emirlikleri & Körfez" }, { lat1: -2.0, lon1: 62.0, lat2: 25.0, lon2: 95.0, name: "Hindistan & Bengal Körfezi" }],
-        depth: { min: 5, opt: 20, max: 70 },
+        depth: { min: 2, opt: 18, max: 70 },
         advice: { bait: "Kalamar, Karides", lure: "Micro Jig", rig: "Bottom Rig", hook: "2/0 - 4/0", baitEn: "Squid, shrimp", baitEl: "Squid, shrimp", baitEs: "Calamar, Camarón", lureEn: "Micro jig", lureEl: "Micro jig", lureEs: "Micro jig", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "2/0 - 4/0", hookEl: "2/0 - 4/0", hookEs: "2/0 - 4/0" },
         note: "Pazarlarda en sık rastlanan balıktır. 'Sheri' ismiyle tanınır ve eti oldukça lezzetlidir.",
         noteEn: "The most common fish in local markets. Known as 'Sheri' and has very tasty meat.", noteEl: "The most common fish in local markets. Known as 'Sheri' and has very tasty meat.", noteEs: "The most common fish in local markets. Known as 'Sheri' and has very tasty meat."
@@ -10158,8 +10158,8 @@ const SPECIES_DB = {
         tempRange: { min: 20, opt: 26, max: 32 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.95, autumn: 0.8 },
         activity: "DAY", pressureSensitivity: 0.5, wavePref: 0.3, currentPref: 0.6, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 22.0, lon1: 51.0, lat2: 27.0, lon2: 57.0, name: "Birleşik Arap Emirlikleri & Körfez" }],
-        depth: { min: 2, opt: 15, max: 100 },
+        regions: [], habitatBboxes: [{ lat1: 22.0, lon1: 51.0, lat2: 27.0, lon2: 57.0, name: "Birleşik Arap Emirlikleri & Körfez" }, { lat1: -2.0, lon1: 62.0, lat2: 25.0, lon2: 95.0, name: "Hindistan & Bengal Körfezi" }],
+        depth: { min: 2, opt: 18, max: 100 },
         advice: { bait: "Canlı Yengeç, Küçük Balık", lure: "Soft Plastic, Jig", rig: "Bottom / Spinning", hook: "5/0 - 8/0", baitEn: "Live crab, small fish", baitEl: "Live crab, small fish", baitEs: "Live Cangrejo, small fish", lureEn: "Soft plastic, jig", lureEl: "Soft plastic, jig", lureEs: "Vinilo, Jig", rigEn: "Bottom / spinning", rigEl: "Bottom / spinning", rigEs: "Bottom / Spinningning", hookEn: "5/0 - 8/0", hookEl: "5/0 - 8/0", hookEs: "5/0 - 8/0" },
         note: "Uzaktan köpekbalığını andıran bir yüzüşü vardır. Çok güçlü bir dövüşçüdür.",
         noteEn: "Has a swimming style that resembles a shark from a distance. A very strong fighter.", noteEl: "Has a swimming style that resembles a shark from a distance. A very strong fighter.", noteEs: "Has a swimming style that resembles a shark from a distance. A very strong fighter."
@@ -10431,20 +10431,6 @@ const SPECIES_DB = {
         advice: { bait: "Canlı Küçük Balık, Kalamar", lure: "Surface Lure, Feather", rig: "Spinning / Trolling", hook: "4/0 - 7/0", baitEn: "Small live fish, squid", baitEl: "Small live fish, squid", baitEs: "Small live fish, Calamar", lureEn: "Surface lure, feather", lureEl: "Surface lure, feather", lureEs: "Surface Señuelo, feather", rigEn: "Spinning / trolling", rigEl: "Spinning / trolling", rigEs: "Spinningning / Curricán", hookEn: "4/0 - 7/0", hookEl: "4/0 - 7/0", hookEs: "4/0 - 7/0" },
         note: "Yaz aylarında BAE açıklarında en çok aranan balıktır. Muhteşem renkleri ve lezzetiyle ünlüdür.",
         noteEn: "The most sought-after fish in UAE waters during summer. Famous for its stunning colors and taste.", noteEl: "The most sought-after fish in UAE waters during summer. Famous for its stunning colors and taste.", noteEs: "The most sought-after fish in UAE waters during summer. Famous for its stunning colors and taste."
-    },
-    "uae_king_mackerel": {
-        name: "Kral Balığı / Kingfish", nameEn: "King Mackerel", nameEl: "Βασιλιάς Σκουμπρί", nameEs: "King Mackerel", icon: "🐟", scientificName: "Scomberomorus commerson",
-        photoId: 1228, category: "PELAJIK_AVCI",
-        
-        huntingMode: "visual",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin resif kenarları",
-        tempRange: { min: 22, opt: 27, max: 32 },
-        seasons: { winter: 0.9, spring: 0.8, summer: 0.4, autumn: 0.8 },
-        activity: "DAWN_DUSK", pressureSensitivity: 0.5, wavePref: 0.4, currentPref: 0.8, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 22.0, lon1: 51.0, lat2: 27.0, lon2: 57.0, name: "Birleşik Arap Emirlikleri & Körfez" }, { lat1: -2.0, lon1: 62.0, lat2: 25.0, lon2: 95.0, name: "Hindistan & Bengal Körfezi" }],
-        depth: { min: 2, opt: 15, max: 70 },
-        advice: { bait: "Canlı Balık, Fleto", lure: "Minnow, Spoon", rig: "Wire Trace Spinning", hook: "5/0 - 8/0", baitEn: "Live fish, fillet", baitEl: "Live fish, fillet", baitEs: "Live fish, fillet", lureEn: "Minnow, spoon", lureEl: "Minnow, spoon", lureEs: "Minnow, spoon", rigEn: "Wire trace spinning", rigEl: "Wire trace spinning", rigEs: "Wire trace Spinningning", hookEn: "5/0 - 8/0", hookEl: "5/0 - 8/0", hookEs: "5/0 - 8/0" },
-        note: "Körfez bölgesinin en popüler ticari ve sportif balığıdır. Çok keskin dişleri vardır.",
-        noteEn: "The most popular commercial and sport fish in the Gulf region. Has razor-sharp teeth.", noteEl: "The most popular commercial and sport fish in the Gulf region. Has razor-sharp teeth.", noteEs: "The most popular commercial and sport fish in the Gulf region. Has razor-sharp teeth."
     },
     "uae_kabbad_mackerel": {
         name: "Kabbad / Benekli Makrelya", nameEn: "Kabbad (Spotted Spanish Mackerel)", nameEl: "Kabbad (Σκουμπρί με στίγματα)", nameEs: "Kabbad (Spotted Spanish Mackerel)", icon: "🐟", scientificName: "Scomberomorus guttatus",
@@ -11021,62 +11007,6 @@ const SPECIES_DB = {
         advice: { bait: "Canlı Küçük Balık", lure: "High Speed Trolling Lure", rig: "Wire Trace Trolling", hook: "7/0 - 10/0", baitEn: "Live small fish", baitEl: "Live small fish", baitEs: "Live small fish", lureEn: "High speed trolling lure", lureEl: "High speed trolling lure", lureEs: "High speed Curricán Señuelo", rigEn: "Wire trace trolling", rigEl: "Wire trace trolling", rigEs: "Wire trace Curricán", hookEn: "7/0 - 10/0", hookEl: "7/0 - 10/0", hookEs: "7/0 - 10/0" },
         note: "Okyanusun en hızlı balıklarından biridir. Doğu kıyısı açıklarında bulunur.",
         noteEn: "One of the fastest fish in the ocean. Found off the east coast.", noteEl: "One of the fastest fish in the ocean. Found off the east coast.", noteEs: "One of the fastest fish in the ocean. Found off the east coast."
-    },
-    "uae_orange_spotted_grouper": {
-        name: "Hamur / Portakal Benekli Lagos", nameEn: "Orange-spotted Grouper (Hamour)", nameEl: "Σφυρίδα με πορτοκαλί κηλίδες (Χαμούρ)", nameEs: "Orange-spotted Grouper (Hamour)", icon: "🐟", scientificName: "Epinephelus coioides",
-        photoId: 1251, category: "KAYALIK",
-        
-        huntingMode: "ambush",peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık derin resifler ve batıklar",
-        tempRange: { min: 22, opt: 28, max: 34 },
-        seasons: { winter: 0.9, spring: 0.8, summer: 0.6, autumn: 0.8 },
-        activity: "DAWN_DUSK", pressureSensitivity: 0.5, wavePref: 0.2, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: ["UAE", "PERSIAN_GULF"], habitatBboxes: [{ lat1: 22.0, lon1: 51.0, lat2: 27.0, lon2: 57.0, name: "Birleşik Arap Emirlikleri & Körfez" }],
-        depth: { min: 5, opt: 30, max: 100 },
-        advice: { bait: "Canlı Balık, Kalamar", lure: "Vertical Jig, Soft Plastic", rig: "Heavy Bottom Rig", hook: "5/0 - 9/0", baitEn: "Live fish, squid", baitEl: "Live fish, squid", baitEs: "Live fish, Calamar", lureEn: "Vertical jig, soft plastic", lureEl: "Vertical jig, soft plastic", lureEs: "Vertical Jig, Vinilo", rigEn: "Heavy bottom rig", rigEl: "Heavy bottom rig", rigEs: "Pesado Aparejo de fondo", hookEn: "5/0 - 9/0", hookEl: "5/0 - 9/0", hookEs: "5/0 - 9/0" },
-        note: "BAE'nin en popüler ve saygı duyulan balığıdır. Aşırı avlanma baskısı altındadır.",
-        noteEn: "The most popular and respected fish in the UAE. Under heavy overfishing pressure.", noteEl: "The most popular and respected fish in the UAE. Under heavy overfishing pressure.", noteEs: "The most popular and respected fish in the UAE. Under heavy overfishing pressure."
-    },
-    "uae_spangled_emperor": {
-        name: "Şeri / İmparator Balığı", nameEn: "Spangled Emperor (Sheri)", nameEl: "Spangled Emperor (Sheri)", nameEs: "Spangled Emperor (Sheri)", icon: "🐟", scientificName: "Lethrinus nebulosus",
-        photoId: 1252, category: "KUM_TABAN",
-        huntingMode: "chemosensory",
-        peakHours: "DAY", peakHoursDesc: "Gündüz kumluk ve resif kenarları",
-        tempRange: { min: 24, opt: 29, max: 34 },
-        seasons: { winter: 0.8, spring: 0.9, summer: 0.7, autumn: 0.9 },
-        activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.3, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: ["UAE", "PERSIAN_GULF"], habitatBboxes: [{ lat1: 22.0, lon1: 51.0, lat2: 27.0, lon2: 57.0, name: "Birleşik Arap Emirlikleri & Körfez" }],
-        depth: { min: 2, opt: 15, max: 60 },
-        advice: { bait: "Karides, Kalamar, Yengeç", lure: "Micro Jig", rig: "Bottom Rig", hook: "1/0 - 4/0", baitEn: "Shrimp, squid, crab", baitEl: "Shrimp, squid, crab", baitEs: "Camarón, Calamar, Cangrejo", lureEn: "Micro jig", lureEl: "Micro jig", lureEs: "Micro jig", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "1/0 - 4/0", hookEl: "1/0 - 4/0", hookEs: "1/0 - 4/0" },
-        note: "Körfez bölgesinin en lezzetli balıklarından biri olarak kabul edilir. Gümüşi rengiyle tanınır.",
-        noteEn: "Considered one of the tastiest fish in the Gulf region. Recognized by its silvery color.", noteEl: "Considered one of the tastiest fish in the Gulf region. Recognized by its silvery color.", noteEs: "Considered one of the tastiest fish in the Gulf region. Recognized by its silvery color."
-    },
-    "uae_cobia": {
-        name: "Kobia / Siyah Akya", nameEn: "Cobia", nameEl: "Cobia", nameEs: "Cobia", icon: "🐟", scientificName: "Rachycentron canadum",
-        photoId: 1253, category: "PELAJIK_AVCI",
-        
-        huntingMode: "visual",peakHours: "DAY", peakHoursDesc: "Gündüz batıklar ve petrol platformları",
-        tempRange: { min: 22, opt: 27, max: 32 },
-        seasons: { winter: 0.6, spring: 0.8, summer: 0.9, autumn: 0.9 },
-        activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.3, currentPref: 0.6, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: ["UAE", "PERSIAN_GULF"], habitatBboxes: [{ lat1: 22.0, lon1: 51.0, lat2: 27.0, lon2: 57.0, name: "Birleşik Arap Emirlikleri & Körfez" }, { lat1: -2.0, lon1: 62.0, lat2: 25.0, lon2: 95.0, name: "Hindistan & Bengal Körfezi" }],
-        depth: { min: 5, opt: 20, max: 100 },
-        advice: { bait: "Canlı Yengeç, Küçük Balık", lure: "Soft Plastic, Jig", rig: "Spinning / Jigging", hook: "4/0 - 7/0", baitEn: "Live crab, small fish", baitEl: "Live crab, small fish", baitEs: "Live Cangrejo, small fish", lureEn: "Soft plastic, jig", lureEl: "Soft plastic, jig", lureEs: "Vinilo, Jig", rigEn: "Spinning / jigging", rigEl: "Spinning / jigging", rigEs: "Spinningning / Jigging", hookEn: "4/0 - 7/0", hookEl: "4/0 - 7/0", hookEs: "4/0 - 7/0" },
-        note: "Görünüşü sebebiyle köpekbalığıyla sıkça karıştırılır. Çok güçlü bir direnç gösterir.",
-        noteEn: "Often mistaken for a shark due to its appearance. Shows very strong resistance.", noteEl: "Often mistaken for a shark due to its appearance. Shows very strong resistance.", noteEs: "Often mistaken for a shark due to its appearance. Shows very strong resistance."
-    },
-    "uae_talang_queenfish": {
-        name: "Kraliçe Balığı / Talang", nameEn: "Talang Queenfish", nameEl: "Βασίλισσα Ταλάνγκ", nameEs: "Talang Queenfish", icon: "🐟", scientificName: "Scomberoides commersonnianus",
-        photoId: 1254, category: "KIYI_AVCI",
-        huntingMode: "visual",
-        peakHours: "DAY", peakHoursDesc: "Gündüz sığ kıyılar ve kanallar",
-        tempRange: { min: 24, opt: 29, max: 34 },
-        seasons: { winter: 0.8, spring: 0.9, summer: 0.6, autumn: 0.8 },
-        activity: "DAY", pressureSensitivity: 0.3, wavePref: 0.4, currentPref: 0.4, salinityPref: "MEDIUM", clarityPref: "CLEAR",
-        regions: ["UAE", "PERSIAN_GULF"], habitatBboxes: [{ lat1: 22.0, lon1: 51.0, lat2: 27.0, lon2: 57.0, name: "Birleşik Arap Emirlikleri & Körfez" }],
-        depth: { min: 0.5, opt: 5, max: 20 },
-        advice: { bait: "Canlı Küçük Balık", lure: "Surface Plug, Popper, Spoon", rig: "Spinning", hook: "2/0 - 5/0", baitEn: "Live small fish", baitEl: "Live small fish", baitEs: "Live small fish", lureEn: "Surface plug, popper, spoon", lureEl: "Surface plug, popper, spoon", lureEs: "Surface plug, Popper, spoon", rigEn: "Spinning", rigEl: "Spinning", rigEs: "Spinningning", hookEn: "2/0 - 5/0", hookEl: "2/0 - 5/0", hookEs: "2/0 - 5/0" },
-        note: "Sudan dışarı sıçrayarak yaptığı akrobatik hareketlerle ünlüdür. Eti kurudur.",
-        noteEn: "Famous for its acrobatic jumps out of the water. Its flesh is dry.", noteEl: "Famous for its acrobatic jumps out of the water. Its flesh is dry.", noteEs: "Famous for its acrobatic jumps out of the water. Its flesh is dry."
     },
     "uae_golden_trevally": {
         name: "Altın Akya", nameEn: "Golden Trevally", nameEl: "Golden Trevally", nameEs: "Golden Trevally", icon: "🐟", scientificName: "Gnathanodon speciosus",
