@@ -98,7 +98,7 @@ const SPECIES_DB = {
             rigEn: "Float (Starlight), bottom rig", rigEl: "Float (Starlight), bottom rig", rigEs: "Flotador (Starlight), bottom rig",
             hookEn: "1 - 3", hookEl: "1 - 3", hookEs: "1 - 3"
         },
-        legalSize: "25 cm (günlük 5 adet)",
+        legalSize: "Asgari boy sınırı var — güncel tebliği kontrol edin (kayıttaki eski 25 cm değeri doğrulanamadı)",
         note: "Zifiri karanlıkta avlanır. Fosforlu şamandıra şart.",
         noteEn: "Hunts in pitch black darkness. Luminous float is essential.", noteEl: "Hunts in pitch black darkness. Luminous float is essential.", noteEs: "Analizando condiciones óptimas para esta especie en tiempo real."
     },
@@ -228,8 +228,7 @@ const SPECIES_DB = {
         legalSize: "20 cm",
         spawningBonus: {
             "EGE": { months: [9, 10, 11], bonus: 0.25, tempMin: 18, tempMax: 22 },
-            "AKDENİZ": { months: [10, 11, 0], bonus: 0.2, tempMin: 19, tempMax: 23 },
-            "MARMARA": { months: [2, 3, 4], bonus: 0.18, tempMin: 13, tempMax: 16 }
+            "AKDENİZ": { months: [10, 11, 0], bonus: 0.2, tempMin: 19, tempMax: 23 }
         },
         note: "Yemi önce ezer, hemen tasmalama yapma.",
         noteEn: "Crush the bait first; don't strike immediately.", noteEl: "Crush the bait first; don't strike immediately.", noteEs: "Crush the bait first; don't strike immediately."
@@ -303,7 +302,7 @@ const SPECIES_DB = {
         name: "Ahtapot", nameEn: "Common Octopus", nameEl: "Κοινό χταπόδι", nameEs: "Pulpo", icon: "🐙", scientificName: "Octopus vulgaris",
         photoId: 47,
         category: "KAFADANBACAKLI",
-        huntingMode: "visual",
+        huntingMode: "chemosensory",
         // [DÜZELTME] Literatür Akdeniz popülasyonlarında baskın olarak gece/alacakaranlık
         // aktivitesi gösteriyor (dens'te gündüz saklanma, alacakaranlıkta çıkış) — DAY yanlıştı.
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık ve gece, kovuklardan çıkış", peakHoursDescEn: "Dusk and night, emerging from dens", peakHoursDescEl: "Dusk and night, emerging from dens", peakHoursDescEs: "Anochecer y noche",
@@ -311,7 +310,7 @@ const SPECIES_DB = {
         // çıkıyor ve ahtapot avcılığı yaz aylarında da (örn. Bodrum/Datça) sürüyor.
         tempRange: { min: 13, opt: 20, max: 27 },
         seasons: { winter: 0.65, spring: 0.50, summer: 0.30, autumn: 0.55 },
-        activity: "DAWN_DUSK",
+        activity: "NIGHT",
         pressureSensitivity: 0.5,
         wavePref: 0.1, clarityPref: "MODERATE",
         currentPref: 0.1,
@@ -328,7 +327,7 @@ const SPECIES_DB = {
     },
 
     "kikla": {
-        name: "Kikla-Ot Balığı", nameEn: "Ballan Wrasse", nameEl: "Ballan Wrasse", nameEs: "Bodión", icon: "🐟", scientificName: "Labrus viridis",
+        name: "Kikla-Ot Balığı", nameEn: "Green Wrasse", nameEl: "Ballan Wrasse", nameEs: "Bodión", icon: "🐟", scientificName: "Labrus viridis",
         photoId: 74,
         category: "KAYALIK",
         
@@ -462,7 +461,7 @@ const SPECIES_DB = {
         pressureSensitivity: 0.4,
         wavePref: 0.4, clarityPref: "TURBID",
         currentPref: 0.3,
-        salinityPref: "ANY",  // Lagün türü — düşük/acı tuzlu suyu tercih eder,
+        salinityPref: "LOW", // [2026-08-03] ANY→LOW geri alındı: rivermouth.js bu türü adıyla "salinityPref LOW" varsayarak yazılmış; ANY motorun tuzluluk bloğunu tamamen atlatıyor (server.js) ve nehir ağzı bonusunu iptal ediyordu.,  // Lagün türü — düşük/acı tuzlu suyu tercih eder,
         planktonPref: "MEDIUM",
         sstTrendPref: "ANY",
         regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
@@ -762,7 +761,7 @@ const SPECIES_DB = {
         pressureSensitivity: 0.4,
         wavePref: 0.3, clarityPref: "TURBID",
         currentPref: 0.3,
-        salinityPref: "ANY",  // Lagün türü — düşük/acı tuzlu suyu tercih eder
+        salinityPref: "LOW", // [2026-08-03] ANY→LOW geri alındı — kefal ile aynı gerekçe (rivermouth.js öriyalin kefalgilleri LOW bekliyor).,  // Lagün türü — düşük/acı tuzlu suyu tercih eder
         regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
         depth: { min: 0, opt: 5, max: 20 },
         advice: { bait: "Ekmek, Kıbrıs Sarma", lure: "Yok", rig: "Kıbrıs Takımı, Şamandıralı", hook: "6 - 10", baitEn: "Bread, Cypriot rig bait", baitEl: "Bread, Cypriot rig bait", baitEs: "Pan, Cypriot rig bait", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Cypriot rig, float", rigEl: "Cypriot rig, float", rigEs: "Cypriot rig, float", hookEn: "6 - 10", hookEl: "6 - 10", hookEs: "6 - 10" },
@@ -1007,7 +1006,7 @@ const SPECIES_DB = {
         noteEn: "Can grow huge (2m+). Night predator. Prefers rocky crevices.", noteEl: "Can grow huge (2m+). Night predator. Prefers rocky crevices.", noteEs: "Can grow huge (2m+). Night predator. Prefiere rocky crevices."
     },
     "zurna": {
-        name: "Zurna", nameEn: "European Barracuda", nameEl: "Ευρωπαϊκό Barracuda", nameEs: "European Barracuda", icon: "🐟", scientificName: "Sphyraena sphyraena",
+        name: "İskarmoz (Zurna)", nameEn: "European Barracuda", nameEl: "Ευρωπαϊκό Barracuda", nameEs: "European Barracuda", icon: "🐟", scientificName: "Sphyraena sphyraena",
         photoId: 52,
         category: "AVCI",
         huntingMode: "visual",
@@ -1133,6 +1132,7 @@ const SPECIES_DB = {
         depth: { min: 2, opt: 20, max: 60 },
         advice: { bait: "Balık Eti", lure: "Yok", rig: "Ağır Dip", hook: "4/0 - 6/0", baitEn: "Fish strip", baitEl: "Fish strip", baitEs: "Tira de pescado", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Heavy bottom", rigEl: "Heavy bottom", rigEs: "Pesado bottom", hookEn: "4/0 - 6/0", hookEl: "4/0 - 6/0", hookEs: "4/0 - 6/0" },
         legalSize: "Avı yasak — yakalarsanız bırakın",
+        protected: true,
         note: "DİKKAT: Zehirli dikeni var! Tutarken çok dikkatli olun.",
         noteEn: "CAUTION: Venomous spine! Handle with great care.", noteEl: "CAUTION: Venomous spine! Handle with great care.", noteEs: "CAUTION: Venomous spine! Handle with great care."
     },
@@ -1141,7 +1141,7 @@ const SPECIES_DB = {
         photoId: 72,
         category: "KAYALIK",
         
-        huntingMode: "visual",shoreMonths: [5, 6, 7, 8, 9], // kıyıya yaklaşma ayları (0=Ocak)
+        huntingMode: "visual", // shoreMonths KALDIRILDI — motor bu alanı yalnız PELAJIK/AVCI/DIP_DERIN/SÜRÜ kategorilerinde okuyor; KAYALIK türünde ölü veriydi.
         peakHours: "DAY", peakHoursDesc: "Gündüz, kayalık", peakHoursDescEn: "Daytime, rocky", peakHoursDescEl: "Daytime, rocky", peakHoursDescEs: "Durante el día",
         tempRange: { min: 18, opt: 24, max: 28 },
         seasons: { winter: 0.25, spring: 0.50, summer: 0.85, autumn: 0.65 },
@@ -1158,7 +1158,7 @@ const SPECIES_DB = {
         noteEn: "Hard-jawed; snaps hooks. Has a powerful trigger mechanism.", noteEl: "Hard-jawed; snaps hooks. Has a powerful trigger mechanism.", noteEs: "Hard-jawed; snaps hooks. Has a powerful trigger mechanism."
     },
     "kurbaga": {
-        name: "Kurbağa Balığı (İskarmoz)", nameEn: "Atlantic Stargazer", nameEl: "Atlantic Stargazer", nameEs: "Atlantic Stargazer", icon: "🐟", scientificName: "Uranoscopus scaber",
+        name: "Kurbağa Balığı", nameEn: "Atlantic Stargazer", nameEl: "Atlantic Stargazer", nameEs: "Atlantic Stargazer", icon: "🐟", scientificName: "Uranoscopus scaber",
         photoId: 79,
         category: "DIP_KIYI",
         huntingMode: "ambush",
@@ -1460,7 +1460,7 @@ const SPECIES_DB = {
         regions: ["KARADENİZ", "MARMARA"],
         depth: { min: 20, opt: 40, max: 70 },
         advice: { bait: "Canlı Hamsi, İstavrit, Balık Fleto", lure: "Yok", rig: "Uzun Köstekli Ağır Dip Oltası", hook: "2 - 6", baitEn: "Live anchovy, horse mackerel, fillet", baitEl: "Live anchovy, horse mackerel, fillet", baitEs: "Live Boquerón, horse mackerel, fillet", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Long trace heavy bottom rig", rigEl: "Long trace heavy bottom rig", rigEs: "Bajo de línea largo Pesado Aparejo de fondo", hookEn: "2 - 6", hookEl: "2 - 6", hookEs: "2 - 6" },
-        legalSize: "45 cm",
+        legalSize: "45 cm — ilkbaharda üreme dönemi av yasağı uygulanır, güncel tebliği kontrol edin",
         note: "Değerli ve nadir. Karadeniz'e özgü. Kumlu dibe kamufle olur — yavaş yem hareketi şart.",
         noteEn: "Valuable and rare. Endemic to Black Sea. Camouflages on sandy bottom — slow bait movement essential.", noteEl: "Valuable and rare. Endemic to Black Sea. Camouflages on sandy bottom — slow bait movement essential.", noteEs: "Valuable and rare. Endemic to Black Sea. Camouflages on sandy bottom — slow bait movement essential."
     },
@@ -1555,7 +1555,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 10, opt: 50, max: 200 },
         advice: { bait: "Canlı balık, Ahtapot", lure: "Büyük Silikon", rig: "Dip", hook: "4/0 - 6/0", baitEn: "Live fish, octopus", baitEl: "Live fish, octopus", baitEs: "Live fish, octopus", lureEn: "Large soft plastic", lureEl: "Large soft plastic", lureEs: "Large Vinilo", rigEn: "Bottom", rigEl: "Bottom", rigEs: "Bottom", hookEn: "4/0 - 6/0", hookEl: "4/0 - 6/0", hookEs: "4/0 - 6/0" },
-        legalSize: "50 cm — Haziran/Temmuz/Ağustos avı yasak. Günlük limit: 2 adet.",
+        legalSize: "50 cm — Haziran/Temmuz/Ağustos avı yasak. Günlük limit: 1 adet.",
         note: "⚠️ KORUMA ALTINDA. 1 Haziran - 31 Ağustos arası avlanması yasaktır. 45 cm altı tüm yıl yasak. Yakaladığınızda mutlaka serbest bırakın!",
         noteEn: "WARNING: PROTECTED. Fishing prohibited 1 June - 31 August. Fish under 45cm prohibited all year. Always release when caught!", noteEl: "WARNING: PROTECTED. Fishing prohibited 1 June - 31 August. Fish under 45cm prohibited all year. Always release when caught!", noteEs: "WARNING: PROTECTED. Fishing prohibido 1 June - 31 August. Fish under 45cm prohibido all year. Always release when caught!"
     },
@@ -1821,7 +1821,7 @@ const SPECIES_DB = {
         // [DÜZELTME] Not, türün genel olarak "nesli tehlikede" olduğunu söylüyordu ama
         // Türkiye'ye özgü somut yasal av dönemini (1 Ekim-31 Aralık dışında avı yasak,
         // kota sistemi) belirtmiyordu — kullanıcının fiilen uyması gereken kural buydu.
-        legalSize: "50 cm (sadece 1 Ekim-31 Aralık arası, kotalı)",
+        legalSize: "50 cm — dönemsel av yasağı var; tarihler doğrulanamadı, güncel tebliği kontrol edin (IUCN: Kritik Tehlikede, CITES Ek-II)",
         note: "Gece avcısı. Lagün, nehir ağzı ve sığ kıyılarda bulunur. Türkiye'de SADECE 1 Ekim-31 Aralık arasında, kota dahilinde avlanabilir; bu tarihler dışında avı yasaktır. İç sularda min. boy 50 cm, günlük limit 3 adet. Avrupa genelinde nesli kritik tehlike altında — mümkünse serbest bırakın.",
         noteEn: "Night predator. Found in lagoons, river mouths and shallow shores. In Turkey, legally fishable ONLY between Oct 1-Dec 31 under a quota system; banned outside that window. Min. size 50cm in inland waters, daily limit 3. Critically endangered across Europe — release if possible.", noteEl: "Night predator. In Turkey, legally fishable only Oct 1-Dec 31 under quota; banned outside that window. Critically endangered — release if possible.", noteEs: "Depredador nocturno. En Turquía, la pesca es legal solo del 1 de octubre al 31 de diciembre bajo cuota; prohibida fuera de ese período. En peligro crítico — libere si es posible."
     },
