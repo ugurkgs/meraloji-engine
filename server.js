@@ -3128,6 +3128,94 @@ function resolveBio(fish) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// BÖLGESEL BOLLUK (ABUNDANCE) FAKTÖRÜ — TÜİK ile kalibre edildi [2026-08-03]
+// ─────────────────────────────────────────────────────────────────────────────
+// [BİLİMSEL NOT]: Bir balığın bölgede "var olması" (isInHabitat) ile "bol olması"
+// farklıdır. Karadeniz'de Mırmır bulunur ancak Ege'deki yoğunluğa sahip değildir.
+//
+// Kaynak: TÜİK Su Ürünleri İstatistikleri, 'Avlanan Deniz Ürünleri Miktarı',
+// tür × deniz × yıl (79 tür, 5 deniz, 2000-2025). Pencere: 2016-2025.
+//
+// YÖNTEM — ham tonaj DOĞRUDAN kullanılmadı, çünkü ticari av 3 şeyi karıştırır:
+// biyolojik bolluk (istediğimiz) + pazar değeri + av aracı seçiciliği (istemediğimiz).
+// Bunun yerine TÜR-İÇİ, BÖLGELER-ARASI pay kullanıldı: bir türün piyasa değeri
+// Marmara'da da Ege'de de aynı olduğu için, pay karşılaştırması o yanlılığı sadeleştirir.
+//   pay = bölgenin avı / türün en yüksek bölgesindeki av
+// Ek güvenlik: bir tür o bölgede MUTLAK olarak bolsa (bölgenin kendi %75'lik
+// diliminin üstünde) pay ne olursa olsun ceza YOK. Marmara hamsisi (18.483 t/yıl)
+// bu yüzden cezasız — Karadeniz'e göre payı düşük olsa da orada gerçekten boldur.
+//
+// Kademe yumuşatıldı (taban 0.65): ticari istatistik olta avının birebir vekili
+// değildir, bu yüzden ceza bilinçli olarak hafif tutuldu. Hiçbir tür 1.0'ın
+// ÜSTÜNE çıkarılmaz — bu blok yalnızca aşağı yönlü çalışır. Elle kalibre edilmiş
+// önceki değerler (Marmara: akya 0.45, çipura 0.80, mırmır 0.85) TÜİK'in önerdiğinden
+// sıkı oldukları için aynen korundu; Karadeniz mırmır ise 0.70'ten 0.65'e çekildi
+// (0.5 t/yıl, ülke payı 0.012 — eldeki en seyrek kayıtlardan).
+//
+// ÇARPAN UYGULANMAYANLAR (istatistik burada bolluk göstergesi DEĞİL):
+//   çipura/levrek — Ege-Akdeniz'de 155.279 t + 165.055 t yetiştiricilik var;
+//                   kafes kaçakları doğal av rakamını şişiriyor
+//   vatoz         — pazar değeri yok; rakam bolluğu değil yan-av bildirimini ölçer
+//   aterin (gümüş)— yem/iskele balığı; Karadeniz'de bol ama ticari olarak çıkarılmaz
+//
+// [DÜZELTME 2026-08-03] Karadeniz bloğundaki 4 kayıttan 3'ü ÖLÜ KODDU: cipura,
+// mercan ve ahtapot'un species.js'teki `regions` alanında KARADENİZ hiç yok, yani
+// isInHabitat onları o bölgede zaten elemiyor ve bu satırlara hiç ulaşılmıyordu.
+// Ölçülerek doğrulandı. Yanıltıcı olmasın diye kaldırıldılar. Aynı hataya düşmemek
+// için aşağıdaki 40 hücrenin TAMAMI species.js `regions` alanına karşı doğrulandı;
+// yeni bir satır eklerken o türün o bölgede gerçekten kayıtlı olduğunu önce kontrol et.
+const ABUNDANCE = {
+    'KARADENİZ': {
+        dil_baligi: 0.65,     // Dil: 1.9 t/yıl, ülke payı 0.009
+        kupes: 0.65,          // Kupez: 17.2 t/yıl, ülke payı 0.007
+        mirmir: 0.65,         // Mırmır: 0.5 t/yıl, ülke payı 0.012
+        karagoz: 0.80,        // Karagöz: 2.4 t/yıl, ülke payı 0.041
+        sardalya: 0.80,       // Sardalya: 417.0 t/yıl, ülke payı 0.037
+        uskumru: 0.80,        // Uskumru: 4.6 t/yıl, ülke payı 0.034
+        izmarit: 0.92,        // İzmarit: 7.5 t/yıl, ülke payı 0.068
+        kolyoz: 0.92,         // Kolyoz: 64.8 t/yıl, ülke payı 0.060
+        minekop: 0.92,        // Minekop: 2.6 t/yıl, ülke payı 0.147
+    },
+    'MARMARA': {
+        akya: 0.45,           // önceki elle kalibrasyon korundu (TÜİK 0.65'ten sıkı)
+        barbun: 0.65,         // Barbunya: 8.2 t/yıl, ülke payı 0.015
+        mercan: 0.65,         // Mercan: 3.5 t/yıl, ülke payı 0.006
+        sinarit: 0.65,        // Sinagrit: 0.8 t/yıl, ülke payı 0.015
+        cipura: 0.80,         // önceki elle kalibrasyon korundu (yetiştiricilik nedeniyle TÜİK dışı)
+        dulger: 0.80,         // Dülger: 1.0 t/yıl, ülke payı 0.026
+        kalkan: 0.80,         // Kalkan: 19.9 t/yıl, ülke payı 0.057
+        kupes: 0.80,          // Kupez: 51.5 t/yıl, ülke payı 0.022
+        melanur: 0.80,        // Melanurya: 2.8 t/yıl, ülke payı 0.042
+        tirsi: 0.80,          // Tirsi: 36.6 t/yıl, ülke payı 0.026
+        mirmir: 0.85,         // önceki elle kalibrasyon korundu (Mırmır: 10.9 t/yıl, pay 0.266)
+        dil_baligi: 0.92,     // Dil: 34.1 t/yıl, ülke payı 0.167
+        isparoz: 0.92,        // İsparoz: 3.9 t/yıl, ülke payı 0.101
+        izmarit: 0.92,        // İzmarit: 12.0 t/yıl, ülke payı 0.110
+        karagoz: 0.92,        // Karagöz: 4.8 t/yıl, ülke payı 0.081
+        lipsoz: 0.92,         // Lipsöz: 1.2 t/yıl, ülke payı 0.082
+        minekop: 0.92,        // Minekop: 1.6 t/yıl, ülke payı 0.092
+        sarpa: 0.92,          // Sarpa: 13.7 t/yıl, ülke payı 0.115
+    },
+    'EGE': {
+        cinekop: 0.80,        // Lüfer: 138.6 t/yıl, ülke payı 0.044 (çinekop = genç lüfer)
+        lufer: 0.80,          // Lüfer: 138.6 t/yıl, ülke payı 0.044
+    },
+    'AKDENİZ': {
+        uskumru: 0.65,        // Uskumru: 0.6 t/yıl, ülke payı 0.005
+        cinekop: 0.80,        // Lüfer: 56.6 t/yıl, ülke payı 0.018 (çinekop = genç lüfer)
+        dulger: 0.80,         // Dülger: 1.1 t/yıl, ülke payı 0.028
+        fener: 0.80,          // Fener Balığı: 5.3 t/yıl, ülke payı 0.045
+        lufer: 0.80,          // Lüfer: 56.6 t/yıl, ülke payı 0.018
+        sarpa: 0.80,          // Sarpa: 3.3 t/yıl, ülke payı 0.028
+        tekir: 0.80,          // Tekir: 23.9 t/yıl, ülke payı 0.015
+        zargana: 0.80,        // Zargana: 1.6 t/yıl, ülke payı 0.017
+        kupes: 0.92,          // Kupez: 173.0 t/yıl, ülke payı 0.073
+        melanur: 0.92,        // Melanurya: 8.1 t/yıl, ülke payı 0.124
+        sinarit: 0.92,        // Sinagrit: 4.0 t/yıl, ülke payı 0.073
+    },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // PUANLAMA MOTORU
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -3868,26 +3956,8 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // === KATMAN 1: TEMEL TOPLAM (BASE POTENTIAL) ===
     let rawScore = s_season + s_temp + s_env + s_activity + s_trigger;
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // BÖLGESEL BOLLUK (ABUNDANCE) FAKTÖRÜ — [YENİ v4.1]
-    // ─────────────────────────────────────────────────────────────────────────────
-    // [BİLİMSEL NOT]: Bir balığın bölgede "var olması" (isInHabitat) ile "bol olması"
-    // farklıdır. Karadeniz'de Mırmır bulunur ancak Ege'deki yoğunluğa sahip değildir.
-    // ═══════════════════════════════════════════════════════════════════════════
-    // [DÜZELTME 2026-08-03] Karadeniz bloğundaki 4 kayıttan 3'ü ÖLÜ KODDU: cipura,
-    // mercan ve ahtapot'un species.js'teki `regions` alanında KARADENİZ hiç yok, yani
-    // isInHabitat onları o bölgede zaten elemiyor ve bu satırlara hiç ulaşılmıyordu.
-    // Ölçülerek doğrulandı. Yanıltıcı olmasın diye kaldırıldılar; gerçekten çalışan
-    // tek kayıt (mirmir) korundu. Bir tür Karadeniz'de seyrekse çözüm burada çarpan
-    // yazmak değil, önce species.js'te o bölgeye eklemektir.
-    let abundanceMult = 1.0;
-    if (region === 'KARADENİZ') {
-        if (key === 'mirmir') abundanceMult = 0.70; // Karadeniz'de seyrek popülasyon
-    } else if (region === 'MARMARA') {
-        if (key === 'mirmir') abundanceMult = 0.85; // Marmara'da orta yoğunluk
-        else if (key === 'cipura') abundanceMult = 0.80;
-        else if (key === 'akya') abundanceMult = 0.45;
-    }
+    // Bölgesel bolluk cezası — tablo ve gerekçesi için yukarıdaki ABUNDANCE tanımına bak.
+    const abundanceMult = (ABUNDANCE[region] && ABUNDANCE[region][key]) || 1.0;
 
     rawScore *= abundanceMult;
     scoreDetails.abundance = { multiplier: abundanceMult, region };
