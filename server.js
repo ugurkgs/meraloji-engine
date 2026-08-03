@@ -3874,12 +3874,15 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // [BİLİMSEL NOT]: Bir balığın bölgede "var olması" (isInHabitat) ile "bol olması"
     // farklıdır. Karadeniz'de Mırmır bulunur ancak Ege'deki yoğunluğa sahip değildir.
     // ═══════════════════════════════════════════════════════════════════════════
+    // [DÜZELTME 2026-08-03] Karadeniz bloğundaki 4 kayıttan 3'ü ÖLÜ KODDU: cipura,
+    // mercan ve ahtapot'un species.js'teki `regions` alanında KARADENİZ hiç yok, yani
+    // isInHabitat onları o bölgede zaten elemiyor ve bu satırlara hiç ulaşılmıyordu.
+    // Ölçülerek doğrulandı. Yanıltıcı olmasın diye kaldırıldılar; gerçekten çalışan
+    // tek kayıt (mirmir) korundu. Bir tür Karadeniz'de seyrekse çözüm burada çarpan
+    // yazmak değil, önce species.js'te o bölgeye eklemektir.
     let abundanceMult = 1.0;
     if (region === 'KARADENİZ') {
         if (key === 'mirmir') abundanceMult = 0.70; // Karadeniz'de seyrek popülasyon
-        else if (key === 'cipura') abundanceMult = 0.40; // Çok nadir (tesadüfi)
-        else if (key === 'mercan') abundanceMult = 0.30; // Neredeyse hiç yok
-        else if (key === 'ahtapot') abundanceMult = 0.20; // Karadeniz'de yok denecek kadar az
     } else if (region === 'MARMARA') {
         if (key === 'mirmir') abundanceMult = 0.85; // Marmara'da orta yoğunluk
         else if (key === 'cipura') abundanceMult = 0.80;
