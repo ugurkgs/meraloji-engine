@@ -4099,8 +4099,38 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         //      kalibre edilmiş türlerde skor derinlikten bağımsız düşer.
         // Tabanı değiştirmek en son çare olmalı: tek sayı, tüm dünyayı etkiler.
         const KIYI_SIG_TABAN = 0.20;
+
+        // ───────────────────────────────────────────────────────────────────
+        // SIĞ TOLERANSLI PELAJİKLER [2026-08-03]
+        // ───────────────────────────────────────────────────────────────────
+        // "Pelajik" ile "derin su ister" aynı şey DEĞİLDİR. Lüfer (Pomatomus
+        // saltatrix) literatürde pelagic-neritic'tir: su kolonunda yaşar ve göç
+        // eder, AMA yem balığını sıkıştırmak için sörf bölgesine, koy içlerine ve
+        // haliçlere girer. Çinekop evresi belirgin şekilde haliç balığıdır.
+        // Kıyıdan lüfer atılması bu yüzden normaldir.
+        //
+        // Kategoriyi değiştirmek ÇÖZÜM DEĞİL: KIYI_AVCI zaten PELAGIC_CATEGORIES
+        // içindedir, yani türü KIYI_AVCI yapmak onu bu banda sokmaz.
+        // Doğru ayırt edici, türün KENDİ beyan ettiği depth.min değeridir —
+        // min=1 yazan bir tür zaten "1 metreye girerim" diyordur.
+        //
+        // Veride doğal bir boşluk var: pelajiklerin min'i ya ≤2 ya da ≥4.
+        // Eşik 3 bu boşluğa oturur. ≤2 grubu: levrek(0.5) lüfer(1) aterin(1)
+        // kupes(1) baraküda(2) çinekop(2) tirsi(2) — hepsi gerçekten sığa girer.
+        // ≥5 grubu (hamsi, istavrit, uskumru, palamut, akya) kesilmeye devam eder.
+        //
+        // Bu türlerde MEVCUT pelajik eğrisi 0'a kadar uzatılır (0.45 + 0.35·d/fMin).
+        // Eğri aynen korunduğu için fMin/2 üstünde HİÇBİR skor değişmez; sadece
+        // altındaki sert kesme kalkar.
+        const SIG_PELAJIK_ESIK = 3;
+        const isShallowPelagic = isPelagicType && fMin > 0 && fMin < SIG_PELAJIK_ESIK;
         const isShoreTolerant = !isPelagicType && fMin > 0;
-        if (isShoreTolerant && d < fMin) {
+
+        if (isShallowPelagic && d < fMin) {
+            depthScore = 0.45 + 0.35 * (d / fMin);
+            if (d < effectiveMin * 0.5) penalties.push(i18n(lang).penalties.tooShallowSpot);
+            else penalties.push(i18n(lang).penalties.shallowSpot);
+        } else if (isShoreTolerant && d < fMin) {
             depthScore = KIYI_SIG_TABAN + (0.70 - KIYI_SIG_TABAN) * (d / fMin);
             if (d < effectiveMin * 0.5) penalties.push(i18n(lang).penalties.tooShallowSpot);
             else penalties.push(i18n(lang).penalties.shallowSpot);
