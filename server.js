@@ -4078,9 +4078,30 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         //
         // PELAJİKLER HARİÇ: orkinos/akya gibi türler için 10 cm su gerçekten
         // imkansızdır, onlarda sert kesme korunur (aşağıdaki dallar).
+        //
+        // ───────────────────────────────────────────────────────────────────
+        // DERİNLİKLE İLGİLİ BİR SORUN ARIYORSANIZ ÖNCE BURAYI OKUYUN
+        // ───────────────────────────────────────────────────────────────────
+        // 0.20 tabanı bilinçli bir ORTA YOL. Neden bu değer:
+        //   • Daha yüksek olsaydı (denendi: sabit 0.45) 20 metrelik lipsöz su
+        //     kenarında 24 puan alıp listeye giriyordu — açıkça yanlış.
+        //   • Daha düşük olsaydı eski davranışa dönerdik: kıyıdan gerçekten
+        //     tutulan vatoz/isparoz 15 kapısını geçemez, liste boş görünürdü.
+        // 0.20 ile su kenarında tür puanının %80'ini kaybeder ama elenmez.
+        //
+        // "X türü sığda çıkmıyor / fazla çıkıyor" şikâyeti gelirse sırasıyla:
+        //   1. Türün KENDİ depth.min'i doğru mu? Ceza d/fMin oranıyla ölçekli,
+        //      yani asıl belirleyici bu sayıdır — tabanı oynatmadan önce onu bak.
+        //   2. Tür PELAJİK mi? Öyleyse bu banda hiç girmez, sert kesme yer.
+        //      Ama dikkat: KIYI_AVCI da PELAGIC_CATEGORIES içindedir; kategoriyi
+        //      KIYI_AVCI yapmak türü bu modele SOKMAZ.
+        //   3. Sorun sıcaklık olabilir — tempRange.opt yaz sularına göre soğuk
+        //      kalibre edilmiş türlerde skor derinlikten bağımsız düşer.
+        // Tabanı değiştirmek en son çare olmalı: tek sayı, tüm dünyayı etkiler.
+        const KIYI_SIG_TABAN = 0.20;
         const isShoreTolerant = !isPelagicType && fMin > 0;
         if (isShoreTolerant && d < fMin) {
-            depthScore = 0.20 + 0.50 * (d / fMin);
+            depthScore = KIYI_SIG_TABAN + (0.70 - KIYI_SIG_TABAN) * (d / fMin);
             if (d < effectiveMin * 0.5) penalties.push(i18n(lang).penalties.tooShallowSpot);
             else penalties.push(i18n(lang).penalties.shallowSpot);
         } else if (d < effectiveMin * 0.5) {
