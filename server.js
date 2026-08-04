@@ -6317,6 +6317,9 @@ app.post('/api/verify-subscription', async (req, res) => {
     // kapalıysa veya alan gelmezse null kalır → eski sabit 30/365 gün hesabına düşülür.
     let googleExpiryMs = null;
 
+    // [Y3] Google'ın bildirdiği GERÇEK başlangıç zamanı. Bkz. aşağıdaki startedAt notu.
+    let googleStartMs = null;
+
     // ── Google Play Doğrulaması ──
     if (GOOGLE_PLAY_VERIFY) {
         try {
@@ -6369,6 +6372,16 @@ app.post('/api/verify-subscription', async (req, res) => {
                 if (!isNaN(_ms) && _ms > Date.now()) googleExpiryMs = _ms;
             }
 
+            // [Y3] Gerçek başlangıç: subscriptionsv2 → startTime (RFC3339). Aboneliğin
+            // İLK verildiği andır, yenilemelerde değişmez — yani "bu kullanıcı ne zamandır
+            // abone" sorusunun doğru cevabı. Bekleyen (pending) satın alımda gelmeyebilir,
+            // o durumda null kalır ve aşağıdaki zincir devreye girer.
+            const _startStr = purchase.startTime;
+            if (_startStr) {
+                const _sms = new Date(_startStr).getTime();
+                if (!isNaN(_sms)) googleStartMs = _sms;
+            }
+
             // CANCELED için GERÇEK gelecekteki bitiş ZORUNLU. Bitiş yok/geçmişse
             // sabit süre fallback'iyle (30/365 gün) erişimi UZATMA — süresi dolmuş say.
             if (isCanceledButActive && !googleExpiryMs) {
@@ -6413,12 +6426,34 @@ app.post('/api/verify-subscription', async (req, res) => {
             // [Y2] Google gerçek bitişi verdiyse onu kullan; yoksa eski sabit süre (fallback).
             const effectiveExpiresAt = googleExpiryMs || (Date.now() + durationMs);
 
+            // [Y3 - 2026-08-04] startedAt eskiden koşulsuz `Date.now()` idi. Bu uç HER
+            // doğrulamada çağrıldığı için (uygulama açılışı, satın alma geri yükleme) alan
+            // sürekli eziliyor, "abonelik başlangıcı" yerine "son doğrulama anı" tutuyordu.
+            // Gerçek örnek: 7 Temmuz'da alınan aylık abonelik 23 Temmuz damgası taşıyordu;
+            // panelde 31 günlük dönem 15 gün gibi görünüp faturalandırma hatası sanıldı.
+            //
+            // Öncelik sırası:
+            //   1) Google'ın startTime'ı — tek gerçek kaynak, yenilemede değişmez
+            //   2) AYNI satın alma jetonuna ait mevcut kayıttaki değer
+            //   3) şimdi (ilk kayıt, veya doğrulama kapalıyken yeni jeton)
+            // Jeton farklıysa yeni bir abonelik demektir; eski tarih taşınmaz.
+            //
+            // GÜVENLİK NOTU: startedAt hiçbir yerde OKUNMUYOR — sunucuda da, arayüzde de.
+            // Salt gösterim/raporlama alanı. Erişim kontrolü expiresAt (ve users/{uid}.
+            // proExpiresAt) üzerinden yürür, bkz. auth middleware. Yani bu alanın değeri
+            // hiçbir kullanıcının PRO durumunu etkileyemez.
+            const _prev = existing.exists ? existing.data() : null;
+            const _samePurchase = !!(_prev && _prev.purchaseToken === purchaseToken);
+            const effectiveStartedAt = googleStartMs
+                || (_samePurchase ? _prev.startedAt : null)
+                || Date.now();
+
             await userSubRef.set({
                 status: 'active',
                 subscriptionId: subId,
                 purchaseToken: purchaseToken,
                 isYearly,
-                startedAt: Date.now(),
+                startedAt: effectiveStartedAt,
                 expiresAt: effectiveExpiresAt,
                 updatedAt: Date.now(),
                 email: userEmail,
