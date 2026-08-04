@@ -4049,36 +4049,64 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         // effectiveMin: kıyı türleri (fMin=0) için 0m; diğerleri için minimum 0.5m eşik.
         const effectiveMin = fMin === 0 ? 0 : Math.max(fMin, 0.5);
 
-        if (d < effectiveMin * 0.5) {
-            // [DÜZELTME] İmkansız derinlik — pelajik muafiyeti burada KALDIRILDI. Eskiden
-            // "PELAJIK/AVCI kategorisi = muaf" kuralı, açık deniz/yapı bağımlı büyük avcıları
-            // (ör. Akya, min=10m) sığ bir kumsalda (1m) tam puan almasına yol açıyordu — çünkü
-            // "dikey göç" mazereti orada su kolonunun kendisi yok denecek kadar sığken geçerli
-            // değildir (göç edecek derin su yok, yapı yok). Eşik türün KENDİ asgari derinliğinin
-            // yarısı olduğundan, gerçekten sığ toleranslı türler (aterin min=1, lüfer min=1 gibi)
-            // bu daldan hâlâ etkilenmez — sadece min'i büyük türlerde (Akya gibi) devreye girer.
+        // ═══════════════════════════════════════════════════════════════════
+        // KIYI BELİRSİZLİK BANDI — kıyı türleri için sert kesme YOK [2026-08-03]
+        // ───────────────────────────────────────────────────────────────────
+        // SORUN: aşağıdaki "imkansız derinlik" dalı fMin/2'nin altında çarpanı
+        // 0.05'e sabitliyordu. Bu, kıyı türlerinde bir UÇURUM yaratıyordu —
+        // vatoz (fMin=2) için 1.01 m'de ×0.503, 0.99 m'de ×0.05: iki santimde
+        // on kat düşüş. Kıyıdan vatoz/isparoz tutulduğu hâlde liste boş kalıyordu.
+        //
+        // NEDEN KESME YANLIŞ: kıyı şeridinde derinlik ÖLÇÜLEMİYOR. EMODnet bu
+        // bantta metre mertebesinde şaşabilir; 0.1 m okunan nokta gerçekte 1-2 m
+        // olabilir. Ölçüm belirsizken türü kesin dille elemek, veriye sahip
+        // olduğumuzdan fazlasını iddia etmek olur. Üstelik bu türlerin çoğu
+        // gerçekten köpüğün içinde beslenir.
+        //
+        // MODEL: kesme kaldırıldı, mevcut kademeli eğri d=0'a kadar UZATILDI ve
+        // normal aralığın başlangıcıyla sürekli hâle getirildi:
+        //     depthScore = 0.20 + 0.50 × (d / fMin)
+        //   d = fMin  → 0.70  (normal aralığın başlangıcı — artık uçurum yok)
+        //   d = 0     → 0.20  (taban; ceza ağır ama tür elenmez)
+        //
+        // Cezanın min'e UZAKLIKLA orantılı olması kritik: oran d/fMin olduğu için
+        // min'i büyük türler kıyıda kendiliğinden dibe iner. Örnek, 0.1 m'de:
+        //   vatoz  (min 2 m)  → ×0.225   listeye girer, belirgin cezalı
+        //   lipsöz (min 20 m) → ×0.203'ün altında kalan ham skorla 15 kapısını geçemez
+        // Yani "20 metrelik tür su kenarında çıkmasın" kuralı ayrı bir eşik
+        // gerektirmeden sağlanır.
+        //
+        // PELAJİKLER HARİÇ: orkinos/akya gibi türler için 10 cm su gerçekten
+        // imkansızdır, onlarda sert kesme korunur (aşağıdaki dallar).
+        const isShoreTolerant = !isPelagicType && fMin > 0;
+        if (isShoreTolerant && d < fMin) {
+            depthScore = 0.20 + 0.50 * (d / fMin);
+            if (d < effectiveMin * 0.5) penalties.push(i18n(lang).penalties.tooShallowSpot);
+            else penalties.push(i18n(lang).penalties.shallowSpot);
+        } else if (d < effectiveMin * 0.5) {
+            // İMKANSIZ DERİNLİK — artık YALNIZCA pelajik türlere uygulanır; kıyı türleri
+            // yukarıdaki bantta yakalandığı için buraya hiç düşmez.
+            //
+            // [DÜZELTME] Pelajik muafiyeti burada KALDIRILMIŞTI: "PELAJIK/AVCI = muaf" kuralı,
+            // açık deniz/yapı bağımlı büyük avcıları (ör. Akya, min=10m) sığ bir kumsalda (1m)
+            // tam puan almasına yol açıyordu — "dikey göç" mazereti su kolonunun kendisi yok
+            // denecek kadar sığken geçerli değildir. Bu davranış korunuyor.
+            //
+            // [NOT 2026-08-03] Eski yorum "aterin/lüfer gibi min=1 türler bu daldan etkilenmez"
+            // diyordu; bu YANLIŞTI — min=1'de eşik 0.5 m olduğundan 0.1 m okuyan kıyı noktası
+            // tam da bu dala düşüyordu. Kıyı türleri için sorun yeni bantla çözüldü, ama
+            // PELAJİK kalan lüfer/çinekop hâlâ buraya düşer (bkz. kategori notu).
             depthScore = 0.05;
             penalties.push(i18n(lang).penalties.tooShallowSpot);
         } else if (fMin > 0 && d < fMin) {
-            // [DÜZELTME — TEKRAR UYGULANDI 2026-08-02] Eski koşul `!isPelagicType && ...` idi
-            // ve bir KÖR BANT bırakıyordu: derinlik `fMin/2` ile `fMin` arasındayken pelajik
-            // türler için hiçbir dal eşleşmiyor, depthScore başlangıç değeri olan 1.0'da
-            // kalıyor ve tür yaşayamayacağı sığlıkta 5/5 tam puan alıyordu.
-            //   • akya (min=10m)  → 6.3m kumsalda %69 ile listenin başı
-            //   • yazılı orkinos / palamut (min=5m) → 3.5m'de 5/5
-            // Üstelik aynı dosyadaki gerekçe motoru (bkz. "Derinlik kontrolü") bu muafiyeti
-            // içermiyor ve aynı balık için "çok sığ" uyarısı üretiyordu — skor ile açıklama
-            // birbiriyle çelişiyordu.
+            // fMin/2 ile fMin arası — bu dala artık yalnızca PELAJİK türler ulaşır
+            // (kıyı türleri yukarıdaki kıyı bandında, fMin=0 olanlar zaten normal aralıkta).
+            // Eskiden buradaki ternary'nin `!isPelagicType` kolu da vardı; kıyı bandı devreye
+            // girdikten sonra o kol ulaşılamaz hâle geldiği için kaldırıldı.
             //
-            // Pelajikler su kolonunda dikey göç ettiği için cezaları dip türlerinden YUMUŞAK
-            // tutuluyor (0.45–0.80 bandı), ama artık tam puan alamıyorlar. Dip türlerinin
-            // davranışı aynen korundu (0.20–0.80).
-            //
-            // NOT: Bu düzeltme 6826428 ile kazara geri alınmıştı; lütfen `!isPelagicType`
-            // koşulunu geri getirmeyin.
-            depthScore = isPelagicType
-                ? 0.45 + 0.35 * (d / fMin)
-                : 0.2 + 0.6 * (d / fMin);
+            // Pelajikler su kolonunda dikey göç ettiği için cezaları yumuşak (0.45–0.80),
+            // ama tam puan alamazlar.
+            depthScore = 0.45 + 0.35 * (d / fMin);
             penalties.push(i18n(lang).penalties.shallowSpot);
         } else if (d >= fMin && d <= fMax) {
             // Normal aralık — optimuma göre Gaussian benzeri
