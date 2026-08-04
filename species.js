@@ -1320,6 +1320,60 @@ const SPECIES_DB = {
         note: "Sürü halinde gezer. Ekmek ile bereketle avlanır.",
         noteEn: "Schools together. Easily caught with bread. Good yield.", noteEl: "Schools together. Easily caught with bread. Good yield.", noteEs: "Schools together. Easily caught with bread. Good yield."
     },
+    // [EKLENDİ 2026-08-04] Saha gözleminden geldi (SAHA-GOZLEMLERI.md): Didim 7 Tem
+    // ve Karaburun 29 Tem. Veritabanında hiç yoktu. Dikkat: aşağıdaki "trakun"
+    // kaydı Caranx crysos'tur, bambaşka bir balık — isim benzerliği yanıltmasın.
+    // Zehirli olduğu için listede görünmesi güvenlik açısından da önemli.
+    "trakonya": {
+        name: "Trakonya", nameEn: "Greater Weever", nameEl: "Δράκαινα", nameEs: "Escorpión", icon: "🦂", scientificName: "Trachinus draco",
+        category: "KUM_TABAN",
+        huntingMode: "ambush",
+        peakHours: "NIGHT", peakHoursDesc: "Gece kumda avlanır, 21:00-03:00", peakHoursDescEn: "Hunts over sand at night, 21:00-03:00", peakHoursDescEl: "Hunts over sand at night, 21:00-03:00", peakHoursDescEs: "Durante la noche",
+        // Norveç'ten Fas'a, tüm Akdeniz ve Karadeniz — geniş termal tolerans.
+        // Kullanıcı 25-26°C'de iki kez yakalandığını belgeledi (temmuz, Ege).
+        tempRange: { min: 8, opt: 21, max: 28 },
+        seasons: { winter: 0.3, spring: 0.65, summer: 0.95, autumn: 0.7 },
+        activity: "NIGHT",
+        pressureSensitivity: 0.3,
+        wavePref: 0.35, clarityPref: "ANY",
+        currentPref: 0.3,
+        salinityPref: "HIGH",
+        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
+        depth: { min: 0, opt: 15, max: 150 },
+        advice: { bait: "Deniz Kurdu, Karides, Balık Parçası", lure: "Yok", rig: "Dip Takımı", hook: "4 - 8", baitEn: "Marine worm, shrimp, fish strip", baitEl: "Marine worm, shrimp, fish strip", baitEs: "Gusano de mar, camarón, tira de pescado", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "4 - 8", hookEl: "4 - 8", hookEs: "4 - 8" },
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
+        note: "ZEHİRLİDİR. Sırt yüzgecindeki ve solungaç kapağındaki dikenler şiddetli ağrı yapar. Gündüz kuma gömülü yatar, sadece gözleri görünür — çıplak ayakla sığ kumda yürürken de basılır. Sokulursa yara yerini elden geldiğince sıcak suda (45°C) 30-90 dakika tutun ve hekime gidin. Balığı asla elle tutmayın, pense kullanın.",
+        noteEn: "VENOMOUS. The dorsal and gill-cover spines cause severe pain. It lies buried in sand by day with only its eyes showing, so it is also stepped on by bare feet in the shallows. If stung, immerse the wound in water as hot as can be tolerated (45°C) for 30-90 minutes and see a doctor. Never handle it by hand - use pliers.",
+        noteEl: "VENOMOUS. The dorsal and gill-cover spines cause severe pain. It lies buried in sand by day with only its eyes showing, so it is also stepped on by bare feet in the shallows. If stung, immerse the wound in water as hot as can be tolerated (45°C) for 30-90 minutes and see a doctor. Never handle it by hand - use pliers.",
+        noteEs: "VENENOSO. Las espinas dorsales y del opérculo causan un dolor intenso. De día permanece enterrado en la arena con solo los ojos a la vista, por lo que también se pisa descalzo en la orilla. Si le pica, sumerja la herida en agua tan caliente como pueda tolerar (45°C) durante 30-90 minutos y acuda al médico. Nunca lo sujete con la mano: use alicates."
+    },
+    // [EKLENDİ 2026-08-04] Saha gözleminden geldi: Aliağa 4 Tem, akşamüstü.
+    // Tür veritabanında vardı ama yalnızca "esp_chopa" olarak, bbox'ı Batı/Orta
+    // Akdeniz (boylam -6..20) — yani Ege'de (boylam ~26-27) hiç görünmüyordu.
+    // Türkiye kaydı yoktu; bu kayıt o boşluğu kapatıyor.
+    "iskatarya": {
+        name: "İskatarya (Sarıgöz)", nameEn: "Black Seabream", nameEl: "Σκαθάρι", nameEs: "Chopa", icon: "🐟", scientificName: "Spondyliosoma cantharus",
+        category: "DIP_KIYI",
+        huntingMode: "visual",
+        peakHours: "DAY", peakHoursDesc: "Gündüz, çayır ve kayalık kenarları", peakHoursDescEn: "Daytime, seagrass and rocky edges", peakHoursDescEl: "Daytime, seagrass and rocky edges", peakHoursDescEs: "Durante el día",
+        // esp_chopa'da max 24 yazıyor; kullanıcı 4 Temmuz'da ~25,5°C suda yakaladı.
+        // Ege gerçeğine göre 27'ye çekildi. Bkz. SAHA-GOZLEMLERI.md.
+        tempRange: { min: 9, opt: 19, max: 27 },
+        seasons: { winter: 0.7, spring: 0.95, summer: 0.75, autumn: 0.85 },
+        activity: "DAY",
+        pressureSensitivity: 0.35,
+        wavePref: 0.35, clarityPref: "ANY",
+        currentPref: 0.45,
+        salinityPref: "HIGH",
+        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        depth: { min: 0, opt: 25, max: 120 },
+        advice: { bait: "Deniz Kurdu, Karides, Midye", lure: "Küçük Silikon", rig: "Hafif Dip Takımı", hook: "4 - 8", baitEn: "Marine worm, shrimp, mussel", baitEl: "Marine worm, shrimp, mussel", baitEs: "Gusano de mar, camarón, mejillón", lureEn: "Small soft plastic", lureEl: "Small soft plastic", lureEs: "Vinilo pequeño", rigEn: "Light bottom rig", rigEl: "Light bottom rig", rigEs: "Aparejo de fondo ligero", hookEn: "4 - 8", hookEl: "4 - 8", hookEs: "4 - 8" },
+        legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
+        note: "Karagöz ve sargozla karıştırılır; gövdesi çipurayı, başı karagözü andırır. İlkbaharda erkeği kuma yuva kazıp yumurtayı bekler, o dönemde çok saldırgandır. Yörelere göre iskatari, sarıgöz, maviş ve fırtına adlarıyla da anılır.",
+        noteEn: "Often confused with two-banded and white seabream; body like a gilthead, head like a two-banded bream. In spring the male digs a nest in sand and guards the eggs, turning very aggressive.",
+        noteEl: "Often confused with two-banded and white seabream; body like a gilthead, head like a two-banded bream. In spring the male digs a nest in sand and guards the eggs, turning very aggressive.",
+        noteEs: "Se confunde a menudo con la mojarra y el sargo; cuerpo de dorada y cabeza de mojarra. En primavera el macho excava un nido en la arena y guarda la puesta, volviéndose muy agresivo."
+    },
     "yazili_orkinos": {
         name: "Yazılı Orkinos", nameEn: "Little Tunny", nameEl: "Καρβούνι", nameEs: "Bacoreta", icon: "🐟", scientificName: "Euthynnus alletteratus",
         photoId: 29,
