@@ -7098,8 +7098,22 @@ app.get('/api/scan', async (req, res) => {
         };
 
         // ── İstemci bağlantıyı keserse döngüyü durdur (bellek sızıntısı önlemi) ──
+        //
+        // [DÜZELTME 2026-08-05] `close`, Node'da SADECE kopmada tetiklenmez — istek
+        // NORMAL bittiğinde de tetiklenir (bkz. http.IncomingMessage 'close': "Emitted
+        // when the request has been completed, or its underlying connection was
+        // terminated prematurely"). Eskisi bu ayrımı yapmadığı için BAŞARIYLA biten her
+        // taramanın ardından da "İstemci bağlantıyı kesti" basıyordu; log'a bakan kişi
+        // taramaların yarıda kaldığını sanıyordu. Deneyle doğrulandı: başarılı akışta
+        // res.end() sonrası close geliyor ve writableEnded=true oluyor, gerçek kopmada
+        // ise writableEnded=false. Ayrımı yapan tek güvenilir alan bu.
+        //
+        // Not: bayrağın işlevsel etkisi yalnızca GERÇEK kopmada vardı; başarılı akışta
+        // close zaten döngü bittikten sonra geliyordu. Yani bu düzeltme tarama davranışını
+        // değiştirmez, sadece log'u dürüst yapar.
         let clientDisconnected = false;
         req.on('close', () => {
+            if (res.writableEnded) return;   // normal bitiş — kopma değil
             clientDisconnected = true;
             console.log(`[SCAN] [${logUser}] İstemci bağlantıyı kesti, tarama durduruluyor.`);
         });
