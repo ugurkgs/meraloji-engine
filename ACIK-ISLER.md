@@ -148,6 +148,43 @@ uçları için mutlaka yokluk verisi gerekir.
 
 Bkz. bölüm 5 — ayrı başlık altında.
 
+### 4.2b Sıcaklık katmanı: toplamsal mı kalsın, çarpımsal mı olsun `ENGELLİ`
+
+**Engel:** 4.1 (`tempRange` kalibrasyonu) bitmeden karara bağlanamaz.
+
+`server.js:3987` beş katmanı **topluyor**:
+
+```js
+let rawScore = s_season + s_temp + s_env + s_activity + s_trigger;
+```
+
+Ölçüldü — bir katman sıfırlanınca kalan puan:
+
+| sıfırlanan | toplamsal (şu anki) | çarpımsal olsaydı |
+|---|---|---|
+| mevsim | 71/93 (%76) | 0 |
+| **sıcaklık** | **65/93 (%70)** | 0 |
+| çevresel | 78/93 (%84) | 0 |
+| aktivite | 77/93 (%83) | 0 |
+| tetikleyici | 81/93 (%87) | 0 |
+
+Yani su termal aralığın tamamen dışındayken bile tür puanın %70'ini alabiliyor.
+Biyolojik olarak tartışmalı (Liebig'in minimum yasası: sınırlayıcı etken tek başına
+belirleyicidir). Saha gözlemlerinde sübyenin aralık dışıyken listede kalması bu.
+
+Motorun izlediği ilke aslında tutarlı: **veto edebilenler çarpılıyor, yalnızca katkı
+verenler toplanıyor.** Habitat, derinlik, zemin, tehlikeli dalga, fırtına — hepsi
+çarpan. Bu ilkeye göre tek şüpheli yerleştirme sıcaklık.
+
+**Neden şimdi yapılmamalı:** çarpımsala geçmek `tempRange` değerlerinin doğru
+olmasını şart koşar. Şu an Ege yazı için soğuk kalibre oldukları biliniyor —
+önce düzeltilmezse türler haksız yere listeden silinir. Sıra: **kalibrasyon → sonra bu karar.**
+
+> Not: çarpanların *sırası* ayrıca incelendi ve sorun bulunmadı. 50.000 rastgele
+> sıralama denendi, sonuç bit düzeyinde aynı (çarpma değişmeli, zincirde çalışan
+> skoru okuyan koşul yok). Sıranın önemli olduğu iki yer — taban `max(3,…)` ve
+> asimptotik sıkıştırma — ikisi de doğru konumda. Sıralamaya dokunmaya gerek yok.
+
 ### 4.3 `photoId` ölü alan `HAZIR`
 
 İlk sürümde vardı, kaldırıldı. Yeni `idn_` kayıtlarından temizlendi ama ~700
