@@ -1329,10 +1329,21 @@ const SPECIES_DB = {
         category: "KUM_TABAN",
         huntingMode: "ambush",
         peakHours: "NIGHT", peakHoursDesc: "Gece kumda avlanır, 21:00-03:00", peakHoursDescEn: "Hunts over sand at night, 21:00-03:00", peakHoursDescEl: "Hunts over sand at night, 21:00-03:00", peakHoursDescEs: "Durante la noche",
-        // Norveç'ten Fas'a, tüm Akdeniz ve Karadeniz — geniş termal tolerans.
-        // Kullanıcı 25-26°C'de iki kez yakalandığını belgeledi (temmuz, Ege).
-        tempRange: { min: 8, opt: 21, max: 28 },
-        seasons: { winter: 0.3, spring: 0.65, summer: 0.95, autumn: 0.7 },
+        // [DÜZELTME 2026-08-06] Bu kayıt ilk yazıldığında HER parametrede akranlarının
+        // üstüne çıkmıştı ve sonuç sahada görüldü: trakonya Ege'den Marmara'ya kadar
+        // listelerin başını tutuyordu. Ölçülen üç aykırılık:
+        //   tempRange 8-28 → genişlik 20°C, veritabanının EN GENİŞİ (Ege ortancası 14)
+        //   opt 21°C       → benzer kum/dip türlerinin hepsinden yüksek (akranlar 17-19)
+        //   yaz 0.95       → Ege'de gece aktif hiçbir türde bu kadar yüksek değil (en üst 0.85)
+        // Üstüne termal uyum kaymasının sınırı yarı-aralıkla ölçeklendiği için en geniş
+        // aralık en büyük kaymayı da alıyordu — çifte avantaj.
+        //
+        // 8-28 bir YAŞAM ZARFI (Norveç'ten Fas'a + Karadeniz), TERCİH aralığı değil.
+        // Motorun tempRange'i tercih eğrisi olarak kullanılıyor; akran bandına çekildi.
+        // Ölçüm: Ege kıyı gecesinde #3 → #7, nehir ağzında #13 → #18.
+        // Kullanıcı gözlemi korunuyor: 25-26°C'de iki kez belgelendi, o bant hâlâ güçlü.
+        tempRange: { min: 11, opt: 20, max: 27 },
+        seasons: { winter: 0.3, spring: 0.65, summer: 0.85, autumn: 0.7 },
         activity: "NIGHT",
         pressureSensitivity: 0.3,
         wavePref: 0.35, clarityPref: "ANY",
