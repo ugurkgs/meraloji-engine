@@ -3246,6 +3246,57 @@ const ABUNDANCE = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// AV DEĞERİ — "burada var mı?" ile "peşine düşülür mü?" AYRI sorulardır
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// [YENİ 2026-08-06] Motor "biyolojik uygunluk" hesaplıyor ve bunu doğru yapıyor:
+// ağustosta 26-27°C suda termofil türler (istilacı aslan/balon balığı, sıcak su
+// pelajikleri) gerçekten optimumlarındadır ve gerçekten oradadırlar. Ama kullanıcı
+// listeye "bugün neyin peşine düşeyim" diye bakıyor. Bu iki soru aynı değil.
+//
+// Kullanıcının kendi ifadesi meseleyi tam anlatıyor:
+//   "kimse trakonya yakalamaya gitmiyor. ama oltasını attığında trakonya da yakalıyor."
+// Yani tür listeden SİLİNMEMELİ — gerçekten yakalanıyor, üstelik trakonya ZEHİRLİ,
+// görünmesinin güvenlik değeri var. Sadece hedef türleri ezmemeli.
+//
+// ÇÖZÜM: skor DEĞİŞMİYOR (biyolojik gerçek olarak kalıyor, ekranda o görünüyor),
+// yalnızca SIRALAMA `skor × avDegeri` ile yapılıyor. Böylece trakonya %60 puanıyla
+// listede kalır ama çipuranın altına düşer.
+//
+// Bu bir ÜRÜN kararıdır, biyoloji değil — o yüzden species.js'te değil burada.
+// species.js "bu tür nedir" der; bu tablo "kullanıcı bunu istiyor mu" der.
+const AV_DEGERI = {
+    // ── Hedeflenmeyen (0.15) — yakalanır, kimse peşine düşmez ──
+    deniz_ignesi: 0.10,   // Syngnathus acus — tutmaya giden yok
+    kurbaga: 0.10,        // Uranoscopus scaber — zehirli, yenmez
+    aterin: 0.15,         // Atherina — yem balığı
+    trakonya: 0.15,       // ZEHİRLİ, yan yakalanır (uyarı için listede kalmalı)
+    aslan_baligi: 0.15,   // İSTİLACI + zehirli
+    balon_baligi: 0.15,   // İSTİLACI + toksik (Türkiye'de satışı yasak)
+
+    // ── Düşük (0.45-0.50) — yenir ama nadiren hedeflenir ──
+    sarpa: 0.45,          // otçul, et kalitesi düşük
+    lokum: 0.45,          // Sillago suezensis — Lesepsiyen göçmen
+    ustura_baligi: 0.45,
+    caca: 0.45,           // ağ balığı, olta hedefi değil
+    papalina: 0.45,       // ağ balığı
+    hani: 0.50,
+    cutre: 0.50,
+    trakun: 0.50,         // Caranx crysos — yenir ama hedeflenmez
+    // [BELİRSİZ] trakun ve cutre için emin değilim; kullanıcı onayına açık.
+};
+function avDegeri(key) {
+    const v = AV_DEGERI[key];
+    return (typeof v === 'number') ? v : 1.0;
+}
+// Liste sıralaması için: skoru bozmadan hedef değerine göre ağırlıklandır.
+// key bulunamazsa 1.0 → davranış eskisiyle birebir aynı.
+function avSirasi(x) {
+    const k = x && (x.key || (x.data && x.data.key) || (x.fish && x.fish.__key));
+    return (Number(x && x.score) || 0) * avDegeri(k);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // PUANLAMA MOTORU
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -5145,7 +5196,8 @@ app.get('/api/forecast', async (req, res) => {
                     }
                 }
                 fishList = Array.from(resultsMap.values()).map(v => v.data);
-                fishList.sort((a, b) => b.score - a.score);
+                // Skor değil, skor × av değeri ile sırala — bkz. AV_DEGERI notu.
+                fishList.sort((a, b) => avSirasi(b) - avSirasi(a));
             }
 
             // GELİŞMİŞ TAKTİK SİSTEMİ
@@ -5459,7 +5511,7 @@ app.get('/api/forecast', async (req, res) => {
                 }
             }
             instantFishList = Array.from(instantResultsMap.values()).map(v => v.data);
-            instantFishList.sort((a, b) => b.score - a.score);
+            instantFishList.sort((a, b) => avSirasi(b) - avSirasi(a));
 
             // GELİŞMİŞ TAKTİK SİSTEMİ - ANLIK
             let instantTacticKey = "";
@@ -5593,7 +5645,7 @@ app.get('/api/forecast', async (req, res) => {
                             : f.score;
                         return { ...f, score: hourScore };
                     }).filter(f => f.score > 0)
-                      .sort((a, b) => b.score - a.score)
+                      .sort((a, b) => avSirasi(b) - avSirasi(a))
                       .slice(0, 3);
                 }
 
@@ -7068,6 +7120,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
                             const _fn = getLoc(fish, "name", lang);
                             resultsMap.set(scientificName, {
                                 score,
+                                key,                 // av değeri sıralaması için gerekli
                                 name: _fn,
                                 fish: fish,
                                 hourlyScores,
@@ -7078,7 +7131,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
                 } catch (e) { }
             }
 
-            const sorted = Array.from(resultsMap.values()).sort((a, b) => b.score - a.score);
+            const sorted = Array.from(resultsMap.values()).sort((a, b) => avSirasi(b) - avSirasi(a));
 
             // Uygun türler — istilacı/koruma/ticari HARİÇ (bunlar bir merayı temsil eden
             // "başlık balık" olamaz; ör. istilacı aslan balığı bir merayı tanımlayamaz).
