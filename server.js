@@ -2375,7 +2375,37 @@ function calculateTempShock(marine, hourlyStartIdx) {
         else trendDirection = 'STABLE';
     }
 
-    return { shock, change, direction, trend, trendDirection, dailyAvgs };
+    // [YENİ 2026-08-06] TERMAL UYUM SICAKLIĞI — "balığın hafızası"
+    // Balık, anlık suya değil son haftalarda YAŞADIĞI suya göre ayarlıdır (thermal
+    // acclimation): metabolizma, enzim kinetiği ve iştah günler ölçeğinde yeniden
+    // kalibre olur. 3 haftadır 27°C'de yaşayan çipura ile 22°C'den gelen çipura
+    // aynı balık değildir. Bu değer, o "alışılmış" sıcaklığı temsil eder.
+    //
+    // Üstel ağırlık (τ=3 gün): dün bugüne yakın ağırlıkta, 7 gün önce ~%10.
+    // Elimizde past_days=7 var; tam mevsimsel uyum için daha uzun pencere gerekir
+    // ama yaz aylarında 7 günlük ortalama zaten mevsimsel seviyeyi yansıtır.
+    const acclimTemp = calculateAcclimTemp(dailyAvgs);
+
+    return { shock, change, direction, trend, trendDirection, dailyAvgs, acclimTemp };
+}
+
+// Termal uyum sıcaklığı — günlük SST ortalamalarının üstel ağırlıklı ortalaması.
+// dailyAvgs[son] = bugün. En az 4 gün veri yoksa null (motor eski davranışa düşer).
+function calculateAcclimTemp(dailyAvgs) {
+    if (!Array.isArray(dailyAvgs) || dailyAvgs.length < 4) return null;
+    const TAU_GUN = 3;
+    const n = dailyAvgs.length;
+    let pay = 0, payda = 0;
+    for (let i = 0; i < n; i++) {
+        const v = dailyAvgs[i];
+        if (typeof v !== 'number' || isNaN(v)) continue;
+        const yasGun = n - 1 - i;                  // 0 = bugün
+        const w = Math.exp(-yasGun / TAU_GUN);
+        pay += w * v;
+        payda += w;
+    }
+    if (payda <= 0) return null;
+    return parseFloat((pay / payda).toFixed(2));
 }
 
 // ── Date → KONUM-YEREL saat (0-24) ─────────────────────────────────────────
@@ -3252,6 +3282,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         currentSpeed, pressureTrend,
         depthAvg, hour, salinity,
         cloudCover, wavePeriod, oceanCurrent, tempShock, uvIndex,
+        acclimTemp,         // [YENİ] termal uyum sıcaklığı — bkz. sıcaklık katmanı. Yoksa uyum uygulanmaz.
         swellHeight,        // [yalnız görüntü] scoreDetails.wave.swell alanında raporlanır
         chlorophyll, thermoclineDepth, moonlightIntensity,
         isBoat,
@@ -3355,16 +3386,83 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         effTemp = Math.min(tempWater, estimateDeepTemp(region));
     }
 
-    // Gaussian/Trapezoid skoru
-    const gaussianScore = getGaussianScore(effTemp, tMin, tOpt, tMax, tOptMin, tOptMax);
+    // ── [YENİ 2026-08-06] TERMAL UYUM — "BALIK HAFIZASI" ───────────────────────
+    // Sorun: tempRange.opt SABİT bir sayıydı. Gauss eğrisi her zaman aynı noktada
+    // tepe yapıyordu — balığın son haftalarda neyin içinde yaşadığından bağımsız.
+    // Biyolojide bu yanlış: balıklar termal uyum (thermal acclimation) gösterir,
+    // optimumları yaşadıkları sıcaklığa doğru kayar.
+    //
+    // ÖLÇÜM (2026-08-05): saha gözlemlerinde temmuzda KAMERAYLA belgelenmiş 8 türün
+    // hiçbiri sıcaklık katmanının %61'inden fazlasını alamıyordu; sübye aralık
+    // dışındaydı. Yani motor, gerçekte tutulan balığa "burada olamazsın" diyordu.
+    // Literatür tempRange değerleri çoğunlukla serin popülasyonlardan/laboratuvardan
+    // gelir; Ege'nin ağustos balığı fizyolojik olarak başka bir noktada durur.
+    //
+    // MODEL: optimum, alışılmış sıcaklığa doğru α kadar kayar — ama SINIRLI:
+    //     kayma = clamp(α·(T_uyum − opt), ±β·yarıAralık)
+    // β·yarıAralık sınırı doğal olarak biyolojiyi taklit eder: dar toleranslı
+    // (stenotermal) türler az kayar, geniş toleranslı (euritermal) türler çok.
+    //
+    // NEDEN min/max KAYMIYOR: bunlar genetik sınırlar ve ölümcül kapı
+    // (getTempGateMultiplier) onlara dayanıyor. Uyum tepeyi oynatır, sınırı değil —
+    // aksi halde soğuk su türü 30°C'de "uyum sağladı" diye listelenirdi.
+    //
+    // NEDEN DERİN TÜRLERE UYGULANMIYOR: effTemp yukarıda derin-su sabitine
+    // çekildiyse, o balık zaten mevsimsel değişmeyen bir katmanda yaşıyor. Yüzeyden
+    // türetilmiş uyum sıcaklığı onun için anlamsız olurdu.
+    //
+    // GERİYE DÖNÜK GÜVENLİK: acclimTemp yoksa (eski cache, başarısız çekim, 4 günden
+    // az veri) tOptEff = tOpt kalır ve davranış BİREBİR eskisi gibi olur.
+    // α TARAMASI (2026-08-06) — kazanç ile ayırt edicilik kaybı arasındaki denge ölçüldü.
+    // Ege temmuz senaryosunda gözlenen 8 türün sıcaklık puanı ve durağan ilkbaharda
+    // (20°C su, 20°C uyum) tam puan alan tür sayısı:
+    //     α      gözlem kazancı    durağanda tam puan alan
+    //   0.20        +5.7                +1 tür
+    //   0.30        +8.3                +1 tür
+    //   0.35        +9.0                +1 tür     ← seçildi
+    //   0.45        +9.5                +5 tür     ← ayırt edicilik uçurumu
+    // 0.35, ulaşılabilir kazancın %95'ini veriyor ama tam puan patlamasını önlüyor.
+    // 0.45'e çıkmak yalnızca +0.5 puan getirip 4 tür daha tam puana taşıyordu — kötü takas.
+    // Not: motorun Gauss eğrisi zaten bir kez SİVRİLTİLMİŞTİ çünkü 19°C'de türlerin %60'ı
+    // tam puan alıyordu (bkz. getGaussianScore notu). α'yı yükseltmek onu geri bozar.
+    // Literatür: termal uyum tepki oranı (ARR) tipik olarak 0.2-0.5 — 0.35 bandın ortası.
+    const ACCLIM_ALFA = 0.35;      // optimumun deneyimi izleme gücü (0 = kitaba sadık)
+    const ACCLIM_BETA = 0.35;      // azami kayma, yarı-aralığın oranı olarak
+    let tOptEff = tOpt, tOptMinEff = tOptMin, tOptMaxEff = tOptMax, acclimShift = 0;
+    const acclimUygulanabilir = (effTemp === tempWater)          // derin-su ezmesi olmadı
+        && typeof acclimTemp === 'number' && !isNaN(acclimTemp)
+        && typeof tOpt === 'number' && typeof tMin === 'number' && typeof tMax === 'number';
+    if (acclimUygulanabilir) {
+        const yariAralik = Math.max(1, (tMax - tMin) / 2);
+        const azamiKayma = ACCLIM_BETA * yariAralik;
+        acclimShift = Math.max(-azamiKayma, Math.min(azamiKayma, ACCLIM_ALFA * (acclimTemp - tOpt)));
+        tOptEff = tOpt + acclimShift;
+        tOptMinEff = tOptMin + acclimShift;
+        tOptMaxEff = tOptMax + acclimShift;
+    }
 
-    // Lethal Gate — Çifte cezayı önlemek için doğrudan sıcaklık skoruna uygulanır
+    // Gaussian/Trapezoid skoru — tepe uyum sıcaklığına kaymış olabilir
+    const gaussianScore = getGaussianScore(effTemp, tMin, tOptEff, tMax, tOptMinEff, tOptMaxEff);
+
+    // Lethal Gate — Çifte cezayı önlemek için doğrudan sıcaklık skoruna uygulanır.
+    // DİKKAT: uyumdan ETKİLENMEZ, ham tMin/tMax kullanır (genetik sınır).
     const gateMultiplier = getTempGateMultiplier(effTemp, tMin, tMax);
     const tempScore = gaussianScore * gateMultiplier;
 
     let s_temp = tempScore * 28;
     const tempIdealText = (fish.tempRange && fish.tempRange.optMin && fish.tempRange.optMax) ? `${fish.tempRange.optMin}-${fish.tempRange.optMax}°C` : (fish.tempRange && fish.tempRange.opt ? `${fish.tempRange.opt}°C` : null);
     scoreDetails.temp = { score: s_temp, max: 28, stars: Math.round(tempScore * 5), value: tempWater, effTemp: (effTemp !== tempWater ? parseFloat(effTemp.toFixed(1)) : undefined), gate: gateMultiplier, idealText: tempIdealText };
+    // Arayüz "balık hafızası" kartını bu alandan besleyecek. Kayma yoksa alan hiç yazılmaz.
+    if (acclimShift !== 0) {
+        scoreDetails.temp.acclim = {
+            acclimTemp: acclimTemp,                                  // balığın alıştığı su
+            bookOpt: tOpt,                                           // kitaptaki optimum
+            effOpt: parseFloat(tOptEff.toFixed(1)),                  // uyumlu optimum
+            shift: parseFloat(acclimShift.toFixed(1)),
+            // Balık bugünkü suyu "sıcak" mı "serin" mi buluyor (kendi referansına göre)
+            feels: tempWater < acclimTemp - 0.3 ? 'COOLER' : tempWater > acclimTemp + 0.3 ? 'WARMER' : 'SAME'
+        };
+    }
 
     // 3. ÇEVRESEL (Max 18)  — 4 bileşen × 4.5 (dalga + berraklık + rüzgar + bölge)
     let s_env = 0;
@@ -5111,6 +5209,9 @@ app.get('/api/forecast', async (req, res) => {
                 wavePeriod: parseFloat(wavePeriod.toFixed(1)),
                 swellHeight: parseFloat(swellHeight.toFixed(2)),
                 tempShock: tempShock.shock ? tempShock : null,
+                // tempShock şok yokken null'a çevriliyor; uyum sıcaklığı AYRI geçmeli
+                // yoksa "şok yok" durumunda balık hafızası da kaybolurdu.
+                acclimTemp: tempShock.acclimTemp,
                 sstTrend: { trend: tempShock.trend, direction: tempShock.trendDirection },
                 thermoclineDepth,
                 chlorophyll: chlorophyllData ? {
@@ -5257,6 +5358,7 @@ app.get('/api/forecast', async (req, res) => {
                 swellHeight: i_swellHeight,
                 oceanCurrent: i_oceanCurrent,
                 tempShock: i_tempShock,
+                acclimTemp: i_tempShock.acclimTemp,
                 chlorophyll,
                 thermoclineDepth: i_thermoclineDepth,
                 moonlightIntensity: i_moonlightIntensity,
@@ -5427,6 +5529,7 @@ app.get('/api/forecast', async (req, res) => {
                 cape: parseFloat(i_cape.toFixed(0)),
                 capeAlert: capeAlertLevel(i_cape, i_weatherCode, i_precipProb, i_rain), // sadece gerçek fırtına kanıtıyla
                 tempShock: i_tempShock.shock ? i_tempShock : null,
+                acclimTemp: i_tempShock.acclimTemp,   // şok null'lansa da uyum korunmalı
                 thermoclineDepth: i_thermoclineDepth,
                 moonlightIntensity: parseFloat(i_moonlightIntensity.toFixed(2)),
                 chlorophyll: chlorophyllData ? {
@@ -5910,6 +6013,7 @@ app.get('/api/fish-search', async (req, res) => {
             swellHeight,
             oceanCurrent,
             tempShock,
+            acclimTemp: tempShock.acclimTemp,
             substrate: substrateData,
             // YENİ (1C)
             windGust, precipProb, weatherCode, visibility,
@@ -6899,6 +7003,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             swellHeight,
             oceanCurrent,
             tempShock,
+            acclimTemp: tempShock.acclimTemp,
             thermoclineDepth: estimateThermoclineDepth(tempWater, now.getMonth(), regionName),
             moonlightIntensity: calculateMoonlightIntensity(now, parseFloat(latF), parseFloat(lonF), cloud),
             // [DÜZELTME] Eskiden null geçiliyordu → forecast'in "şimdi" hesabı gerçek klorofil
