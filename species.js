@@ -152,7 +152,7 @@ const SPECIES_DB = {
         noteEn: "Diurnal species; buries in sand at night. Sharp teeth can cut lines. Delicious meat. Can descend to 150m in winter.", noteEl: "Diurnal species; buries in sand at night. Sharp teeth can cut lines. Delicious meat. Can descend to 150m in winter.", noteEs: "Analizando condiciones óptimas para esta especie en tiempo real."
     },
     "minekop": {
-        name: "Minekop",
+        name: "Minekop (Kötek)",
         nameEn: "Shi Drum", nameEl: "Μυλοκόπι στικτό", nameEs: "Verrugato",
         icon: "🐟",
         scientificName: "Umbrina cirrosa",
