@@ -64,6 +64,47 @@ güvenlik değeri taşıyor, gizlenmemeli.
 Sınıflandırma tablosu: `server.js` → `AV_DEGERI` (14 tür 'bycatch').
 Bilinmeyen anahtar `'target'` döner → yeni tür eklendiğinde davranış değişmez.
 
+### 1.5 Kıyı skoru bildirimi — KURU ÇALIŞMADA `KARAR BEKLİYOR`
+
+Kuruldu ama **kapalı**. `SHORE_ALERT_ENABLED=true` verilmedikçe hiçbir bildirim
+gitmez; yalnızca "kime ne giderdi" raporu log'a ve `notifyLog` koleksiyonuna yazılır.
+
+**Açmadan önce yapılacaklar:**
+
+1. **Birkaç gün kuru çalıştır.** Render log'unda şu satırı ara:
+   `[SHORE-ALERT/KURU] ... aday → ... farklı hücre` ve
+   `eşik %80 → N/M kullanıcı · hücre skor dağılımı: ...`
+   Bu, eşiği rakamla seçmeni sağlar. Kullanıcı %70 istemişti, mevcut günlük iş %80
+   kullanıyor — dağılımı görmeden seçme.
+2. **GİZLİLİK POLİTİKASI — ŞART.** Bu özellik konumu SAKLAMAYA başlıyor
+   (`users/{uid}.lastSeen`). Daha önce konum işleniyordu ama saklanmıyordu.
+   `public/privacy.html` güncellenmeli: hangi veri, ne kadar süre, ne amaçla.
+   KVKK/GDPR kapsamında bu bir veri işleme faaliyetidir.
+3. **Kullanıcıya kapatma seçeneği** verilmeli (favorilerdeki `notify` bayrağı gibi).
+   Şu an tercih yok — herkes aday. Mobil tarafta ayar gerekir.
+
+**Env değişkenleri:** `SHORE_ALERT_ENABLED` (varsayılan false) ·
+`SHORE_ALERT_ESIK` (80) · `SHORE_ALERT_SAAT` (17, kullanıcının YEREL saati).
+
+**APK gerekmiyor:** mevcut kanal (`meraloji_notifications`) ve mevcut
+`data.type` (`daily_best`) kullanılıyor. Yeni kanal veya yeni type APK isterdi.
+Metin `SERVER_i18n` içinde (sunucu tarafı), 4 dilde eklendi.
+
+**Ölçüm:** `fcmOptions.analyticsLabel` eklendi — `shore_alert`, `daily_best`,
+`pressure_alert`. Firebase Analytics'teki `notification_receive` / `_open` /
+`_dismiss` olayları artık tür bazında ayrıştırılabilir. Önceden hepsi tek torbadaydı.
+
+**Saat dilimi:** mevcut cron'lar TR saatine sabit. Bu yeni cron kullanıcının
+boylamından yerel saat türetiyor — Endonezya/İspanya kullanıcısına gece 03:00'te
+bildirim gitmiyor. Eski cron'lar bu açıdan hâlâ hatalı (bkz. 2.3).
+
+### 2.3 Mevcut cron'lar Türkiye saatine sabit `HAZIR`
+
+`cron.schedule('0 * * * *')` ve günlük iş `Date.now() + 3*3600*1000` ile TR saati
+varsayıyor. Uygulama Endonezya ve İspanya'da da kullanılıyor — o kullanıcılara
+yanlış saatte bildirim gidiyor. Çözüm kıyı bildiriminde uygulandı (boylamdan
+UTC ofseti), aynısı bu ikisine de taşınmalı.
+
 ## 2 · Analitik ve ölçüm
 
 ### 2.1 `mera_tarama` → `scan_result` uçurumu `ARAŞTIRMA`

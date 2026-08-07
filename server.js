@@ -169,7 +169,9 @@ const SERVER_i18n = {
             title: '🌪️ Fırtına Öncesi Fırsatı Kaçırma!',
             body: (spot) => `${spot} bölgesinde basınç hızla düşüyor, balıklar aşırı iştahlı!`,
             dailyBestTitle: '🌟 Bugün En İyi Meran',
-            dailyBestBody: (spot, score) => `Bugün ${spot} merasında balık aktivitesi %${score} seviyesinde! Fırsatı kaçırma.`
+            dailyBestBody: (spot, score) => `Bugün ${spot} merasında balık aktivitesi %${score} seviyesinde! Fırsatı kaçırma.`,
+            shoreAlertTitle: '🎣 Yakınında Skor Yükseldi',
+            shoreAlertBody: (spot, score) => `${spot} skor %${score}. Şansını denemek ister misin?`
         },
         tactic: {
             dominantNote: '⭐ Baskın tür tespit edildi — ticari değeri olan bir balık ise, av için ideal koşullar.',
@@ -318,7 +320,9 @@ const SERVER_i18n = {
             title: '🌪️ Pre-Storm Opportunity!',
             body: (spot) => `Pressure dropping fast at ${spot} — fish may be active!`,
             dailyBestTitle: '🌟 Best Spot Today',
-            dailyBestBody: (spot, score) => `Fish activity at ${spot} is at ${score}% today! Don't miss out.`
+            dailyBestBody: (spot, score) => `Fish activity at ${spot} is at ${score}% today! Don't miss out.`,
+            shoreAlertTitle: '🎣 Score Is Up Near You',
+            shoreAlertBody: (spot, score) => `${spot} is at ${score}%. Fancy trying your luck?`
         },
         tactic: {
             dominantNote: '⭐ Dominant species detected — if commercially valued, ideal conditions for a catch.',
@@ -467,7 +471,9 @@ const SERVER_i18n = {
             title: '🌪️ ¡Oportunidad pre-tormenta!',
             body: (spot) => `La presión cae rápido en ${spot} — ¡los peces pueden estar activos!`,
             dailyBestTitle: '🌟 Mejor lugar de hoy',
-            dailyBestBody: (spot, score) => `¡La actividad de pesca en ${spot} es del ${score}% hoy! No te lo pierdas.`
+            dailyBestBody: (spot, score) => `¡La actividad de pesca en ${spot} es del ${score}% hoy! No te lo pierdas.`,
+            shoreAlertTitle: '🎣 La puntuación ha subido cerca de ti',
+            shoreAlertBody: (spot, score) => `${spot} está al ${score}%. ¿Te animas a probar suerte?`
         },
         tactic: {
             dominantNote: '⭐ Especie dominante detectada — si tiene valor comercial, condiciones ideales.',
@@ -616,7 +622,9 @@ const SERVER_i18n = {
             title: '🌪️ Ευκαιρία Προ-Καταιγίδας!',
             body: (spot) => `Η πίεση πέφτει γρήγορα στο ${spot} — τα ψάρια μπορεί να είναι ενεργά!`,
             dailyBestTitle: '🌟 Καλύτερο σημείο σήμερα',
-            dailyBestBody: (spot, score) => `Η δραστηριότητα των ψαριών στο ${spot} είναι στο ${score}% σήμερα! Μην το χάσετε.`
+            dailyBestBody: (spot, score) => `Η δραστηριότητα των ψαριών στο ${spot} είναι στο ${score}% σήμερα! Μην το χάσετε.`,
+            shoreAlertTitle: '🎣 Η βαθμολογία ανέβηκε κοντά σου',
+            shoreAlertBody: (spot, score) => `${spot} στο ${score}%. Θέλεις να δοκιμάσεις την τύχη σου;`
         },
         tactic: {
             dominantNote: '⭐ Κυρίαρχο είδος εντοπίστηκε — ιδανικές συνθήκες για αλιεία.',
@@ -2055,6 +2063,49 @@ function haversineKm(lat1, lon1, lat2, lon2) {
     const a = Math.sin(dLat / 2) ** 2 +
         Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SON GÖRÜLEN KONUM — kıyı bildirimi için
+// ═══════════════════════════════════════════════════════════════════════════
+// [YENİ 2026-08-07] Sunucu kullanıcının nerede olduğunu HİÇ bilmiyordu; elindeki
+// tek koordinat kullanıcının favoriye eklediği noktalardı. Kıyı skoru bildirimi
+// için "bu kullanıcı en son nereye baktı" bilgisi gerekiyor.
+//
+// NEDEN FIRESTORE: Render belleği yeniden başlatmada uçar ve Render düzenli
+// olarak yeniden başlar. Firestore maliyeti bu hacimde ihmal edilebilir —
+// yazma ücretsiz kotası günde 20.000, bu uygulamada aylık ~3.600 tarama var.
+//
+// YAZMA KISITI: her istekte yazmak gereksiz. Kullanıcı anlamlı ölçüde
+// (LASTSEEN_MIN_KM) hareket etmediyse ve üzerinden LASTSEEN_MIN_SAAT geçmediyse
+// atlanıyor. RAM önbelleği sayesinde çoğu istek Firestore'a hiç gitmiyor.
+//
+// GÜVENLİK: tamamen ateşle-ve-unut. Hata olursa yutulur, analiz isteğini ASLA
+// yavaşlatmaz veya bozmaz. Bu bir yan kayıt, kritik yol değil.
+//
+// MAHREMİYET: bu, konumun SAKLANMAYA başladığı yerdir. Gizlilik politikasında
+// (public/privacy.html) belirtilmesi gerekir — bkz. ACIK-ISLER.md.
+const lastSeenCache = new NodeCache({ stdTTL: 21600, checkperiod: 900 }); // 6 saat
+const LASTSEEN_MIN_KM = 3;      // bu kadar hareket etmeden tekrar yazma
+const LASTSEEN_MIN_SAAT = 6;
+
+function kaydetSonKonum(uid, lat, lon) {
+    try {
+        if (!db || !uid) return;
+        const la = parseFloat(lat), lo = parseFloat(lon);
+        if (!isFinite(la) || !isFinite(lo)) return;
+        const onceki = lastSeenCache.get(uid);
+        if (onceki) {
+            const km = haversineKm(onceki.lat, onceki.lon, la, lo);
+            const saat = (Date.now() - onceki.at) / 3600000;
+            if (km < LASTSEEN_MIN_KM && saat < LASTSEEN_MIN_SAAT) return;   // değişmedi
+        }
+        const kayit = { lat: la, lon: lo, at: Date.now() };
+        lastSeenCache.set(uid, kayit);
+        db.collection('users').doc(uid)
+            .set({ lastSeen: kayit }, { merge: true })
+            .catch(e => console.log('[LASTSEEN] yazılamadı:', e.message));
+    } catch (e) { /* yan kayıt — asla isteği bozmaz */ }
 }
 
 // Rüzgar Yönü Skoru
@@ -4636,6 +4687,13 @@ app.get('/api/forecast', async (req, res) => {
         const isBoat = req.query.mode === 'boat'; // tekne modu
         const isAutoLoad = req.query.source === 'autoload'; // Sıcak başlangıç isteği
         const logUser = req.user ? (req.user.email || req.user.uid) : 'anonim';
+
+        // [YENİ] Son görülen konumu kaydet — kıyı bildirimi cron'u bunu kullanır.
+        // Ateşle-ve-unut; bu satır analiz akışını hiçbir koşulda etkilemez.
+        // Oto-yükleme isteklerinde YAZILMIYOR: kullanıcının bilinçli seçimi değil,
+        // uygulama açılışında otomatik gelen konumdur.
+        if (req.user && !isAutoLoad) kaydetSonKonum(req.user.uid, latRaw, lonRaw);
+
         const now = new Date();
         const clickHour = now.getHours();
         const currentMonth = now.getMonth();
@@ -7804,7 +7862,11 @@ cron.schedule('0 7 * * *', async () => {
                         android: {
                             priority: 'high',
                             notification: { sound: 'default', channelId: 'meraloji_notifications' }
-                        }
+                        },
+                        // [YENİ] Ölçüm etiketi. Sunucudan gönderilen bildirimler Firebase
+                        // Analytics'te notification_receive/open/dismiss olarak zaten
+                        // görünüyor ama HEPSİ TEK TORBADA. Bu etiket türleri ayırır.
+                        fcmOptions: { analyticsLabel: 'daily_best' }
                     };
                     await admin.messaging().send(message);
                     console.log(`[DAILY BEST CRON] ✅ Bildirim gönderildi -> uid:${uid}, mera:${bestFav.name}, skor:%${Math.round(bestScore)}`);
@@ -8030,7 +8092,8 @@ cron.schedule('0 * * * *', async () => {
                 },
                 apns: {
                     payload: { aps: { sound: 'default', badge: 1 } }
-                }
+                },
+                fcmOptions: { analyticsLabel: 'pressure_alert' }
             };
         });
 
@@ -8102,6 +8165,146 @@ app.get('/api/hotspot', (req, res) => {
     const spot = HOT_SPOT_SEASONAL[season];
     console.log(`[HOTSPOT] Mevsim:${season} → ${spot.name} (${spot.lat},${spot.lon})`);
     res.json({ ...spot, season, month, source: 'autoload' });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎣 KIYI SKORU BİLDİRİMİ — kullanıcının son baktığı yerde skor yükselince haber ver
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// [YENİ 2026-08-07] "Urla Kıyısında Skor %72, Şansını Denemek İster misin"
+//
+// VARSAYILAN OLARAK KURU ÇALIŞMA. SHORE_ALERT_ENABLED=true env değişkeni
+// verilmedikçe HİÇBİR BİLDİRİM GÖNDERİLMEZ — yalnızca "kime ne giderdi"
+// raporu log'a ve Firestore'a yazılır. Eşik ve hacim ölçülmeden canlıya
+// açılmamalı: gönderilen bildirim geri alınamaz.
+//
+// ── MALİYET ─────────────────────────────────────────────────────────────
+// Kullanıcı sayısı ≠ analiz sayısı. Kullanıcılar coğrafi olarak kümelenir ve
+// Open-Meteo çözünürlüğü zaten ~4-5 km — 2 km arayla duran iki kullanıcı AYNI
+// model hücresinden veri alır. O yüzden kullanıcı değil HÜCRE analiz edilir.
+// 1000 kullanıcı pratikte ~100-150 hücreye düşer; maliyet kullanıcı sayısıyla
+// neredeyse düz kalır.
+//
+// ── SAAT DİLİMİ ─────────────────────────────────────────────────────────
+// Mevcut cron'lar Türkiye saatine sabitlenmiş (`Date.now() + 3*3600*1000`).
+// Uygulama artık Endonezya ve İspanya'da da kullanılıyor; aynı mantık orada
+// gece 03:00'te bildirim gönderirdi. Burada saat dilimi kullanıcının kendi
+// boylamından türetiliyor (boylam/15 ≈ UTC ofseti) ve herkes kendi yerel
+// saatinde bildirim alır.
+//
+// ── APK GÜNCELLEMESİ GEREKMİYOR ─────────────────────────────────────────
+// Mevcut kanal ('meraloji_notifications') ve mevcut data.type ('daily_best')
+// kullanılıyor — uygulama bu ikisini zaten tanıyor, bildirime tıklayınca
+// doğru noktaya gider. Yeni bir kanal veya yeni bir type APK gerektirirdi.
+// Ayrıştırma analyticsLabel ile yapılıyor (Analytics tarafı, istemci değil).
+const SHORE_ALERT_ENABLED = process.env.SHORE_ALERT_ENABLED === 'true';
+const SHORE_ALERT_ESIK = parseFloat(process.env.SHORE_ALERT_ESIK || '80');
+const SHORE_ALERT_YEREL_SAAT = parseInt(process.env.SHORE_ALERT_SAAT || '17', 10);
+const SHORE_ALERT_SOGUMA_SAAT = 20;    // aynı kullanıcıya tekrar göndermeden önce
+const SHORE_ALERT_KONUM_TAZE_GUN = 21; // bundan eski lastSeen kullanılmaz
+const SHORE_HUCRE_LAT = 0.045;         // ~5 km — Open-Meteo çözünürlüğüyle uyumlu
+const SHORE_HUCRE_LON = 0.055;
+
+const _snap = (v, s) => Math.round(v / s) * s;
+const shoreHucreAnahtari = (lat, lon) =>
+    `${_snap(lat, SHORE_HUCRE_LAT).toFixed(3)},${_snap(lon, SHORE_HUCRE_LON).toFixed(3)}`;
+
+cron.schedule('5 * * * *', async () => {
+    if (!db || !admin) return;
+    const mod = SHORE_ALERT_ENABLED ? 'CANLI' : 'KURU';
+    try {
+        // ── 1) Konumu ve token'ı olan kullanıcılar ────────────────────────
+        const snap = await db.collection('users').where('lastSeen.at', '>',
+            Date.now() - SHORE_ALERT_KONUM_TAZE_GUN * 86400000).get();
+        if (snap.empty) return;
+
+        const nowUtcSaat = new Date().getUTCHours();
+        const adaylar = [];
+        for (const doc of snap.docs) {
+            const d = doc.data();
+            const ls = d.lastSeen;
+            if (!ls || !d.fcmToken) continue;
+            // Kullanıcının kendi yerel saati — boylamdan türetilir
+            const ofset = Math.round(ls.lon / 15);
+            const yerel = ((nowUtcSaat + ofset) % 24 + 24) % 24;
+            if (yerel !== SHORE_ALERT_YEREL_SAAT) continue;
+            // Soğuma: aynı kullanıcıya çok sık gönderme
+            const son = d.lastShoreAlert?.at || 0;
+            if (Date.now() - son < SHORE_ALERT_SOGUMA_SAAT * 3600000) continue;
+            adaylar.push({ uid: doc.id, token: d.fcmToken, lang: d.lang || 'tr',
+                lat: ls.lat, lon: ls.lon, hucre: shoreHucreAnahtari(ls.lat, ls.lon) });
+        }
+        if (!adaylar.length) return;
+
+        // ── 2) HÜCRE bazında skor — kullanıcı başına DEĞİL ────────────────
+        const hucreler = new Map();
+        for (const a of adaylar) if (!hucreler.has(a.hucre)) hucreler.set(a.hucre, a);
+        console.log(`[SHORE-ALERT/${mod}] ${adaylar.length} aday → ${hucreler.size} farklı hücre`);
+
+        const port = process.env.PORT || 3000;
+        const hucreSkor = new Map();
+        for (const [anahtar, ornek] of hucreler) {
+            try {
+                const r = await safeFetchJSON(
+                    `http://localhost:${port}/api/forecast?lat=${ornek.lat}&lon=${ornek.lon}`, 20000);
+                const s = (r && r.forecast && r.forecast[0] && r.forecast[0].score) || 0;
+                hucreSkor.set(anahtar, s);
+            } catch (e) {
+                console.error(`[SHORE-ALERT] hücre ${anahtar} skoru alınamadı:`, e.message);
+            }
+            await new Promise(r => setTimeout(r, 300));   // API'ye nazik davran
+        }
+
+        // ── 3) Eşiği geçenler ────────────────────────────────────────────
+        const gidecek = adaylar.filter(a => (hucreSkor.get(a.hucre) || 0) >= SHORE_ALERT_ESIK);
+        const dagilim = {};
+        for (const s of hucreSkor.values()) {
+            const b = Math.floor(s / 10) * 10; dagilim[b] = (dagilim[b] || 0) + 1;
+        }
+        console.log(`[SHORE-ALERT/${mod}] eşik %${SHORE_ALERT_ESIK} → ${gidecek.length}/${adaylar.length} kullanıcı` +
+            `  · hücre skor dağılımı: ${Object.entries(dagilim).sort((a, b) => b[0] - a[0]).map(([k, v]) => `%${k}+:${v}`).join(' ')}`);
+
+        // ── 4) Gönder (veya kuru çalışmada yalnızca kaydet) ───────────────
+        for (const a of gidecek) {
+            const skor = Math.round(hucreSkor.get(a.hucre));
+            const yerAdi = getCoastalLocality(a.lat, a.lon, a.lang) || 'Kıyı';
+            const i18nN = SERVER_i18n[a.lang] || SERVER_i18n.tr;
+
+            if (!SHORE_ALERT_ENABLED) {
+                console.log(`[SHORE-ALERT/KURU] → uid:${a.uid} ${yerAdi} %${skor} (gönderilmedi)`);
+            } else {
+                try {
+                    await admin.messaging().send({
+                        token: a.token,
+                        notification: {
+                            title: i18nN.notification.shoreAlertTitle || i18nN.notification.dailyBestTitle,
+                            body: (i18nN.notification.shoreAlertBody || i18nN.notification.dailyBestBody)(yerAdi, skor)
+                        },
+                        // type ve channelId MEVCUT değerler — uygulama bunları zaten tanıyor
+                        data: { type: 'daily_best', spotName: String(yerAdi), score: String(skor),
+                                lat: String(a.lat), lon: String(a.lon) },
+                        android: { priority: 'high',
+                                   notification: { sound: 'default', channelId: 'meraloji_notifications' } },
+                        apns: { payload: { aps: { sound: 'default', badge: 1 } } },
+                        fcmOptions: { analyticsLabel: 'shore_alert' }   // ← ölçüm burada ayrışır
+                    });
+                    await db.collection('users').doc(a.uid)
+                        .set({ lastShoreAlert: { at: Date.now(), hucre: a.hucre } }, { merge: true });
+                    console.log(`[SHORE-ALERT/CANLI] ✅ uid:${a.uid} ${yerAdi} %${skor}`);
+                } catch (e) {
+                    console.error(`[SHORE-ALERT] gönderilemedi uid:${a.uid}:`, e.message);
+                }
+                await new Promise(r => setTimeout(r, 200));
+            }
+            // Her iki modda da kalıcı kayıt — eşik seçimi bu veriden yapılacak
+            db.collection('notifyLog').add({
+                tur: 'shore_alert', mod, uid: a.uid, hucre: a.hucre,
+                skor, yer: String(yerAdi), esik: SHORE_ALERT_ESIK, at: Date.now()
+            }).catch(() => { });
+        }
+    } catch (e) {
+        console.error(`[SHORE-ALERT/${mod}] hata:`, e.message);
+    }
 });
 
 // ═══════════════════════════════════════════════════════════════
