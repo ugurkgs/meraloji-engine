@@ -4309,11 +4309,53 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             depthScore = 0.45 + 0.35 * (d / fMin);
             penalties.push(i18n(lang).penalties.shallowSpot);
         } else if (d >= fMin && d <= fMax) {
-            // Normal aralık — optimuma göre Gaussian benzeri
+            // ── NORMAL ARALIK — LOGARİTMİK, ASİMETRİK, PLATOLU ──────────────────
+            //
+            // [YENİDEN YAZILDI 2026-08-06] Eski formül:
+            //     d<=opt: 0.7 + 0.3·(d−min)/(opt−min)
+            //     d> opt: 0.7 + 0.3·(max−d)/(max−opt)
+            // İki yapısal kusuru vardı:
+            //
+            // 1) METRE CİNSİNDEN DOĞRUSAL. Balık için 1 m ile 3 m arasındaki fark
+            //    devasadır (ışık, dalga karışımı, sıcaklık, avcı baskısı); 100 m ile
+            //    102 m arasındaki fark yok denecek kadar azdır. Doğrusal model ikisini
+            //    eşit sayıyordu. Derinlik algısı logaritmiktir → ln(1+d) kullanılıyor.
+            //
+            // 2) ARALIK KENARINDA 0.70. Oysa min/max türün NORMAL yaşam aralığıdır.
+            //    Kaydın kendisi "burada yaşarım" derken %30 ceza vermek tutarsız.
+            //
+            // İkisi birleşince kıyı türlerinde ters sonuç doğuyordu. Çipura (0-10-150):
+            // çıkan kol 10 m, inen kol 140 m → sığ su SERT, derin su neredeyse cezasız
+            // cezalanıyordu. Ölçüm: kullanıcının saha kaydında çipura tekrar tekrar
+            // 50 cm'de tutulmuşken ("kıyı 50 cm vardı, diz hizasındaydı") motor o
+            // derinlikte 0.715 çarpanı, yani %29 kesinti uyguluyordu.
+            //
+            // ASİMETRİ NEDEN: sığa çıkmak DAVRANIŞTIR — kıyı balığı beslenmek için
+            // rutin olarak merkezinden sığa girer. Derine inmek ise FİZYOLOJİK olarak
+            // kısıtlıdır (ışık, basınç, sıcaklık, besin). Bu yüzden sığ kenar cezası
+            // (0.15) derin kenar cezasından (0.28) küçük.
+            //
+            // ÜS (1.6) optimum çevresinde bir PLATO yaratır: ceza ancak kenarlara
+            // yaklaşınca ısırır, aralığın ortasında tür tam puana yakın kalır.
+            //
+            // DOKUNULMAYAN: bu dal yalnızca [fMin, fMax] ARASI içindir. Aralığın
+            // altındaki sığ davranış (kıyı bandı, 0.20 tabanı ve pelajik dalı) ile
+            // fMax üstü derin ceza aynen korunuyor — onlar ayrıca kalibre edilmişti.
+            const SIG_KENAR = 0.15;    // fMin'de skor = 0.85
+            const DERIN_KENAR = 0.28;  // fMax'ta skor = 0.72
+            const US = 1.6;            // >1 → optimum çevresinde plato
+            const u = Math.log1p(d);
+            const uOpt = Math.log1p(fOpt);
             if (d <= fOpt) {
-                depthScore = 0.7 + 0.3 * ((d - fMin) / Math.max(1, fOpt - fMin));
+                const uMin = Math.log1p(fMin);
+                const kol = Math.max(1e-6, uOpt - uMin);
+                const z = Math.min(1, Math.max(0, (uOpt - u) / kol));
+                depthScore = 1 - SIG_KENAR * Math.pow(z, US);
             } else {
-                depthScore = 0.7 + 0.3 * ((fMax - d) / Math.max(1, fMax - fOpt));
+                const uMax = Math.log1p(fMax);
+                const kol = Math.max(1e-6, uMax - uOpt);
+                const z = Math.min(1, Math.max(0, (u - uOpt) / kol));
+                depthScore = 1 - DERIN_KENAR * Math.pow(z, US);
             }
         } else if (d > fMax) {
             // Çok derin

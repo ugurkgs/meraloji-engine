@@ -133,6 +133,31 @@ sorumluluk doğurabilir; hukuki dil gerektirir.
 
 ## 4 · Motor ve veri
 
+### 4.1b DENENİP REDDEDİLEN İKİ SICAKLIK YÖNTEMİ — tekrar denemeyin `KAPANDI`
+
+2026-08-06'da `tempRange`'i saha gözlemi beklemeden düzeltmek için iki yöntem
+kuruldu, ölçüldü ve **ikisi de gönderilmedi.** Kayda geçsin ki tekrarlanmasın.
+
+**1. Mevsim-ağırlıklı regresyon.** `opt = Σ(mevsim_ağırlık × mevsim_suyu)/Σağırlık`.
+Kendi doğrulama testinde çöktü: sonucu bilinen 8 türün **8'i de yanlış yöne** gitti
+(hamsi 12→15.4 yukarı, balon balığı 26→22.6 aşağı). Sebep: ağırlıklı ortalama her
+şeyi yıllık ortalamaya (~20°C) çekiyor, ayırt etme gücü sıfır. Önerdiği aralıklar
+saçmaydı (karagöz için 7-18-29).
+
+**2. Zirve mevsimi tutarlılık düzeltmesi.** Teşhis kısmı SAĞLAM — yön doğrulamasını
+geçti, soğuk su türlerini doğru tarafta buldu. Gerçek bir bulgu üretti: 66 türün
+40'ında ≥3°C tutarsızlık var, 34'ü aynı yönde (optimum kendi zirve mevsimi için
+fazla soğuk), 6 tür kendi zirve mevsiminde aralık DIŞINDA kalıyor.
+Ama 33 türe uygulanınca **ölçüm kötüleşti**: değerli tür ilk 10'da 61 → 51,
+çipura #13 → #17. Sebep: düzeltilen türlerin çoğu düşük değerli (lapin, kikla,
+müren, zargana) ve yukarı çekilince değerli olanları listeden ittiler. Geri alındı.
+
+**Çıkarılan ders:** `tempRange` bu ürünün asıl sorunu değildi. Çipuranın mevsim
+(18.7/22) ve aktivite (16/16) puanları zaten tamdı; kaybettiği yer DERİNLİK
+katmanıydı — ve o düzeltildi (bkz. commit geçmişi, logaritmik/asimetrik eğri).
+Tutarsızlık bulgusu yine de gerçek; ileride ele alınacaksa **tür tür ve av
+değerine bakarak** yapılmalı, toplu değil.
+
 ### 4.1 `tempRange` kalibrasyonu `ENGELLİ`
 
 **Engel:** "hiç yok" gözlemi yok. Bkz. `SAHA-GOZLEMLERI.md`.
