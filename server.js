@@ -3259,9 +3259,17 @@ const ABUNDANCE = {
 // Yani tür listeden SİLİNMEMELİ — gerçekten yakalanıyor, üstelik trakonya ZEHİRLİ,
 // görünmesinin güvenlik değeri var. Sadece hedef türleri ezmemeli.
 //
-// ÇÖZÜM: skor DEĞİŞMİYOR (biyolojik gerçek olarak kalıyor, ekranda o görünüyor),
-// yalnızca SIRALAMA `skor × avDegeri` ile yapılıyor. Böylece trakonya %60 puanıyla
-// listede kalır ama çipuranın altına düşer.
+// [DÜZELTME 2026-08-07 — DÜRÜSTLÜK] İlk uygulama sıralamayı `skor × avDegeri` ile
+// yapıyordu. Skoru bozmuyordu ama sonuç yine de YANILTICIYDI: kullanıcı listede
+// çipurayı %45 ile trakonyanın (%60) ÜSTÜNDE görüyordu ve nedenini göremiyordu.
+// Liste, üzerindeki sayılarla çelişiyorsa skorun dürüst olması yetmez — gizli bir
+// ağırlıkla yapılan sıralama da bir tür manipülasyondur.
+//
+// ARTIK: sıralama SAF SKORA göre. Sayılar ile sıra birebir tutarlı.
+// Bu tablo yalnızca `targetClass` etiketi üretir; istemci onunla gruplayıp
+// rozet gösterebilir ("hedef tür" / "ayrıca bulunabilir"). Bilgi gizlenmiyor,
+// aksine görünür hâle geliyor: trakonya %60 ile listede kalır, ama yanında
+// hedeflenen bir tür olmadığı YAZAR. Zehirli olduğu için orada olması da önemli.
 //
 // Bu bir ÜRÜN kararıdır, biyoloji değil — o yüzden species.js'te değil burada.
 // species.js "bu tür nedir" der; bu tablo "kullanıcı bunu istiyor mu" der.
@@ -3289,11 +3297,12 @@ function avDegeri(key) {
     const v = AV_DEGERI[key];
     return (typeof v === 'number') ? v : 1.0;
 }
-// Liste sıralaması için: skoru bozmadan hedef değerine göre ağırlıklandır.
-// key bulunamazsa 1.0 → davranış eskisiyle birebir aynı.
-function avSirasi(x) {
-    const k = x && (x.key || (x.data && x.data.key) || (x.fish && x.fish.__key));
-    return (Number(x && x.score) || 0) * avDegeri(k);
+// İstemciye gönderilecek etiket. SIRALAMAYI ETKİLEMEZ — sıralama saf skorla yapılır.
+// 'target'  : peşine düşülen tür
+// 'bycatch' : yakalanır ama hedeflenmez (yem balığı, istilacı, zehirli, düşük değerli)
+// Bilinmeyen anahtar 'target' döner → yeni tür eklendiğinde davranış değişmez.
+function avSinifi(key) {
+    return avDegeri(key) < 0.6 ? 'bycatch' : 'target';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -5218,6 +5227,7 @@ app.get('/api/forecast', async (req, res) => {
                                     nameEn: fish.nameEn || fish.name,
                                     scientificName: fish.scientificName, photoId: fish.photoId,
                                     icon: fish.icon, category: fish.category,
+                                    targetClass: avSinifi(key),   // 'target' | 'bycatch' — bkz. AV_DEGERI
                                     peakHours: fish.peakHours,
                                     peakHoursDesc: getLoc(fish, 'peakHoursDesc', lang),
                                     score: dailyScore,
@@ -5238,8 +5248,9 @@ app.get('/api/forecast', async (req, res) => {
                     }
                 }
                 fishList = Array.from(resultsMap.values()).map(v => v.data);
-                // Skor değil, skor × av değeri ile sırala — bkz. AV_DEGERI notu.
-                fishList.sort((a, b) => avSirasi(b) - avSirasi(a));
+                // SAF SKORA göre sırala — sıra ile gösterilen sayı birebir tutarlı
+                // olsun. Hedef/yan-yakalanan ayrımı `targetClass` etiketiyle taşınır.
+                fishList.sort((a, b) => b.score - a.score);
             }
 
             // GELİŞMİŞ TAKTİK SİSTEMİ
@@ -5534,6 +5545,7 @@ app.get('/api/forecast', async (req, res) => {
                                 nameEn: fish.nameEn || fish.name,
                                 scientificName: fish.scientificName, photoId: fish.photoId,
                                 icon: fish.icon, category: fish.category,
+                                targetClass: avSinifi(key),   // 'target' | 'bycatch'
                                 peakHours: fish.peakHours,
                                 peakHoursDesc: getLoc(fish, 'peakHoursDesc', lang),
                                 score: smoothedScore,
@@ -5553,7 +5565,7 @@ app.get('/api/forecast', async (req, res) => {
                 }
             }
             instantFishList = Array.from(instantResultsMap.values()).map(v => v.data);
-            instantFishList.sort((a, b) => avSirasi(b) - avSirasi(a));
+            instantFishList.sort((a, b) => b.score - a.score);
 
             // GELİŞMİŞ TAKTİK SİSTEMİ - ANLIK
             let instantTacticKey = "";
@@ -5687,7 +5699,7 @@ app.get('/api/forecast', async (req, res) => {
                             : f.score;
                         return { ...f, score: hourScore };
                     }).filter(f => f.score > 0)
-                      .sort((a, b) => avSirasi(b) - avSirasi(a))
+                      .sort((a, b) => b.score - a.score)
                       .slice(0, 3);
                 }
 
@@ -7162,7 +7174,8 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
                             const _fn = getLoc(fish, "name", lang);
                             resultsMap.set(scientificName, {
                                 score,
-                                key,                 // av değeri sıralaması için gerekli
+                                key,
+                                targetClass: avSinifi(key),   // 'target' | 'bycatch'
                                 name: _fn,
                                 fish: fish,
                                 hourlyScores,
@@ -7173,7 +7186,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
                 } catch (e) { }
             }
 
-            const sorted = Array.from(resultsMap.values()).sort((a, b) => avSirasi(b) - avSirasi(a));
+            const sorted = Array.from(resultsMap.values()).sort((a, b) => b.score - a.score);
 
             // Uygun türler — istilacı/koruma/ticari HARİÇ (bunlar bir merayı temsil eden
             // "başlık balık" olamaz; ör. istilacı aslan balığı bir merayı tanımlayamaz).

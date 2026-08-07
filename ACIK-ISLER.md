@@ -42,6 +42,28 @@ kalibre — ama İber Atlantiği'ni de kapsadığı için körlemesine değişti
 
 ---
 
+### 1.4 `targetClass` etiketini arayüzde göster `HAZIR` · **MOBİL**
+
+Sunucu artık her liste öğesinde `targetClass` döndürüyor: `'target'` veya
+`'bycatch'`. Sıralama **saf skorla** yapılıyor — sıra ile gösterilen sayı birebir
+tutarlı, gizli ağırlık yok.
+
+**Neden böyle:** ilk uygulama `skor × avDegeri` ile sıralıyordu. Skor bozulmuyordu
+ama kullanıcı çipurayı %45 ile trakonyanın (%60) üstünde görüyor ve nedenini
+göremiyordu. Liste üzerindeki sayılarla çelişiyorsa, skorun dürüst olması yetmez.
+
+**Sonucu:** dürüstlük sağlandı ama liste başı yine yem balığı / istilacı / zehirli
+türlerle doldu — çünkü ağustos suyunda gerçekten en yüksek skoru onlar alıyor.
+
+**Yapılması gereken (mobil taraf):** listeyi `targetClass` ile ikiye ayırın —
+"Hedef türler" ve "Ayrıca bulunabilir" — ya da `bycatch` olanlara rozet koyun.
+Her grup kendi içinde skora göre sıralı kalır. Böylece hem sıra dürüst olur hem
+liste kullanışlı. Zehirli türlerin (trakonya, aslan, balon) görünmesi ayrıca
+güvenlik değeri taşıyor, gizlenmemeli.
+
+Sınıflandırma tablosu: `server.js` → `AV_DEGERI` (14 tür 'bycatch').
+Bilinmeyen anahtar `'target'` döner → yeni tür eklendiğinde davranış değişmez.
+
 ## 2 · Analitik ve ölçüm
 
 ### 2.1 `mera_tarama` → `scan_result` uçurumu `ARAŞTIRMA`
