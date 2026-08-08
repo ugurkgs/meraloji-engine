@@ -770,6 +770,7 @@ function printRequestLog(req, timeMs) {
         if (lat != null && lon != null && !isNaN(+lat) && !isNaN(+lon)) parts.push(`📍 ${(+lat).toFixed(4)}, ${(+lon).toFixed(4)}`);
         if (s.radiusKm != null) parts.push(`⌀ ${s.radiusKm} km`);
         if (s.depth != null)    parts.push(`⬇ ${s.depth} m`);
+        if (s.elevation != null) parts.push(`⛰ rakım ${s.elevation} m`);   // kara — derinlik DEĞİL
         if (s.substrate)        parts.push(`🪨 ${s.substrate}`);
         if (s.status)           parts.push(`🌊 ${s.status}${s.city ? ' (' + s.city + ')' : ''}`);
         // [DÜZELTME 2026-08-07] Blok eskiden DÖRT AYRI console.log ile basılıyordu.
@@ -4995,6 +4996,7 @@ app.get('/api/forecast', async (req, res) => {
         // 2. Batimetri kontrolü (kıyıya yakın kara noktaları)
         let isLand = false;
         let landReason = '';
+        let elevationM = null;   // kara ise rakım (m). Derinlik DEĞİLDİR — ayrı alanda gider.
 
         if (!marine.hourly || !marine.hourly.wave_height) {
             isLand = true;
@@ -5018,6 +5020,21 @@ app.get('/api/forecast', async (req, res) => {
                 // Pozitif = deniz seviyesinin üstünde = KESİN KARA
                 isLand = true;
                 landReason = 'CERTAIN_LAND'; // frontend'e sinyal
+                // [DÜZELTME 2026-08-08] Yukarıda depthData = Math.abs(bathymetryRaw) yapılmıştı.
+                // Pozitif değer DERİNLİK DEĞİL, KARA RAKIMIDIR; abs() onu sahte bir derinliğe
+                // çeviriyordu. Canlı log'da kanıtı: Muğla'da "⬇ 813.2 m", Samsun'da "120 m",
+                // Sakarya'da "32 m" — üçü de o noktaların gerçek rakımı. Bu sayı response'ta
+                // depth alanıyla istemciye de gidiyordu; kullanıcıya karada "derinlik" göstermek
+                // uydurma bilgidir. Rakımı ayrı ve doğru adıyla veriyoruz.
+                // Kıyı snap'i başarılı olursa aşağıda gerçek deniz derinliğiyle doldurulur.
+                elevationM = +bathymetryRaw.toFixed(1);
+                // depthData'nın KENDİSİ bilerek ellenmiyor. Onu hâlâ tek bir yer okuyor:
+                // "instant" bloğu (if(true) — isLand ile korunmuyor), yani kara noktasında da
+                // skor üretiyor. Ölçtük: derinliği null yapınca oradaki 68 türün 67'si oynuyor,
+                // en büyük fark 65.9 puan (derinlik katmanı tamamen devre dışı kaldığı için
+                // skorlar ~6'dan ~70'e çıkıyor). Uygulama yayında ve APK güncellenemiyor;
+                // kara ekranında ne gösterildiğini buradan doğrulayamıyoruz. Bu yüzden HESAP
+                // aynen korunuyor, yalnızca RAPORLANAN değer düzeltiliyor.
             } else if (Math.abs(bathymetryRaw) <= SHALLOW_THRESHOLD) {
                 // Çok sığ ama veri var — sığ uyarısı ver ama analizi engelleme
                 // isLand = false kalır, sadece landReason set edilir
@@ -5059,6 +5076,7 @@ app.get('/api/forecast', async (req, res) => {
                         };
                         isLand = false;
                         landReason = '';
+                        elevationM = null;   // artık deniz noktasındayız, rakım anlamsız
                         snapInfo = {
                             distanceM: snap.distanceM,
                             snapLat: parseFloat(snap.lat),
@@ -5124,8 +5142,16 @@ app.get('/api/forecast', async (req, res) => {
 
         // Log hikâyesi: nokta derinliği + dip yapısı (bu noktada kesinleşmiş)
         if (req._story) {
-            req._story.depth = (depthData && depthData.avg != null) ? +Number(depthData.avg).toFixed(1) : null;
+            req._story.depth = (elevationM == null && depthData && depthData.avg != null)
+                ? +Number(depthData.avg).toFixed(1) : null;
             req._story.substrate = substrateData || null;
+            // [DÜZELTME 2026-08-08] status'ü şimdiye kadar analyzeLocationOffline yazıyordu —
+            // o yalnızca "Türkiye'de hangi il" bakıyor, il poligonu dışındaki HER yere 'SEA'
+            // diyor. Canlı log'da Sahra'nın ortasındaki bir nokta (14.74,15.10) "🌊 SEA" diye
+            // basılmıştı. Artık gerçek kara tespiti bittikten sonra son karar yazılıyor.
+            if (isLand) req._story.status = landReason === 'CERTAIN_LAND' ? 'KARA' : `KARA (${landReason})`;
+            else if (snapInfo) req._story.status = `SEA ←${snapInfo.distanceM}m snap`;
+            if (elevationM != null) req._story.elevation = elevationM;
         }
 
         // [YENİ] Kıyı açısı — tıklanan nokta boyunca sabit, döngü dışında bir kez hesaplanır.
@@ -5909,7 +5935,12 @@ app.get('/api/forecast', async (req, res) => {
         const rawResponseData = {
             version: "F.I.S.H. v3.0", region: displayRegion, isLand, landReason, clickHour: correctedClickHour,
             lat: parseFloat(lat), lon: parseFloat(lon),
-            depth: depthData,        // EMODnet Bathymetry derinlik verisi
+            // Karada bathymetri POZİTİFTİR (rakım). Eski kod abs() alıp derinlik diye
+            // gönderiyordu; istemci onu "derinlik" olarak gösterebiliyordu. {avg:null} zaten
+            // bugün de oluşan bir durum (bathymetri çekilemediğinde), yani istemci için yeni
+            // bir şekil değil — güvenli.
+            depth: elevationM != null ? { avg: null, min: null, max: null } : depthData,
+            elevation: elevationM,   // kara ise rakım (m), deniz ise null — derinlikle KARIŞTIRILMAZ
             substrate: substrateData, // EMODnet Seabed Habitats dip yapısı
             snapInfo,                // null veya { distanceM, snapLat, snapLon } — kıyı snap bilgisi
             gridDistanceKm: parseFloat(gridDistanceKm.toFixed(2)), // Marine API grid sapması (km)
