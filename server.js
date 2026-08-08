@@ -733,6 +733,12 @@ function _userBadge(req) {
     if (req.isGracePeriod) return { who, plan: `🆓 DENEME · ${req.graceDaysLeft != null ? req.graceDaysLeft : '?'} gün kaldı · kayıt ${_regDateStr(req.user.uid)}` };
     return { who, plan: `⛔ SÜRE DOLDU · kayıt ${_regDateStr(req.user.uid)}` };
 }
+// İsteğin gerçekten sunucunun kendisinden (localhost) gelip gelmediği. Taklit edilemez:
+// req.ip proxy başlıklarına bakar, socket.remoteAddress ise gerçek TCP karşı ucudur.
+function _isLoopback(req) {
+    const a = req.socket && req.socket.remoteAddress;
+    return a === '127.0.0.1' || a === '::1' || a === '::ffff:127.0.0.1';
+}
 // İstek sonunda çağrılır. Analiz/tarama/arama isteklerinde tam blok, diğerlerinde tek satır.
 function printRequestLog(req, timeMs) {
     const p = req.path;
@@ -740,6 +746,23 @@ function printRequestLog(req, timeMs) {
     const { who, plan } = _userBadge(req);
     const KIND = { '/api/forecast': '🔍 ANALİZ', '/api/scan': '🛰 MERA TARAMASI', '/api/fish-search': '🐟 BALIK ARAMA' };
     const kind = KIND[p];
+
+    // [DÜZELTME 2026-08-07] SUNUCUNUN KENDİ İÇ ÇAĞRILARI. Cron işleri skor almak için
+    // kendi /api/forecast ucunu localhost üzerinden çağırıyor. Bu istekler oturum
+    // taşımadığı için "🕵 anonim" görünüyor ve log'da sahte bir kullanıcı akını gibi
+    // duruyordu — gerçek log'da 04:00'da onlarca "anonim analiz" satırı bu yüzden vardı.
+    // Artık tek satır ve açıkça işaretli; gerçek kullanıcı bloklarına karışmıyor.
+    //
+    // _internal bayrağı TEK BAŞINA yeterli değil: dışarıdan biri de URL'ye ekleyip
+    // kendi isteğini "iç çağrı" gibi gösterebilirdi, log yalan söylerdi. Bu yüzden
+    // TCP karşı ucunun gerçekten loopback olması da şart. 'trust proxy' açık olduğu
+    // için req.ip taklit edilebilir (X-Forwarded-For); socket.remoteAddress edilemez.
+    if (req.query && req.query._internal === '1' && _isLoopback(req)) {
+        const lat = req.query.lat, lon = req.query.lon;
+        _origConsoleLog(`⚙ [iç çağrı] ${kind || p}  ${(+lat).toFixed(3)},${(+lon).toFixed(3)}  ${ms}ms`);
+        return;
+    }
+
     if (kind) {
         const s = req._story || {};
         const lat = req.query.lat, lon = req.query.lon;
@@ -749,10 +772,22 @@ function printRequestLog(req, timeMs) {
         if (s.depth != null)    parts.push(`⬇ ${s.depth} m`);
         if (s.substrate)        parts.push(`🪨 ${s.substrate}`);
         if (s.status)           parts.push(`🌊 ${s.status}${s.city ? ' (' + s.city + ')' : ''}`);
-        _origConsoleLog('*'.repeat(80));
-        _origConsoleLog(`👤 ${who}   [${plan}]`);
-        _origConsoleLog(`${kind}   ${parts.join('  ·  ')}`);
-        _origConsoleLog(`⏱ ${ms} ms`);
+        // [DÜZELTME 2026-08-07] Blok eskiden DÖRT AYRI console.log ile basılıyordu.
+        // Her çağrı ayrı bir stdout yazması demek; eşzamanlı iki istek bitince
+        // satırlar birbirine giriyordu. Gerçek log'da görülen belirti: sahipsiz
+        // "⏱ 10834 ms" satırları ve yanlış kullanıcının altına düşen 📍 satırları.
+        //
+        // Artık TEK yazma: satırlar \n ile birleştirilip bir kerede basılıyor.
+        // POSIX, PIPE_BUF (4096 bayt) altındaki tek write() çağrısını atomik sayar;
+        // bu blok ~200 bayt, yani araya başka bir isteğin satırı GİREMEZ.
+        //
+        // Ayrıca süre artık ayrı satır değil — kendi başına kaldığında hangi
+        // kullanıcıya ait olduğu anlaşılmayan tek satır oydu.
+        _origConsoleLog(
+            '*'.repeat(80) + '\n' +
+            `👤 ${who}   [${plan}]` + '\n' +
+            `${kind}   ${parts.join('  ·  ')}  ·  ⏱ ${ms} ms`
+        );
     } else {
         _origConsoleLog(`· ${who} [${plan.split(' ')[0]}]  ${req.method} ${p}  ${ms}ms`);
     }
@@ -7830,7 +7865,9 @@ cron.schedule('0 7 * * *', async () => {
                     try {
                         const port = process.env.PORT || 3000; // server.js ile aynı port
                         // [D3] forecast_days/past_days parametreleri endpoint'te yok sayılıyordu — kaldırıldı
-                        const localUrl = `http://localhost:${port}/api/forecast?lat=${f.lat}&lon=${f.lon}`;
+                        // _internal=1 → printRequestLog bunu 'anonim kullanıcı' bloğu olarak DEĞİL,
+                        // tek satırlık iç çağrı olarak basar (bkz. printRequestLog notu).
+                        const localUrl = `http://localhost:${port}/api/forecast?lat=${f.lat}&lon=${f.lon}&_internal=1`;
                         const res = await safeFetchJSON(localUrl, 15000);
                         if (res && res.forecast && res.forecast.length > 0) {
                             const todayScore = res.forecast[0].score || 0;
@@ -8246,7 +8283,7 @@ cron.schedule('5 * * * *', async () => {
         for (const [anahtar, ornek] of hucreler) {
             try {
                 const r = await safeFetchJSON(
-                    `http://localhost:${port}/api/forecast?lat=${ornek.lat}&lon=${ornek.lon}`, 20000);
+                    `http://localhost:${port}/api/forecast?lat=${ornek.lat}&lon=${ornek.lon}&_internal=1`, 20000);
                 const s = (r && r.forecast && r.forecast[0] && r.forecast[0].score) || 0;
                 hucreSkor.set(anahtar, s);
             } catch (e) {
