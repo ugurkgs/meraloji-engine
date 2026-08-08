@@ -76,6 +76,23 @@ gitmez; yalnızca "kime ne giderdi" raporu log'a ve `notifyLog` koleksiyonuna ya
    `eşik %80 → N/M kullanıcı · hücre skor dağılımı: ...`
    Bu, eşiği rakamla seçmeni sağlar. Kullanıcı %70 istemişti, mevcut günlük iş %80
    kullanıyor — dağılımı görmeden seçme.
+
+   **İLK ÖLÇÜM — 2026-08-08 15:05 UTC (kullanıcı yereli 17:00):**
+   ```
+   [SHORE-ALERT/KURU] 11 aday → 11 farklı hücre
+   eşik %80 → 0/11 kullanıcı · dağılım: %60+:3 %50+:3 %40+:3 %30+:1 %0+:1
+   ```
+   En yüksek hücre 60'lı bantta. Yani **%80 de %70 de sıfır bildirim demek** —
+   kullanıcının istediği eşikte özellik hiç çalışmazdı. %60'ta 3/11 kişi.
+   TEK GÜN, TEK SAAT, ağustos. Eşiği bununla seçme; en az bir hafta topla.
+
+   İki de aksaklık çıktı:
+   - **İç bölge adayı.** Hücrelerden biri Ankara (39.370, 32.377) — `INLAND`,
+     skor 0, 1 ms. `lastSeen` karada olan kullanıcı aday listesine giriyor.
+     Zararsız (0 asla eşiği geçmez) ama boşuna çağrı. Aday süzgecine
+     `analyzeLocationOffline(...).status !== 'INLAND'` eklenmeli.
+   - **11 aday az.** `lastSeen` daha yeni yazılmaya başladı (03:57 dağıtımı).
+     Havuz birkaç gün içinde büyüyecek; şimdiki sayıya bakıp karar verme.
 2. **GİZLİLİK POLİTİKASI — ŞART.** Bu özellik konumu SAKLAMAYA başlıyor
    (`users/{uid}.lastSeen`). Daha önce konum işleniyordu ama saklanmıyordu.
    `public/privacy.html` güncellenmeli: hangi veri, ne kadar süre, ne amaçla.
@@ -220,6 +237,74 @@ müren, zargana) ve yukarı çekilince değerli olanları listeden ittiler. Geri
 katmanıydı — ve o düzeltildi (bkz. commit geçmişi, logaritmik/asimetrik eğri).
 Tutarsızlık bulgusu yine de gerçek; ileride ele alınacaksa **tür tür ve av
 değerine bakarak** yapılmalı, toplu değil.
+
+### 4.8 `instant` bloğu karada da skor üretiyor `HAZIR` · **MOBİL DOĞRULAMA GEREKİR**
+
+7 günlük döngü `if (!isLand)` ile korunuyor — karada balık listelenmiyor. Ama hemen
+altındaki anlık (`instant`) bloğu `if (true)` ile açılıyor, yani **kara noktasında
+da tür skoru hesaplanıp `instant` alanıyla istemciye gidiyor.**
+
+2026-08-08'de kara/rakım düzeltmesi yapılırken ortaya çıktı. Oraya giren derinlik
+eskiden rakımdı (Muğla'da 813 m). "Bilinmiyor" (null) geçirmeyi denedim, ölçtüm:
+**68 Ege türünün 67'si oynadı, en büyük fark 65.9 puan** — derinlik katmanı tamamen
+devre dışı kalınca skorlar ~6'dan ~70'e çıkıyor. Yani şu an karada düşük (~6),
+null geçilirse yüksek (~70) skor üretiliyor; ikisi de anlamsız çünkü orası kara.
+
+Uygulama yayında, APK güncellenemiyor ve kara ekranında `instant`'ın gösterilip
+gösterilmediği buradan doğrulanamıyor. Bu yüzden **hesap aynen bırakıldı**,
+yalnızca raporlanan derinlik düzeltildi.
+
+**Yapılacak:** mobil tarafta kara yanıtında (`isLand: true`) `instant` alanının
+okunup okunmadığı kontrol edilsin.
+- Okunmuyorsa → sunucuda blok `if (!isLand)` ile kapatılır, iş biter.
+- Okunuyorsa → kullanıcı karada balık skoru görüyor demektir; önce mobil düzeltilir.
+
+`instantData` zaten `null` başlatılıyor ve `if (instantData)` ile korunuyor, yani
+sunucu tarafı null'a hazır. Risk yalnızca istemcide.
+
+### 4.9 NOAA çağrılarında devre kesici yok `HAZIR`
+
+`fetchChlorophyll` (klorofil) ve `fetchSatelliteSST` (uydu SST) NOAA ERDDAP'a
+gidiyor, ikisi de 5 sn timeout'lu ve `Promise.all` içinde. Open-Meteo'da 429 için
+backoff var (`_OM_BACKOFF_KEY`), **NOAA'da hiçbir şey yok** — servis düştüğünde her
+istek tam 5 saniyeyi ödüyor.
+
+2026-08-08 log'unda kanıt (NOAA hata satırı → hemen ardından yavaş istek):
+| saat | hata | istek süresi |
+|---|---|---|
+| 14:34:40 | `[PLANKTON] API_TIMEOUT` | **5523 ms** |
+| 15:05:19 | `[SST-SAT] API_TIMEOUT` | **4689 ms** |
+| 15:05:25 | `[PLANKTON] API_TIMEOUT` | **5297 ms** |
+| 21:48:09 | `[SST-SAT] API_TIMEOUT` | **4542 ms** |
+
+Normal istek 1.7–2.5 sn. Yani NOAA düşünce süre **iki katına** çıkıyor.
+
+**Çözüm:** Open-Meteo'daki desenin aynısı — üst üste N hata sonrası 5–10 dk boyunca
+NOAA'yı atla. **Karar gerektiren yan etki:** backoff penceresinde başarılı olabilecek
+bir istek de atlanır, klorofil/uydu SST null döner ve Open-Meteo SST'ye düşülür.
+Skoru etkiler. Süre kazancı bu bedele değer mi — ölçülüp karar verilmeli.
+
+### 4.10 İstemci analizi iki kere istiyor (biri oturumsuz) `ARAŞTIRMA` · **MOBİL**
+
+Log'da tekrarlayan desen: aynı koordinat, saniyeler arayla, önce `🕵 anonim` sonra
+gerçek kullanıcı. İkincisi önbellekten dönüyor (ms cinsinden).
+
+```
+13:15:39  verify-subscription  mehmetgokce26 (kimlikli)
+13:15:47  🕵 anonim         37.2206, 27.5825   2392 ms   ← tam iş
+13:15:50  mehmetgokce26     37.2206, 27.5825     22 ms   ← önbellek
+```
+Aynısı 10:29:34/35'te ismailkurt0608 için. Koordinatlar 4 hanede birebir aynı
+(~11 m), araya 1–3 sn giriyor — iki ayrı kişinin tesadüfü değil.
+
+`verify-subscription` kimlikli gidebiliyor, demek ki token hazır; yine de forecast
+bir kez tokensiz atılıyor. Muhtemel sebep: açılışta oto-yükleme isteği token
+eklenmeden fırlıyor.
+
+**Etkisi:** (a) anonim IP kotası boşuna tüketiliyor, (b) analitikte tek analiz iki
+olay sayılıyor, (c) log'da olduğundan çok anonim kullanıcı görünüyor —
+2026-08-08'de 15 anonim analizin en az 2'si bu. API maliyeti yok (ikincisi önbellek).
+Sunucudan çözülemez; istemcide isteğin token hazır olduktan sonra atılması gerekir.
 
 ### 4.1 `tempRange` kalibrasyonu `ENGELLİ`
 
