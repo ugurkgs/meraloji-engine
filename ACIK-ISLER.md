@@ -306,6 +306,50 @@ olay sayılıyor, (c) log'da olduğundan çok anonim kullanıcı görünüyor �
 2026-08-08'de 15 anonim analizin en az 2'si bu. API maliyeti yok (ikincisi önbellek).
 Sunucudan çözülemez; istemcide isteğin token hazır olduktan sonra atılması gerekir.
 
+### 4.11 `hourlyTimeline` saat indeksi sabit 24 `HAZIR`
+
+`server.js:5799-5800`, aynı döngünün iki satırı tutarsız:
+
+```js
+const wIdx = 24 + correctedClickHour + h;                    // weather ← SABİT
+const mIdx = marineHourlyOffset + correctedClickHour + h;    // marine  ← dinamik
+```
+
+`hourlyOffset = _wToday > 0 ? _wToday : 24` düzeltmesi (kodda [O2] notu) günlük
+döngüye (5168), instant'a (5495/5497), fish-search'e (6174) ve 7157'ye
+uygulanmış — **tek atlanan yer 5799.**
+
+**Ne zaman patlar:** `raw_weather_${gLat}_${gLon}` önbelleği yalnız ızgara
+hücresine göre anahtarlanıyor, tarih/saat yok. Önbellek gece yarısından önce
+dolup sonra okunursa `findTodayIndex` doğru offseti (48) verir ama bu satır 24
+okur → **bir gün öncesinin saatlik verisi.**
+
+**Pencere dar:** TTL 10800 sn (5956) veya 3900 sn (7786). UTC+3'te en geç yerel
+**02:59** (3 saatlik TTL) / **01:04** (65 dk). Bu saatlerden sonra tetiklenemez.
+
+> 2026-08-09'da bir rüzgâr şikâyeti bu satıra bağlanmak istendi ama gözlem yerel
+> 03:49'daydı, yani pencerenin dışında. Kusur gerçek, o olayın sebebi değil.
+> (Şikâyetin sebebi hamle/ortalama farkıydı — kullanıcı doğruladı.) Dikkat: TTL
+> kısaldıkça pencere DARALIR; 65 dakikalık varyant iddiayı desteklemez.
+
+### 4.12 Kıyı snap'i hava verisini taşımıyor `HAZIR`
+
+`server.js:5052`, kodun kendi yorumu: *"Sadece marine verisi snap noktasından
+çekilir (weather aynı kalır)"*. Kod da öyle — snap başarılı olunca yalnızca
+`marine = snapMarine` yapılıyor, **weather hiç yeniden çekilmiyor.**
+
+Sonuç: kıyı noktası denize snap'lendiğinde dalga/SST/akıntı denizden gelir ama
+**rüzgâr, basınç, hava sıcaklığı kara koordinatında kalır.** Kara üzerinde 10 m
+rüzgârı yüzey pürüzlülüğü nedeniyle sistematik olarak düşük okunur; ölçümde aynı
+bölgede kara hücresi 8,9 km/s, açık deniz 13,9 km/s çıktı.
+
+Bu, saatten bağımsız **kalıcı** bir eksik okuma. Rüzgâr hem skorun rüzgâr
+katmanına hem de dalga/berraklık türevlerine giriyor.
+
+**Düzeltmeden önce ölçülecek:** snap noktasından weather de çekilirse kaç ek
+Open-Meteo isteği doğar (snap yalnız `CERTAIN_LAND`'de tetikleniyor, oran
+log'dan çıkarılabilir) ve skorlar ne kadar oynar.
+
 ### 4.1 `tempRange` kalibrasyonu `ENGELLİ`
 
 **Engel:** "hiç yok" gözlemi yok. Bkz. `SAHA-GOZLEMLERI.md`.
