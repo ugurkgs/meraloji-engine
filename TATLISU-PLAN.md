@@ -216,10 +216,19 @@ sadeleştirme gerçek detay siler ve kıyıya yakın tıklamayı gölün dışı
 
 **`goller_ham.geojson` kullanılacak.**
 
-> Yukarıdaki ölçüm **319 göllük** kümeye aitti. Eşik kaldırılıp 657'ye çıkıldı;
-> eklenen 338 gölün hepsi küçük (0,10–0,50 km²), yani köşe sayısı az. `goller.py`
-> `ESIK = 0.1` ile yeniden çalıştırıldığında bastığı yeni boyut buraya yazılacak.
-> Beklenti ~3 MB; 4 MB'ı aşarsa sadeleştirme yeniden değerlendirilir.
+**657 göllük küme ölçüldü (kesin rakamlar):**
+
+| tolerans | boyut |
+|---|---|
+| **ham** | **2.746 KB** ← kullanılacak |
+| 11 m | 2.735 KB |
+| 22 m | 2.540 KB |
+| 55 m | 1.794 KB |
+
+319'luk kümeden yalnızca 362 KB fazla — eklenen 338 gölün hepsi küçük olduğu
+için köşe sayısı az. Ham ile 11 m arasında **11 KB** fark var; kaynak verinin
+1:250.000 kabalığını bir kez daha doğruluyor. Sadeleştirmenin kazancı yok,
+riski var. Karar: **ham.**
 
 ---
 
@@ -351,14 +360,31 @@ değil.
 
 ---
 
-## 6 · Aşama 2 — OSM: isim + tuzluluk + mevsimlik `KRİTİK YOL`
+## 6 · Aşama 2 — OSM: tuzluluk + mevsimlik (isim yan ürün) `ZORUNLU`
 
-**Bu aşama isteğe bağlı bir süsleme değil, projenin kritik yolu.** 657 gölün
-**637'si isimsiz** (%97). Ve kesim keskin: 10 km²'nin altındaki 582 gölün
-**hiçbirinin** adı yok, 50 km² üstündeki 23 gölün 18'inin var. Yani HydroLAKES
-pratikte yalnızca "herkesin bildiği" gölleri adlandırıyor.
+**Bu adımın gerekçesi isim DEĞİL.** İsim yalnızca arayüzde gösterilir ve
+gösterilmese de uygulama çalışır — il adına düşmek yeterlidir ("Isparta'da göl").
+Sunucuda zaten `_cityFeatures` yüklü, il adı ek veri gerektirmiyor.
 
-Aynı sorgu üç sorunu birden çözüyor — isim, tuzluluk (§2.4), mevsimliklik:
+Bu adım **iki işlevsel bayrak** için zorunlu:
+
+| etiket | ne işe yarıyor | atlanırsa ne olur |
+|---|---|---|
+| `salt=yes` | göl tuzlu/sodalı mı | Tuz Gölü'nde sazan skoru üretiriz |
+| `intermittent=yes` | mevsimlik kuruyor mu | kuru yatakta skor üretiriz |
+
+§2.4'te ölçüldü: HydroLAKES'te tuzluluk alanı **yok** ve `Res_time` vekil olarak
+denendi, **tutmadı** (13/18). Başka kaynak da yok. Bu iki bayrak alınmazsa tatlı
+su skorlaması tuzlu göllerde yanlış çalışır — doğrudan dürüstlük ihlali.
+
+İsim aynı yanıtta zaten geliyor, ayrı maliyeti yok — alınır, arayüz isterse
+kullanır. **Ama isim yüzünden bu adım geciktirilmeyecek; bayraklar yüzünden
+yapılacak.**
+
+657 gölün 637'si isimsiz (%97); 10 km² altındaki 582 gölün hiçbirinin adı yok.
+Yani isim beklentisi zaten düşük tutulmalı.
+
+Sorgu:
 
 ```
 [out:json][timeout:180];
@@ -377,12 +403,24 @@ bizim için hâlâ değerli.
 
 Eşleştirme: OSM'in `center` noktası HydroLAKES poligonunun içine düşüyorsa eşleş.
 Birden fazla aday varsa alanı en yakın olanı seç. Eşleşmeyen kalırsa
-`pourLat/pourLon`'a en yakın isimli su kütlesi, **2 km sınırıyla**.
+`pourLat/pourLon`'a en yakın su kütlesi, **2 km sınırıyla**.
 
-- `name` alanı: OSM'den gelen Türkçe ad · `salt`/`intermittent` etiketleri taşınacak
-- `nameSource`: `'hydrolakes'` | `'osm'` | `'yok'`
-- Hiçbiri tutmazsa isim **uydurulmaz**; `nameSource:'yok'` ve uygulamada
-  "İsimsiz göl (Konya)" gibi il adıyla gösterilir.
+`tr-lakes.json`'a yazılacak alanlar:
+
+```js
+salt:        true | false | null      // null = BİLİNMİYOR (varsayılan tatlı DEĞİL)
+intermittent: true | false | null
+name:        string | null
+nameSource:  'hydrolakes' | 'osm' | null
+```
+
+**En kritik kural:** `salt` bilinmiyorsa (`null`) göl **tatlı varsayılmaz.**
+§2.4'te ölçüldü — tuzluluğu türetecek hiçbir sinyal yok, dolayısıyla "bilmiyorum"
+ile "tatlı" aynı şey değil. Bilinmeyen gölde tür listesi üretilmeden önce
+kullanıcıya suyun niteliğinin doğrulanmadığı söylenir.
+
+İsim bulunamazsa **uydurulmaz**: `name: null`, arayüzde il adıyla ("Konya'da
+göl"). İl adı sunucuda zaten var (`_cityFeatures`), OSM gerektirmez.
 
 Overpass tek seferde zaman aşımına düşerse il il böl.
 
