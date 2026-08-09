@@ -23,9 +23,9 @@ hiçbir şey sunmuyoruz.
 
 | Konu | Karar |
 |---|---|
-| Alt sınır | **0,5 km²** (319 göl). 0,25 km² → 445, 1,0 km² → 226 |
+| Alt sınır | **YOK — 657 gölün hepsi.** Gerekçe §2.2 |
 | Geometri | `goller_ham.geojson`, **sadeleştirme YOK** (gerekçe §3) |
-| Derinlik | **Bilinmiyor sayılacak.** HydroLAKES derinliği KULLANILMAYACAK (§3) |
+| Derinlik | **Bilinmiyor sayılacak.** HydroLAKES derinliği KULLANILMAYACAK (§2.6) |
 | Mimari | **Ayrı dosya.** Deniz ve tatlı su hesapları hiç iç içe girmeyecek (§4) |
 | Uygulama | Göl analizinde dalga/swell/gelgit/dalga yönü panelleri gizlenecek (§10) |
 | Kapsam dışı | `public/index.html` (web sürümü) bu çalışmada değişmeyecek |
@@ -46,17 +46,74 @@ Atıf zorunlu (lisans gereği):
 
 ```
 Country='Turkey'          657 göl        (bbox'sız, tüm dünya taranarak)
-Lake_area >= 0,5 km²      319 göl        ← seçilen küme
-  doğal göl (Lake_type 1) 222
-  baraj     (Lake_type 2)  97
-İsimli                     20 / 319      ← 299 göl OSM'den isim alacak
-Derinlik kaynağı: literatür 3 · GRanD 97 · MODEL 219
-Derinlik  medyan 7,1 m · ortalama 16,7 · azami 170,1
-Rakım     medyan 530 m · azami 2434 m · asgari -4 m
-Shore_dev medyan 1,96 · azami 15,63 (Atatürk Barajı)
+  GRanD kayıtlı baraj     101
+  gerisi                  556            ← "doğal göl" DEĞİL, "sınıflandırılmadı"
+İsimli                     20 / 657       (%3,0)
+Derinlik kaynağı: literatür 3 · GRanD 101 · MODEL 553   (%84 model)
+Rakım     azami 2434 m · 32 göl 1500 m üstü · 51 göl tam 0 m · 22 göl deniz altı
 ```
 
-### 2.2 GÜVENİLİR alanlar
+### 2.2 Eşik: alan bandına göre dağılım ve neden eşik yok
+
+| alan (km²) | göl | isimli | kümülatif |
+|---|---|---|---|
+| 0,10–0,25 | 212 | **0** | 657 |
+| 0,25–0,50 | 126 | **0** | 445 |
+| 0,50–1 | 93 | **0** | 319 |
+| 1–2 | 67 | **0** | 226 |
+| 2–5 | 59 | **0** | 159 |
+| 5–10 | 25 | **0** | 100 |
+| 10–50 | 52 | 2 | 75 |
+| 50+ | 23 | 18 | 23 |
+
+Eşik önce 0,5 km² seçilmişti. **Gerçek bir kullanıcı bunu çürüttü:** 38.6566,
+29.3382 noktası **Karaağaç Göleti** (Uşak) — 1993 yapımı DSİ göleti, asfalt yol,
+mesire tesisi, ve balık faunası hakemli çalışmayla belgelenmiş (turna, kadife,
+sazan; turna stoku Leslie yöntemiyle 2.456 birey). Veride `Hylak_id 1368364`,
+alanı **tam 0,1000 km²** — yani HydroLAKES'in mutlak tabanı. Onu almanın tek
+yolu eşiği kaldırmak.
+
+0,10–0,50 bandındaki 338 göl kalite bayrağı açısından temiz çıktı: `Dis_avg`
+eksiği 0, `Res_time = -1` olan 0, `Shore_dev > 3` olan 0. Eleyecek bir sinyal
+yok — eşik, elemesi gereken şeyi elemiyor ama gerçek balık göletlerini eliyor.
+
+### 2.3 `Lake_type` tamamen gereksiz — ölçüldü
+
+|  | `Grand_id = 0` | `Grand_id ≠ 0` |
+|---|---|---|
+| `Lake_type = 1` | **556** | 0 |
+| `Lake_type = 2` | 0 | **101** |
+
+Birebir örtüşme, tek bir istisna yok. `Lake_type` **hiçbir ek bilgi taşımıyor**;
+`Grand_id`'nin sıfır olup olmamasından ibaret. `Vol_src = 2` kümesi de aynı 101
+kayıt. Yani sınıflandırma tek bitlik: "GRanD'de var mı, yok mu".
+
+Sonuç: 556 su kütlesi "doğal göl" görünüyor ama bu yalnızca "GRanD'de yok"
+demek. Karaağaç gibi yüzlerce DSİ göleti bu kümede. **Kullanıcıya "doğal göl"
+denmeyecek.**
+
+### 2.4 TUZLU/SODALI göller — veride hiçbir sinyal yok
+
+HydroLAKES'te tuzluluk/kimya alanı yok. Türkiye'nin en büyük göllerinin önemli
+bir kısmı ise tuzlu, sodalı veya alkali: **Tuz** (balık yok), **Van** (sodalı,
+tek tür inci kefali), **Acıgöl**, **Erçek**, **Burdur**. Bunlara sazan/turna
+skoru üretmek ciddi bir hata olur.
+
+`Res_time`'ı vekil gösterge olarak **denedim, tutmadı.** 18 bilinen gölde en iyi
+eşik 13/18: Eğirdir (150 yıl) ve Çıldır (90 yıl) tatlı olduğu hâlde yanlış
+pozitif, Erçek (9 yıl, sodalı) ve Acıgöl kaçıyor. `Dis_avg`/alan oranı da
+ayırt etmiyor (Erçek 0,072 sodalı > Beyşehir 0,038 tatlı).
+
+**Çözüm iki parçalı:**
+1. Bilinen tuzlu/sodalı göller için **elle liste** — büyükler zaten sayılı.
+2. Küçük ve isimsiz olanlar için: OSM'de tuz gölleri sık sık `salt=yes` ve
+   mevsimlikler `intermittent=yes` etiketli. §6'daki Overpass sorgusu zaten
+   çalışacak — **aynı sorgudan bu iki etiket de alınacak.**
+
+Etiketlenemeyen göl **tatlı su varsayılmayacak**; tür listesi üretilmeden önce
+suyun tatlı olduğu bilinmiyorsa kullanıcıya bu söylenecek.
+
+### 2.5 GÜVENİLİR alanlar
 
 `Hylak_id` · `Lake_area` · `Elevation` · `Shore_dev` · `Shore_len` ·
 `Res_time` · `Wshd_area` · `Pour_long` / `Pour_lat` · geometri
@@ -74,14 +131,14 @@ sulama göleti — veride `Lake_type = 1` yani "doğal göl" görünüyor.
 
 **Kural:** bir su kütlesi ancak `Grand_id != 0` ise kesin olarak barajdır.
 `Lake_type == 1` "doğal göl" diye gösterilmeyecek; `Grand_id == 0` olanlar
-"göl/gölet" gibi nötr bir etiketle geçilecek. 97 büyük baraj GRanD kayıtlıdır,
+"göl/gölet" gibi nötr bir etiketle geçilecek. 101 baraj GRanD kayıtlıdır,
 küçük göletler değildir.
 
 `Pour_long`/`Pour_lat`, poligonun **içinde garantili** bir temsil noktasıdır.
 Gölün tamamı için tek skor gerektiğinde (favori bildirimi gibi) tıklama noktası
 yerine bu kullanılacak.
 
-### 2.3 KULLANILMAYACAK alan: `Depth_avg`
+### 2.6 KULLANILMAYACAK alan: `Depth_avg`
 
 | göl | HydroLAKES | gerçek | `Vol_src` |
 |---|---|---|---|
@@ -105,7 +162,7 @@ ikisine de aynı skoru verir ve kıyıdaki balıkçıyı derin su türlerine yö
 
 **Karar: göl noktalarında derinlik `null` geçilecek.**
 
-### 2.3b Kapsama sınırı — göletlerin bir kısmı veride HİÇ YOK
+### 2.7 Kapsama sınırı — göletlerin bir kısmı veride HİÇ YOK
 
 HydroLAKES'in alt sınırı **10 hektar**, ve doküman kendi eksikliğini kabul
 ediyor: *"virtually full completion for lakes above 35 ha and close to full
@@ -128,7 +185,7 @@ HydroLAKES'ten çok daha güncel ve küçük göletleri de içeriyor. §6'da isi
 zaten Overpass'a gidiliyor; aynı sorgudan geometri de alınıp HydroLAKES'te
 karşılığı olmayanlar ikinci bir kaynak olarak eklenebilir. Ayrı iş, sonraya.
 
-### 2.4 Veri 2000 yılının fotoğrafı
+### 2.8 Veri 2000 yılının fotoğrafı
 
 Ana kaynak SRTM, **Şubat 2000**. Doküman açıkça uyarıyor: *"some lakes may have
 changed in their extent (or even disappeared)"*. Türkiye için bu ciddi —
@@ -159,6 +216,11 @@ sadeleştirme gerçek detay siler ve kıyıya yakın tıklamayı gölün dışı
 
 **`goller_ham.geojson` kullanılacak.**
 
+> Yukarıdaki ölçüm **319 göllük** kümeye aitti. Eşik kaldırılıp 657'ye çıkıldı;
+> eklenen 338 gölün hepsi küçük (0,10–0,50 km²), yani köşe sayısı az. `goller.py`
+> `ESIK = 0.1` ile yeniden çalıştırıldığında bastığı yeni boyut buraya yazılacak.
+> Beklenti ~3 MB; 4 MB'ı aşarsa sadeleştirme yeniden değerlendirilir.
+
 ---
 
 ## 4 · Mimari — ayrı dosya, iç içe geçmeyen hesap
@@ -167,7 +229,7 @@ sadeleştirme gerçek detay siler ve kıyıya yakın tıklamayı gölün dışı
 
 | dosya | içerik |
 |---|---|
-| `tr-lakes.json` | 319 göl poligonu + öznitelikler (GeoJSON) |
+| `tr-lakes.json` | 657 göl poligonu + öznitelikler (GeoJSON) |
 | `tatlisu.js` | Tatlı su tür veritabanı **ve** skor fonksiyonu. Kendi kendine yeter |
 
 `species.js` ve `server.js` içindeki `calculateFishScore` **hiç değişmeyecek.**
@@ -209,9 +271,9 @@ Mevcut alanlar aynı isimde kalır (uygulama kırılmasın). Eklenecekler:
 waterBody: 'SEA' | 'LAKE'        // deniz yolunda her zaman 'SEA'
 lake: {                           // yalnızca LAKE'te, aksi halde null
   id, name, nameSource,           // 'hydrolakes' | 'osm' | 'yok'
-  type: 'BARAJ' | 'GOL',          // BARAJ yalnızca Grand_id != 0 ise (§2.2)
+  type: 'BARAJ' | 'GOL',          // BARAJ yalnızca Grand_id != 0 ise (§2.3)
   areaKm2, elevationM, shoreDev,
-  depthKnown: false               // §2.3 — şimdilik daima false
+  depthKnown: false               // §2.6 — şimdilik daima false
 }
 ```
 
@@ -230,7 +292,7 @@ Gölde anlamsız olan alanlar **uydurulmayacak, `null` geçilecek**: `wave`,
 `goller.py` çalıştırıldı, `goller_ham.geojson` + `goller.csv` üretildi.
 Yeniden üretilecekse: kaynak `HydroLAKES_polys_v10.gdb`, katman
 `HydroLAKES_polys_v10`, bbox `(25.5, 35.6, 45.1, 42.3)`, süzgeç
-`Country='Turkey'`, eşik `Lake_area >= 0.5`.
+`Country='Turkey'`, **eşik yok** (`goller.py` içinde `ESIK = 0.1`).
 
 > **TUZAK (yaşandı):** pyogrio'da `where=` ile `columns=` birlikte kullanılırsa
 > ve filtrelenen sütun `columns` içinde YOKSA, sonuç **hata vermeden 0 döner**.
@@ -246,13 +308,13 @@ Lake_type→ type        Shore_dev → shoreDev     Pour_lat/long → pourLat/po
 Lake_name→ name (boşsa null)
 ```
 
-`Depth_avg`, `Vol_total`, `Vol_src` **taşınmayacak** — §2.3. Dosyaya girerse
+`Depth_avg`, `Vol_total`, `Vol_src` **taşınmayacak** — §2.6. Dosyaya girerse
 er ya da geç biri kullanır.
 
 ### 5.3 Eleme — asıl sorun kurumuş göller DEĞİL
 
 Kurumuş göl kendi kendini çözer: oraya kimse balık tutmaya gitmez, dolayısıyla
-o poligona kimse tıklamaz. 319 gölü uydu görüntüsüyle tek tek doğrulamak boşa
+o poligona kimse tıklamaz. 657 gölü uydu görüntüsüyle tek tek doğrulamak boşa
 iş — **yapılmayacak.**
 
 Kalıcı olan sorun **küçülmüş** göller. HydroLAKES poligonu Şubat 2000'in su
@@ -266,10 +328,16 @@ tıklayacakları yerde oluyor.
 
 1. Elle kısa bir dışlama listesi — büyük ölçüde kurumuş bilinen göller
    (Akşehir, Meke). On dakikalık iş, proje değil. `tr-lakes.json`'a girmezler.
-2. `Elevation == 0` **ve** `Depth_avg == 1,0` tam yuvarlak çıkan 7 kayıt model
-   taban değerine düşmüş demektir. Bunların çoğu **kıyı lagünü** (Akyatan,
-   Tuzla, Akgöl) ve oralarda balık tutuluyor — **silinmeyecek**, `LAGUN` diye
-   etiketlenecek.
+2. Rakımı 0 veya altı olan **73 göl** (51 tam 0, 22 deniz seviyesi altı) —
+   bunlar kıyı lagünleri (Akyatan, Tuzla, Akgöl gibi) ve oralarda balık
+   tutuluyor. **Silinmeyecek**, `LAGUN` diye etiketlenecek; acı su karışımı
+   olduğu için tür listesi tatlı su gölünden farklı olmalı.
+
+   > Düzeltme: bir önceki taslakta "`Elevation==0` ve `Depth_avg==1,0` olanlar
+   > model taban değerine düşmüş" yazıyordu. 657 kayıtta ölçüldü, **tutmuyor**:
+   > ikisi birden olan yalnızca 8 kayıt var ve rakımı 0 olan 51 gölün derinliği
+   > 0,6–22,3 m arasında gerçek bir dağılım gösteriyor. Taban değeri sanısı
+   > küçük örnekten gelen yanlış çıkarımdı.
 3. Mevsimlik kuruyanlar (Tuz başta) `MEVSIMLIK` etiketi alır; veri dosyasına
    girer ama skor üretmez, kullanıcıya durum bilgisi verilir.
 
@@ -277,31 +345,41 @@ tıklayacakları yerde oluyor.
 kalkışma. Doğru çözüm veri: **JRC Global Surface Water** (Pekel et al.,
 Landsat 1984–günümüz) her piksel için su bulunma yüzdesi ve mevsimsellik
 veriyor. HydroLAKES poligonuyla kesiştirilirse küçülme, kuruma ve mevsimsellik
-**tek seferde ve otomatik** çıkar — 319 gölü elle incelemeye gerek kalmaz.
+**tek seferde ve otomatik** çıkar — 657 gölü elle incelemeye gerek kalmaz.
 Bu, kullanıcıdan "burası göl değil ki" şikâyeti gelirse yapılacak iş; şimdi
 değil.
 
 ---
 
-## 6 · Aşama 2 — İsimlendirme (OSM)
+## 6 · Aşama 2 — OSM: isim + tuzluluk + mevsimlik `KRİTİK YOL`
 
-319 gölün **299'u isimsiz**. Kullanıcıya `id 14743` gösteremeyiz.
+**Bu aşama isteğe bağlı bir süsleme değil, projenin kritik yolu.** 657 gölün
+**637'si isimsiz** (%97). Ve kesim keskin: 10 km²'nin altındaki 582 gölün
+**hiçbirinin** adı yok, 50 km² üstündeki 23 gölün 18'inin var. Yani HydroLAKES
+pratikte yalnızca "herkesin bildiği" gölleri adlandırıyor.
 
-OpenStreetMap Overpass API'den Türkiye'deki isimli su kütlelerini çek:
+Aynı sorgu üç sorunu birden çözüyor — isim, tuzluluk (§2.4), mevsimliklik:
 
 ```
 [out:json][timeout:180];
 area["ISO3166-1"="TR"][admin_level=2]->.tr;
-( way["natural"="water"]["name"](area.tr);
-  relation["natural"="water"]["name"](area.tr); );
+( way["natural"="water"](area.tr);
+  relation["natural"="water"](area.tr);
+  way["landuse"="reservoir"](area.tr); );
 out center tags;
 ```
+
+Alınacak etiketler: `name` · `salt` · `intermittent` · `water` · `landuse` ·
+`name:tr`. `salt=yes` → tuzlu, `intermittent=yes` → mevsimlik.
+
+`["name"]` süzgeci **konmayacak** — isimsiz ama `salt=yes` etiketli bir kayıt
+bizim için hâlâ değerli.
 
 Eşleştirme: OSM'in `center` noktası HydroLAKES poligonunun içine düşüyorsa eşleş.
 Birden fazla aday varsa alanı en yakın olanı seç. Eşleşmeyen kalırsa
 `pourLat/pourLon`'a en yakın isimli su kütlesi, **2 km sınırıyla**.
 
-- `name` alanı: OSM'den gelen Türkçe ad
+- `name` alanı: OSM'den gelen Türkçe ad · `salt`/`intermittent` etiketleri taşınacak
 - `nameSource`: `'hydrolakes'` | `'osm'` | `'yok'`
 - Hiçbiri tutmazsa isim **uydurulmaz**; `nameSource:'yok'` ve uygulamada
   "İsimsiz göl (Konya)" gibi il adıyla gösterilir.
@@ -329,7 +407,7 @@ try {
 
 `_pointInFeature` (`server.js:1345`) zaten var, **yeniden yazma, onu kullan.**
 
-Performans: 319 poligon × 49.946 köşe her istekte taranmamalı. Her göl için
+Performans: 657 poligon her istekte taranmamalı. Her göl için
 yükleme sırasında bir **bbox** hesapla; önce ucuz bbox testi, sadece geçenlerde
 `_pointInFeature`. Tipik tıklamada 0-2 poligon gerçek teste girer.
 
@@ -384,7 +462,7 @@ Tsu(t) = Tsu(t-1) + (Thava_ewma(t) - Tsu(t-1)) / τ
 τ ≈ f(derinlik sınıfı, alan, rakım)
 ```
 
-Derinliği bilmiyoruz (§2.3) ama **`areaKm2`, `elevationM` ve `Res_time`
+Derinliği bilmiyoruz (§2.6) ama **`areaKm2`, `elevationM` ve `Res_time`
 güvenilir** — τ'yu bunlardan türet. Rakım ayrıca doğrudan girdi: 2434 m'deki
 göl ile deniz seviyesindeki göl aynı havada aynı suya sahip değil.
 
@@ -448,7 +526,7 @@ kahverengi alabalık · gökkuşağı alabalığı · dere alabalığı · İnci
 kızılgöz · tahta balığı · sarıbalık · yılan balığı (tatlı su evresi)
 
 Alan şeması `species.js` ile aynı kalsın (bakım kolaylığı) ama:
-- `depth` alanı **yazılmayacak** — §2.3, derinlik bilinmiyor
+- `depth` alanı **yazılmayacak** — §2.6, derinlik bilinmiyor
 - `salinityPref` yerine göl tipi tercihi (`DOGAL_GOL` / `BARAJ` / `ikisi`)
 - Van için ayrı işaretleme: sodalı su (~22‰, pH 9,8), tek tür İnci kefali
 
@@ -561,7 +639,7 @@ Yapılacaklar:
 - HydroLAKES `Depth_avg` hiçbir yerde skorlamaya girmeyecek
 - Göl suyu sıcaklığı ölçüm gibi sunulmayacak
 - Bilinen kurumuş göller (kısa elle liste) veri dosyasına alınmayacak;
-  `MEVSIMLIK` göller skor üretmeyecek. **319 gölün uydu görüntüsüyle tek tek
+  `MEVSIMLIK` göller skor üretmeyecek. **657 gölün uydu görüntüsüyle tek tek
   doğrulanması yapılmayacak** — kurumuş göle zaten kimse tıklamaz (§5.3)
 - Sıcaklık kapısı (§8.3) geçilmeden tür verisi yazılmayacak
 - İsim bulunamayan göle isim uydurulmayacak
