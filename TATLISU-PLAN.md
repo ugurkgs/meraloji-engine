@@ -213,23 +213,37 @@ Lake_name→ name (boşsa null)
 `Depth_avg`, `Vol_total`, `Vol_src` **taşınmayacak** — §2.3. Dosyaya girerse
 er ya da geç biri kullanır.
 
-### 5.3 Eleme ve doğrulama — ZORUNLU
+### 5.3 Eleme — asıl sorun kurumuş göller DEĞİL
 
-Şu kurallarla aday listesi çıkar, sonra **her birini güncel uydu görüntüsüyle
-tek tek doğrula** (Google Earth / Sentinel Hub, 2024 sonrası kare):
+Kurumuş göl kendi kendini çözer: oraya kimse balık tutmaya gitmez, dolayısıyla
+o poligona kimse tıklamaz. 319 gölü uydu görüntüsüyle tek tek doğrulamak boşa
+iş — **yapılmayacak.**
 
-1. `Depth_avg < 2,0 m` **ve** `areaKm2 >= 5` → mevsimlik kuruma şüphesi.
-   (Ölçüldüğünde 12 kayıt geldi; eşik 1,5 iken Akşehir kaçtığı için 2,0'a çıkarıldı.)
-2. `Elevation == 0` **ve** `Depth_avg == 1,0` tam yuvarlak → model taban değerine
-   düşmüş. Ölçümde 7 kayıt böyleydi. Bunların çoğu **kıyı lagünü** (Akyatan,
-   Tuzla, Akgöl gibi) ve oralarda balık tutuluyor — **toptan silme**, etiketle.
-3. Bilinen kurumuş/çok küçülmüş göller elle işaretlenir: **Akşehir, Eber, Meke,
-   Tuz** (mevsimlik), Burdur (çok küçüldü).
+Kalıcı olan sorun **küçülmüş** göller. HydroLAKES poligonu Şubat 2000'in su
+seviyesini gösteriyor; Eğirdir o tarihten beri 12,8 m gerilemiş, Burdur ciddi
+küçülmüş. Poligon bugünkü gölden **büyük**, yani eski kıyı çizgisiyle bugünkü
+kıyı çizgisi arasındaki **kuru araziye tıklayan kullanıcı "göldesin" cevabı
+alır.** Ve bu, insanların gerçekten balık tuttuğu göllerde, gerçekten
+tıklayacakları yerde oluyor.
 
-Sonuç: her göle `durum: 'AKTIF' | 'MEVSIMLIK' | 'KURUMUS' | 'LAGUN'`.
-`KURUMUS` olanlar `tr-lakes.json`'a hiç girmez. `MEVSIMLIK` olanlar girer ama
-tatlı su yolunda skor üretmez — kullanıcıya "bu göl yaz aylarında kuruyor"
-denir. Uydurma skor üretmektense bilgi vermek.
+**Yapılacak (ucuz olan):**
+
+1. Elle kısa bir dışlama listesi — büyük ölçüde kurumuş bilinen göller
+   (Akşehir, Meke). On dakikalık iş, proje değil. `tr-lakes.json`'a girmezler.
+2. `Elevation == 0` **ve** `Depth_avg == 1,0` tam yuvarlak çıkan 7 kayıt model
+   taban değerine düşmüş demektir. Bunların çoğu **kıyı lagünü** (Akyatan,
+   Tuzla, Akgöl) ve oralarda balık tutuluyor — **silinmeyecek**, `LAGUN` diye
+   etiketlenecek.
+3. Mevsimlik kuruyanlar (Tuz başta) `MEVSIMLIK` etiketi alır; veri dosyasına
+   girer ama skor üretmez, kullanıcıya durum bilgisi verilir.
+
+**Küçülme için (gerekirse, sonraya):** poligon sınırını elle düzeltmeye
+kalkışma. Doğru çözüm veri: **JRC Global Surface Water** (Pekel et al.,
+Landsat 1984–günümüz) her piksel için su bulunma yüzdesi ve mevsimsellik
+veriyor. HydroLAKES poligonuyla kesiştirilirse küçülme, kuruma ve mevsimsellik
+**tek seferde ve otomatik** çıkar — 319 gölü elle incelemeye gerek kalmaz.
+Bu, kullanıcıdan "burası göl değil ki" şikâyeti gelirse yapılacak iş; şimdi
+değil.
 
 ---
 
@@ -510,8 +524,9 @@ Yapılacaklar:
 - `public/index.html` (web sürümü) bu çalışmada **kapsam dışı**
 - HydroLAKES `Depth_avg` hiçbir yerde skorlamaya girmeyecek
 - Göl suyu sıcaklığı ölçüm gibi sunulmayacak
-- `KURUMUS` göller veri dosyasına alınmayacak, `MEVSIMLIK` göller skor
-  üretmeyecek
+- Bilinen kurumuş göller (kısa elle liste) veri dosyasına alınmayacak;
+  `MEVSIMLIK` göller skor üretmeyecek. **319 gölün uydu görüntüsüyle tek tek
+  doğrulanması yapılmayacak** — kurumuş göle zaten kimse tıklamaz (§5.3)
 - Sıcaklık kapısı (§8.3) geçilmeden tür verisi yazılmayacak
 - İsim bulunamayan göle isim uydurulmayacak
 
@@ -520,7 +535,7 @@ Yapılacaklar:
 ## 14 · Sıra
 
 ```
-1. tr-lakes.json üretimi + eleme/doğrulama        (§5)
+1. tr-lakes.json üretimi + kısa eleme listesi     (§5)
 2. OSM isimlendirme                               (§6)
 3. Sunucuda göl tanıma + yol ayrımı               (§7)   → Test 1,2,3,4,5,9
 4. Sıcaklık modeli + DOĞRULAMA KAPISI             (§8)   → Test 7   ⛔ KAPI
