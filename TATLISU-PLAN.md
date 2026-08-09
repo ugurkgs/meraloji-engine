@@ -58,11 +58,24 @@ Shore_dev medyan 1,96 · azami 15,63 (Atatürk Barajı)
 
 ### 2.2 GÜVENİLİR alanlar
 
-`Hylak_id` · `Lake_area` · `Elevation` · `Lake_type` · `Shore_dev` ·
-`Shore_len` · `Res_time` · `Wshd_area` · `Pour_long` / `Pour_lat` · geometri
+`Hylak_id` · `Lake_area` · `Elevation` · `Shore_dev` · `Shore_len` ·
+`Res_time` · `Wshd_area` · `Pour_long` / `Pour_lat` · geometri
 
 Doğrulandı: Tuz 1665 km² ✓, Beyşehir rakım 1122 m ✓, Eğirdir rakım 916 m ✓,
 Van rakım 1645 m ✓.
+
+**`Lake_type` KOŞULLU güvenilir.** Dokümanın kendi ifadesi: *"the default value
+for all water bodies is 1, and only those water bodies explicitly identified as
+other types (mostly based on information from the GRanD database) have other
+values."* Yani "1 = doğal göl" aslında "sınıflandırılmadı" anlamına geliyor.
+
+Canlı kanıt: Karaağaç Göleti (Uşak, `Hylak_id 1368364`) — 1993 yapımı bir DSİ
+sulama göleti — veride `Lake_type = 1` yani "doğal göl" görünüyor.
+
+**Kural:** bir su kütlesi ancak `Grand_id != 0` ise kesin olarak barajdır.
+`Lake_type == 1` "doğal göl" diye gösterilmeyecek; `Grand_id == 0` olanlar
+"göl/gölet" gibi nötr bir etiketle geçilecek. 97 büyük baraj GRanD kayıtlıdır,
+küçük göletler değildir.
 
 `Pour_long`/`Pour_lat`, poligonun **içinde garantili** bir temsil noktasıdır.
 Gölün tamamı için tek skor gerektiğinde (favori bildirimi gibi) tıklama noktası
@@ -91,6 +104,29 @@ olta atan 1-2 metrede, gölün ortasındaki tekne 15 metrede — tek bir göl-or
 ikisine de aynı skoru verir ve kıyıdaki balıkçıyı derin su türlerine yönlendirir.
 
 **Karar: göl noktalarında derinlik `null` geçilecek.**
+
+### 2.3b Kapsama sınırı — göletlerin bir kısmı veride HİÇ YOK
+
+HydroLAKES'in alt sınırı **10 hektar**, ve doküman kendi eksikliğini kabul
+ediyor: *"virtually full completion for lakes above 35 ha and close to full
+completion for lakes between 10 and 35 ha."*
+
+Buna kaynak verinin Şubat 2000 olması ekleniyor. Sonuç, üç kör nokta:
+
+1. 10 hektarın altındaki göletler — **hiç yok**
+2. 10–35 hektar arası — **eksik olabilir**
+3. 2000'den sonra yapılan göletler — **hiç yok**
+
+Türkiye'de binlerce DSİ sulama göleti var ve içlerine bilinçli olarak sazan,
+turna stoklanıyor. Bunların önemli bir kısmı yukarıdaki üç kör noktaya düşüyor.
+Yani eşik ne olursa olsun, kullanıcı bazı göletlerde "burası göl değil" cevabı
+alacak. Bu bir hata değil, verinin sınırı — **arayüzde de böyle anlatılacak,
+"burası kara" gibi kesin bir dille değil.**
+
+Kapsamı genişletmek gerekirse yol: OSM'de `natural=water` etiketli su kütleleri
+HydroLAKES'ten çok daha güncel ve küçük göletleri de içeriyor. §6'da isim için
+zaten Overpass'a gidiliyor; aynı sorgudan geometri de alınıp HydroLAKES'te
+karşılığı olmayanlar ikinci bir kaynak olarak eklenebilir. Ayrı iş, sonraya.
 
 ### 2.4 Veri 2000 yılının fotoğrafı
 
@@ -173,7 +209,7 @@ Mevcut alanlar aynı isimde kalır (uygulama kırılmasın). Eklenecekler:
 waterBody: 'SEA' | 'LAKE'        // deniz yolunda her zaman 'SEA'
 lake: {                           // yalnızca LAKE'te, aksi halde null
   id, name, nameSource,           // 'hydrolakes' | 'osm' | 'yok'
-  type: 'DOGAL_GOL' | 'BARAJ',
+  type: 'BARAJ' | 'GOL',          // BARAJ yalnızca Grand_id != 0 ise (§2.2)
   areaKm2, elevationM, shoreDev,
   depthKnown: false               // §2.3 — şimdilik daima false
 }
