@@ -97,24 +97,25 @@ kalibre — ama İber Atlantiği'ni de kapsadığı için körlemesine değişti
 **ÖLÇÜLDÜ 2026-08-10 — kullanıcı ATLADI, değer/emek düşük bulundu.** Sayılar burada,
 tekrar ölçmeye gerek yok:
 
-- **Türk kullanıcıyı etkilemiyor.**  bbox'ları Türkiye ile kesişmiyor
-  (Akdeniz kutusu 'de bitiyor). Gerçek  ile doğrulandı:
-  İzmir , Antalya . Aynı tür () Türkiye'de
-  ayrı kayıt:  (9/19/27).
-- **Çoğu senaryoda etkisi yok.**  derin-dip kategorisinde ve
-   termoklinin altında → 
-  ile **14°C'ye sabitleniyor**, yüzey sıcaklığı hesaba girmiyor. 
-  farkı bu rejimde sabit **+1.3 puan**.
+- **Türk kullanıcıyı etkilemiyor.** `esp_chopa` bbox'ları Türkiye ile kesişmiyor
+  (Akdeniz kutusu `lon -6..20`'de bitiyor). Gerçek `isInHabitat` ile doğrulandı:
+  İzmir `false`, Antalya `false`. Aynı tür (`Spondyliosoma cantharus`) Türkiye'de
+  ayrı kayıt: `iskatarya` (9/19/27).
+- **Çoğu senaryoda etkisi yok.** `DIP_KIYI` derin-dip kategorisinde ve
+  `depth.opt = 30 m` termoklinin altında → `effTemp = min(tempWater, estimateDeepTemp(region))`
+  ile **14°C'ye sabitleniyor**, yüzey sıcaklığı hesaba girmiyor.
+  (`getRegion` "Batı/Orta Akdeniz" döndürüyor, `estimateDeepTemp` switch'inde yok →
+  `default: 14`.) `max 24→27` farkı bu rejimde sabit **+1.3 puan**.
 - **Termoklin yokken (sığ su) anlamlı:** 18°C +0.0 · 20°C +1.3 · 22°C +3.2 ·
   24°C +3.7 · 26°C +4.4 · 28°C +1.4.
-- **Atlantik endişesi geçersiz:** soğuk uçta (18°C) fark **+0.0**.  yalnız üst
+- **Atlantik endişesi geçersiz:** soğuk uçta (18°C) fark **+0.0**. `max` yalnız üst
   toleransı genişletiyor, Biskay popülasyonuna dokunmuyor.
-- ** YÜKSELTİLMEMELİ:**  derin rejimde **−5.5 puan** kaybettiriyor
-  (eğri tepesi 14°C'den uzaklaşıyor). Sadece  değişmeli.
-- **Akran bandı:**  max 18–28 (medyan 24), TR DIP_KIYI 20–31 (medyan 26).
+- **`opt` YÜKSELTİLMEMELİ:** `opt 17→19` derin rejimde **−5.5 puan** kaybettiriyor
+  (eğri tepesi 14°C'den uzaklaşıyor). Sadece `max` değişmeli.
+- **Akran bandı:** `esp_` max 18–28 (medyan 24), TR DIP_KIYI 20–31 (medyan 26).
   27 bandın içinde, aykırı değil.
 
-Yapılacaksa tek satır:  24 → 27,  17'de kalır.
+Yapılacaksa tek satır: `esp_chopa.tempRange.max` 24 → 27, `opt` 17'de kalır.
 
 ---
 
