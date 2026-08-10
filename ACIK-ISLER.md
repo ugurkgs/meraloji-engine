@@ -20,7 +20,7 @@ Aşağıdaki maddelerin **hâlâ açık olduğu koddan mekanik olarak doğruland
 | 1.2 | `status` süresi dolunca güncellenmiyor | yazılan tek değer: `'active'` |
 | 1.3 | `esp_chopa` `tempRange.max = 24` | kayıt satır 6816 → `min:9, opt:17, max:24` ✓ |
 | 1.4 | sunucu `targetClass` döndürüyor | 5 yerde geçiyor, `avSinifi()` 4 çağrı — **mobil iş kaldı** |
-| 1.5 | kıyı bildirimi kuru | `SHORE_ALERT_ENABLED === 'true'` (satır 8268), env verilmemiş |
+| ~~1.5~~ | ~~kıyı bildirimi kuru~~ | **2026-08-11'de AÇILDI** — Render'da `ENABLED=true`, `ESIK=80`, `SAAT=17` |
 | 2.3 | cron'lar TR saatine sabit | 2 cron `{timezone:'Europe/Istanbul'}`, saatlik cron `Date.now()+3*60*60*1000` |
 | 4.3 | `photoId` ölü alan | **species.js'de 827**, server.js'de 8 kullanım |
 | 4.4 | Biskay/Akdeniz bbox çakışması | Akdeniz `lat30-45 lon-6..20` ∩ Biskay `lat36-46 lon-10..-1` → **lat36-45 lon-6..-1 çakışıyor** ✓ |
@@ -49,7 +49,7 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | ~~7~~ | ~~**4.12**~~ | ~~snap'te weather'ı da çek~~ | **ÖLÇÜLDÜ — değişiklik gerekmedi** | — |
 | ~~8~~ | ~~**2.3**~~ | ~~cron'ları kullanıcı saat dilimine taşı~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | ~~9~~ | ~~**4.3**~~ | ~~`photoId` temizliği~~ | **DOĞRULANDI — yapılmadı, gerekçe kayıtlı** | — |
-| 10 | **1.5** | kıyı bildirimi eşiği + gizlilik politikası | server.js + public/privacy.html | orta — **canlı bildirim** |
+| 10 | **1.5** | kıyı bildirimi | **KISMEN — canlıya alındı, kapatma ayarı APK'ya kaldı** | orta |
 | 11 | **4.8** | `instant`'ı `isLand` ile kapat | server.js | **önce mobil doğrulama şart** |
 | 12 | **1.4** | `targetClass` gruplaması | **APK** | mobil |
 | 13 | **4.10** | çift istek (oturumsuz + kimlikli) | **APK** | mobil |
@@ -64,7 +64,7 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 > **Uyarı:** `findNearestSeaPoint()` pahalıdır (ağ çağrısı yapar), ızgaradaki her
 > nokta için çağrılmamalı. Ucuz olan poligon testiyle süz, snap'i taramaya sokma.
 
-**Ölçüm gerektirenler (kod yazmadan önce):** 4.4, 4.9, 4.12, 1.5
+**Ölçüm gerektirenler (kod yazmadan önce):** ~~4.4, 4.9, 4.12, 1.5~~ — hepsi ölçüldü.
 **Mobil doğrulama gerektirenler (sunucuya dokunmadan önce):** 4.3, 4.8
 
 ---
@@ -141,62 +141,82 @@ güvenlik değeri taşıyor, gizlenmemeli.
 Sınıflandırma tablosu: `server.js` → `AV_DEGERI` (14 tür 'bycatch').
 Bilinmeyen anahtar `'target'` döner → yeni tür eklendiğinde davranış değişmez.
 
-### 1.5 Kıyı skoru bildirimi — KURU ÇALIŞMADA `KARAR BEKLİYOR`
+### 1.5 Kıyı skoru bildirimi — `CANLI, EŞİK 80` (kapatma ayarı açık)
 
-Kuruldu ama **kapalı**. `SHORE_ALERT_ENABLED=true` verilmedikçe hiçbir bildirim
-gitmez; yalnızca "kime ne giderdi" raporu log'a ve `notifyLog` koleksiyonuna yazılır.
+**2026-08-11: özellik açıldı.** Render → Environment:
+`SHORE_ALERT_ENABLED=true` · `SHORE_ALERT_ESIK=80` · `SHORE_ALERT_SAAT=17`.
+Artık gerçek bildirim gidiyor. Kapatmak için değişkeni silmek veya `false`
+yapmak yeterli (üçü de modül yüklenirken bir kez okunan `const`, Render
+kaydedince yeniden başlattığı için ayrıca bir şey gerekmiyor).
+Kod: `SHORE_ALERT_ENABLED` 8572 · `SHORE_ALERT_ESIK` 8582 · `SHORE_ALERT_SAAT` 8583.
 
-**Açmadan önce yapılacaklar:**
+**Eşik 80 bilinçli olarak seçildi — muhtemelen HİÇ bildirim göndermiyor.**
+Bu bir kusur değil, kademeli açılış: özellik canlıda ama pratikte sessiz,
+birkaç gün log izlenip 75'e indirilecek. Ölçüm bunu destekliyor:
 
-1. **Birkaç gün kuru çalıştır.** Render log'unda şu satırı ara:
-   `[SHORE-ALERT/KURU] ... aday → ... farklı hücre` ve
-   `eşik %80 → N/M kullanıcı · hücre skor dağılımı: ...`
-   Bu, eşiği rakamla seçmeni sağlar. Kullanıcı %70 istemişti, mevcut günlük iş %80
-   kullanıyor — dağılımı görmeden seçme.
+| eşik | tetiklenen | oran |
+|---|---|---|
+| %80 | 0/64 | **%0** |
+| %70 | 3/64 | %4.7 |
+| %60 | 17/64 | %26.6 |
+| %50 | 37/64 | %58 |
 
-   **İLK ÖLÇÜM — 2026-08-08 15:05 UTC (kullanıcı yereli 17:00):**
-   ```
-   [SHORE-ALERT/KURU] 11 aday → 11 farklı hücre
-   eşik %80 → 0/11 kullanıcı · dağılım: %60+:3 %50+:3 %40+:3 %30+:1 %0+:1
-   ```
-   En yüksek hücre 60'lı bantta. Yani **%80 de %70 de sıfır bildirim demek** —
-   kullanıcının istediği eşikte özellik hiç çalışmazdı. %60'ta 3/11 kişi.
-   TEK GÜN, TEK SAAT, ağustos. Eşiği bununla seçme; en az bir hafta topla.
+*(2026-08 kuru çalışma, üç ayrı koşunun toplamı: 29 + 24 + 11 = 64 aday-gözlem.)*
 
-   İki de aksaklık çıktı:
-   - **İç bölge adayı.** Hücrelerden biri Ankara (39.370, 32.377) — `INLAND`,
-     skor 0, 1 ms. `lastSeen` karada olan kullanıcı aday listesine giriyor.
-     Zararsız (0 asla eşiği geçmez) ama boşuna çağrı. Aday süzgecine
-     `analyzeLocationOffline(...).status !== 'INLAND'` eklenmeli.
-   - **11 aday az.** `lastSeen` daha yeni yazılmaya başladı (03:57 dağıtımı).
-     Havuz birkaç gün içinde büyüyecek; şimdiki sayıya bakıp karar verme.
-2. ~~**GİZLİLİK POLİTİKASI — ŞART.**~~ ✅ **2026-08-10'da yapıldı.**
-   `public/privacy.html` baştan yazıldı. Konum saklama (`users/{uid}.lastSeen`)
-   ayrı bir bölümde anlatılıyor: ne saklanıyor (tek nokta, geçmiş yok), yazma
-   koşulu (3 km + 6 saat), ne için kullanılıyor (5 km ızgara hücresi), ve
-   **özelliğin şu an kapalı olduğu ama konumun zaten saklandığı.**
-   Eski sürümdeki *"konum verileriniz sunucularımızda saklanmaz"* iddiası
-   yanlıştı — kaldırılmadı, alıntılanıp düzeltildi.
-   Ayrıca kaldırılan bir yanlış daha: **Visual Crossing** üçüncü taraf olarak
-   listeleniyordu, kodda hiç kullanılmıyor (0 eşleşme).
-3. **Kullanıcıya kapatma seçeneği** verilmeli (favorilerdeki `notify` bayrağı gibi).
-   Şu an tercih yok — herkes aday. Mobil tarafta ayar gerekir.
+**DİKKAT — 75'in gerçek oranı ölçülmedi.** Ağustos logu 10 puanlık bantlar
+kullanıyordu, yani `%70+:3` görülüyordu ama o üç hücrenin 71 mi 78 mi olduğu
+bilinmiyordu. 75 için doğru cevap **0 ile %4.7 arasında herhangi bir yer**.
+Bu yüzden dağılım logu **5 puanlık bantlara** çevrildi; artık `%75+` kovası
+ve `(N/M hücre)` sayısı doğrudan logdan okunuyor, çıkarım yapmaya gerek yok.
 
-**Env değişkenleri:** `SHORE_ALERT_ENABLED` (varsayılan false) ·
-`SHORE_ALERT_ESIK` (80) · `SHORE_ALERT_SAAT` (17, kullanıcının YEREL saati).
+**Yapılanlar:**
 
-**APK gerekmiyor:** mevcut kanal (`meraloji_notifications`) ve mevcut
-`data.type` (`daily_best`) kullanılıyor. Yeni kanal veya yeni type APK isterdi.
-Metin `SERVER_i18n` içinde (sunucu tarafı), 4 dilde eklendi.
+1. ✅ **Kuru çalışma yapıldı** (yukarıdaki 64 gözlem) ve varsayılan eşik
+   80 → **75**'e çekildi. Env'de şu an 80 verildiği için canlıda 80 geçerli.
+2. ✅ **Gizlilik politikası** — 2026-08-10. `public/privacy.html` baştan yazıldı.
+   Konum saklama (`users/{uid}.lastSeen`) ayrı bölümde: ne saklanıyor (tek nokta,
+   geçmiş yok), yazma koşulu (3 km + 6 saat), ne için kullanılıyor (5 km ızgara
+   hücresi). Eski sürümdeki *"konum verileriniz sunucularımızda saklanmaz"*
+   iddiası yanlıştı — kaldırılmadı, alıntılanıp düzeltildi. Ayrıca **Visual
+   Crossing** üçüncü taraf olarak listeleniyordu, kodda hiç kullanılmıyor.
+3. ✅ **İç bölge süzgeci.** `lastSeen`'i karada olan kullanıcı (ör. Ankara
+   39.370, 32.377) aday listesine giriyor, hücresi için boşuna forecast çağrısı
+   yapılıyor ve skor 0 dönüyordu. Zararsızdı (0 asla eşiği geçmez) ama ağustos
+   koşusunda adayların **%14'ü** buydu — hem gereksiz iş hem de dağılım raporunu
+   kirletip eşik kararını zorlaştırıyordu. `analyzeLocationOffline(...).status
+   === 'INLAND'` ile eleniyor (bellek içi poligon testi, ağ maliyeti yok).
+   Elenen sayı loga yazılıyor.
+
+**AÇIK KALAN — 4. Kullanıcıya kapatma seçeneği yok.** Şu an tercih mekanizması
+yok, `fcmToken`'ı olan herkes aday. Favorilerdeki `notify` bayrağının eşdeğeri
+gerekli. **Mobil taraf işi, APK gerektiriyor.** Konuma dayalı bildirim için bu
+ciddi bir eksik; eşik 80'de pratikte kimseye gitmediği için şimdilik tolere
+ediliyor, ama eşik düşürülmeden ÖNCE çözülmeli.
+
+**EYLÜL KONTROLÜ.** Sezonda skorlar yükselecek. Logda şu satıra bakılacak:
+```
+[SHORE-ALERT/CANLI] 29 aday → 25 farklı hücre  · 4 iç bölge adayı elendi
+[SHORE-ALERT/CANLI] eşik %80 → 1/29 kullanıcı  (1/25 hücre)  · hücre skor
+                    dağılımı: %80+:1 %75+:2 %70+:1 %65+:3 ...
+```
+`%75+` kovası ve `(N/M hücre)` sayısı eşik kararını doğrudan veriyor.
+Hâlâ kimseye gitmiyorsa `SHORE_ALERT_ESIK` env değişkeni silinir (varsayılan
+75 devreye girer). Değer sadece rakam olmalı — `parseFloat` başarısız olursa
+`NaN` çıkar ve `skor >= NaN` **her zaman false** döner, yani özellik hata
+vermeden sessizce ölür.
+
+**APK gerekmiyor (bildirimin kendisi için):** mevcut kanal
+(`meraloji_notifications`) ve mevcut `data.type` (`daily_best`) kullanılıyor.
+Yeni kanal veya yeni type APK isterdi. Metin `SERVER_i18n` içinde (sunucu
+tarafı), 4 dilde eklendi. Kapatma ayarı ayrı bir iş ve APK istiyor.
 
 **Ölçüm:** `fcmOptions.analyticsLabel` eklendi — `shore_alert`, `daily_best`,
 `pressure_alert`. Firebase Analytics'teki `notification_receive` / `_open` /
 `_dismiss` olayları artık tür bazında ayrıştırılabilir. Önceden hepsi tek torbadaydı.
 
-**Saat dilimi:** mevcut cron'lar TR saatine sabit. Bu yeni cron kullanıcının
-boylamından yerel saat türetiyor — Endonezya/İspanya kullanıcısına gece 03:00'te
-bildirim gitmiyor. Eski cron'lar bu açıdan hâlâ hatalı (bkz. 2.3).
-
+**Saat dilimi:** bu cron kullanıcının boylamından yerel saat türetiyor —
+Endonezya/İspanya kullanıcısına gece 03:00'te bildirim gitmiyor. Eski cron'lar
+da 2.3'te aynı hizaya getirildi.
 ## 2 · Analitik ve ölçüm
 
 ### 2.1 `mera_tarama` → `scan_result` uçurumu `ARAŞTIRMA`
