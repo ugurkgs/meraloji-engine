@@ -94,6 +94,28 @@ Orta büyüklükte bir iş, ödeme koduna dokunuyor — dikkatli test ister.
 kullanıcı ~25,5°C suda yakalamıştı. İspanya/Akdeniz kaydı da muhtemelen soğuk
 kalibre — ama İber Atlantiği'ni de kapsadığı için körlemesine değiştirmedim.
 
+**ÖLÇÜLDÜ 2026-08-10 — kullanıcı ATLADI, değer/emek düşük bulundu.** Sayılar burada,
+tekrar ölçmeye gerek yok:
+
+- **Türk kullanıcıyı etkilemiyor.**  bbox'ları Türkiye ile kesişmiyor
+  (Akdeniz kutusu 'de bitiyor). Gerçek  ile doğrulandı:
+  İzmir , Antalya . Aynı tür () Türkiye'de
+  ayrı kayıt:  (9/19/27).
+- **Çoğu senaryoda etkisi yok.**  derin-dip kategorisinde ve
+   termoklinin altında → 
+  ile **14°C'ye sabitleniyor**, yüzey sıcaklığı hesaba girmiyor. 
+  farkı bu rejimde sabit **+1.3 puan**.
+- **Termoklin yokken (sığ su) anlamlı:** 18°C +0.0 · 20°C +1.3 · 22°C +3.2 ·
+  24°C +3.7 · 26°C +4.4 · 28°C +1.4.
+- **Atlantik endişesi geçersiz:** soğuk uçta (18°C) fark **+0.0**.  yalnız üst
+  toleransı genişletiyor, Biskay popülasyonuna dokunmuyor.
+- ** YÜKSELTİLMEMELİ:**  derin rejimde **−5.5 puan** kaybettiriyor
+  (eğri tepesi 14°C'den uzaklaşıyor). Sadece  değişmeli.
+- **Akran bandı:**  max 18–28 (medyan 24), TR DIP_KIYI 20–31 (medyan 26).
+  27 bandın içinde, aykırı değil.
+
+Yapılacaksa tek satır:  24 → 27,  17'de kalır.
+
 ---
 
 ### 1.4 `targetClass` etiketini arayüzde göster `HAZIR` · **MOBİL**
