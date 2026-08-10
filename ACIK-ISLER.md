@@ -40,7 +40,7 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 
 | # | madde | ne | nerede | risk |
 |---|---|---|---|---|
-| 1 | **4.11** | `hourlyTimeline` sabit 24 → `hourlyOffset` | server.js, **tek satır** | çok düşük |
+| ~~1~~ | ~~**4.11**~~ | ~~`hourlyTimeline` sabit 24 → `hourlyOffset`~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | 2 | **1.2** | süresi dolan aboneliğe `status:'expired'` | server.js | düşük |
 | 3 | **1.3** | `esp_chopa` `tempRange` gözden geçir | species.js, tek kayıt | düşük |
 | 4 | **4.13** | **taramada kara koruması** — kullanıcı gördü, bildirdi | server.js | düşük-orta |
@@ -378,32 +378,6 @@ olay sayılıyor, (c) log'da olduğundan çok anonim kullanıcı görünüyor �
 2026-08-08'de 15 anonim analizin en az 2'si bu. API maliyeti yok (ikincisi önbellek).
 Sunucudan çözülemez; istemcide isteğin token hazır olduktan sonra atılması gerekir.
 
-### 4.11 `hourlyTimeline` saat indeksi sabit 24 `HAZIR`
-
-`server.js:5799-5800`, aynı döngünün iki satırı tutarsız:
-
-```js
-const wIdx = 24 + correctedClickHour + h;                    // weather ← SABİT
-const mIdx = marineHourlyOffset + correctedClickHour + h;    // marine  ← dinamik
-```
-
-`hourlyOffset = _wToday > 0 ? _wToday : 24` düzeltmesi (kodda [O2] notu) günlük
-döngüye (5168), instant'a (5495/5497), fish-search'e (6174) ve 7157'ye
-uygulanmış — **tek atlanan yer 5799.**
-
-**Ne zaman patlar:** `raw_weather_${gLat}_${gLon}` önbelleği yalnız ızgara
-hücresine göre anahtarlanıyor, tarih/saat yok. Önbellek gece yarısından önce
-dolup sonra okunursa `findTodayIndex` doğru offseti (48) verir ama bu satır 24
-okur → **bir gün öncesinin saatlik verisi.**
-
-**Pencere dar:** TTL 10800 sn (5956) veya 3900 sn (7786). UTC+3'te en geç yerel
-**02:59** (3 saatlik TTL) / **01:04** (65 dk). Bu saatlerden sonra tetiklenemez.
-
-> 2026-08-09'da bir rüzgâr şikâyeti bu satıra bağlanmak istendi ama gözlem yerel
-> 03:49'daydı, yani pencerenin dışında. Kusur gerçek, o olayın sebebi değil.
-> (Şikâyetin sebebi hamle/ortalama farkıydı — kullanıcı doğruladı.) Dikkat: TTL
-> kısaldıkça pencere DARALIR; 65 dakikalık varyant iddiayı desteklemez.
-
 ### 4.12 Kıyı snap'i hava verisini taşımıyor `HAZIR`
 
 `server.js:5052`, kodun kendi yorumu: *"Sadece marine verisi snap noktasından
@@ -644,3 +618,10 @@ ayrılmış test kümesi** şart — yoksa modelin ne zaman hazır olduğu hiç 
 - **`startedAt` her doğrulamada eziliyordu** — düzeltildi (`23919de`).
 - **BAE mükerrer kayıtları** — 5 çift birleştirildi.
 - **Tuzluluk sayısal aralığı** — ölçüldü, değmiyor (bkz. 4.5).
+- **4.11 `hourlyTimeline` saat indeksi sabit 24** — düzeltildi. `wIdx` artık
+  `hourlyOffset` kullanıyor; aynı döngüdeki marine indeksi zaten dinamikti.
+  Etkisi dar bir pencereyle sınırlıydı: `raw_weather` önbelleği gece yarısından
+  önce dolup sonra okunduğunda saatlik veri bir gün geriden geliyordu (UTC+3'te
+  en geç yerel 02:59). **Deniz regresyonu: 6160 skor, sapma 0** — beklenen sonuç,
+  çünkü değişiklik `calculateFishScore` dışında, yalnızca `hourlyTimeline`
+  dizisini besleyen indekste.

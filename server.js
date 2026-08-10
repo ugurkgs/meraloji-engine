@@ -5848,7 +5848,16 @@ app.get('/api/forecast', async (req, res) => {
             const hourlyTimeline = [];
 
             for (let h = 0; h < 24; h++) {
-                const wIdx = 24 + correctedClickHour + h; // weather
+                // [DÜZELTME 4.11] Eskiden sabit 24 idi. Bu rotanın her yerinde
+                // hourlyOffset kullanılıyor (günlük döngü, instant, fish-search);
+                // atlanan tek yer burasıydı ve bir sonraki satırdaki marine indeksi
+                // zaten dinamik offset kullanıyordu — aynı döngünün iki satırı
+                // tutarsızdı. raw_weather önbelleği yalnız ızgara hücresine göre
+                // anahtarlandığı için (tarih/saat yok), önbellek gece yarısından
+                // önce dolup sonra okunduğunda findTodayIndex doğru offseti (48)
+                // verirken bu satır 24 okuyor ve BİR GÜN ÖNCESİNİN saatlik verisini
+                // gösteriyordu.
+                const wIdx = hourlyOffset + correctedClickHour + h; // weather
                 const mIdx = marineHourlyOffset + correctedClickHour + h; // marine
 
                 if (!weather.hourly?.time || wIdx >= weather.hourly.time.length) break;
