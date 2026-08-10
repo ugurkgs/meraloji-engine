@@ -45,7 +45,7 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | 3 | **1.3** | `esp_chopa` `tempRange` gözden geçir | species.js, tek kayıt | düşük |
 | ~~4~~ | ~~**4.13**~~ | ~~taramada kara koruması~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | ~~5~~ | ~~**4.4**~~ | ~~bbox çakışması~~ | **ÖLÇÜLDÜ — değişiklik gerekmedi** | — |
-| 6 | **4.9** | NOAA devre kesici | server.js | **orta — skor girdisi değişir** |
+| ~~6~~ | ~~**4.9**~~ | ~~NOAA devre kesici~~ | **YAPILDI** (devre kesici yerine önbellek) | — |
 | 7 | **4.12** | snap'te weather'ı da çek | server.js | **orta — skor + API maliyeti** |
 | 8 | **2.3** | cron'ları kullanıcı saat dilimine taşı | server.js | orta |
 | 9 | **4.3** | `photoId` temizliği (827 kayıt) | species.js | orta — **önce mobil kontrol** |
@@ -356,27 +356,38 @@ okunup okunmadığı kontrol edilsin.
 `instantData` zaten `null` başlatılıyor ve `if (instantData)` ile korunuyor, yani
 sunucu tarafı null'a hazır. Risk yalnızca istemcide.
 
-### 4.9 NOAA çağrılarında devre kesici yok `HAZIR`
+### 4.15 İstemci klorofil yokken 0 gösteriyor `HAZIR` · **MOBİL**
 
-`fetchChlorophyll` (klorofil) ve `fetchSatelliteSST` (uydu SST) NOAA ERDDAP'a
-gidiyor, ikisi de 5 sn timeout'lu ve `Promise.all` içinde. Open-Meteo'da 429 için
-backoff var (`_OM_BACKOFF_KEY`), **NOAA'da hiçbir şey yok** — servis düştüğünde her
-istek tam 5 saniyeyi ödüyor.
+4.9 çalışılırken çıktı. Sunucu doğru davranıyor — klorofil alınamazsa **`null`**
+gönderiyor (`chlorophyll: chlorophyllData ? ... : null`). Ama istemci onu **0**
+yapıyor:
 
-2026-08-08 log'unda kanıt (NOAA hata satırı → hemen ardından yavaş istek):
-| saat | hata | istek süresi |
-|---|---|---|
-| 14:34:40 | `[PLANKTON] API_TIMEOUT` | **5523 ms** |
-| 15:05:19 | `[SST-SAT] API_TIMEOUT` | **4689 ms** |
-| 15:05:25 | `[PLANKTON] API_TIMEOUT` | **5297 ms** |
-| 21:48:09 | `[SST-SAT] API_TIMEOUT` | **4542 ms** |
+```java
+// MainActivity:3415, 3538, 3542
+plankton = (d.chlorophyll != null && d.chlorophyll.value != null) ? d.chlorophyll.value : 0;
+// :1386, :1497 — simülasyona da 0 veriliyor
+waveSimulationView.setChlorophyllData(m.plankton != null ? m.plankton.floatValue() : 0f);
+```
 
-Normal istek 1.7–2.5 sn. Yani NOAA düşünce süre **iki katına** çıkıyor.
+Talimat §2.1: *"`0` 'ölçtük, sıfır çıktı' demektir; `null` 'bilmiyoruz' demektir."*
+Klorofil sıfır demek denizde besin zinciri yok demektir — NOAA veri vermediğinde
+kullanıcıya bu gösteriliyor. Yanlış bilgi.
 
-**Çözüm:** Open-Meteo'daki desenin aynısı — üst üste N hata sonrası 5–10 dk boyunca
-NOAA'yı atla. **Karar gerektiren yan etki:** backoff penceresinde başarılı olabilecek
-bir istek de atlanır, klorofil/uydu SST null döner ve Open-Meteo SST'ye düşülür.
-Skoru etkiler. Süre kazancı bu bedele değer mi — ölçülüp karar verilmeli.
+**Yapılacak:** istemcide `null` durumu 0'dan ayrılsın; plankton katmanı çizilmesin
+veya "bilinmiyor" gösterilsin. Sunucuda değişiklik gerekmiyor.
+
+### 4.9 devamı — istemci tarafı `HAZIR` · **MOBİL**
+
+Sunucu tarafı bitti (bkz. Kapatılanlar). Kullanıcının istediği akışın kalan yarısı:
+
+Yanıtta artık `dataQuality: { satelliteSst, chlorophyll }` var. İstemci bunu görüp
+`satelliteSst === false` ise **birkaç saniye sonra sessizce tekrar istesin**; gelen
+veri iyileştiyse **"NOAA verisi güncellendi"** toast'ı gösterip skorları tazelesin.
+
+**Negatif işaret KOYULMAYACAK.** NOAA gelmediğinde uygulama boş kalmıyor, Open-Meteo
+SST (~10 km) kullanılıyor ve o da gerçek bir ölçüm. "Eksik veri" demek elimizde olanı
+yokmuş gibi göstermek olur — ters yönde bir dürüstlük hatası. Yalnızca veri
+iyileştiğinde pozitif bildirim yapılacak.
 
 ### 4.10 İstemci analizi iki kere istiyor (biri oturumsuz) `ARAŞTIRMA` · **MOBİL**
 
@@ -577,6 +588,23 @@ ayrılmış test kümesi** şart — yoksa modelin ne zaman hazır olduğu hiç 
 - **`startedAt` her doğrulamada eziliyordu** — düzeltildi (`23919de`).
 - **BAE mükerrer kayıtları** — 5 çift birleştirildi.
 - **Tuzluluk sayısal aralığı** — ölçüldü, değmiyor (bkz. 4.5).
+- **4.9 NOAA çağrılarında devre kesici yok** — devre kesici YERİNE önbellek
+  yapıldı; ölçüm devre kesiciyi reddettirdi.
+  **ÖLÇÜLEN BEDEL** (6160 skor): klorofil `null` → %10.8 tür ort 0.75 puan ·
+  uydu SST yerine Open-Meteo (±1 °C) → %12.5 tür ort 2.51 puan · ikisi birden
+  → **%13.5 tür ort 2.83, azami 7.18 puan**. Yani devre kesici 3 saniye
+  kazanmak için her 7 türden birinde ~3 puan feda ederdi, üstelik NOAA
+  ÇALIŞIRKEN bile (backoff penceresinde başarılı istekler de atlanır).
+  **Bunun yerine:** (1) uydu SST'ye önbellek — daha önce HİÇ YOKTU, her istek
+  NOAA'ya gidiyordu; ürün günlük olduğu için 3 saatlik önbellek birebir aynı
+  değeri verir, **skor etkisi sıfır**. (2) timeout 5/4 sn → 2 sn. (3) yanıt
+  gönderildikten sonra arka planda uzun timeout ile yeniden deneme, başarılı
+  olursa önbelleğe yazılır. (4) yanıta `dataQuality` alanı eklendi.
+  `null` da 10 dk önbelleklenir ki NOAA düştüğünde her istek 2 sn ödemesin.
+  Doğrulama: 6 kontrollük önbellek testi (ilk çağrı 620 ms, ikinci 0 ms,
+  null için TTL 600 sn, farklı hücre ayrı anahtar, arka plan fonksiyonu
+  geçersiz koordinatta patlamıyor), deniz regresyonu 6160 skor sapma 0.
+  Kalan istemci işi: **4.9 devamı** maddesi.
 - **4.4 Biskay/Akdeniz bbox çakışması** — ÖLÇÜLDÜ, değişiklik gerekmedi.
   Çakışma geometrik olarak var (`lat 36-45, lon -6..-1`) ama etkisi yok:
   Akdeniz kutusunu taşıyan **59 türün 56'sı zaten Biskay kutusunu da**

@@ -1040,6 +1040,13 @@ const cache = new NodeCache({ stdTTL: 10800, checkperiod: 600 }); // 3 saat — 
 // Bathymetry sonuçlarını 24 saat cache'le — aynı bölgede tekrar taramada API çağrısı yok
 const bathyCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
 
+// Uydu SST önbelleği — 3 saat. ESKİDEN HİÇ ÖNBELLEK YOKTU: her analiz isteği
+// NOAA ERDDAP'a gidiyordu, yani hem gecikme hem hata riski her istekte ödeniyordu.
+// nesdisVHNSQsstDaily GÜNLÜK bir üründür; gün içinde aynı hücre için aynı değeri
+// döndürür. Dolayısıyla 3 saatlik önbellek BİREBİR AYNI veriyi verir — skor
+// etkisi yoktur, yalnızca gereksiz ağ çağrısı ortadan kalkar.
+const sstSatCache = new NodeCache({ stdTTL: 10800, checkperiod: 600 });
+
 // Substrat sonuçlarını 24 saat cache'le — dip yapısı değişmez
 const substrateCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
 const planktonMemoryCache = new NodeCache({ stdTTL: 10800, checkperiod: 600 }); // Plankton RAM Önbelleği (3 Saat)
@@ -1487,7 +1494,10 @@ async function fetchChlorophyll(lat, lon) {
 
     try {
         // NOAA bazen 302 redirect yapıyor — follow: 'follow' ile çöz
-        const res = await fetchWithTimeout(url, 5000); // Paralel çalışıyor, kısa timeout yeterli
+        // [4.9] 5000 → 2000. Kullanıcı analizi NOAA'yı beklemesin; veri gelmezse
+        // klorofil null geçer (0 DEĞİL — bilinmeyen ile ölçülmüş sıfır farklı şeydir)
+        // ve analiz açılır. Arka plan yeniden denemesi önbelleği doldurur.
+        const res = await fetchWithTimeout(url, 2000);
         if (!res.ok) return null;
         const json = await res.json();
 
@@ -1530,7 +1540,52 @@ async function fetchChlorophyll(lat, lon) {
 // Klorofil ile aynı sunucu/pattern, auth gerektirmez.
 // Bulutlu günlerde null döner — fallback Open-Meteo SST'ye düşer.
 // ═══════════════════════════════════════════════════════════════════════════
-async function fetchSatelliteSST(lat, lon, logUser = null) {
+/**
+ * [4.9] Uydu SST — önbellekli sarmalayıcı. Kodda zaten kullanılan
+ * fetchBathymetry / _fetchBathymetryBase deseninin aynısı.
+ *
+ * ÖNBELLEK ANAHTARI 0.01° ≈ 1.1 km — ürünün ~1 km çözünürlüğüyle ve forecast'ın
+ * kendi ızgara adımıyla uyumlu.
+ *
+ * NULL DA ÖNBELLEKLENİR ama kısa süreyle (10 dk). Gerekçe: NOAA düştüğünde her
+ * istek yeniden 2 saniye ödemesin. Bathymetri'de null bilinçli olarak
+ * önbelleklenmiyor çünkü orada tek kaynak var; burada Open-Meteo SST'ye
+ * düşülüyor, yani boş sonuç kullanıcıyı veri-siz bırakmıyor. 10 dk sonra
+ * kendiliğinden yeniden denenir; ayrıca arka plan tazelemesi (aşağıda) başarılı
+ * olursa null'ın üstüne gerçek değeri yazar.
+ */
+async function fetchSatelliteSST(lat, lon, logUser = null, timeoutMs = 2000) {
+    const key = 's_' + parseFloat(lat).toFixed(2) + '_' + parseFloat(lon).toFixed(2);
+    const hit = sstSatCache.get(key);
+    if (hit !== undefined) return hit;
+
+    const val = await _fetchSatelliteSSTBase(lat, lon, logUser, timeoutMs);
+    sstSatCache.set(key, val, val === null ? 600 : 10800);
+    return val;
+}
+
+/**
+ * [4.9] Arka plan tazelemesi. Kullanıcının isteği KAPANDIKTAN SONRA çağrılır:
+ * NOAA 2 saniyede yetişemediyse daha uzun timeout ile bir kez daha denenir ve
+ * başarılı olursa önbelleğe yazılır. Böylece kullanıcı tekrar dokunduğunda veya
+ * bir sonraki istekte veri hazır olur.
+ *
+ * Hiçbir şeyi await ETMEZ ve hata fırlatmaz — açık isteği yavaşlatamaz, süreci
+ * düşüremez.
+ */
+function refreshSatelliteSSTInBackground(lat, lon, logUser = null) {
+    const key = 's_' + parseFloat(lat).toFixed(2) + '_' + parseFloat(lon).toFixed(2);
+    _fetchSatelliteSSTBase(lat, lon, logUser, 12000)
+        .then(val => {
+            if (val !== null) {
+                sstSatCache.set(key, val, 10800);
+                console.log(`[SST-BG] ${lat},${lon} arka planda geldi: ${val}°C — önbelleğe yazıldı`);
+            }
+        })
+        .catch(() => { /* sessiz: arka plan işi kullanıcıyı etkilemez */ });
+}
+
+async function _fetchSatelliteSSTBase(lat, lon, logUser = null, timeoutMs = 2000) {
     const latMin = (parseFloat(lat) - 0.05).toFixed(4);
     const latMax = (parseFloat(lat) + 0.05).toFixed(4);
     const lonMin = (parseFloat(lon) - 0.05).toFixed(4);
@@ -1547,7 +1602,7 @@ async function fetchSatelliteSST(lat, lon, logUser = null) {
         `?sst[(${start}):(${end})][(0)][(${latMin}):(${latMax})][(${lonMin}):(${lonMax})]`;
 
     try {
-        const res = await fetchWithTimeout(url, 4000); // NOAA yavaşsa beklemesini kısalt
+        const res = await fetchWithTimeout(url, timeoutMs);
         if (!res.ok) return null;
         const json = await res.json();
         if (!json?.table?.rows) return null;
@@ -6033,6 +6088,17 @@ app.get('/api/forecast', async (req, res) => {
             apiGrid: (marine && marine.latitude) ? { lat: marine.latitude, lon: marine.longitude } : null,
             forecast: forecast,
             instant: instantData,
+            // [4.9] Hangi kaynakların bu istekte gelebildiği. YENİ ALAN — eski APK
+            // görmezden gelir (yanıt sözleşmesi: alan eklemek güvenli).
+            //
+            // AMACI KULLANICIYA "EKSİK VERİ" DEMEK DEĞİL. NOAA gelmediğinde uygulama
+            // boş kalmıyor; uydu SST yerine Open-Meteo SST (~10 km) kullanılıyor, o da
+            // gerçek bir ölçüm. Bu alan istemcinin "birkaç saniye sonra tekrar isteyip
+            // daha iyi veriyle skoru tazeleyeyim mi?" kararını verebilmesi için var.
+            dataQuality: {
+                satelliteSst: sstSat !== null,      // false → Open-Meteo SST kullanıldı
+                chlorophyll: chlorophyllData != null // false → klorofil katmanı yok
+            },
             isPro: true              // Ham veri her zaman "Tam/Açık" veridir.
         };
 
@@ -6044,6 +6110,14 @@ app.get('/api/forecast', async (req, res) => {
         }
 
         res.json(applySanitization(rawResponseData, isProUser));
+
+        // [4.9] Yanıt GÖNDERİLDİKTEN SONRA: NOAA 2 saniyede yetişemediyse arka planda
+        // uzun timeout ile bir kez daha dene ve önbelleğe yaz. Kullanıcı beklemiyor;
+        // kazanan bir sonraki istek (veya kullanıcının yeniden dokunması) oluyor.
+        // await EDİLMEZ, hata yutulur — açık isteği ne yavaşlatır ne düşürür.
+        if (sstSat === null && !isLand) {
+            refreshSatelliteSSTInBackground(lat, lon, logUser);
+        }
 
     } catch (error) {
         console.error("API Error:", error);
