@@ -44,7 +44,7 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | ~~2~~ | ~~**1.2**~~ | ~~süresi dolan aboneliğe `status:'expired'`~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | 3 | **1.3** | `esp_chopa` `tempRange` gözden geçir | species.js, tek kayıt | düşük |
 | ~~4~~ | ~~**4.13**~~ | ~~taramada kara koruması~~ | **YAPILDI** — bkz. Kapatılanlar | — |
-| 5 | **4.4** | bbox çakışmasını ÖLÇ, sonra karar ver | species.js | düşük (önce ölçüm) |
+| ~~5~~ | ~~**4.4**~~ | ~~bbox çakışması~~ | **ÖLÇÜLDÜ — değişiklik gerekmedi** | — |
 | 6 | **4.9** | NOAA devre kesici | server.js | **orta — skor girdisi değişir** |
 | 7 | **4.12** | snap'te weather'ı da çek | server.js | **orta — skor + API maliyeti** |
 | 8 | **2.3** | cron'ları kullanıcı saat dilimine taşı | server.js | orta |
@@ -470,11 +470,30 @@ olmasını şart koşar. Şu an Ege yazı için soğuk kalibre oldukları bilini
 İlk sürümde vardı, kaldırıldı. Yeni `idn_` kayıtlarından temizlendi ama ~700
 yabancı türde hâlâ duruyor ve frontend'de bağlı. Temizlik işi.
 
-### 4.4 Biskay / Akdeniz bbox çakışması `HAZIR`
+### 4.14 İspanya bölge adları yanlış gösteriliyor `HAZIR`
 
-"İber Atlantiği & Biskay" (`lat 36-46, lon -10..-1`) ile "Batı/Orta Akdeniz"
-(`lat 30-45, lon -6..20`) Cebelitarık civarında çakışıyor. Sonuç: bazı türler
-yanlış denizde listelenebilir. Ölçülmedi, etkisi bilinmiyor.
+4.4 ölçülürken çıktı. `getRegion` **Bilbao (43.40, -3.00)** için
+`"Batı/Orta Akdeniz"` döndürüyor — Bilbao Biskay Körfezi'nde, Atlantik'te.
+Sebep: Akdeniz bbox'ı `lat 30-45, lon -6..20` ve Bilbao tam içine düşüyor.
+
+**Skoru etkilemiyor** (ölçüldü, aşağıya bak) ama **kullanıcıya gösteriliyor.**
+`displayRegion = getCoastalLocality(...) || i18n.regions[regionName] || regionName`:
+
+| nokta | gösterilen |
+|---|---|
+| Bilbao (Biskay) | `Batı/Orta Akdeniz` ← yanlış |
+| Cádiz (Atlantik) | `Batı/Orta Akdeniz` ← yanlış |
+| Barselona | `Batı/Orta Akdeniz` ✓ |
+| İzmir | `Narlıdere Kıyıları` ✓ |
+
+`getCoastalLocality` yalnız `tr-coastal-localities.json`'a bakıyor (Türkiye),
+İspanya'da boş dönüyor; `i18n.regions` sözlüğünde de bu adlar yok, o yüzden ham
+bölge adı ekrana çıkıyor. Bu bir **dürüstlük sorunu** — Biskay'daki kullanıcı
+ekranında "Akdeniz" yazıyor.
+
+**Çözüm seçenekleri:** (a) `i18n.regions`'a İspanya bölge adlarını ekle,
+(b) `getRegion`'da kutu sırasını düzelt (Biskay önce denensin). (a) daha güvenli —
+habitat kapısına dokunmaz.
 
 ### 4.5 Tuzluluk sayısal aralığı `ERTELENDİ`
 
@@ -553,6 +572,16 @@ ayrılmış test kümesi** şart — yoksa modelin ne zaman hazır olduğu hiç 
 - **`startedAt` her doğrulamada eziliyordu** — düzeltildi (`23919de`).
 - **BAE mükerrer kayıtları** — 5 çift birleştirildi.
 - **Tuzluluk sayısal aralığı** — ölçüldü, değmiyor (bkz. 4.5).
+- **4.4 Biskay/Akdeniz bbox çakışması** — ÖLÇÜLDÜ, değişiklik gerekmedi.
+  Çakışma geometrik olarak var (`lat 36-45, lon -6..-1`) ama etkisi yok:
+  Akdeniz kutusunu taşıyan **59 türün 56'sı zaten Biskay kutusunu da**
+  taşıyor, yani bilinçli olarak iki denize işaretlenmişler. Yalnız 3 tür
+  Akdeniz'e özel ve Cádiz'de görünüyor (`med_silver_scabbard`,
+  `med_spearfish`, `med_cobia`) — üçü de Cebelitarık civarında bulunabilir.
+  **Skor etkisi 0/64 tür**: `getSalinity` ve `estimateDeepTemp` her iki bölge
+  adı için de varsayılana düşüyor (35 ppt / 14 °C), yani etiket hiçbir hesaba
+  girmiyor. Bbox'ı daraltmak 59 türün habitat kapısını etkilerdi — risk/fayda
+  kötü bulundu. Ölçüm sırasında çıkan gerçek kusur ayrı madde: **4.14**.
 - **4.13 Mera taraması karaya pin basıyor** — düzeltildi. İki katman eklendi:
   ızgarada `INLAND` ön eleme (Katman 1) ve derinlik kapısı (Katman 2,
   `MIN_SCAN_DEPTH_M = 1.5`, fail-closed — `bathyRaw === null` de eler).
