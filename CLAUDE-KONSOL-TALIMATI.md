@@ -150,6 +150,15 @@ Bunlar gerçekten yaşandı, kayda geçti:
 
 Sırayı `ACIK-ISLER.md` §0.1 belirliyor. Aşağıdakiler tuzak barındıranlar:
 
+**4.13 (taramada kara koruması)** — Listedeki tek madde ki kullanıcı hatayı kendi
+gözüyle gördü: Selçuk/Gebekirse'de kuru zeminde "Baraküda %68,3 · 1 m" pini.
+`/api/scan` kara koruması hiç çalıştırmıyor; `/api/forecast`'te iki katman var.
+**Tuzak:** `findNearestSeaPoint()` ağ çağrısı yapar, ızgaradaki her nokta için
+çağırma — tarama saatlerce sürer ve Open-Meteo kotasını yakar. Ucuz olan
+`analyzeLocationOffline()` (bellek içi poligon testi) ile süz, snap'i taramaya
+sokma. Düzeltmeden sonra pin sayısı azalır; bu beklenen sonuçtur ama **kaç pin
+elendiği ölçülüp raporlanmalı** — gereğinden fazla eleniyorsa süzgeç yanlıştır.
+
 **4.11 (`hourlyTimeline` sabit 24)** — En kolay madde, tek satır. Doğru değer
 zaten kapsamda: `hourlyOffset`. Ama düzeltmenin **kullanıcıya yansıyıp
 yansımadığı belirsiz**, çünkü istemcinin bu alanı okuyup okumadığı repodan

@@ -43,18 +43,26 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | 1 | **4.11** | `hourlyTimeline` sabit 24 → `hourlyOffset` | server.js, **tek satır** | çok düşük |
 | 2 | **1.2** | süresi dolan aboneliğe `status:'expired'` | server.js | düşük |
 | 3 | **1.3** | `esp_chopa` `tempRange` gözden geçir | species.js, tek kayıt | düşük |
-| 4 | **4.4** | bbox çakışmasını ÖLÇ, sonra karar ver | species.js | düşük (önce ölçüm) |
-| 5 | **4.9** | NOAA devre kesici | server.js | **orta — skor girdisi değişir** |
-| 6 | **4.12** | snap'te weather'ı da çek | server.js | **orta — skor + API maliyeti** |
-| 7 | **2.3** | cron'ları kullanıcı saat dilimine taşı | server.js | orta |
-| 8 | **4.3** | `photoId` temizliği (827 kayıt) | species.js | orta — **önce mobil kontrol** |
-| 9 | **1.5** | kıyı bildirimi eşiği + gizlilik politikası | server.js + public/privacy.html | orta — **canlı bildirim** |
-| 10 | **4.8** | `instant`'ı `isLand` ile kapat | server.js | **önce mobil doğrulama şart** |
-| 11 | **1.4** | `targetClass` gruplaması | **APK** | mobil |
-| 12 | **4.10** | çift istek (oturumsuz + kimlikli) | **APK** | mobil |
-| 13 | **2.1** | `mera_tarama` → `scan_result` uçurumu | **APK** | mobil |
-| 14 | **1.1** | RTDN / Pub/Sub | server.js + altyapı | **yüksek — ödeme kodu** |
-| 15 | **göl** | `TATLISU-PLAN.md` | ayrı dosya + APK | en son |
+| 4 | **4.13** | **taramada kara koruması** — kullanıcı gördü, bildirdi | server.js | düşük-orta |
+| 5 | **4.4** | bbox çakışmasını ÖLÇ, sonra karar ver | species.js | düşük (önce ölçüm) |
+| 6 | **4.9** | NOAA devre kesici | server.js | **orta — skor girdisi değişir** |
+| 7 | **4.12** | snap'te weather'ı da çek | server.js | **orta — skor + API maliyeti** |
+| 8 | **2.3** | cron'ları kullanıcı saat dilimine taşı | server.js | orta |
+| 9 | **4.3** | `photoId` temizliği (827 kayıt) | species.js | orta — **önce mobil kontrol** |
+| 10 | **1.5** | kıyı bildirimi eşiği + gizlilik politikası | server.js + public/privacy.html | orta — **canlı bildirim** |
+| 11 | **4.8** | `instant`'ı `isLand` ile kapat | server.js | **önce mobil doğrulama şart** |
+| 12 | **1.4** | `targetClass` gruplaması | **APK** | mobil |
+| 13 | **4.10** | çift istek (oturumsuz + kimlikli) | **APK** | mobil |
+| 14 | **2.1** | `mera_tarama` → `scan_result` uçurumu | **APK** | mobil |
+| 15 | **1.1** | RTDN / Pub/Sub | server.js + altyapı | **yüksek — ödeme kodu** |
+| 16 | **göl** | `TATLISU-PLAN.md` | ayrı dosya + APK | en son |
+
+> **4.13 neden 4. sırada:** listedeki tek madde ki kullanıcı hatayı **kendi
+> gözüyle görüp bildirdi** (karada balık pini). Düzeltmesi yeni bir model
+> gerektirmiyor — `analyzeLocationOffline()` zaten var ve bellek içi çalışıyor,
+> `/api/scan` onu hiç çağırmıyor. Değer/emek oranı listedeki en yüksek olan.
+> **Uyarı:** `findNearestSeaPoint()` pahalıdır (ağ çağrısı yapar), ızgaradaki her
+> nokta için çağrılmamalı. Ucuz olan poligon testiyle süz, snap'i taramaya sokma.
 
 **Ölçüm gerektirenler (kod yazmadan önce):** 4.4, 4.9, 4.12, 1.5
 **Mobil doğrulama gerektirenler (sunucuya dokunmadan önce):** 4.3, 4.8
