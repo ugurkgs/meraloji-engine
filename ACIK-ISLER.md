@@ -9,6 +9,58 @@ bağlamı taşır.
 
 ---
 
+## 0 · DOĞRULAMA — 2026-08-10
+
+Aşağıdaki maddelerin **hâlâ açık olduğu koddan mekanik olarak doğrulandı.**
+"Yapılmış ama kapatılmamış" bir madde çıkmadı.
+
+| madde | iddia | kanıt |
+|---|---|---|
+| 1.1 | RTDN/webhook ucu yok | `rtdn\|pubsub\|developerNotification` → **0 eşleşme** |
+| 1.2 | `status` süresi dolunca güncellenmiyor | yazılan tek değer: `'active'` |
+| 1.3 | `esp_chopa` `tempRange.max = 24` | kayıt satır 6816 → `min:9, opt:17, max:24` ✓ |
+| 1.4 | sunucu `targetClass` döndürüyor | 5 yerde geçiyor, `avSinifi()` 4 çağrı — **mobil iş kaldı** |
+| 1.5 | kıyı bildirimi kuru | `SHORE_ALERT_ENABLED === 'true'` (satır 8268), env verilmemiş |
+| 2.3 | cron'lar TR saatine sabit | 2 cron `{timezone:'Europe/Istanbul'}`, saatlik cron `Date.now()+3*60*60*1000` |
+| 4.3 | `photoId` ölü alan | **species.js'de 827**, server.js'de 8 kullanım |
+| 4.4 | Biskay/Akdeniz bbox çakışması | Akdeniz `lat30-45 lon-6..20` ∩ Biskay `lat36-46 lon-10..-1` → **lat36-45 lon-6..-1 çakışıyor** ✓ |
+| 4.7 | barınak/maruziyet modeli yok | `exposure\|maruziyet` → 0 eşleşme (`shoreBearing` 54 kullanım ama farklı iş) |
+| 4.8 | `instant` bloğu `if (true)` | blok aynen duruyor |
+| 4.9 | NOAA devre kesici yok | `noaa backoff` → **0 eşleşme** (OM'da var, NOAA'da yok) |
+| 4.11 | `hourlyTimeline` `wIdx` sabit 24 | `const wIdx = 24 + correctedClickHour + h;` aynen duruyor |
+| 4.12 | snap weather'ı yeniden çekmiyor | snap bloğunda `marine =` 1 kez, `weather =` **0 kez** |
+
+> Doğrulama sırasında iki madde önce yanlışlıkla "değişmiş" işaretlendi; ikisi de
+> regex hatasıydı (1.5'te kod yerine yorum satırı, 1.3'te `esp_chopa`'nın geçtiği
+> başka bir kaydın yorumu yakalanmıştı). Elle kontrolde ikisi de açık çıktı.
+
+### 0.1 KOLAYDAN ZORA İŞ SIRASI
+
+Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
+
+| # | madde | ne | nerede | risk |
+|---|---|---|---|---|
+| 1 | **4.11** | `hourlyTimeline` sabit 24 → `hourlyOffset` | server.js, **tek satır** | çok düşük |
+| 2 | **1.2** | süresi dolan aboneliğe `status:'expired'` | server.js | düşük |
+| 3 | **1.3** | `esp_chopa` `tempRange` gözden geçir | species.js, tek kayıt | düşük |
+| 4 | **4.4** | bbox çakışmasını ÖLÇ, sonra karar ver | species.js | düşük (önce ölçüm) |
+| 5 | **4.9** | NOAA devre kesici | server.js | **orta — skor girdisi değişir** |
+| 6 | **4.12** | snap'te weather'ı da çek | server.js | **orta — skor + API maliyeti** |
+| 7 | **2.3** | cron'ları kullanıcı saat dilimine taşı | server.js | orta |
+| 8 | **4.3** | `photoId` temizliği (827 kayıt) | species.js | orta — **önce mobil kontrol** |
+| 9 | **1.5** | kıyı bildirimi eşiği + gizlilik politikası | server.js + public/privacy.html | orta — **canlı bildirim** |
+| 10 | **4.8** | `instant`'ı `isLand` ile kapat | server.js | **önce mobil doğrulama şart** |
+| 11 | **1.4** | `targetClass` gruplaması | **APK** | mobil |
+| 12 | **4.10** | çift istek (oturumsuz + kimlikli) | **APK** | mobil |
+| 13 | **2.1** | `mera_tarama` → `scan_result` uçurumu | **APK** | mobil |
+| 14 | **1.1** | RTDN / Pub/Sub | server.js + altyapı | **yüksek — ödeme kodu** |
+| 15 | **göl** | `TATLISU-PLAN.md` | ayrı dosya + APK | en son |
+
+**Ölçüm gerektirenler (kod yazmadan önce):** 4.4, 4.9, 4.12, 1.5
+**Mobil doğrulama gerektirenler (sunucuya dokunmadan önce):** 4.3, 4.8
+
+---
+
 ## 1 · Abonelik ve ödeme
 
 ### 1.1 RTDN yok — yenilemeler takip edilmiyor `HAZIR`
@@ -117,10 +169,22 @@ bildirim gitmiyor. Eski cron'lar bu açıdan hâlâ hatalı (bkz. 2.3).
 
 ### 2.3 Mevcut cron'lar Türkiye saatine sabit `HAZIR`
 
-`cron.schedule('0 * * * *')` ve günlük iş `Date.now() + 3*3600*1000` ile TR saati
-varsayıyor. Uygulama Endonezya ve İspanya'da da kullanılıyor — o kullanıcılara
-yanlış saatte bildirim gidiyor. Çözüm kıyı bildiriminde uygulandı (boylamdan
-UTC ofseti), aynısı bu ikisine de taşınmalı.
+Üç yerde TR saati varsayılıyor (2026-08-10'da koddan doğrulandı):
+
+| satır | cron | mekanizma |
+|---|---|---|
+| 7866 | günlük en iyi, `0 7 * * *` | `{ timezone: 'Europe/Istanbul' }` (7950) |
+| 7957 | cache temizliği, `0 3 * * *` | `{ timezone: 'Europe/Istanbul' }` (7995) |
+| 8000 | basınç uyarısı, `0 * * * *` | `Date.now() + 3 * 60 * 60 * 1000` → TR 22:00–07:00 uyku |
+
+> Bu maddenin önceki tarifi `Date.now() + 3*3600*1000` diyordu; kodda öyle bir
+> ifade yok. Gerçek mekanizma yukarıdaki tabloda.
+
+Cache temizliği (03:00) saat diliminden bağımsız, sorun değil. Sorun **kullanıcıya
+bildirim gönderen ikisinde**: Endonezya ve İspanya'daki kullanıcılar Türkiye
+saatine göre bildirim alıyor. Çözüm kıyı bildiriminde uygulandı (`shoreAlert`
+cron'u boylamdan UTC ofseti türetiyor, `Math.round(ls.lon / 15)`), aynısı bu
+ikisine taşınmalı.
 
 ## 2 · Analitik ve ölçüm
 
