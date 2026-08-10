@@ -41,7 +41,7 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | # | madde | ne | nerede | risk |
 |---|---|---|---|---|
 | ~~1~~ | ~~**4.11**~~ | ~~`hourlyTimeline` sabit 24 → `hourlyOffset`~~ | **YAPILDI** — bkz. Kapatılanlar | — |
-| 2 | **1.2** | süresi dolan aboneliğe `status:'expired'` | server.js | düşük |
+| ~~2~~ | ~~**1.2**~~ | ~~süresi dolan aboneliğe `status:'expired'`~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | 3 | **1.3** | `esp_chopa` `tempRange` gözden geçir | species.js, tek kayıt | düşük |
 | 4 | **4.13** | **taramada kara koruması** — kullanıcı gördü, bildirdi | server.js | düşük-orta |
 | 5 | **4.4** | bbox çakışmasını ÖLÇ, sonra karar ver | species.js | düşük (önce ölçüm) |
@@ -87,12 +87,6 @@ sürdürülebilirliği tamamen buna bağlı ve şu an elimizde veri yok.
 
 **Sonraki adım:** Pub/Sub konusu + webhook ucu + `subscriptions/{uid}` güncelleme.
 Orta büyüklükte bir iş, ödeme koduna dokunuyor — dikkatli test ister.
-
-### 1.2 `status` alanı süresi dolunca güncellenmiyor `HAZIR`
-
-Abonelik bitince Firestore'da `status: "active"` kalmaya devam ediyor. Erişim
-`expiresAt` ile kapandığı için **güvenlik açığı değil**, ama panelde yanıltıcı.
-Süresi dolmuş bir abonelik "aktif" görünüyor.
 
 ### 1.3 `esp_chopa` sıcaklık aralığı gözden geçirilmeli `HAZIR`
 
@@ -618,6 +612,15 @@ ayrılmış test kümesi** şart — yoksa modelin ne zaman hazır olduğu hiç 
 - **`startedAt` her doğrulamada eziliyordu** — düzeltildi (`23919de`).
 - **BAE mükerrer kayıtları** — 5 çift birleştirildi.
 - **Tuzluluk sayısal aralığı** — ölçüldü, değmiyor (bkz. 4.5).
+- **1.2 `status` süresi dolunca güncellenmiyor** — düzeltildi. verifyAuth'te
+  abonelik okunurken `status==="active"` ama `expiresAt` geçmişse Firestore'a
+  `status:"expired"` yazılıyor (merge, await edilmiyor, hatası yutuluyor).
+  **Erişim değişmedi:** hem sunucu hem istemci `status==="active" && expiresAt>now`
+  çift koşulunu arıyor; yazım yalnızca expiresAt zaten geçmişken yapılıyor, yani
+  o dal çoktan false. 8 senaryoluk test HEAD ile YENİ arasında erişim farkı
+  olmadığını gösterdi (ödeyen abone dahil). `expiresAt` sayı değilse
+  DOKUNULMUYOR — bilinmeyen alanda karar verilmiyor. Deniz regresyonu 6160
+  skor sapma 0.
 - **4.11 `hourlyTimeline` saat indeksi sabit 24** — düzeltildi. `wIdx` artık
   `hourlyOffset` kullanıyor; aynı döngüdeki marine indeksi zaten dinamikti.
   Etkisi dar bir pencereyle sınırlıydı: `raw_weather` önbelleği gece yarısından

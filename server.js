@@ -1820,6 +1820,30 @@ async function verifyAuth(req, res, next) {
                     const sub = subDoc.data();
                     if (sub.status === 'active' && sub.expiresAt > Date.now()) {
                         isPremiumCached = true;
+                    } else if (sub.status === 'active'
+                               && typeof sub.expiresAt === 'number'
+                               && sub.expiresAt <= Date.now()) {
+                        // [1.2] Süresi dolmuş abonelik Firestore'da "active" kalıyordu;
+                        // panelde bitmiş abonelik aktif görünüyordu. Burada düzeltiliyor.
+                        //
+                        // ERİŞİMİ DEĞİŞTİRMEZ: hem bu kontrol (yukarıdaki if) hem istemci
+                        // (MainActivity: "active".equals(status) && expiresAt > now) İKİ
+                        // koşulu birden arıyor. Buraya yalnızca expiresAt zaten geçmişken
+                        // giriliyor, yani o dal çoktan false. status'ü "expired" yapmak
+                        // sonucu değiştiremez.
+                        //
+                        // expiresAt SAYI DEĞİLSE dokunulmuyor: eksik/null bir alanda
+                        // "undefined <= now" ile karar vermek, bilmediğimiz bir şeyi
+                        // bilir gibi davranmak olurdu. Bilinmiyorsa kayıt olduğu gibi kalır.
+                        //
+                        // Bir kez yazılır (sonraki okumada status artık "active" değil),
+                        // await EDİLMEZ ve hatası yutulur — auth yolu bu yazımdan dolayı
+                        // ne yavaşlar ne de kırılır. Yenileme olursa /api/verify-subscription
+                        // status'ü tekrar "active" yapar.
+                        db.collection('subscriptions').doc(decoded.uid)
+                            .set({ status: 'expired' }, { merge: true })
+                            .then(() => console.log(`[SUB] ${decoded.uid} aboneliği süresi dolmuş olarak işaretlendi (expiresAt: ${new Date(sub.expiresAt).toISOString()})`))
+                            .catch(e => console.log('[SUB] expired işaretlenemedi:', e.message));
                     }
                 }
                 if (!isPremiumCached && userDoc.exists) {
