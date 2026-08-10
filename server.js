@@ -1639,21 +1639,26 @@ const FREE_DAILY_CLICKS = 2;    // Ücretsiz kullanıcı günde 2 tıklama (grac
 // /api/fish-search, /api/use-click ve /api/subscription-status'in raporladığı
 // clickLimit değeri FREE_DAILY_CLICKS olarak KALIR — istemcinin kendi kapısı
 // da 2 olduğu için kullanıcıya gösterilen sayı tutarlı kalsın.
-// Kaç ekstra analiz hakkı verileceği. Ürün kararı: süresi dolmuş kullanıcı
-// günde 2 analiz yapar, ardından BİR reklam izleyerek 1 hak daha kazanır.
-// Yani günlük tavan 2 + 1 = 3.
+// ÜRÜN KURALI: süresi dolmuş kullanıcı günde 2 ücretsiz analiz yapar. Sonrasında
+// izlediği HER reklam 1 hak daha kazandırır ve reklam sayısı sınırsızdır. Ertesi
+// gün sayaç sıfırlanır, yine 2 ücretsiz + reklam başına 1.
 //
-// Sunucu "kaç reklam izlendi" bilgisine sahip değil; bu yüzden pay, reklam
-// başına değil GÜNLÜK TOPLAM olarak uygulanır. İstemci de günde tek ödüle izin
-// verip (ad_reward_day/ad_reward_used) ikinci reklamda butonu gizlediği için
-// iki taraf aynı sayıda buluşuyor.
+// Aşağıdaki sayı bu kuralın parçası DEĞİL; yalnızca bir KÖTÜYE KULLANIM FRENİ.
+// Sunucu "kaç reklam izlendi" bilgisine sahip olmadığı için ürün kuralını birebir
+// uygulayamıyor; yapabildiği tek şey günlük bir üst sınır koymak. 20 seçildi çünkü
+// gerçek bir kullanıcı bir günde 20 ödüllü reklam izlemez (~10 dakika kesintisiz
+// video) ve AdMob'un kendi frekans sınırlaması zaten çok daha önce devreye girer.
+// Yani meşru kullanıcı bu tavana ASLA çarpmaz; tavan sadece elle hazırlanmış API
+// çağrılarıyla kota yağmalanmasını engeller.
 //
-// Kötüye kullanım riski düşük: clickUsage sayacı Firestore'da uid'ye bağlı,
-// yani uygulama verisini silmek onu SIFIRLAMIYOR. İstemci kapısı da 2'de
-// durduğu için normal bir kullanıcının bu payı kullanmasının tek yolu gerçekten
-// reklam izlemek. (Elle hazırlanmış API çağrısı ayrı bir tehdit sınıfı; asıl
-// çözümü SSV.)
-const AD_REWARD_HEADROOM = 1;
+// Kötüye kullanım riski düşük: clickUsage sayacı Firestore'da uid'ye bağlı, yani
+// uygulama verisini silmek onu SIFIRLAMIYOR. İstemci kapısı da 2'de durduğu için
+// normal akışta bu payı kullanmanın tek yolu gerçekten reklam izlemek.
+//
+// ⚠️ ARA ÇÖZÜM. Doğrusu AdMob Server-Side Verification: ödülü AdMob doğrudan
+// sunucuya bildirir, o zaman hak reklam BAŞINA verilir ve tavana gerek kalmaz.
+// SSV istemcide setUserId/customData gerektirdiği için APK ile gelecek.
+const AD_REWARD_HEADROOM = 20;
 const FREE_DAILY_SCANS = 1;     // Ücretsiz kullanıcı günde 1 tarama
 const GRACE_PERIOD_DAYS = 14;   // Yeni kullanıcıya 14 gün tam erişim
 const VALID_SUBSCRIPTIONS = ['meraloji_pro_monthly', 'meraloji_pro_yearly'];
