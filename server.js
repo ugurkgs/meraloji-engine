@@ -1615,6 +1615,31 @@ function applyShoaling(waveHeight, wavePeriod, depthM) {
 
 
 const FREE_DAILY_CLICKS = 2;    // Ücretsiz kullanıcı günde 2 tıklama (grace period sonrası)
+
+// ── REKLAM ÖDÜLÜ İÇİN TAVAN PAYI ────────────────────────────────────────────
+// SORUN: "Reklam izle → +1 hak" modülü ödülü YALNIZCA istemcide veriyor
+// (MainActivity.showRewardedAd → post_trial_clicks sayacını 1 azaltır).
+// Sunucunun bundan haberi olmuyor, bir sonraki analizde clickUsage sayacı
+// FREE_DAILY_CLICKS'e dayanıp 403 dönüyor, istemci de 403 üzerine
+// syncClickCounterToLimit() ile sayacı geri limite çekiyor. Sonuç: kullanıcı
+// reklamı izliyor, "hakkın verildi" mesajını görüyor ve hemen ardından analiz
+// yerine paywall görüyor. Reklam boşa izlenmiş oluyor.
+//
+// NEDEN SUNUCUDAN ÇÖZÜLEBİLİYOR: istemcinin kendi kapısı da 2'de duruyor
+// (MainActivity.POST_TRIAL_DAILY_LIMIT). Reklam İZLEMEYEN kullanıcı o kapıyı
+// hiç geçemediği için sunucuya 3. isteği ATAMIYOR. Dolayısıyla sunucu tavanını
+// 1 artırmak, fazladan hakkı yalnızca sayacı reklamla düşmüş kullanıcıya verir;
+// reklam izlemeyen hiç kimse bundan yararlanamaz.
+//
+// ⚠️ BU BİR ARA ÇÖZÜM. Doğrusu AdMob Server-Side Verification (SSV): ödülü
+// AdMob doğrudan sunucuya bildirir. SSV, istemcide setUserId/customData
+// gerektirdiği için APK ile gelecek. O gün bu payı KALDIRIN.
+//
+// Kapsam bilinçli olarak dar: yalnızca /api/forecast kotasında kullanılır.
+// /api/fish-search, /api/use-click ve /api/subscription-status'in raporladığı
+// clickLimit değeri FREE_DAILY_CLICKS olarak KALIR — istemcinin kendi kapısı
+// da 2 olduğu için kullanıcıya gösterilen sayı tutarlı kalsın.
+const AD_REWARD_HEADROOM = 1;
 const FREE_DAILY_SCANS = 1;     // Ücretsiz kullanıcı günde 1 tarama
 const GRACE_PERIOD_DAYS = 14;   // Yeni kullanıcıya 14 gün tam erişim
 const VALID_SUBSCRIPTIONS = ['meraloji_pro_monthly', 'meraloji_pro_yearly'];
@@ -4761,14 +4786,22 @@ app.get('/api/forecast', async (req, res) => {
                 const usageDoc = await usageRef.get();
                 const used = usageDoc.exists ? (usageDoc.data().count || 0) : 0;
 
-                if (used >= FREE_DAILY_CLICKS) {
-                    console.log(`[FORECAST] [${logUser}] ⛔ Günlük limit doldu (${used}/${FREE_DAILY_CLICKS})`);
+                // Tavan = normal kota + reklam ödülü payı (bkz. AD_REWARD_HEADROOM).
+                const dailyCeiling = FREE_DAILY_CLICKS + AD_REWARD_HEADROOM;
+                if (used >= dailyCeiling) {
+                    console.log(`[FORECAST] [${logUser}] ⛔ Günlük limit doldu (${used}/${dailyCeiling})`);
                     // İstemci 403'ü zaten paywall açarak karşılıyor.
                     return res.status(403).json({
                         message: i18n(lang).errors.limitExceeded,
-                        limit: FREE_DAILY_CLICKS,
+                        limit: dailyCeiling,
                         used
                     });
+                }
+                if (used >= FREE_DAILY_CLICKS) {
+                    // Normal kotanın üstündeki tek hak — istemcide reklam izlenmiş
+                    // olmalı, çünkü istemci kapısı da 2'de duruyor. Kullanımı
+                    // görebilmek ve payın işe yarayıp yaramadığını ölçmek için loglanır.
+                    console.log(`[FORECAST] [${logUser}] 🎬 reklam ödülü hakkı kullanıldı (${used + 1}/${dailyCeiling})`);
                 }
 
                 await usageRef.set({
