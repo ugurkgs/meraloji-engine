@@ -48,7 +48,7 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | ~~6~~ | ~~**4.9**~~ | ~~NOAA devre kesici~~ | **YAPILDI** (devre kesici yerine önbellek) | — |
 | ~~7~~ | ~~**4.12**~~ | ~~snap'te weather'ı da çek~~ | **ÖLÇÜLDÜ — değişiklik gerekmedi** | — |
 | ~~8~~ | ~~**2.3**~~ | ~~cron'ları kullanıcı saat dilimine taşı~~ | **YAPILDI** — bkz. Kapatılanlar | — |
-| 9 | **4.3** | `photoId` temizliği (827 kayıt) | species.js | orta — **önce mobil kontrol** |
+| ~~9~~ | ~~**4.3**~~ | ~~`photoId` temizliği~~ | **DOĞRULANDI — yapılmadı, gerekçe kayıtlı** | — |
 | 10 | **1.5** | kıyı bildirimi eşiği + gizlilik politikası | server.js + public/privacy.html | orta — **canlı bildirim** |
 | 11 | **4.8** | `instant`'ı `isLand` ile kapat | server.js | **önce mobil doğrulama şart** |
 | 12 | **1.4** | `targetClass` gruplaması | **APK** | mobil |
@@ -444,11 +444,6 @@ olmasını şart koşar. Şu an Ege yazı için soğuk kalibre oldukları bilini
 > skoru okuyan koşul yok). Sıranın önemli olduğu iki yer — taban `max(3,…)` ve
 > asimptotik sıkıştırma — ikisi de doğru konumda. Sıralamaya dokunmaya gerek yok.
 
-### 4.3 `photoId` ölü alan `HAZIR`
-
-İlk sürümde vardı, kaldırıldı. Yeni `idn_` kayıtlarından temizlendi ama ~700
-yabancı türde hâlâ duruyor ve frontend'de bağlı. Temizlik işi.
-
 ### 4.14 İspanya bölge adları yanlış gösteriliyor `HAZIR`
 
 4.4 ölçülürken çıktı. `getRegion` **Bilbao (43.40, -3.00)** için
@@ -551,6 +546,17 @@ ayrılmış test kümesi** şart — yoksa modelin ne zaman hazır olduğu hiç 
 - **`startedAt` her doğrulamada eziliyordu** — düzeltildi (`23919de`).
 - **BAE mükerrer kayıtları** — 5 çift birleştirildi.
 - **Tuzluluk sayısal aralığı** — ölçüldü, değmiyor (bkz. 4.5).
+- **4.3 `photoId` ölü alan** — MOBİL DOĞRULAMA YAPILDI, temizlik yapılmadı.
+  Madde "frontend'de bağlı" diyordu; **değil.** Android kaynağında `photoId`
+  yalnızca `ForecastResponse.java:227`'de tanımlı ve `MainActivity:1552, 3517`'de
+  nesneden nesneye kopyalanıyor — **hiçbir yerde okunmuyor.** Uygulamada balık
+  fotoğrafı yükleyen kod yok (Glide sadece kullanıcı avatarı için, `getIdentifier`
+  ile drawable arayan kod yok). Sunucuda da 4 yerde sadece yanıta kopyalanıyor.
+  **Neden temizlenmedi:** kazanç görünmez (827 satır + birkaç KB yanıt), risk
+  gerçek — §3 `species.js` tür parametrelerini dokunulmayacaklar listesine koyuyor
+  ve yanıttan alan kaldırmak sözleşmeyi daraltır. Bunun yerine `species.js`
+  başına "yeni kayıtlara eklemeyin" notu düşüldü; yeni türler zaten almıyordu,
+  yani sorun kendiliğinden küçülüyor.
 - **2.3 Cron'lar Türkiye saatine sabit** — düzeltildi. Bildirim gönderen iki
   cron artık kullanıcının YEREL saatine göre çalışıyor:
   **Günlük en iyi mera:** `0 7 * * *` + `timezone:'Europe/Istanbul'` yerine

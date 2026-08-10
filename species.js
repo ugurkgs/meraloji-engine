@@ -1,6 +1,15 @@
 // MERALOJİ F.I.S.H. — Tür Veritabanı
 // Bu dosyayı düzenleyerek balık türlerini ekleyebilir, güncelleyebilirsiniz.
 // Değişiklikler server.js'e require() ile yansır.
+//
+// ⚠️ photoId ÖLÜ ALANDIR — YENİ KAYITLARA EKLEMEYİN.
+// İlk sürümde balık fotoğrafı için kullanılıyordu, o özellik kaldırıldı.
+// 2026-08-10'da doğrulandı: sunucu alanı yalnızca yanıta kopyalıyor
+// (4 yer), Android istemcide ise SADECE modelde tanımlı ve nesneden
+// nesneye kopyalanıyor (MainActivity:1552, 3517) — hiçbir yerde okunmuyor,
+// hiçbir görsel yüklenmiyor. Mevcut 827 kayıttan TEMİZLENMEDİ: kazanç
+// sıfırken 827 kayda toplu dokunmak, tek bir hatanın bütün listeleri
+// zehirlemesi riskine değmez (bkz. ACIK-ISLER.md "Trakonya vakası").
 
 const SPECIES_DB = {
     "levrek": {
