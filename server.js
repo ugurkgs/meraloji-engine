@@ -6043,7 +6043,18 @@ app.get('/api/forecast', async (req, res) => {
                     oxygen: hOxygen,
                     upwelling: hUpwelling,
                     salinity: instantData.salinity || 38.0,
-                    plankton: (instantData.chlorophyll && instantData.chlorophyll.value) ? instantData.chlorophyll.value : 0.2,
+                    // [DÜZELTME] Eskiden klorofil bilinmiyorken 0.2 UYDURULUYORDU. Bu,
+                    // aynı an için iki farklı sayı üretiyordu: ilk açılışta refreshScore
+                    // timeline'daki 0.2'yi alıyor (MainActivity:3473), kullanıcı slider'ı
+                    // oynatıp "Şimdi"ye dönünce ise instant.chlorophyll (null) okunuyor ve
+                    // 0 gösteriliyordu. Kullanıcı bunu bildirdi: "0,20 gösteriyor, slider'ı
+                    // kaydırıp dönünce 0 oluyor."
+                    // Artık bilinmeyen bilinmeyen olarak gidiyor. Alan zaten Double (nullable)
+                    // ve istemcideki tüm okumaları null korumalı — eski APK kırılmaz.
+                    // İstemcinin null'ı 0'a çevirmesi ayrı bir kusur, madde 4.15.
+                    plankton: (instantData.chlorophyll && typeof instantData.chlorophyll.value === 'number')
+                        ? instantData.chlorophyll.value
+                        : null,
                     weatherCode: hCode,
                     weatherSummary: hSummary,
                     visibility: safeNum(weather.hourly?.visibility?.[wIdx], 20000),
