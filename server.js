@@ -1639,7 +1639,17 @@ const FREE_DAILY_CLICKS = 2;    // Ücretsiz kullanıcı günde 2 tıklama (grac
 // /api/fish-search, /api/use-click ve /api/subscription-status'in raporladığı
 // clickLimit değeri FREE_DAILY_CLICKS olarak KALIR — istemcinin kendi kapısı
 // da 2 olduğu için kullanıcıya gösterilen sayı tutarlı kalsın.
-const AD_REWARD_HEADROOM = 1;
+// Kaç reklamın hak kazandıracağı. Sunucu "kaç reklam izlendi" bilgisine sahip
+// olmadığı için bu bir GÜNLÜK TAVAN PAYIDIR: kullanıcı gün içinde en fazla bu
+// kadar ekstra analiz alabilir. 1 iken canlıda yetmedi — ilk reklam çalışıyor,
+// ikincisi 403 alıyordu (2026-08-10 kullanıcı raporu + log doğrulaması).
+//
+// Kötüye kullanım riski düşük: clickUsage sayacı Firestore'da uid'ye bağlı,
+// yani uygulama verisini silmek onu SIFIRLAMIYOR. İstemci kapısı da 2'de
+// durduğu için normal bir kullanıcının bu payı kullanmasının tek yolu gerçekten
+// reklam izlemek. (Elle hazırlanmış API çağrısı ayrı bir tehdit sınıfı; asıl
+// çözümü SSV.)
+const AD_REWARD_HEADROOM = 3;
 const FREE_DAILY_SCANS = 1;     // Ücretsiz kullanıcı günde 1 tarama
 const GRACE_PERIOD_DAYS = 14;   // Yeni kullanıcıya 14 gün tam erişim
 const VALID_SUBSCRIPTIONS = ['meraloji_pro_monthly', 'meraloji_pro_yearly'];
@@ -4789,7 +4799,7 @@ app.get('/api/forecast', async (req, res) => {
                 // Tavan = normal kota + reklam ödülü payı (bkz. AD_REWARD_HEADROOM).
                 const dailyCeiling = FREE_DAILY_CLICKS + AD_REWARD_HEADROOM;
                 if (used >= dailyCeiling) {
-                    console.log(`[FORECAST] [${logUser}] ⛔ Günlük limit doldu (${used}/${dailyCeiling})`);
+                    console.log(`[KOTA] [${logUser}] ⛔ Günlük limit doldu (${used}/${dailyCeiling})`);
                     // İstemci 403'ü zaten paywall açarak karşılıyor.
                     return res.status(403).json({
                         message: i18n(lang).errors.limitExceeded,
@@ -4801,7 +4811,7 @@ app.get('/api/forecast', async (req, res) => {
                     // Normal kotanın üstündeki tek hak — istemcide reklam izlenmiş
                     // olmalı, çünkü istemci kapısı da 2'de duruyor. Kullanımı
                     // görebilmek ve payın işe yarayıp yaramadığını ölçmek için loglanır.
-                    console.log(`[FORECAST] [${logUser}] 🎬 reklam ödülü hakkı kullanıldı (${used + 1}/${dailyCeiling})`);
+                    console.log(`[KOTA] [${logUser}] 🎬 reklam ödülü hakkı kullanıldı (${used + 1}/${dailyCeiling})`);
                 }
 
                 await usageRef.set({
