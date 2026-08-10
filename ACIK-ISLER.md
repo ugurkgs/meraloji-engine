@@ -25,7 +25,7 @@ Aşağıdaki maddelerin **hâlâ açık olduğu koddan mekanik olarak doğruland
 | 4.3 | `photoId` ölü alan | **species.js'de 827**, server.js'de 8 kullanım |
 | 4.4 | Biskay/Akdeniz bbox çakışması | Akdeniz `lat30-45 lon-6..20` ∩ Biskay `lat36-46 lon-10..-1` → **lat36-45 lon-6..-1 çakışıyor** ✓ |
 | 4.7 | barınak/maruziyet modeli yok | `exposure\|maruziyet` → 0 eşleşme (`shoreBearing` 54 kullanım ama farklı iş) |
-| 4.8 | `instant` bloğu `if (true)` | blok aynen duruyor |
+| ~~4.8~~ | ~~`instant` bloğu `if (true)`~~ | **YAPILDI** — tür döngüsüne `if (isLand) break` kondu |
 | 4.9 | NOAA devre kesici yok | `noaa backoff` → **0 eşleşme** (OM'da var, NOAA'da yok) |
 | 4.11 | `hourlyTimeline` `wIdx` sabit 24 | `const wIdx = 24 + correctedClickHour + h;` aynen duruyor |
 | 4.12 | snap weather'ı yeniden çekmiyor | snap bloğunda `marine =` 1 kez, `weather =` **0 kez** |
@@ -50,7 +50,8 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | ~~8~~ | ~~**2.3**~~ | ~~cron'ları kullanıcı saat dilimine taşı~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | ~~9~~ | ~~**4.3**~~ | ~~`photoId` temizliği~~ | **DOĞRULANDI — yapılmadı, gerekçe kayıtlı** | — |
 | 10 | **1.5** | kıyı bildirimi | **KISMEN — canlıya alındı, kapatma ayarı APK'ya kaldı** | orta |
-| 11 | **4.8** | `instant`'ı `isLand` ile kapat | server.js | **önce mobil doğrulama şart** |
+| ~~11~~ | ~~**4.8**~~ | ~~`instant`'ı `isLand` ile kapat~~ | **YAPILDI** — bkz. Kapatılanlar | — |
+| 11b | **4.16** | widget karada skor gösteriyor | **APK** | mobil |
 | 12 | **1.4** | `targetClass` gruplaması | **APK** | mobil |
 | 13 | **4.10** | çift istek (oturumsuz + kimlikli) | **APK** | mobil |
 | 14 | **2.1** | `mera_tarama` → `scan_result` uçurumu | **APK** | mobil |
@@ -65,7 +66,7 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 > nokta için çağrılmamalı. Ucuz olan poligon testiyle süz, snap'i taramaya sokma.
 
 **Ölçüm gerektirenler (kod yazmadan önce):** ~~4.4, 4.9, 4.12, 1.5~~ — hepsi ölçüldü.
-**Mobil doğrulama gerektirenler (sunucuya dokunmadan önce):** 4.3, 4.8
+**Mobil doğrulama gerektirenler (sunucuya dokunmadan önce):** ~~4.3, 4.8~~ — ikisi de doğrulandı.
 
 ---
 
@@ -333,30 +334,32 @@ katmanıydı — ve o düzeltildi (bkz. commit geçmişi, logaritmik/asimetrik e
 Tutarsızlık bulgusu yine de gerçek; ileride ele alınacaksa **tür tür ve av
 değerine bakarak** yapılmalı, toplu değil.
 
-### 4.8 `instant` bloğu karada da skor üretiyor `HAZIR` · **MOBİL DOĞRULAMA GEREKİR**
+### 4.16 Widget karada balık skoru gösteriyor `HAZIR` · **MOBİL**
 
-7 günlük döngü `if (!isLand)` ile korunuyor — karada balık listelenmiyor. Ama hemen
-altındaki anlık (`instant`) bloğu `if (true)` ile açılıyor, yani **kara noktasında
-da tür skoru hesaplanıp `instant` alanıyla istemciye gidiyor.**
+4.8 doğrulanırken çıktı. Sunucu 2026-08-11'den beri karada `instant.score: 0` ·
+`fishList: []` · `hasActiveFish: false` gönderiyor, yani **acil değil** — ama
+istemci hâlâ kara/deniz ayrımı yapmıyor ve 0'ı "%0" diye basıyor.
 
-2026-08-08'de kara/rakım düzeltmesi yapılırken ortaya çıktı. Oraya giren derinlik
-eskiden rakımdı (Muğla'da 813 m). "Bilinmiyor" (null) geçirmeyi denedim, ölçtüm:
-**68 Ege türünün 67'si oynadı, en büyük fark 65.9 puan** — derinlik katmanı tamamen
-devre dışı kalınca skorlar ~6'dan ~70'e çıkıyor. Yani şu an karada düşük (~6),
-null geçilirse yüksek (~70) skor üretiliyor; ikisi de anlamsız çünkü orası kara.
+```java
+// WidgetUpdateWorker.java:80-89 — isLand hiç okunmuyor
+JSONObject instant = data.optJSONObject("instant");
+if (instant != null) { ...her slotu doldur... }
+// :109
+case WidgetPrefs.SLOT_SCORE: return "%" + Math.round(instant.optDouble("score", 0));
+```
 
-Uygulama yayında, APK güncellenemiyor ve kara ekranında `instant`'ın gösterilip
-gösterilmediği buradan doğrulanamıyor. Bu yüzden **hesap aynen bırakıldı**,
-yalnızca raporlanan derinlik düzeltildi.
+Widget koordinatı `WidgetConfigActivity`'de **elle yazılabiliyor** (`cfg_lat` /
+`cfg_lon`, kayıt `:376`) veya favorilerden seçiliyor; hiçbir yerde kara denetimi
+yok. Ana ekran `applyLandMode()` ile skoru gizliyor, widget gizlemiyor.
 
-**Yapılacak:** mobil tarafta kara yanıtında (`isLand: true`) `instant` alanının
-okunup okunmadığı kontrol edilsin.
-- Okunmuyorsa → sunucuda blok `if (!isLand)` ile kapatılır, iş biter.
-- Okunuyorsa → kullanıcı karada balık skoru görüyor demektir; önce mobil düzeltilir.
+**Yapılacak:** `extractValue` içinde `data.optBoolean("isLand")` true ise skor,
+berraklık, SST gibi denize özgü slotlar `"—"` dönsün; hava slotları (airTemp,
+wind, pressure, rain, cloud) kalsın. `WidgetPrefs` metinsel değer sakladığı için
+sunucu sözleşmesi değişmiyor, APK yeterli.
 
-`instantData` zaten `null` başlatılıyor ve `if (instantData)` ile korunuyor, yani
-sunucu tarafı null'a hazır. Risk yalnızca istemcide.
-
+**Aynı dosyada ikinci bir kusur:** `optDouble(..., 0)` her alanda kullanılıyor —
+yani veri gelmediğinde de "0" gösteriliyor (§2.1). Klorofil için bu 4.15 ile
+aynı hata. Widget düzeltilirken ikisi birlikte ele alınmalı.
 ### 4.15 İstemci klorofil yokken 0 gösteriyor `HAZIR` · **MOBİL**
 
 4.9 çalışılırken çıktı. Sunucu doğru davranıyor — klorofil alınamazsa **`null`**
@@ -566,6 +569,36 @@ ayrılmış test kümesi** şart — yoksa modelin ne zaman hazır olduğu hiç 
 - **`startedAt` her doğrulamada eziliyordu** — düzeltildi (`23919de`).
 - **BAE mükerrer kayıtları** — 5 çift birleştirildi.
 - **Tuzluluk sayısal aralığı** — ölçüldü, değmiyor (bkz. 4.5).
+- **4.8 `instant` bloğu karada da skor üretiyor** — düzeltildi.
+  Instant tür döngüsüne `if (isLand) break` kondu. Günlük döngü zaten
+  `if (!isLand)` ile korunuyordu; instant korunmuyordu, yani aynı yanıtta
+  `forecast[].fishList` boş, `instant.fishList` DOLU dönüyordu.
+  **Ölçüm (2026-08-11, gerçek sunucu ayağa kaldırılıp HTTP ile sorgulandı):**
+  38.35, 26.50 (`CERTAIN_LAND`, snap başarısız) → önce `instant.score` **67.5**,
+  10 tür (Lipsöz 69.5 · Trakonya 65.0 · Mırmır 62.2); sonra **0**, 0 tür,
+  `hasActiveFish:false`. Hava alanları birebir aynı kaldı (airTemp 27.6,
+  wind 14.8, pressure 992.9). Ankara/Konya gibi `INLAND` noktalar zaten erken
+  dönüşe düşüyor, `instant` hiç üretilmiyordu.
+  Maddedeki "skorlar ~6" tahmini **yanlıştı** — gerçek değer 67.5.
+  **Aynı yanıttaki çelişki de kapandı:** `hourlyTimeline[].score` karada zaten 0
+  dönüyordu (günlük listeden türetiliyor), "şimdi" skoru 67.5 idi.
+  **Maddede yazan çözüm uygulanmadı, çünkü iki yönden yanlıştı:**
+  1. *Bloğu komple kapatmak* gerileme olurdu — kara ekranındaki saatlik hava
+     verisi ve zaman kaydırıcısı `instant` / `instant.hourlyTimeline` ile
+     besleniyor (`MainActivity:1272, 3409, 3452`); `applyLandMode()` bunları
+     bilerek görünür bırakıyor.
+  2. *`score: null` göndermek* yayındaki APK'yı çökertirdi —
+     `MainActivity:3395` `double score` primitif, `:3413` `score = d.score`
+     otomatik unboxing yapıyor → her kara analizinde NullPointerException.
+     `calcAvgScore([])` zaten `{score: 0}` döndürdüğü için liste boşaltmak
+     null üretmeden aynı sonucu veriyor.
+  **Mobil doğrulama sonucu:** ana ekranda skor karada zaten görünmüyordu
+  (`applyLandMode()` skor kutusu, gauge, balık listesi, taktik notunu GONE
+  yapıyor). Skor grafiği (`forecastChartView`) kara modunda gizlenmiyor ama
+  **ölü kod** — `findViewById` satırı yorumda (`MainActivity:800`), alan hiç
+  atanmıyor. Gerçek sızıntı ana ekranda değil **widget'ta** çıktı → **4.16**.
+  Doğrulama: `node --check`, gerçek sunucu 4 canlı istekle ayakta,
+  deniz regresyonu 8 nokta × gündüz/gece × 385 tür = 6160 skor, **sapma 0**.
 - **4.3 `photoId` ölü alan** — MOBİL DOĞRULAMA YAPILDI, temizlik yapılmadı.
   Madde "frontend'de bağlı" diyordu; **değil.** Android kaynağında `photoId`
   yalnızca `ForecastResponse.java:227`'de tanımlı ve `MainActivity:1552, 3517`'de

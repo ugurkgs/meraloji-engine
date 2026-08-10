@@ -5194,13 +5194,13 @@ app.get('/api/forecast', async (req, res) => {
                 // uydurma bilgidir. Rakımı ayrı ve doğru adıyla veriyoruz.
                 // Kıyı snap'i başarılı olursa aşağıda gerçek deniz derinliğiyle doldurulur.
                 elevationM = +bathymetryRaw.toFixed(1);
-                // depthData'nın KENDİSİ bilerek ellenmiyor. Onu hâlâ tek bir yer okuyor:
-                // "instant" bloğu (if(true) — isLand ile korunmuyor), yani kara noktasında da
-                // skor üretiyor. Ölçtük: derinliği null yapınca oradaki 68 türün 67'si oynuyor,
-                // en büyük fark 65.9 puan (derinlik katmanı tamamen devre dışı kaldığı için
-                // skorlar ~6'dan ~70'e çıkıyor). Uygulama yayında ve APK güncellenemiyor;
-                // kara ekranında ne gösterildiğini buradan doğrulayamıyoruz. Bu yüzden HESAP
-                // aynen korunuyor, yalnızca RAPORLANAN değer düzeltiliyor.
+                // depthData'nın KENDİSİ bilerek ellenmiyor — raporlanan değer elevationM'e
+                // taşındı, hesap yolundaki depthData aynen bırakıldı.
+                // [4.8 — 2026-08-11] Buradaki eski not "instant bloğu isLand ile korunmuyor,
+                // karada da skor üretiyor" diyordu; ARTIK KORUNUYOR (bkz. instant tür
+                // döngüsündeki 'if (isLand) break'). Karada instant.fishList boş, score 0.
+                // depthData'ya hâlâ dokunulmuyor çünkü onu okuyan skor yolu karada zaten
+                // çalışmıyor; deniz tarafında tek bir sayı bile oynamasın diye bırakıldı.
             } else if (Math.abs(bathymetryRaw) <= SHALLOW_THRESHOLD) {
                 // Çok sığ ama veri var — sığ uyarısı ver ama analizi engelleme
                 // isLand = false kalır, sadece landReason set edilir
@@ -5783,6 +5783,35 @@ app.get('/api/forecast', async (req, res) => {
 
             const instantResultsMap = new Map();
             for (const [key, fish] of Object.entries(SPECIES_DB || {})) {
+                // [4.8] KARA KAPISI. Bu döngü "if (true)" bloğunun içinde ve isLand ile
+                // korunmuyordu; günlük döngü (satır ~5431) korunuyor. Sonuç: kara
+                // noktasında forecast[].fishList boş dönerken instant.fishList DOLU
+                // dönüyordu. 2026-08-11 ölçümü (38.35, 26.50 — CERTAIN_LAND, snap
+                // başarısız): instant.score 67.5, 10 tür (Lipsöz 69.5, Trakonya 65.0,
+                // Mırmır 62.2). Aynı yanıtta hourlyTimeline[0].score = 0 idi, çünkü o
+                // günlük listeden türetiliyor — sunucu kendi kendisiyle çelişiyordu.
+                //
+                // NEDEN GÖRÜNMÜYORDU: uygulamanın ana ekranı applyLandMode() ile skor
+                // kutusunu, gauge'u ve balık listesini gizliyor. AMA ana ekran tek
+                // tüketici değil: WidgetUpdateWorker.java:80-109 aynı yanıtı okuyor ve
+                // SLOT_SCORE'u isLand'e bakmadan "%68" diye basıyor. Widget koordinatı
+                // WidgetConfigActivity'de elle yazılabiliyor (kara denetimi yok).
+                //
+                // NEDEN break, NEDEN BLOK KAPATILMADI: instant'ın kendisi karada da
+                // gerekli — kara ekranındaki hava sıcaklığı/rüzgâr/basınç ve saat
+                // kaydırıcısı instant.hourlyTimeline'dan besleniyor (MainActivity:1272,
+                // 3409, 3452). Bloğu komple kapatmak kullanıcıyı saatlik veriden günlük
+                // ortalamaya düşürürdü — görünür gerileme.
+                //
+                // NEDEN score null DEĞİL: MainActivity:3395 'double score' primitif,
+                // :3413 'score = d.score' otomatik unboxing yapıyor. null göndermek
+                // yayındaki APK'da her kara analizinde NullPointerException demek.
+                // calcAvgScore([]) zaten {score: 0, dominant: false} döndürüyor
+                // (satır ~2513), yani liste boşalınca skor sayısal 0 olur ve
+                // hasActiveFish (i_topScore > 0) kendiliğinden false'a döner —
+                // hourlyTimeline'ın karada verdiği 0 ile de tutarlı hale gelir.
+                // Kalıcı çözüm APK'da: widget isLand'de "—" göstermeli.
+                if (isLand) break;
                 if (!isInHabitat(fish, lat, lon, regionName)) continue;
 
                 // 3 saatlik pencere ortalaması ile daha stabil skor (gürültü filtreleme)
