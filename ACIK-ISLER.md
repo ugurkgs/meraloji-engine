@@ -46,7 +46,7 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | ~~4~~ | ~~**4.13**~~ | ~~taramada kara koruması~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | ~~5~~ | ~~**4.4**~~ | ~~bbox çakışması~~ | **ÖLÇÜLDÜ — değişiklik gerekmedi** | — |
 | ~~6~~ | ~~**4.9**~~ | ~~NOAA devre kesici~~ | **YAPILDI** (devre kesici yerine önbellek) | — |
-| 7 | **4.12** | snap'te weather'ı da çek | server.js | **orta — skor + API maliyeti** |
+| ~~7~~ | ~~**4.12**~~ | ~~snap'te weather'ı da çek~~ | **ÖLÇÜLDÜ — değişiklik gerekmedi** | — |
 | 8 | **2.3** | cron'ları kullanıcı saat dilimine taşı | server.js | orta |
 | 9 | **4.3** | `photoId` temizliği (827 kayıt) | species.js | orta — **önce mobil kontrol** |
 | 10 | **1.5** | kıyı bildirimi eşiği + gizlilik politikası | server.js + public/privacy.html | orta — **canlı bildirim** |
@@ -411,24 +411,6 @@ olay sayılıyor, (c) log'da olduğundan çok anonim kullanıcı görünüyor �
 2026-08-08'de 15 anonim analizin en az 2'si bu. API maliyeti yok (ikincisi önbellek).
 Sunucudan çözülemez; istemcide isteğin token hazır olduktan sonra atılması gerekir.
 
-### 4.12 Kıyı snap'i hava verisini taşımıyor `HAZIR`
-
-`server.js:5052`, kodun kendi yorumu: *"Sadece marine verisi snap noktasından
-çekilir (weather aynı kalır)"*. Kod da öyle — snap başarılı olunca yalnızca
-`marine = snapMarine` yapılıyor, **weather hiç yeniden çekilmiyor.**
-
-Sonuç: kıyı noktası denize snap'lendiğinde dalga/SST/akıntı denizden gelir ama
-**rüzgâr, basınç, hava sıcaklığı kara koordinatında kalır.** Kara üzerinde 10 m
-rüzgârı yüzey pürüzlülüğü nedeniyle sistematik olarak düşük okunur; ölçümde aynı
-bölgede kara hücresi 8,9 km/s, açık deniz 13,9 km/s çıktı.
-
-Bu, saatten bağımsız **kalıcı** bir eksik okuma. Rüzgâr hem skorun rüzgâr
-katmanına hem de dalga/berraklık türevlerine giriyor.
-
-**Düzeltmeden önce ölçülecek:** snap noktasından weather de çekilirse kaç ek
-Open-Meteo isteği doğar (snap yalnız `CERTAIN_LAND`'de tetikleniyor, oran
-log'dan çıkarılabilir) ve skorlar ne kadar oynar.
-
 ### 4.1 `tempRange` kalibrasyonu `ENGELLİ`
 
 **Engel:** "hiç yok" gözlemi yok. Bkz. `SAHA-GOZLEMLERI.md`.
@@ -588,6 +570,20 @@ ayrılmış test kümesi** şart — yoksa modelin ne zaman hazır olduğu hiç 
 - **`startedAt` her doğrulamada eziliyordu** — düzeltildi (`23919de`).
 - **BAE mükerrer kayıtları** — 5 çift birleştirildi.
 - **Tuzluluk sayısal aralığı** — ölçüldü, değmiyor (bkz. 4.5).
+- **4.12 Kıyı snap'i hava verisini taşımıyor** — ÖLÇÜLDÜ, değişiklik gerekmedi.
+  Kusur gerçek: snap başarılı olunca yalnız `marine = snapMarine` yapılıyor,
+  `weather` tıklanan KARA koordinatında kalıyor. Ama düzeltmenin karşılığı yok.
+  **Ölçüm:** snap en fazla ~1200 m taşıyor; Open-Meteo hava ızgarası 0.0625°
+  ≈ **6.9 km**. 8 gerçek Türkiye kıyı noktasında (Kuşadası, Çeşme, Bodrum,
+  Antalya, Sinop, Trabzon, Şile, Fethiye) 1.2 km kaydırma **8/8 aynı ızgara
+  hücresini** döndürdü — yani ek Open-Meteo isteği birebir aynı veriyi getirir.
+  Teorik olarak eksen başına ~%17 ihtimalle hücre değişir; değiştiğinde bile
+  komşu hücre 7 km çözünürlükte hâlâ kara/deniz karışımıdır.
+  **DÜZELTME:** maddede geçen "kara 8,9 km/s vs açık deniz 13,9 km/s" ölçümü
+  ~10 km arayla alınmıştı, snap mesafesiyle (1,2 km) ilgisi yok. O sayıyı
+  snap'in etki büyüklüğü gibi sunmak yanıltıcıydı; kayda geçiriliyor.
+  Karar: snap başına bir Open-Meteo isteği eklemek, çoğu vakada aynı veriyi
+  ikinci kez çekmek olurdu. Yapılmadı.
 - **4.9 NOAA çağrılarında devre kesici yok** — devre kesici YERİNE önbellek
   yapıldı; ölçüm devre kesiciyi reddettirdi.
   **ÖLÇÜLEN BEDEL** (6160 skor): klorofil `null` → %10.8 tür ort 0.75 puan ·
