@@ -43,7 +43,7 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | ~~1~~ | ~~**4.11**~~ | ~~`hourlyTimeline` sabit 24 → `hourlyOffset`~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | ~~2~~ | ~~**1.2**~~ | ~~süresi dolan aboneliğe `status:'expired'`~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | 3 | **1.3** | `esp_chopa` `tempRange` gözden geçir | species.js, tek kayıt | düşük |
-| 4 | **4.13** | **taramada kara koruması** — kullanıcı gördü, bildirdi | server.js | düşük-orta |
+| ~~4~~ | ~~**4.13**~~ | ~~taramada kara koruması~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | 5 | **4.4** | bbox çakışmasını ÖLÇ, sonra karar ver | species.js | düşük (önce ölçüm) |
 | 6 | **4.9** | NOAA devre kesici | server.js | **orta — skor girdisi değişir** |
 | 7 | **4.12** | snap'te weather'ı da çek | server.js | **orta — skor + API maliyeti** |
@@ -413,88 +413,6 @@ katmanına hem de dalga/berraklık türevlerine giriyor.
 Open-Meteo isteği doğar (snap yalnız `CERTAIN_LAND`'de tetikleniyor, oran
 log'dan çıkarılabilir) ve skorlar ne kadar oynar.
 
-### 4.13 Mera taraması karaya pin basıyor `KARAR BEKLİYOR`
-
-Kullanıcı 2026-08-02'de ekran görüntüsüyle bildirdi: Selçuk/Gebekirse'de yapılan
-taramada **"Baraküda %68.3 · 1 m"** ve **"Yılan Balığı %46.8 · 0 m"** pinleri kuru
-zeminde çıktı (Gebekirse Gölü Milli Parkı sınırları içinde). Aynı taramadaki
-"Müren 18 m" ve "Lipsoz 55 m" pinleri denizde ve doğru. Uygulamanın güvenilirliğini
-doğrudan vuran bir hata — kullanıcı karada balık noktası gösterildiğini görüyor.
-
-**Kök sebep: `/api/scan` içinde kara koruması hiç yok.**
-
-`/api/forecast` tarafında iki katman koruma var ve ikisi de taramaya bağlı değil:
-
-| Fonksiyon | `/api/forecast` | `/api/scan` |
-|---|---|---|
-| `analyzeLocationOffline()` (il poligonu kara testi) | ✅ 2 çağrı | ❌ 0 |
-| `findNearestSeaPoint()` (kıyı snap) | ✅ 2 çağrı | ❌ 0 |
-
-`generateGridPoints()` saf geometrik ızgara üretiyor, kara/deniz ayrımı yapmıyor.
-Taramanın tek koruması `calcPointScoreFromWeather()` içindeki tek satır:
-
-```js
-if (bathyRaw !== null && bathyRaw > 0) return null;   // "kara tespiti"
-```
-
-Bu satırın **iki deliği** var:
-
-1. **`bathyRaw === 0` geçiyor.** `0 > 0` yanlış. Kıyı çizgisi ve EMODnet'in 0
-   döndürdüğü her yer "deniz" sayılıyor. Ekrandaki "0 m" pini bu.
-2. **`bathyRaw === null` kontrolü tamamen atlıyor — FAIL-OPEN.** EMODnet 3 sn
-   timeout'una takılırsa veya veri yoksa nokta sorgusuz geçiyor.
-
-"Baraküda 1 m" pini ise muhtemelen Gebekirse lagününün EMODnet'te sığ su olarak
-kayıtlı olmasından; ızgara oraya düşmüş ve `-1` derinlik kabul görmüş.
-
-**Not:** bu madde 4.8'den FARKLI bir uçtur. 4.8 `/api/forecast`'ın `instant`
-bloğunun karada skor üretmesiyle ilgili; bu madde `/api/scan`'in kara pini
-basmasıyla. İkisi ayrı ayrı düzeltilmeli.
-
-**Tasarlanmış çözüm — iki katman (kod yazıldı, deploy edilmedi):**
-
-*Katman 1 — ızgarada ön eleme.* `generateGridPoints()` çıktısı
-`analyzeLocationOffline()`'dan geçirilir, `INLAND` olanlar atılır. Bedava (offline
-poligon testi) ve o noktalar için hiç bathymetry/hava isteği atılmadığı için
-**Open-Meteo/EMODnet kotası da tasarruf eder**. Tüm ızgara elenirse taramaya
-`error` event'i döner.
-
-`COASTAL_LAND` bilinçli olarak **elenmez**: poligon il sınırıdır, kabadır —
-loglarda İzmir körfezindeki gerçek deniz noktaları da `COASTAL_LAND` dönüyor.
-Elenirse meşru pinler kesilir. Kıyı çizgisi hassasiyetini Katman 2 halleder.
-
-*Katman 2 — derinlik kapısı fail-closed.*
-
-```js
-if (bathyRaw === null) return null;                 // veri yok → pin YOK
-if (bathyRaw >= -MIN_SCAN_DEPTH_M) return null;     // kara, 0 m veya sığlık
-```
-
-Artı eleme sayaçları ve özet log satırı (`[SCAN] eleme: N kara/sığlık · M derinlik
-verisi yok · K geçerli pin`) — eşiği canlı veriyle ayarlayabilmek için.
-
-`calcPointScoreFromWeather()` yalnızca taramadan çağrılıyor (iki çağrı yeri,
-doğrulandı), yani sıkılaştırma `/api/forecast`'ı etkilemez.
-
-**Kıyı snap taramaya bağlanmadı — bilinçli.** `findNearestSeaPoint()` pin başına
-8-24 ek bathymetry isteği atıyor; 25-50 pinlik taramada 200-1200 ekstra istek eder.
-Taramanın işi en iyi noktayı bulmak; şüpheli noktayı **elemek**, kaydırmaktan iyi.
-Kullanıcı 3 yerine 2 pin görsün ama hepsi doğru olsun.
-
-**KARAR BEKLENEN — `MIN_SCAN_DEPTH_M` eşiği:**
-- **2 m** — ekrandaki iki hatalı pini (0 m ve 1 m) kesin eler, sığ meşru noktalara
-  agresif.
-- **1,5 m** — ikisini yine eler, biraz daha toleranslı.
-
-**Kabul edilmesi gereken taviz:** fail-closed olduğu için bathymetry'si gelmeyen
-nokta artık pin üretmez. `delayedPoints` retry mekanizması top5 üyeliğine bağlı
-olduğundan (elenen nokta top5'e giremez) o noktalar geri gelmez. Yavaş EMODnet
-yanıtlarında birkaç pin eksik görünebilir — ama yanlış pin görünmez. Tarama bir
-survey olduğu için belirsiz noktayı göstermemek göstermekten iyi kabul edildi.
-
-**Sonraki adım:** eşik kararı verilsin, yama uygulansın, birkaç gerçek taramanın
-`[SCAN] eleme:` log satırına bakılarak eşik gerekiyorsa ayarlansın.
-
 ### 4.1 `tempRange` kalibrasyonu `ENGELLİ`
 
 **Engel:** "hiç yok" gözlemi yok. Bkz. `SAHA-GOZLEMLERI.md`.
@@ -635,6 +553,22 @@ ayrılmış test kümesi** şart — yoksa modelin ne zaman hazır olduğu hiç 
 - **`startedAt` her doğrulamada eziliyordu** — düzeltildi (`23919de`).
 - **BAE mükerrer kayıtları** — 5 çift birleştirildi.
 - **Tuzluluk sayısal aralığı** — ölçüldü, değmiyor (bkz. 4.5).
+- **4.13 Mera taraması karaya pin basıyor** — düzeltildi. İki katman eklendi:
+  ızgarada `INLAND` ön eleme (Katman 1) ve derinlik kapısı (Katman 2,
+  `MIN_SCAN_DEPTH_M = 1.5`, fail-closed — `bathyRaw === null` de eler).
+  `calcPointScoreFromWeather` içindeki eski `bathyRaw > 0` backstop olarak
+  sıkılaştırıldı.
+  **ÖLÇÜM** (kullanıcının bildirdiği nokta 37.9482/27.2591, R=5 km, 29 ızgara
+  noktası, gerçek EMODnet): `bathy > 0` 11 · `0 > bathy >= -1.5` **4** ·
+  `-1.5 > bathy >= -2.0` 0 · `bathy < -2.0` 14 · null 0. Pin sayısı **18 → 14**.
+  Eşik 1.5 ile 2.0 birebir aynı 4 noktayı eliyor (arada nokta yok), o yüzden
+  daha az agresif olan 1.5 seçildi.
+  **Katman 1 bu taramada SIFIR nokta eledi** — Selçuk İzmir ilinde, yani
+  `analyzeLocationOffline` `INLAND` değil `COASTAL_LAND` döndürüyor. Asıl
+  düzeltmeyi Katman 2 yaptı; Katman 1 iç bölge taramalarında kota kazandırır.
+  Kıyı snap bilinçli olarak bağlanmadı (pin başına 8-24 ek istek).
+  Doğrulama: 11 vakalık kapı testi (kullanıcının 4 gerçek pini eleniyor, -1.51 m
+  ve daha derin geçiyor), deniz regresyonu 6160 skor sapma 0.
 - **1.2 `status` süresi dolunca güncellenmiyor** — düzeltildi. verifyAuth'te
   abonelik okunurken `status==="active"` ama `expiresAt` geçmişse Firestore'a
   `status:"expired"` yazılıyor (merge, await edilmiyor, hatası yutuluyor).

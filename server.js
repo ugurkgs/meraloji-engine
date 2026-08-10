@@ -6915,6 +6915,40 @@ app.post('/api/verify-subscription', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 
 // Grid nokta üretici: merkez etrafında km yarıçaplı noktalar
+// ═══════════════════════════════════════════════════════════════════════════
+// TARAMA KARA/SIĞLIK KAPISI  (madde 4.13)
+// ═══════════════════════════════════════════════════════════════════════════
+// SORUN: kullanıcı 2026-08-02'de ekran görüntüsüyle bildirdi — Selçuk/Gebekirse'de
+// yapılan taramada "Baraküda %68.3 · 1 m" ve "Yılan Balığı %46.8 · 0 m" pinleri
+// kuru zeminde çıktı. Uygulamanın güvenilirliğini doğrudan vuran bir hata.
+//
+// KÖK SEBEP: /api/scan içinde kara koruması yoktu. generateGridPoints saf
+// geometrik ızgara üretiyor; analyzeLocationOffline() ve findNearestSeaPoint()
+// yalnızca /api/forecast tarafında çağrılıyordu. Taramanın tek koruması
+// calcPointScoreFromWeather içindeki "bathyRaw > 0" idi ve iki deliği vardı:
+//   (a) bathyRaw === 0 geçiyordu (0 > 0 yanlış),
+//   (b) bathyRaw === null kontrolü tamamen atlıyordu — FAIL-OPEN.
+//
+// ÖLÇÜM (2026-08-10, kullanıcının bildirdiği nokta 37.9482/27.2591, R=5km,
+// 29 ızgara noktası, gerçek EMODnet verisi):
+//     bathy > 0 (kara)          : 11   ← mevcut kural zaten eliyordu
+//     0 > bathy >= -1.5         :  4   ← SORUNLU PİNLER, kural bunları geçiriyordu
+//     -1.5 > bathy >= -2.0      :  0
+//     bathy < -2.0 (net deniz)  : 14
+//     bathy null                :  0
+// Eşik 1.5 ile 2.0 BİREBİR aynı 4 noktayı eliyor (arada nokta yok), o yüzden
+// daha az agresif olan 1.5 seçildi. Pin sayısı 18 → 14.
+//
+// KIYI SNAP TARAMAYA BAĞLANMADI — bilinçli. findNearestSeaPoint() pin başına
+// 8-24 ek bathymetry isteği atar; 25-50 pinlik taramada 200-1200 ekstra istek
+// demektir. Taramanın işi en iyi noktayı bulmak; şüpheli noktayı elemek
+// kaydırmaktan iyidir.
+//
+// TAVİZ: fail-closed olduğu için bathymetry'si gelmeyen nokta artık pin
+// üretmez. delayedPoints retry'ı top5 üyeliğine bağlı olduğundan elenen nokta
+// geri gelmez. Tarama bir survey; belirsiz noktayı göstermemek göstermekten iyi.
+const MIN_SCAN_DEPTH_M = 1.5;
+
 function generateGridPoints(centerLat, centerLon, radiusKm) {
     const points = [];
     const latStep = radiusKm / 111;             // 1 derece lat ≈ 111 km
@@ -7231,8 +7265,12 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
     const regionName = getRegion(latF, lonF) || "AÇIK DENİZ";
 
     try {
-        // Kara tespiti: bathymetri pozitifse kesin kara
-        if (bathyRaw !== null && bathyRaw > 0) return null;
+        // [BACKSTOP] Kara/sığlık kapısı. Asıl eleme /api/scan döngüsünde yapılıyor
+        // (sayaç tutabilmek için); bu satır fonksiyon başka bir yerden çağrılırsa diye
+        // ikinci katman. Eski hali "bathyRaw !== null && bathyRaw > 0" idi: 0 m karayı
+        // geçiriyor, null (veri yok) durumunda kontrolü tamamen atlıyordu.
+        if (bathyRaw === null) return null;
+        if (bathyRaw >= -MIN_SCAN_DEPTH_M) return null;
         // Marine veri kontrolü
         if (!marine.hourly.wave_height || marine.hourly.wave_height.length === 0) return null;
 
@@ -7540,11 +7578,33 @@ app.get('/api/scan', async (req, res) => {
             console.log(`[SCAN] [${logUser}] İstemci bağlantıyı kesti, tarama durduruluyor.`);
         });
 
-        const gridPoints = generateGridPoints(centerLat, centerLon, radiusKm);
+        // [KATMAN 1] İç bölge noktalarını API isteği ATMADAN ele. Bedava (bellek
+        // içi poligon testi) ve o noktalar için hiç bathymetry/hava isteği gitmez.
+        //
+        // COASTAL_LAND bilinçli olarak ELENMEZ: poligon il sınırıdır, kabadır —
+        // İzmir körfezindeki gerçek deniz noktaları da COASTAL_LAND dönüyor.
+        // Kıyı çizgisi hassasiyetini Katman 2 (derinlik) halleder.
+        //
+        // DÜRÜSTLÜK NOTU: ölçümde bu katman kullanıcının bildirdiği taramada
+        // SIFIR nokta eledi (Selçuk, İzmir ilinde → COASTAL_LAND). Asıl düzeltme
+        // Katman 2'dir. Bu katman iç bölgede yapılan taramalarda kota kazandırır.
+        const rawGrid = generateGridPoints(centerLat, centerLon, radiusKm);
+        const gridPoints = rawGrid.filter(p => analyzeLocationOffline(p.lat, p.lon).status !== 'INLAND');
+        const inlandDropped = rawGrid.length - gridPoints.length;
+        if (inlandDropped > 0) {
+            console.log(`[SCAN] [${logUser}] ızgara: ${rawGrid.length} noktanın ${inlandDropped} tanesi İÇ BÖLGE — istek atılmadan elendi`);
+        }
+        if (gridPoints.length === 0) {
+            console.log(`[SCAN] [${logUser}] tüm ızgara iç bölge çıktı, tarama iptal`);
+            sendEvent({ type: 'error', message: (i18n(lang).scan && i18n(lang).scan.landError) || 'Bu bölgede taranacak deniz alanı bulunamadı.' });
+            res.end();
+            return;
+        }
         const total = gridPoints.length;
         const results = [];
         const delayedPoints = []; // Derinliği ilk aşamada alınamayan noktalar
 
+        let dropNoDepth = 0, dropShallow = 0;   // [KATMAN 2] eleme sayaçları
         const BATCH_SIZE = 8;
         const BATCH_DELAY_MS = 100;
 
@@ -7602,9 +7662,18 @@ app.get('/api/scan', async (req, res) => {
                     bathyRaw = await fetchBathymetry(pt.lat, pt.lon, 3000);
                 } catch (e) { }
 
-                // Eğer derinlik gelmediyse (timeout veya hata), arka planda tekrar denemek için listeye ekle
+                // [KATMAN 2] KARA/SIĞLIK KAPISI — bkz. MIN_SCAN_DEPTH_M açıklaması.
+                // FAIL-CLOSED: derinliği doğrulanamayan nokta pin ÜRETMEZ.
                 if (bathyRaw === null) {
-                    delayedPoints.push(pt);
+                    delayedPoints.push(pt);   // istatistik/geriye uyum için tutuluyor
+                    dropNoDepth++;
+                    return { pt, result: null };
+                }
+                // bathyRaw negatif = su altı. >= -MIN_SCAN_DEPTH_M olan her şey
+                // (pozitif = kara, 0 = kıyı çizgisi, -0.2 = sığlık) elenir.
+                if (bathyRaw >= -MIN_SCAN_DEPTH_M) {
+                    dropShallow++;
+                    return { pt, result: null };
                 }
 
                 // Substrate'yi de paralel çek — cache'e yazar, calcPointScoreFromWeather cache'den okur
@@ -7666,6 +7735,10 @@ app.get('/api/scan', async (req, res) => {
         if (db && usageRef) {
             const finalDoc = await usageRef.get();
             remainingScans = Math.max(0, dailyLimit - (finalDoc.exists ? finalDoc.data().count : scanCost));
+        }
+
+        if (dropNoDepth || dropShallow) {
+            console.log(`[SCAN] [${logUser}] eleme: ${dropShallow} kara/sığlık (<${MIN_SCAN_DEPTH_M}m) · ${dropNoDepth} derinlik verisi yok · ${results.length} geçerli pin`);
         }
 
         const scanResult = {
