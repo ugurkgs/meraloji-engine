@@ -8570,7 +8570,16 @@ app.get('/api/hotspot', (req, res) => {
 // doğru noktaya gider. Yeni bir kanal veya yeni bir type APK gerektirirdi.
 // Ayrıştırma analyticsLabel ile yapılıyor (Analytics tarafı, istemci değil).
 const SHORE_ALERT_ENABLED = process.env.SHORE_ALERT_ENABLED === 'true';
-const SHORE_ALERT_ESIK = parseFloat(process.env.SHORE_ALERT_ESIK || '80');
+// [1.5] Varsayılan 80'den 75'e çekildi. 2026-08 kuru çalışma verisi (64 aday-gözlem,
+// üç ayrı koşu) eşik 80'de **hiç** tetiklenmediğini gösterdi — özellik o eşikte ölü.
+// Bantlar: %70-79 → 3 hücre (%4.7) · %60-69 → 14 · %50-59 → 20 · altı → 27.
+// 70 seçilseydi kullanıcı başına ~21 günde bir bildirim (ayda ~1.5) çıkardı; 60
+// ayda ~8 ederdi ve "istisnai koşul" iddiası anlamını kaybederdi.
+// 75, ikisinin arasında ve eylül sezonunda skorlar yükselirse tampon bırakıyor.
+// DİKKAT: ağustos verisi kovalanmış olduğu için (70-79 tek bant) 75'in GERÇEK
+// oranı ölçülmedi — 0 ile %4.7 arasında. Bu yüzden aşağıdaki dağılım logu
+// 5 puanlık bantlara çevrildi; eylülde net sayı elde olacak.
+const SHORE_ALERT_ESIK = parseFloat(process.env.SHORE_ALERT_ESIK || '75');
 const SHORE_ALERT_YEREL_SAAT = parseInt(process.env.SHORE_ALERT_SAAT || '17', 10);
 const SHORE_ALERT_SOGUMA_SAAT = 20;    // aynı kullanıcıya tekrar göndermeden önce
 const SHORE_ALERT_KONUM_TAZE_GUN = 21; // bundan eski lastSeen kullanılmaz
@@ -8592,10 +8601,18 @@ cron.schedule('5 * * * *', async () => {
 
         const nowUtcSaat = new Date().getUTCHours();
         const adaylar = [];
+        let icBolgeElenen = 0;
         for (const doc of snap.docs) {
             const d = doc.data();
             const ls = d.lastSeen;
             if (!ls || !d.fcmToken) continue;
+            // [1.5] İÇ BÖLGE SÜZGECİ. lastSeen'i karada olan kullanıcı (ör. Ankara
+            // 39.370, 32.377) aday listesine giriyor, hücresi için boşuna forecast
+            // çağrısı yapılıyor ve skor 0 dönüyordu. Zararsızdı (0 asla eşiği geçmez)
+            // ama 2026-08 koşusunda adayların %14'ü buydu — hem gereksiz iş hem de
+            // dağılım raporunu kirletiyor, eşik kararını zorlaştırıyordu.
+            // analyzeLocationOffline bellek içi poligon testi, maliyeti yok.
+            if (analyzeLocationOffline(ls.lat, ls.lon).status === 'INLAND') { icBolgeElenen++; continue; }
             // Kullanıcının kendi yerel saati — boylamdan türetilir
             const ofset = Math.round(ls.lon / 15);
             const yerel = ((nowUtcSaat + ofset) % 24 + 24) % 24;
@@ -8611,7 +8628,8 @@ cron.schedule('5 * * * *', async () => {
         // ── 2) HÜCRE bazında skor — kullanıcı başına DEĞİL ────────────────
         const hucreler = new Map();
         for (const a of adaylar) if (!hucreler.has(a.hucre)) hucreler.set(a.hucre, a);
-        console.log(`[SHORE-ALERT/${mod}] ${adaylar.length} aday → ${hucreler.size} farklı hücre`);
+        console.log(`[SHORE-ALERT/${mod}] ${adaylar.length} aday → ${hucreler.size} farklı hücre` +
+            (icBolgeElenen ? `  · ${icBolgeElenen} iç bölge adayı elendi` : ''));
 
         const port = process.env.PORT || 3000;
         const hucreSkor = new Map();
@@ -8629,11 +8647,17 @@ cron.schedule('5 * * * *', async () => {
 
         // ── 3) Eşiği geçenler ────────────────────────────────────────────
         const gidecek = adaylar.filter(a => (hucreSkor.get(a.hucre) || 0) >= SHORE_ALERT_ESIK);
+        // [1.5] Bantlar 10 → 5 puan. 10'luk bantla "%70+:3" görülüyordu ama o üçünün
+        // 71 mi 78 mi olduğu bilinmiyordu, dolayısıyla 75 eşiğinin oranı hesaplanamıyordu.
+        // 5 puanlık bantla eşik kararı doğrudan logdan okunabiliyor.
         const dagilim = {};
         for (const s of hucreSkor.values()) {
-            const b = Math.floor(s / 10) * 10; dagilim[b] = (dagilim[b] || 0) + 1;
+            const b = Math.floor(s / 5) * 5; dagilim[b] = (dagilim[b] || 0) + 1;
         }
+        // Eşiği geçen hücre sayısını da ayrıca yaz — bant toplamı yapmak zorunda kalma.
+        const esigiGecenHucre = [...hucreSkor.values()].filter(v => v >= SHORE_ALERT_ESIK).length;
         console.log(`[SHORE-ALERT/${mod}] eşik %${SHORE_ALERT_ESIK} → ${gidecek.length}/${adaylar.length} kullanıcı` +
+            `  (${esigiGecenHucre}/${hucreSkor.size} hücre)` +
             `  · hücre skor dağılımı: ${Object.entries(dagilim).sort((a, b) => b[0] - a[0]).map(([k, v]) => `%${k}+:${v}`).join(' ')}`);
 
         // ── 4) Gönder (veya kuru çalışmada yalnızca kaydet) ───────────────
