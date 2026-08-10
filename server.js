@@ -2248,6 +2248,41 @@ const lastSeenCache = new NodeCache({ stdTTL: 21600, checkperiod: 900 }); // 6 s
 const LASTSEEN_MIN_KM = 3;      // bu kadar hareket etmeden tekrar yazma
 const LASTSEEN_MIN_SAAT = 6;
 
+// ── KULLANICI YEREL SAATİ ────────────────────────────────────────────────
+// Bildirim cron'ları "kullanıcının sabahı" gibi kavramlarla çalışıyor. Sunucu
+// UTC'de koştuğu için bu ancak kullanıcının UTC ofseti bilinirse doğru olur.
+//
+// İKİ KAYNAK, ÖNCELİK SIRASIYLA:
+//  1. users/{uid}.utcOffsetSec — Open-Meteo'nun timezone=auto ile döndürdüğü
+//     GERÇEK ofset (yaz saati dahil). Analiz sırasında kaydediliyor.
+//  2. Boylamdan tahmin (lon/15) — kaydı olmayan kullanıcı için yedek.
+//
+// NEDEN SADECE BOYLAM YETMİYOR: Türkiye kalıcı UTC+3, ama boylamı 26-36 arası
+// olduğu için lon/15 çoğu yerde 2 veriyor. Yalnız boylama dayansaydık mevcut
+// Türk kullanıcıların günlük bildirimi 07:00'den 08:00'e kayardı — asıl kitleye
+// görünür bir gerileme. Gerçek ofset varken onu kullanıyoruz.
+function ofsetSaatBoylamdan(lon) {
+    const lo = parseFloat(lon);
+    return isFinite(lo) ? Math.round(lo / 15) : 0;
+}
+function kullaniciYerelSaat(utcSaat, ofsetSaat) {
+    return ((utcSaat + ofsetSaat) % 24 + 24) % 24;
+}
+
+// Ofset nadiren değişir → 7 günlük önbellek, kullanıcı başına haftada ~1 yazma.
+const utcOfsetCache = new NodeCache({ stdTTL: 604800, checkperiod: 3600 });
+function kaydetUtcOfset(uid, saniye) {
+    try {
+        if (!db || !uid || typeof saniye !== 'number' || !isFinite(saniye)) return;
+        const saat = Math.round(saniye / 3600);
+        if (utcOfsetCache.get(uid) === saat) return;      // değişmedi
+        utcOfsetCache.set(uid, saat);
+        db.collection('users').doc(uid)
+            .set({ utcOffsetSec: saniye }, { merge: true })
+            .catch(e => console.log('[UTCOFS] yazılamadı:', e.message));
+    } catch (e) { /* yan kayıt — isteği asla bozmaz */ }
+}
+
 function kaydetSonKonum(uid, lat, lon) {
     try {
         if (!db || !uid) return;
@@ -5258,6 +5293,9 @@ app.get('/api/forecast', async (req, res) => {
         // Marine:  past_days=7 → hourly[0-167]=geçmiş 7 gün, [168-191]=bugün, [192+]=gelecek
         // Weather hourlyOffset (past_days=1): bugün = indeks 24
         const utcOffsetSeconds = weather.utc_offset_seconds || 0;
+        // [2.3] Kullanıcının gerçek UTC ofsetini sakla — bildirim cron'ları bunu
+        // kullanarak "onun sabahı"nı doğru hesaplasın. Ateşle-unut, throttle'lı.
+        if (req.user && isFinite(utcOffsetSeconds)) kaydetUtcOfset(req.user.uid, utcOffsetSeconds);
         const marineHourlyOffset = findTodayIndex(marine.hourly.time, utcOffsetSeconds);
         // [O2] Weather "bugün" indeksi de time dizisinden bulunur. Sabit 24, gece yarısını
         // geçen 3 saatlik raw_weather cache'inde DÜNÜ gösteriyordu (00:00-03:00 arası eski
@@ -8106,9 +8144,15 @@ setTimeout(() => {
 // 🐟 BUGÜN EN İYİ MERAM BİLDİRİMİ (BLOK 6C)
 // Günde 1 kez (Sabah 07:00'de) çalışır.
 // ═══════════════════════════════════════════════════════════════════════
-cron.schedule('0 7 * * *', async () => {
-    console.log(`[DAILY BEST CRON] Başlıyor...`);
+// [2.3] Eskiden '0 7 * * *' + { timezone: 'Europe/Istanbul' } idi: Endonezya'daki
+// kullanıcı Türkiye'nin sabah 7'sinde (kendi saatiyle 11:00), İspanya'daki 05:00'te
+// bildirim alıyordu. Artık cron SAATLİK koşuyor ve her kullanıcıya YALNIZCA kendi
+// yerel saati 07:00 olduğunda gönderiyor. Pahalı iş (favori başına forecast çağrısı)
+// bu kontrolden SONRA yapılıyor, yani saatlik koşmak maliyet getirmiyor.
+const DAILY_BEST_YEREL_SAAT = 7;
+cron.schedule('0 * * * *', async () => {
     if (!db || !admin) return;
+    const _utcSaat = new Date().getUTCHours();
 
     try {
         const snapshot = await db.collectionGroup('favorites').where('notify', '==', true).get();
@@ -8129,6 +8173,16 @@ cron.schedule('0 7 * * *', async () => {
                 const userLang = userDoc.data()?.lang || 'tr';
                 const notifI18n = SERVER_i18n[userLang] || SERVER_i18n.tr;
                 if (!token) continue; // Token yoksa geç
+
+                // [2.3] Kullanıcının yerel saati 07:00 değilse bu turda atla.
+                // Ofset kaynağı: kayıtlı gerçek ofset → yoksa favorinin boylamı.
+                const _ofsSec = userDoc.data()?.utcOffsetSec;
+                const _refFav = favs.find(f => isFinite(parseFloat(f.lon)));
+                const _ofsSaat = (typeof _ofsSec === 'number' && isFinite(_ofsSec))
+                    ? Math.round(_ofsSec / 3600)
+                    : (_refFav ? ofsetSaatBoylamdan(_refFav.lon) : null);
+                if (_ofsSaat === null) continue;   // saati bilinmiyorsa gönderme
+                if (kullaniciYerelSaat(_utcSaat, _ofsSaat) !== DAILY_BEST_YEREL_SAAT) continue;
 
                 let bestFav = null;
                 let bestScore = 0;
@@ -8190,7 +8244,7 @@ cron.schedule('0 7 * * *', async () => {
     } catch (e) {
         console.error('[DAILY BEST CRON] Hata:', e.message);
     }
-}, { timezone: 'Europe/Istanbul' }); // O4: "07:00 sabah" niyeti TR saatiyle çalışsın (UTC değil)
+});   // [2.3] timezone YOK — cron UTC'de saatlik koşar, yerel saat kullanıcı başına hesaplanır
 
 // ═══════════════════════════════════════════════════════════════════════
 // BLOK 8: CACHE TEMİZLEME CRON (Performans Yönetimi)
@@ -8242,14 +8296,14 @@ cron.schedule('0 3 * * *', async () => {
 
 cron.schedule('0 * * * *', async () => {
 
-    // ── 1. UYKU MODU: Türkiye saati 22:00 – 07:00 arası çalışma ─────────
-    const nowTR = new Date(Date.now() + 3 * 60 * 60 * 1000); // UTC+3
-    const hourTR = nowTR.getUTCHours();
-    if (hourTR >= 22 || hourTR < 7) {
-        console.log(`[NOTIFY CRON] Uyku modu (TR ${hourTR}:00). Atlanıyor.`);
-        return;
-    }
-    console.log(`[NOTIFY CRON] Başlıyor — TR saati: ${hourTR}:00`);
+    // ── 1. UYKU MODU ────────────────────────────────────────────────────
+    // [2.3] Eskiden TÜM cron Türkiye saatine göre susturuluyordu (TR 22:00-07:00),
+    // yani Endonezya'daki kullanıcı kendi gecesinde bildirim alabiliyor, kendi
+    // gündüzünde alamıyordu. Artık cron her saat çalışır; susturma her koordinat
+    // grubu için AYRI AYRI, o grubun boylamından türetilen yerel saatle yapılır
+    // (aşağıda). Burada yalnız UTC saati hazırlanıyor.
+    const _utcSaat = new Date().getUTCHours();
+    console.log(`[NOTIFY CRON] Başlıyor — UTC ${_utcSaat}:00`);
 
     if (!db || !admin) {
         console.log('[NOTIFY CRON] Firestore/Admin hazır değil, atlanıyor.');
@@ -8303,8 +8357,15 @@ cron.schedule('0 * * * *', async () => {
     console.log(`[NOTIFY CRON] ${snapshot.size} favori → ${groups.length} benzersiz koordinat grubu`);
 
     // ── 4. Her benzersiz koordinat için basınç trendi kontrolü ────────────
+    let _uykuAtlanan = 0;
     for (const group of groups) {
         const { lat, lon, spots } = group;
+
+        // [2.3] Bu koordinatın yerel saati uyku penceresindeyse atla. Boylamdan
+        // türetilen ofset ±1 saat sapabilir; uyku PENCERESİ için bu kabul edilebilir
+        // (9 saatlik bant), sabit saatli bildirimde ise kayıtlı gerçek ofset kullanılır.
+        const _yerel = kullaniciYerelSaat(_utcSaat, ofsetSaatBoylamdan(lon));
+        if (_yerel >= 22 || _yerel < 7) { _uykuAtlanan++; continue; }
 
         // Open-Meteo: son 24 saatlik yüzey basıncı — safeFetchJSON kullan (backoff dahil)
         const omUrl = `https://${OM_HOST}/v1/forecast` +

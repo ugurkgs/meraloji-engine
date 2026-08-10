@@ -47,7 +47,7 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | ~~5~~ | ~~**4.4**~~ | ~~bbox çakışması~~ | **ÖLÇÜLDÜ — değişiklik gerekmedi** | — |
 | ~~6~~ | ~~**4.9**~~ | ~~NOAA devre kesici~~ | **YAPILDI** (devre kesici yerine önbellek) | — |
 | ~~7~~ | ~~**4.12**~~ | ~~snap'te weather'ı da çek~~ | **ÖLÇÜLDÜ — değişiklik gerekmedi** | — |
-| 8 | **2.3** | cron'ları kullanıcı saat dilimine taşı | server.js | orta |
+| ~~8~~ | ~~**2.3**~~ | ~~cron'ları kullanıcı saat dilimine taşı~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | 9 | **4.3** | `photoId` temizliği (827 kayıt) | species.js | orta — **önce mobil kontrol** |
 | 10 | **1.5** | kıyı bildirimi eşiği + gizlilik politikası | server.js + public/privacy.html | orta — **canlı bildirim** |
 | 11 | **4.8** | `instant`'ı `isLand` ile kapat | server.js | **önce mobil doğrulama şart** |
@@ -196,25 +196,6 @@ Metin `SERVER_i18n` içinde (sunucu tarafı), 4 dilde eklendi.
 **Saat dilimi:** mevcut cron'lar TR saatine sabit. Bu yeni cron kullanıcının
 boylamından yerel saat türetiyor — Endonezya/İspanya kullanıcısına gece 03:00'te
 bildirim gitmiyor. Eski cron'lar bu açıdan hâlâ hatalı (bkz. 2.3).
-
-### 2.3 Mevcut cron'lar Türkiye saatine sabit `HAZIR`
-
-Üç yerde TR saati varsayılıyor (2026-08-10'da koddan doğrulandı):
-
-| satır | cron | mekanizma |
-|---|---|---|
-| 7866 | günlük en iyi, `0 7 * * *` | `{ timezone: 'Europe/Istanbul' }` (7950) |
-| 7957 | cache temizliği, `0 3 * * *` | `{ timezone: 'Europe/Istanbul' }` (7995) |
-| 8000 | basınç uyarısı, `0 * * * *` | `Date.now() + 3 * 60 * 60 * 1000` → TR 22:00–07:00 uyku |
-
-> Bu maddenin önceki tarifi `Date.now() + 3*3600*1000` diyordu; kodda öyle bir
-> ifade yok. Gerçek mekanizma yukarıdaki tabloda.
-
-Cache temizliği (03:00) saat diliminden bağımsız, sorun değil. Sorun **kullanıcıya
-bildirim gönderen ikisinde**: Endonezya ve İspanya'daki kullanıcılar Türkiye
-saatine göre bildirim alıyor. Çözüm kıyı bildiriminde uygulandı (`shoreAlert`
-cron'u boylamdan UTC ofseti türetiyor, `Math.round(ls.lon / 15)`), aynısı bu
-ikisine taşınmalı.
 
 ## 2 · Analitik ve ölçüm
 
@@ -570,6 +551,30 @@ ayrılmış test kümesi** şart — yoksa modelin ne zaman hazır olduğu hiç 
 - **`startedAt` her doğrulamada eziliyordu** — düzeltildi (`23919de`).
 - **BAE mükerrer kayıtları** — 5 çift birleştirildi.
 - **Tuzluluk sayısal aralığı** — ölçüldü, değmiyor (bkz. 4.5).
+- **2.3 Cron'lar Türkiye saatine sabit** — düzeltildi. Bildirim gönderen iki
+  cron artık kullanıcının YEREL saatine göre çalışıyor:
+  **Günlük en iyi mera:** `0 7 * * *` + `timezone:'Europe/Istanbul'` yerine
+  saatlik UTC cron; her kullanıcıya yalnız kendi yerel saati 07:00 olduğunda
+  gönderiyor. Pahalı iş (favori başına forecast çağrısı) bu kontrolden SONRA
+  yapıldığı için saatlik koşmak maliyet getirmiyor.
+  **Basınç uyarısı:** global TR 22:00-07:00 susturması yerine her koordinat
+  grubu için ayrı yerel uyku penceresi.
+  **TUZAK — sadece boylam yetmiyordu.** Türkiye kalıcı UTC+3 ama boylamı 26-36
+  arası olduğu için `lon/15` çoğu yerde **2** veriyor. Yalnız boylama
+  dayansaydık mevcut Türk kullanıcıların günlük bildirimi **07:00'den 08:00'e
+  kayardı** — asıl kitleye görünür bir gerileme. Çözüm: `users/{uid}.utcOffsetSec`
+  alanı eklendi; Open-Meteo'nun `timezone=auto` ile döndürdüğü GERÇEK ofset
+  (yaz saati dahil) analiz sırasında kaydediliyor (`kaydetUtcOfset`, 7 günlük
+  önbellek → kullanıcı başına haftada ~1 yazma, ateşle-unut). Cron önce bu
+  kaydı kullanıyor, yoksa boylama düşüyor.
+  Uyku penceresinde boylam yedeği yeterli — ±1 saat sapma 9 saatlik bantta
+  görünmez; sabit saatli bildirimde ise gerçek ofset şart.
+  **Ölçüm:** eski davranışta Endonezya kullanıcısı yerel **11:00**, Hindistan
+  **10:00**, İspanya **06:00** alıyordu; artık hepsi **07:00**. Türk kullanıcı
+  07:00'de kalıyor (kayıtlı ofset sayesinde). 16 kontrollük test server.js'ten
+  sökülen fonksiyonlarla koştu, deniz regresyonu 6160 skor sapma 0.
+  Cache temizliği cron'u (`0 3 * * *`, TR) bilinçli olarak DEĞİŞMEDİ —
+  kullanıcıya bildirim göndermiyor, saat dilimi umursamaz.
 - **4.12 Kıyı snap'i hava verisini taşımıyor** — ÖLÇÜLDÜ, değişiklik gerekmedi.
   Kusur gerçek: snap başarılı olunca yalnız `marine = snapMarine` yapılıyor,
   `weather` tıklanan KARA koordinatında kalıyor. Ama düzeltmenin karşılığı yok.
