@@ -170,10 +170,15 @@ gitmez; yalnızca "kime ne giderdi" raporu log'a ve `notifyLog` koleksiyonuna ya
      `analyzeLocationOffline(...).status !== 'INLAND'` eklenmeli.
    - **11 aday az.** `lastSeen` daha yeni yazılmaya başladı (03:57 dağıtımı).
      Havuz birkaç gün içinde büyüyecek; şimdiki sayıya bakıp karar verme.
-2. **GİZLİLİK POLİTİKASI — ŞART.** Bu özellik konumu SAKLAMAYA başlıyor
-   (`users/{uid}.lastSeen`). Daha önce konum işleniyordu ama saklanmıyordu.
-   `public/privacy.html` güncellenmeli: hangi veri, ne kadar süre, ne amaçla.
-   KVKK/GDPR kapsamında bu bir veri işleme faaliyetidir.
+2. ~~**GİZLİLİK POLİTİKASI — ŞART.**~~ ✅ **2026-08-10'da yapıldı.**
+   `public/privacy.html` baştan yazıldı. Konum saklama (`users/{uid}.lastSeen`)
+   ayrı bir bölümde anlatılıyor: ne saklanıyor (tek nokta, geçmiş yok), yazma
+   koşulu (3 km + 6 saat), ne için kullanılıyor (5 km ızgara hücresi), ve
+   **özelliğin şu an kapalı olduğu ama konumun zaten saklandığı.**
+   Eski sürümdeki *"konum verileriniz sunucularımızda saklanmaz"* iddiası
+   yanlıştı — kaldırılmadı, alıntılanıp düzeltildi.
+   Ayrıca kaldırılan bir yanlış daha: **Visual Crossing** üçüncü taraf olarak
+   listeleniyordu, kodda hiç kullanılmıyor (0 eşleşme).
 3. **Kullanıcıya kapatma seçeneği** verilmeli (favorilerdeki `notify` bayrağı gibi).
    Şu an tercih yok — herkes aday. Mobil tarafta ayar gerekir.
 

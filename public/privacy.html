@@ -1,59 +1,463 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERALOJİ - Gizlilik Politikası</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0e1a; color: #e0e6ed; line-height: 1.8; padding: 24px; max-width: 800px; margin: 0 auto; }
-        h1 { color: #00c8c8; font-size: 1.5rem; margin-bottom: 8px; }
-        h2 { color: #00c8c8; font-size: 1.1rem; margin-top: 24px; margin-bottom: 8px; }
-        p { margin-bottom: 12px; font-size: 0.9rem; color: #b0b8c8; }
-        .date { color: #6b7280; font-size: 0.8rem; margin-bottom: 24px; }
-        a { color: #00c8c8; }
-        ul { margin-bottom: 12px; padding-left: 20px; color: #b0b8c8; font-size: 0.9rem; }
-        li { margin-bottom: 8px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="index, follow">
+<meta name="description" content="MERALOJİ F.I.S.H. System gizlilik politikası — hangi veri toplanıyor, neden, ne kadar süre saklanıyor.">
+<title>Gizlilik Politikası — MERALOJİ</title>
+<link rel="icon" href="/icons/icon-192.png">
+<style>
+:root{
+  --bg:#070c16; --yuzey:#0e1626; --yuzey2:#131e33; --cizgi:#1e2c45;
+  --metin:#e6ecf4; --soluk:#9aa8bd; --daha-soluk:#6b7a91;
+  --vurgu:#00c8c8; --vurgu-koyu:#00a0a0; --uyari:#ffb454; --iyi:#5ed6a0;
+  --r:14px; --ic:clamp(18px,4vw,32px);
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#f6f8fb; --yuzey:#ffffff; --yuzey2:#eef2f8; --cizgi:#dde4ee;
+    --metin:#101927; --soluk:#4a5a70; --daha-soluk:#71829a;
+    --vurgu:#00807f; --vurgu-koyu:#006665;
+  }
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--metin);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+  font-size:clamp(15px,2.4vw,16.5px); line-height:1.75;
+  padding:0 var(--ic) 72px; overflow-x:hidden;
+}
+.sarmal{max-width:820px;margin:0 auto}
+
+/* ── başlık ─────────────────────────────────────────── */
+header{padding:clamp(32px,7vw,56px) 0 8px;border-bottom:1px solid var(--cizgi);margin-bottom:28px}
+.rozet{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--yuzey2);border:1px solid var(--cizgi);
+  color:var(--vurgu);font-size:.72rem;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;padding:5px 11px;border-radius:100px;margin-bottom:16px
+}
+h1{font-size:clamp(1.6rem,5.5vw,2.3rem);line-height:1.2;letter-spacing:-.02em;font-weight:700}
+.ust-ozet{color:var(--soluk);margin-top:14px;font-size:clamp(.95rem,2.4vw,1.05rem)}
+.tarih{color:var(--daha-soluk);font-size:.82rem;margin-top:18px;display:flex;flex-wrap:wrap;gap:6px 16px}
+
+/* ── dil ────────────────────────────────────────────── */
+.dil{display:flex;gap:6px;margin:22px 0 0}
+.dil button{
+  flex:0 0 auto;background:var(--yuzey);border:1px solid var(--cizgi);color:var(--soluk);
+  font:inherit;font-size:.85rem;font-weight:600;padding:7px 16px;border-radius:100px;cursor:pointer;
+  transition:.15s
+}
+.dil button[aria-selected="true"]{background:var(--vurgu);border-color:var(--vurgu);color:#04121a}
+.dil button:hover:not([aria-selected="true"]){border-color:var(--vurgu);color:var(--metin)}
+
+/* ── içindekiler ────────────────────────────────────── */
+nav.icindekiler{
+  background:var(--yuzey);border:1px solid var(--cizgi);border-radius:var(--r);
+  padding:18px 20px;margin:26px 0 34px
+}
+nav.icindekiler p{font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;color:var(--daha-soluk);font-weight:600;margin-bottom:12px}
+nav.icindekiler ol{list-style:none;counter-reset:n;display:grid;gap:7px;grid-template-columns:1fr}
+@media(min-width:620px){nav.icindekiler ol{grid-template-columns:1fr 1fr;gap:7px 26px}}
+nav.icindekiler li{counter-increment:n;font-size:.92rem}
+nav.icindekiler li::before{content:counter(n) ".";color:var(--vurgu);font-weight:600;margin-right:8px}
+nav.icindekiler a{color:var(--soluk);text-decoration:none;border-bottom:1px solid transparent}
+nav.icindekiler a:hover{color:var(--vurgu);border-bottom-color:var(--vurgu)}
+
+/* ── bölümler ───────────────────────────────────────── */
+section{margin-bottom:40px;scroll-margin-top:20px}
+h2{
+  font-size:clamp(1.12rem,3.4vw,1.35rem);font-weight:650;letter-spacing:-.01em;
+  margin-bottom:14px;padding-bottom:9px;border-bottom:1px solid var(--cizgi);
+  display:flex;align-items:baseline;gap:10px
+}
+h2 .no{color:var(--vurgu);font-size:.85em;font-variant-numeric:tabular-nums;flex:0 0 auto}
+h3{font-size:1rem;font-weight:650;margin:22px 0 8px;color:var(--metin)}
+p{color:var(--soluk);margin-bottom:13px}
+strong{color:var(--metin);font-weight:600}
+a{color:var(--vurgu);text-decoration:none;border-bottom:1px solid rgba(0,200,200,.32)}
+a:hover{border-bottom-color:var(--vurgu)}
+ul{list-style:none;margin:0 0 14px}
+ul li{color:var(--soluk);padding-left:20px;position:relative;margin-bottom:9px}
+ul li::before{content:"";position:absolute;left:4px;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--vurgu-koyu)}
+
+/* ── tablo → mobilde kart ───────────────────────────── */
+.tablo-sarmal{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 0 16px}
+table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:520px}
+th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--cizgi);vertical-align:top}
+th{color:var(--daha-soluk);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;font-weight:600;white-space:nowrap}
+td{color:var(--soluk)}
+td:first-child{color:var(--metin);font-weight:600}
+tbody tr:last-child td{border-bottom:none}
+code{
+  font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,monospace;
+  font-size:.86em;background:var(--yuzey2);border:1px solid var(--cizgi);
+  padding:1px 5px;border-radius:5px;color:var(--metin);white-space:nowrap
+}
+@media(max-width:600px){
+  table,thead,tbody,th,td,tr{display:block;min-width:0}
+  thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  tbody tr{
+    background:var(--yuzey);border:1px solid var(--cizgi);border-radius:12px;
+    padding:12px 14px;margin-bottom:10px
+  }
+  /* td BLOK kalır — flex yapılırsa hücre içindeki <code> gibi satır içi öğeler
+     alt alta düşer ve aralarındaki virgül tek başına satırda kalır. */
+  td{border:none;padding:4px 0;display:block}
+  td::before{
+    content:attr(data-b);display:block;margin-bottom:2px;
+    font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--daha-soluk);font-weight:600
+  }
+  td code{white-space:normal}
+  td:first-child{font-size:1rem;padding-bottom:8px;margin-bottom:6px;border-bottom:1px solid var(--cizgi)}
+}
+
+/* ── kutular ────────────────────────────────────────── */
+.kutu{
+  background:var(--yuzey);border:1px solid var(--cizgi);border-left:3px solid var(--vurgu);
+  border-radius:0 var(--r) var(--r) 0;padding:16px 18px;margin:18px 0
+}
+.kutu.dikkat{border-left-color:var(--uyari)}
+.kutu.olumlu{border-left-color:var(--iyi)}
+.kutu p:last-child{margin-bottom:0}
+.kutu .bas{font-weight:650;color:var(--metin);display:block;margin-bottom:6px;font-size:.95rem}
+
+/* ── iletişim ───────────────────────────────────────── */
+.iletisim{
+  background:linear-gradient(180deg,var(--yuzey) 0%,var(--yuzey2) 100%);
+  border:1px solid var(--cizgi);border-radius:var(--r);padding:24px;margin-top:8px
+}
+.iletisim a.eposta{
+  display:inline-block;margin-top:6px;font-size:1.02rem;font-weight:600;word-break:break-all
+}
+footer{
+  margin-top:48px;padding-top:22px;border-top:1px solid var(--cizgi);
+  color:var(--daha-soluk);font-size:.83rem;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center
+}
+footer a{color:var(--daha-soluk);border-bottom-color:transparent}
+footer a:hover{color:var(--vurgu)}
+[hidden]{display:none !important}
+</style>
 </head>
 <body>
+<div class="sarmal">
 
-    <h1>MERALOJİ - Gizlilik Politikası</h1>
-    <p class="date">Son Güncelleme: 13 Mart 2026</p>
+<header>
+  <span class="rozet">MERALOJİ F.I.S.H. System</span>
+  <h1 data-tr="Gizlilik Politikası" data-en="Privacy Policy">Gizlilik Politikası</h1>
+  <p class="ust-ozet"
+     data-tr="Hangi veriyi topluyoruz, neden topluyoruz, ne kadar süre saklıyoruz ve nasıl sildirebilirsiniz. Bu sayfa uygulamanın gerçek davranışını anlatır — genel geçer ifadeler değil."
+     data-en="What we collect, why, how long we keep it, and how you can have it deleted. This page describes what the app actually does, not generic boilerplate.">
+  </p>
+  <div class="tarih">
+    <span data-tr="Son güncelleme: 10 Ağustos 2026" data-en="Last updated: 10 August 2026">Son güncelleme: 10 Ağustos 2026</span>
+    <span data-tr="Veri sorumlusu: MERALOJİ" data-en="Data controller: MERALOJİ">Veri sorumlusu: MERALOJİ</span>
+  </div>
+  <div class="dil" role="tablist" aria-label="Dil / Language">
+    <button role="tab" aria-selected="true"  data-dil="tr">Türkçe</button>
+    <button role="tab" aria-selected="false" data-dil="en">English</button>
+  </div>
+</header>
 
-    <h2>1. Toplanan Veriler</h2>
-    <p>MERALOJİ uygulaması aşağıdaki verileri toplar:</p>
-    <ul>
-        <li><strong>Google Hesap Bilgileri:</strong> Google ile giriş yaptığınızda adınız, e-posta adresiniz ve profil fotoğrafınız Firebase Authentication aracılığıyla alınır. Bu bilgiler yalnızca kimlik doğrulama ve abonelik yönetimi amacıyla kullanılır.</li>
-        <li><strong>Konum Bilgisi:</strong> Harita üzerinde seçtiğiniz koordinatlar hava durumu ve deniz koşulları verilerini almak için kullanılır. Cihazınızın GPS konumu yalnızca siz izin verdiğinizde ve yalnızca anlık sorgu amacıyla kullanılır. Konum verileriniz sunucularımızda saklanmaz.</li>
-        <li><strong>Abonelik Bilgileri:</strong> Google Play üzerinden yapılan abonelik işlemlerine ait durum bilgisi (aktif/pasif) Firebase Firestore'da saklanır.</li>
-    </ul>
+<nav class="icindekiler" aria-label="İçindekiler">
+  <p data-tr="İçindekiler" data-en="Contents">İçindekiler</p>
+  <ol>
+    <li><a href="#ozet"    data-tr="Kısaca"                data-en="In short">Kısaca</a></li>
+    <li><a href="#veriler" data-tr="Topladığımız veriler"  data-en="Data we collect">Topladığımız veriler</a></li>
+    <li><a href="#konum"   data-tr="Konum — ayrıntılı"     data-en="Location — in detail">Konum — ayrıntılı</a></li>
+    <li><a href="#neden"   data-tr="Neden ve hukuki dayanak" data-en="Why, and legal basis">Neden ve hukuki dayanak</a></li>
+    <li><a href="#sure"    data-tr="Saklama süreleri"      data-en="Retention">Saklama süreleri</a></li>
+    <li><a href="#ucuncu"  data-tr="Üçüncü taraflar"       data-en="Third parties">Üçüncü taraflar</a></li>
+    <li><a href="#reklam"  data-tr="Reklam"                data-en="Advertising">Reklam</a></li>
+    <li><a href="#yapmadik" data-tr="Yapmadıklarımız"      data-en="What we don't do">Yapmadıklarımız</a></li>
+    <li><a href="#haklar"  data-tr="Haklarınız"            data-en="Your rights">Haklarınız</a></li>
+    <li><a href="#silme"   data-tr="Hesap ve veri silme"   data-en="Deleting your data">Hesap ve veri silme</a></li>
+    <li><a href="#guvenlik" data-tr="Güvenlik ve çocuklar" data-en="Security & children">Güvenlik ve çocuklar</a></li>
+    <li><a href="#iletisim" data-tr="İletişim"             data-en="Contact">İletişim</a></li>
+  </ol>
+</nav>
 
-    <h2>2. Verilerin Kullanımı</h2>
-    <p>Toplanan veriler yalnızca şu amaçlarla kullanılır: uygulamaya giriş yapmanızı sağlamak, abonelik durumunuzu doğrulamak, seçtiğiniz konuma göre balık avı tahmini sunmak ve uygulama performansını iyileştirmek.</p>
-    
-    <h2>3. Üçüncü Taraf Hizmetleri</h2>
-    <p>Uygulamamız aşağıdaki üçüncü taraf hizmetleri kullanır:</p>
-    <ul>
-        <li><strong>Firebase (Google):</strong> Kimlik doğrulama ve veritabanı hizmetleri. <a href="https://firebase.google.com/support/privacy" target="_blank">Firebase Gizlilik Politikası</a></li>
-        <li><strong>Google AdMob:</strong> Ücretsiz sürümde reklam gösterimi. AdMob, reklam kişiselleştirme için cihaz tanımlayıcıları kullanabilir. <a href="https://policies.google.com/privacy" target="_blank">Google Gizlilik Politikası</a></li>
-        <li><strong>Open-Meteo / Visual Crossing:</strong> Hava durumu ve deniz koşulları verileri. Bu hizmetlere yalnızca koordinat bilgisi gönderilir, kişisel veri paylaşılmaz.</li>
-    </ul>
+<!-- 1 -->
+<section id="ozet">
+  <h2><span class="no">01</span><span data-tr="Kısaca" data-en="In short">Kısaca</span></h2>
+  <div class="kutu olumlu">
+    <p data-tr="Hesabınız Google ile açılır. Uygulamayı kullandıkça haritada seçtiğiniz noktalar hava ve deniz verisi almak için kullanılır; <strong>en son analiz ettiğiniz nokta sunucuda saklanır.</strong> Aboneliğiniz Google Play üzerinden doğrulanır. Reklam yalnızca mobil uygulamanın ücretsiz sürümünde gösterilir. Verinizi satmıyoruz, reklam ağlarıyla paylaşmıyoruz."
+       data-en="Your account is created with Google. The points you tap on the map are used to fetch weather and marine data, and <strong>your most recent analysed location is stored on our server.</strong> Your subscription is verified through Google Play. Ads appear only in the free tier of the mobile app. We do not sell your data and we do not share it with ad networks.">
+    </p>
+  </div>
+  <div class="kutu dikkat">
+    <span class="bas" data-tr="2026 Ağustos'ta değişen şey" data-en="What changed in August 2026">2026 Ağustos'ta değişen şey</span>
+    <p data-tr="Bu politikanın önceki sürümü “konum verileriniz sunucularımızda saklanmaz” diyordu. Bu artık doğru değil: yakınınızdaki kıyıda skor yükseldiğinde sizi uyarabilmek için <strong>en son analiz ettiğiniz koordinat kaydediliyor.</strong> Ayrıntısı 3. bölümde. Bunu gizlemek yerine ayrı bir başlık altında anlatmayı tercih ettik."
+       data-en="An earlier version of this policy said location data was never stored on our servers. That is no longer true: to be able to alert you when the score rises on a shore near you, <strong>your most recently analysed coordinate is now saved.</strong> Section 3 explains exactly how. We chose to give this its own section rather than bury it.">
+    </p>
+  </div>
+</section>
 
-    <h2>4. Reklam</h2>
-    <p>Ücretsiz sürümde Google AdMob aracılığıyla reklam gösterilir. PRO abonelik satın alarak reklamsız deneyim elde edebilirsiniz. Reklam kimliğinizi (Advertising ID) cihaz ayarlarınızdan sıfırlayabilir veya kişiselleştirilmiş reklamları kapatabilirsiniz.</p>
-    
-    <h2>5. Veri Saklama ve Güvenlik</h2>
-    <p>Verileriniz Firebase altyapısında şifrelenmiş olarak saklanır. Hesabınızı silmek istediğinizde meraloji.info@gmail.com adresine e-posta göndererek tüm verilerinizin silinmesini talep edebilirsiniz. Talebiniz en geç 30 gün içinde işleme alınır.</p>
-    
-    <h2>6. Çocukların Gizliliği</h2>
-    <p>Uygulamamız 13 yaşın altındaki çocuklara yönelik değildir. Bilerek 13 yaşından küçük kullanıcılardan veri toplamayız.</p>
+<!-- 2 -->
+<section id="veriler">
+  <h2><span class="no">02</span><span data-tr="Topladığımız veriler" data-en="Data we collect">Topladığımız veriler</span></h2>
+  <p data-tr="Aşağıdaki tablo, sunucumuzda tutulan her kaydı listeler. Başka bir kişisel veri tutmuyoruz."
+     data-en="The table below lists every record we hold on our server. We hold no other personal data."></p>
+  <div class="tablo-sarmal">
+    <table>
+      <thead><tr>
+        <th data-tr="Veri" data-en="Data">Veri</th>
+        <th data-tr="İçeriği" data-en="Contents">İçeriği</th>
+        <th data-tr="Nerede" data-en="Where">Nerede</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td data-b="Veri" data-tr="Hesap bilgileri" data-en="Account">Hesap bilgileri</td>
+          <td data-b="İçeriği" data-tr="Ad, e-posta adresi, profil fotoğrafı, kullanıcı kimliği" data-en="Name, e-mail address, profile photo, user ID">Ad, e-posta adresi, profil fotoğrafı, kullanıcı kimliği</td>
+          <td data-b="Nerede">Firebase Authentication</td>
+        </tr>
+        <tr>
+          <td data-b="Veri" data-tr="Son konum" data-en="Last location">Son konum</td>
+          <td data-b="İçeriği" data-tr="Enlem, boylam ve zaman damgası — tek kayıt, geçmiş tutulmaz" data-en="Latitude, longitude and a timestamp — a single record, no history">Enlem, boylam ve zaman damgası — tek kayıt, geçmiş tutulmaz</td>
+          <td data-b="Nerede"><code>users/{uid}.lastSeen</code></td>
+        </tr>
+        <tr>
+          <td data-b="Veri" data-tr="Abonelik durumu" data-en="Subscription">Abonelik durumu</td>
+          <td data-b="İçeriği" data-tr="Aktif mi, hangi paket, bitiş tarihi, Google Play satın alma kaydı" data-en="Active or not, which plan, expiry date, Google Play purchase record">Aktif mi, hangi paket, bitiş tarihi, Google Play satın alma kaydı</td>
+          <td data-b="Nerede"><code>users</code>, <code>subscriptions</code></td>
+        </tr>
+        <tr>
+          <td data-b="Veri" data-tr="Favori noktalar" data-en="Saved spots">Favori noktalar</td>
+          <td data-b="İçeriği" data-tr="Kaydettiğiniz koordinatlar ve bildirim tercihiniz" data-en="Coordinates you saved and your notification preference">Kaydettiğiniz koordinatlar ve bildirim tercihiniz</td>
+          <td data-b="Nerede"><code>favorites</code></td>
+        </tr>
+        <tr>
+          <td data-b="Veri" data-tr="Bildirim anahtarı" data-en="Notification token">Bildirim anahtarı</td>
+          <td data-b="İçeriği" data-tr="Cihazınıza bildirim gönderebilmek için Firebase'in ürettiği token" data-en="The token Firebase issues so we can push notifications to your device">Cihazınıza bildirim gönderebilmek için Firebase'in ürettiği token</td>
+          <td data-b="Nerede"><code>users/{uid}.fcmToken</code></td>
+        </tr>
+        <tr>
+          <td data-b="Veri" data-tr="Kullanım sayacı" data-en="Usage counters">Kullanım sayacı</td>
+          <td data-b="İçeriği" data-tr="Günlük analiz ve tarama hakkınızı takip eden sayaçlar" data-en="Counters tracking your daily analysis and scan allowance">Günlük analiz ve tarama hakkınızı takip eden sayaçlar</td>
+          <td data-b="Nerede"><code>clickUsage</code>, <code>scanUsage</code></td>
+        </tr>
+        <tr>
+          <td data-b="Veri" data-tr="Bildirim kaydı" data-en="Notification log">Bildirim kaydı</td>
+          <td data-b="İçeriği" data-tr="Hangi bildirimin ne zaman gönderildiği" data-en="Which notification was sent and when">Hangi bildirimin ne zaman gönderildiği</td>
+          <td data-b="Nerede"><code>notifyLog</code></td>
+        </tr>
+        <tr>
+          <td data-b="Veri" data-tr="Sunucu kayıtları" data-en="Server logs">Sunucu kayıtları</td>
+          <td data-b="İçeriği" data-tr="Her istekte e-posta adresiniz, koordinat ve süre teknik kayda yazılır. Hata ayıklama içindir, barındırma sağlayıcısında tutulur." data-en="Each request writes your e-mail address, the coordinate and the duration to a technical log. It exists for debugging and is held by our hosting provider.">Her istekte e-posta adresiniz, koordinat ve süre teknik kayda yazılır.</td>
+          <td data-b="Nerede" data-tr="Barındırma (Render)" data-en="Hosting (Render)">Barındırma (Render)</td>
+        </tr>
+        <tr>
+          <td data-b="Veri" data-tr="IP adresi" data-en="IP address">IP adresi</td>
+          <td data-b="İçeriği" data-tr="Giriş yapmamış ziyaretçilerin günlük ücretsiz hakkını sınırlamak için geçici olarak sunucu belleğinde tutulur. Veritabanına yazılmaz." data-en="Held briefly in server memory to cap the daily free allowance for signed-out visitors. It is never written to the database.">Giriş yapmamış ziyaretçilerin ücretsiz hakkını sınırlamak için geçici olarak bellekte.</td>
+          <td data-b="Nerede" data-tr="Yalnız bellek" data-en="Memory only">Yalnız bellek</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p data-tr="Cihazınızın GPS konumu yalnızca siz izin verdiğinizde okunur ve haritayı bulunduğunuz yere getirmek için kullanılır. İzin vermezseniz uygulama haritadan elle seçtiğiniz noktalarla çalışmaya devam eder."
+     data-en="Your device's GPS position is read only if you grant permission, and is used to centre the map on you. If you decline, the app keeps working with points you pick on the map by hand."></p>
+</section>
 
-    <h2>7. Değişiklikler</h2>
-    <p>Bu gizlilik politikası zaman zaman güncellenebilir. Önemli değişikliklerde uygulama içinden bilgilendirileceksiniz.</p>
+<!-- 3 -->
+<section id="konum">
+  <h2><span class="no">03</span><span data-tr="Konum — ayrıntılı" data-en="Location — in detail">Konum — ayrıntılı</span></h2>
+  <p data-tr="Konum en hassas veri olduğu için ayrı bir bölümde açıklıyoruz."
+     data-en="Because location is the most sensitive thing we hold, it gets its own section."></p>
+  <h3 data-tr="Ne saklanıyor" data-en="What is stored">Ne saklanıyor</h3>
+  <ul>
+    <li data-tr="Yalnızca <strong>en son</strong> analiz ettiğiniz noktanın enlem, boylam ve zamanı. Önceki noktalar üzerine yazılır — hareket geçmişiniz veya rotanız tutulmaz."
+        data-en="Only the latitude, longitude and time of the <strong>most recent</strong> point you analysed. Earlier points are overwritten — no movement history or route is kept."></li>
+    <li data-tr="Kayıt her analizde güncellenmez. Yeni kaydın yazılması için önceki noktadan <strong>en az 3 km</strong> uzaklaşmış <strong>ve</strong> üzerinden <strong>en az 6 saat</strong> geçmiş olması gerekir."
+        data-en="It is not rewritten on every analysis. A new record is written only if you are <strong>at least 3 km</strong> away from the previous point <strong>and</strong> <strong>at least 6 hours</strong> have passed."></li>
+    <li data-tr="Otomatik yüklenen (siz dokunmadan açılan) analizlerde kayıt yapılmaz."
+        data-en="Auto-loaded analyses — those that run without you tapping — are not recorded."></li>
+  </ul>
+  <h3 data-tr="Ne için kullanılıyor" data-en="What it is used for">Ne için kullanılıyor</h3>
+  <p data-tr="Tek bir amaç için: yakınınızdaki kıyıda av skoru yükseldiğinde size bildirim gönderebilmek. Bu bildirim hesaplanırken tam koordinatınız değil, yaklaşık <strong>5 km'lik bir ızgara hücresi</strong> kullanılır — aynı hücredeki kullanıcılar için tek bir hesap yapılır."
+     data-en="For one purpose: to notify you when the fishing score rises on a shore near you. The calculation does not use your exact coordinate but an approximately <strong>5 km grid cell</strong> — one computation is shared by everyone in that cell."></p>
+  <div class="kutu dikkat">
+    <p data-tr="<strong>Bu bildirim şu anda gönderilmiyor.</strong> Özellik kurulu ama kapalı; sunucu yalnızca “kime gönderilirdi” hesabını yapıp kendi kaydına yazıyor. Açıldığında bu sayfa güncellenecek ve uygulama içinde bilgilendirileceksiniz. Konumun saklanması ise şu an <strong>çalışıyor</strong> — bu yüzden burada anlatıyoruz."
+       data-en="<strong>This notification is not being sent yet.</strong> The feature is built but switched off; the server only computes who would have received one and writes that to its own log. When it is switched on, this page will be updated and you will be told in the app. The storing of your location, however, is <strong>already happening</strong> — which is why it is described here."></p>
+  </div>
+  <h3 data-tr="İstemiyorsanız" data-en="If you would rather not">İstemiyorsanız</h3>
+  <p data-tr="Şu an uygulama içinde bu kaydı ayrı olarak kapatan bir anahtar yok — bunu eksik olarak kabul ediyor ve eklemeyi planlıyoruz. O zamana kadar 10. bölümdeki adresten yazarak son konum kaydınızın silinmesini ve bir daha yazılmamasını isteyebilirsiniz."
+     data-en="There is currently no in-app switch that turns this single record off — we consider that a gap and intend to add one. Until then you can write to the address in section 10 and ask us to delete your stored location and stop recording it."></p>
+</section>
 
-    <h2>8. İletişim</h2>
-    <p>Gizlilik politikası hakkında sorularınız için: <a href="mailto:meralojifishsystem@gmail.com">meralojifishsystem@gmail.com</a></p>
+<!-- 4 -->
+<section id="neden">
+  <h2><span class="no">04</span><span data-tr="Neden ve hukuki dayanak" data-en="Why, and legal basis">Neden ve hukuki dayanak</span></h2>
+  <div class="tablo-sarmal">
+    <table>
+      <thead><tr>
+        <th data-tr="Amaç" data-en="Purpose">Amaç</th>
+        <th data-tr="Kullanılan veri" data-en="Data used">Kullanılan veri</th>
+        <th data-tr="Dayanak" data-en="Basis">Dayanak</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td data-b="Amaç" data-tr="Hesabınızı açmak ve tanımak" data-en="Creating and recognising your account">Hesabınızı açmak ve tanımak</td>
+          <td data-b="Kullanılan veri" data-tr="Hesap bilgileri" data-en="Account data">Hesap bilgileri</td>
+          <td data-b="Dayanak" data-tr="Sözleşmenin ifası" data-en="Performance of a contract">Sözleşmenin ifası</td>
+        </tr>
+        <tr>
+          <td data-b="Amaç" data-tr="Seçtiğiniz noktaya tahmin üretmek" data-en="Producing a forecast for your chosen point">Seçtiğiniz noktaya tahmin üretmek</td>
+          <td data-b="Kullanılan veri" data-tr="Koordinat" data-en="Coordinate">Koordinat</td>
+          <td data-b="Dayanak" data-tr="Sözleşmenin ifası" data-en="Performance of a contract">Sözleşmenin ifası</td>
+        </tr>
+        <tr>
+          <td data-b="Amaç" data-tr="Abonelik doğrulamak, ücretsiz hakkı saymak" data-en="Verifying subscriptions, counting the free allowance">Abonelik doğrulamak, ücretsiz hakkı saymak</td>
+          <td data-b="Kullanılan veri" data-tr="Abonelik, sayaçlar, IP" data-en="Subscription, counters, IP">Abonelik, sayaçlar, IP</td>
+          <td data-b="Dayanak" data-tr="Sözleşme ve meşru menfaat" data-en="Contract and legitimate interest">Sözleşme ve meşru menfaat</td>
+        </tr>
+        <tr>
+          <td data-b="Amaç" data-tr="Bildirim göndermek" data-en="Sending notifications">Bildirim göndermek</td>
+          <td data-b="Kullanılan veri" data-tr="Bildirim anahtarı, son konum, favoriler" data-en="Token, last location, saved spots">Bildirim anahtarı, son konum, favoriler</td>
+          <td data-b="Dayanak" data-tr="Açık rıza (bildirim izni)" data-en="Consent (notification permission)">Açık rıza</td>
+        </tr>
+        <tr>
+          <td data-b="Amaç" data-tr="Hata ayıklamak, kötüye kullanımı engellemek" data-en="Debugging and preventing abuse">Hata ayıklamak, kötüye kullanımı engellemek</td>
+          <td data-b="Kullanılan veri" data-tr="Sunucu kayıtları, IP" data-en="Server logs, IP">Sunucu kayıtları, IP</td>
+          <td data-b="Dayanak" data-tr="Meşru menfaat" data-en="Legitimate interest">Meşru menfaat</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
 
+<!-- 5 -->
+<section id="sure">
+  <h2><span class="no">05</span><span data-tr="Saklama süreleri" data-en="Retention">Saklama süreleri</span></h2>
+  <ul>
+    <li data-tr="<strong>Kullanım sayaçları ve teknik önbellek:</strong> her gece otomatik olarak silinir; 24 saatten eski kayıt tutulmaz."
+        data-en="<strong>Usage counters and technical caches:</strong> deleted automatically every night; nothing older than 24 hours is kept."></li>
+    <li data-tr="<strong>Son konum:</strong> yeni bir kayıtla üzerine yazılana kadar durur. Bildirim hesabında yalnızca <strong>son 21 gün</strong> içindeki kayıtlar kullanılır; daha eskisi dikkate alınmaz."
+        data-en="<strong>Last location:</strong> kept until a newer record overwrites it. Notification calculations only consider records from the <strong>last 21 days</strong>; anything older is ignored."></li>
+    <li data-tr="<strong>Hesap, abonelik ve favoriler:</strong> hesabınız var olduğu sürece. Silme talebinizde kaldırılır."
+        data-en="<strong>Account, subscription and saved spots:</strong> for as long as your account exists. Removed when you ask us to delete it."></li>
+    <li data-tr="<strong>Sunucu teknik kayıtları:</strong> barındırma sağlayıcısının saklama süresi kadar tutulur; kalıcı arşivini biz tutmuyoruz."
+        data-en="<strong>Server technical logs:</strong> kept for as long as the hosting provider retains them; we keep no permanent archive of our own."></li>
+    <li data-tr="<strong>Ödeme kayıtları:</strong> ödemeyi biz almıyoruz, Google Play alıyor. Mali kayıt yükümlülüğü Google'dadır."
+        data-en="<strong>Payment records:</strong> we do not take payments — Google Play does. Financial record-keeping obligations sit with Google."></li>
+  </ul>
+</section>
+
+<!-- 6 -->
+<section id="ucuncu">
+  <h2><span class="no">06</span><span data-tr="Üçüncü taraflar" data-en="Third parties">Üçüncü taraflar</span></h2>
+  <h3 data-tr="Kişisel verinize erişebilenler" data-en="Who can access your personal data">Kişisel verinize erişebilenler</h3>
+  <ul>
+    <li><strong>Google Firebase</strong> — <span data-tr="kimlik doğrulama, veritabanı, bildirim altyapısı." data-en="authentication, database and notification infrastructure."></span> <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase</a></li>
+    <li><strong>Google Play</strong> — <span data-tr="abonelik satın alma ve doğrulama." data-en="subscription purchase and verification."></span> <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google</a></li>
+    <li><strong>Render</strong> — <span data-tr="sunucu barındırma; teknik kayıtlar burada oluşur." data-en="server hosting; technical logs are produced here."></span></li>
+  </ul>
+  <h3 data-tr="Yalnızca koordinat gönderdiğimiz veri kaynakları" data-en="Data sources that receive only a coordinate">Yalnızca koordinat gönderdiğimiz veri kaynakları</h3>
+  <p data-tr="Bu servislere <strong>yalnızca enlem ve boylam</strong> gider. Kimliğiniz, e-postanız veya cihaz bilgileriniz gönderilmez — sizi tanıyamazlar."
+     data-en="These services receive <strong>latitude and longitude only</strong>. Your identity, e-mail and device details are never sent, so they cannot identify you."></p>
+  <ul>
+    <li><strong>Open-Meteo</strong> — <span data-tr="hava ve deniz tahmini" data-en="weather and marine forecasts"></span></li>
+    <li><strong>NOAA CoastWatch / NGDC</strong> — <span data-tr="uydu deniz suyu sıcaklığı, klorofil, dip yapısı" data-en="satellite sea temperature, chlorophyll, seabed"></span></li>
+    <li><strong>EMODnet</strong> — <span data-tr="derinlik ve deniz tabanı habitatı" data-en="bathymetry and seabed habitat"></span></li>
+    <li><strong>GEBCO</strong> — <span data-tr="derinlik verisi" data-en="bathymetry"></span></li>
+  </ul>
+  <h3 data-tr="Yalnızca web sürümünde" data-en="Web version only">Yalnızca web sürümünde</h3>
+  <p data-tr="meraloji.com üzerinden tarayıcıda kullandığınızda ayrıca Google Analytics (ölçüm), Google Fonts, harita döşemeleri (ArcGIS, OpenSeaMap) ve bir betik dağıtım ağı devreye girer. Mobil uygulamada bunlar yoktur."
+     data-en="When you use meraloji.com in a browser, Google Analytics, Google Fonts, map tiles (ArcGIS, OpenSeaMap) and a script CDN are also involved. None of these are present in the mobile app."></p>
+</section>
+
+<!-- 7 -->
+<section id="reklam">
+  <h2><span class="no">07</span><span data-tr="Reklam" data-en="Advertising">Reklam</span></h2>
+  <p data-tr="Reklam yalnızca <strong>mobil uygulamanın ücretsiz sürümünde</strong> Google AdMob aracılığıyla gösterilir; web sürümünde reklam yoktur. İzlediğiniz ödüllü reklam karşılığında ek analiz hakkı verilir."
+     data-en="Ads are shown through Google AdMob in the <strong>free tier of the mobile app only</strong>; the web version carries none. Watching a rewarded ad grants you an extra analysis."></p>
+  <p data-tr="AdMob, reklam kişiselleştirmesi için cihazınızın reklam kimliğini kullanabilir. Bu kimliği cihaz ayarlarınızdan sıfırlayabilir veya kişiselleştirilmiş reklamları kapatabilirsiniz. PRO aboneliği reklamları tamamen kaldırır."
+     data-en="AdMob may use your device's advertising ID to personalise ads. You can reset that ID or turn off personalised ads in your device settings. A PRO subscription removes ads entirely."></p>
+</section>
+
+<!-- 8 -->
+<section id="yapmadik">
+  <h2><span class="no">08</span><span data-tr="Yapmadıklarımız" data-en="What we don't do">Yapmadıklarımız</span></h2>
+  <ul>
+    <li data-tr="Verinizi <strong>satmıyoruz</strong>, kiralamıyoruz, veri simsarlarına vermiyoruz." data-en="We do not <strong>sell</strong>, rent or broker your data."></li>
+    <li data-tr="Konumunuzu reklam ağlarıyla <strong>paylaşmıyoruz</strong>." data-en="We do not <strong>share</strong> your location with ad networks."></li>
+    <li data-tr="Hareket geçmişinizi veya rotanızı <strong>tutmuyoruz</strong> — yalnızca tek bir son nokta." data-en="We do not <strong>keep</strong> a movement history or route — only a single last point."></li>
+    <li data-tr="Arka planda konum <strong>takip etmiyoruz</strong>; kayıt yalnız siz analiz yaptığınızda oluşur." data-en="We do not <strong>track</strong> location in the background; a record is created only when you run an analysis."></li>
+    <li data-tr="Rehber, fotoğraf, kişi listesi gibi cihaz içeriğine <strong>erişmiyoruz</strong>." data-en="We do not <strong>access</strong> device content such as contacts or photos."></li>
+  </ul>
+</section>
+
+<!-- 9 -->
+<section id="haklar">
+  <h2><span class="no">09</span><span data-tr="Haklarınız" data-en="Your rights">Haklarınız</span></h2>
+  <p data-tr="KVKK (6698 sayılı Kanun) ve GDPR kapsamında; verinizin işlenip işlenmediğini öğrenme, kopyasını isteme, düzeltilmesini veya silinmesini talep etme, işlemeye itiraz etme ve verinizi taşınabilir bir biçimde alma haklarına sahipsiniz."
+     data-en="Under Turkey's KVKK (Law 6698) and the GDPR you have the right to learn whether your data is processed, to obtain a copy, to have it corrected or erased, to object to processing, and to receive it in a portable format."></p>
+  <p data-tr="Bu taleplerin tamamı için 12. bölümdeki adrese yazmanız yeterli. Talebiniz en geç <strong>30 gün</strong> içinde sonuçlandırılır."
+     data-en="Writing to the address in section 12 is enough for any of these. We will respond within <strong>30 days</strong> at the latest."></p>
+</section>
+
+<!-- 10 -->
+<section id="silme">
+  <h2><span class="no">10</span><span data-tr="Hesap ve veri silme" data-en="Deleting your data">Hesap ve veri silme</span></h2>
+  <p data-tr="Hesabınızın ve tüm verilerinizin silinmesini talep edebilirsiniz. Adımlar ayrı bir sayfada anlatılıyor:"
+     data-en="You can ask for your account and all of your data to be deleted. The steps are on a separate page:"></p>
+  <p><a href="/delete-account.html" data-tr="→ Hesap silme sayfası" data-en="→ Account deletion page">→ Hesap silme sayfası</a></p>
+  <p data-tr="Yalnızca <strong>son konum kaydınızın</strong> silinmesini, hesabınızı kapatmadan da isteyebilirsiniz."
+     data-en="You may also ask for just your <strong>stored location</strong> to be deleted without closing your account."></p>
+</section>
+
+<!-- 11 -->
+<section id="guvenlik">
+  <h2><span class="no">11</span><span data-tr="Güvenlik ve çocuklar" data-en="Security &amp; children">Güvenlik ve çocuklar</span></h2>
+  <p data-tr="Veriler Google Firebase altyapısında, aktarım sırasında ve depolandığında şifreli olarak tutulur. Sunucuya erişim kimlik doğrulaması ile sınırlıdır. Hiçbir sistem mutlak güvenlik vaat edemez; bir veri ihlali yaşanırsa etkilenen kullanıcıları ve ilgili kurumu mevzuatın öngördüğü sürede bilgilendiririz."
+     data-en="Data is held on Google Firebase infrastructure, encrypted in transit and at rest. Server access is restricted by authentication. No system can promise absolute security; in the event of a breach we will notify affected users and the relevant authority within the period the law requires."></p>
+  <p data-tr="Uygulama 13 yaşın altındaki çocuklara yönelik değildir ve bilerek onlardan veri toplamayız. Böyle bir kaydın farkına varırsak sileriz."
+     data-en="The app is not directed at children under 13 and we do not knowingly collect their data. If we become aware of such a record we delete it."></p>
+</section>
+
+<!-- 12 -->
+<section id="iletisim">
+  <h2><span class="no">12</span><span data-tr="İletişim" data-en="Contact">İletişim</span></h2>
+  <div class="iletisim">
+    <p data-tr="Gizlilikle ilgili her soru, talep ve şikâyet için:" data-en="For any privacy question, request or complaint:"></p>
+    <a class="eposta" href="mailto:meralojifishsystem@gmail.com">meralojifishsystem@gmail.com</a>
+    <p style="margin-top:14px" data-tr="Bu politikada önemli bir değişiklik olursa sayfanın üstündeki tarih güncellenir ve uygulama içinde bilgilendirilirsiniz."
+       data-en="If this policy changes materially, the date at the top is updated and you are informed inside the app."></p>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 MERALOJİ F.I.S.H. System</span>
+  <a href="/" data-tr="Ana sayfa" data-en="Home">Ana sayfa</a>
+  <a href="/delete-account.html" data-tr="Hesap silme" data-en="Delete account">Hesap silme</a>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var dugmeler = document.querySelectorAll('.dil button');
+  function uygula(dil){
+    document.documentElement.lang = dil;
+    document.querySelectorAll('[data-tr]').forEach(function(el){
+      var v = el.getAttribute('data-' + dil);
+      if (v !== null) el.innerHTML = v;
+    });
+    dugmeler.forEach(function(b){
+      b.setAttribute('aria-selected', String(b.dataset.dil === dil));
+    });
+    try { localStorage.setItem('meraloji_gizlilik_dil', dil); } catch(e){}
+  }
+  dugmeler.forEach(function(b){
+    b.addEventListener('click', function(){ uygula(b.dataset.dil); });
+  });
+  var kayitli = null;
+  try { kayitli = localStorage.getItem('meraloji_gizlilik_dil'); } catch(e){}
+  var baslangic = kayitli || ((navigator.language || 'tr').toLowerCase().indexOf('tr') === 0 ? 'tr' : 'en');
+  uygula(baslangic);
+})();
+</script>
 </body>
 </html>
