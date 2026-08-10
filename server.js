@@ -1639,17 +1639,21 @@ const FREE_DAILY_CLICKS = 2;    // Ücretsiz kullanıcı günde 2 tıklama (grac
 // /api/fish-search, /api/use-click ve /api/subscription-status'in raporladığı
 // clickLimit değeri FREE_DAILY_CLICKS olarak KALIR — istemcinin kendi kapısı
 // da 2 olduğu için kullanıcıya gösterilen sayı tutarlı kalsın.
-// Kaç reklamın hak kazandıracağı. Sunucu "kaç reklam izlendi" bilgisine sahip
-// olmadığı için bu bir GÜNLÜK TAVAN PAYIDIR: kullanıcı gün içinde en fazla bu
-// kadar ekstra analiz alabilir. 1 iken canlıda yetmedi — ilk reklam çalışıyor,
-// ikincisi 403 alıyordu (2026-08-10 kullanıcı raporu + log doğrulaması).
+// Kaç ekstra analiz hakkı verileceği. Ürün kararı: süresi dolmuş kullanıcı
+// günde 2 analiz yapar, ardından BİR reklam izleyerek 1 hak daha kazanır.
+// Yani günlük tavan 2 + 1 = 3.
+//
+// Sunucu "kaç reklam izlendi" bilgisine sahip değil; bu yüzden pay, reklam
+// başına değil GÜNLÜK TOPLAM olarak uygulanır. İstemci de günde tek ödüle izin
+// verip (ad_reward_day/ad_reward_used) ikinci reklamda butonu gizlediği için
+// iki taraf aynı sayıda buluşuyor.
 //
 // Kötüye kullanım riski düşük: clickUsage sayacı Firestore'da uid'ye bağlı,
 // yani uygulama verisini silmek onu SIFIRLAMIYOR. İstemci kapısı da 2'de
 // durduğu için normal bir kullanıcının bu payı kullanmasının tek yolu gerçekten
 // reklam izlemek. (Elle hazırlanmış API çağrısı ayrı bir tehdit sınıfı; asıl
 // çözümü SSV.)
-const AD_REWARD_HEADROOM = 3;
+const AD_REWARD_HEADROOM = 1;
 const FREE_DAILY_SCANS = 1;     // Ücretsiz kullanıcı günde 1 tarama
 const GRACE_PERIOD_DAYS = 14;   // Yeni kullanıcıya 14 gün tam erişim
 const VALID_SUBSCRIPTIONS = ['meraloji_pro_monthly', 'meraloji_pro_yearly'];
