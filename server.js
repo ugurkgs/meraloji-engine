@@ -197,8 +197,8 @@ const SERVER_i18n = {
         },
         tactic: {
             dominantNote: '⭐ Baskın tür tespit edildi — ticari değeri olan bir balık ise, av için ideal koşullar.',
-            TACTIC_DANGER_WAVE: '🚫 TEHLİKELİ DALGALAR! Denize kesinlikle çıkmayın.',
-            TACTIC_ROUGH_WAVE: '⚠️ SERT DALGALAR! Küçük tekneler için riskli.',
+            TACTIC_DANGER_WAVE: '🚫 TEHLİKELİ DALGALAR! Tekneyle çıkmayın. Bu koşullarda tüm türlerin skoru düşer; korunaklı bir koy veya liman içi tercih edin.',
+            TACTIC_ROUGH_WAVE: '⚠️ SERT DALGALAR! Küçük tekneler için riskli. Korunaklı bir koy veya liman içi tercih edin.',
         },
         score: {
             badConditions: 'Koşullar Uygun Değil',
@@ -370,8 +370,8 @@ const SERVER_i18n = {
         },
         tactic: {
             dominantNote: '⭐ Dominant species detected — if commercially valued, ideal conditions for a catch.',
-            TACTIC_DANGER_WAVE: '🚫 DANGEROUS WAVES! Absolutely do not go out.',
-            TACTIC_ROUGH_WAVE: '⚠️ ROUGH WAVES! Risky for small boats.',
+            TACTIC_DANGER_WAVE: '🚫 DANGEROUS WAVES! Do not go out by boat. Every species scores low in these conditions; prefer a sheltered cove or harbour.',
+            TACTIC_ROUGH_WAVE: '⚠️ ROUGH WAVES! Risky for small boats. Prefer a sheltered cove or harbour.',
         },
         score: {
             badConditions: 'Poor Conditions',
@@ -543,8 +543,8 @@ const SERVER_i18n = {
         },
         tactic: {
             dominantNote: '⭐ Especie dominante detectada — si tiene valor comercial, condiciones ideales.',
-            TACTIC_DANGER_WAVE: '🚫 ¡OLAS PELIGROSAS! No salir al mar.',
-            TACTIC_ROUGH_WAVE: '⚠️ OLEAJE FUERTE! Riesgoso para botes pequeños.',
+            TACTIC_DANGER_WAVE: '🚫 ¡OLAS PELIGROSAS! No salgas en barco. Con estas condiciones todas las especies puntúan bajo; elige una cala o puerto resguardado.',
+            TACTIC_ROUGH_WAVE: '⚠️ OLEAJE FUERTE! Riesgoso para botes pequeños. Elige una cala o puerto resguardado.',
         },
         score: {
             badConditions: 'Condiciones malas',
@@ -716,8 +716,8 @@ const SERVER_i18n = {
         },
         tactic: {
             dominantNote: '⭐ Κυρίαρχο είδος εντοπίστηκε — ιδανικές συνθήκες για αλιεία.',
-            TACTIC_DANGER_WAVE: '🚫 ΕΠΙΚΙΝΔΥΝΑ ΚΥΜΑΤΑ! Μην βγείτε στη θάλασσα.',
-            TACTIC_ROUGH_WAVE: '⚠️ ΤΡΑΧΙΑ ΚΥΜΑΤΑ! Επικίνδυνο για μικρά σκάφη.',
+            TACTIC_DANGER_WAVE: '🚫 ΕΠΙΚΙΝΔΥΝΑ ΚΥΜΑΤΑ! Μην βγείτε με σκάφος. Σε αυτές τις συνθήκες όλα τα είδη έχουν χαμηλή βαθμολογία· προτιμήστε προστατευμένο όρμο ή λιμάνι.',
+            TACTIC_ROUGH_WAVE: '⚠️ ΤΡΑΧΙΑ ΚΥΜΑΤΑ! Επικίνδυνο για μικρά σκάφη. Προτιμήστε προστατευμένο όρμο ή λιμάνι.',
         },
         score: {
             badConditions: 'Κακές Συνθήκες',

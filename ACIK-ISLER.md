@@ -392,11 +392,35 @@ iyileştirmek 72 kişiyi etkiler, insanları duvara kadar getirmek 453 kişiyi.
 
 **Karar:** ücretsiz sınır nerede, çok mu cömert?
 
-### 3.3 Fırtınada boş liste — güvenlik uyarısı `KARAR BEKLİYOR`
+### ~~3.3 Fırtınada boş liste~~ **YAPILDI** (2026-08-12) · APK bekliyor
 
-Dalga yüksekken liste boşalıyor ve kullanıcı **neden** boşaldığını göremiyor.
-Daha önce konuşuldu, riskli bulunup ertelendi (B seçeneği). Uyarı göstermek
-sorumluluk doğurabilir; hukuki dil gerektirir.
+**MADDEDEKİ TEŞHİS YANLIŞTI — liste hiç boşalmıyor.** Ölçüldü (gerçek
+`calculateFishScore`, Kuşadası, 68 habitat türü):
+
+| dalga | ≥20 puan alan | en yüksek skor | listedeki tür |
+|---|---|---|---|
+| 0,3 m | 60 | 76,4 | 67 |
+| 2,0 m | 51 | 44,4 | 67 |
+| **2,6 m** | **0** | **3,0** | **67** |
+| 4,5 m | 0 | 3,0 | 67 |
+
+Ne sunucuda ne istemcide skor eşiği var; dalga cezası `rawScore *= 0.15`
+(~5067), sıfırlama değil. **2,6 m üstünde bütün türler aynı TABAN puana (3,0)
+çöküyor** — kullanıcı 10 balığı da %3 görüp "liste boş / bozuk" diye okuyor.
+Gerçek sorun boşluk değil, **açıklamasız çöküş**.
+
+**Yapılan:** uyarı yalnız yasaklıyordu (*"Denize kesinlikle çıkmayın"*), ne
+yapılacağını söylemiyordu. Kullanıcı kararıyla alternatif eklendi ve skor
+çöküşünün sebebi yazıldı. Hukuki dil KULLANILMADI, tavsiye dili seçildi:
+
+> 🚫 TEHLİKELİ DALGALAR! Tekneyle çıkmayın. Bu koşullarda tüm türlerin skoru
+> düşer; korunaklı bir koy veya liman içi tercih edin.
+
+**Metinler İKİ YERDE:** `strings.xml` × 4 dil (anlık ekran) **ve** `server.js`
+`SERVER_i18n` × 4 dil (7 günlük tahmin taktik notu). Yalnız birini değiştirmek
+ikisini ayrıştırır — ikisi de güncellendi.
+
+Eşikler zaten hizalıydı (istemci `weatherSummaryToTip` 3,0/2,0; sunucu aynı).
 
 ---
 
