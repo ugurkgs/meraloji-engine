@@ -6826,7 +6826,15 @@ const SPECIES_DB = {
         name: "Kara Sargoz", nameEn: "Black Seabream", nameEl: "Σκαθάρι", nameEs: "Chopa", icon: "🐠", scientificName: "Spondyliosoma cantharus",
         category: "DIP_KIYI",
         huntingMode: "chemosensory", peakHours: "DAY", peakHoursDesc: "Gündüz kayalık ve çayır kenarlarında",
-        tempRange: { min: 9, opt: 17, max: 24 },
+        // [2026-08-12] max 24 → 27. Üst tolerans fazla soğuk kalibreydi: aynı tür
+        // (Spondyliosoma cantharus) Türkiye kaydı `iskatarya` 27 kullanıyor ve
+        // kullanıcı 4 Temmuz'da ~25,5 °C suda yakalamıştı.
+        // `opt` BİLEREK 17'DE BIRAKILDI — ölçüldü: 19'a çekmek derin rejimde
+        // −5,5 puan kaybettiriyor (eğri tepesi termoklin altı ~14 °C'den uzaklaşır).
+        // Yalnız üst uç genişledi; soğuk uçta fark 0, yani Biskay/İber Atlantiği
+        // popülasyonu etkilenmiyor. Türkiye'yi HİÇ etkilemiyor: bu kaydın
+        // bbox'ları Ege/Akdeniz kıyımızla kesişmiyor (lon −6..20'de bitiyor).
+        tempRange: { min: 9, opt: 17, max: 27 },
         seasons: { winter: 0.8, spring: 0.95, summer: 0.85, autumn: 0.85 },
         activity: "DAY", pressureSensitivity: 0.35, wavePref: 0.35, currentPref: 0.45, salinityPref: "HIGH", clarityPref: "ANY",
         regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],

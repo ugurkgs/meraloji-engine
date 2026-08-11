@@ -47,7 +47,7 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 |---|---|---|---|---|
 | ~~1~~ | ~~**4.11**~~ | ~~`hourlyTimeline` sabit 24 → `hourlyOffset`~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | ~~2~~ | ~~**1.2**~~ | ~~süresi dolan aboneliğe `status:'expired'`~~ | **YAPILDI** — bkz. Kapatılanlar | — |
-| 3 | **1.3** | `esp_chopa` `tempRange` gözden geçir | species.js, tek kayıt | düşük |
+| ~~3~~ | ~~**1.3**~~ | ~~`esp_chopa` `tempRange`~~ | **YAPILDI** — max 24→27, bkz. Kapatılanlar | — |
 | ~~4~~ | ~~**4.13**~~ | ~~taramada kara koruması~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | ~~5~~ | ~~**4.4**~~ | ~~bbox çakışması~~ | **ÖLÇÜLDÜ — değişiklik gerekmedi** | — |
 | ~~6~~ | ~~**4.9**~~ | ~~NOAA devre kesici~~ | **YAPILDI** (devre kesici yerine önbellek) | — |
@@ -127,7 +127,35 @@ Yapılırsa öncelik `SUBSCRIPTION_CANCELED` / `SUBSCRIPTION_REVOKED` olmalı.
 **Sonraki adım:** Pub/Sub konusu + webhook ucu + `subscriptions/{uid}` güncelleme.
 Orta büyüklükte bir iş, ödeme koduna dokunuyor — dikkatli test ister.
 
-### 1.3 `esp_chopa` sıcaklık aralığı gözden geçirilmeli `HAZIR`
+### ~~1.3 `esp_chopa` sıcaklık aralığı~~ **YAPILDI** (2026-08-12)
+
+`tempRange.max` 24 → **27**, `opt` 17'de bırakıldı. Kullanıcı onayıyla — bu alan
+§3'te "dokunulmaz" listesindeydi, tek parametre ve ölçümle değiştirildi.
+
+**Ölçüm (gerçek `calculateFishScore`, Málaga/Vigo/Bilbao):**
+
+| rejim | etki |
+|---|---|
+| sığ su, termoklin yok | **azami +4,6 puan** (25 °C'de); 20 °C'de +1,3 · 24 °C'de +3,5 · 28 °C'de +1,3 · 30 °C'de 0 |
+| derin (termoklin altı) | sabit **+1,3** |
+| Türkiye | **0 — habitat kapısı kapalı** (`isInHabitat` 4 noktada false) |
+| komşu `esp_` türleri | 0 |
+
+> **Belgedeki eski not KISMEN YANLIŞTI, düzeltildi.** *"Soğuk uçta fark +0.0,
+> Biskay popülasyonuna dokunmuyor"* deniyordu — bu yalnız **18 °C** için ölçülmüş.
+> Gerçek: 18 °C'de +0,02 (yok sayılır) ama **14 °C'de +1,3**. Sebep
+> `tOptMax = tOpt + (tMax − tOpt)·0,35` — `max` büyüyünce optimum platosu genişliyor
+> ve eğri soğuk tarafta da bir miktar yükseliyor. **Kayıp yok**, yalnızca küçük bir
+> artış, o yüzden kabul edildi; ama "dokunmuyor" demek yanlıştı.
+
+**Ölçüm harness'i iki kez yanılttı, kayda geçsin:** (1) `server.js` iki kez
+yüklendi ama ikisi de **aynı `species.js` nesnesini** paylaşıyordu (Node modül
+önbelleği) → her fark 0 çıkıyordu, test kırmızı veremez hâldeydi. (2)
+`thermoclineDepth: 18` verilmişti; `depth.opt = 30 > 18` olduğu için `effTemp`
+**her zaman** 14 °C'ye kırpılıyordu — "sığ su" diye ölçülen şey aslında derin
+rejimdi. Sığ suda termoklin **yoktur**, `null` verilmeli.
+
+### 1.3b (kapandı) — eski gerekçe, kayıt için
 
 `tempRange.max: 24`. Türkiye kaydını (`iskatarya`) eklerken 27 verdim, çünkü
 kullanıcı ~25,5°C suda yakalamıştı. İspanya/Akdeniz kaydı da muhtemelen soğuk
