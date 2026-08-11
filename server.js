@@ -3057,10 +3057,12 @@ async function acikSuYayiGetir(lat, lon) {
     const hit = acikSuCache.get(key);
     if (hit !== undefined) return hit;
 
-    const ps = [], meta = [];
+    const ps = [], meta = [], ADIM_OF = [];
     for (let sIdx = 0; sIdx < ACIK_SU_SEKTOR; sIdx++) {
         const b = sIdx * (360 / ACIK_SU_SEKTOR);
-        for (const km of ACIK_SU_ADIMLAR) { ps.push(_yayKaydir(latF, lonF, b, km)); meta.push(b); }
+        for (const km of ACIK_SU_ADIMLAR) {
+            ps.push(_yayKaydir(latF, lonF, b, km)); meta.push(b); ADIM_OF.push(km);
+        }
     }
     try {
         const url = 'https://api.open-meteo.com/v1/elevation?latitude='
@@ -3074,33 +3076,79 @@ async function acikSuYayiGetir(lat, lon) {
         const j = await r.json();
         const el = j && j.elevation;
         if (!Array.isArray(el) || el.length !== ps.length) return null;
-        const acik = [];
+        // Her yön için: kara İLK hangi mesafede çıkıyor (yoksa null).
+        // Mesafe lazım çünkü sığ suda çizim EN YAKIN karaya kilitlenecek.
+        const acik = [], karaKm = {};
         for (let sIdx = 0; sIdx < ACIK_SU_SEKTOR; sIdx++) {
             const b = sIdx * (360 / ACIK_SU_SEKTOR);
-            let kapali = false;
-            for (let i = 0; i < meta.length; i++) {
-                if (meta[i] === b && typeof el[i] === 'number' && el[i] > 0) { kapali = true; break; }
+            let ilkKara = null;
+            for (const km of ACIK_SU_ADIMLAR) {
+                for (let i = 0; i < meta.length; i++) {
+                    if (meta[i] === b && ps[i] && ADIM_OF[i] === km
+                        && typeof el[i] === 'number' && el[i] > 0) { ilkKara = km; break; }
+                }
+                if (ilkKara !== null) break;
             }
-            if (!kapali) acik.push(b);
+            if (ilkKara === null) acik.push(b); else karaKm[b] = ilkKara;
         }
-        acikSuCache.set(key, acik);
-        return acik;
+        const sonuc = { acik, karaKm };
+        acikSuCache.set(key, sonuc);
+        return sonuc;
     } catch (e) {
         return null;   // veri yoksa uydurmuyoruz — düzeltme uygulanmaz
     }
 }
 
-// Model kaynak yönünü açık su yayına kaydırır. Düzeltme GEREKMEZSE null döner,
-// böylece yanıta yalnız gerçekten değişen yerde alan eklenir.
-function dalgaYonuDuzelt(kaynakYon, acik) {
-    if (!Array.isArray(acik) || acik.length === 0) return null;      // yay yok
-    if (acik.length === ACIK_SU_SEKTOR) return null;                 // her yön su — açık deniz
+// En yakın karanın yönü (yoksa null).
+function _enYakinKaraYonu(yay) {
+    if (!yay || !yay.karaKm) return null;
+    let enIyi = null, enKisa = Infinity;
+    for (const b of Object.keys(yay.karaKm)) {
+        const km = yay.karaKm[b];
+        if (km < enKisa) { enKisa = km; enIyi = parseFloat(b); }
+    }
+    return enIyi;
+}
+
+// Sığ su eşiği: derin su dalga boyu L = 1.56*T^2; refraksiyon L/4'ten sığda
+// belirgin. Periyot bilinmiyorsa 4 m varsayılır (Ege'de tipik 3-4 sn dalga
+// için hesaplanan değere yakın). 3-12 m ile sınırlı.
+function _siglikEsigiM(periyotSn) {
+    if (typeof periyotSn !== 'number' || !isFinite(periyotSn) || periyotSn <= 0) return 4;
+    const L = 1.56 * periyotSn * periyotSn;
+    return Math.max(3, Math.min(12, L / 4));
+}
+
+// Çizim için dalga yönü düzeltmesi. Düzeltme GEREKMEZSE null döner, böylece
+// yanıta yalnız gerçekten değişen yerde alan eklenir.
+//
+// İki kural, bu sırayla:
+//   1) KIYI KİLİDİ (sığ su) — dalga tabanı hissediyorsa refraksiyonla kıyıya
+//      döner. Çizim en yakın karaya kilitlenir. Kullanıcı kıyıda dururken
+//      kendinden UZAKLAŞAN dalga göremez; sığ suda bu fiziksel olarak olmaz.
+//   2) AÇIK SU YAYI — derin suda kaynak yönü karaya düşüyorsa (ızgara koyu
+//      çözemediği için olur) yaya en yakın geçerli yöne kaydırılır.
+function dalgaYonuDuzelt(kaynakYon, yay, derinlikM, periyotSn) {
+    if (!yay || !Array.isArray(yay.acik)) return null;
     if (typeof kaynakYon !== 'number' || !isFinite(kaynakYon) || kaynakYon <= 0) return null;
     const yariSektor = (360 / ACIK_SU_SEKTOR) / 2;
-    for (const b of acik) if (angularDiff(b, kaynakYon) <= yariSektor) return null;  // zaten geçerli
-    let enIyi = acik[0], enIyiF = angularDiff(acik[0], kaynakYon);
-    for (const b of acik) { const f = angularDiff(b, kaynakYon); if (f < enIyiF) { enIyiF = f; enIyi = b; } }
-    return { yon: enIyi, kaydirma: Math.round(enIyiF) };
+
+    // 1) Kıyı kilidi
+    const karaYon = _enYakinKaraYonu(yay);
+    if (karaYon !== null && typeof derinlikM === 'number' && isFinite(derinlikM)
+        && derinlikM > 0 && derinlikM < _siglikEsigiM(periyotSn)) {
+        const yeniKaynak = (karaYon + 180) % 360;            // çizim = karaYon
+        const f = angularDiff(yeniKaynak, kaynakYon);
+        if (f <= yariSektor) return null;                    // zaten aynı yöne bakıyor
+        return { yon: yeniKaynak, kaydirma: Math.round(f), sebep: 'SIG_SU' };
+    }
+
+    // 2) Açık su yayı
+    if (yay.acik.length === 0 || yay.acik.length === ACIK_SU_SEKTOR) return null;
+    for (const b of yay.acik) if (angularDiff(b, kaynakYon) <= yariSektor) return null;
+    let enIyi = yay.acik[0], enIyiF = angularDiff(yay.acik[0], kaynakYon);
+    for (const b of yay.acik) { const f = angularDiff(b, kaynakYon); if (f < enIyiF) { enIyiF = f; enIyi = b; } }
+    return { yon: enIyi, kaydirma: Math.round(enIyiF), sebep: 'KARA_KAYNAK' };
 }
 
 // Noktadan en yakın kıyı köşesine olan yön = "kıyıya doğru" (onshore) eksen.
@@ -5889,7 +5937,7 @@ app.get('/api/forecast', async (req, res) => {
                 // (headOnWaveBonus, ~4349). Aşağıdaki EK alan yalnız çizim içindir.
                 // Düzeltme gerekmediyse null gelir.
                 waveDirectionAdjusted: (function () {
-                    const d = dalgaYonuDuzelt(waveDirection, acikSuYayi);
+                    const d = dalgaYonuDuzelt(waveDirection, acikSuYayi, depthData.avg, wavePeriod);
                     return d ? d.yon : null;
                 })(),
                 windWaveHeight: parseFloat(windWaveHeight.toFixed(2)),
@@ -6251,14 +6299,18 @@ app.get('/api/forecast', async (req, res) => {
                 //   waveDirectionShiftDeg : kaç derece kaydırıldı (şeffaflık)
                 //   openWaterSectors      : 16 sektörün kaçı açık su (null = bilinmiyor)
                 waveDirectionAdjusted: (function () {
-                    const d = dalgaYonuDuzelt(i_waveDirection, acikSuYayi);
+                    const d = dalgaYonuDuzelt(i_waveDirection, acikSuYayi, depthData.avg, i_wavePeriod);
                     return d ? d.yon : null;
                 })(),
                 waveDirectionShiftDeg: (function () {
-                    const d = dalgaYonuDuzelt(i_waveDirection, acikSuYayi);
+                    const d = dalgaYonuDuzelt(i_waveDirection, acikSuYayi, depthData.avg, i_wavePeriod);
                     return d ? d.kaydirma : null;
                 })(),
-                openWaterSectors: Array.isArray(acikSuYayi) ? acikSuYayi.length : null,
+                waveDirectionReason: (function () {
+                    const d = dalgaYonuDuzelt(i_waveDirection, acikSuYayi, depthData.avg, i_wavePeriod);
+                    return d ? d.sebep : null;   // SIG_SU | KARA_KAYNAK | null
+                })(),
+                openWaterSectors: (acikSuYayi && Array.isArray(acikSuYayi.acik)) ? acikSuYayi.acik.length : null,
                 windWaveHeight: parseFloat(i_windWaveHeight.toFixed(2)),
                 swellPeriod: parseFloat(i_swellPeriod.toFixed(1)),
                 visibility: i_visibility,
@@ -6391,7 +6443,8 @@ app.get('/api/forecast', async (req, res) => {
                     // alan burada da olmazsa kaydırıcı oynayınca çizim ham yöne
                     // geri döner ve aynı an için iki farklı yön görünür.
                     waveDirectionAdjusted: (function () {
-                        const d = dalgaYonuDuzelt(safeNum(marine.hourly?.wave_direction?.[mIdx]), acikSuYayi);
+                        const d = dalgaYonuDuzelt(safeNum(marine.hourly?.wave_direction?.[mIdx]),
+                            acikSuYayi, depthData.avg, safeNum(marine.hourly?.wave_period?.[mIdx]));
                         return d ? d.yon : null;
                     })(),
                     temp: parseFloat(hSst.toFixed(1)),
