@@ -237,7 +237,8 @@ Bölümler: (A) sınırsız PRO / tip hataları · (B) `verifiedByGoogle=false` 
   ⚠️ **Denetim çıktısı uid'leri 8 karaktere kısaltıyor** — Console'da bu
   kısaltmayla arama yapılırsa sonuç çıkmaz, tam uid gerekir.
 - **`stats/pro_count` güvenilmez:** 20 diyor, dökümde 5, koleksiyonda 23 doküman.
-  Kullanıcı bunu bilinçli olarak açık bıraktı, sonra düzeltilecek.
+  **Kullanıcı bunu ELLE düzeltiyor — iş listesinde DEĞİL, açık iş olarak
+  açmayın.** Buraya yalnız denetimin bulgusu olarak yazıldı.
 - **⚠️ `startedAt` 2026-08-04 öncesinde "son doğrulama zamanı" tutuyordu**
   (bkz. commit `23919de`). Bu yüzden sütun "25 Temmuz sonrası 8 abonelik" gibi
   okunuyor; **gerçek sayı 5.** Bu alanla tarih sorgusu yapan herkes bunu bilmeli.

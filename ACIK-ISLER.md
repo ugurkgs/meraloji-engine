@@ -95,7 +95,13 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 
 ## 1 · Abonelik ve ödeme
 
-### 1.1 RTDN yok — yenilemeler takip edilmiyor `HAZIR`
+### 1.1 RTDN yok — yenilemeler takip edilmiyor `ERTELENDİ`
+
+> **2026-08-12 kararı: şimdilik efor harcanmayacak, çok sonraya bırakıldı.**
+> Gerekçe aşağıdaki denetim bulgusu — abonelerin %81'i yıllık, yenileme sorunu
+> bu kitlede 2027'ye kadar tetiklenmiyor. Gündeme dönerse **iptal/iade**
+> bildirimleriyle başlanmalı, yenilemeyle değil.
+
 
 Google Play Real-time Developer Notifications kurulu değil. Kodda hiçbir webhook
 ucu yok (arandı, sıfır sonuç).
@@ -227,11 +233,13 @@ ve `(N/M hücre)` sayısı doğrudan logdan okunuyor, çıkarım yapmaya gerek y
    (`undefined`) eski davranışta kalıyor, mevcut kimse sessizce susturulmuyor.
    Ayrıntı: `25-TEMMUZ-SONRASI-YAPILANLAR.md` § 13.
 
-**AÇIK KALAN — kullanıcı ayarı APK'ya bağlı.** Kod hazır ama **derlenmiş sürüm
-yayınlanmadan kullanıcının elinde kapatma düğmesi yok.** Eşik 80'de pratikte
-kimseye gitmediği için tolere ediliyor; **eşik düşürülmeden ÖNCE APK çıkmalı.**
-Sıra: APK yayınla → birkaç gün log izle → eşiği indir. Ters sırada yapılırsa
-bildirim alan kullanıcının onu susturma yolu olmaz.
+**MADDE KAPANDI (2026-08-12).** Kod tarafında yapılacak iş kalmadı: özellik canlı,
+kapatma ayarı iki yarısıyla yazıldı. **Eşik kararı ve izleme kullanıcıya ait**,
+iş listesinde takip edilmiyor.
+
+**Tek teknik kısıt kayda geçsin:** kapatma düğmesi APK'nın içinde.
+**Eşik düşürülmeden ÖNCE APK yayınlanmalı** — ters sırada bildirim alan
+kullanıcının onu susturma yolu olmaz.
 
 **EYLÜL KONTROLÜ.** Sezonda skorlar yükselecek. Logda şu satıra bakılacak:
 ```
@@ -435,6 +443,22 @@ gradyanı mı). Bu bir **tasarım kararı**, kullanıcıdan gelmeli.
 
 Aciliyeti düşük — yanlış veri göstermiyor, yalnızca kara noktasında deniz gibi
 görünüyor.
+
+### 4.18b "Gece ay çizilmiyor" — HATA DEĞİL, tekrar araştırmayın `KAPANDI`
+
+Kullanıcı 2026-08-12'de bildirdi: simülasyonda gece olunca güneş gidiyor ama ay
+gelmiyor. **Ölçüldü, davranış doğru.**
+
+- Tesisat tam: `MainActivity.feedRealSolar` → `SolarCalc.moonPosition` →
+  `setSolarData(...)`; çizimde `else if (moonUp)` dalı var. Ay yalnızca
+  **ufkun üstündeyse** çiziliyor (`moonElevation > 0`).
+- `SolarCalc` sağlık kontrolü (kullanıcının noktası, 30 gün × 24 saat):
+  ay ufkun üstünde **%50**, gece saatlerinde ay var oranı **%50** — beklenen.
+- Şikâyetin tarihi (12 Ağustos 2026) **yeni ay dönemi**: ay 06:00'da doğup
+  21:00'de batıyor, yani **gündüz** gökyüzünde, gece ufkun altında.
+
+Gece ay çizmek §2.1 ihlali olurdu (olmayan bir şeyi göstermek). Değişiklik
+yapılmadı. Aynı soru tekrar gelirse önce tarihe/ay evresine bakın.
 
 ### 4.19 Akıntı yönü konvansiyonu DOĞRULANMADI `ARAŞTIRMA`
 
