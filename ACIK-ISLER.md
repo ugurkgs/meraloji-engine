@@ -60,8 +60,8 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | 11b | **4.16** | widget karada skor gösteriyor | **APK** | mobil |
 | ~~11d~~ | ~~**4.17**~~ | ~~7 gün detayda gündüz/gece sıcaklık — istemci yarısı~~ | **YAPILDI** — APK bekliyor | — |
 | 11e | **4.18** | hava sıcaklığı simülasyonu karada deniz zemini çiziyor | **APK** | **karar bekliyor** |
-| 11f | **4.19** | akıntı yönü konvansiyonu doğrulanmadı | ölçüm | düşük |
-| 11g | **4.20** | kıyı açısı il sınırı poligonlarından geliyor | server.js | orta — skoru etkiliyor |
+| ~~11f~~ | ~~**4.19**~~ | ~~akıntı yönü konvansiyonu~~ | **ÖLÇÜLDÜ** — değişiklik gerekmedi | — |
+| ~~11g~~ | ~~**4.20**~~ | ~~kıyı açısı il poligonundan~~ | **YAPILDI** — yükseklik halkası, bkz. 4.20 | — |
 | 12 | **1.4** | `targetClass` gruplaması | **APK** | mobil |
 | 13 | **4.10** | çift istek (oturumsuz + kimlikli) | **APK** | mobil |
 | 14 | **2.1** | `mera_tarama` → `scan_result` uçurumu | **APK** | mobil |
@@ -512,57 +512,64 @@ gelmiyor. **Ölçüldü, davranış doğru.**
 Gece ay çizmek §2.1 ihlali olurdu (olmayan bir şeyi göstermek). Değişiklik
 yapılmadı. Aynı soru tekrar gelirse önce tarihe/ay evresine bakın.
 
-### 4.19 Akıntı yönü konvansiyonu DOĞRULANMADI `ARAŞTIRMA`
+### ~~4.19 Akıntı yönü konvansiyonu~~ **ÖLÇÜLDÜ — DEĞİŞİKLİK GEREKMEDİ** (2026-08-12)
 
-Dalga yönü işi sırasında çıktı (bkz. `25-TEMMUZ-SONRASI-YAPILANLAR.md` § 20).
-Rüzgâr ve dalga yönleri meteorolojik konvansiyondadır ("**geldiği** yön") ve
-istemcide artık her ikisi de `+180` ile "gittiği yön"e çevriliyor.
+`ocean_current_direction` **"gittiği" yön** (oşinografik konvansiyon).
+İstemcideki mevcut hâli DOĞRU; çevrilmemeli. Dokunulmadı.
 
-**`ocean_current_direction` için bu ÇEVİRME YAPILMADI** — oşinografide akıntı
-yönü geleneksel olarak "**gittiği** yön"dür, yani zaten doğru olabilir. Çevrilirse
-çalışan bir gösterim bozulur. Doğrulanmadığı için dokunulmadı.
+**Ölçüm:** kuvvetli sürekli rüzgârda yüzey akıntısı rüzgârın gittiği yönde
+sürüklenir (Ekman sapmasıyla). 7 açık okyanus noktası, rüzgâr ≥30 km/s ve
+akıntı ≥0,2 m/s süzgeciyle **449 örneklem**:
 
-**Nerede:** `MainActivity` → `metricCurrentDir` ve detay diyaloğundaki
-`currentDirVal` hâlâ `getWindDirectionStr` (ham) kullanıyor; dalga/ölü dalga/
-rüzgâr `gidisYonuStr` kullanıyor. Kodda not düşüldü.
+| varsayım | ortalama sapma |
+|---|---|
+| **"gittiği" yön** | **27,3°** |
+| "geldiği" yön | 152,7° |
 
-**Nasıl ölçülür (dalga için kullanılan yöntemin aynısı):** kuvvetli ve sürekli
-rüzgâr olan bir bölgede yüzey akıntısı Ekman sapmasıyla rüzgârın **gittiği**
-yönden ~15–45° sağa (kuzey yarıküre) kayar. `ocean_current_direction` ile
-`wind_direction_10m + 180` arasındaki fark tutarlı olarak küçükse ("gittiği"),
-~180° ise ("geldiği"). Zayıf akıntı (< 0,2 m/s) elenmeli — dalga ölçümünde zayıf
-rüzgâr denizi yüzünden ilk sonuç anlamsız çıkmıştı, aynı tuzak.
+27,3° tam olarak beklenen Ekman sapması aralığında (15–45°) — yani yalnız daha
+yakın değil, fiziğin öngördüğü kadar yakın. Zayıf sinyal bilinçli olarak elendi;
+dalga konvansiyonu ölçümünde bu yapılmayınca sonuç anlamsız çıkmıştı.
 
-### 4.20 `getShoreNormalBearing` il sınırı poligonlarına dayanıyor `ARAŞTIRMA`
+### ~~4.20 `getShoreNormalBearing` il sınırı poligonlarına dayanıyor~~ **YAPILDI** (2026-08-12)
 
-Kıyı köşeleri `tr-cities.json`'daki **idari il sınırı** poligonlarından
-türetiliyor (3460 köşe, 31 kıyı ili). Bu poligonlar kara sınırlarını da içeriyor
-ve kıyıda çok sadeleştirilmiş.
+Kıyı normali artık **yükseklik halkasından** türetiliyor. Veri zaten elde: dalga
+yönü işinde kurulan açık su yayı her yönde karanın ilk çıktığı mesafeyi tutuyor
+(tek elevation isteği, 30 gün önbellek). **En yakın karanın yönü = kıyıya doğru
+eksen** — dalga en yakın kıyıya dik yaklaşır. Ek maliyet YOK.
 
-**Ölçülen sonuçlar:**
+**Doğruluk ölçümü** (6 doğrulanmış deniz noktası; yer gerçeği 24 yön × 8 mesafe
+ince tarama — üretimdekinin daha yüksek çözünürlüklüsü):
 
-- Kullanıcının Selçuk noktasında **`null`** — en yakın köşe 2,76 km,
-  `SHORE_BEARING_MAX_KM` 2. Urla'da 3,62 km, orada da null.
-- `analyzeLocationOffline` aynı poligonlarla kullanıcının **2,1 m derinlikteki
-  deniz noktasına `COASTAL_LAND`** diyor. Poligonlar koyları yutuyor. (Zaten
-  sunucu yalnız `INLAND`'e güveniyor — bu yüzden.)
+| nokta | yer gerçeği | eski (il poligonu) | yeni (yükseklik) |
+|---|---|---|---|
+| Selçuk koyu | 0° | **null** | 0° · **0°** |
+| Kuşadası | 105° | 89° · 16° | 90° · 15° |
+| Şile | 165° | 181° · 16° | 158° · **8°** |
+| Erdek | 0° | 317° · **43°** | 0° · **0°** |
+| Fethiye körfezi | 105° | 253° · **148°** | 90° · 15° |
+| Bodrum | 0° | 247° · **113°** | 0° · **0°** |
 
-**Etkisi sadece görsel değil:**
-- `calculateRipCurrentRisk` `shoreBearing` null olunca **sessizce kapanıyor** —
-  güvenlik özelliği tam da kıyıya yakın noktalarda çalışmıyor.
-- `server.js:4346` levrek `headOnWaveBonus` aynı değeri okuyor → **skor girdisi**.
-  Değiştirilmeden önce ölçülmeli (§2.2).
-- 4.7 (barınak/maruziyet modeli) bu veriye bağlı, bu hâliyle kurulamaz.
+**eski: ortalama 67,1° · 1 null · 2/5 nokta >45°**
+**yeni: ortalama 6,3° · null yok · 0/6 nokta >45°**
 
-**DİKKAT — "yanlış" demeden önce:** bu fonksiyon "en yakın kıyıya doğru" verir,
-yani **deniz** noktasında karaya, **kara** noktasında denize bakar. İkisi de
-doğrudur. Ölçüm yapan önce noktanın deniz olduğunu doğrulamalı; bu atlandığı için
-bir kez "9/10 yanlış" sonucuna varılıp geri alındı.
+Kalan hata örnekleme çözünürlüğü: 16 sektör = 22,5° adım, yani ±11° kuantalama.
+Açıklanabilir ve sınırlı.
 
-**Olası yön:** 20.4'teki açık su yayı zaten her yönde kara mesafesini biliyor ve
-tek elevation isteğiyle geliyor. Kıyı normali oradan türetilebilir — ama
-*"kara yönlerinin vektör ortalaması"* denendi ve koylarda doğrulanamadı
-(bkz. § 20.3). En yakın karaya olan yön daha sağlam bir aday; ölçülmedi.
+**Skor etkisi ÖLÇÜLDÜ (§2.2).** `shoreBearing` yalnız iki yerde kullanılıyor:
+`headOnWaveBonus` (species.js'te **tek tür**: levrek, `maxBonus: 1.5`) ve
+`calculateRipCurrentRisk` (skora girmez). 6 nokta × tüm Türkiye türleri:
+**yalnız 1 tür-nokta değişti — Fethiye'de levrek +0,60 puan.** Yani 148°'lik bir
+açı hatası düzelirken skor tarafında ödenen bedel tek türde yarım puan.
+
+**Yan kazanç:** çeken akıntı uyarısı `shoreBearing` null olunca sessizce
+kapanıyordu; Selçuk gibi noktalarda artık çalışıyor.
+
+**Yay yoksa eski poligon yöntemine düşülüyor** (istek başarısız / karada) —
+gerileme yok.
+
+> **Deniz regresyonu sapma 0 çıkar ama bu yolu KAPSAMAZ:** harness
+> `paramUret`'te `shoreBearing` göndermiyor, dolayısıyla bonus hiç
+> tetiklenmiyor. Bu değişikliğin kanıtı yukarıdaki ayrı ölçümdür.
 
 ### 4.15 İstemci klorofil yokken 0 gösteriyor `HAZIR` · **MOBİL**
 

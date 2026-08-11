@@ -3209,6 +3209,29 @@ function dalgaYonuDuzelt(kaynakYon, yay, derinlikM, periyotSn) {
     return { yon: enIyi, kaydirma: Math.round(enIyiF), sebep: 'KARA_KAYNAK' };
 }
 
+// ── KIYI NORMALİ: açık su yayından ────────────────────────────────────────
+// Aşağıdaki getShoreNormalBearing İL SINIRI poligonlarının köşelerine bakıyor.
+// Ölçüldü (6 doğrulanmış deniz noktası): ortalama sapma 67,1°, biri null,
+// ikisi 100°'den fazla ters (Fethiye 148°, Bodrum 113°). Sebep: o poligonlar
+// idari sınır, kara sınırlarını da içeriyor ve kıyıda çok sadeleştirilmiş.
+//
+// Açık su yayı zaten her yönde karanın İLK çıktığı mesafeyi biliyor. En yakın
+// karanın yönü = kıyıya doğru eksen (dalga en yakın kıyıya dik yaklaşır).
+// Aynı 6 noktada ortalama sapma 6,3°, null yok. Kalan hata örnekleme
+// çözünürlüğü: 16 sektör = 22,5° adım, yani ±11° kuantalama.
+//
+// Ek maliyet YOK — yay dalga yönü için zaten çekiliyor ve 30 gün önbellekte.
+function kiyiNormaliYaydan(yay) {
+    if (!yay || !yay.karaKm) return null;
+    let enIyi = null, enKisa = Infinity;
+    for (const b of Object.keys(yay.karaKm)) {
+        const km = yay.karaKm[b];
+        if (km < enKisa) { enKisa = km; enIyi = parseFloat(b); }
+    }
+    if (enIyi === null) return null;
+    return { onshoreBearing: enIyi, distanceKm: enKisa, kaynak: 'YUKSEKLIK' };
+}
+
 // Noktadan en yakın kıyı köşesine olan yön = "kıyıya doğru" (onshore) eksen.
 // maxKm ötesinde hiçbir kıyı yeterince yakın değildir → null (özellik uygulanmaz).
 // [DÜZELTME] 8km → 2km. Sahada ölçüldü: tr-cities.json'daki poligon bazı küçük
@@ -5693,7 +5716,9 @@ app.get('/api/forecast', async (req, res) => {
 
         // [YENİ] Kıyı açısı — tıklanan nokta boyunca sabit, döngü dışında bir kez hesaplanır.
         // Kıyıya >8km uzaksa null döner (özellik uygulanmaz — mevcut davranış aynen korunur).
-        const shoreBearingInfo = getShoreNormalBearing(lat, lon);
+        // [4.20] Önce yükseklik halkası; yay yoksa (istek başarısız / karada)
+        // eski poligon yöntemine düşülür — davranış gerilemez.
+        const shoreBearingInfo = kiyiNormaliYaydan(acikSuYayi) || getShoreNormalBearing(lat, lon);
 
         for (let i = 0; i < 7; i++) {
             const targetDate = new Date();
