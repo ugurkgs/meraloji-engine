@@ -291,7 +291,9 @@ hiçbir şey getirmiyor.
 - `item_forecast_day.xml` → yeni `tvTempDayNight` satırı, varsayılan `gone`.
   **Mini metrik satırına eklenmedi** (`🌊 · 🌬️ · 🌡️`): oraya iki değer daha
   sığmıyor, dar ekranda taşardı. Ayrı satır, `4dp` üstten boşluk.
-- `ForecastAdapter` → `☀️ Gündüz 29.6°  ·  🌙 Gece 26.4°`. Metin 4 dilde
+- `ForecastAdapter` → `☀️ Gündüz Ort. 29.6°  ·  🌙 Gece Ort. 26.4°`.
+  ("Ort." kullanıcı isteğiyle eklendi — ortalama olduğu anlaşılsın.)
+  Metin 4 dilde
   (`fd_day_night_temp`), sayılar `Locale.US` ile — üstteki satırla aynı
   ondalık ayracı kullansın diye.
 - **İkisinden biri `null` ise satır hiç çizilmiyor.** Eski sunucuya karşı
@@ -338,8 +340,61 @@ tek: **`WaveSimulationView.setLandMode()` vardı ama `MainActivity` onu hiç
 |---|---|---|
 | 1 | hava sıcaklığı simülasyonunda balık figürü | balık + `air_fish_comfort_layer` etiketi `if (!isLandMode)` içine |
 | 1b | karada kumsal/kıyı şeridi çiziliyor | `drawAirTempMode` 8. bölüm (45 satır) `if (!isLandMode)` içine |
-| 2 | rüzgâr simülasyonu deniz maskesi çıkarmaya çalışıyor | `setLandMode` maskeyi temizliyor, `generateSeaMaskAsync` karada erken dönüyor (bitmap geri veriliyor) |
+| 2 | rüzgâr simülasyonu deniz maskesi çıkarmaya çalışıyor | **iki turda çözüldü, aşağıya bak** |
 | 4 | beyaz rüzgâr çizgileri karada görünmüyor | alfa tabanı 60 → **120**, ayrıca her beyaz çizginin altına koyu `streakHalo` |
+
+### 14.1 · Madde 2 ilk denemede ÇÖZÜLMEDİ — asıl sebep sıralamaydı
+
+Kullanıcı APK'yı derleyip **maskelemenin hâlâ çalıştığını** bildirdi. İlk
+düzeltme (maske temizleme + `generateSeaMaskAsync` kara kapısı) yanlış değildi
+ama **yanlış şeyi durduruyordu.**
+
+**Kullanıcının gördüğü şey maske HESABI değil, haritanın KATMAN DEĞİŞTİRMESİYDİ.**
+`captureMapSnapshotForSimulation` maskeyi güvenilir çıkarmak için kullanıcı
+uydu/hibrit katmandayken şunu yapıyor:
+
+```
+setMapType(NORMAL) → 700 ms bekle → maske snapshot'ı
+setMapType(kullanıcının katmanı) → 500 ms bekle → görüntü snapshot'ı
+```
+
+Yani ekranda **~1,2 saniye görünür bir katman gidiş-gelişi.** Karada maske zaten
+hesaplanmıyordu, ama bu gidiş-geliş yine de yapılıyordu — hiçbir işe yaramadan.
+
+**Kök sebep (sıralama hatası, 6 satır):** `applyLandMode()` içinde
+
+```java
+modeSelector.setLandMode(true);          // ← ÖNCE bu vardı
+waveSimulationView.setLandMode(true);    // ← SONRA bu
+```
+
+`SimulationModeSelector.setLandMode(true)` gövdesi mod'u WIND'e çevirip
+**dinleyiciyi SENKRON tetikliyor** (`listener.onModeSelected(Mode.WIND)`),
+dinleyici de `MainActivity:871`'de `captureMapSnapshotForSimulation`'ı çağırıyor.
+Yani katman değiştirme, view'e "karadayız" denmeden **önce** başlıyordu.
+
+**Düzeltme — iki parça:**
+
+1. **Sıra çevrildi:** önce çizim yapan view, sonra seçici. Aynı kural
+   `applySeaMode()`'a da uygulandı (orada dinleyici tetiklenmiyor çünkü
+   seçicinin ilgili dalı `isLand==true` istiyor, yani hata yoktu — sıra yine
+   de tek kurala bağlandı ki ileride sessizce bozulmasın).
+2. **Karada çift snapshot tamamen atlanıyor.** `WaveSimulationView`'e
+   `isLandMode()` getter'ı eklendi; `captureMapSnapshotForSimulation` karada
+   tek snapshot alıyor, **kullanıcının kendi katmanında, katman hiç
+   değiştirilmeden.** Sonuç: kullanıcının istediği gibi "maskeleme yapmadan
+   küçük haritayı gösteriyor". Yan fayda: kara analizinde ~1,2 saniye ve bir
+   tam bitmap tasarrufu.
+
+**Test kırmızı verdi ve yakaladı.** `kontrol-java.js`'teki iddia eski (hatalı)
+sırayı sabitliyordu — `modeSelector` önce, `waveSimulationView` sonra. Sıra
+düzeltilince test doğru biçimde kırmızıya döndü. İddia yeni kurala göre
+yazıldı ve artık **sıra geri çevrilirse kırmızı verecek.**
+
+> Ders: "kodda kapı koydum" ≠ "kullanıcının gördüğü şey durdu". Kapı doğru
+> yerdeydi, ama gözle görülen davranış başka bir katmanda (harita katman
+> değişimi) üretiliyordu. Kullanıcının tarif ettiği **belirtiyi** doğrudan
+> aramak gerekiyordu, düzelttiğim mekanizmayı değil.
 
 **Not:** hava sıcaklığı simülasyonu karada hâlâ **deniz zeminini çiziyor**
 (6. bölüm). Tespit edildi, kullanıcı kararı bekliyor — `ACIK-ISLER.md` → 4.18.
