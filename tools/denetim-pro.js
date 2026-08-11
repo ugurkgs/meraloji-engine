@@ -118,25 +118,71 @@ const kisalt = u => u ? (u.slice(0, 8) + '…') : '-';
 
     // ── C) İKİ KOLEKSİYON ARASI TUTARSIZLIK ───────────────────────────────
     console.log('\n── C) users ↔ subscriptions tutarsızlıkları ──');
-    let sadeceUsers = 0, sadeceSubs = 0, tarihFarki = 0;
+    const sadeceUsers = [], sadeceSubs = [], tarihFarki = [];
     usersSnap.forEach(d => {
         const u = d.data(); if (u.isPro !== true) return;
         const s = subMap.get(d.id);
-        if (!s) { sadeceUsers++; return; }
+        if (!s) { sadeceUsers.push([d.id, u]); return; }
         if (typeof u.proExpiresAt === 'number' && typeof s.expiresAt === 'number'
-            && Math.abs(u.proExpiresAt - s.expiresAt) > 60000) tarihFarki++;
+            && Math.abs(u.proExpiresAt - s.expiresAt) > 60000) tarihFarki.push([d.id, u, s]);
     });
     subsSnap.forEach(d => {
         const s = d.data(); if (s.status !== 'active') return;
         if (typeof s.expiresAt !== 'number' || s.expiresAt <= NOW) return;
         const ud = usersSnap.docs.find(x => x.id === d.id);
-        if (!ud || ud.data().isPro !== true) sadeceSubs++;
+        if (!ud || ud.data().isPro !== true) sadeceSubs.push([d.id, s, !!ud]);
     });
-    console.log('   users\'ta Pro ama subscriptions kaydı yok : ' + sadeceUsers);
-    console.log('   subscriptions aktif ama users\'ta Pro değil: ' + sadeceSubs);
-    console.log('   iki taraftaki bitiş tarihi farklı         : ' + tarihFarki);
+    console.log('   users\'ta Pro ama subscriptions kaydı yok : ' + sadeceUsers.length);
+    console.log('   subscriptions aktif ama users\'ta Pro değil: ' + sadeceSubs.length);
+    console.log('   iki taraftaki bitiş tarihi farklı         : ' + tarihFarki.length);
     console.log('   (Bu üçü de tek başına erişim vermiyor — auth İKİ kaynağa da bakıyor,');
     console.log('    herhangi biri Pro derse Pro. Yani tutarsızlık = fazladan erişim riski.)');
+
+    if (sadeceUsers.length) {
+        console.log('\n   ⚠ users\'ta Pro ama ÖDEME KAYDI YOK — sunucu bunu üretemez:');
+        console.log('   (isPro yalnız server.js:7161\'de, hep proExpiresAt ile birlikte ve');
+        console.log('    hep subscriptions yazımından SONRA yazılıyor. Yani bu kayıtlar');
+        console.log('    dışarıdan geldi — Firebase Console\'dan elle, ya da eski bir sürümden.)');
+        for (const [uid, u] of sadeceUsers)
+            console.log('     ' + kisalt(uid) + '  ' + String(u.email || u.displayName || '(e-posta yok)').padEnd(34) +
+                '  bitiş ' + tarih(u.proExpiresAt) + ' (' + gun(u.proExpiresAt) + ' gün)' +
+                '  plan=' + (u.proPlan || '-'));
+    }
+    if (sadeceSubs.length) {
+        console.log('\n   ödeyen ama users\'ta Pro işareti olmayan (erişim VAR, sorun değil):');
+        for (const [uid, s, varmi] of sadeceSubs)
+            console.log('     ' + kisalt(uid) + '  ' + String(s.email || '-').padEnd(34) +
+                '  bitiş ' + tarih(s.expiresAt) + '  users dokümanı: ' + (varmi ? 'var, isPro yok' : 'hiç yok'));
+    }
+
+    // ── E) ABONELİK ZAMAN ÇİZGİSİ — yenileme sorusuna en yakın veri ───────
+    console.log('\n── E) ABONELİK ZAMAN ÇİZGİSİ ──');
+    console.log('   RTDN olmadığı için "kim yeniledi" verisi yok. Ama startedAt ile expiresAt');
+    console.log('   arasındaki mesafe ipucu veriyor: aylık bir abonelikte bu fark 30 günden');
+    console.log('   BÜYÜKSE en az bir yenileme geçmiş demektir (Google gerçek bitişi veriyor).');
+    console.log('');
+    const satirlar = [];
+    subsSnap.forEach(d => {
+        const s = d.data();
+        const sur = (typeof s.startedAt === 'number' && typeof s.expiresAt === 'number')
+            ? Math.round((s.expiresAt - s.startedAt) / 86400000) : null;
+        satirlar.push([d.id, s, sur]);
+    });
+    satirlar.sort((a, b) => (a[1].startedAt || 0) - (b[1].startedAt || 0));
+    console.log('   uid        e-posta                        plan     başlangıç         bitiş             süre  durum');
+    for (const [uid, s, sur] of satirlar) {
+        const beklenen = s.isYearly ? 365 : 30;
+        const yenilenmis = (sur !== null && sur > beklenen + 3);
+        console.log('   ' + kisalt(uid) + ' ' + String(s.email || '-').slice(0, 30).padEnd(30) +
+            ' ' + (s.isYearly ? 'yıllık ' : 'aylık  ') +
+            ' ' + tarih(s.startedAt).padEnd(17) + ' ' + tarih(s.expiresAt).padEnd(17) +
+            ' ' + String(sur === null ? '?' : sur + 'g').padStart(5) +
+            '  ' + (s.expiresAt > NOW ? 'aktif' : 'BİTMİŞ') + (yenilenmis ? '  ← YENİLENMİŞ' : ''));
+    }
+    const yenilenen = satirlar.filter(([, s, sur]) => sur !== null && sur > (s.isYearly ? 365 : 30) + 3).length;
+    console.log('\n   en az bir kez yenilenmiş görünen: ' + yenilenen + '/' + satirlar.length);
+    console.log('   UYARI: startedAt yalnızca 2026-08-04\'ten beri güvenilir (Y3 düzeltmesi);');
+    console.log('   ondan önceki kayıtlarda alan "son doğrulama anı" tutuyordu, süre yanıltır.');
 
     // ── D) SAYAÇ ──────────────────────────────────────────────────────────
     try {
@@ -144,10 +190,21 @@ const kisalt = u => u ? (u.slice(0, 8) + '…') : '-';
         console.log('\n── D) stats/pro_count ──');
         if (st.exists) {
             const c = st.data();
+            const kirilim = (c.monthlyCount || 0) + (c.yearlyCount || 0);
             console.log('   kayıtlı sayaç : count=' + c.count + '  aylık=' + (c.monthlyCount || 0) + '  yıllık=' + (c.yearlyCount || 0));
-            console.log('   gerçek aktif  : ' + aktifSub.length);
+            console.log('   gerçek aktif  : ' + aktifSub.length + '   ·  toplam abonelik dokümanı: ' + subsSnap.size);
             console.log('   NOT: sayaç KÜMÜLATİF (her yeni Pro\'da +1, iptalde -1 yok).');
-            console.log('   Büyük olması normal; "şu an kaç abone var" cevabı yukarıdaki ' + aktifSub.length + '.');
+            if (c.count !== kirilim) {
+                console.log('   ⚠ count (' + c.count + ') ≠ aylık+yıllık (' + kirilim + ').');
+                console.log('     Kod ikisini AYNI set() çağrısında artırıyor (server.js:7169), yani');
+                console.log('     sapamazlar — kırılım alanları count\'tan SONRA eklenmiş demektir.');
+                console.log('     Sonuç: kırılım ' + kirilim + ' satın almayı kapsıyor, count ' + c.count + '\'yi.');
+            }
+            if (c.count !== subsSnap.size) {
+                console.log('   ⚠ count (' + c.count + ') ≠ abonelik dokümanı (' + subsSnap.size + ').');
+                console.log('     Aradaki ' + Math.abs(c.count - subsSnap.size) + ' kayıt sayaç eklenmeden önce oluşmuş olabilir.');
+            }
+            console.log('   → "Şu an kaç abonem var?" sorusunun güvenilir cevabı sayaç DEĞİL, ' + aktifSub.length + '.');
         } else console.log('   kayıt yok');
     } catch (e) { console.log('\n── D) stats/pro_count okunamadı: ' + e.message); }
 
