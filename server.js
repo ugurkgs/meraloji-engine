@@ -1803,7 +1803,52 @@ const FREE_DAILY_CLICKS = 2;    // Ücretsiz kullanıcı günde 2 tıklama (grac
 // SSV istemcide setUserId/customData gerektirdiği için APK ile gelecek.
 const AD_REWARD_HEADROOM = 20;
 const FREE_DAILY_SCANS = 1;     // Ücretsiz kullanıcı günde 1 tarama
-const GRACE_PERIOD_DAYS = 14;   // Yeni kullanıcıya 14 gün tam erişim
+const GRACE_PERIOD_DAYS = 14;       // ESKİ kayıtlar — DEĞİŞTİRİLMEDİ
+const GRACE_PERIOD_DAYS_NEW = 7;    // Kesim tarihinden SONRA açılan hesaplar
+
+// Kesim tarihi. Boşsa özellik KAPALI: herkes eski 14 günü alır, yani bu deploy
+// tek başına canlıdaki hiçbir kullanıcıyı etkilemez. Yeni APK yayınlandıktan
+// sonra Render → Environment'ta kurulur:  TRIAL_SHORT_FROM=2026-08-20
+// Bozuk/anlamsız değer verilirse de KAPALI kalır — yanlış tarihle kimsenin
+// denemesi yarıda kesilmesin diye fail-closed.
+const TRIAL_SHORT_FROM = (() => {
+    const raw = (process.env.TRIAL_SHORT_FROM || '').trim();
+    if (!raw) return null;
+    // BİÇİM ZORUNLU: YYYY-MM-DD (isteğe bağlı saat). Testte yakalandı —
+    // Date.parse('7') GEÇERLİ bir tarih döndürüyor (geçmişte). "7 gün" sanıp
+    // env'e 7 yazan biri kesimi geçmişe kurar ve HERKESİN denemesini geriye
+    // dönük 7'ye düşürürdü. Serbest tarih ayrıştırmasına güvenilmez.
+    if (!/^\d{4}-\d{2}-\d{2}([T ].*)?$/.test(raw)) {
+        console.warn('⚠️  TRIAL_SHORT_FROM biçimi YYYY-MM-DD olmalı — yok sayıldı, deneme 14 kalıyor:', raw);
+        return null;
+    }
+    const t = Date.parse(raw);
+    if (isNaN(t)) { console.warn('⚠️  TRIAL_SHORT_FROM okunamadı, deneme süresi 14 kalıyor:', raw); return null; }
+    // Uygulama 2026'da yayında; daha eski bir kesim yazım hatasıdır ve mevcut
+    // kullanıcıların denemesini toptan keser. Kabul etme.
+    if (t < Date.parse('2026-01-01')) {
+        console.warn('⚠️  TRIAL_SHORT_FROM 2026 öncesi — yazım hatası sayıldı, deneme 14 kalıyor:', raw);
+        return null;
+    }
+    return t;
+})();
+
+// Bu hesap kaç günlük deneme alır? Hesabın OLUŞTURULMA anına bakılır —
+// "şu an"a değil. Böylece kesim tarihinden önce kayıt olmuş biri, kesim
+// geçtikten sonra da 14 gününü tamamlar; kimsenin elinden bir şey alınmaz.
+function graceGunSayisi(createdAtMs) {
+    if (TRIAL_SHORT_FROM === null) return GRACE_PERIOD_DAYS;
+    if (typeof createdAtMs !== 'number' || !isFinite(createdAtMs)) return GRACE_PERIOD_DAYS;
+    return createdAtMs >= TRIAL_SHORT_FROM ? GRACE_PERIOD_DAYS_NEW : GRACE_PERIOD_DAYS;
+}
+
+// ŞU AN kayıt olacak birinin alacağı süre — ödeme duvarındaki metin için
+// ("%d gün ücretsiz dene"). Henüz hesabı olmayan/PRO olan kullanıcıda
+// graceGunSayisi çağrılamadığı için ayrı duruyor.
+function yeniKayitGraceGun() {
+    return (TRIAL_SHORT_FROM !== null && Date.now() >= TRIAL_SHORT_FROM)
+        ? GRACE_PERIOD_DAYS_NEW : GRACE_PERIOD_DAYS;
+}
 const VALID_SUBSCRIPTIONS = ['meraloji_pro_monthly', 'meraloji_pro_yearly'];
 
 // ── GERİ DÖNÜŞ ("COMEBACK") DENEMESİ ─────────────────────────────────────
@@ -2013,7 +2058,10 @@ async function verifyAuth(req, res, next) {
                     createdAt = new Date(userRecord.metadata.creationTime).getTime();
                     userCreationCache.set(decoded.uid, createdAt);
                 }
-                const gracePeriodMs = GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000;
+                // [DENEME 7 GÜN] Süre artık hesabın açılma tarihine göre seçiliyor.
+                const graceGun = graceGunSayisi(createdAt);
+                req.trialDays = graceGun;              // istemci metni bunu kullanır
+                const gracePeriodMs = graceGun * 24 * 60 * 60 * 1000;
                 const elapsed = Date.now() - createdAt;
                 accountAgeKnown = true;
                 if (elapsed < gracePeriodMs) {
@@ -7106,6 +7154,11 @@ app.get('/api/subscription-status', async (req, res) => {
         isPremium: req.isPremium,
         isGracePeriod: req.isGracePeriod,
         graceDaysLeft: req.graceDaysLeft,
+        // [DENEME 7 GÜN] Deneme süresi artık SUNUCUDAN geliyor. İstemci kendi
+        // sabitinden hesaplarsa kesim tarihinin iki yanındaki kullanıcılara
+        // yanlış sayı gösterir (eski kayıt 14 gün alır ama yeni APK 7 yazardı).
+        // Bu kullanıcı için geçerli süre; bilinmiyorsa yeni kayıt süresi.
+        trialDays: (typeof req.trialDays === 'number') ? req.trialDays : yeniKayitGraceGun(),
         // Mevcut istemci bu alanı kullanmaz (Gson bilinmeyen alanı yok sayar).
         // İleride "3 gün PRO açtık" dialogu eklenecekse hazır dursun diye var.
         isComebackTrial: req.isComebackTrial,
