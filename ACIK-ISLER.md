@@ -58,7 +58,7 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | ~~11~~ | ~~**4.8**~~ | ~~`instant`'ı `isLand` ile kapat~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | ~~11c~~ | ~~**4.14**~~ | ~~İspanya bölge adları~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | 11b | **4.16** | widget karada skor gösteriyor | **APK** | mobil |
-| 11d | **4.17** | 7 gün detayda gündüz/gece sıcaklık — istemci yarısı | **APK** | mobil, düşük |
+| ~~11d~~ | ~~**4.17**~~ | ~~7 gün detayda gündüz/gece sıcaklık — istemci yarısı~~ | **YAPILDI** — APK bekliyor | — |
 | 11e | **4.18** | hava sıcaklığı simülasyonu karada deniz zemini çiziyor | **APK** | **karar bekliyor** |
 | 12 | **1.4** | `targetClass` gruplaması | **APK** | mobil |
 | 13 | **4.10** | çift istek (oturumsuz + kimlikli) | **APK** | mobil |
@@ -416,23 +416,10 @@ sunucu sözleşmesi değişmiyor, APK yeterli.
 yani veri gelmediğinde de "0" gösteriliyor (§2.1). Klorofil için bu 4.15 ile
 aynı hata. Widget düzeltilirken ikisi birlikte ele alınmalı.
 
-### 4.17 Gündüz/gece sıcaklık — istemci yarısı `HAZIR` · **MOBİL**
+### ~~4.17 Gündüz/gece sıcaklık — istemci yarısı~~ **YAPILDI** · APK bekliyor
 
-Sunucu 2026-08-11'den beri her gün için `airTempDayAvg` ve `airTempNightAvg`
-gönderiyor (`gunGeceSicaklikOrt()`, SunCalc ile gündüz/gece ayrımı, veri yoksa
-`null`). **İstemci bu alanları hiç okumuyor** — `ForecastResponse`'ta karşılık
-alan yok, 7 günlük detayda hâlâ tek sıcaklık görünüyor.
-
-```
-grep -rn "airTempDayAvg" --include=*.java   →  0 eşleşme   (2026-08-11)
-```
-
-**Yapılacak:** `ForecastResponse`'ta günlük nesneye iki `Double` alan
-(`@SerializedName`), 7 günlük satırda `Gündüz Ort. 30,8° / Gece Ort. 28,3°`.
-**`null` gelirse eski tek değer gösterilsin** — 0 basılmamalı (§2.1) ve
-sunucu eski bir sürümdeyse gerileme olmamalı.
-
-`airTemp` alanı **değişmedi ve değişmemeli** — skoru o besliyor.
+2026-08-11'de kapatıldı, bkz. Kapatılanlar ve
+`25-TEMMUZ-SONRASI-YAPILANLAR.md` § 12.
 
 ### 4.18 Hava sıcaklığı simülasyonu karada deniz zemini çiziyor `KARAR BEKLİYOR` · **MOBİL**
 
@@ -646,7 +633,13 @@ ayrılmış test kümesi** şart — yoksa modelin ne zaman hazır olduğu hiç 
 - **7 günlük detayda sıcaklık analiz saatini gösteriyordu** — sunucu yarısı
   yapıldı. `gunGeceSicaklikOrt()` günün 24 saatini SunCalc ile gündüz/gece
   ayırıp `airTempDayAvg` / `airTempNightAvg` üretiyor. `airTemp` **dokunulmadı**
-  (skoru o besliyor). İstemci yarısı açık → **4.17**. § 12.
+  (skoru o besliyor). § 12.
+  **İstemci yarısı da 2026-08-11'de yapıldı (eski 4.17).** Kullanıcı APK'yı
+  derleyip değerleri göremeyince tamamlandı — sunucu yarısı tek başına ekrana
+  hiçbir şey getirmiyor, model alanı olmadan Gson veriyi düşürüyor.
+  **Ders: "sunucu gönderiyor" ≠ "kullanıcı görüyor".** Bu oturumda üçüncü kez
+  aynı aile (bkz. `setLandMode`, `elevation`); iki yarısı olan bir işte
+  yarısını gönderip maddeyi kapatmak, kullanıcıya bitmiş gibi görünüyor.
 - **Kara modu görsel kusurları (kullanıcının 11 maddelik listesi)** — Android
   tarafı yazıldı, APK bekliyor. Kök sebep tekti: `setLandMode()` API'si vardı,
   `MainActivity` onu **hiç çağırmıyordu**. § 14–18.

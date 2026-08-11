@@ -269,7 +269,7 @@ davranışı korunuyor (gerileme yok).
 
 ---
 
-## 12 · 7 günlük tahminde gündüz/gece sıcaklık ortalaması `CANLIDA` (sunucu yarısı)
+## 12 · 7 günlük tahminde gündüz/gece sıcaklık ortalaması `CANLIDA` + `APK BEKLİYOR`
 
 **Belirti:** gece analiz yapıp 7 günlük detaya girildiğinde hava sıcaklığı
 düşük görünüyordu — gösterilen değer analiz saatinin sıcaklığıydı, günün değil.
@@ -282,8 +282,30 @@ ortalama üretiyor, yanıta `airTempDayAvg` / `airTempNightAvg` olarak ekliyor.
 yalnızca gösterim için, ek alan olduğu için yayındaki APK kırılmıyor.
 Veri yoksa `null`.
 
-> **⚠️ İstemci yarısı YAPILMADI** — `ForecastResponse`'ta alanlar tanımlı değil,
-> ekranda hâlâ tek sıcaklık var. Bkz. `ACIK-ISLER.md` → 4.17.
+**İstemci (`APK BEKLİYOR`) — 2026-08-11'de tamamlandı.** Kullanıcı APK'yı
+derleyip değerleri göremeyince yapıldı; sunucu yarısı tek başına ekrana
+hiçbir şey getirmiyor.
+
+- `ForecastResponse.ForecastDay` → `airTempDayAvg` / `airTempNightAvg`
+  (ikisi de `Double`, çünkü veri yoksa `null` geliyor — 0 değil).
+- `item_forecast_day.xml` → yeni `tvTempDayNight` satırı, varsayılan `gone`.
+  **Mini metrik satırına eklenmedi** (`🌊 · 🌬️ · 🌡️`): oraya iki değer daha
+  sığmıyor, dar ekranda taşardı. Ayrı satır, `4dp` üstten boşluk.
+- `ForecastAdapter` → `☀️ Gündüz 29.6°  ·  🌙 Gece 26.4°`. Metin 4 dilde
+  (`fd_day_night_temp`), sayılar `Locale.US` ile — üstteki satırla aynı
+  ondalık ayracı kullansın diye.
+- **İkisinden biri `null` ise satır hiç çizilmiyor.** Eski sunucuya karşı
+  gerileme yok, eksik değerin yerine 0 veya tahmin yazılmıyor (§2.1).
+  Kilitli (PRO olmayan) günlerde de gizli.
+
+**Yan düzeltme:** `ForecastAdapter:88` `String.format("%.1f°", day.airTemp)`
+kullanıyordu; `airTemp` `null` gelseydi ekrana **"🌡️ null"** basardı
+(Java `Formatter` null argümanı "null" diye yazar). Artık `—` gösteriyor.
+
+**Canlı doğrulama (2026-08-11, 38.35/26.60):** 7/7 gün için alanlar geliyor —
+`airTemp 32.7 · gündüz 29.6 · gece 26.4`. Aradaki fark maddenin sebebini
+birebir gösteriyor: öğlen analizde tek değer 32.7 iken günün gündüz
+ortalaması 29.6, gece analizde ise ~26 görünüp gün soğuk sanılıyordu.
 
 ---
 
