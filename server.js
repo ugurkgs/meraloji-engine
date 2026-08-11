@@ -6222,6 +6222,19 @@ app.get('/api/forecast', async (req, res) => {
                     pressure: Math.round(safeNum(weather.hourly?.surface_pressure?.[wIdx], 1013)),
                     rain: safeNum(weather.hourly?.precipitation?.[wIdx]),
                     cloud: safeNum(weather.hourly?.cloud_cover?.[wIdx]) + "%",
+                    // [madde 8 — 2026-08-11] Görüş mesafesi saatlik olarak Open-Meteo'dan
+                    // ZATEN çekiliyordu (weatherUrl'de hourly=...,visibility,...) ama
+                    // timeline'a konmuyordu. İstemci bu boşluğu bulut oranından TÜRETEREK
+                    // dolduruyordu (MainActivity:1437 → vis - cCover*0.10), ve bu türetme
+                    // "Şimdi"de de çalıştığı için aynı an için İKİ FARKLI SAYI çıkıyordu:
+                    // ilk açılışta instant.visibility = 41, slider'ı oynatıp Şimdi'ye
+                    // dönünce 41 - 3 = 38. Kullanıcı bildirdi. Klorofildeki (0.20 ↔ 0)
+                    // hatanın birebir aynısı — kaynak: "bilinmeyeni hesapla doldurmak".
+                    // Open-Meteo'nun visibility'si zaten sis/pus/yağışı içeren meteorolojik
+                    // görüş mesafesidir; üstüne bulut düşmek çift sayım olur.
+                    // Veri yoksa null gider (§2.1) — istemci o zaman kendi tahminine düşer.
+                    visibility: (typeof weather.hourly?.visibility?.[wIdx] === 'number')
+                        ? weather.hourly.visibility[wIdx] : null,
                     wavePeriod: parseFloat(safeNum(marine.hourly?.wave_period?.[mIdx]).toFixed(1)),
                     swellHeight: parseFloat(safeNum(marine.hourly?.swell_wave_height?.[mIdx]).toFixed(2)),
                     swellPeriod: parseFloat(safeNum(marine.hourly?.swell_wave_period?.[mIdx]).toFixed(1)),
