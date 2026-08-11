@@ -1813,7 +1813,13 @@ const GRACE_PERIOD_DAYS_NEW = 7;    // Kesim tarihinden SONRA açılan hesaplar
 // denemesi yarıda kesilmesin diye fail-closed.
 const TRIAL_SHORT_FROM = (() => {
     const raw = (process.env.TRIAL_SHORT_FROM || '').trim();
-    if (!raw) return null;
+    // Boş/kurulmamış = özellik KAPALI. Açılış logunda açıkça söyleniyor ki
+    // operatör "değişkeni yazdım, tuttu mu?" sorusunu log'dan cevaplayabilsin.
+    if (!raw) {
+        console.log('ℹ️  Deneme süresi: ' + GRACE_PERIOD_DAYS
+            + ' gün (TRIAL_SHORT_FROM kurulu değil — kısaltma KAPALI)');
+        return null;
+    }
     // BİÇİM ZORUNLU: YYYY-MM-DD (isteğe bağlı saat). Testte yakalandı —
     // Date.parse('7') GEÇERLİ bir tarih döndürüyor (geçmişte). "7 gün" sanıp
     // env'e 7 yazan biri kesimi geçmişe kurar ve HERKESİN denemesini geriye
@@ -1830,6 +1836,10 @@ const TRIAL_SHORT_FROM = (() => {
         console.warn('⚠️  TRIAL_SHORT_FROM 2026 öncesi — yazım hatası sayıldı, deneme 14 kalıyor:', raw);
         return null;
     }
+    const g = new Date(t).toISOString().split('T')[0];
+    console.log('✅ Deneme süresi kesimi: ' + g + ' — bu tarihten SONRA açılan hesaplar '
+        + GRACE_PERIOD_DAYS_NEW + ' gün, önce açılanlar ' + GRACE_PERIOD_DAYS + ' gün alır'
+        + (t > Date.now() ? '  (kesim henüz GELMEDİ, şu an herkes ' + GRACE_PERIOD_DAYS + ' gün alıyor)' : ''));
     return t;
 })();
 
