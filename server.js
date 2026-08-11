@@ -3011,6 +3011,98 @@ function angularDiff(a, b) {
     return d > 180 ? 360 - d : d;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// AÇIK SU YAYI — dalga yönü fiziksel olarak mümkün mü?
+// ─────────────────────────────────────────────────────────────────────────────
+// SORUN (kullanıcı bildirdi, 2026-08-11): Selçuk yakınında 2,1 m derinlikte bir
+// koy noktasında uygulama dalganın 288°'den (BKB) geldiğini gösteriyordu. O yönde
+// 1 km'de 59 m, 2 km'de 230 m yükseklikte KARA var. Karada dalga üremez.
+//
+// SEBEBİ KOD DEĞİL: Open-Meteo dalga ızgarası ~5 km; küçük koylar ızgarada yok,
+// hücrenin değeri açık denizden miras kalıyor. İstemcinin ±180 çevrimi de DOĞRU —
+// ölçüldü: 137 örneklemde (4 okyanus, kuvvetli rüzgâr denizi) wave_direction
+// rüzgârla aynı konvansiyonda, ortalama fark 6°, yani "dalganın GELDİĞİ yön".
+//
+// ÖLÇÜM: yüksekliği 0 ile doğrulanmış 15 kıyı noktasının 3'ünde (%20) kaynak
+// yönü 3 km içinde karanın üstüne düşüyor.
+//
+// NEDEN KIYI NORMALİ TAHMİN EDİLMİYOR: önce "kara yönlerinin vektör ortalaması"
+// denendi ve DOĞRULANAMADI — koyda bu, kıyı normalini değil kara kütle merkezini
+// verir (Çeşme 112°, Antalya 56° sapma ölçüldü). Onun yerine tartışmasız olan
+// kural uygulanıyor: DALGA ANCAK SU OLAN BİR YÖNDEN GELEBİLİR (fetch şart).
+//
+// YÖNTEM: 16 yönde 0,5/1/2/3 km örneklenir; hiç kara görmeyen yönler "açık su
+// yayı"dır. Model yönü bu yayın dışındaysa yaya en yakın geçerli yöne kaydırılır.
+// Yay boşsa veya 16/16 açıksa DOKUNULMAZ — açık denizde model zaten doğrudur.
+//
+// MALİYET: tek Open-Meteo elevation isteği (64 nokta, sınır 100). Kıyı şeridi
+// değişmediği için 30 gün önbelleklenir; anahtar ~1 km ızgara.
+const acikSuCache = new NodeCache({ stdTTL: 2592000, checkperiod: 86400 }); // 30 gün
+const ACIK_SU_SEKTOR = 16;
+const ACIK_SU_ADIMLAR = [0.5, 1, 2, 3];
+
+function _yayKaydir(la, lo, bearing, km) {
+    const R = 6371, d = km / R, b = bearing * Math.PI / 180, rl = la * Math.PI / 180;
+    const l2 = Math.asin(Math.sin(rl) * Math.cos(d) + Math.cos(rl) * Math.sin(d) * Math.cos(b));
+    const o2 = lo * Math.PI / 180 + Math.atan2(Math.sin(b) * Math.sin(d) * Math.cos(rl),
+                                               Math.cos(d) - Math.sin(rl) * Math.sin(l2));
+    return [l2 * 180 / Math.PI, o2 * 180 / Math.PI];
+}
+
+// Kara görmeyen yönlerin listesi, veya null (istek başarısız — hiçbir şey yapılmaz).
+async function acikSuYayiGetir(lat, lon) {
+    const latF = parseFloat(lat), lonF = parseFloat(lon);
+    if (isNaN(latF) || isNaN(lonF)) return null;
+    const key = 'yay_' + latF.toFixed(2) + '_' + lonF.toFixed(2);
+    const hit = acikSuCache.get(key);
+    if (hit !== undefined) return hit;
+
+    const ps = [], meta = [];
+    for (let sIdx = 0; sIdx < ACIK_SU_SEKTOR; sIdx++) {
+        const b = sIdx * (360 / ACIK_SU_SEKTOR);
+        for (const km of ACIK_SU_ADIMLAR) { ps.push(_yayKaydir(latF, lonF, b, km)); meta.push(b); }
+    }
+    try {
+        const url = 'https://api.open-meteo.com/v1/elevation?latitude='
+            + ps.map(p => p[0].toFixed(4)).join(',')
+            + '&longitude=' + ps.map(p => p[1].toFixed(4)).join(',');
+        // 2,5 sn: kullanıcı yeni bir konumda bunu BEKLİYOR. Uzun timeout, servis
+        // yavaşladığında her yeni koordinata gecikme bindirir (NOAA'da aynı ders
+        // alınmıştı: 5 sn → 2 sn). Gelmezse düzeltme yapılmaz, analiz sürer.
+        const r = await fetchWithTimeout(url, 2500);
+        if (!r || !r.ok) return null;
+        const j = await r.json();
+        const el = j && j.elevation;
+        if (!Array.isArray(el) || el.length !== ps.length) return null;
+        const acik = [];
+        for (let sIdx = 0; sIdx < ACIK_SU_SEKTOR; sIdx++) {
+            const b = sIdx * (360 / ACIK_SU_SEKTOR);
+            let kapali = false;
+            for (let i = 0; i < meta.length; i++) {
+                if (meta[i] === b && typeof el[i] === 'number' && el[i] > 0) { kapali = true; break; }
+            }
+            if (!kapali) acik.push(b);
+        }
+        acikSuCache.set(key, acik);
+        return acik;
+    } catch (e) {
+        return null;   // veri yoksa uydurmuyoruz — düzeltme uygulanmaz
+    }
+}
+
+// Model kaynak yönünü açık su yayına kaydırır. Düzeltme GEREKMEZSE null döner,
+// böylece yanıta yalnız gerçekten değişen yerde alan eklenir.
+function dalgaYonuDuzelt(kaynakYon, acik) {
+    if (!Array.isArray(acik) || acik.length === 0) return null;      // yay yok
+    if (acik.length === ACIK_SU_SEKTOR) return null;                 // her yön su — açık deniz
+    if (typeof kaynakYon !== 'number' || !isFinite(kaynakYon) || kaynakYon <= 0) return null;
+    const yariSektor = (360 / ACIK_SU_SEKTOR) / 2;
+    for (const b of acik) if (angularDiff(b, kaynakYon) <= yariSektor) return null;  // zaten geçerli
+    let enIyi = acik[0], enIyiF = angularDiff(acik[0], kaynakYon);
+    for (const b of acik) { const f = angularDiff(b, kaynakYon); if (f < enIyiF) { enIyiF = f; enIyi = b; } }
+    return { yon: enIyi, kaydirma: Math.round(enIyiF) };
+}
+
 // Noktadan en yakın kıyı köşesine olan yön = "kıyıya doğru" (onshore) eksen.
 // maxKm ötesinde hiçbir kıyı yeterince yakın değildir → null (özellik uygulanmaz).
 // [DÜZELTME] 8km → 2km. Sahada ölçüldü: tr-cities.json'daki poligon bazı küçük
@@ -5487,6 +5579,12 @@ app.get('/api/forecast', async (req, res) => {
             if (elevationM != null) req._story.elevation = elevationM;
         }
 
+        // [DALGA YÖNÜ] Açık su yayı — nokta boyunca sabit, döngü dışında bir kez.
+        // KARADA ATLANIYOR: orada waveDirection zaten 0 (bkz. ~5570) ve düzeltici
+        // 0'a dokunmuyor, yani istek boşa giderdi. isLand bu satırdan önce
+        // çözülmüş oluyor (kıyı snap'i dahil).
+        const acikSuYayi = isLand ? null : await acikSuYayiGetir(lat, lon);
+
         // [YENİ] Kıyı açısı — tıklanan nokta boyunca sabit, döngü dışında bir kez hesaplanır.
         // Kıyıya >8km uzaksa null döner (özellik uygulanmaz — mevcut davranış aynen korunur).
         const shoreBearingInfo = getShoreNormalBearing(lat, lon);
@@ -5787,6 +5885,13 @@ app.get('/api/forecast', async (req, res) => {
                 windGust: Math.round(windGust),
                 precipProb: precipProb,
                 waveDirection: waveDirection,
+                // [DALGA YÖNÜ] waveDirection'a DOKUNULMADI — skoru o besliyor
+                // (headOnWaveBonus, ~4349). Aşağıdaki EK alan yalnız çizim içindir.
+                // Düzeltme gerekmediyse null gelir.
+                waveDirectionAdjusted: (function () {
+                    const d = dalgaYonuDuzelt(waveDirection, acikSuYayi);
+                    return d ? d.yon : null;
+                })(),
                 windWaveHeight: parseFloat(windWaveHeight.toFixed(2)),
                 swellPeriod: parseFloat(swellPeriod.toFixed(1)),
                 swellDirection: swellWaveDir,
@@ -6140,6 +6245,20 @@ app.get('/api/forecast', async (req, res) => {
                 windGust: Math.round(i_windGust),
                 precipProb: i_precipProb,
                 waveDirection: i_waveDirection,
+                // [DALGA YÖNÜ] Bkz. acikSuYayiGetir başlığındaki açıklama.
+                // waveDirection DEĞİŞMEDİ (skor girdisi). Bunlar ek alan:
+                //   waveDirectionAdjusted : kaynak yönü karaya düşüyorsa yeni değer, yoksa null
+                //   waveDirectionShiftDeg : kaç derece kaydırıldı (şeffaflık)
+                //   openWaterSectors      : 16 sektörün kaçı açık su (null = bilinmiyor)
+                waveDirectionAdjusted: (function () {
+                    const d = dalgaYonuDuzelt(i_waveDirection, acikSuYayi);
+                    return d ? d.yon : null;
+                })(),
+                waveDirectionShiftDeg: (function () {
+                    const d = dalgaYonuDuzelt(i_waveDirection, acikSuYayi);
+                    return d ? d.kaydirma : null;
+                })(),
+                openWaterSectors: Array.isArray(acikSuYayi) ? acikSuYayi.length : null,
                 windWaveHeight: parseFloat(i_windWaveHeight.toFixed(2)),
                 swellPeriod: parseFloat(i_swellPeriod.toFixed(1)),
                 visibility: i_visibility,
@@ -6268,6 +6387,13 @@ app.get('/api/forecast', async (req, res) => {
                     windGust: Math.round(safeNum(weather.hourly?.wind_gusts_10m?.[wIdx])),
                     wave: parseFloat(hWave.toFixed(2)),
                     waveDirection: safeNum(marine.hourly?.wave_direction?.[mIdx]),
+                    // [DALGA YÖNÜ] Kaydırıcı bu diziden besleniyor; düzeltilmiş
+                    // alan burada da olmazsa kaydırıcı oynayınca çizim ham yöne
+                    // geri döner ve aynı an için iki farklı yön görünür.
+                    waveDirectionAdjusted: (function () {
+                        const d = dalgaYonuDuzelt(safeNum(marine.hourly?.wave_direction?.[mIdx]), acikSuYayi);
+                        return d ? d.yon : null;
+                    })(),
                     temp: parseFloat(hSst.toFixed(1)),
                     airTemp: safeNum(weather.hourly?.temperature_2m?.[wIdx]),
                     pressure: Math.round(safeNum(weather.hourly?.surface_pressure?.[wIdx], 1013)),
