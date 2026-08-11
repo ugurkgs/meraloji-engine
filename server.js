@@ -2769,6 +2769,47 @@ function getTimeOfDay(hour, sunTimes, utcOff = 0) {
     return "NIGHT";
 }
 
+/**
+ * [madde 3 — 2026-08-11] Bir GÜNÜN gündüz ve gece hava sıcaklığı ortalaması.
+ *
+ * NEDEN GEREKTİ: 7 günlük tahminde her gün, kullanıcının ANALİZ YAPTIĞI SAATİN
+ * sıcaklığını gösteriyordu (server.js:5462 → hourlyStartIdx + correctedClickHour).
+ * Gece 03:00'te analiz yapan kullanıcı yedi gün boyunca 03:00 sıcaklığını
+ * görüyordu; ağustosta bu ~22°C, oysa günün gerçeği 24-34°C. Tek bir sayı
+ * günün tamamını temsil edemez — bu yüzden ikiye ayrılıyor.
+ *
+ * GÜNDÜZ/GECE SINIRI: getTimeOfDay ile AYNI tanım (SunCalc + gerçek yerel ofset).
+ * Sabit saat (ör. 07-19) kullanmadım; sistemin başka hiçbir yerinde öyle
+ * tanımlanmıyor ve iki farklı "gündüz" tanımı olması karışıklık yaratırdı.
+ * DAWN ve DUSK gündüze sayılıyor: kullanıcı için "gün ışığı var mı" sorusu bu.
+ *
+ * @param hourly            weather.hourly (timezone=auto → yerel saatler)
+ * @param gunBaslangicIdx   o günün 00:00'ına denk gelen saatlik indeks
+ * @param date              o gün (SunCalc için)
+ * @param lat, lon          konum
+ * @param utcOff            gerçek UTC ofseti (saniye)
+ * @returns {{gunduz: number|null, gece: number|null}}
+ *          Veri yoksa null döner, 0 DEĞİL (bkz. CLAUDEKONSOLTALIMATI §2.1).
+ */
+function gunGeceSicaklikOrt(hourly, gunBaslangicIdx, date, lat, lon, utcOff) {
+    const dizi = hourly && hourly.temperature_2m;
+    if (!Array.isArray(dizi)) return { gunduz: null, gece: null };
+    let sunTimes = null;
+    try { sunTimes = SunCalc.getTimes(date, parseFloat(lat), parseFloat(lon)); } catch (e) { sunTimes = null; }
+
+    let gT = 0, gN = 0, nT = 0, nN = 0;
+    for (let hh = 0; hh < 24; hh++) {
+        const v = dizi[gunBaslangicIdx + hh];
+        if (typeof v !== 'number' || !isFinite(v)) continue;   // eksik saati atla
+        const mod = getTimeOfDay(hh, sunTimes, utcOff);
+        if (mod === 'NIGHT') { nT += v; nN++; } else { gT += v; gN++; }
+    }
+    return {
+        gunduz: gN > 0 ? parseFloat((gT / gN).toFixed(1)) : null,
+        gece:   nN > 0 ? parseFloat((nT / nN).toFixed(1)) : null
+    };
+}
+
 // Solunar Pencere
 function getSolunarWindow(date, lat = 41.0, lon = 29.0) {
     const moonTimes = SunCalc.getMoonTimes(date, lat, lon);
@@ -5490,6 +5531,12 @@ app.get('/api/forecast', async (req, res) => {
 
             const waveRaw = isLand ? 0 : safeNum(marine.daily?.wave_height_max?.[dailyIdx]);
             const tempAir = safeNum(weather.hourly?.temperature_2m?.[hourlyIdx]);
+            // [madde 3] tempAir ANALİZ SAATİNİN sıcaklığı — öyle kalıyor, çünkü o günün
+            // skoru bu saate göre hesaplanıyor ve alanı değiştirmek skoru kaydırırdı.
+            // Kullanıcıya GÖSTERİLECEK olan aşağıdaki iki ortalama; ek alan, mevcut
+            // hiçbir şeyi bozmuyor (Gson bilinmeyen alanı yok sayar, eski APK etkilenmez).
+            const havaOrt = gunGeceSicaklikOrt(
+                weather.hourly, hourlyStartIdx, targetDate, lat, lon, utcOffsetSeconds);
             // [DÜZELTME] Rüzgar hızı: günün MAKSİMUMU yerine ANALİZ SAATİNDEKİ saatlik değer.
             // Eskiden wind_speed_10m_max kullanılıyordu → esinti az olsa bile günün zirvesini
             // (ör. 19:00'da 21 km/s) gösteriyordu. Artık o günün, kullanıcının yerel saatine
@@ -5771,6 +5818,10 @@ app.get('/api/forecast', async (req, res) => {
                 }), tacticKey, tacticData, weatherSummary,
                 fishList: fishList.slice(0, 10), moonPhase: moon.phase,
                 moonPhaseName: getMoonPhaseName(moon.phase, lang), airTemp: tempAir, timeMode,
+                // [madde 3] Günün gündüz/gece hava sıcaklığı ortalaması. airTemp
+                // (analiz saatinin değeri) yerine DEĞİL, ONA EK olarak gidiyor.
+                airTempDayAvg: havaOrt.gunduz,
+                airTempNightAvg: havaOrt.gece,
                 activityWindows: activityWindows
             });
         }
