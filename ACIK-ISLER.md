@@ -51,6 +51,7 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | ~~9~~ | ~~**4.3**~~ | ~~`photoId` temizliği~~ | **DOĞRULANDI — yapılmadı, gerekçe kayıtlı** | — |
 | 10 | **1.5** | kıyı bildirimi | **KISMEN — canlıya alındı, kapatma ayarı APK'ya kaldı** | orta |
 | ~~11~~ | ~~**4.8**~~ | ~~`instant`'ı `isLand` ile kapat~~ | **YAPILDI** — bkz. Kapatılanlar | — |
+| ~~11c~~ | ~~**4.14**~~ | ~~İspanya bölge adları~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | 11b | **4.16** | widget karada skor gösteriyor | **APK** | mobil |
 | 12 | **1.4** | `targetClass` gruplaması | **APK** | mobil |
 | 13 | **4.10** | çift istek (oturumsuz + kimlikli) | **APK** | mobil |
@@ -467,31 +468,6 @@ olmasını şart koşar. Şu an Ege yazı için soğuk kalibre oldukları bilini
 > skoru okuyan koşul yok). Sıranın önemli olduğu iki yer — taban `max(3,…)` ve
 > asimptotik sıkıştırma — ikisi de doğru konumda. Sıralamaya dokunmaya gerek yok.
 
-### 4.14 İspanya bölge adları yanlış gösteriliyor `HAZIR`
-
-4.4 ölçülürken çıktı. `getRegion` **Bilbao (43.40, -3.00)** için
-`"Batı/Orta Akdeniz"` döndürüyor — Bilbao Biskay Körfezi'nde, Atlantik'te.
-Sebep: Akdeniz bbox'ı `lat 30-45, lon -6..20` ve Bilbao tam içine düşüyor.
-
-**Skoru etkilemiyor** (ölçüldü, aşağıya bak) ama **kullanıcıya gösteriliyor.**
-`displayRegion = getCoastalLocality(...) || i18n.regions[regionName] || regionName`:
-
-| nokta | gösterilen |
-|---|---|
-| Bilbao (Biskay) | `Batı/Orta Akdeniz` ← yanlış |
-| Cádiz (Atlantik) | `Batı/Orta Akdeniz` ← yanlış |
-| Barselona | `Batı/Orta Akdeniz` ✓ |
-| İzmir | `Narlıdere Kıyıları` ✓ |
-
-`getCoastalLocality` yalnız `tr-coastal-localities.json`'a bakıyor (Türkiye),
-İspanya'da boş dönüyor; `i18n.regions` sözlüğünde de bu adlar yok, o yüzden ham
-bölge adı ekrana çıkıyor. Bu bir **dürüstlük sorunu** — Biskay'daki kullanıcı
-ekranında "Akdeniz" yazıyor.
-
-**Çözüm seçenekleri:** (a) `i18n.regions`'a İspanya bölge adlarını ekle,
-(b) `getRegion`'da kutu sırasını düzelt (Biskay önce denensin). (a) daha güvenli —
-habitat kapısına dokunmaz.
-
 ### 4.5 Tuzluluk sayısal aralığı `ERTELENDİ`
 
 Ölçüldü ve **yapmaya değmediği kanıtlandı**: hiçbir düzeltme kova sınırını
@@ -569,6 +545,52 @@ ayrılmış test kümesi** şart — yoksa modelin ne zaman hazır olduğu hiç 
 - **`startedAt` her doğrulamada eziliyordu** — düzeltildi (`23919de`).
 - **BAE mükerrer kayıtları** — 5 çift birleştirildi.
 - **Tuzluluk sayısal aralığı** — ölçüldü, değmiyor (bkz. 4.5).
+- **4.14 İspanya bölge adları yanlış gösteriliyor** — düzeltildi. İki ayrı kusur
+  çıktı; maddede yazan teşhis kısmen yanlıştı.
+  **(1) Coğrafi hata — sandığımızdan DAR.** Ölçüldü: Cádiz, A Coruña, Vigo, Lizbon
+  zaten DOĞRU (`İber Atlantiği & Biskay`); madde bunları da yanlış sanıyordu.
+  Málaga, Barselona, Valensiya, Mallorca da doğru. Hatalı olan yalnızca
+  **İspanya'nın kuzey kıyısı**: Bilbao (43.40, −3.00) ve Gijón (43.60, −5.70)
+  `Batı/Orta Akdeniz` dönüyordu. Sebep iki kutunun çakışması —
+  Akdeniz `lat 30–45, lon −6..20` ∩ Biskay `lat 36–46, lon −10..−1`
+  = `lat 36–45, lon −6..−1`; `getRegion` ilk eşleşeni döndürüyor ve tür
+  sırasında Akdeniz önce geliyor.
+  **Maddedeki (b) seçeneği (kutu sırasını çevir) UYGULANMADI, çünkü yanlış:**
+  aynı çakışma bandında Málaga, Almería ve bütün Costa del Sol var — Biskay'ı
+  öne almak İspanya'nın GÜNEY kıyısını Atlantik yapardı.
+  **Kutuların kendisi de değiştirilmedi:** `habitatBboxes` tür parametresidir
+  (§3) ve `isInHabitat` onları doğrudan okur.
+  Çözüm: `getRegion`'a yalnız isim yolunu düzelten tek satır —
+  `lat 42.5–46 & lon −6..−1 → İber Atlantiği & Biskay`.
+  **(2) Asıl sorun daha büyüktü: çeviri yok.** `displayRegion` şu zinciri
+  kullanıyor: `getCoastalLocality(...) || i18n(lang).regions[name] || name`.
+  `getCoastalLocality` yalnız `tr-coastal-localities.json`'a bakıyor, yurt
+  dışında hep null. Sözlükte de yoksa **ham Türkçe** ekrana çıkıyor. Ölçüldü:
+  39 benzersiz kutu adının **8'i** bu durumdaydı — Barselona'daki İspanyol
+  kullanıcı ekranında *"Batı/Orta Akdeniz"* yazıyordu. 8 ad × 4 dil eklendi.
+  **Ölçüm — 39 addan yalnız 19'u ekrana çıkabiliyor.** `getRegion` ilk eşleşeni
+  döndürdüğü için kalan 20'si önceki kutuların alt kümesi ve hiçbir koordinatta
+  dönmüyor (dünya çapında 0.5° ızgara ile tarandı). Bunlar zaten kullanıcıya
+  gösterilmek için yazılmamış tür notları — `Avustralya (Örn: Cairns)`,
+  `Norveç (Yaz Ziyaretçisi)` gibi. Ulaşılamaz oldukları için çevrilmediler.
+  **Skora etkisi YOK — ölçüldü.** Bilbao'da iki bölge adı için
+  `getSalinity` 35→35 · `estimateDeepTemp` 14→14 · termoklin 31→31 ·
+  upwelling 0.09→0.09 · `estimateCurrent` 0.7→0.7 · `safeWaterTemp` 24→24;
+  `isInHabitat` 64 tür → 64 tür, 64 skorun 0'ı oynadı. Sebebi: iki ad da
+  `server.js`'te **hiç geçmiyor** (0 eşleşme), yalnız species.js'te kutu adı
+  olarak varlar ve bölgeye bağlı tabloların hepsinde varsayılana düşüyorlar.
+  **TEST İLK SEFERDE KIRMIZI VERDİ ve yamayı yakaladı.** Üst sınır koymayı
+  unutmuştum; `lat ≥ 42.5 & lon −6..−1` bandı Cornwall, Galler ve batı
+  İskoçya'yı da yakalayıp `Birleşik Krallık Kıyıları`'nı Biskay yapıyordu
+  (704 ızgara noktası, 3 farklı geçiş). Üst sınır 46 eklendi → 66 nokta,
+  tek geçiş. Nöbetçi noktalar teste kalıcı olarak eklendi.
+  Doğrulama: dünya çapında 195.391 nokta karşılaştırıldı, HEAD'e göre yalnız
+  **66** nokta değişti (hepsi `lat 42.5–45, lon −6..−1`); Türkiye 6 noktada
+  aynı; 4 dilde 19/19 ad çevrili; Biskay bandında 320 skor karşılaştırıldı,
+  habitat farkı 0, skor farkı 0; deniz regresyonu 6160 skor **sapma 0**;
+  açılış testi 20 sn ayakta.
+  **Kayda geçsin:** sözlükteki `Japonya Kıyıları` species.js'te YOK (gerçek ad
+  `Japonya`) — sözlük kutulardan sapmış, ölü kayıt. Zararsız, silinmedi.
 - **4.8 `instant` bloğu karada da skor üretiyor** — düzeltildi.
   Instant tür döngüsüne `if (isLand) break` kondu. Günlük döngü zaten
   `if (!isLand)` ile korunuyordu; instant korunmuyordu, yani aynı yanıtta

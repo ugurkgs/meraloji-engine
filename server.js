@@ -104,7 +104,29 @@ const SERVER_i18n = {
             'Birleşik Krallık Kıyıları': 'Birleşik Krallık Kıyıları',
             'ABD Kuzeydoğu Kıyıları': 'ABD Kuzeydoğu Kıyıları',
             'Norveç': 'Norveç',
-            'Avustralya': 'Avustralya'
+            'Avustralya': 'Avustralya',
+            // [4.14 — 2026-08-11] Buradan aşağısı species.js habitatBboxes'tan gelen
+            // GLOBAL bölge adları. Sözlükte olmayan ad ekrana HAM TÜRKÇE çıkıyordu:
+            // displayRegion = getCoastalLocality(...) || i18n(lang).regions[name] || name
+            // ve getCoastalLocality yalnız Türkiye'ye bakıyor (tr-coastal-localities.json),
+            // yurt dışında hep null. Yani Barselona'daki İspanyol kullanıcı ekranında
+            // "Batı/Orta Akdeniz" yazıyordu.
+            // Ölçüldü: 39 benzersiz kutu adı var ama getRegion ilk eşleşeni döndürdüğü
+            // için yalnız 19'u ekrana çıkabiliyor (kalan 20'si önceki kutuların alt
+            // kümesi — ör. "Avustralya (Örn: Cairns)", "Norveç (Yaz Ziyaretçisi)";
+            // bunlar tür kaydı için yazılmış notlar, kullanıcıya gösterilmek için değil
+            // ve hiçbir koordinatta dönmüyorlar, o yüzden çevrilmediler).
+            // Çıkabilen 19'un 8'inin çevirisi yoktu — eklenenler bunlar.
+            // NOT: sözlükteki 'Japonya Kıyıları' species.js'te YOK (gerçek ad 'Japonya');
+            // eskiden beri ölü bir kayıt, sözlük kutulardan sapmış. Silmedim, zararsız.
+            'Batı/Orta Akdeniz': 'Batı/Orta Akdeniz',
+            'İber Atlantiği & Biskay': 'İber Atlantiği & Biskay',
+            'Kanarya Adaları': 'Kanarya Adaları',
+            'İzlanda': 'İzlanda',
+            'California': 'Kaliforniya',
+            'Japonya': 'Japonya',
+            'Endonezya & Borneo': 'Endonezya & Borneo',
+            'Hindistan & Bengal Körfezi': 'Hindistan & Bengal Körfezi'
         },
         substrate: {
             ROCK: '🪨 Kayalık', SAND: '🏖️ Kum', MUD: '🟫 Çamur',
@@ -255,7 +277,29 @@ const SERVER_i18n = {
             'Birleşik Krallık Kıyıları': 'United Kingdom Coasts',
             'ABD Kuzeydoğu Kıyıları': 'US Northeast Coasts',
             'Norveç': 'Norway',
-            'Avustralya': 'Australia'
+            'Avustralya': 'Australia',
+            // [4.14 — 2026-08-11] Buradan aşağısı species.js habitatBboxes'tan gelen
+            // GLOBAL bölge adları. Sözlükte olmayan ad ekrana HAM TÜRKÇE çıkıyordu:
+            // displayRegion = getCoastalLocality(...) || i18n(lang).regions[name] || name
+            // ve getCoastalLocality yalnız Türkiye'ye bakıyor (tr-coastal-localities.json),
+            // yurt dışında hep null. Yani Barselona'daki İspanyol kullanıcı ekranında
+            // "Batı/Orta Akdeniz" yazıyordu.
+            // Ölçüldü: 39 benzersiz kutu adı var ama getRegion ilk eşleşeni döndürdüğü
+            // için yalnız 19'u ekrana çıkabiliyor (kalan 20'si önceki kutuların alt
+            // kümesi — ör. "Avustralya (Örn: Cairns)", "Norveç (Yaz Ziyaretçisi)";
+            // bunlar tür kaydı için yazılmış notlar, kullanıcıya gösterilmek için değil
+            // ve hiçbir koordinatta dönmüyorlar, o yüzden çevrilmediler).
+            // Çıkabilen 19'un 8'inin çevirisi yoktu — eklenenler bunlar.
+            // NOT: sözlükteki 'Japonya Kıyıları' species.js'te YOK (gerçek ad 'Japonya');
+            // eskiden beri ölü bir kayıt, sözlük kutulardan sapmış. Silmedim, zararsız.
+            'Batı/Orta Akdeniz': 'Western/Central Mediterranean',
+            'İber Atlantiği & Biskay': 'Iberian Atlantic & Bay of Biscay',
+            'Kanarya Adaları': 'Canary Islands',
+            'İzlanda': 'Iceland',
+            'California': 'California',
+            'Japonya': 'Japan',
+            'Endonezya & Borneo': 'Indonesia & Borneo',
+            'Hindistan & Bengal Körfezi': 'India & Bay of Bengal'
         },
         substrate: {
             ROCK: '🪨 Rocky', SAND: '🏖️ Sandy', MUD: '🟫 Muddy',
@@ -406,7 +450,29 @@ const SERVER_i18n = {
             'Birleşik Krallık Kıyıları': 'Costas del Reino Unido',
             'ABD Kuzeydoğu Kıyıları': 'Costas del Noreste de EE.UU.',
             'Norveç': 'Noruega',
-            'Avustralya': 'Australia'
+            'Avustralya': 'Australia',
+            // [4.14 — 2026-08-11] Buradan aşağısı species.js habitatBboxes'tan gelen
+            // GLOBAL bölge adları. Sözlükte olmayan ad ekrana HAM TÜRKÇE çıkıyordu:
+            // displayRegion = getCoastalLocality(...) || i18n(lang).regions[name] || name
+            // ve getCoastalLocality yalnız Türkiye'ye bakıyor (tr-coastal-localities.json),
+            // yurt dışında hep null. Yani Barselona'daki İspanyol kullanıcı ekranında
+            // "Batı/Orta Akdeniz" yazıyordu.
+            // Ölçüldü: 39 benzersiz kutu adı var ama getRegion ilk eşleşeni döndürdüğü
+            // için yalnız 19'u ekrana çıkabiliyor (kalan 20'si önceki kutuların alt
+            // kümesi — ör. "Avustralya (Örn: Cairns)", "Norveç (Yaz Ziyaretçisi)";
+            // bunlar tür kaydı için yazılmış notlar, kullanıcıya gösterilmek için değil
+            // ve hiçbir koordinatta dönmüyorlar, o yüzden çevrilmediler).
+            // Çıkabilen 19'un 8'inin çevirisi yoktu — eklenenler bunlar.
+            // NOT: sözlükteki 'Japonya Kıyıları' species.js'te YOK (gerçek ad 'Japonya');
+            // eskiden beri ölü bir kayıt, sözlük kutulardan sapmış. Silmedim, zararsız.
+            'Batı/Orta Akdeniz': 'Mediterráneo occidental y central',
+            'İber Atlantiği & Biskay': 'Atlántico ibérico y golfo de Vizcaya',
+            'Kanarya Adaları': 'Islas Canarias',
+            'İzlanda': 'Islandia',
+            'California': 'California',
+            'Japonya': 'Japón',
+            'Endonezya & Borneo': 'Indonesia y Borneo',
+            'Hindistan & Bengal Körfezi': 'India y golfo de Bengala'
         },
         substrate: {
             ROCK: '🪨 Rocoso', SAND: '🏖️ Arenoso', MUD: '🟫 Fangoso',
@@ -557,7 +623,29 @@ const SERVER_i18n = {
             'Birleşik Krallık Kıyıları': 'Ακτές Ηνωμένου Βασιλείου',
             'ABD Kuzeydoğu Kıyıları': 'Βορειοανατολικές Ακτές ΗΠΑ',
             'Norveç': 'Νορβηγία',
-            'Avustralya': 'Αυστραλία'
+            'Avustralya': 'Αυστραλία',
+            // [4.14 — 2026-08-11] Buradan aşağısı species.js habitatBboxes'tan gelen
+            // GLOBAL bölge adları. Sözlükte olmayan ad ekrana HAM TÜRKÇE çıkıyordu:
+            // displayRegion = getCoastalLocality(...) || i18n(lang).regions[name] || name
+            // ve getCoastalLocality yalnız Türkiye'ye bakıyor (tr-coastal-localities.json),
+            // yurt dışında hep null. Yani Barselona'daki İspanyol kullanıcı ekranında
+            // "Batı/Orta Akdeniz" yazıyordu.
+            // Ölçüldü: 39 benzersiz kutu adı var ama getRegion ilk eşleşeni döndürdüğü
+            // için yalnız 19'u ekrana çıkabiliyor (kalan 20'si önceki kutuların alt
+            // kümesi — ör. "Avustralya (Örn: Cairns)", "Norveç (Yaz Ziyaretçisi)";
+            // bunlar tür kaydı için yazılmış notlar, kullanıcıya gösterilmek için değil
+            // ve hiçbir koordinatta dönmüyorlar, o yüzden çevrilmediler).
+            // Çıkabilen 19'un 8'inin çevirisi yoktu — eklenenler bunlar.
+            // NOT: sözlükteki 'Japonya Kıyıları' species.js'te YOK (gerçek ad 'Japonya');
+            // eskiden beri ölü bir kayıt, sözlük kutulardan sapmış. Silmedim, zararsız.
+            'Batı/Orta Akdeniz': 'Δυτική/Κεντρική Μεσόγειος',
+            'İber Atlantiği & Biskay': 'Ιβηρικός Ατλαντικός & Βισκαϊκός Κόλπος',
+            'Kanarya Adaları': 'Κανάρια Νησιά',
+            'İzlanda': 'Ισλανδία',
+            'California': 'Καλιφόρνια',
+            'Japonya': 'Ιαπωνία',
+            'Endonezya & Borneo': 'Ινδονησία & Βόρνεο',
+            'Hindistan & Bengal Körfezi': 'Ινδία & Κόλπος Βεγγάλης'
         },
         substrate: {
             ROCK: '🪨 Βραχώδες', SAND: '🏖️ Αμμώδες', MUD: '🟫 Λασπώδες',
@@ -2763,6 +2851,41 @@ function getRegion(latRaw, lonRaw) {
             }
         }
     }
+
+    // 2a. [4.14 — 2026-08-11] BİSKAY DÜZELTMESİ.
+    // species.js'teki iki kutu çakışıyor:
+    //   "Batı/Orta Akdeniz"       lat 30–45, lon  −6..20
+    //   "İber Atlantiği & Biskay" lat 36–46, lon −10..−1
+    // Çakışma alanı lat 36–45, lon −6..−1 ve Akdeniz kutusu tür sırasında ÖNCE
+    // geldiği için kazanıyor. Sonuç: Bilbao (43.40, −3.00) ve Gijón (43.60, −5.70)
+    // "Batı/Orta Akdeniz" dönüyordu — ikisi de Biskay Körfezi'nde, Atlantik'te.
+    //
+    // KUTU SIRASINI DEĞİŞTİRMEK ÇÖZÜM DEĞİL: aynı çakışma bandında Málaga
+    // (36.60, −4.40), Almería ve bütün Costa del Sol var; Biskay'ı öne almak
+    // İspanya'nın GÜNEY kıyısını Atlantik yapardı — bir hatayı daha büyüğüyle
+    // değiştirmek olurdu.
+    // KUTULARIN KENDİSİ DE DEĞİŞTİRİLMEDİ: habitatBboxes tür parametresidir
+    // (bkz. CLAUDEKONSOLTALIMATI §3) ve isInHabitat onları doğrudan okur;
+    // daraltmak hangi türün nerede listeleneceğini değiştirirdi.
+    //
+    // Bunun yerine yalnız İSİM yolu düzeltiliyor. lat 42.5–46 & lon −6..−1
+    // bandında Akdeniz suyu YOKTUR (o enlemde Akdeniz lon > 2'de başlar,
+    // Aslan Körfezi); bant İspanya'nın kuzey kıyısı + Fransa Atlantik kıyısıdır.
+    //
+    // ÜST SINIR 46 ŞART — ilk denemede yoktu ve test kırmızı verdi: sınırsız
+    // bırakınca lon −6..−1 bandı Cornwall, Galler ve batı İskoçya'yı da yakalayıp
+    // "Birleşik Krallık Kıyıları"nı "İber Atlantiği & Biskay" yapıyordu (704 ızgara
+    // noktası, 3 farklı geçiş). 46, Biskay kutusunun kendi lat2'si; Britanya
+    // lat 50'den başlıyor, arada güvenli boşluk var.
+    //
+    // SKORA ETKİSİ YOK — ölçüldü (2026-08-11, Bilbao):
+    //   getSalinity 35→35 · estimateDeepTemp 14→14 · thermocline 31→31 ·
+    //   upwelling 0.09→0.09 · estimateCurrent 0.7→0.7 · safeWaterTemp 24→24
+    //   isInHabitat 64 tür → 64 tür (eklenen/çıkan yok) · 64 türün 0'ı oynadı.
+    // Sebebi: iki ad da server.js'te HİÇ geçmiyor (0 eşleşme), yalnız species.js
+    // kutu adı olarak varlar; bölgeye bağlı tabloların hepsinde varsayılana
+    // düşüyorlar. Bu satır sadece kullanıcının gördüğü etiketi düzeltir.
+    if (lat >= 42.5 && lat <= 46.0 && lon >= -6.0 && lon <= -1.0) return 'İber Atlantiği & Biskay';
 
     // 2. Global BBox yöntemi (species.js habitatBboxes)
     if (_globalBboxFeatures.length > 0) {
