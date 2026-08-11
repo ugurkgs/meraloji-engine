@@ -503,6 +503,128 @@ hepsi artık doğru sayfayı açacak.
 
 ---
 
+## 20 · Dalga yönü karadan geliyor gösteriliyordu `CANLIDA` + `APK BEKLİYOR`
+
+**Belirti (kullanıcı bildirdi, 2026-08-11):** Selçuk yakınında 2,1 m derinlikte
+bir koyda dalga yönü `Doğu (E) 108°` görünüyordu — yani dalga kıyıdan açığa
+gidiyordu. *"Kullanıcı burada kıyıya gitse dalganın ondan uzaklaştığını
+görmeyecek, kendisine doğru gelen dalgayı görecek."*
+
+### 20.1 Konvansiyon DOĞRUYDU — burayı kurcalamayın
+
+Önce şüphelenilen ±180 hatası **yok.** Ölçüldü:
+
+| katman | ne yapıyor |
+|---|---|
+| Open-Meteo `wave_direction` | dalganın **geldiği** yön |
+| `WaveSimulationView:1759` | `prop = (yön + 180) % 360` → gittiği yön ✓ |
+| `wvDrawFronts` | `prop` yönünde akıtıyor ✓ |
+| HUD yazısı (`:2132`) | `prop` gösteriyor ✓ |
+
+**Konvansiyon ölçümü:** rüzgâr dalgası tanım gereği yerel rüzgârla hizalıdır ve
+rüzgâr yönü kesin olarak "geldiği yön"dür. Kuvvetli, oturmuş rüzgâr denizinde
+(dalga ≥ 1,5 m **ve** rüzgâr ≥ 30 km/s) 4 okyanusta **137 örneklem**:
+ortalama fark **6,0°**. → `wave_direction` da "geldiği yön".
+
+> İlk ölçüm Ege kıyısında yapıldı ve anlamsız çıktı (fark 70°): orada rüzgâr
+> dalgası 0–0,28 m, yani yön gürültüden ibaretti. Zayıf rüzgâr denizi elenmeli.
+
+### 20.2 Asıl sorun: değer o noktada fiziksel olarak imkânsız
+
+Noktanın çevresi yükseklik verisiyle tarandı (Copernicus DEM):
+
+```
+         K 17 m KARA
+   KB 26 KARA   KD 3 KARA        dalga GELDİĞİ yön : 288-290° (BKB)
+ B 59 KARA  ●  D 0 deniz         → o yönde 1 km'de 59 m, 2 km'de 230 m TEPE
+   GB 0 deniz   GD 0 deniz       dalga GİTTİĞİ yön : 108-110° → açık deniz
+         G 0 deniz
+```
+
+**İki bağımsız sebep:**
+
+1. **Çözünürlük.** Open-Meteo dalga ızgarası ~5 km; küçük koy ızgarada yok,
+   hücrenin değeri açık Ege'den miras.
+2. **Fizik.** 2,1 m zaten sığlaşma/kırılma bölgesi. Dalga sığa girerken kırılır
+   (refraksiyon), cepheler derinlik konturlarına — kıyıya — paralel hâle gelir.
+   **Açık denizdeki yön ne olursa olsun kumsaldaki adam dalgayı kendine gelirken
+   görür.** Model doğru değeri verse bile o değer kumsaldaki görüntüyü anlatmaz.
+
+**Yaygınlık ölçümü:** yüksekliği 0 ile **deniz olduğu doğrulanmış** 15 kıyı
+noktasının **3'ünde (%20)** kaynak yönü 3 km içinde karanın üstüne düşüyor.
+
+### 20.3 REDDEDİLEN YAKLAŞIM — kıyı normali tahmini (tekrar denemeyin)
+
+İlk tasarım "derinlik/kara gradyanından kıyı normali türet" idi. Kuruldu,
+**kendi doğrulamasını geçemedi ve gönderilmedi.** Koyda *kara yönlerinin vektör
+ortalaması* kıyı normalini değil **kara kütle merkezini** verir:
+Çeşme **112°**, Antalya **56°**, Mersin **45°** sapma.
+
+> **Ölçüm sırasında iki kez yanlış sonuca varıldı, kayda geçsin:**
+> **(1)** Marine API ile kara tespiti denendi — kıyıda karada da veri döndüğü
+> için işe yaramadı; yükseklik API'sine geçildi.
+> **(2)** İlk karşılaştırmada test noktalarının **8/11'i KARADAYDI** ve
+> "kıyı açısı 9/10 yanlış" gibi bir sonuç üretildi. `getShoreNormalBearing`
+> "en yakın kıyıya doğru" verir: deniz noktasında karaya, **kara noktasında
+> denize** bakar — yani doğru davranış yanlış görünüyordu. Sonuç geri alındı.
+> **Ders: kıyı geometrisi ölçerken noktanın deniz olduğunu ÖNCE doğrula.**
+
+### 20.4 Uygulanan çözüm — iki kural, ikisi de doğrudan ölçülebilir
+
+**1) Açık su yayı.** *Dalga ancak su olan bir yönden gelebilir (fetch şart).*
+16 yönde 0,5/1/2/3 km örneklenir; hiç kara görmeyen yönler açık su yayıdır.
+Model yönü yayın dışındaysa yaya en yakın geçerli yöne kaydırılır.
+**16/16 açıksa DOKUNULMAZ** — açık denizde model zaten doğrudur.
+
+**2) Kıyı kilidi (sığlaşma).** Nokta sığlaşma bölgesindeyse çizim **en yakın
+karaya** kilitlenir. Eşik keyfi değil: `L = 1,56·T²` (derin su dalga boyu),
+refraksiyon `L/4`'ten sığda baskın, 3–12 m ile sınırlı. 3,3 sn için **4,25 m**.
+
+**Sığlaşma bölgesi DIŞINDA zorlanmaz.** Karadan esen rüzgârın açığa giden
+çırpıntı üretmesi gerçektir; onu kıyıya döndürmek uydurma olurdu.
+*(Test önce "her nokta kıyıya baksın" diye iddia edip Erdek'te kırmızı verdi —
+iddia yanlıştı, kapsam sığlaşma bölgesiyle sınırlandı.)*
+
+**Ölçülen sonuç: sığlaşma bölgesindeki 7 noktanın 7'sinde çizim kıyıya bakıyor.**
+
+**Canlı doğrulama (kullanıcının noktası):**
+```
+derinlik 2,06 m · periyot 3,3 sn · eşik 4,25 m → SIĞLAŞMA
+ham 290° → düzeltilmiş 180°  (sebep SIG_SU, kaydırma 110°)
+çizim 0° = ölçülen en yakın kara yönü      (eski hâli 110° = açığa)
+```
+
+### 20.5 Skor DOKUNULMADI
+
+`waveDirection` **değişmedi** — `headOnWaveBonus` (~4349) onu okuyor.
+Düzeltilmiş değer **ek alanlarda** gidiyor: `waveDirectionAdjusted` (instant,
+`forecast[]`, `hourlyTimeline[]`), ayrıca instant'ta `waveDirectionShiftDeg`,
+`waveDirectionReason` (`SIG_SU` | `KARA_KAYNAK`), `openWaterSectors`.
+
+`hourlyTimeline`'a da konması **şart**: istemcide kaydırıcı o diziden besleniyor
+(`MainActivity:3597`); orada olmasa kaydırıcı oynayınca çizim ham yöne dönerdi.
+
+**Deniz regresyonu: 6160 skor, sapma 0.**
+
+**Maliyet:** tek Open-Meteo elevation isteği (64 nokta, sınır 100), **30 gün**
+önbellek (~1 km ızgara — kıyı şeridi değişmez), **karada hiç çağrılmıyor**,
+timeout 2,5 sn. Gelmezse düzeltme yapılmaz, analiz sürer.
+
+### 20.6 İstemci `APK BEKLİYOR`
+
+- Model: `waveDirectionAdjusted` üç sınıfa (`ForecastDay`, `InstantData`,
+  `HourlyMetric`), instant'a ayrıca shift/reason/sectors.
+- 5 çizim çağrısı tek `dalgaYonuCizim(ham, düzeltilmiş)` yardımcısından geçiyor.
+- **Metrik paneli simülasyonla aynı dile getirildi.** Simülasyon gittiği yönü
+  çiziyordu, metrik satırı ham "geldiği" değeri basıyordu — aynı dalga için
+  ekranda iki farklı harf vardı (`0.4m BKB` ↔ `DGD 110°`), ve düzeltme bu farkı
+  daha da açtı. Dalga, ölü dalga ve rüzgâr artık `gidisYonuStr()` kullanıyor.
+- **Rüzgâr zaten doğruydu** (`WaveSimulationView:3344`,
+  `feltDir = windDir + 180`) — parçacık, pusula ve yazı üçü de gittiği yönde.
+- **⚠️ AKINTIYA DOKUNULMADI** — bkz. `ACIK-ISLER.md` → 4.19.
+
+---
+
 ## Bu dönemde teşhis edildi, düzeltilmedi
 
 Ayrıntıları `ACIK-ISLER.md` içinde:

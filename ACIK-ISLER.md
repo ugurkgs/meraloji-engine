@@ -60,6 +60,8 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | 11b | **4.16** | widget karada skor gösteriyor | **APK** | mobil |
 | ~~11d~~ | ~~**4.17**~~ | ~~7 gün detayda gündüz/gece sıcaklık — istemci yarısı~~ | **YAPILDI** — APK bekliyor | — |
 | 11e | **4.18** | hava sıcaklığı simülasyonu karada deniz zemini çiziyor | **APK** | **karar bekliyor** |
+| 11f | **4.19** | akıntı yönü konvansiyonu doğrulanmadı | ölçüm | düşük |
+| 11g | **4.20** | kıyı açısı il sınırı poligonlarından geliyor | server.js | orta — skoru etkiliyor |
 | 12 | **1.4** | `targetClass` gruplaması | **APK** | mobil |
 | 13 | **4.10** | çift istek (oturumsuz + kimlikli) | **APK** | mobil |
 | 14 | **2.1** | `mera_tarama` → `scan_result` uçurumu | **APK** | mobil |
@@ -434,6 +436,58 @@ gradyanı mı). Bu bir **tasarım kararı**, kullanıcıdan gelmeli.
 Aciliyeti düşük — yanlış veri göstermiyor, yalnızca kara noktasında deniz gibi
 görünüyor.
 
+### 4.19 Akıntı yönü konvansiyonu DOĞRULANMADI `ARAŞTIRMA`
+
+Dalga yönü işi sırasında çıktı (bkz. `25-TEMMUZ-SONRASI-YAPILANLAR.md` § 20).
+Rüzgâr ve dalga yönleri meteorolojik konvansiyondadır ("**geldiği** yön") ve
+istemcide artık her ikisi de `+180` ile "gittiği yön"e çevriliyor.
+
+**`ocean_current_direction` için bu ÇEVİRME YAPILMADI** — oşinografide akıntı
+yönü geleneksel olarak "**gittiği** yön"dür, yani zaten doğru olabilir. Çevrilirse
+çalışan bir gösterim bozulur. Doğrulanmadığı için dokunulmadı.
+
+**Nerede:** `MainActivity` → `metricCurrentDir` ve detay diyaloğundaki
+`currentDirVal` hâlâ `getWindDirectionStr` (ham) kullanıyor; dalga/ölü dalga/
+rüzgâr `gidisYonuStr` kullanıyor. Kodda not düşüldü.
+
+**Nasıl ölçülür (dalga için kullanılan yöntemin aynısı):** kuvvetli ve sürekli
+rüzgâr olan bir bölgede yüzey akıntısı Ekman sapmasıyla rüzgârın **gittiği**
+yönden ~15–45° sağa (kuzey yarıküre) kayar. `ocean_current_direction` ile
+`wind_direction_10m + 180` arasındaki fark tutarlı olarak küçükse ("gittiği"),
+~180° ise ("geldiği"). Zayıf akıntı (< 0,2 m/s) elenmeli — dalga ölçümünde zayıf
+rüzgâr denizi yüzünden ilk sonuç anlamsız çıkmıştı, aynı tuzak.
+
+### 4.20 `getShoreNormalBearing` il sınırı poligonlarına dayanıyor `ARAŞTIRMA`
+
+Kıyı köşeleri `tr-cities.json`'daki **idari il sınırı** poligonlarından
+türetiliyor (3460 köşe, 31 kıyı ili). Bu poligonlar kara sınırlarını da içeriyor
+ve kıyıda çok sadeleştirilmiş.
+
+**Ölçülen sonuçlar:**
+
+- Kullanıcının Selçuk noktasında **`null`** — en yakın köşe 2,76 km,
+  `SHORE_BEARING_MAX_KM` 2. Urla'da 3,62 km, orada da null.
+- `analyzeLocationOffline` aynı poligonlarla kullanıcının **2,1 m derinlikteki
+  deniz noktasına `COASTAL_LAND`** diyor. Poligonlar koyları yutuyor. (Zaten
+  sunucu yalnız `INLAND`'e güveniyor — bu yüzden.)
+
+**Etkisi sadece görsel değil:**
+- `calculateRipCurrentRisk` `shoreBearing` null olunca **sessizce kapanıyor** —
+  güvenlik özelliği tam da kıyıya yakın noktalarda çalışmıyor.
+- `server.js:4346` levrek `headOnWaveBonus` aynı değeri okuyor → **skor girdisi**.
+  Değiştirilmeden önce ölçülmeli (§2.2).
+- 4.7 (barınak/maruziyet modeli) bu veriye bağlı, bu hâliyle kurulamaz.
+
+**DİKKAT — "yanlış" demeden önce:** bu fonksiyon "en yakın kıyıya doğru" verir,
+yani **deniz** noktasında karaya, **kara** noktasında denize bakar. İkisi de
+doğrudur. Ölçüm yapan önce noktanın deniz olduğunu doğrulamalı; bu atlandığı için
+bir kez "9/10 yanlış" sonucuna varılıp geri alındı.
+
+**Olası yön:** 20.4'teki açık su yayı zaten her yönde kara mesafesini biliyor ve
+tek elevation isteğiyle geliyor. Kıyı normali oradan türetilebilir — ama
+*"kara yönlerinin vektör ortalaması"* denendi ve koylarda doğrulanamadı
+(bkz. § 20.3). En yakın karaya olan yön daha sağlam bir aday; ölçülmedi.
+
 ### 4.15 İstemci klorofil yokken 0 gösteriyor `HAZIR` · **MOBİL**
 
 4.9 çalışılırken çıktı. Sunucu doğru davranıyor — klorofil alınamazsa **`null`**
@@ -659,6 +713,14 @@ ayrılmış test kümesi** şart — yoksa modelin ne zaman hazır olduğu hiç 
   Billing'i o parametreye bakarak açıyor). Yan fayda: dışarıdan gelen **her**
   `meraloji.com` bağlantısı da bugüne kadar ana sayfaya düşüyordu, artık
   düşmüyor. § 19.
+- **Dalga yönü karadan geliyor gösteriliyordu** — düzeltildi, sunucu canlıda.
+  Konvansiyon **doğruydu** (137 örneklemde ölçüldü, ±180 hatası yok); sorun
+  ızgara çözünürlüğü + sığ suda refraksiyon. İki kural kondu: açık su yayı
+  (dalga ancak su olan yönden gelir) ve sığlaşma kilidi (sığ suda çizim en yakın
+  karaya). Sığlaşma bölgesindeki 7/7 noktada çizim artık kıyıya bakıyor.
+  `waveDirection` dokunulmadı (skor girdisi), deniz regresyonu sapma 0.
+  Ayrıntı + reddedilen yaklaşım: `25-TEMMUZ-SONRASI-YAPILANLAR.md` § 20.
+  **Açık kalan iki soru → 4.19 (akıntı konvansiyonu) ve 4.20 (kıyı poligonu).**
 - **Kurulum → ilk açılış "%41 sızıntısı"** — gerçek değil. Play Console 86 ilk
   açılış diyordu, Firebase 227 `first_open` görüyor. İki sistemin farklı şey
   sayması. Ürün sorunu yok, kampanya bütçesi ayrılmamalı.
