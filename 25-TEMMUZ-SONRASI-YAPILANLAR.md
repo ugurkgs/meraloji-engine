@@ -215,6 +215,217 @@ karada gösterilince kullanıcıya karada ölçüm varmış izlenimi veriyordu.
 
 ---
 
+## 10 · Ücretsiz PRO denetimi — sızıntı YOK `CANLIDA` (araç)
+
+Şüphe: para ödemeden PRO olan hesaplar var mı. **Yanıt: yok.**
+
+**Yeni dosya:** `tools/denetim-pro.js` — salt okunur. Render Shell'de
+`node tools/denetim-pro.js` ile çalışır. Firestore'a tek çağrısı `.get()`;
+dosyadaki tek `.set(` bir JavaScript `Map`'idir, veritabanına yazmaz.
+
+Bölümler: (A) sınırsız PRO / tip hataları · (B) `verifiedByGoogle=false` ·
+(C) `users` ↔ `subscriptions` tutarsızlıkları, kimlikleriyle · (D) `stats/pro_count`
+· (E) abonelik başlangıç→bitiş zaman çizelgesi.
+
+**Sonuçlar:**
+
+- **20 gerçek ödeyen** abone. Kullanıcının "bedava PRO" sandığı iki hesabın
+  (`roadrush35`, `ugurkogus`) ikisinin de abonelik kaydı **var**.
+- Gerçek aykırılar iki **sahipsiz doküman**: `I32RotlX…` ve `PGiOFnGv…` —
+  ödeme kaydı yok. `I32RotlX…` Authentication listesinde de yok, yani karşılığı
+  olan kullanıcı silinmiş; erişim üretmiyor, zararsız.
+  ⚠️ **Denetim çıktısı uid'leri 8 karaktere kısaltıyor** — Console'da bu
+  kısaltmayla arama yapılırsa sonuç çıkmaz, tam uid gerekir.
+- **`stats/pro_count` güvenilmez:** 20 diyor, dökümde 5, koleksiyonda 23 doküman.
+  Kullanıcı bunu bilinçli olarak açık bıraktı, sonra düzeltilecek.
+- **⚠️ `startedAt` 2026-08-04 öncesinde "son doğrulama zamanı" tutuyordu**
+  (bkz. commit `23919de`). Bu yüzden sütun "25 Temmuz sonrası 8 abonelik" gibi
+  okunuyor; **gerçek sayı 5.** Bu alanla tarih sorgusu yapan herkes bunu bilmeli.
+- **%81'i yıllık abone.** İş sonucu: 1.1 (RTDN) maddesinin *yenileme takibi*
+  değeri 2027'ye kayıyor; *iptal/iade* takibi değeri aynen duruyor.
+
+---
+
+## 11 · Görüş mesafesi artık gerçek ölçüm `CANLIDA` + `APK BEKLİYOR`
+
+**Belirti (kullanıcı bildirdi):** görüş simülasyonunda bar "Şimdi" iken 41,
+kaydırıcı gezdirilip tekrar "şimdi"ye getirilince 38. Aynı an, iki farklı sayı.
+
+**Sebep:** sunucu `hourlyTimeline`'da görüş mesafesi **göndermiyordu**; istemci
+onu bulut örtüsünden **tahmin ediyordu** (`vis − cCover×0.10` gibi). "Şimdi"
+gerçek `instant.visibility`'yi okuyor, kaydırıcı tahmini okuyordu.
+
+Talimat §2.1 ihlali — bu oturumda üçüncü kez aynı aile: gerçek değerin yerine
+uydurulmuş değer. (Diğerleri: `hourlyTimeline` sabit 24, klorofil `0.2`/`0`.)
+
+**Sunucu (`CANLIDA`):** `hourlyTimeline` satırlarına gerçek saatlik
+`weather.hourly.visibility[wIdx]` eklendi. Veri yoksa **`null`** — 0 değil.
+Alan **eklendi**, hiçbir alan kaldırılmadı; Gson bilinmeyen alanı yok saydığı
+için yayındaki APK etkilenmiyor.
+
+**İstemci (`APK BEKLİYOR`):** `boolean visGercek` / `visGercekSlider` bayrakları.
+Gerçek veri geldiyse tahmin blokları hiç çalışmıyor; gelmediyse eski tahmin
+davranışı korunuyor (gerileme yok).
+
+---
+
+## 12 · 7 günlük tahminde gündüz/gece sıcaklık ortalaması `CANLIDA` (sunucu yarısı)
+
+**Belirti:** gece analiz yapıp 7 günlük detaya girildiğinde hava sıcaklığı
+düşük görünüyordu — gösterilen değer analiz saatinin sıcaklığıydı, günün değil.
+
+**Sunucu:** yeni `gunGeceSicaklikOrt()` yardımcısı. Günün 24 saatini
+`getTimeOfDay()` ile (SunCalc + yerel ofset) gündüz/gece ayırıp iki ayrı
+ortalama üretiyor, yanıta `airTempDayAvg` / `airTempNightAvg` olarak ekliyor.
+
+**Mevcut `airTemp` alanına DOKUNULMADI** — skoru o besliyor. Yeni alanlar
+yalnızca gösterim için, ek alan olduğu için yayındaki APK kırılmıyor.
+Veri yoksa `null`.
+
+> **⚠️ İstemci yarısı YAPILMADI** — `ForecastResponse`'ta alanlar tanımlı değil,
+> ekranda hâlâ tek sıcaklık var. Bkz. `ACIK-ISLER.md` → 4.17.
+
+---
+
+## 13 · Kıyı bildirimi kapatma ayarı `CANLIDA` + `APK BEKLİYOR`
+
+1.5'in "AÇIK KALAN" 4. maddesi. Artık iki yarısı da yazıldı.
+
+**Sunucu (`CANLIDA`):** aday döngüsünde
+`if (d.notifyShoreAlert === false) { kapatanElenen++; continue; }`
+Karşılaştırma **`=== false` ile KESİN** — alanı hiç olmayan kullanıcı
+(`undefined`) eski davranışta kalır, yani mevcut kimse sessizce susturulmaz.
+Elenen sayı loga yazılıyor.
+
+**İstemci (`APK BEKLİYOR`):** Menü → Ayarlar → Bildirim Ayarları.
+Anahtar, Firestore okuması bitene kadar **devre dışı** duruyor — kullanıcı
+bilinmeyen bir duruma dokunup yanlışlıkla yazmasın diye. Yazma
+`set(..., SetOptions.merge())` ile; `update()` olsaydı dokümanı henüz olmayan
+kullanıcıda sessizce patlardı (aynı hata `firestore_rules` maddesinde yaşandı).
+
+---
+
+## 14 · Kara modu görsel kusurları `APK BEKLİYOR`
+
+Karada analiz yapıldığında simülasyonların deniz gibi davranması. Kök sebep
+tek: **`WaveSimulationView.setLandMode()` vardı ama `MainActivity` onu hiç
+çağırmıyordu.** 3 çağrı eklendi (açılış `false`, `applyLandMode` `true`,
+`applySeaMode` `false`).
+
+| # | belirti | düzeltme |
+|---|---|---|
+| 1 | hava sıcaklığı simülasyonunda balık figürü | balık + `air_fish_comfort_layer` etiketi `if (!isLandMode)` içine |
+| 1b | karada kumsal/kıyı şeridi çiziliyor | `drawAirTempMode` 8. bölüm (45 satır) `if (!isLandMode)` içine |
+| 2 | rüzgâr simülasyonu deniz maskesi çıkarmaya çalışıyor | `setLandMode` maskeyi temizliyor, `generateSeaMaskAsync` karada erken dönüyor (bitmap geri veriliyor) |
+| 4 | beyaz rüzgâr çizgileri karada görünmüyor | alfa tabanı 60 → **120**, ayrıca her beyaz çizginin altına koyu `streakHalo` |
+
+**Not:** hava sıcaklığı simülasyonu karada hâlâ **deniz zeminini çiziyor**
+(6. bölüm). Tespit edildi, kullanıcı kararı bekliyor — `ACIK-ISLER.md` → 4.18.
+
+---
+
+## 15 · Karada "Derinlik: Bilinmiyor" yerine rakım `APK BEKLİYOR`
+
+Kara noktasında `Derinlik: Bilinmiyor` yazıyordu. Sunucu `elevation`'ı
+**zaten gönderiyordu**, istemcide karşılık alan yoktu.
+
+- `ForecastResponse.java` → `@SerializedName("elevation") public Double elevation;`
+- Karada: `elevation` varsa `R.string.elevation_val`, yoksa satır `View.GONE`.
+  "Bilinmeyen"i yazmaktansa hiç yazma.
+- **Denizde davranış aynen korundu** (`depth_none` dâhil).
+
+Aynı aile: sunucunun gönderdiği ama istemcinin okumadığı alan. Bu oturumda
+üç kez çıktı (`setLandMode`, `elevation`, `forecastChartView`).
+
+---
+
+## 16 · Dalga simülasyonu etiketi `APK BEKLİYOR`
+
+Dalga yüksekliği ekranının sol üstünde "Rüzgar" yazıyordu, rüzgâr hızı sanılıyordu.
+`wh_wind` 4 dilde: **RÜZGAR DALGASI · WIND WAVE · OLA DE VIENTO · ΚΥΜΑ ΑΝΕΜΟΥ**.
+Rüzgâr simülasyonundaki `hud_wind` **değişmedi** (o gerçekten rüzgâr).
+
+**Bileşik dalga sorusu ölçüldü — hesapta hata YOK.** Rüzgâr dalgası 0,4 +
+ölü dalga 0,4 → bileşik 0,5, çünkü bileşik **toplama değil enerji toplamıdır**
+(`√(rüzgâr² + ölü²)`). Üstelik bu değeri biz hesaplamıyoruz: `wave_height`
+Open-Meteo'nun kendi alanı ve tanımı zaten "rüzgâr dalgası + ölü dalganın
+birleşik belirgin yüksekliği". Ekrandaki üç sayı da yuvarlanmış olduğu için
+elle çarpıp kontrol etmek yanıltıcı.
+
+---
+
+## 17 · Menü yeniden düzenlendi + hesap silme `APK BEKLİYOR`
+
+12 madde tek düz listeydi, sıra rastgeleydi (Hakkında üstlerdeydi).
+
+- Sık kullanılanlar üstte açık: **PRO · Giriş · Favoriler**
+- **⚙️ Ayarlar** (açılır): Bildirim Ayarları · Dil · Gizlilik Politikası · Hesabımı Sil
+- **ℹ️ Hakkında** (açılır): Hakkında · Algoritma · Geri Bildirim · Instagram
+- Çıkış en altta
+
+Gruplar **kapalı başlıyor**, başlık satırı açıp kapatıyor, sağdaki ok `▸`/`▾`
+dönüyor. Tek yardımcı: `menuGrubuKur(baslikId, govdeId, okId)`.
+
+**Hesap silme e-posta değil sayfa açıyor.** Eski `sendAccountDeletionRequest()`
+(mailto, 46 satır) tamamen silindi; artık onay diyaloğundan sonra
+`https://meraloji.com/delete-account.html`. Gizlilik politikası da
+`https://meraloji.com/privacy.html`. İkisi ortak `menuAdresAc(url)` kullanıyor —
+tarayıcı yoksa adresi **panoya kopyalayıp gösteriyor**, kullanıcı boşta kalmıyor.
+Bilgi notu (30 gün + "abonelik ayrıca Play'den iptal edilmeli") korundu,
+metin e-postadan sayfaya göre yeniden yazıldı.
+
+**Layout doğrulaması:** 50 mevcut id'nin hepsi korundu, 6 yeni id eklendi,
+`LinearLayout` açma/kapama dengesi 15/15, 4 dilde anahtar kümeleri eşit.
+
+---
+
+## 18 · Popüler meralara uzun basma `APK BEKLİYOR`
+
+Buton 150 km yarıçapla sınırlıydı. Artık **4 saniye basılı tutunca tüm popüler
+meralar** geliyor (tek seferlik).
+
+**Tuzak:** `OnLongClickListener` ~500 ms'de tetiklenir, 4 saniyeyi ifade edemez.
+Süre `OnTouchListener` içinde ölçülüyor: `HEATMAP_HOLD_REFRESH_MS = 500`,
+`HEATMAP_HOLD_ALL_MS = 4000`, tek atımlık `mHeatmapShowAll` bayrağı.
+`fetchHeatmapData` bayrağı **hemen tüketiyor** ve o çağrıda enlem sorgusunu,
+yarıçap süzgecini ve önbelleğe yazmayı atlıyor — sonraki normal çağrılar
+kirlenmiyor.
+
+---
+
+## 19 · Gizlilik / hesap silme sayfası açılmıyordu — TWA derin bağlantı `APK BEKLİYOR`
+
+**Belirti:** butona basınca sayfaya gitmeye çalışıyor ama uygulamanın ana
+sayfasında takılıyor. Kullanıcı `index.html`'i suçladı — **index masumdu.**
+
+**Gerçek zincir:**
+
+```
+MainActivity → ACTION_VIEW https://meraloji.com/privacy.html
+AndroidManifest:84  autoVerify="true", host="meraloji.com", YOL SINIRI YOK
+                    → sitenin TÜM adresleri kendi uygulamamıza düşüyor
+TwaActivity         gelen intent'in adresini HİÇ okumuyordu
+TwaActivity:24      LAUNCH_URL = "https://meraloji.com/?source=android_app"
+                    → her zaman ana sayfa
+```
+
+`public/sw.js` ve `public/index.html` tek tek elendi: servis çalışanında gezinme
+yedeği yok, `/privacy.html` `STATIC_ASSETS` içinde değil (ağa düşüyor),
+index'te yönlendirme yok.
+
+**Düzeltme:** `launchTwa()` artık `getIntent().getData()`'yı okuyor. Host
+`meraloji.com` ve yol kök değilse **gelen adres** açılıyor; kök veya yabancı
+host ise eski `LAUNCH_URL`'e dönülüyor. Böylece `source=android_app`
+korunuyor — web tarafı bu parametreye bakıp Google Billing'i açıyor
+(`index.html:6082`). `lang` her iki durumda da ekleniyor.
+
+**Yan fayda:** bu yalnızca iki menü butonunu düzeltmiyor. Dışarıdan gelen
+**her** `meraloji.com` bağlantısı (WhatsApp'ta paylaşılan sayfa, e-postadaki
+bağlantı, Play'deki gizlilik adresi) bugüne kadar ana sayfaya düşüyordu;
+hepsi artık doğru sayfayı açacak.
+
+---
+
 ## Bu dönemde teşhis edildi, düzeltilmedi
 
 Ayrıntıları `ACIK-ISLER.md` içinde:

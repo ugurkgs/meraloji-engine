@@ -14,6 +14,11 @@ bağlamı taşır.
 Aşağıdaki maddelerin **hâlâ açık olduğu koddan mekanik olarak doğrulandı.**
 "Yapılmış ama kapatılmamış" bir madde çıkmadı.
 
+> **Bu tablo 2026-08-10 tarihlidir. Sonrasında yapılanlar için 0.1'deki iş
+> sırasına ve Kapatılanlar bölümüne bak** — belge en son **2026-08-11**'de
+> güncellendi (denetim, görüş mesafesi, gündüz/gece sıcaklık, 1.5 kapatma
+> ayarı, Android 11 maddelik liste, menü, TWA derin bağlantı).
+
 | madde | iddia | kanıt |
 |---|---|---|
 | 1.1 | RTDN/webhook ucu yok | `rtdn\|pubsub\|developerNotification` → **0 eşleşme** |
@@ -49,15 +54,30 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | ~~7~~ | ~~**4.12**~~ | ~~snap'te weather'ı da çek~~ | **ÖLÇÜLDÜ — değişiklik gerekmedi** | — |
 | ~~8~~ | ~~**2.3**~~ | ~~cron'ları kullanıcı saat dilimine taşı~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | ~~9~~ | ~~**4.3**~~ | ~~`photoId` temizliği~~ | **DOĞRULANDI — yapılmadı, gerekçe kayıtlı** | — |
-| 10 | **1.5** | kıyı bildirimi | **KISMEN — canlıya alındı, kapatma ayarı APK'ya kaldı** | orta |
+| ~~10~~ | ~~**1.5**~~ | ~~kıyı bildirimi~~ | **YAPILDI** — canlı; kapatma ayarı da yazıldı, APK bekliyor | — |
 | ~~11~~ | ~~**4.8**~~ | ~~`instant`'ı `isLand` ile kapat~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | ~~11c~~ | ~~**4.14**~~ | ~~İspanya bölge adları~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | 11b | **4.16** | widget karada skor gösteriyor | **APK** | mobil |
+| 11d | **4.17** | 7 gün detayda gündüz/gece sıcaklık — istemci yarısı | **APK** | mobil, düşük |
+| 11e | **4.18** | hava sıcaklığı simülasyonu karada deniz zemini çiziyor | **APK** | **karar bekliyor** |
 | 12 | **1.4** | `targetClass` gruplaması | **APK** | mobil |
 | 13 | **4.10** | çift istek (oturumsuz + kimlikli) | **APK** | mobil |
 | 14 | **2.1** | `mera_tarama` → `scan_result` uçurumu | **APK** | mobil |
 | 15 | **1.1** | RTDN / Pub/Sub | server.js + altyapı | **yüksek — ödeme kodu** |
 | 16 | **göl** | `TATLISU-PLAN.md` | ayrı dosya + APK | en son |
+
+> ### ⚠️ ŞU ANDAKİ TEK BÜYÜK DARBOĞAZ: APK YAYINLANMADI
+>
+> 2026-08-11 itibarıyla Android tarafında **~18 değişiklik derlenmeyi ve
+> yayınlanmayı bekliyor** (kara modu görselleri, rakım, görüş mesafesi,
+> dalga etiketi, menü yeniden düzeni, hesap silme sayfası, gizlilik bağlantısı,
+> uzun basma, bildirim ayarları, TWA derin bağlantı).
+> Tam liste: `25-TEMMUZ-SONRASI-YAPILANLAR.md` § 11–19.
+>
+> **Sonucu:** yukarıdaki tablodaki `APK` etiketli maddelerin hiçbiri
+> kullanıcıya ulaşmadı ve **1.5'in eşiği bu sürüm çıkmadan indirilmemeli.**
+> Bu yığın büyüdükçe tek seferde doğrulanacak değişiklik sayısı artıyor;
+> bir sonraki iş APK almak olmalı, yeni Android maddesi eklemek değil.
 
 > **4.13 neden 4. sırada:** listedeki tek madde ki kullanıcı hatayı **kendi
 > gözüyle görüp bildirdi** (karada balık pini). Düzeltmesi yeni bir model
@@ -86,6 +106,15 @@ cache de bunu bir süre kilitliyor).
 
 **Ayrıca ölçemediğimiz şey:** bir abonenin ikinci ayı görüp görmediği. Gelirin
 sürdürülebilirliği tamamen buna bağlı ve şu an elimizde veri yok.
+
+**2026-08-11 denetimi aciliyeti DEĞİŞTİRDİ (bkz. `tools/denetim-pro.js`):
+20 gerçek abonenin %81'i YILLIK.** Yani "yenileme kaçırılıyor" sorunu bu kitlede
+pratikte **2027'ye kadar tetiklenmiyor**; aylık abone sayısı tek haneli.
+Buna karşılık **iptal ve iade** bildirimlerinin değeri aynen duruyor — onlar
+abonelik türünden bağımsız ve şu an hiç görülmüyor.
+
+**Sonuç:** iş büyüklüğü aynı, ama "yenileme takibi" gerekçesiyle acele edilmemeli.
+Yapılırsa öncelik `SUBSCRIPTION_CANCELED` / `SUBSCRIPTION_REVOKED` olmalı.
 
 **Sonraki adım:** Pub/Sub konusu + webhook ucu + `subscriptions/{uid}` güncelleme.
 Orta büyüklükte bir iş, ödeme koduna dokunuyor — dikkatli test ister.
@@ -189,11 +218,18 @@ ve `(N/M hücre)` sayısı doğrudan logdan okunuyor, çıkarım yapmaya gerek y
    === 'INLAND'` ile eleniyor (bellek içi poligon testi, ağ maliyeti yok).
    Elenen sayı loga yazılıyor.
 
-**AÇIK KALAN — 4. Kullanıcıya kapatma seçeneği yok.** Şu an tercih mekanizması
-yok, `fcmToken`'ı olan herkes aday. Favorilerdeki `notify` bayrağının eşdeğeri
-gerekli. **Mobil taraf işi, APK gerektiriyor.** Konuma dayalı bildirim için bu
-ciddi bir eksik; eşik 80'de pratikte kimseye gitmediği için şimdilik tolere
-ediliyor, ama eşik düşürülmeden ÖNCE çözülmeli.
+4. ✅ **Kapatma seçeneği YAZILDI — 2026-08-11.** İki yarısı da hazır:
+   sunucuda aday döngüsünde `if (d.notifyShoreAlert === false) { ... continue; }`
+   (`CANLIDA`), istemcide Menü → Ayarlar → Bildirim Ayarları (`APK BEKLİYOR`).
+   Karşılaştırma `=== false` ile **kesin**: alanı hiç olmayan kullanıcı
+   (`undefined`) eski davranışta kalıyor, mevcut kimse sessizce susturulmuyor.
+   Ayrıntı: `25-TEMMUZ-SONRASI-YAPILANLAR.md` § 13.
+
+**AÇIK KALAN — kullanıcı ayarı APK'ya bağlı.** Kod hazır ama **derlenmiş sürüm
+yayınlanmadan kullanıcının elinde kapatma düğmesi yok.** Eşik 80'de pratikte
+kimseye gitmediği için tolere ediliyor; **eşik düşürülmeden ÖNCE APK çıkmalı.**
+Sıra: APK yayınla → birkaç gün log izle → eşiği indir. Ters sırada yapılırsa
+bildirim alan kullanıcının onu susturma yolu olmaz.
 
 **EYLÜL KONTROLÜ.** Sezonda skorlar yükselecek. Logda şu satıra bakılacak:
 ```
@@ -219,6 +255,9 @@ tarafı), 4 dilde eklendi. Kapatma ayarı ayrı bir iş ve APK istiyor.
 **Saat dilimi:** bu cron kullanıcının boylamından yerel saat türetiyor —
 Endonezya/İspanya kullanıcısına gece 03:00'te bildirim gitmiyor. Eski cron'lar
 da 2.3'te aynı hizaya getirildi.
+
+---
+
 ## 2 · Analitik ve ölçüm
 
 ### 2.1 `mera_tarama` → `scan_result` uçurumu `ARAŞTIRMA`
@@ -247,6 +286,21 @@ Cevaplanacak iki soru:
 ikisi de "etkileşim" gibi kokuyor) — ama tahminle karar verilmemeli.
 
 Mobil kod bu repoda değil.
+
+**2026-08-11 güncellemesi — 25 Tem – 10 Ağu penceresi (351 kullanıcı /
+11.412 olay) incelendi. Madde KAPANMADI, ama iki tuzak ayrıştırıldı:**
+
+- **Sürüm kohortu.** `scan_result` yalnızca 25 Temmuz sürümünde var,
+  `mera_tarama` iki sürümde de. Karşılaştırma sahte huni kaybı üretiyor
+  (bkz. `25-TEMMUZ-SONRASI-YAPILANLAR.md` sonundaki analitik notu).
+  **Bu madde `app_version` kırılımı alınmadan kapatılamaz.**
+- **Ölçüm artefaktları.** `consent_result` her açılışta, `trial_expired` her
+  oturumda atılıyor; ikisi de "kullanıcı sayısı" gibi okunursa yanıltıyor.
+  351'lik toplam da yalnız arka planda uyanan kullanıcıları içeriyor.
+
+**Kullanıcıdan beklenen (GA4'te elle):** `mera_tarama` ve `scan_result` için
+`app_version` kırılımı; `purchase_result` için `success` / `error_reason`.
+Bu iki kırılım alınmadan buraya yeni sayı yazılmamalı.
 
 ### 2.2 Bildirim açılma oranı düşük `HAZIR`
 
@@ -361,6 +415,38 @@ sunucu sözleşmesi değişmiyor, APK yeterli.
 **Aynı dosyada ikinci bir kusur:** `optDouble(..., 0)` her alanda kullanılıyor —
 yani veri gelmediğinde de "0" gösteriliyor (§2.1). Klorofil için bu 4.15 ile
 aynı hata. Widget düzeltilirken ikisi birlikte ele alınmalı.
+
+### 4.17 Gündüz/gece sıcaklık — istemci yarısı `HAZIR` · **MOBİL**
+
+Sunucu 2026-08-11'den beri her gün için `airTempDayAvg` ve `airTempNightAvg`
+gönderiyor (`gunGeceSicaklikOrt()`, SunCalc ile gündüz/gece ayrımı, veri yoksa
+`null`). **İstemci bu alanları hiç okumuyor** — `ForecastResponse`'ta karşılık
+alan yok, 7 günlük detayda hâlâ tek sıcaklık görünüyor.
+
+```
+grep -rn "airTempDayAvg" --include=*.java   →  0 eşleşme   (2026-08-11)
+```
+
+**Yapılacak:** `ForecastResponse`'ta günlük nesneye iki `Double` alan
+(`@SerializedName`), 7 günlük satırda `Gündüz Ort. 30,8° / Gece Ort. 28,3°`.
+**`null` gelirse eski tek değer gösterilsin** — 0 basılmamalı (§2.1) ve
+sunucu eski bir sürümdeyse gerileme olmamalı.
+
+`airTemp` alanı **değişmedi ve değişmemeli** — skoru o besliyor.
+
+### 4.18 Hava sıcaklığı simülasyonu karada deniz zemini çiziyor `KARAR BEKLİYOR` · **MOBİL**
+
+Kara modu düzeltmeleri sırasında çıktı (bkz. `25-TEMMUZ-SONRASI-YAPILANLAR.md` § 14).
+Balık figürü, konfor katmanı etiketi ve kumsal/kıyı şeridi karada artık
+çizilmiyor; ama `drawAirTempMode`'un **6. bölümü hâlâ deniz zeminini basıyor.**
+
+Diğerleri gibi tek satırlık kapı değil: zemin kaldırılırsa arkasında ne
+kalacağına karar vermek gerekiyor (düz renk mi, küçük harita mı, sıcaklık
+gradyanı mı). Bu bir **tasarım kararı**, kullanıcıdan gelmeli.
+
+Aciliyeti düşük — yanlış veri göstermiyor, yalnızca kara noktasında deniz gibi
+görünüyor.
+
 ### 4.15 İstemci klorofil yokken 0 gösteriyor `HAZIR` · **MOBİL**
 
 4.9 çalışılırken çıktı. Sunucu doğru davranıyor — klorofil alınamazsa **`null`**
@@ -538,6 +624,48 @@ ayrılmış test kümesi** şart — yoksa modelin ne zaman hazır olduğu hiç 
 
 ## Kapatılanlar (kayıt için)
 
+- **"Ücretsiz PRO olan hesaplar var mı?"** — DENETLENDİ, **sızıntı yok.**
+  `tools/denetim-pro.js` (salt okunur) yazıldı ve Render Shell'de koştu.
+  20 gerçek ödeyen abone; kullanıcının şüphelendiği iki hesabın da abonelik
+  kaydı var. İki **sahipsiz doküman** çıktı (`I32RotlX…`, `PGiOFnGv…`) —
+  biri Authentication'da hiç yok, yani karşılığı olan kullanıcı silinmiş;
+  erişim üretmiyor. Ayrıntı: `25-TEMMUZ-SONRASI-YAPILANLAR.md` § 10.
+  **İki tuzak kayda geçsin:** (1) denetim uid'leri **8 karaktere kısaltıyor**,
+  Console'da o kısaltmayla arama yapılırsa sonuç çıkmaz. (2) `startedAt`
+  2026-08-04 öncesinde "son doğrulama zamanı" tutuyordu — o alanla tarih
+  sorgusu yapmak yanlış sayı verir (8 görünür, gerçek 5).
+- **Görüş mesafesi "şimdi" ile kaydırıcı arasında tutarsızdı** (41 vs 38) —
+  düzeltildi. Sunucu `hourlyTimeline`'da görüş göndermiyordu, istemci bulut
+  örtüsünden **tahmin ediyordu**. Artık gerçek saatlik `visibility` geliyor
+  (yoksa `null`, 0 değil); istemcide `visGercek` bayrağı gerçek veri varken
+  tahmin bloğunu hiç çalıştırmıyor. Alan **eklendi**, hiçbir alan kaldırılmadı —
+  yayındaki APK etkilenmiyor. § 11.
+  **Aynı kök sebep ailesi üçüncü kez çıktı:** gerçek değerin yerine uydurulmuş
+  değer (§2.1) — önceki ikisi `hourlyTimeline` sabit 24 ve klorofil `0.2`/`0`.
+  Belirtisi hep aynı: *aynı an için iki farklı sayı.*
+- **7 günlük detayda sıcaklık analiz saatini gösteriyordu** — sunucu yarısı
+  yapıldı. `gunGeceSicaklikOrt()` günün 24 saatini SunCalc ile gündüz/gece
+  ayırıp `airTempDayAvg` / `airTempNightAvg` üretiyor. `airTemp` **dokunulmadı**
+  (skoru o besliyor). İstemci yarısı açık → **4.17**. § 12.
+- **Kara modu görsel kusurları (kullanıcının 11 maddelik listesi)** — Android
+  tarafı yazıldı, APK bekliyor. Kök sebep tekti: `setLandMode()` API'si vardı,
+  `MainActivity` onu **hiç çağırmıyordu**. § 14–18.
+  **Bu, oturumun ikinci tekrar eden aile'si: var olan ama çağrılmayan API.**
+  Üç kez çıktı — `setLandMode()`, `ForecastResponse.elevation` (sunucu
+  gönderiyordu, istemcide alan yoktu), `forecastChartView` (`findViewById`
+  satırı yorumda, alan hiç atanmıyor).
+  **Bileşik dalga şüphesi (0,4 + 0,4 → 0,5) ölçüldü, hata YOK:** bileşik
+  toplama değil enerji toplamı (`√(rüzgâr²+ölü²)`) ve değeri biz hesaplamıyoruz,
+  Open-Meteo'nun `wave_height` alanı zaten bu tanımda. Yalnız **etiket**
+  yanlıştı, o düzeltildi.
+- **Gizlilik / hesap silme sayfası açılmıyordu** — düzeltildi, **index masumdu.**
+  `TwaActivity` gelen intent'in adresini hiç okumuyor, sabit `LAUNCH_URL`
+  açıyordu; `AndroidManifest`'teki doğrulanmış süzgeçte **yol sınırı olmadığı**
+  için sitenin tüm adresleri kendi uygulamamıza düşüyordu. Artık gelen adres
+  açılıyor, kök adreste `source=android_app` korunuyor (web tarafı Google
+  Billing'i o parametreye bakarak açıyor). Yan fayda: dışarıdan gelen **her**
+  `meraloji.com` bağlantısı da bugüne kadar ana sayfaya düşüyordu, artık
+  düşmüyor. § 19.
 - **Kurulum → ilk açılış "%41 sızıntısı"** — gerçek değil. Play Console 86 ilk
   açılış diyordu, Firebase 227 `first_open` görüyor. İki sistemin farklı şey
   sayması. Ürün sorunu yok, kampanya bütçesi ayrılmamalı.
