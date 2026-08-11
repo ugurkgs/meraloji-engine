@@ -8818,10 +8818,26 @@ cron.schedule('5 * * * *', async () => {
         const nowUtcSaat = new Date().getUTCHours();
         const adaylar = [];
         let icBolgeElenen = 0;
+        let kapatanElenen = 0;
         for (const doc of snap.docs) {
             const d = doc.data();
             const ls = d.lastSeen;
             if (!ls || !d.fcmToken) continue;
+            // [1.5 — KAPATMA SEÇENEĞİ, 2026-08-11] Bu bildirim kullanıcının SON
+            // KONUMUNA dayanıyor; konuma dayalı bir bildirimi kapatamamak kabul
+            // edilemezdi ve özelliğin önündeki son engel buydu.
+            //
+            // OPT-OUT (varsayılan AÇIK) seçildi, opt-in değil: alan yoksa bildirim
+            // gider. Sebep — özellik zaten 2026-08-11'de eşik 80 ile canlıya alındı
+            // ve o eşikte pratikte hiç tetiklenmiyor (64 gözlemde 0). Varsayılanı
+            // KAPALI yapmak, uygulamayı güncellemeyen kullanıcılar için hiçbir şeyi
+            // değiştirmezken, güncelleyenler için özelliği sessizce öldürürdü.
+            // Konum saklama ayrıca privacy.html'de anlatılıyor (1.5 adım 2).
+            //
+            // Alanı istemci yazıyor: users/{uid}.notifyShoreAlert (Bildirim Ayarları).
+            // KESİN false karşılaştırması bilinçli — undefined/null "kullanıcı henüz
+            // seçim yapmadı" demektir, "kapattı" demek değildir.
+            if (d.notifyShoreAlert === false) { kapatanElenen++; continue; }
             // [1.5] İÇ BÖLGE SÜZGECİ. lastSeen'i karada olan kullanıcı (ör. Ankara
             // 39.370, 32.377) aday listesine giriyor, hücresi için boşuna forecast
             // çağrısı yapılıyor ve skor 0 dönüyordu. Zararsızdı (0 asla eşiği geçmez)
@@ -8845,7 +8861,8 @@ cron.schedule('5 * * * *', async () => {
         const hucreler = new Map();
         for (const a of adaylar) if (!hucreler.has(a.hucre)) hucreler.set(a.hucre, a);
         console.log(`[SHORE-ALERT/${mod}] ${adaylar.length} aday → ${hucreler.size} farklı hücre` +
-            (icBolgeElenen ? `  · ${icBolgeElenen} iç bölge adayı elendi` : ''));
+            (icBolgeElenen ? `  · ${icBolgeElenen} iç bölge adayı elendi` : '') +
+            (kapatanElenen ? `  · ${kapatanElenen} kullanıcı bildirimi kapatmış` : ''));
 
         const port = process.env.PORT || 3000;
         const hucreSkor = new Map();
