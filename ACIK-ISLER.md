@@ -701,6 +701,59 @@ Kullanıcının kararı, ve gerekçesi kayda değer:
 **Yapılacaksa sıra:** önce ölçüm kampanyası (metrik: ilk 10'daki değerli tür
 sayısı), sonra karar. Aceleye gelirse §4.1b tekrar yaşanır.
 
+### ~~4.24 "Veri Noktası" karada görünüyordu~~ **ÇÖZÜLDÜ** (2026-08-12) · sunucu CANLI BEKLİYOR · istemci APK BEKLİYOR
+
+Kullanıcı ekran görüntüsüyle bildirdi: analiz denizde (Çandarlı, **38.9370,
+26.9235**, rakım 0 m) ama camgöbeği "Veri Noktası" nişangâhı **karada** duruyordu.
+
+**ÖLÇÜLDÜ — üç bulgu, üçü de baloncuktaki cümleyi yalanlıyor:**
+
+| | koordinat | rakım | sapma |
+|---|---|---|---|
+| analiz noktası | 38.9370, 26.9235 | 0 m | — |
+| **marine düğümü** | 38.9583, 26.8750 | **428 m** (dağ) | 4,82 km KB |
+| **hava düğümü** | 38.9375, 27.0000 | 2 m | 6,62 km **D** |
+
+1. **Değer o düğümden okunmuyor.** Aynı istek analiz noktası için ve doğrudan
+   428 m'lik düğüm için yapıldığında ikisi de **aynı koordinatı** yansıtıyor ama
+   SST **23,5** ve **24,7** dönüyor. Open-Meteo değeri istenen koordinat için
+   üretiyor; yansıttığı koordinat yalnızca **en yakın kafes düğümü** — bir yer
+   değil, bir etiket.
+2. **Hava verisi oradan gelmiyor.** Ayrı kafes, üstelik **ters yönde**. Tek
+   işaretle iki ızgara temsil ediliyordu.
+3. **Karada olması veriyi geçersiz kılmıyor.** Hücre ~4,6 km ve suyu kapsıyor.
+   Gerçekten veri olmayan yerde API **null** dönüyor (Ankara ile doğrulandı).
+
+**`cell_selection` ile ÇÖZÜLMEZ — denendi, ölçüldü, reddedildi:**
+
+| marine | sonuç |
+|---|---|
+| varsayılan | 428 m düğüm, dalga **var** |
+| `cell_selection=sea` | **aynı düğüm** — hiçbir şey değişmiyor |
+| `cell_selection=nearest` | 28 m düğüm ama dalga verisi **YOK** |
+
+Hava tarafında `sea` umut vericiydi (Çandarlı 6,62 → 1,21 km) ama **12 kıyı
+noktasında ölçülünce 4'ünde DAHA KÖTÜ** (Urla 1,99 → 8,69 · Çeşme 1,34 → 5,82 ·
+Trabzon 2,79 → 5,01), ortalama kazanç yalnız 1,40 km, ve rüzgârı 7,3 km/s'ye
+kadar oynatıyor. **Veriye dokunulmadı.**
+
+**ÇÖZÜM — veri değil sunum.** Sorun gerçekti ama veri katmanında değil:
+
+- **Sunucu (alan EKLEME, geriye dönük risk sıfır):** `weatherGrid`,
+  `weatherGridDistanceKm`, `gridCellDeg` eklendi. Mevcut `apiGrid` ve
+  `gridDistanceKm` **dokunulmadı** — yayındaki APK yeni alanları görmezden gelir.
+- **İstemci:** nişangâh yerine **model hücreleri kare olarak** çiziliyor
+  (marine camgöbeği, hava kehribar). Nokta çizmek olmayan bir kesinlik ima
+  ediyordu; kare, denize taştığını görünür kılıyor.
+- **Metin düzeltildi, 4 dilde.** Eski hâli iki yönden yanlıştı. Yenisi:
+  *"Değerler analiz yapılan nokta için hesaplanır. Kareler, verinin geldiği model
+  hücreleridir; merkezleri karaya düşebilir — hücre suyu kapsıyorsa veri
+  geçerlidir."* Başlık `Veri Noktası` → `Model Izgara Hücresi`.
+- İki ızgaranın mesafesi artık **ayrı ayrı** yazılıyor.
+
+**Doğrulama:** `node --check` temiz · 4 `strings.xml` XML geçerli, karakterler
+doğru · `compileReleaseJavaWithJavac` **BUILD SUCCESSFUL**.
+
 ### 4.23 Uykuda tuzaklar — şu an zarar vermiyor `HAZIR` (düşük öncelik)
 
 Aynı denetimden; üçü de doğrulandı, üçü de bugün zararsız.

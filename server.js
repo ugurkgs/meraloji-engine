@@ -5834,6 +5834,25 @@ app.get('/api/forecast', async (req, res) => {
             console.log(`[GRID] [${logUser}] Tıklanan:(${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}) API:(${marine.latitude},${marine.longitude}) Sapma:${gridDistanceKm.toFixed(2)}km`);
         }
 
+        // [VERİ NOKTASI] Hava ızgarası MARINE'DEN AYRI bir kafes ve genellikle
+        // BAŞKA BİR YÖNDE. İstemci bugüne kadar yalnız marine düğümünü çizip
+        // "hava, dalga ve su bu koordinattan alınır" diyordu — hava için YANLIŞ.
+        //
+        // ÖLÇÜLDÜ (Çandarlı 38.9370,26.9235): marine düğümü 4,82 km KB'da ve
+        // rakımı 428 m (dağ); hava düğümü 6,62 km D'da ve rakımı 2 m. Tek işaretle
+        // iki ayrı ızgara temsil ediliyordu.
+        //
+        // Düğümün karada olması veriyi geçersiz KILMAZ: düğüm bir yer değil, model
+        // kafesinin etiketidir; hücre (~4,6 km) suyu kapsıyorsa değer geçerlidir.
+        // Kanıt: gerçekten veri olmayan yerde (Ankara) API null döner.
+        // `cell_selection` ile düzeltilemez — ölçüldü: marine'de `sea` aynı düğümü
+        // verir, `nearest` dalga verisini tamamen kaybettirir; hava tarafında `sea`
+        // 12 kıyı noktasının 4'ünde ızgarayı DAHA UZAĞA taşır. Bu yüzden veriye
+        // dokunulmuyor, yalnız istemcinin dürüst çizebilmesi için alan EKLENİYOR.
+        const weatherGridDistanceKm = (weather && weather.latitude != null && weather.longitude != null)
+            ? haversineKm(parseFloat(lat), parseFloat(lon), parseFloat(weather.latitude), parseFloat(weather.longitude))
+            : null;
+
         // Weather: past_days=1 → hourly[0-23]=dün, [24-47]=bugün, [48-71]=yarın...
         // Marine:  past_days=7 → hourly[0-167]=geçmiş 7 gün, [168-191]=bugün, [192+]=gelecek
         // Weather hourlyOffset (past_days=1): bugün = indeks 24
@@ -6773,6 +6792,18 @@ app.get('/api/forecast', async (req, res) => {
             gridDistanceKm: parseFloat(gridDistanceKm.toFixed(2)), // Marine API grid sapması (km)
             gridWarning: gridDistanceKm > 10,                      // true ise veri 10km+ uzak noktadan
             apiGrid: (marine && marine.latitude) ? { lat: marine.latitude, lon: marine.longitude } : null,
+            // [VERİ NOKTASI] YENİ ALANLAR — eski APK görmezden gelir (alan eklemek güvenli).
+            // İstemci bunlarla model HÜCRESİNİ çizebilir; nokta çizmek, olmayan bir
+            // kesinlik ima ediyordu ve merkezi karaya düştüğünde saçma görünüyordu.
+            weatherGrid: (weather && weather.latitude != null)
+                ? { lat: weather.latitude, lon: weather.longitude } : null,
+            weatherGridDistanceKm: weatherGridDistanceKm != null
+                ? parseFloat(weatherGridDistanceKm.toFixed(2)) : null,
+            // Hücre kenar uzunlukları (derece). Yansıtılan koordinatlardan ölçüldü:
+            // marine düğümleri 1/24° (≈4,6 km), hava düğümleri 1/16° (≈6,9 km)
+            // katlarına oturuyor. Open-Meteo çözünürlüğü değişirse kare biraz
+            // kayar — yalnız görsel, veriye etkisi yok.
+            gridCellDeg: { marine: 1 / 24, weather: 1 / 16 },
             forecast: forecast,
             instant: instantData,
             // [4.9] Hangi kaynakların bu istekte gelebildiği. YENİ ALAN — eski APK
