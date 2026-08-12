@@ -4,6 +4,53 @@
 > ve `species.js` bu çalışmadan hiç etkilenmedi. Aşamalar sırayla uygulanmalı ve
 > **4. aşamadaki doğrulama kapısı geçilmeden 5. aşamaya başlanmamalı.**
 
+> **2026-08-12 — PLAN KODA KARŞI SINANDI.** Aşağıdaki §0.1 on bulguyu listeliyor;
+> ikisi kritik. İlgili bölümler bu bulgulara göre düzeltildi. Bulgulardan önceki
+> hâline dayanarak iş yapılmamalı.
+
+---
+
+## 0.1 · Kod doğrulaması — 10 bulgu
+
+| # | bulgu | ağırlık | nerede |
+|---|---|---|---|
+| A | `null` akıntı yayındaki APK'yı ÇÖKERTİR | **kritik** | §4.3, §12 |
+| B | INLAND reddi İKİ yerde, plan birini görüyor | **kritik** | §7.3 |
+| C | Aşama 1 çıktıları repoda yok | önemli | §5.1 |
+| D | Doğrulama kapısı model-model karşılaştırması | önemli | §8.3 |
+| E | Sıcaklık modeli durumsuz sunucuda koşamaz | önemli | §8.2 |
+| F | `salt: null` kuralı özelliği boşaltabilir | önemli | §6 |
+| G | §0'daki gerekçe noktası doğrulanmadı | önemli | §0 |
+| H | Satır referanslarının hepsi bayat | küçük | §7.3, §10.2 |
+| I | Derinlik çarpanı iddiası doğru ama eksik | küçük | §10.2 |
+| J | Deniz regresyonu bu değişiklik için yetersiz | küçük | §11 |
+
+**A — `null` akıntı çökertir.** §4.3 *"null, istemcinin bugün de karşılaştığı bir
+durum"* diyordu. Doğrulanmadı ve yanlış:
+
+```java
+ForecastResponse:150   @SerializedName("current") public Double current;   // instant
+MainActivity:3562      current = d.current >= 0 ? ... : "—";              // null kontrolü YOK
+```
+
+`Double` üzerinde `>=` otomatik unboxing yapar → **her göl analizinde
+NullPointerException.** Kod "bilinmiyor" için zaten **`-1` sentinel** kullanıyor
+(instant `>= 0`, günlük `startsWith("-1")`) — çıkış yolu bu.
+Diğer alanlar güvenli: `wave`, `rain`, `salinity`, `wavePeriod`, `swellHeight`,
+`swellPeriod`, `thermoclineDepth`, `tide` hepsi null korumalı okunuyor.
+
+**G — gerekçe doğrulanmadı.** §0 bütün projeyi `39.371, 32.375` noktasındaki
+favoriye dayandırıyor ama o noktanın bir HydroLAKES poligonunun **içine düşüp
+düşmediği hiç kontrol edilmedi.** Aşama 1'in ilk işi bu olmalı; düşmüyorsa
+gerekçe yeniden yazılmalı.
+
+**F — tuzluluk kuralı kendi içinde çelişiyor.** §2.4 "bilinen tuzlu göller için
+elle liste" diyor, §6 ise "salt bilinmiyorsa tatlı varsayılmaz". 657 gölün
+637'si isimsiz ve OSM'de `salt=yes` nadir; ikinci kural katı uygulanırsa
+göllerin büyük kısmı tür listesi üretemez. Türkiye'nin tuzlu/sodalı gölleri
+sayılı ve belgeli olduğu için "elle listede yok" güçlü bir kanıttır.
+**Karara bağlanmalı; (b) seçilirse ÖNCE kaç göl elde kalıyor ölçülmeli.**
+
 ---
 
 ## 0 · Neden
@@ -288,15 +335,37 @@ lake: {                           // yalnızca LAKE'te, aksi halde null
 
 Gölde anlamsız olan alanlar **uydurulmayacak, `null` geçilecek**: `wave`,
 `swellHeight`, `swellPeriod`, `wavePeriod`, `waveDirection`, `tideFlow`,
-`oceanCurrent`, `salinity`, `thermoclineDepth`, `depth`.
-`null`, istemcinin bugün de karşılaştığı bir durumdur (bathymetri
-çekilemediğinde `depth:{avg:null}` gidiyor), yani yeni bir şekil değil.
+`salinity`, `thermoclineDepth`, `depth`.
+
+> **⚠️ BULGU A — `current` BU LİSTEDEN ÇIKARILDI.** Eski metin *"null,
+> istemcinin bugün de karşılaştığı bir durumdur"* diyordu; **doğrulanmadı ve
+> yanlış.** `instant.current` istemcide `Double` (`ForecastResponse:150`) ve
+> `MainActivity:3562` şunu yapıyor:
+> ```java
+> current = d.current >= 0 ? fmt("%.2f m/s", d.current) : "—";
+> ```
+> Null kontrolü yok; `>=` otomatik unboxing yapıyor → **yayındaki APK her göl
+> analizinde NullPointerException ile çöker.**
+>
+> Kod "bilinmiyor" için zaten **`-1` sentinel** kullanıyor (instant `>= 0`
+> kontrolü, günlükte `startsWith("-1")`). Göl yolunda `current: -1`
+> gönderilecek. Bu bir uydurma değer değil, kodun mevcut "bilinmiyor" işareti.
+>
+> Listedeki diğer alanlar **güvenli** — istemcide null korumalı okunuyorlar:
+> `wave`, `rain`, `salinity`, `wavePeriod`, `swellHeight`, `swellPeriod`,
+> `thermoclineDepth`, `tide`. `clarity` ve `pressure` korumasız ama §10.1'e
+> göre gölde ikisi de çalışıyor, null gitmeyecek.
 
 ---
 
 ## 5 · Aşama 1 — Göl verisi
 
-### 5.1 Çıkarma (TAMAMLANDI)
+### 5.1 Çıkarma — ⚠️ ÇIKTILAR REPODA YOK (bulgu C)
+
+> Bu bölüm "TAMAMLANDI" diyordu. 2026-08-12'de kontrol edildi: `goller.py`,
+> `goller_ham.geojson`, `goller.csv` ve `tr-lakes.json` **repoda yok.** İş
+> kullanıcının makinesinde yapılmışsa dosyalar repoya alınmalı; alınamıyorsa
+> üretim baştan koşulmalı. Aşama 1 şu hâliyle **yeniden üretilebilir değil.**
 
 `goller.py` çalıştırıldı, `goller_ham.geojson` + `goller.csv` üretildi.
 Yeniden üretilecekse: kaynak `HydroLAKES_polys_v10.gdb`, katman
@@ -443,7 +512,8 @@ try {
 
 ### 7.2 `golBul(lat, lon)`
 
-`_pointInFeature` (`server.js:1345`) zaten var, **yeniden yazma, onu kullan.**
+`_pointInFeature` (`server.js:1440`) zaten var, **yeniden yazma, onu kullan.**
+*(Bulgu H: plandaki tüm satır referansları bayattı, güncellendi.)*
 
 Performans: 657 poligon her istekte taranmamalı. Her göl için
 yükleme sırasında bir **bbox** hesapla; önce ucuz bbox testi, sadece geçenlerde
@@ -451,9 +521,22 @@ yükleme sırasında bir **bbox** hesapla; önce ucuz bbox testi, sadece geçenl
 
 ### 7.3 Bağlantı noktası
 
-`analyzeLocationOffline` (`server.js:1444`) `SEA | COASTAL_LAND | INLAND`
-döndürüyor. **Bu fonksiyonu değiştirme.** `/api/forecast` içindeki INLAND erken
-dönüşünün (`server.js:~4855`) hemen ÖNCESİNE göl kontrolü koy:
+`analyzeLocationOffline` (`server.js:1540`) `SEA | COASTAL_LAND | INLAND`
+döndürüyor. **Bu fonksiyonu değiştirme.**
+
+> **⚠️ BULGU B — INLAND ERKEN DÖNÜŞÜ İKİ YERDE.** Plan tek yerden bahsediyordu.
+> Gerçek:
+>
+> | konum | uç |
+> |---|---|
+> | `server.js:5407` | `/api/forecast` |
+> | `server.js:6746` | `/api/fish-search` |
+>
+> **İkisi de yamanmalı.** Yalnız birincisi yapılırsa kullanıcı göl üzerinde
+> analiz alır ama balık araması yaptığında *"burası kara"* cevabı gelir — aynı
+> nokta için iki farklı gerçek.
+
+Her iki erken dönüşün hemen ÖNCESİNE göl kontrolü koy:
 
 ```
 INLAND ise:
@@ -507,10 +590,40 @@ göl ile deniz seviyesindeki göl aynı havada aynı suya sahip değil.
 Kar erimesi (ilkbaharda yüksek rakımlı göllerde su sıcaklığını baskılar) ve
 buzlanma ayrıca ele alınmalı.
 
+> **⚠️ BULGU E — BU FORMÜL DURUMSUZ SUNUCUDA KOŞAMAZ.** `Tsu(t)` bir önceki
+> günün `Tsu(t−1)` değerini ister; sunucu istek başına durumsuz ve göl
+> sıcaklığı deposu **yok.** Plan bunu hiç ele almıyordu.
+>
+> Isınma (spin-up) için geçmiş hava sıcaklığı gerekiyor: τ günlükse ~**3τ**
+> günlük geçmiş. Uygulama şu an `past_days=7` kullanıyor — τ'nun büyük çıkacağı
+> derin/geniş göllerde bu yetmez.
+>
+> Yazılması gerekenler (aşama başlamadan):
+> 1. Geçmiş kaynağı: `past_days` büyütmek mi (üst sınır 92), yoksa
+>    `archive-api.open-meteo.com` mı. Arşiv ucunun gecikmesi ölçülmeli.
+> 2. Göl başına önbellek ve TTL — her istekte 30-90 günlük seri çekilemez.
+> 3. Önbellek boşken ilk isteğin gecikmesi (kullanıcı bunu bekler).
+> 4. Geçmiş alınamazsa davranış: sıcaklık `null`, "bilinmiyor" modu. Uydurma yok.
+
 ### 8.3 KAPI — geçilmesi gereken ölçüm
 
-En çok balık tutulan **20 göl** için, modelin çıktısını ERA5-Land
-`lake_mix_layer_temperature` ve/veya Copernicus LSWT ile **en az 12 ay boyunca**
+> **⚠️ BULGU D — REFERANS SIRASI DÜZELTİLDİ.** Eski metin ERA5-Land'i eş
+> değerde referans gösteriyordu. **ERA5-Land `lake_mix_layer_temperature` bir
+> FLake MODEL çıktısıdır, ölçüm değil.** Ona karşı MAE ölçmek "iki model
+> uyuşuyor mu" sorusunu cevaplar, "modelimiz doğru mu" sorusunu değil. Bu ayrım
+> §8.4'te doğrudan kullanıcıya yansıyor: `tempWaterErrorC` bir hata payı diye
+> gösteriliyor.
+>
+> **Birincil referans: Copernicus LSWT (uydu tabanlı, gerçek ölçüme en yakın).**
+> ERA5-Land yalnızca ikincil/destekleyici — LSWT'nin kapsamadığı göller ve
+> bulutlu dönemler için, ve sonuç böyle etiketlenerek.
+>
+> **Ayrıca:** CDS'ten 12 ay × 20 göl veri çekmek kayıt + API + GRIB/NetCDF işi.
+> Bu, kapının bir onay kutusu değil kendi başına bir alt görevidir; süresi
+> planlanmalı.
+
+En çok balık tutulan **20 göl** için, modelin çıktısını **Copernicus LSWT**
+(birincil) ve gerekirse ERA5-Land (ikincil) ile **en az 12 ay boyunca**
 karşılaştır. Rapor et:
 
 - ortalama mutlak hata (MAE), göl bazında ve toplu
@@ -603,13 +716,24 @@ Sıfırlananlar `null` geçilecek, 0 değil — 0 "ölçtük, sıfır çıktı" 
 
 ### 10.2 Derinlik çarpanı — DİKKAT
 
-`server.js:4288` ve `4461`'de derinlik **toplamsal katman değil, çarpandır**:
+Derinlik **toplamsal katman değil, çarpandır** (`server.js:4830-4831` —
+bulgu H: plandaki 4288/4461 referansları bayattı):
 
 ```js
+let depthScore = 1.0;                                        // :4830
+if (depthAvg !== undefined && depthAvg !== null && fish.depth) {   // :4831
+    ...
+}
 rawScore *= depthScore;      // depthScore ∈ [0.05, 1.0]
 ```
 
 `depthAvg` null ise bu blok hiç çalışmaz, yani **çarpan 1,0 kalır — ceza yok.**
+
+> **BULGU I — İDDİA DOĞRU AMA EKSİK.** Kapı `&&` ile iki koşullu:
+> `depthAvg != null` **ve** `fish.depth`. §9.2 tatlı su türlerine `depth`
+> alanı yazmayacağını söylüyor — yani derinlik bir gün bilinse bile **ikinci
+> koşul da düşer** ve çarpan kalıcı olarak 1,0 kalır. Kalibrasyon, planda
+> yazandan daha zorunlu.
 Tatlı su türlerinin hepsinde durum aynı olacağı için türler arası **sıralama**
 bozulmaz, ama **mutlak skor sistematik olarak şişer.** Sonuç: her göl her
 denizden yüksek skor verir, ve fark gerçek değil eksik cezadan gelir.
@@ -647,14 +771,35 @@ Test kuralı bu projede sabit: **kod `server.js`'ten regex ile sökülüp
 Test 1 ve 5 en kritikleri: **yayında 453 kullanıcı var ve deniz yolu bu
 çalışmadan hiç etkilenmemeli.**
 
+> **⚠️ BULGU J — TEST 1 TEK BAŞINA YETMEZ.** Bu ders 4.20 (kıyı açısı) işinde
+> bizzat yaşandı: deniz regresyonu harness'ı `paramUret`'te `shoreBearing`
+> göndermediği için o yolu **hiç kapsamıyordu** ve "sapma 0" sahte güvence
+> veriyordu. Aynı şekilde harness göl yolunu da kapsamaz — INLAND noktalarını
+> hiç skorlamıyor.
+>
+> Bu yüzden:
+> - **Test 2 ve 3, Test 1 kadar kritiktir.**
+> - Ayrıca bir **POZİTİF KONTROL** eklenmeli: INLAND + göl olan bir noktanın
+>   yanıtı DEĞİŞMİŞ olmalı. Hiçbir şey değişmiyorsa özellik çalışmıyor demektir
+>   ve "bütün testler yeşil" bunu gizler.
+
 ---
 
 ## 12 · Aşama 7 — Uygulama (APK)
 
 Uygulama native, yani bu değişiklikler APK sürümü gerektiriyor. Sunucu tarafı
-ÖNCE yayına alınabilir: eski APK `waterBody` alanını tanımaz, göl yanıtını deniz
-gibi çizer. Bu yüzden **sunucu yayına alınırken göl yolu kapalı başlamalı**
-(`LAKE_ENABLED=false` ortam değişkeni), APK hazır olunca açılmalı.
+ÖNCE yayına alınabilir ve **göl yolu kapalı başlamalı** (`LAKE_ENABLED=false`
+ortam değişkeni), APK hazır olunca açılmalı.
+
+> **⚠️ BULGU A — ESKİ APK "DENİZ GİBİ ÇİZMEZ, ÇÖKER."** Eski metin *"eski APK
+> `waterBody` alanını tanımaz, göl yanıtını deniz gibi çizer"* diyordu. Yanlış:
+> `instant.current` null giderse `MainActivity:3562` unboxing yapıp
+> NullPointerException fırlatır (ayrıntı §4.3).
+>
+> İki sonucu var:
+> 1. Göl yolunda `current: -1` gönderilecek (kodun mevcut "bilinmiyor" işareti).
+> 2. `LAKE_ENABLED` sırası **ihlal edilemez** — ve APK yayınlansa bile eski
+>    sürümler sahada kalmaya devam eder. Açmadan önce sürüm dağılımına bakılmalı.
 
 Yapılacaklar:
 
@@ -687,6 +832,7 @@ Yapılacaklar:
 ## 14 · Sıra
 
 ```
+0. Karar: tuzluluk kuralı · null akıntı · COASTAL_LAND kapsamı   (§0.1 F, A)
 1. tr-lakes.json üretimi + kısa eleme listesi     (§5)
 2. OSM isimlendirme                               (§6)
 3. Sunucuda göl tanıma + yol ayrımı               (§7)   → Test 1,2,3,4,5,9
