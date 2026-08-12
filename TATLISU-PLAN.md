@@ -16,11 +16,11 @@
 |---|---|---|---|
 | A | `null` akıntı yayındaki APK'yı ÇÖKERTİR | **kritik** | §4.3, §12 |
 | B | INLAND reddi İKİ yerde, plan birini görüyor | **kritik** | §7.3 |
-| C | Aşama 1 çıktıları repoda yok | önemli | §5.1 |
+| ~~C~~ | ~~Aşama 1 çıktıları yok~~ — **YANLIŞ ALARM, bkz. §0.2** | — | §0.2 |
 | D | Doğrulama kapısı model-model karşılaştırması | önemli | §8.3 |
 | E | Sıcaklık modeli durumsuz sunucuda koşamaz | önemli | §8.2 |
 | F | `salt: null` kuralı özelliği boşaltabilir | önemli | §6 |
-| G | §0'daki gerekçe noktası doğrulanmadı | önemli | §0 |
+| ~~G~~ | ~~Gerekçe noktası doğrulanmadı~~ — **DOĞRULANDI, göl içinde** | — | §0.2 |
 | H | Satır referanslarının hepsi bayat | küçük | §7.3, §10.2 |
 | I | Derinlik çarpanı iddiası doğru ama eksik | küçük | §10.2 |
 | J | Deniz regresyonu bu değişiklik için yetersiz | küçük | §11 |
@@ -39,10 +39,17 @@ NullPointerException.** Kod "bilinmiyor" için zaten **`-1` sentinel** kullanıy
 Diğer alanlar güvenli: `wave`, `rain`, `salinity`, `wavePeriod`, `swellHeight`,
 `swellPeriod`, `thermoclineDepth`, `tide` hepsi null korumalı okunuyor.
 
-**G — gerekçe doğrulanmadı.** §0 bütün projeyi `39.371, 32.375` noktasındaki
-favoriye dayandırıyor ama o noktanın bir HydroLAKES poligonunun **içine düşüp
-düşmediği hiç kontrol edilmedi.** Aşama 1'in ilk işi bu olmalı; düşmüyorsa
-gerekçe yeniden yazılmalı.
+**G — ÇÖZÜLDÜ (2026-08-12): gerekçe sağlam.** `39.371, 32.375` noktası bir göl
+poligonunun **içinde**: `Hylak_id 1367460`, **0,40 km²**, isimsiz, rakım 966 m.
+
+> Bu aynı zamanda §2.2'nin eşik kararını doğruluyor: göl 0,40 km² ve isimsiz.
+> İlk seçilen **0,5 km² eşiği korunsaydı, projeyi başlatan kullanıcının favorisi
+> kapsam dışında kalırdı.**
+>
+> §0'daki ikinci nokta ("Isparta'dan") planda **koordinatsız** verildiği için
+> doğrulanamadı.
+
+**C — YANLIŞ ALARM.** Bkz. §0.2.
 
 **F — tuzluluk kuralı kendi içinde çelişiyor.** §2.4 "bilinen tuzlu göller için
 elle liste" diyor, §6 ise "salt bilinmiyorsa tatlı varsayılmaz". 657 gölün
@@ -50,6 +57,25 @@ elle liste" diyor, §6 ise "salt bilinmiyorsa tatlı varsayılmaz". 657 gölün
 göllerin büyük kısmı tür listesi üretemez. Türkiye'nin tuzlu/sodalı gölleri
 sayılı ve belgeli olduğu için "elle listede yok" güçlü bir kanıttır.
 **Karara bağlanmalı; (b) seçilirse ÖNCE kaç göl elde kalıyor ölçülmeli.**
+
+---
+
+## 0.2 · Aşama 1 girdi denetimi (2026-08-12)
+
+**Bulgu C geri alındı.** Çıktılar duruyor: `Desktop/meraloji-goller/` içinde
+`goller_ham.geojson` (2.811.723 bayt = **2746 KB**, §3 tablosuyla birebir),
+`goller.csv` ve sadeleştirilmiş üç sürüm. Kaynak `.gdb` de yerinde (902 MB).
+
+> Önceki "dosyalar yok" sonucu **arama hatasıydı**: bu kabukta `/c/Users/...`
+> biçimi geçersiz, `C:/Users/...` gerekiyor. `find` var olmayan bir dizinde
+> arayıp boş döndü, boş sonuç "yok" diye okundu. Aynı hata sınıfı: **başarısız
+> sorgu, değer yerine geçti.**
+
+**Veri planın §2 ölçümleriyle birebir doğrulandı:** 657 kayıt · 8 alan bandının
+**hepsi** tabloyla aynı · 20 isimli · 101 GRanD barajı · 73 göl rakım ≤ 0.
+Planın sayıları güvenilir.
+
+**`tr-lakes.json` üretildi** — 656 göl, 2419 KB. Ayrıntı §5.2.
 
 ---
 
@@ -397,12 +423,10 @@ Gölde anlamsız olan alanlar **uydurulmayacak, `null` geçilecek**: `wave`,
 
 ## 5 · Aşama 1 — Göl verisi
 
-### 5.1 Çıkarma — ⚠️ ÇIKTILAR REPODA YOK (bulgu C)
+### 5.1 Çıkarma (TAMAMLANDI — doğrulandı 2026-08-12)
 
-> Bu bölüm "TAMAMLANDI" diyordu. 2026-08-12'de kontrol edildi: `goller.py`,
-> `goller_ham.geojson`, `goller.csv` ve `tr-lakes.json` **repoda yok.** İş
-> kullanıcının makinesinde yapılmışsa dosyalar repoya alınmalı; alınamıyorsa
-> üretim baştan koşulmalı. Aşama 1 şu hâliyle **yeniden üretilebilir değil.**
+Çıktılar `Desktop/meraloji-goller/` içinde, kaynak `.gdb` Downloads altında. Boyut ve sayılar
+§3 / §2 tablolarıyla birebir tutuyor. Bkz. §0.2.
 
 `goller.py` çalıştırıldı, `goller_ham.geojson` + `goller.csv` üretildi.
 Yeniden üretilecekse: kaynak `HydroLAKES_polys_v10.gdb`, katman
@@ -413,7 +437,41 @@ Yeniden üretilecekse: kaynak `HydroLAKES_polys_v10.gdb`, katman
 > ve filtrelenen sütun `columns` içinde YOKSA, sonuç **hata vermeden 0 döner**.
 > `Country` ile süzerken ya `columns` verme ya da `Country`'yi listeye ekle.
 
-### 5.2 `tr-lakes.json` üretimi
+### 5.2 `tr-lakes.json` üretimi — ÜRETİLDİ (2026-08-12)
+
+```
+girdi  657 gol  ->  cikti  656 gol   (2419 KB)
+  BARAJ (GRanD)    101        LAGUN         73
+  GOL/GOLET        555        MEVSIMLIK      1  (Eber)
+  tuzlu (elle)       5        atilan         1  (Aksehir, kurumus)
+```
+
+**Elle listeler** — yalnız isimli 20 gölden kurulabildi; isimsiz 636 göl §6'da
+OSM'e kalıyor:
+
+- **Tuzlu/sodalı (5):** Van (sodalı, tek tür İnci kefali) · Tuz (balık yok) ·
+  Acıgöl · Burdur · Erçek
+- **Kurumuş, dosyaya girmedi (1):** Akşehir
+- **MEVSİMLİK, skor üretmez (1):** Eber — *ciddi küçülme ve sazlık.*
+  ⚠️ **Bu etiketi ben ekledim, plan yalnız "Akşehir, Meke" diyordu — DOĞRULANMALI.**
+- **Meke:** veride isimli kayıt olarak yok (çok küçük); elle liste onu yakalayamıyor.
+
+**Ek alan `saltSource`** (`'elle-liste'` | `'varsayim'`): §1.1 karar 1
+"bilinmeyen tatlı sayılır" diyor, ama **bilinen ile varsayılan ayrımı korunuyor**
+— ileride bir gölde sorun çıkarsa hangisinin varsayım olduğu görülebilsin.
+
+> **YENİ BULGU — `Res_time = -1`.** HydroLAKES'te bu "veri yok" işaretidir,
+> sayı değil (Acıgöl'de böyle). §8.2 τ'yu `Res_time`'dan türetmeyi öneriyor;
+> **-1'i sayı sanan bir formül saçma τ üretir.** Dosyada `resTimeDays: null`
+> olarak geçiyor ve §8.2 bu null'ı ele almak zorunda.
+
+**Doğrulama — 18 iddia, hepsi geçti:** geometri ham hâliyle birebir korundu ·
+yasaklı alanların hiçbiri taşınmadı (`Depth_avg`, `Vol_total`, `Vol_src`,
+`Dis_avg`, `Lake_type`) · `type` yalnız BARAJ/GOL · BARAJ tam 101 · LAGUN tam
+73 ve hepsi rakım ≤ 0 · Akşehir dosyada yok · gerekçe noktası hâlâ göl içinde ·
+İznik ve Beyşehir bulunuyor · Ankara merkezi ve Konya ovası göl değil.
+
+#### Şema
 
 `goller_ham.geojson`'dan, her özniteliğe sade ad vererek:
 
