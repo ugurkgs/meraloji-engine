@@ -46,6 +46,36 @@ bölgesel varsayılanında da var.
 yapıldığının örneği zaten var: `dataQuality: { satelliteSst, chlorophyll }`
 (`:6817`) — kaynak gelmediğinde bunu **söylüyor**. Basınç ve SST için karşılığı yok.
 
+### 0.0.1 · ⚠️ İKİNCİ DÜZELTME — bu madde de ÖLÇÜMLE DÜŞTÜ (2026-08-13)
+
+Yukarıdaki "yeni iş kalemi" için ilk iş ölçüm yapmaktı: Open-Meteo bu alanları
+gerçekten ne sıklıkla boş bırakıyor? **Ölçüldü: hiç.**
+
+`tools/olcum-eksik-veri.js` · 18 Türkiye kıyı/açık deniz noktası:
+
+| alan | boş değer olan nokta | toplam boş saat |
+|---|---|---|
+| `surface_pressure` | **0 / 18** | **0** (18 × 192 saat) |
+| `sea_surface_temperature` | **0 / 18** | **0** (18 × 336 saat) |
+| `wave_height` | **0 / 18** | **0** (18 × 336 saat) |
+
+Dizi indeksleri de taşmıyor: hava dizisi 192, en büyük `hourlyIdx` = 191;
+marine dizisi 336, en büyük `marineHourlyIdx` = 335. `safeWaterTemp`'in diğer
+kapıları (`val === 0`, `val < 2`, `val > 35`) da Türkiye sularında pratikte
+tetiklenmiyor — Karadeniz kışı bile 6-8 °C.
+
+**SONUÇ — null/uydurma zinciri KAPANDI.** `safeNum(...,1013)` ve
+`safeWaterTemp(...)` **savunma kodu**; Open-Meteo bu alanları güvenilir biçimde
+dolduruyor. Uydurma yolu var ama **çalışmıyor**.
+
+> **Latent tuzak olarak kayıtta kalsın:** Open-Meteo bir gün bu alanları
+> boşaltırsa (model değişikliği, yeni bölge, farklı sağlayıcı) uydurma sessizce
+> devreye girer ve kullanıcı 1013 hPa / iklim-tablosu SST'yi ölçüm sanır.
+> Ölçümü tekrarlamak için: `node tools/olcum-eksik-veri.js`
+
+**§1 / §2 / §3 ve bu madde — dördü de aynı zincirin halkaları ve dördü de
+ulaşılamaz.** Konu kapandı.
+
 > **Ders:** "kod bu değeri üretebilir" ile "kullanıcı bu değeri görür" ayrı
 > şeyler. Bu raporun ilk hâli ikisini karıştırdı. `DEVIR.md` §3.2 zaten bunu
 > söylüyordu: *başarısız sorgu ≠ negatif sonuç.*
@@ -295,13 +325,18 @@ ama biri onu tekrar kullanmaya kalkarsa Türkçe'de sessizce çalışmaz.**
 | # | bulgu | durum / neden |
 |---|---|---|
 | ~~1~~ | ~~**§8 bozuk kodlama**~~ | ✅ **YAPILDI 2026-08-13.** Güvenlik işareti geri geldi, çapraz kontrol testi eklendi. |
-| **2** | **YENİ: sunucu uydurması** (§0.0) | `safeNum(..., 1013)` ve `safeWaterTemp` bölgesel varsayılanı, ölçüm olmayan değeri ölçüm gibi gönderiyor. **Asıl §2.1 ihlali burada.** Sunucuda `dataQuality`'ye alan eklemek doğru yol — desen zaten kurulu. **Ölçüm gerektirir:** Open-Meteo bu alanları ne sıklıkla boş bırakıyor? |
-| **3** | **§5 veri-yok yolları** | 12 modun 8'inde "Veri Yok" yolu yok. #2 çözülmeden bu da çözülemez (mod "yok" diyebilmek için önce ayrımı bilmeli). |
-| 4 | §6 kara modu | `isLandMode` 3 modda denetleniyor. Bilinen 4.18'in genişi; tasarım kararı gerektiriyor. |
-| 5 | §4, §7 | Temizlik. `wavePeriod` üç yerde üç yedek; `:7120` suni trend. |
-| — | ~~§2 basınç 0~~ | ❌ **ULAŞILAMAZ** — bkz. §0.0. Kod olarak duruyor, **latent tuzak**: biri sunucudaki `safeNum` varsayılanını kaldırırsa anında canlanır. Yorum düşülmesi yeter. |
-| — | ~~§3 durağan sıcaklık~~ | ❌ **PRATİKTE OLUŞMUYOR** — bkz. §0.0. Aynı şekilde latent. |
-| — | ~~§1 sınırda null→0~~ | ❌ Şiddeti düştü: sunucu zaten uydurduğu için istemciye null ulaşmıyor. **Kök sebep değil, semptom.** Gerçek kök #2. |
+| ~~2~~ | ~~sunucu uydurması~~ | ❌ **ÖLÇÜMLE DÜŞTÜ** — bkz. §0.0.1. Open-Meteo 18 noktada 0 boş değer. Kod savunma amaçlı, çalışmıyor. |
+| **1** | **§6 kara modu** | `isLandMode` 12 modun yalnız 3'ünde. **Kalan en büyük GERÇEKTEN ULAŞILABİLİR bulgu** — karaya her tıklamada oluşuyor. Bilinen 4.18'in genişi, tasarım kararı gerektiriyor. |
+| **2** | **§7 suni trend** | `:7120` `effectiveTrend = (pressure − 1013)/5` — gerçek trend sıfıra yakınken devreye giriyor ve bu SIK. "Balık stresli/rahat" biyolojik iddiasını besliyor. Ulaşılabilir. |
+| 3 | §5 veri-yok yolları | 12 modun 8'inde yok. Normal işleyişte veri hep geliyor, ama **sunucu erişilemezse / `dataQuality.satelliteSst=false` iken** anlamlı. Şiddeti düştü ama sıfırlanmadı. |
+| 4 | §4 tutarsız yedekler | Temizlik. `wavePeriod` üç yerde 3 / 5 / 4. |
+| — | ~~§1, §2, §3~~ | ❌ Üçü de aynı zincirin halkası, üçü de **ulaşılamaz** — bkz. §0.0 ve §0.0.1. Latent tuzak olarak kayıtta. |
+
+> **Bu raporun kendi dersi:** ilk sürüm sekiz bulgu sıraladı ve üst üçünü
+> "kritik/yüksek" işaretledi. Ölçüldüğünde **üçü de düştü**, gerçekten
+> ulaşılabilir olan tek kritik bulgu sıralamada **en altta** duran §8'di
+> (bozuk kodlama). Kod okuması *mekanizmayı* bulur, *sıklığı* bulmaz.
+> Şiddet sıralaması ölçmeden yapılmamalı.
 
 > **§8 için uyarı:** dosyada 117 bozuk yer var. **Toplu bir "hepsini düzelt"
 > taraması YAPILMAMALI** — 7.678 satırlık bir dosyada toplu kodlama dönüşümü
