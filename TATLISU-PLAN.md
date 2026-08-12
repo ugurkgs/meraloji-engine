@@ -504,6 +504,22 @@ out center tags;
 Alınacak etiketler: `name` · `salt` · `intermittent` · `water` · `landuse` ·
 `name:tr`. `salt=yes` → tuzlu, `intermittent=yes` → mevsimlik.
 
+> **ERİŞİM NOTU (2026-08-12'de denendi).** Overpass'a `Content-Type:
+> application/x-www-form-urlencoded` ile POST atmak **HTTP 406** döndürüyor.
+> Çalışan biçim: sorguyu `?data=` ile **GET** ve bir **`User-Agent`** başlığı.
+> Başlıksız istekler de reddedilebiliyor.
+>
+> `out center tags;` **geometri VERMEZ** — yalnız merkez noktası ve etiketler.
+> Bu §6 için yeterli (eşleştirme merkez noktasıyla yapılıyor), ama §2.7'deki
+> "OSM'i ikinci geometri kaynağı yap" fikri için `out geom;` gerekir ve o çok
+> daha ağırdır.
+>
+> **Kapsam ölçüldü (İznik çevresi, 0,2° × 0,5° kutu):** 11 su kütlesi, **yalnız
+> 1'i isimli**. Yani OSM isimlendirmesi HydroLAKES kadar seyrek — §6'nın "isim
+> yan üründür, bu adım bayraklar için yapılıyor" gerekçesi ölçümle doğrulandı.
+> HydroLAKES birincil kaynak olarak kalıyor: OSM'de `Elevation` ve `Res_time`
+> yok, ikisi de §8.2'deki τ türetimi için gerekli.
+
 `["name"]` süzgeci **konmayacak** — isimsiz ama `salt=yes` etiketli bir kayıt
 bizim için hâlâ değerli.
 
