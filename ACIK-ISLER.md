@@ -57,29 +57,30 @@ Sunucu tarafı işler önce; APK gerektirenler ve göl en sonda.
 | ~~10~~ | ~~**1.5**~~ | ~~kıyı bildirimi~~ | **YAPILDI** — canlı; kapatma ayarı da yazıldı, APK bekliyor | — |
 | ~~11~~ | ~~**4.8**~~ | ~~`instant`'ı `isLand` ile kapat~~ | **YAPILDI** — bkz. Kapatılanlar | — |
 | ~~11c~~ | ~~**4.14**~~ | ~~İspanya bölge adları~~ | **YAPILDI** — bkz. Kapatılanlar | — |
-| 11b | **4.16** | widget karada skor gösteriyor | **APK** | mobil |
+| ~~11b~~ | ~~**4.16**~~ | ~~widget karada skor gösteriyor~~ | **KULLANICI KAPATTI** (2026-08-12) | — |
 | ~~11d~~ | ~~**4.17**~~ | ~~7 gün detayda gündüz/gece sıcaklık — istemci yarısı~~ | **YAPILDI** — APK bekliyor | — |
 | 11e | **4.18** | hava sıcaklığı simülasyonu karada deniz zemini çiziyor | **APK** | **karar bekliyor** |
 | ~~11f~~ | ~~**4.19**~~ | ~~akıntı yönü konvansiyonu~~ | **ÖLÇÜLDÜ** — değişiklik gerekmedi | — |
 | ~~11g~~ | ~~**4.20**~~ | ~~kıyı açısı il poligonundan~~ | **YAPILDI** — yükseklik halkası, bkz. 4.20 | — |
-| 12 | **1.4** | `targetClass` gruplaması | **APK** | mobil |
-| 13 | **4.10** | çift istek (oturumsuz + kimlikli) | **APK** | mobil |
+| ~~12b~~ | ~~**4.15**~~ | ~~klorofil `null` → istemci 0~~ | **YAPILDI** — koddan doğrulandı, bkz. 4.15 | — |
+| ~~12~~ | ~~**4.9 devamı**~~ | ~~NOAA verisi sonradan gelirse tazele + toast~~ | **YAPILDI** — sunucu deploy + APK bekliyor | — |
+| 13 | **1.4** | `targetClass` gruplaması | **APK** | mobil |
 | 14 | **2.1** | `mera_tarama` → `scan_result` uçurumu | **APK** | mobil |
 | 15 | **1.1** | RTDN / Pub/Sub | server.js + altyapı | **yüksek — ödeme kodu** |
 | 16 | **göl** | `TATLISU-PLAN.md` | ayrı dosya + APK | en son |
+| 17 | **4.10** | çift istek (oturumsuz + kimlikli) | **APK** | **kullanıcı kararı: EN SONA** |
 
-> ### ⚠️ ŞU ANDAKİ TEK BÜYÜK DARBOĞAZ: APK YAYINLANMADI
+> ### ✅ ESKİ DARBOĞAZ ÇÖZÜLDÜ — APK v4.2.0 PLAY'E GÖNDERİLDİ (2026-08-12)
 >
-> 2026-08-11 itibarıyla Android tarafında **~18 değişiklik derlenmeyi ve
-> yayınlanmayı bekliyor** (kara modu görselleri, rakım, görüş mesafesi,
-> dalga etiketi, menü yeniden düzeni, hesap silme sayfası, gizlilik bağlantısı,
-> uzun basma, bildirim ayarları, TWA derin bağlantı).
-> Tam liste: `25-TEMMUZ-SONRASI-YAPILANLAR.md` § 11–19.
+> Bu blokta *"~18 değişiklik yayınlanmayı bekliyor, bir sonraki iş APK almak
+> olmalı"* yazıyordu. **Artık geçerli değil:** v4.2.0 (versionCode 44) kullanıcı
+> tarafından test edildi ve yayın başvurusuna girdi. İçeriği `DEVIR.md` §5'te.
 >
-> **Sonucu:** yukarıdaki tablodaki `APK` etiketli maddelerin hiçbiri
-> kullanıcıya ulaşmadı ve **1.5'in eşiği bu sürüm çıkmadan indirilmemeli.**
-> Bu yığın büyüdükçe tek seferde doğrulanacak değişiklik sayısı artıyor;
-> bir sonraki iş APK almak olmalı, yeni Android maddesi eklemek değil.
+> **Yerine geçen tek sıra kuralı:** `SHORE_ALERT_ESIK` **APK gerçekten yayına
+> çıkmadan indirilmemeli** — susturma düğmesi APK'nın içinde, ters sırada
+> bildirim alan kullanıcının onu kapatma yolu olmaz. "Gönderildi" ≠ "yayında".
+>
+> Tablodaki `APK` etiketli maddeler bir **sonraki** sürüme kalanlardır.
 
 > **4.13 neden 4. sırada:** listedeki tek madde ki kullanıcı hatayı **kendi
 > gözüyle görüp bildirdi** (karada balık pini). Düzeltmesi yeni bir model
@@ -186,7 +187,22 @@ Yapılacaksa tek satır: `esp_chopa.tempRange.max` 24 → 27, `opt` 17'de kalır
 
 ---
 
-### 1.4 `targetClass` etiketini arayüzde göster `HAZIR` · **MOBİL**
+### 1.4 `targetClass` etiketini arayüzde göster `AÇIK` · **MOBİL**
+
+> **2026-08-12 doğrulaması — İŞ YAPILMAMIŞ, madde açık.** Karışıklık etiketten
+> çıktı: `HAZIR` "yapıldı" değil, **"yapılabilir, sıra bekliyor"** demek
+> (bkz. belge başındaki durum tanımları).
+>
+> | taraf | kanıt |
+> |---|---|
+> | sunucu | `server.js:6004, 6362, 8124` → `targetClass: avSinifi(key)` gönderiyor |
+> | istemci | Android kaynağının tamamında `targetClass` → **0 eşleşme** |
+>
+> Yani alan yıllardır yanıtta taşınıyor, istemci hiç okumuyor. Bu, belgenin
+> kendi deyimiyle *"sunucu gönderiyor ≠ kullanıcı görüyor"* ailesinin bir üyesi.
+> **Gson uyarısı:** `ForecastResponse` içinde karşılık gelen alan da yok — sadece
+> arayüzü yazmak yetmez, model alanı eklenmeden Gson veriyi düşürür (aynı tuzak
+> 4.17'de yaşandı).
 
 Sunucu artık her liste öğesinde `targetClass` döndürüyor: `'target'` veya
 `'bycatch'`. Sıralama **saf skorla** yapılıyor — sıra ile gösterilen sayı birebir
@@ -451,7 +467,18 @@ katmanıydı — ve o düzeltildi (bkz. commit geçmişi, logaritmik/asimetrik e
 Tutarsızlık bulgusu yine de gerçek; ileride ele alınacaksa **tür tür ve av
 değerine bakarak** yapılmalı, toplu değil.
 
-### 4.16 Widget karada balık skoru gösteriyor `HAZIR` · **MOBİL**
+### ~~4.16 Widget karada balık skoru gösteriyor~~ `KULLANICI KAPATTI` (2026-08-12)
+
+> **Kullanıcı kararı: yapılmayacak, önemli bir ayrıntı değil.** Sunucu tarafı
+> zaten korumalı (karada `score: 0` · `fishList: []` · `hasActiveFish: false`),
+> yani yanlış bir SAYI üretilmiyor — widget yalnızca o sıfırı "%0" diye basıyor.
+> Tekrar gündeme gelirse teşhis ve çözüm aşağıda duruyor, yeniden araştırmaya
+> gerek yok.
+>
+> **Beraberinde düşen ikinci kusur:** aynı dosyadaki `optDouble(..., 0)`
+> alışkanlığı. 4.15 istemcinin ana ekranında düzeltildi ama **widget'ta
+> düzeltilmedi** — `WidgetUpdateWorker.java:120` klorofili hâlâ bu yolla okuyor.
+> Widget'a bir gün dokunulursa ikisi birlikte ele alınmalı.
 
 4.8 doğrulanırken çıktı. Sunucu 2026-08-11'den beri karada `instant.score: 0` ·
 `fishList: []` · `hasActiveFish: false` gönderiyor, yani **acil değil** — ama
@@ -591,9 +618,57 @@ kullanıcıya bu gösteriliyor. Yanlış bilgi.
 **Yapılacak:** istemcide `null` durumu 0'dan ayrılsın; plankton katmanı çizilmesin
 veya "bilinmiyor" gösterilsin. Sunucuda değişiklik gerekmiyor.
 
-### 4.9 devamı — istemci tarafı `HAZIR` · **MOBİL**
+### ~~4.9 devamı~~ **YAPILDI** (2026-08-12) · sunucu CANLI BEKLİYOR · istemci APK BEKLİYOR
 
-Sunucu tarafı bitti (bkz. Kapatılanlar). Kullanıcının istediği akışın kalan yarısı:
+> **MADDEDEKİ "sunucu tarafı bitti, kalan yarısı istemci" TEŞHİSİ YANLIŞTI.**
+> İstemci tek başına bu işi yapamıyordu — ölçüldü:
+>
+> Forecast yanıtı `cacheKey` altında **3 saat** duruyor (`server.js:1126`
+> `stdTTL:10800`, dönüş `:5447`). Arka plandaki NOAA denemesi ise yalnız
+> `sstSatCache`'e yazıyordu (`:1743`), forecast önbelleğine dokunmuyordu.
+> Yani istemcinin tekrar denemesi 3 saat boyunca **birebir aynı gövdeyi** alırdı;
+> `satelliteSst` hep `false` kalır, toast hiç çıkmazdı.
+>
+> **İkinci ve daha tehlikeli bulgu — kota.** `clickUsage` sayacı `:5399`'da,
+> önbellek kontrolünden (`:5414`) **önce** artıyor. `FREE_DAILY_CLICKS = 2` iken
+> 1 analiz + 3 deneme = **4 hak**: özellik kullanıcıyı kendi analizinin ortasında
+> 403 + paywall ile kilitlerdi.
+>
+> **SUNUCUDA YAPILANLAR** (dar tutuldu, kullanıcı onayıyla):
+>
+> 1. `source=retry` eklendi — kotadan, anonim IP tavanından ve `kaydetSonKonum`'dan
+>    muaf. **Geriye dönük etki sıfır:** yayındaki APK bu değeri göndermiyor.
+> 2. Arka plan SST başarılı olunca **yalnız o hücrenin** forecast kaydı ve
+>    **yalnız `satelliteSst:false` ise** düşürülüyor. Yeniden üretim ek Open-Meteo
+>    çağrısı getirmiyor — ham veri `raw_weather_`/`raw_marine_` anahtarlarında
+>    ayrı duruyor (`:5537`).
+>
+> **Kabul edilen geriye dönük etki:** düşürme sonrası yayındaki APK kullanıcıları
+> da uydu SST'li veri alır → skorlar oynar. Büyüklüğü zaten ölçülüydü:
+> **türlerin %12,5'inde ortalama 2,51 puan**, yönü iyileştirme. Kullanıcı onayladı.
+>
+> **İSTEMCİDE YAPILANLAR:**
+>
+> - `ForecastResponse.dataQuality` **alanı yoktu** — Gson veriyi sessizce
+>   düşürüyordu (aynı tuzak `elevation` ve `airTempDayAvg`'de de yaşanmıştı).
+> - Tekrar zinciri **3 sn → 5 sn → 10 sn**, `MainActivity`. "Aynı poligon" =
+>   sunucunun ızgara hücresi (0,01° ≈ 1,1 km). Farklı hücreye tıklanırsa iptal,
+>   aynı hücrede sayaç sıfırlanmaz. Ekran kapansa da zincir sürer; `onDestroy`'da
+>   temizlenir.
+> - İyileşme ölçüsü **sayı** (`kaliteSkoru` 0-2), böylece yalnız klorofilin
+>   gelmesi de yakalanıyor. Üç deneme yeterse sessiz bırakılıyor — olumsuz işaret yok.
+> - `toast_data_refreshed` **4 dilde** eklendi (TR/EN/ES/EL), hardcode yok.
+>
+> **Doğrulama:** `node --check` temiz · `tools/kontrol-4.9-onbellek.js` **7/7**
+> (pozitif kontrol dâhil: eski kodda 1. test kırmızı veriyor) · 4 `strings.xml`
+> XML olarak geçerli ve karakterler doğru · `:app:compileReleaseJavaWithJavac`
+> **BUILD SUCCESSFUL**.
+>
+> **Deniz regresyonu BİLEREK koşulmadı.** Bu değişikliğin amacı skorun değişmesi
+> (Open-Meteo SST → uydu SST); "sapma 0" çıksaydı iş yaramıyor demekti. §2.4'ün
+> sahte güvence verdiği durumlardan biri — bkz. `DEVIR.md` §3.3.
+
+**Eski kayıt (kapanmadan önceki tarif):** Sunucu tarafı bitti (bkz. Kapatılanlar). Kullanıcının istediği akışın kalan yarısı:
 
 Yanıtta artık `dataQuality: { satelliteSst, chlorophyll }` var. İstemci bunu görüp
 `satelliteSst === false` ise **birkaç saniye sonra sessizce tekrar istesin**; gelen
@@ -604,7 +679,12 @@ SST (~10 km) kullanılıyor ve o da gerçek bir ölçüm. "Eksik veri" demek eli
 yokmuş gibi göstermek olur — ters yönde bir dürüstlük hatası. Yalnızca veri
 iyileştiğinde pozitif bildirim yapılacak.
 
-### 4.10 İstemci analizi iki kere istiyor (biri oturumsuz) `ARAŞTIRMA` · **MOBİL**
+### 4.10 İstemci analizi iki kere istiyor (biri oturumsuz) `ERTELENDİ — EN SONA` · **MOBİL**
+
+> **Kullanıcı kararı 2026-08-12: sıranın en sonuna alındı.** Gerekçe kayıtta zaten
+> var — API maliyeti yok (ikinci istek önbellekten dönüyor), kullanıcıya görünen
+> bir kusur yok. Bedeli yalnızca anonim IP kotası ve analitikteki çift sayım.
+> Diğer mobil maddeler bittikten sonra bakılacak.
 
 Log'da tekrarlayan desen: aynı koordinat, saniyeler arayla, önce `🕵 anonim` sonra
 gerçek kullanıcı. İkincisi önbellekten dönüyor (ms cinsinden).

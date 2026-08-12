@@ -1735,13 +1735,31 @@ async function fetchSatelliteSST(lat, lon, logUser = null, timeoutMs = 2000) {
  * Hiçbir şeyi await ETMEZ ve hata fırlatmaz — açık isteği yavaşlatamaz, süreci
  * düşüremez.
  */
-function refreshSatelliteSSTInBackground(lat, lon, logUser = null) {
+function refreshSatelliteSSTInBackground(lat, lon, logUser = null, forecastCacheKey = null) {
     const key = 's_' + parseFloat(lat).toFixed(2) + '_' + parseFloat(lon).toFixed(2);
     _fetchSatelliteSSTBase(lat, lon, logUser, 12000)
         .then(val => {
             if (val !== null) {
                 sstSatCache.set(key, val, 10800);
                 console.log(`[SST-BG] ${lat},${lon} arka planda geldi: ${val}°C — önbelleğe yazıldı`);
+
+                // [4.9 devamı] SST'yi önbelleğe yazmak TEK BAŞINA YETMEZ.
+                // Forecast yanıtı da ayrı bir kayıtta 3 saat duruyor (cacheKey) ve o
+                // kayıt uydu SST'siz üretildi — `dataQuality.satelliteSst:false`.
+                // Düşürülmezse istemcinin tekrar denemesi 3 saat boyunca BİREBİR AYNI
+                // gövdeyi alır, "veri iyileşti" durumu hiç oluşmaz ve toast hiç çıkmaz.
+                //
+                // Kapsam bilinçli olarak dar: yalnız BU anahtar, yalnız gerçekten
+                // satelliteSst:false ise. Yeniden üretim ek Open-Meteo çağrısı
+                // GETİRMEZ — ham hava/deniz verisi `raw_weather_`/`raw_marine_`
+                // anahtarlarında ayrı ve aynı TTL ile duruyor (bkz. ~5537).
+                if (forecastCacheKey) {
+                    const cached = cache.get(forecastCacheKey);
+                    if (cached && cached.dataQuality && cached.dataQuality.satelliteSst === false) {
+                        cache.del(forecastCacheKey);
+                        console.log(`[SST-BG] forecast önbelleği düşürüldü: ${forecastCacheKey} — sonraki istek uydu SST ile üretilecek`);
+                    }
+                }
             }
         })
         .catch(() => { /* sessiz: arka plan işi kullanıcıyı etkilemez */ });
@@ -5339,13 +5357,26 @@ app.get('/api/forecast', async (req, res) => {
         const lon = lonRaw.toFixed(4);
         const isBoat = req.query.mode === 'boat'; // tekne modu
         const isAutoLoad = req.query.source === 'autoload'; // Sıcak başlangıç isteği
+
+        // [4.9 devamı] TEKRAR DENEMESİ. İstemci yanıtta `dataQuality.satelliteSst:false`
+        // görürse aynı noktayı 3/5/10 sn sonra yeniden istiyor (uydu SST arka planda
+        // gelmiş olabilir). Bu bir KULLANICI TIKLAMASI DEĞİLDİR:
+        //   • günlük kotaya sayılmaz  • son konum olarak yazılmaz
+        //   • anonim IP tavanını yemez
+        // Sayılsaydı özellik kullanıcıyı kendi analizinin ortasında kilitlerdi:
+        // FREE_DAILY_CLICKS = 2 iken 1 analiz + 3 deneme = 4 hak.
+        //
+        // GERİYE DÖNÜK ETKİ YOK: yayındaki APK `source=retry` göndermiyor, yani
+        // hiçbir mevcut kullanıcı bu dala girmez; davranışları birebir aynı kalır.
+        const isRetry = req.query.source === 'retry';
         const logUser = req.user ? (req.user.email || req.user.uid) : 'anonim';
 
         // [YENİ] Son görülen konumu kaydet — kıyı bildirimi cron'u bunu kullanır.
         // Ateşle-ve-unut; bu satır analiz akışını hiçbir koşulda etkilemez.
         // Oto-yükleme isteklerinde YAZILMIYOR: kullanıcının bilinçli seçimi değil,
         // uygulama açılışında otomatik gelen konumdur.
-        if (req.user && !isAutoLoad) kaydetSonKonum(req.user.uid, latRaw, lonRaw);
+        // Tekrar denemesinde de yazılmıyor: aynı nokta zaten ilk istekte kaydedildi.
+        if (req.user && !isAutoLoad && !isRetry) kaydetSonKonum(req.user.uid, latRaw, lonRaw);
 
         const now = new Date();
         const clickHour = now.getHours();
@@ -5354,6 +5385,8 @@ app.get('/api/forecast', async (req, res) => {
         // AutoLoad isteğini logla — click sayacı istemci tarafında zaten atlanıyor
         if (isAutoLoad) {
             console.log(`[FORECAST] [${logUser}] 🌍 OTO-YÜKLEME TALEBİ BAŞLADI (lat:${lat}, lon:${lon})`);
+        } else if (isRetry) {
+            console.log(`[FORECAST] [${logUser}] 🔄 TEKRAR DENEMESİ (lat:${lat}, lon:${lon}) — kotaya sayılmıyor`);
         } else {
             console.log(`[FORECAST] [${logUser}] 🌍 YENİ ANALİZ TALEBİ BAŞLADI (lat:${lat}, lon:${lon})`);
         }
@@ -5369,8 +5402,9 @@ app.get('/api/forecast', async (req, res) => {
         //   • Yalnızca GİRİŞ YAPMIŞ kullanıcılar sayılır (anonim akış değişmedi)
         //   • PRO ve deneme (grace) süresindekiler muaf
         //   • autoload (sıcak başlangıç) sayılmaz — kullanıcı tıklaması değil
+        //   • retry (4.9 tekrar denemesi) sayılmaz — aynı gerekçe, bkz. isRetry
         //   • db yoksa AÇIK KALIR (altyapı hatası kullanıcıyı kilitlemesin)
-        if (req.user && !req.isPremium && !req.isGracePeriod && !isAutoLoad && db) {
+        if (req.user && !req.isPremium && !req.isGracePeriod && !isAutoLoad && !isRetry && db) {
             try {
                 const uid = req.user.uid;
                 const today = new Date().toISOString().split('T')[0];
@@ -5434,7 +5468,9 @@ app.get('/api/forecast', async (req, res) => {
                 const key = `af_${ip}_${new Date().toISOString().slice(0, 10)}`;
                 const used = anonFreeIpCache.get(key) || 0;
                 if (used < ANON_FREE_IP_DAILY_MAX) {
-                    anonFreeIpCache.set(key, used + 1);
+                    // Tekrar denemesi tavanı TÜKETMEZ — hakkı ilk istek zaten ödedi.
+                    // Sayılsaydı tek analiz 4 hak yer, 30'luk tavan 7 analize düşerdi.
+                    if (!isRetry) anonFreeIpCache.set(key, used + 1);
                     anonFreeGranted = true;
                 } else {
                     console.log(`[ANON-FREE] ⚠️ ${ip} günlük tavanı aştı (${used}/${ANON_FREE_IP_DAILY_MAX}) → sanitize edilmiş veri`);
@@ -6729,8 +6765,10 @@ app.get('/api/forecast', async (req, res) => {
         // uzun timeout ile bir kez daha dene ve önbelleğe yaz. Kullanıcı beklemiyor;
         // kazanan bir sonraki istek (veya kullanıcının yeniden dokunması) oluyor.
         // await EDİLMEZ, hata yutulur — açık isteği ne yavaşlatır ne düşürür.
+        // cacheKey de veriliyor: başarılı olursa o kayıt düşürülür, yoksa istemcinin
+        // tekrar denemesi 3 saat boyunca aynı eski gövdeyi görür (bkz. fonksiyon içi not).
         if (sstSat === null && !isLand) {
-            refreshSatelliteSSTInBackground(lat, lon, logUser);
+            refreshSatelliteSSTInBackground(lat, lon, logUser, cacheKey);
         }
 
     } catch (error) {

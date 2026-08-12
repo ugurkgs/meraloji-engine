@@ -626,6 +626,56 @@ timeout 2,5 sn. Gelmezse düzeltme yapılmaz, analiz sürer.
 
 ---
 
+## 21 · Veri kalitesi tekrar denemesi (4.9 devamı) `DEPLOY BEKLİYOR` + `APK BEKLİYOR`
+
+Uydu SST / klorofil ilk istekte 2 sn'de yetişemezse istemci aynı noktayı
+**3 → 5 → 10 sn** sonra sessizce yeniden istiyor; veri iyileşirse skorları
+tazeleyip **tek bir toast** gösteriyor. Üç deneme yetmezse sessizce bırakıyor.
+
+**Madde "sunucu tarafı bitti, kalan yarısı istemci" diyordu — YANLIŞTI.**
+İstemci tek başına bu işi yapamıyordu, iki tıkanma vardı:
+
+1. **Tekrar denemek aynı cevabı getiriyordu.** Forecast yanıtı `cacheKey` altında
+   3 saat duruyor (`server.js:1126`, dönüş `:5447`); arka plandaki NOAA denemesi
+   yalnız `sstSatCache`'e yazıyordu (`:1743`). Yani istemci 3 saat boyunca
+   **birebir aynı gövdeyi** alırdı, `satelliteSst` hep `false`, toast hiç çıkmazdı.
+2. **Kota.** `clickUsage` sayacı `:5399`'da, önbellek kontrolünden (`:5414`)
+   **önce** artıyor. `FREE_DAILY_CLICKS = 2` iken 1 analiz + 3 deneme = **4 hak**:
+   özellik kullanıcıyı kendi analizinin ortasında 403 + paywall ile kilitlerdi.
+
+**Sunucu:**
+- `source=retry` — kotadan, anonim IP tavanından ve `kaydetSonKonum`'dan muaf.
+  **Geriye dönük etki sıfır:** yayındaki APK bu değeri göndermiyor.
+- Arka plan SST başarılı olunca **yalnız o hücrenin** forecast kaydı, **yalnız
+  `satelliteSst:false` ise** düşürülüyor. Yeniden üretim ek Open-Meteo çağrısı
+  getirmiyor — ham veri `raw_weather_`/`raw_marine_` anahtarlarında ayrı ve aynı
+  TTL ile duruyor (`:5537`).
+
+**⚠️ KABUL EDİLEN GERİYE DÖNÜK ETKİ (kullanıcı onayladı):** düşürme sonrası
+yayındaki APK kullanıcıları da uydu SST'li veri alır → skorlar oynar.
+Ölçüsü zaten kayıtlıydı: **türlerin %12,5'inde ortalama 2,51 puan**, yönü
+iyileştirme.
+
+**İstemci:**
+- `ForecastResponse.dataQuality` **alanı yoktu** — Gson veriyi sessizce
+  düşürüyordu. Bu, `elevation` ve `airTempDayAvg`'den sonra aynı ailenin
+  **dördüncü** vakası: *sunucu göndermek, kullanıcının görmesi değildir.*
+- `ApiService`'e ayrı `forecastRetry` / `analyzeAnonRetry` metotları — mevcut
+  metotlara dokunulmadı, çalışan çağrı yerleri risksiz kaldı.
+- "Aynı poligon" = sunucunun ızgara hücresi (0,01° ≈ 1,1 km). Farklı hücreye
+  tıklanırsa zincir iptal; aynı hücrede sayaç sıfırlanmaz. Ekran kapansa da
+  zincir sürer, `onDestroy`'da temizlenir.
+- İyileşme ölçüsü **sayı** (0-2), böylece yalnız klorofilin gelmesi de yakalanıyor.
+- `toast_data_refreshed` **4 dilde** (TR/EN/ES/EL), hardcode yok.
+- **Olumsuz işaret KOYULMADI** — uydu SST yokken Open-Meteo SST (~10 km)
+  kullanılıyor, o da gerçek ölçüm.
+
+**Doğrulama:** `node --check` · `tools/kontrol-4.9-onbellek.js` **7/7**
+(pozitif kontrol dâhil) · 4 `strings.xml` XML geçerli · `compileReleaseJavaWithJavac`
+**BUILD SUCCESSFUL**.
+
+---
+
 ## Bu dönemde teşhis edildi, düzeltilmedi
 
 Ayrıntıları `ACIK-ISLER.md` içinde:
