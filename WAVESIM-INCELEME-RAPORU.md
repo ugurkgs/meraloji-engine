@@ -165,7 +165,34 @@ görüyor ve bunun ölçüme dayandığını sanıyor.
 
 ---
 
-## 8 · KRİTİK — bozuk kodlama TÜRKÇE FIRTINA UYARISINI KIRMIŞ
+## 8 · ~~KRİTİK — bozuk kodlama TÜRKÇE FIRTINA UYARISINI KIRMIŞ~~ **DÜZELTİLDİ** (2026-08-13)
+
+> **YAPILDI.** İki `hasStormText` satırındaki Türkçe anahtarlar onarıldı, ölü
+> `hasRainText` kaldırıldı. Düzeltirken **iki akraba kusur daha** çıktı:
+>
+> - **İspanyolca anahtar hiç yoktu.** Sunucu `"⛈️ Tormenta eléctrica"` gönderiyor;
+>   ne `"storm"` ne `"fırtına"` içeriyor → **ES kullanıcıda da her zaman false**.
+>   `"tormenta"` eklendi.
+> - **Yunanca sunucuda YOK.** `getWeatherIconicDescription`'daki `weatherMap`
+>   yalnız `tr/en/es` taşıyor (`server.js:2410-2431`); `res[lang] || res.tr`
+>   yüzünden **Yunan kullanıcı TÜRKÇE hava metni görüyor** — her hava kodunda,
+>   yalnız fırtınada değil. **Ayrı bir kusur, düzeltilmedi** (gerçek çeviri
+>   gerekiyor, uydurmak daha kötü olurdu). Bugün "fırtına" ile kazara eşleşiyor;
+>   Yunanca metinler girdiği gün sessizce bozulmasın diye `"καταιγίδα"` ileriye
+>   dönük eklendi.
+>
+> **Toplu kodlama taraması YAPILMADI** — yalnız üç satıra dokunuldu, kalan 114
+> bozuk yer yorum satırı ve zararsız.
+>
+> **Test:** `tools/kontrol-firtina-metni.js` — sunucudaki 18 fırtına metnini
+> (3 dil × 6 varyant) istemcideki anahtarlarla çapraz sınıyor, **18/18 geçiyor**,
+> pozitif kontrol dâhil. İki taraf da kaynaktan sökülüyor, yani biri değişirse
+> test yakalar. Bu hatanın yıllarca sessiz kalabilmesinin sebebi tam olarak
+> böyle bir kontrolün olmamasıydı.
+>
+> **Yayındaki APK etkilenmez** (istemci kodu); bir sonraki sürümde devreye girer.
+
+### Bulgunun kaydı (düzeltilmeden önceki hâli)
 
 Dosyada **117 yerde** çift kodlanmış UTF-8 var. Çoğu yorum satırında ve
 zararsız (`â”€â”€ SETTERS â”€â”€`, `klorofil deÄŸerini`, `(mg/mÂ³)`). **Ama ikisi
