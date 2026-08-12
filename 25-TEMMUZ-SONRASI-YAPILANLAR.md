@@ -676,9 +676,66 @@ iyileştirme.
 
 ---
 
+## 22 · Derinlik eğrisi aralığın DIŞINDA daha yüksek puan veriyordu `DEPLOY BEKLİYOR`
+
+Dış gözle yapılan bir motor denetiminde bulundu, kullanıcı bağımsız doğruladı.
+**874 türün 874'ünü** etkiliyordu. Ayrıntı: `ACIK-ISLER.md` §4.21.
+
+Derinlik çarpanı iki dalda hesaplanıyor ve **sınırda birbirine bağlanmıyordu**:
+aralık içi dal `fMax`'ta 0,72 ile bitiyor, dış dal bağımsız olarak 1,0'dan
+başlıyordu. Balık kendi bildirdiği azami derinliğin dışına çıkınca skoru **%38
+artıyordu.** Anomali bandı `fMax` → `fMax × 1,28`.
+
+Somut vaka: **levrek `max: 40 m`** → 41 m'de 0,975 · 40 m'de 0,720.
+Ege'de sürekli tıklanan bir bant.
+
+```js
+// eski: Math.max(0.1, 1.0 - (d - fMax) / fMax)
+depthScore = Math.max(0.1, (1 - DERIN_KENAR) * (1.0 - (d - fMax) / fMax));
+```
+
+`SIG_KENAR` / `DERIN_KENAR` / `US` iç dalın içinden yukarı taşındı — dış dal
+onları göremiyordu, hatanın kökü buydu.
+
+**ÖLÇÜM:** tek biçimli **−%28** (taban kelepçesi devreye girene kadar; örneklemin
+%42'sinde iki sürüm de 0,1'e kelepçelendiği için hiç değişmiyor). **Hiçbir tür
+puan kazanmıyor.** Türkiye türlerinde etkilenen sayısı: 15 m'ye kadar 0, 20 m'de
+3, 50 m'de 13, 60 m'de 21. Anomali bandı **0/76** türde kaldı.
+
+> Kullanıcı iki biçim arasından **ölçekleme**yi seçti (alternatif: yalnız bandı
+> kırpmak). Yani düzeltme bandın dışına da dokunuyor; 2026-08-06 notundaki
+> *"fMax üstü ceza ayrıca kalibre edilmişti"* ifadesinin mutlak düzeyi değişti,
+> eğimi değişmedi.
+
+**Doğrulama:** `tools/kontrol-derinlik-sureklilik.js` **6/6**, 874 tür taranarak.
+Testler davranış değil **özellik** sınıyor (süreklilik, monotonluk, sınır
+değerleri, "kimse kazanmıyor") ve pozitif kontrol içeriyor.
+
+**Deniz regresyonu bilerek koşulmadı** — bu değişikliğin amacı skorun değişmesi;
+"sapma 0" çıksaydı düzeltme işe yaramıyor demekti. Aynı denetimden çıkan test
+dersi `DEVIR.md` §3.9'a yazıldı.
+
+---
+
 ## Bu dönemde teşhis edildi, düzeltilmedi
 
 Ayrıntıları `ACIK-ISLER.md` içinde:
+
+- **Eylül "yaz" sayılıyor** (madde 4.22) — `getSeason` yılı eşit bölmüyor:
+  yaz 4 ay (Haz-EYLÜL), sonbahar yalnız 2 ay (Eki-Kas). Türkiye'de **26 tür
+  kaybediyor** (kalamar −13,2 · mırlan −9,9 · sübye/barbun/mezgit −8,8),
+  **34 tür haksız kazanıyor** (eşkina +8,8 · izmarit +6,6 · trakun +5,5 ·
+  balon balığı +4,4). 1.4'teki "liste başı yem/zehirli türlerle doluyor"
+  şikâyetinin eylüldeki mekanizması. **Düzeltilmedi** çünkü §4.1b'de çöken
+  toplu değişikliğin aynı şekli — ölçüm kampanyası ister.
+  *Hafifletici:* `monthlyActivity`'si olan 14 tür muaf ve onlar tam olarak
+  eylülün yıldızları (lüfer, palamut, çinekop, hamsi, uskumru, istavrit…).
+- **Uykuda üç tuzak** (madde 4.23) — `isGlobal` habitat kutularını yutuyor
+  (bugün 0 kayıt) · `SOUTH_AF_AFRICA` yazım hatası (`sa_spotted_grunter`) ·
+  11 yabancı türde dört mevsim de aynı.
+- **Denetimin bakmadığı katmanlar:** sıcaklık trapezoidi · tetikleyici katmanı
+  (`s_trigger`, 12 puan, ~40 dal) · substrate · solunar. Aynı yöntemle
+  incelenmesi istendi.
 
 - **`hourlyTimeline` saat indeksi sabit 24** (madde 4.11) — aynı döngüde marine
   dinamik offset kullanırken weather sabit 24 kullanıyor. Cache gece yarısını

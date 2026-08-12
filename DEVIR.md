@@ -101,6 +101,27 @@ HydroLAKES gdb: C:\Users\Ugur Kogus\Downloads\files (12)\meraloji-twa-package\Hy
 8. **Yayındaki APK null'a dayanıklı değil.** `instant.current` `Double` ve
    `MainActivity:3562` null kontrolsüz unboxing yapıyor. Kod "bilinmiyor" için
    **`-1` sentinel** kullanıyor.
+9. **REGRESYON TESTİ ESKİ HATAYI BULMAZ — KORUR.** §3.3'ten farklı bir kusur:
+   orada test bir yolu *kapsamıyordu*; burada test **kapsadığı yerde bile
+   kördü.**
+
+   Somut vaka (`ACIK-ISLER.md` §4.21): derinlik eğrisi 2026-08-06'da yeniden
+   yazıldı ve o günkü regresyon şunu diyordu:
+
+   ```
+   ✓ fMax ÜSTÜ (çok derin cezası): 68 kontrol, değişen 0
+   ```
+
+   Doğruydu — dış dala dokunulmadığını kanıtlıyordu, ve bu başarı sayıldı. Ama
+   **iki dalın birbirine bağlanıp bağlanmadığını hiç sormuyordu.** Sınırda %38'lik
+   bir sıçrama vardı (balık kendi azami derinliğinin dışında daha yüksek puan
+   alıyordu), yeniden yazımdan önce de oradaydı, ve test onu "değişmedi" diye
+   onayladı. Bulan, kodu ilk kez gören bir dış göz oldu.
+
+   **Kural:** *"değişmedi"* testi yalnızca **gerileme** yakalar; doğruluk
+   sınamaz. Doğruluk için davranışı değil **ÖZELLİĞİ** yaz — süreklilik,
+   monotonluk, sınır değerleri, "kimse puan kazanmıyor".
+   Örnek: `tools/kontrol-derinlik-sureklilik.js`.
 
 ---
 

@@ -4981,6 +4981,20 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         const KIYI_SIG_TABAN = 0.20;
 
         // ───────────────────────────────────────────────────────────────────
+        // DERİNLİK EĞRİSİ SABİTLERİ — İKİ DAL PAYLAŞIR [2026-08-12'de yukarı alındı]
+        // ───────────────────────────────────────────────────────────────────
+        // Eskiden bunlar SADECE "aralık içi" dalın içinde tanımlıydı; "fMax üstü"
+        // dalı onları göremiyordu ve bağımsız olarak 1.0'dan başlıyordu. Sonuç:
+        // aralığın son metresinde 0.72, bir metre dışarıda 0.99 — yani sınırı
+        // GEÇMEK skoru %38 ARTIRIYORDU (874 türün 874'ünde, band fMax..1.28·fMax).
+        //
+        // Kapsamı yukarı almak, iki dalın aynı sayıya bağlı olduğunu kodda görünür
+        // kılıyor: DERIN_KENAR değişirse her iki taraf birlikte hareket eder.
+        const SIG_KENAR = 0.15;    // fMin'de skor = 0.85
+        const DERIN_KENAR = 0.28;  // fMax'ta skor = 0.72 — dış dalın da başlangıcı
+        const US = 1.6;            // >1 → optimum çevresinde plato
+
+        // ───────────────────────────────────────────────────────────────────
         // SIĞ TOLERANSLI PELAJİKLER [2026-08-03]
         // ───────────────────────────────────────────────────────────────────
         // "Pelajik" ile "derin su ister" aynı şey DEĞİLDİR. Lüfer (Pomatomus
@@ -5072,9 +5086,7 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             // DOKUNULMAYAN: bu dal yalnızca [fMin, fMax] ARASI içindir. Aralığın
             // altındaki sığ davranış (kıyı bandı, 0.20 tabanı ve pelajik dalı) ile
             // fMax üstü derin ceza aynen korunuyor — onlar ayrıca kalibre edilmişti.
-            const SIG_KENAR = 0.15;    // fMin'de skor = 0.85
-            const DERIN_KENAR = 0.28;  // fMax'ta skor = 0.72
-            const US = 1.6;            // >1 → optimum çevresinde plato
+            // SIG_KENAR / DERIN_KENAR / US yukarıda tanımlı (iki dal paylaşıyor).
             const u = Math.log1p(d);
             const uOpt = Math.log1p(fOpt);
             if (d <= fOpt) {
@@ -5089,8 +5101,33 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
                 depthScore = 1 - DERIN_KENAR * Math.pow(z, US);
             }
         } else if (d > fMax) {
-            // Çok derin
-            depthScore = Math.max(0.1, 1.0 - (d - fMax) / fMax);
+            // ── ARALIK ÜSTÜ — SINIRDA SÜREKLİ [DÜZELTİLDİ 2026-08-12] ──────────
+            //
+            // ESKİ HALİ: `Math.max(0.1, 1.0 - (d - fMax) / fMax)` — 1.0'DAN başlıyordu.
+            // Aralık içi dal fMax'ta 1−DERIN_KENAR = 0.72 ile bitiyor, bu dal ise
+            // hemen bir metre ötede 0.99 veriyordu. Yani balık kendi bildirdiği
+            // azami derinliğin DIŞINA çıkınca skoru %38 ARTIYORDU; anomali bandı
+            // fMax → fMax×1.28 idi ve depth.max tanımlı 874 türün 874'ünü kapsıyordu.
+            // Somut: levrek max=40 m → 41 m'de 0.975, 40 m'de 0.720. Ege'de sürekli
+            // tıklanan bir bant.
+            //
+            // NEDEN 1−DERIN_KENAR: sınırı geçmek skoru ARTIRAMAZ. Aralığın son
+            // metresindeki değer, aralık dışının TAVANIDIR. Bu bir kalibrasyon
+            // tercihi değil, eğrinin tanımı gereği tek doğru başlangıç.
+            //
+            // Rampanın ŞEKLİ korundu (fMax'tan itibaren bir fMax boyunca doğrusal
+            // iniş), yalnızca ölçeklendi. 0.1 tabanına varış noktası da neredeyse
+            // aynı kaldı: eskiden 1.90·fMax, şimdi 1.86·fMax.
+            //
+            // YÖN GARANTİSİ: yeni değer her d için eskisinden KÜÇÜK veya EŞİT —
+            // hiçbir tür bu değişiklikten puan KAZANMAZ.
+            //
+            // Bu hata logaritmik yeniden yazımdan (2026-08-06) ÖNCE de vardı:
+            // eski iç dal sınırda 0.70 veriyordu, sıçrama 0.30'du. O günkü regresyon
+            // "fMax üstü: 68 kontrol, değişen 0" diyordu — dala dokunulmadığını
+            // doğruluyordu ama iki dalın BİRBİRİNE BAĞLANIP bağlanmadığını hiç
+            // sormuyordu. Eski davranışı sabitleyen test, eski hatayı korur.
+            depthScore = Math.max(0.1, (1 - DERIN_KENAR) * (1.0 - (d - fMax) / fMax));
             penalties.push(i18n(lang).penalties.tooDeeply);
         }
         depthScore = Math.max(0.05, Math.min(1.0, depthScore));

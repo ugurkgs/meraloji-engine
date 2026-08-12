@@ -598,9 +598,149 @@ gerileme yok.
 > `paramUret`'te `shoreBearing` göndermiyor, dolayısıyla bonus hiç
 > tetiklenmiyor. Bu değişikliğin kanıtı yukarıdaki ayrı ölçümdür.
 
-### 4.15 İstemci klorofil yokken 0 gösteriyor `HAZIR` · **MOBİL**
+### ~~4.21 Derinlik eğrisi aralığın DIŞINDA daha yüksek puan veriyordu~~ **DÜZELTİLDİ** (2026-08-12)
 
-4.9 çalışılırken çıktı. Sunucu doğru davranıyor — klorofil alınamazsa **`null`**
+Dış gözle yapılan bir motor denetiminde bulundu, kullanıcı bağımsız olarak
+doğruladı. **874 türün 874'ünü** etkiliyordu.
+
+**Hata:** derinlik çarpanı iki dalda hesaplanıyor ve **sınırda birbirine
+bağlanmıyordu.** Aralık içi dal `fMax`'ta `1−DERIN_KENAR` = **0,72** ile bitiyor,
+`fMax` üstü dal ise bağımsız olarak **1,0**'dan başlıyordu:
+
+| çipura (max 150 m) | çarpan |
+|---|---|
+| 150 m — aralığın sınırı | 0,720 |
+| **151 m — ARALIK DIŞI** | **0,993** |
+| 192 m — aralık dışı | 0,720 ← ancak burada başa dönüyordu |
+
+Yani balık kendi bildirdiği azami derinliğin dışına çıkınca skoru **%38
+artıyordu.** Anomali bandı `fMax` → `fMax × 1,28`. Somut vaka: **levrek
+`max: 40 m`** → 41 m'de 0,975 · 40 m'de 0,720. Ege'de sürekli tıklanan bir bant.
+
+**Düzeltme:** dış dal `1−DERIN_KENAR`'dan başlıyor —
+`Math.max(0.1, (1 - DERIN_KENAR) * (1.0 - (d - fMax) / fMax))`.
+Sabitler iki dalın da görebilmesi için yukarı taşındı.
+
+> **Bu bir kalibrasyon tercihi DEĞİL.** Sınırı geçmek skoru artıramaz; aralığın
+> son metresindeki değer, aralık dışının tavanıdır. Tek doğru başlangıç bu.
+
+**ÖLÇÜM.** Rampanın *şekli* korundu, yalnız ölçeklendi; 0,1 tabanına varış
+noktası neredeyse aynı (eski 1,90·fMax → yeni 1,86·fMax).
+
+- Etki **tek biçimli −%28** (dış daldaki her derinlikte), taban kelepçesi
+  devreye girene kadar. Örneklemin %42'sinde iki sürüm de 0,1'e kelepçelendiği
+  için **hiç değişmiyor.**
+- **Hiçbir tür puan KAZANMIYOR** — testle garanti altında.
+- Türkiye türlerinde tıklama derinliğine göre etkilenen tür sayısı:
+  15 m'ye kadar **0**, 20 m'de 3, 50 m'de 13, 60 m'de 21, 200 m'de 11.
+  Etkilenenler zaten **kendi derinlik aralığının dışında** puanlanan türler.
+- Anomali bandı kapandı: **0/76** Türkiye türünde sınır aşımı kaldı.
+
+> **DÜRÜSTLÜK NOTU — düzeltme bandın dışına da dokunuyor.** Yalnız `fMax..1,28·fMax`
+> aralığını değil, **tüm dış rampayı** %72'ye ölçekliyor. Bu kaçınılmaz: sınırı
+> sürekli yapmanın ve rampanın şeklini korumanın başka yolu yok. 2026-08-06
+> notundaki *"fMax üstü ceza ayrıca kalibre edilmişti"* ifadesi bu yüzden artık
+> kısmen geçersiz — o kalibrasyonun mutlak düzeyi değişti, eğimi değişmedi.
+
+**Doğrulama:** `node --check` temiz · `tools/kontrol-derinlik-sureklilik.js` **6/6**,
+874 tür taranarak (süreklilik, monotonluk, "kimse kazanmıyor", sınır değerleri,
+ve **pozitif kontrol**: eski kodda 1. test kırmızı veriyor).
+
+**Deniz regresyonu koşulmadı — bilerek.** Bu değişikliğin amacı skorun değişmesi;
+"sapma 0" çıksaydı düzeltme işe yaramıyor demekti.
+
+### 4.22 Eylül "yaz" sayılıyor `KARAR BEKLİYOR` · **ÖLÇÜM GEREKTİRİR**
+
+Aynı denetimde bulundu, kullanıcı doğruladı. **Düzeltilmedi — bilerek.**
+
+`getSeason` (`server.js:3517`) yılı eşit bölmüyor:
+
+```
+kış      3 ay → Ara, Oca, Şub
+ilkbahar 3 ay → Mar, Nis, May
+yaz      4 ay → Haz, Tem, Ağu, EYLÜL   ←
+sonbahar 2 ay → Eki, Kas               ← yalnız iki ay
+```
+
+JS'te ay 0-tabanlı, `month >= 5 && month <= 8` → 8 = **Eylül** = yaz.
+Mevsim katmanı 22 puan; kayıp `(autumn − summer) × 22`.
+
+**Türkiye'de 26 tür kaybediyor, 34 tür haksız kazanıyor:**
+
+| kaybedenler (değerli) | kazananlar (çoğu yem/istilacı/zehirli) |
+|---|---|
+| Kalamar −13,2 · Mırlan −9,9 | Eşkina +8,8 · İzmarit +6,6 |
+| Sübye −8,8 · Barbun −8,8 · Mezgit −8,8 | Zargana +6,6 · Lokum +6,6 |
+| Sargöz −7,7 · Levrek −6,6 · Karagöz −6,6 | **Trakun +5,5** · **Balon balığı +4,4** |
+
+Bu, 1.4'teki *"liste başı yem/istilacı/zehirli türlerle doluyor"* şikâyetinin
+eylüldeki mekanizması — veriden değil takvimden geliyor.
+
+**HAFİFLETİCİ GERÇEK:** `monthlyActivity`'si olan **14 tür bu hatadan muaf**
+(`:4105` önceliği) ve o 14 tür tam olarak eylülün yıldızları: lüfer, palamut,
+çinekop, hamsi, uskumru, istavrit, sardalya, kolyoz, papalina, çaça, tirsi,
+aterin, yazılı orkinos, lahoz. Yani **kampanyanın vitrin türleri doğru
+puanlanıyor**; hata dip/kıyı türlerinde.
+
+### ⚠️ NEDEN HEMEN DÜZELTİLMEDİ
+
+Kullanıcının kararı, ve gerekçesi kayda değer:
+
+1. **Bu, §4.1b'de ÇÖKEN değişikliğin aynı şekli.** O da sağlam teşhisti,
+   "değerli türler listeye çıkacak" mantığıyla yapıldı, ölçüldüğünde
+   **kötüleşti** (ilk 10'da değerli tür 61→51) ve geri alındı. Eylülü sonbahara
+   almak yüzlerce türü birden oynatır ve aynı gerekçeye dayanır.
+   **Ölçüm metriği o vakadakiyle aynı olmalı.**
+2. **Sıcaklık katmanıyla gerilim var.** Ege'de eylül suyu hâlâ 25-26 °C, yani
+   *sıcaklık olarak* gerçekten yaz. Eylül sonbahara alınırsa tür, sonbahar
+   davranış puanı alırken sıcaklık katmanından (28 puan, ayrı) yaz puanı almaya
+   devam eder. İkisinin birlikte doğru sonuç verip vermediği **ölçüm işidir,
+   akıl yürütme işi değil.**
+3. Eylül kampanyası kararının (3.1) tam üstüne düşüyor.
+
+**Yapılacaksa sıra:** önce ölçüm kampanyası (metrik: ilk 10'daki değerli tür
+sayısı), sonra karar. Aceleye gelirse §4.1b tekrar yaşanır.
+
+### 4.23 Uykuda tuzaklar — şu an zarar vermiyor `HAZIR` (düşük öncelik)
+
+Aynı denetimden; üçü de doğrulandı, üçü de bugün zararsız.
+
+- **`isGlobal` bbox'ları yutuyor.** `isInHabitat:3469`'daki `if (!fish.isGlobal)
+  return false;` global türde atlanıyor, `:3474` her yerde `true` dönüyor. Yani
+  `isGlobal:true` + `habitatBboxes` yazan kayıtta **kutular hiç okunmaz.**
+  Bugün böyle kayıt **yok** (0/874) — risk, ileride birinin sessizce yanılması.
+  Tek satırlık yorum uyarısı yeter.
+- **`SOUTH_AF_AFRICA` yazım hatası** — `sa_spotted_grunter`, `species.js:10961`.
+  Diğer 20 Güney Afrika türü `SOUTH_AFRICA` yazıyor. Bbox önceliği türü zaten
+  geçirdiği için zararsız; **bbox kaldırılırsa tür haritadan kaybolur.**
+- **11 yabancı türde dört mevsim de aynı** (UAE, G. Afrika, Yeni Zelanda, BK —
+  hepsi 0,8 veya 0,9). Mevsim katmanı onlarda hiç ayırt etmiyor. Kasıtlı
+  olabilir. *(Orfoz/mersinin sıfırları kasıtlı — `protected: true`.)*
+
+> **DENETİMİN BAKMADIĞI YERLER** (kayda geçsin, iş bitmedi): sıcaklık trapezoid
+> eğrisi · **tetikleyici katmanı (`s_trigger`, 12 puan, ~40 dal)** · zemin
+> (substrate) çarpanı · solunar hesabı. Aynı yöntemle bakılması istendi.
+
+### ~~4.15 İstemci klorofil yokken 0 gösteriyor~~ **YAPILDI** (doğrulandı 2026-08-12)
+
+> **Android kaynağından mekanik olarak doğrulandı** — madde açık duruyordu ama iş
+> bitmiş. Kanıt:
+>
+> - `WaveSimulationView.java:563` `chlorophyllKnown` bayrağı eklenmiş; `:566`
+>   `setChlorophyllData(Double)` aşırı yüklemesi `null` gelince bayrağı `false`
+>   yapıp çiziyor — 0'a çevirmiyor.
+> - `MainActivity.java:3537` `planktonKnown` (yorumu aynen: *"0 nöbetçi
+>   değeriyle karışmasın"*), `:3848` simülasyona
+>   `planktonKnown ? Double.valueOf(plankton) : null` geçiyor.
+>   `:1454` ve `:1575` de null geçiyor.
+>
+> **Kalan tek incelik (yapılmadı, bilinçli):** `MainActivity:3962` HUD'da
+> `plankton > 0 ? fmt(...) : "—"` kullanıyor, `planktonKnown`'a bakmıyor. Yani
+> klorofil GERÇEKTEN 0 ölçülürse de "—" görünür. Bu ilk hatanın tersi ve çok daha
+> zararsız (bilinen bir değeri "bilinmiyor" göstermek); denizde gerçek 0 pratikte
+> görülmüyor. Widget'taki kardeşi için bkz. 4.16.
+
+**Eski kayıt (kapanmadan önceki teşhis):** 4.9 çalışılırken çıktı. Sunucu doğru davranıyor — klorofil alınamazsa **`null`**
 gönderiyor (`chlorophyll: chlorophyllData ? ... : null`). Ama istemci onu **0**
 yapıyor:
 
