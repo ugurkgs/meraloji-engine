@@ -8,6 +8,50 @@
 
 ---
 
+## 0.0 · ⚠️ DÜZELTME (2026-08-13) — §2 ve §3'ün ŞİDDETİ YANLIŞTI
+
+Raporun ilk hâli kod okumasına dayanıyordu ve **ulaşılabilirlik ölçülmemişti**
+(§10'da bu açıkça yazılıydı). Ölçüldü, ve **iki üst madde çöktü:**
+
+| iddia | ölçüm | sonuç |
+|---|---|---|
+| §2 `pressure = 0` KRİTİK | `server.js:5955` ve `:6268` → `safeNum(..., **1013**)` | Sunucu basıncı **hiç null göndermiyor**. `MainActivity:1599`'daki `: 0.0` dalı **hiç çalışmıyor**. §2 **ULAŞILAMAZ**. |
+| §3 durağan `waterTemp` YÜKSEK | `:6171` `temp: Math.round(tempWater*10)/10`, `tempWater` `safeWaterTemp(...)`'ten bölgesel varsayılanla geliyor | `temp` **hiç null değil**; `setWaterTempData` her seferinde yazıyor. Sızıntı **pratikte oluşmuyor**. `salinity` de aynı — `getSalinity` hep sayı döndürüyor. |
+
+`MainActivity:7645`'teki ikinci basınç yolu da güvenli: `win` yalnız null-olmayan
+değer alıyor ve `size() >= 2` şartı var.
+
+### Bunun yerine ORTAYA ÇIKAN GERÇEK BULGU
+
+Sorun ortadan kalkmadı — **yer değiştirdi. Uydurma istemcide değil SUNUCUDA:**
+
+```js
+// server.js:2282
+function safeNum(val, defaultVal = 0) {
+    return (val === undefined || val === null || isNaN(val)) ? defaultVal : Number(val);
+}
+// :5955
+const pressure = safeNum(weather.hourly?.surface_pressure?.[hourlyIdx], 1013);
+```
+
+Open-Meteo basınç vermediğinde (ya da indeks dizinin dışına taştığında) sunucu
+**1013 hPa uyduruyor** ve bunu ölçüm gibi gönderiyor. Aynı desen `safeWaterTemp`
+bölgesel varsayılanında da var.
+
+**Yani §2.1 ihlali gerçek, ama `WaveSimulationView`'da değil `server.js`'te.**
+İstemcinin null işleme kodu (`1013f`, `35f`, `20f` nöbetçileri) tam da bu yüzden
+**ölü kod** — sunucu zaten uydurmuş olduğu için istemciye hiç null ulaşmıyor.
+
+**Bu yeni bir iş kalemi**, ve doğru yeri sunucu. Sunucuda bunun nasıl dürüst
+yapıldığının örneği zaten var: `dataQuality: { satelliteSst, chlorophyll }`
+(`:6817`) — kaynak gelmediğinde bunu **söylüyor**. Basınç ve SST için karşılığı yok.
+
+> **Ders:** "kod bu değeri üretebilir" ile "kullanıcı bu değeri görür" ayrı
+> şeyler. Bu raporun ilk hâli ikisini karıştırdı. `DEVIR.md` §3.2 zaten bunu
+> söylüyordu: *başarısız sorgu ≠ negatif sonuç.*
+
+---
+
 ## 0 · Yöntem ve kapsam
 
 Veri girişinden çıktıya kadar izlendi: **sunucu yanıtı → `MainActivity` çağrısı →
@@ -246,15 +290,18 @@ ama biri onu tekrar kullanmaya kalkarsa Türkçe'de sessizce çalışmaz.**
 
 ## 9 · Öncelik önerisi
 
-| # | bulgu | neden bu sırada |
+**§0.0'daki düzeltmeden SONRAKİ sıra:**
+
+| # | bulgu | durum / neden |
 |---|---|---|
-| 1 | **§8 bozuk kodlama** | **Tek satırlık düzeltme, güvenlik işaretini geri getiriyor.** Emek/değer oranı listedeki en yüksek; risk yok, ölçüm gerektirmiyor. Ana dilde çalışmayan bir tehlike uyarısı. |
-| 2 | **§2 basınç 0** | Tek gerçek *bozulma*; analizler arası sızıyor, ekranda yanlış sayı ve yanlış biyolojik iddia üretiyor. Düzeltmesi dar. |
-| 3 | **§3 durağan sıcaklık** | Sessiz ve kullanıcının fark edemeyeceği türden; B noktasında A'nın verisi gösteriliyor. |
-| 4 | **§1 sınırda null→0** | Kök sebep, ama geniş: 11 çağrı yeri + setter'lar. §1'i çözmek §2 ve §5'i büyük ölçüde kapatır. Toplu değişiklik olduğu için ölçülerek yapılmalı. |
-| 5 | **§5 veri-yok yolları** | §1'e bağlı; önce ayrım kurulmalı ki mod "yok" diyebilsin. |
-| 6 | §6 kara modu | Bilinen 4.18'in genişletilmiş hâli, tasarım kararı gerektiriyor. |
-| 7 | §4, §7 | Temizlik; tek başlarına kullanıcıya yanlış bilgi vermiyor (§7 sınırda). |
+| ~~1~~ | ~~**§8 bozuk kodlama**~~ | ✅ **YAPILDI 2026-08-13.** Güvenlik işareti geri geldi, çapraz kontrol testi eklendi. |
+| **2** | **YENİ: sunucu uydurması** (§0.0) | `safeNum(..., 1013)` ve `safeWaterTemp` bölgesel varsayılanı, ölçüm olmayan değeri ölçüm gibi gönderiyor. **Asıl §2.1 ihlali burada.** Sunucuda `dataQuality`'ye alan eklemek doğru yol — desen zaten kurulu. **Ölçüm gerektirir:** Open-Meteo bu alanları ne sıklıkla boş bırakıyor? |
+| **3** | **§5 veri-yok yolları** | 12 modun 8'inde "Veri Yok" yolu yok. #2 çözülmeden bu da çözülemez (mod "yok" diyebilmek için önce ayrımı bilmeli). |
+| 4 | §6 kara modu | `isLandMode` 3 modda denetleniyor. Bilinen 4.18'in genişi; tasarım kararı gerektiriyor. |
+| 5 | §4, §7 | Temizlik. `wavePeriod` üç yerde üç yedek; `:7120` suni trend. |
+| — | ~~§2 basınç 0~~ | ❌ **ULAŞILAMAZ** — bkz. §0.0. Kod olarak duruyor, **latent tuzak**: biri sunucudaki `safeNum` varsayılanını kaldırırsa anında canlanır. Yorum düşülmesi yeter. |
+| — | ~~§3 durağan sıcaklık~~ | ❌ **PRATİKTE OLUŞMUYOR** — bkz. §0.0. Aynı şekilde latent. |
+| — | ~~§1 sınırda null→0~~ | ❌ Şiddeti düştü: sunucu zaten uydurduğu için istemciye null ulaşmıyor. **Kök sebep değil, semptom.** Gerçek kök #2. |
 
 > **§8 için uyarı:** dosyada 117 bozuk yer var. **Toplu bir "hepsini düzelt"
 > taraması YAPILMAMALI** — 7.678 satırlık bir dosyada toplu kodlama dönüşümü
