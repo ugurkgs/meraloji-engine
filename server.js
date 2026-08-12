@@ -1552,6 +1552,80 @@ function analyzeLocationOffline(lat, lon) {
     return { status: 'SEA' };
 }
 // ═══════════════════════════════════════════════════════════════════════
+// GÖL TANIMA (TATLISU-PLAN §7) — tatlı su yolunun GİRİŞ KAPISI
+// ─────────────────────────────────────────────────────────────────────────────
+// LAKE_ENABLED yoksa/false ise HİÇBİR ŞEY DEĞİŞMEZ: golBul çağrılmaz, bugünkü
+// kara reddi aynen çalışır. Özellik ancak APK hazır olunca açılacak (§12), çünkü
+// yayındaki APK göl yanıtındaki bazı alanları kaldıramaz (§0.1 bulgu A).
+const LAKE_ENABLED = process.env.LAKE_ENABLED === 'true';
+
+let _lakeFeatures = [];
+try {
+    const raw = fs.readFileSync(path.join(__dirname, 'tr-lakes.json'), 'utf8');
+    _lakeFeatures = JSON.parse(raw).features;
+    // Bbox ön-elemesi: 656 poligonu her istekte taramak pahalı. Yükleme sırasında
+    // bir kez sınır kutusu hesaplanır; istekte önce ucuz kutu testi yapılır ve
+    // tipik tıklamada yalnız 0-2 poligon gerçek nokta testine girer.
+    for (const f of _lakeFeatures) {
+        let a = 90, b = -90, c = 180, d = -180;
+        const ps = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+        for (const p of ps) for (const [lo, la] of p[0]) {
+            if (la < a) a = la; if (la > b) b = la; if (lo < c) c = lo; if (lo > d) d = lo;
+        }
+        f._bb = [a, b, c, d];
+    }
+    console.log(`✅ Göller yüklendi — ${_lakeFeatures.length} göl/baraj` + (LAKE_ENABLED ? '' : '  (LAKE_ENABLED kapalı — kullanılmıyor)'));
+} catch (e) {
+    console.log('⚠️  tr-lakes.json yüklenemedi:', e.message);
+}
+
+// Nokta bir gölün içinde mi? Değilse null.
+// _pointInFeature YENİDEN YAZILMADI — mevcut olan kullanılıyor.
+function golBul(lat, lon) {
+    if (!LAKE_ENABLED || _lakeFeatures.length === 0) return null;
+    const la = parseFloat(lat), lo = parseFloat(lon);
+    if (isNaN(la) || isNaN(lo)) return null;
+    for (const f of _lakeFeatures) {
+        const b = f._bb;
+        if (la < b[0] || la > b[1] || lo < b[2] || lo > b[3]) continue;   // ucuz eleme
+        if (_pointInFeature(la, lo, f)) return f;
+    }
+    return null;
+}
+
+// Göl yanıtının ortak bloğu. Skorlama henüz YOK (§9-§10, aşama 5-6) —
+// bu yüzden yanıt açıkça "hazır değil" diyor, sahte skor üretmiyor.
+function golYanitiKur(f, lang) {
+    const p = f.properties;
+    return {
+        waterBody: 'LAKE',
+        isLand: false,
+        lake: {
+            id: p.id,
+            name: p.name,
+            nameSource: p.nameSource,
+            type: p.type,                    // 'BARAJ' | 'GOL' — "doğal göl" DENMEZ (§2.3)
+            areaKm2: p.areaKm2,
+            elevationM: p.elevationM,
+            shoreDev: p.shoreDev,
+            durum: p.durum,                  // null | 'LAGUN' | 'MEVSIMLIK'
+            salt: p.salt,
+            saltSource: p.saltSource,        // 'elle-liste' | 'osm' | 'varsayim'
+            intermittent: p.intermittent,    // null = OSM karşılığı yok, BİLİNMİYOR
+            depthKnown: false                // §2.6 — kalıcı
+        },
+        // Gölde anlamsız olanlar UYDURULMAZ. current NULL DEĞİL -1: yayındaki APK
+        // MainActivity:3562'de `d.current >= 0` ile unboxing yapıyor ve null'da
+        // çöker; -1 kodun mevcut "bilinmiyor" işareti (§0.1 bulgu A, §1.1 karar 2).
+        current: -1,
+        wave: null, swellHeight: null, swellPeriod: null, wavePeriod: null,
+        waveDirection: null, tideFlow: null, salinity: null, thermoclineDepth: null,
+        depth: { avg: null, min: null, max: null },
+        // Aşama 4-6 bitene kadar skor YOK. Sahte sayı göndermektense bunu söylüyoruz.
+        status: 'SCORING_NOT_IMPLEMENTED'
+    };
+}
+// ═══════════════════════════════════════════════════════════════════════
 
 // [D3] localhost muaf: daily-best cron'un kendi sunucusuna yaptığı iç forecast
 // çağrıları gerçek kullanıcıların IP kotasını/limitini tüketmesin.
@@ -5404,6 +5478,19 @@ app.get('/api/forecast', async (req, res) => {
         req._story = { status: offlineAnalysis.status, city: offlineAnalysis.city }; // log hikâyesi
         console.log(`[OFFLINE] [${logUser}] Durum: ${offlineAnalysis.status}${offlineAnalysis.city ? ' (' + offlineAnalysis.city + ')' : ''}`);
 
+        // ── GÖL KAPISI (§7.3) ────────────────────────────────────────────
+        // INLAND reddinin ÖNÜNDE ve kıyı snap'inin ÖNÜNDE. Böylece hem iç
+        // bölgedeki (bugün reddedilen) hem kıyı ilindeki (bugün denize
+        // kaydırılan) göller yakalanır — §1.1 karar 3.
+        // SEA atlanır: göl poligonları kara içinde, deniz noktası göle düşemez.
+        if (offlineAnalysis.status !== 'SEA') {
+            const _gol = golBul(lat, lon);
+            if (_gol) {
+                console.log(`[GÖL] [${logUser}] ${_gol.properties.name || 'isimsiz'} (${_gol.properties.type}, ${_gol.properties.areaKm2} km²)`);
+                return res.json(golYanitiKur(_gol, lang));
+            }
+        }
+
         if (offlineAnalysis.status === 'INLAND') {
             // İç bölge: sıfır API, anında reddet
             return res.json({
@@ -6743,6 +6830,12 @@ app.get('/api/fish-search', async (req, res) => {
 
         // ── OFFLİNE KONUM ANALİZİ ─────────────────────────────────────────
         const offlineAnalysis = analyzeLocationOffline(latF, lonF);
+        // [§7.3 bulgu B] Bu uçtaki INLAND reddi planda gözden kaçmıştı. Yamanmazsa
+        // kullanıcı göl üzerinde analiz alır ama balık aramasında "kara" görür.
+        if (offlineAnalysis.status !== 'SEA') {
+            const _gol = golBul(latF, lonF);
+            if (_gol) return res.json(golYanitiKur(_gol, lang));
+        }
         if (offlineAnalysis.status === 'INLAND') {
             return res.json({
                 error: 'land',
