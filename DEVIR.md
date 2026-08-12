@@ -141,10 +141,19 @@ hesap silme sayfaları (TWA derin bağlantı düzeltmesi) · bildirim ayarları 
 ### ⚠️ YAYINDAN SONRA YAPILACAKLAR — sıra önemli
 
 ```
-1. Render → Environment → TRIAL_SHORT_FROM = <yayın tarihi, 2026-08-20 biçiminde>
-   Logda "✅ Deneme süresi kesimi: …" satırını doğrula.
-   Yazılmazsa ekran "7 gün" der, sunucu 14 verir.
-   Kesimden ÖNCE kayıt olanlar 14 gününü tamamlar (kullanıcının şartı).
+1. ✅ YAPILDI — 2026-08-12'de yayına alındı, TRIAL_SHORT_FROM = 2026-08-13.
+   Gerçek kodla sınandı: kesim öncesi kayıt 14 gün, kesim günü ve sonrası 7 gün.
+   Hatalı biçimler ("7", "13.08.2026", "2026-8-13", 2026 öncesi) reddediliyor
+   ve 14 günü koruyor.
+
+   ⚠️ İKİ İNCELİK — ikisi de kullanıcı lehine, müdahale gerekmez:
+
+   a) KESİM 13 AĞUSTOS 03:00'TE (TR) BAŞLIYOR, gece yarısında değil.
+      Date.parse('2026-08-13') UTC gece yarısını verir = TR 03:00.
+      12 Ağustos 13:40 itibarıyla kesime 13 saat vardı; o aralıkta ekran
+      "7 gün" derken sunucu hâlâ 14 veriyordu. Söz verilenden fazlası
+      verildiği için zararsız, ve kendiliğinden kapandı.
+   b) 13 Ağustos gecesi 00:00–03:00 (TR) arasında kayıt olan 14 gün alır.
 
 2. Birkaç gün sonra SHORE_ALERT_ESIK değerlendirilebilir.
    Kapatma düğmesi artık kullanıcıda; eşiği indirmenin önü açıldı.
