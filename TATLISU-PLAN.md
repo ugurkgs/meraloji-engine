@@ -76,6 +76,43 @@ hiçbir şey sunmuyoruz.
 | Mimari | **Ayrı dosya.** Deniz ve tatlı su hesapları hiç iç içe girmeyecek (§4) |
 | Uygulama | Göl analizinde dalga/swell/gelgit/dalga yönü panelleri gizlenecek (§10) |
 | Kapsam dışı | `public/index.html` (web sürümü) bu çalışmada değişmeyecek |
+| **Tuzluluk** | **Elle liste yetkili; listede olmayan tatlı sayılır** (2026-08-12, §1.1) |
+| **Akıntı alanı** | **`current: -1`** — null DEĞİL, APK'yı çökertir (2026-08-12, §1.1) |
+| **İlk tur kapsamı** | **INLAND + COASTAL_LAND gölleri** (2026-08-12, §1.1) |
+
+### 1.1 · 2026-08-12 kararları (kod doğrulaması sonrası)
+
+**1) Tuzluluk — elle liste yetkili.** `salt` bilinmiyorsa göl **tatlı kabul
+edilir.** Gerekçe: Türkiye'nin tuzlu/sodalı gölleri sayılı ve iyi belgeli (Tuz,
+Van, Acıgöl, Erçek, Burdur, Seyfe, Tersakan…), yani "elle listede yok" güçlü bir
+kanıttır. §6'daki *"bilinmiyorsa tatlı varsayılmaz"* kuralı **bu kararla
+geçersizdir** — uygulanırsa 657 gölün büyük kısmı tür listesi üretemezdi (§0.1 F).
+
+> Karşılığında alınan risk: listeye girmemiş küçük bir tuzlu gölde yanlış tür
+> listesi. Elle liste bu yüzden **titiz** hazırlanmalı ve OSM `salt=yes` sonuçları
+> listeye EKLENMELİ (listeyi daraltmak için değil, genişletmek için kullanılır).
+
+**2) Akıntı — `-1` sentinel.** Göl yanıtında `instant.current` **null
+gitmeyecek**, `-1` gidecek. Bu uydurma bir değer değil; kodun mevcut
+"bilinmiyor" işareti (istemci `d.current >= 0` ve `startsWith("-1")` ile zaten
+böyle okuyor). Yayındaki APK korunur (§0.1 A).
+
+**3) Kapsam — INLAND + COASTAL_LAND.** İznik, Sapanca, Ulubat, Manyas gibi çok
+balık tutulan göller kıyı illerinde; ilk turda dışarıda bırakılmayacaklar.
+
+> **⚠️ BU KARAR RİSKİ ARTIRIYOR, PLANIN §7.3 NOTUNU GEÇERSİZ KILAR.** `INLAND`
+> noktaları bugün zaten reddediliyor — orada bozulacak bir davranış yok.
+> `COASTAL_LAND` ise bugün **deniz yoluna giriyor** ve kıyı snap'i ile en yakın
+> deniz noktasına kaydırılıp deniz tahmini üretiyor. Yani İznik'e tıklayan
+> kullanıcı bugün (yanlış ama) çalışan bir deniz cevabı alıyor.
+>
+> Sonuçları:
+> - Göl kontrolü kıyı snap'inden **ÖNCE** gelmeli.
+> - Bu, mevcut bir davranışı değiştiren tek yer — kendi testini ister:
+>   *"göl olmayan COASTAL_LAND noktası bugünkü yanıtın birebir aynısını veriyor"*
+>   ve *"göl olan COASTAL_LAND noktası artık LAKE dönüyor"*.
+> - Deniz kıyısındaki lagünlere (§5.3'teki 73 `LAGUN`) dikkat: bunların bir
+>   kısmı hem lagün hem deniz kıyısı, hangi yola gideceği açıkça kararlaştırılmalı.
 
 ---
 
@@ -483,7 +520,12 @@ name:        string | null
 nameSource:  'hydrolakes' | 'osm' | null
 ```
 
-**En kritik kural:** `salt` bilinmiyorsa (`null`) göl **tatlı varsayılmaz.**
+> **⚠️ AŞAĞIDAKİ KURAL 2026-08-12'DE DEĞİŞTİRİLDİ — bkz. §1.1 karar 1.**
+> Artık `salt: null` göl **tatlı kabul ediliyor**; yetki elle listede.
+> Eski metin kayıt için bırakıldı, gerekçesi hâlâ geçerli ama uygulanabilir
+> değildi: katı hâliyle göllerin büyük kısmı tür listesi üretemiyordu.
+
+~~**En kritik kural:** `salt` bilinmiyorsa (`null`) göl **tatlı varsayılmaz.**~~
 §2.4'te ölçüldü — tuzluluğu türetecek hiçbir sinyal yok, dolayısıyla "bilmiyorum"
 ile "tatlı" aynı şey değil. Bilinmeyen gölde tür listesi üretilmeden önce
 kullanıcıya suyun niteliğinin doğrulanmadığı söylenir.
@@ -548,9 +590,11 @@ INLAND ise:
 Böylece deniz ve kara davranışı birebir korunur; yalnızca bugüne kadar
 reddedilen bir alt küme yeni yola girer.
 
-> **Not:** `COASTAL_LAND` içinde de göl olabilir (İznik, Sapanca, Ulubat kıyı
-> illerinde). İkinci turda ele alınacak — önce `INLAND` ile başla, çünkü orada
-> mevcut davranışı bozma riski yok.
+> **~~Not: COASTAL_LAND ikinci turda ele alınacak.~~ — 2026-08-12'DE DEĞİŞTİ.**
+> Karar: **İznik, Sapanca, Ulubat, Manyas ilk turda dahil** (§1.1 karar 3).
+> Bu, `COASTAL_LAND` yolunda **mevcut davranışı değiştiren tek yer** olduğu için
+> göl kontrolü kıyı snap'inden ÖNCE gelmeli ve kendi regresyon testini ister:
+> göl olmayan `COASTAL_LAND` noktası bugünkü yanıtın birebir aynısını vermeli.
 
 ---
 
@@ -832,7 +876,7 @@ Yapılacaklar:
 ## 14 · Sıra
 
 ```
-0. Karar: tuzluluk kuralı · null akıntı · COASTAL_LAND kapsamı   (§0.1 F, A)
+0. ✅ Karar: tuzluluk · akıntı sentinel · kapsam — VERİLDİ (§1.1)
 1. tr-lakes.json üretimi + kısa eleme listesi     (§5)
 2. OSM isimlendirme                               (§6)
 3. Sunucuda göl tanıma + yol ayrımı               (§7)   → Test 1,2,3,4,5,9
