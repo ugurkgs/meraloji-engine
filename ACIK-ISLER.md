@@ -408,6 +408,54 @@ iyileştirmek 72 kişiyi etkiler, insanları duvara kadar getirmek 453 kişiyi.
 
 **Karar:** ücretsiz sınır nerede, çok mu cömert?
 
+### ⚠️ 2026-08-13 — KULLANICI KARARI: MODEL DEĞİŞMİYOR
+
+**Ücretsiz kotaya DOKUNULMAYACAK.** Kullanıcının gerekçesi, bu maddenin
+çerçevesini de düzeltiyor:
+
+> *"Tarama zaten tüm verileri göstermiyor. Kullanıcı aslında tarama hakkının
+> sınırsız olmasından ziyade simülasyonları ve metrikleri görmek istiyor.
+> İki tarama kullanıcıya yetiyor demek doğru bir söylem değil. Churn riski
+> ayrı. Model şu an iyi — dün ve bugün iki abone daha geldi."*
+
+**Bu maddedeki huni analizi YANLIŞ DUVARI ölçüyordu.** Kodla doğrulandı:
+
+| duvar | kim çarpıyor |
+|---|---|
+| **A — günlük kota** (2 analiz + 1 tarama) | yalnız **%14** |
+| **B — sanitizasyon** (`applySanitization`, `:5324`) | süresi dolmuş **herkes** |
+
+Duvar B'nin sıfırladıkları: `oxygen · upwelling · clarity · salinity ·
+pressure · tide · current · swellHeight · precipProb`, ayrıca
+`hourlyScores = []` (**zaman kaydırıcısında veri yok**), `activityWindows = null`,
+balık listesi **10 → 3**.
+
+**Ve kota yalnız deneme bittikten sonra ısırıyor.** Anonim kullanıcı `anonFree`
+ile **tam veri** alıyor; deneme süresindeki de öyle. Yani "günde 2 analiz"
+durumundaki kişi ürünün tam hâlini 7 gün kullanıp kaybetmiş biri — onun için
+1 mi 2 mi olduğu ayrıntı, kaybettiği şey **simülasyonlar**.
+
+Dolayısıyla kotayı kısmak, zaten ödememeye karar vermiş kişiye sürtünme ekler:
+churn riski var, dönüşüm kazancı yok.
+
+**Reklam ödülünü değiştirme önerisi de REDDEDİLDİ** (asistan "3. tarama yerine
+o analizde tüm metrikleri aç" önermişti). Kullanıcı: *"reklam ödülü olması
+gerektiği gibi; kullanıcı skoru ve liste başı balıkları görüyor, dahasını
+isterse ödeme istiyoruz."*
+
+### Bunun yerine ÖLÇÜLECEK: geri dönüş kampanyası
+
+Kullanıcının seçtiği yön. `tools/denetim-comeback.js` yazıldı (salt okunur,
+Render Shell'de koşar): **3 günlük geri dönüş denemesi verilen kaç kişi abone
+oldu?**
+
+Kampanya **canlıda ve penceresi 2026-08-27'ye kadar açık**
+(`server.js:1971`, `COMEBACK_CAMPAIGN_END`). Damga:
+`users/{uid}.comebackTrialStart`.
+
+Bu sayı 3.2'yi doğrudan cevaplar: ürünü geri alan insanlar ödüyorsa, cevap
+"daha çok kısıtla" değil **"daha sık tattır"**.
+
 ### ~~3.3 Fırtınada boş liste~~ **YAPILDI** (2026-08-12) · APK bekliyor
 
 **MADDEDEKİ TEŞHİS YANLIŞTI — liste hiç boşalmıyor.** Ölçüldü (gerçek
