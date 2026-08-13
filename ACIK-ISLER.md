@@ -995,7 +995,53 @@ tepe yaptığı andan hesaplamak (veya SunCalc ile üst/alt geçişi ayrı ayrı
 ikisini de major saymak). İkincisi klasik solunar'a birebir uyar ve günde 4 saat
 major üretir — **bu skor dağılımını değiştirir, ölçülmeden yapılmamalı.**
 
-### 4.27 Substrat katmanı: 6 kural yazılmış ama HİÇ ÇALIŞMIYOR `HAZIR` · küçük
+### ~~4.27 Substrat katmanı: ölü anahtarlar~~ **DÜZELTİLDİ** (2026-08-13) · 1 madde onay bekliyor
+
+> ### ⚠️ ÖNCE BİR DÜZELTME — bu maddenin ilk hâli ABARTILIYDI
+>
+> İlk yazımda *"yazılmış ama hiç uygulanmayan **6** kural"* ve *"dördü açık
+> yeniden adlandırma"* denmişti. **Yanlıştı.** Düzeltmeden önce yapılan
+> kontrol (hedef anahtarda ZATEN kayıt var mı?) tabloyu değiştirdi:
+>
+> | ölü anahtar | değeri | hedef | durum |
+> |---|---|---|---|
+> | `sinagrit` | `['ROCK']` | `sinarit` | **MÜKERRER** — hedefte aynı değer zaten var, kayıp YOK |
+> | `murekkepbal` | `['SAND','MIXED']` | `subye` | **MÜKERRER** — hedefte `['SAND','MUD']` var, kayıp YOK |
+> | **`dil`** | `['SAND','MUD']` | **`dil_baligi`** | **GERÇEKTEN KAYIP** ✅ düzeltildi |
+> | `altinbas` | `['SEAGRASS','SAND']` | `sarikulak`? | **GERÇEKTEN KAYIP** ⏳ onay bekliyor |
+> | `yayinbaligi`, `berlam` | dizi | — | species.js'te karşılığı yok |
+> | `torik`, `sarikanat`, `lapsari` | `null` | — | zaten etkisiz |
+>
+> **Gerçekten kaybolmuş kural 6 değil 2'ydi.** Ders aynı: ölçmeden şiddet
+> yazma — bu oturumda beşinci kez.
+>
+> **YAPILDI:** `dil: [...]` → **`dil_baligi: ['SAND','MUD']`**.
+> *Solea solea*, DIP_KIYI, 3-40 m. Zemin dil balığı için **tanımlayıcı** habitat
+> özelliği (kuma/çamura gömülür), yani en çok anlam taşıdığı türlerden birinde
+> kayıptı. Artık eşleşen zeminde **×1,15** (uzman: 2 tip ≤ 2), eşleşmeyende
+> **×0,85**; önceden ×1,0 (hiç etki yoktu).
+>
+> Ölü anahtarlar **silinmedi**, yorumla işaretlendi — "bu neden burada" sorusu
+> bir daha sorulmasın diye.
+>
+> ### ⏳ ONAY BEKLİYOR — `altinbas` → `sarikulak`
+>
+> `altinbas: ['SEAGRASS','SAND']` kuralının hedefi büyük olasılıkla
+> **`sarikulak`** (*Chelon auratus*, "Sarıkulak Kefal", LAGUN, 0-20 m) —
+> "altınbaş kefal" ve "sarıkulak kefal" aynı türün iki yaygın adı, kategori ve
+> derinlik de SEAGRASS/SAND ile uyumlu.
+>
+> **DEĞİŞTİRİLMEDİ**, çünkü bu bir **çıkarım**; `dil_baligi` gibi kesin değil.
+> Yanlış türe zemin kuralı yazmak, hiç yazmamaktan kötüdür. Tek satır —
+> kullanıcı "evet aynı balık" derse eklenir.
+>
+> **Kapsam notu (değişmedi):** `SUBSTRATE_PREFS` 874 türün **%3,1'ini** kapsıyor.
+> Bu bilinçli olabilir (zemin yalnız dip türleri için anlamlı), sorun sayılmadı.
+>
+> **Asimetri notu (değişmedi):** eşleşmeme cezası (−%15), genelci bonusundan
+> (+%10) büyük. Bilinçli mi, kayda değer.
+
+### 4.27 (eski kayıt) Substrat katmanı: ölü anahtarlar
 
 Ölçüm: `tools/olcum-substrate.js`.
 

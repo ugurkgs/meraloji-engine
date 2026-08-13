@@ -1374,7 +1374,10 @@ const SUBSTRATE_PREFS = {
     mercan: ['ROCK'],
     orfoz: ['ROCK'],
     lahoz: ['ROCK'],
-    sinagrit: ['ROCK'],
+    // [4.27] `sinagrit` species.js'te YOK — ama hemen altındaki `sinarit` AYNI
+    // değeri taşıyor, yani kural kaybı yok, yalnız mükerrer kalıntı. Silinmedi
+    // ki "bu neden burada" sorusu bir daha sorulmasın.
+    sinagrit: ['ROCK'],     // ← ölü anahtar (mükerrer; gerçek anahtar: sinarit)
     sinarit: ['ROCK'],
     fangri: ['ROCK', 'MIXED'],
     isparoz: ['ROCK', 'SEAGRASS'],
@@ -1383,11 +1386,25 @@ const SUBSTRATE_PREFS = {
     // Kum / çayır sevenler
     tekir: ['SAND', 'SEAGRASS', 'MIXED'],
     barbun: ['SAND', 'MUD'],
-    dil: ['SAND', 'MUD'],
+    // [DÜZELTİLDİ 2026-08-13 — madde 4.27] `dil` anahtarı species.js'te YOK;
+    // gerçek anahtar `dil_baligi` (Solea solea, DIP_KIYI, 3-40 m). Kural yazılmış
+    // ama HİÇ UYGULANMIYORDU — `SUBSTRATE_PREFS[key]` undefined döndüğü için tür
+    // ne bonus ne ceza alıyordu (×1.0). Dil balığı için zemin TANIMLAYICI
+    // habitat özelliğidir (kuma/çamura gömülür), yani en çok anlam taşıdığı
+    // türlerden birinde kayıptı. Eski satır kayıt olarak duruyor.
+    // dil: ['SAND', 'MUD'],   ← ÖLÜ ANAHTAR, aşağıdaki satırla değiştirildi
+    dil_baligi: ['SAND', 'MUD'],
     kalkan: ['SAND', 'MUD', 'MIXED'],
     pisi: ['SAND', 'MUD'],
     kefal: ['MUD', 'MIXED', 'SEAGRASS'],
-    altinbas: ['SEAGRASS', 'SAND'],
+    // [4.27] `altinbas` species.js'te YOK. Muhtemel hedef: `sarikulak`
+    // ("Sarıkulak Kefal", Chelon auratus, LAGUN, 0-20 m) — "altınbaş kefal" ve
+    // "sarıkulak kefal" aynı türün iki yaygın adı. Kategori ve derinlik de
+    // SEAGRASS/SAND ile uyumlu.
+    // DEĞİŞTİRİLMEDİ: bu bir ÇIKARIM, `dil_baligi` gibi kesin değil. Tür adı
+    // eşlemesi kullanıcı onayı ister — yanlış türe zemin kuralı yazmak, hiç
+    // yazmamaktan kötüdür. Bkz. ACIK-ISLER 4.27.
+    altinbas: ['SEAGRASS', 'SAND'],   // ← ölü anahtar (hedef: sarikulak? ONAY BEKLİYOR)
     // Pelajik (dip yapısı önemsiz)
     lufer: null,
     palamut: null,
@@ -1400,7 +1417,9 @@ const SUBSTRATE_PREFS = {
     sardalya: null,
     // Dip türleri
     mezgit: ['SAND', 'MUD'],
-    berlam: ['SAND', 'MUD'],
+    // [4.27] `berlam` (Merluccius merluccius) species.js'te YOK — tür veritabanına
+    // hiç girmemiş. Kural boşta duruyor; tür eklenirse anahtar hazır.
+    berlam: ['SAND', 'MUD'],   // ← ölü anahtar (tür DB'de yok)
     izmarit: ['ROCK', 'MIXED'],
     mirmir: ['SAND'], // [EKLENDİ] Mırmır kumluk uzmanıdır
     // Kafadanbacaklılar
