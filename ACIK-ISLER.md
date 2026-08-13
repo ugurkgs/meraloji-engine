@@ -903,6 +903,86 @@ kadar oynatıyor. **Veriye dokunulmadı.**
 **Doğrulama:** `node --check` temiz · 4 `strings.xml` XML geçerli, karakterler
 doğru · `compileReleaseJavaWithJavac` **BUILD SUCCESSFUL**.
 
+### 4.28 Solunar "major" penceresi günlerin YARISINDA yanlış saatte `KARAR BEKLİYOR` · **ÖLÇÜLDÜ**
+
+**Bu oturumun en büyük bulgusu.** Ölçüm: `tools/olcum-solunar.js`
+(`getSolunarWindow` kaynaktan sökülüp koşuldu, yer gerçeği ay yüksekliği dakika
+dakika taranarak bulundu).
+
+```js
+const transit = (moonTimes.rise.getTime() + moonTimes.set.getTime()) / 2;
+```
+
+`SunCalc.getMoonTimes` bir **takvim günü** içindeki doğuş/batışı döndürür ve
+bunlar **aynı geçişe ait olmak zorunda değildir**. Ay her gün ~50 dakika geç
+doğduğu için, ayın yaklaşık yarısında batış zaman damgası doğuştan **önce**
+gelir; o günlerde orta nokta transit değil, **ayın ayak altında olduğu an**
+oluyor.
+
+**İzmir, 30 gün:**
+
+| | |
+|---|---|
+| incelenen gün | 28 |
+| **1 saatten fazla hatalı** | **14 / 28 — tam yarısı** |
+| ortalama hata | **6,21 saat** |
+| en büyük hata | **12,52 saat** |
+
+```
+2026-08-20  doğuş 11:36  batış 20:57   → kod 16:17   gerçek 16:17   hata 0,01 sa  ✓
+2026-08-24  doğuş 14:55  batış 23:27*  → kod 07:11   gerçek 19:42   hata 12,51 sa ✗
+```
+
+Major penceresi ±1,0 saat; 12,5 saatlik hata onu tamamen ıskalatıyor. Ve major
+**tek tetikleyicide en büyük bonus** (+4 ham puan, `:4348`).
+
+> **HAFİFLETİCİ — göründüğü kadar kötü değil.** Klasik solunar (Aldrich, kodun
+> kendi kaynağı) günde **İKİ** major tanımlar: ay tepede *ve* ay ayak altında.
+> Kod yanlış hesapladığında tam da **öteki meşru major'a** düşüyor. Yani pencere
+> "geçersiz bir saate" değil, "diğer major'a" kayıyor.
+>
+> **Ama iki sorun kalıyor:** (1) hangi major'ın seçileceği takvim günü sınırına
+> bağlı, yani **rastgele**; (2) kod her koşulda günde **tek** major üretiyor —
+> ölçüldü: **2,00 saat/gün**, iki geçiş olsaydı 4,00 olurdu. Yani majorların
+> yarısı hiç görünmüyor.
+
+**Minor pencereler sağlam:** ölçüm 2,98 saat/gün, beklenen 3,00 (2 olay × 1,5 sa).
+
+**Aday düzeltme:** transit'i doğuş/batış ortalamasından değil, ayın yüksekliğinin
+tepe yaptığı andan hesaplamak (veya SunCalc ile üst/alt geçişi ayrı ayrı bulup
+ikisini de major saymak). İkincisi klasik solunar'a birebir uyar ve günde 4 saat
+major üretir — **bu skor dağılımını değiştirir, ölçülmeden yapılmamalı.**
+
+### 4.27 Substrat katmanı: 6 kural yazılmış ama HİÇ ÇALIŞMIYOR `HAZIR` · küçük
+
+Ölçüm: `tools/olcum-substrate.js`.
+
+**Kapsam zaten çok dar:** `SUBSTRATE_PREFS` 36 anahtar taşıyor, 27'si etkili —
+yani **874 türün %3,1'i**. Kalan 838 tür bu katmandan hiç etkilenmiyor. Bu
+bilinçli olabilir (zemin yalnız dip türleri için anlamlı), sorun değil.
+
+**Asıl bulgu: 36 anahtarın 9'u `species.js`'te YOK.** Altısında gerçek tercih
+dizisi tanımlı — yani **yazılmış ama hiç uygulanmayan 6 kural**. Dördü açık
+yeniden adlandırma:
+
+| ölü anahtar | tercih | gerçek anahtar |
+|---|---|---|
+| `sinagrit` | `['ROCK']` | **`sinarit`** (*Dentex dentex*) |
+| `dil` | `['SAND','MUD']` | **`dil_baligi`** (*Solea solea*) |
+| `murekkepbal` | `['SAND','MIXED']` | **`subye`** (*Sepia officinalis*) |
+| `altinbas` | `['SEAGRASS','SAND']` | muhtemelen **`sarikulak`** (*Chelon auratus*) |
+| `yayinbaligi` | `['MUD','MIXED']` | karşılığı yok (tatlı su) |
+| `berlam` | `['SAND','MUD']` | karşılığı yok (*Merluccius* DB'de değil) |
+
+**`dil_baligi` en dikkat çekeni:** dil balığı için zemin *tanımlayıcı* habitat
+özelliğidir (kum/çamura gömülür) ve tam o kural kayıp.
+
+Etkisi: bu türler şu an ne bonus ne ceza alıyor (×1,0). Düzeltilirse eşleşmede
+**+%15**, eşleşmemede **−%15**. Dört tür için gerçek skor değişimi.
+
+> **Küçük ve düşük riskli**, ama yine de canlı skoru oynatıyor — onay ister.
+> Not: ceza (−%15) genelci bonusundan (+%10) büyük; bilinçli mi, kayda değer.
+
 ### 4.26 Sıcaklık eğrisi aralığın DIŞINDA daha yüksek puan veriyor `KARAR BEKLİYOR` · **871 TÜR**
 
 **4.21'deki derinlik hatasının birebir aynısı, bu kez sıcaklık katmanında (28 puan)
