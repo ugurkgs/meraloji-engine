@@ -3369,17 +3369,48 @@ async function acikSuYayiGetir(lat, lon) {
         }
     }
     try {
-        const url = 'https://api.open-meteo.com/v1/elevation?latitude='
-            + ps.map(p => p[0].toFixed(4)).join(',')
+        const qs = 'latitude=' + ps.map(p => p[0].toFixed(4)).join(',')
             + '&longitude=' + ps.map(p => p[1].toFixed(4)).join(',');
+
+        // [2026-08-14] ÜCRETLİ UÇ ÖNCE, ücretsiz YEDEK.
+        //
+        // Bu çağrı eskiden yalnız `api.open-meteo.com` (ücretsiz, anahtarsız)
+        // kullanıyordu — oysa diğer her istek customer-api üzerinde (1M/gün).
+        // Ücretsiz uçta dakikalık sınır var ve dolduğunda burası null dönüyor.
+        //
+        // ÖNCEDEN ÖNEMSİZDİ: yay yalnız dalga YÖNÜ çizimini düzeltiyordu,
+        // gelmezse çizim eski hâlinde kalıyordu. ARTIK KRİTİK: dalga YÜKSEKLİĞİ
+        // tavanı da buna bağlı. Yay gelmezse Boğaz sessizce 2,08 m'ye geri döner
+        // — yani düzelttiğimiz hatanın ta kendisine.
+        //
+        // Sıra bilerek "ücretli → ücretsiz": customer-api bu ucu desteklemiyorsa
+        // davranış bugünküne düşer, daha kötüye gitmez.
+        const adaylar = [];
+        if (OM_PAID && OM_API_KEY) adaylar.push(omKey(`https://${OM_HOST}/v1/elevation?${qs}`));
+        adaylar.push(`https://api.open-meteo.com/v1/elevation?${qs}`);
+
         // 2,5 sn: kullanıcı yeni bir konumda bunu BEKLİYOR. Uzun timeout, servis
         // yavaşladığında her yeni koordinata gecikme bindirir (NOAA'da aynı ders
         // alınmıştı: 5 sn → 2 sn). Gelmezse düzeltme yapılmaz, analiz sürer.
-        const r = await fetchWithTimeout(url, 2500);
-        if (!r || !r.ok) return null;
-        const j = await r.json();
-        const el = j && j.elevation;
-        if (!Array.isArray(el) || el.length !== ps.length) return null;
+        let el = null;
+        for (const url of adaylar) {
+            const r = await fetchWithTimeout(url, 2500);
+            if (!r || !r.ok) {
+                console.log(`[YAY] elevation başarısız (${r ? r.status : 'yanıt yok'}) — ${url.split('?')[0]}`);
+                continue;
+            }
+            const j = await r.json();
+            if (Array.isArray(j?.elevation) && j.elevation.length === ps.length) { el = j.elevation; break; }
+            console.log(`[YAY] elevation beklenmeyen yanıt — ${url.split('?')[0]}`);
+        }
+        if (!el) {
+            // SESSİZ BAŞARISIZLIK YASAK: bu satır olmadan "açık deniz olduğu için
+            // tavan uygulanmadı" ile "yay gelmediği için uygulanamadı" ayırt
+            // edilemiyordu. 2026-08-14'te tam bu belirsizlik yaşandı.
+            console.warn(`[YAY] ⚠️ Açık su yayı alınamadı (${latF.toFixed(4)},${lonF.toFixed(4)}) `
+                + `— dalga yönü düzeltmesi VE fetch tavanı bu istekte uygulanmayacak`);
+            return null;
+        }
         // Her yön için: kara İLK hangi mesafede çıkıyor (yoksa null).
         // Mesafe lazım çünkü sığ suda çizim EN YAKIN karaya kilitlenecek.
         //
@@ -6144,6 +6175,27 @@ app.get('/api/forecast', async (req, res) => {
             const azamiRuzgar = gunlukRuzgar.length ? Math.max(...gunlukRuzgar) : null;
             fetchTavan = (azamiRuzgar != null) ? fetchDalgaTavani(acikSuYayi, azamiRuzgar) : null;
 
+            // ── TEŞHİS: her dal loglanır ────────────────────────────────────
+            // 2026-08-14'te tavan Sarıyer'de devreye girmedi ve log SESSİZDİ;
+            // "açık deniz olduğu için mi, yay gelmediği için mi" ayırt edilemedi.
+            // Aşağıdaki satırlar o belirsizliği bir daha yaşatmamak için var.
+            if (!fetchTavan) {
+                const dz = marine.hourly.wave_height.filter(v => typeof v === 'number');
+                const azamiDalga = dz.length ? Math.max(...dz) : null;
+                const yonSayi = acikSuYayi?.fetchKm
+                    ? Object.values(acikSuYayi.fetchKm).filter(v => v === null).length : null;
+                // Yalnız ŞÜPHELİ durumda bas: dalga yüksek ama tavan yok.
+                if (azamiDalga != null && azamiDalga > 1.0) {
+                    console.log(`[FETCH-TAVAN] [${logUser}] (${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}) `
+                        + `TAVAN YOK — sebep: `
+                        + (!acikSuYayi ? 'açık su yayı alınamadı'
+                            : !acikSuYayi.fetchKm ? 'yay ESKİ biçimde (fetchKm yok, önbellekten)'
+                                : azamiRuzgar == null ? 'günlük rüzgâr verisi yok'
+                                    : `açık su (açık yön ${yonSayi}/16 > eşik ${FETCH_TAVAN_ACIK_YON_ESIK})`)
+                        + `; model azami dalga ${azamiDalga.toFixed(2)} m`);
+                }
+            }
+
             if (fetchTavan) {
                 const T = fetchTavan.tavanM;
                 let kirpilan = 0, enBuyukOnce = 0;
@@ -6165,12 +6217,12 @@ app.get('/api/forecast', async (req, res) => {
                 }
                 fetchTavan.kirpilanSaat = kirpilan;
                 fetchTavan.enBuyukOnce = enBuyukOnce;
-                if (kirpilan > 0) {
-                    console.log(`[FETCH-TAVAN] [${logUser}] (${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}) `
-                        + `kapalı su: açık yön ${fetchTavan.acikYon}/16, fetch ${fetchTavan.fetchKm} km, `
-                        + `rüzgâr azami ${azamiRuzgar.toFixed(0)} km/h → tavan ${T.toFixed(2)} m; `
-                        + `${kirpilan} saat kırpıldı (en yüksek ${enBuyukOnce.toFixed(2)} m)`);
-                }
+                console.log(`[FETCH-TAVAN] [${logUser}] (${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}) `
+                    + `kapalı su: açık yön ${fetchTavan.acikYon}/16, fetch ${fetchTavan.fetchKm} km, `
+                    + `rüzgâr azami ${azamiRuzgar.toFixed(0)} km/h → tavan ${T.toFixed(2)} m; `
+                    + (kirpilan > 0
+                        ? `${kirpilan} saat KIRPILDI (en yüksek ${enBuyukOnce.toFixed(2)} m → ${T.toFixed(2)} m)`
+                        : `kırpma YOK — model zaten tavanın altındaydı`));
             }
         }
 
