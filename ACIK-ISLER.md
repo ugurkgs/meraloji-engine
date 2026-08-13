@@ -1232,6 +1232,78 @@ koşullarında**.
 > **Yapılacak iş: ölçüm, kod değil.** Artık `tools/motor.js` var; hipotez
 > doğrudan sınanabilir.
 
+#### ✅ KÖK SEBEP ÖLÇÜLDÜ (2026-08-13) — `tools/olcum-429-kok-sebep.js`
+
+**SUÇLU SICAKLIK KATMANI. Mevsim katmanı DEĞİL.**
+
+**Katman ayrıştırması, Ağustos Ege 26 °C, tüm Türkiye türleri:**
+
+| grup | adet | ort. skor | mevsim | **sıcaklık** | tetik | ort. `tempRange.max` |
+|---|---|---|---|---|---|---|
+| DEĞERLİ | 60 | 31,6 | 13,4 | **6,8** / 28 | 0,4 | 25,1 |
+| bycatch | 14 | 41,0 | 16,1 | **13,8** / 28 | 0,6 | 26,6 |
+
+Bycatch grubu sıcaklık katmanından **iki katı** puan alıyor. Sebep `opt`
+değerlerinde:
+
+| ilk 10'daki bycatch | tempRange | 26 °C puanı |
+|---|---|---|
+| Balon Balığı | 18/**26**/32 | **28,0** / 28 |
+| Lokum | 20/**26**/30 | **28,0** |
+| Trakun | 17/**25**/28 | 27,9 |
+| Aslan Balığı | 18/**25**/30 | 27,9 |
+
+| listeye giremeyen yerli | tempRange | 26 °C puanı | sıra |
+|---|---|---|---|
+| Palamut | 12/**18**/24 | **0,6** | 50 |
+| Lüfer | 12/**18**/25 | **1,6** | 64 |
+| Barbun | 8/**18**/25 | 4,4 | 23 |
+| Mercan | 14/**20**/26 | 6,1 | 31 |
+| Çipura | 14/**20**/28 | 9,1 | 21 |
+
+**Sıcaklık taraması** — su sıcaklığı dışında her şey sabit:
+
+```
+16 °C → 9/10 değerli      22 °C → 6/10      28 °C → 5/10
+18 °C → 8/10              24 °C → 6/10      30 °C → 7/10 (her şey çöküyor)
+20 °C → 8/10              26 °C → 5/10
+```
+
+Temiz, tek yönlü düşüş. **Sıcaklık sürücü.**
+
+**MEVSİM KATMANI SUÇSUZ — ölçüldü ve elendi.** Su 26 °C sabit tutulup yalnız
+tarih değiştirildiğinde: Ağustos **5/10**, Ekim **5/10**, Kasım **5/10**.
+Hiç fark yok. Yani bu bulgunun **`4.22` (eylül "yaz" sayılıyor) ile ilgisi yok.**
+
+#### ⚠️ AMA "HATA" OLDUĞU KANITLANMADI
+
+Mekanizma kesin: yerli türlerin `opt` değerleri 18-20 °C, Lesepsiyen istilacılarınki
+25-26 °C; ağustos Ege suyu 26 °C olunca istilacılar optimumunda, yerliler
+6-8 °C yukarısında kalıyor.
+
+**Ama bu ölçüm, `opt` değerlerinin YANLIŞ olduğunu göstermez.** İki olasılık var
+ve ikisi de ciddiye alınmalı:
+
+1. **`tempRange` yerli türlerde soğuk kalibre** → madde `4.1`, zaten `ENGELLİ`
+   (yokluk verisi yok). Belgedeki eski ölçüm bunu destekliyor: *"temmuzda
+   kamerayla belgelenmiş 8 türün hiçbiri sıcaklık katmanının %61'inden fazlasını
+   alamıyor"*.
+2. **Model doğru olabilir.** Balon ve aslan balığı Ege'de ağustosta gerçekten
+   çok yaygın ve sürekli vuruyor. Motor "en çok yakalanacak tür" diyorsa,
+   cevabı doğru olabilir — sorun cevabın **işe yaramaması**.
+
+**Ayırt etmenin tek yolu saha verisi** (bkz. `SAHA-GOZLEMLERI.md`, `4.2`).
+Ölçümle karar verilemez.
+
+> **ÜRÜN TARAFINDAKİ CEVAP ZATEN KARARLAŞTIRILMIŞTI:** `1.4` `targetClass`
+> etiketi — "hedef türler" / "ayrıca bulunabilir" ayrımı. Bu ölçüm o maddenin
+> **önceliğini yükseltiyor**: Ağustos Ege'de ilk 10'un yarısı bycatch olduğuna
+> göre etiket kozmetik değil, listenin okunabilirliği için şart.
+>
+> **`4.1`'in önceliği de değişti.** Eskiden "doğruluk iyileştirmesi, yokluk
+> verisi yok, ertelendi" diye duruyordu. Artık biliniyor ki `4.1` aynı zamanda
+> **listenin tepesini istilacı türlere veren mekanizma.**
+
 Denetimin bakmadığı katmanlardan ilki incelendi (`s_trigger`, 12 puan, ~40 dal).
 **Yapısal hata BULUNAMADI** — `asymptoticTriggerSum` gerçekten var, gerçekten
 uygulanıyor (`:4864`) ve bandı `[-12, +12]` içinde tutuyor. Kodun kendi ölçüm
