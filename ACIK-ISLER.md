@@ -510,7 +510,22 @@ aynı hata. Widget düzeltilirken ikisi birlikte ele alınmalı.
 2026-08-11'de kapatıldı, bkz. Kapatılanlar ve
 `25-TEMMUZ-SONRASI-YAPILANLAR.md` § 12.
 
-### 4.18 Hava sıcaklığı simülasyonu karada deniz zemini çiziyor `KARAR BEKLİYOR` · **MOBİL**
+### ~~4.18 Hava sıcaklığı simülasyonu karada deniz zemini çiziyor~~ **KAPANDI — KULLANICI KARARI: BU HALİYLE KALSIN**
+
+> **2026-08-13:** Kullanıcı bu kararı **daha önce vermiş, notlara yazılmamış.**
+> Tekrar soruldu, **karar aynı: değişiklik yapılmayacak.** Zemin kaldırılmayacak,
+> yerine bir şey konmayacak.
+>
+> **Madde kapandı, tasarım sorusu (düz renk / küçük harita / gradyan) düştü.**
+> Tekrar gündeme gelirse teşhis aşağıda duruyor.
+>
+> **Kapsam ölçüldü ve sanılandan KÜÇÜK** (bkz. `WAVESIM-INCELEME-RAPORU.md` §6):
+> `SimulationModeSelector.rebuild()` karada 16 modun 12'sini listeden çıkarıyor.
+> Karada yalnız 4 mod açılabiliyor (`WIND`, `AIR_TEMP`, `RAIN`, `MOONLIGHT`) ve
+> ikisi kara denetimi yapıyor. Bu madde **tek kalan artık**: `drawAirTempMode`'un
+> 6. bölümü. 7. bölüm (balık + konfor etiketi) ve 8. bölüm (kumsal) zaten kapalı.
+
+### 4.18 (eski kayıt) Hava sıcaklığı simülasyonu karada deniz zemini çiziyor · **MOBİL**
 
 Kara modu düzeltmeleri sırasında çıktı (bkz. `25-TEMMUZ-SONRASI-YAPILANLAR.md` § 14).
 Balık figürü, konfor katmanı etiketi ve kumsal/kıyı şeridi karada artık
@@ -538,6 +553,30 @@ gelmiyor. **Ölçüldü, davranış doğru.**
 
 Gece ay çizmek §2.1 ihlali olurdu (olmayan bir şeyi göstermek). Değişiklik
 yapılmadı. Aynı soru tekrar gelirse önce tarihe/ay evresine bakın.
+
+> **2026-08-13 — SORU TEKRAR GELDİ, bu kez zaman kaydırıcısıyla.** Not aynen
+> işe yaradı: önce tarihe bakıldı.
+>
+> **Ölçüm (SunCalc, İzmir 38.42/27.14, 13 Ağustos 2026):** ay evresi **0,022 =
+> yeni ay**, aydınlanma **%0**; ay **06:59'da doğuyor, 20:44'te batıyor** — yani
+> gündüz gökyüzünde. Önümüzdeki 24 saatte **10 gece saati var ve hiçbirinde ay
+> ufkun üstünde değil.** Davranış yine doğru çıktı.
+>
+> **Kaydırıcı tesisatı da doğru:** `feedRealSolar(hourOffset, ...)` seçilen saati
+> `Calendar.add(HOUR_OF_DAY, hourOffset)` ile uyguluyor ve `SolarCalc`'a veriyor
+> (`MainActivity:4552-4560`); kaydırıcı hareketinde çağrılıyor (`:1535`).
+>
+> **AMA KULLANICININ ŞİKÂYETİ YİNE DE GEÇERLİYDİ** ve bu madde onu görmemişti:
+> gece + ay yok olunca `drawAirTempMode` §3'teki `if (sunUp) … else if (moonUp)`
+> zinciri **hiçbir şey çizmiyor**, gökyüzü bomboş kalıyordu. Kullanıcı "ay ufkun
+> altında" ile "uygulama çizmeyi unuttu" arasındaki farkı göremiyordu.
+>
+> **YAPILDI:** sahte ay değil, **sebep** yazılıyor — `else if (night)` dalı
+> eklendi: ay evresi emojisi + "Ay ufkun altında" (4 dilde). Aysız gece balıkçı
+> için zaten bilgidir; boş gökyüzü değildir.
+>
+> **Ders:** "davranış doğru" ile "kullanıcı deneyimi doğru" ayrı şeyler. Madde
+> ilkini kanıtlayıp kapanmış, ikincisini sormamıştı.
 
 ### ~~4.19 Akıntı yönü konvansiyonu~~ **ÖLÇÜLDÜ — DEĞİŞİKLİK GEREKMEDİ** (2026-08-12)
 
