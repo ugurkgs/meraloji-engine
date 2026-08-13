@@ -903,7 +903,49 @@ kadar oynatıyor. **Veriye dokunulmadı.**
 **Doğrulama:** `node --check` temiz · 4 `strings.xml` XML geçerli, karakterler
 doğru · `compileReleaseJavaWithJavac` **BUILD SUCCESSFUL**.
 
-### 4.28 Solunar "major" penceresi günlerin YARISINDA yanlış saatte `KARAR BEKLİYOR` · **ÖLÇÜLDÜ**
+### ~~4.28 Solunar "major" penceresi günlerin YARISINDA yanlış saatte~~ **DÜZELTİLDİ** (2026-08-13)
+
+> **YAPILDI.** Transit artık `(rise + set) / 2` ile değil, **`now`'u İÇİNE ALAN
+> geçişin** orta noktasıyla hesaplanıyor. Ay ufkun altındaysa geçiş yoktur →
+> major da yoktur (üst geçiş tanımı gereği geçişin içindedir). Olaylar komşu
+> günlerden de toplanıyor (3 `getMoonTimes` çağrısı), çünkü `now`'u içine alan
+> geçişin doğuşu bir önceki takvim gününde olabilir.
+>
+> **KARAR DÜZEYİNDE ÖLÇÜM** (4 nokta × 45 gün × 72 örnek = 12.960 karar;
+> yer gerçeği = ay yüksekliği dakika dakika taranarak):
+>
+> | | isabet | yanlış POZ | yanlış NEG |
+> |---|---|---|---|
+> | **eski** | %92,17 | 512 | 503 |
+> | **yeni** | **%99,34** | **71** | **14** |
+>
+> **Toplam major süresi neredeyse değişmedi** (1,87 → 1,90 sa/gün) — yani bonus
+> miktarı aynı kaldı, yalnız **saati düzeldi**. Eski kodla örtüşme %49'du:
+> günde ~0,95 saat yanlış saatte veriliyor, ~0,98 saat kaçırılıyordu.
+>
+> **Minor pencereler:** komşu gün olayları da tarandığı için gece yarısını aşan
+> pencereler artık kaybolmuyor. Ölçülen etki küçük: **2,84 → 2,90 sa/gün**
+> (teorik 3,00).
+>
+> **Test:** `tools/kontrol-solunar.js` **5/5** — isabet eşiği, eskiye üstünlük,
+> **pozitif kontrol** (eski kod eşiği geçemiyor), "ay ufkun altındayken major
+> açılmaz", ve major süresinin makul bandda kalması.
+>
+> **Kalan ~%0,66 hata bilinçli kabul edildi:** orta nokta, gerçek üst geçişin
+> yaklaşığıdır (geçiş boyunca deklinasyon değişir). Gerçek tepe noktasını aramak
+> ~100× pahalıya mal olur; bu fonksiyon tarama noktası başına çağrılıyor.
+>
+> ### ⚠️ KLASİK SOLUNAR'A TAM UYUM YAPILMADI — bilinçli
+>
+> Aldrich günde **iki** major tanımlar (ay tepede + ay ayak altında). Ölçüldü:
+> ikisini de saymak major süresini **1,87 → 4,69 sa/gün**, yani **2,51×**
+> artırırdı ve +4 bonusu günde **2,83 saat daha fazla** dağıtırdı.
+>
+> Bu bir hata düzeltmesi değil **özellik değişikliğidir** ve skor dağılımını
+> kaydırır. §4.1b'de çöken toplu değişikliğin aynı deseni — ayrı ölçüm ve karar
+> ister. **Yapılacaksa metrik: ilk 10'daki değerli tür sayısı.**
+
+### 4.28 (eski kayıt) Solunar "major" penceresi günlerin YARISINDA yanlış saatteydi
 
 **Bu oturumun en büyük bulgusu.** Ölçüm: `tools/olcum-solunar.js`
 (`getSolunarWindow` kaynaktan sökülüp koşuldu, yer gerçeği ay yüksekliği dakika
