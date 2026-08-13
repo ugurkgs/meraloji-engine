@@ -31,8 +31,26 @@ Bu tam olarak 2026-07-28 turunda yaşananın aynısı: 55 kullanıcı damgaland�
 **YAPILACAK — Render → Environment:**
 
 ```
-COMEBACK_CAMPAIGN_END = 2026-08-13T00:00:00Z      (bugün veya geçmiş bir tarih)
+COMEBACK_CAMPAIGN_END = 2026-08-01T00:00:00Z
 ```
+
+Format `Date.parse()` ile okunuyor: **ISO 8601**, `YYYY-MM-DDTHH:MM:SSZ`.
+Tırnak yok, boşluk yok, sondaki `Z` = UTC.
+
+> ⚠️ **BUGÜNÜN TARİHİNİ YAZMA.** Karşılaştırma `Date.now() < COMEBACK_CAMPAIGN_END`
+> (`server.js:2261`), yani değer **geçmişte** olmalı. Türkiye UTC+3: TR'de gece
+> yarısını geçmişken UTC'de hâlâ dünkü gün olabilir, o yüzden "bugün"ün tarihi
+> pencereyi 3 saat daha açık bırakabilir. Açıkça geçmiş bir tarih seç —
+> `2026-08-01` gibi — hesap yapmaya gerek kalmasın.
+
+**Kaydettikten sonra açılış logunu kontrol et:**
+
+```
+[COMEBACK] Kampanya bitişi: 2026-08-01T00:00:00.000Z        ← doğru
+[COMEBACK] ⚠️ COMEBACK_CAMPAIGN_END geçersiz, ...            ← format bozuk
+```
+
+İkincisinde kampanya yine kapanır (fail-safe), ama yanlış yazdığını bilmen iyi.
 
 Bu **yeni damga yazılmasını durdurur**. Damgası olanın 72 saati kendiliğinden
 tamamlanır, PRO'lar ve denemesi sürenler her koşulda kapsam dışı — kimseden
