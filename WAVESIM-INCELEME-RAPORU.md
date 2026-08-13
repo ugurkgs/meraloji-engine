@@ -213,7 +213,41 @@ diğer modlara taşınmamış.
 
 ---
 
-## 6 · ORTA — `isLandMode` 12 modun yalnız 3'ünde denetleniyor
+## 6 · ~~ORTA — `isLandMode` 12 modun yalnız 3'ünde~~ ⚠️ **BU SAYIM DA YANLIŞTI** (ölçüldü 2026-08-13)
+
+> Üçüncü kez aynı hata: **mekanizma sayıldı, ulaşılabilirlik ölçülmedi.**
+>
+> **Karada o modların çoğuna ULAŞILAMIYOR.** `SimulationModeSelector.rebuild()`
+> (`:136-147`) karada `isSeaMode()` olan modları **listeden tamamen çıkarıyor**;
+> `isSeaMode()` 16 modun **12'sini** kapsıyor (`:184-197`). Üstelik
+> `setLandMode(true)` seçili mod deniz moduysa zorla `WIND`'e geçiyor (`:210-213`).
+>
+> **Karada gerçekten açılabilen 4 mod var:**
+>
+> | mod | `isLandMode` denetimi | değerlendirme |
+> |---|---|---|
+> | `WIND` | ✅ var (`:3382`, `:3386`) | tamam |
+> | `AIR_TEMP` | ✅ var (`:3757`, `:3778`) | kısmen — bkz. aşağı |
+> | `RAIN` | ❌ yok | yağmur zaten gökyüzü olayı, karada da geçerli |
+> | `MOONLIGHT` | ❌ yok | **uzay/yıldız zemini çiziyor** (`:8129-8134`), deniz değil |
+>
+> Yani "9 mod karada deniz çiziyor" **doğru değil**.
+>
+> **`drawThermoclineMode`'daki kara dalı ÖLÜ KOD** (`:4046`): THERMOCLINE bir
+> deniz modu, karada listede bile yok. Dosyanın kendi yorumu (`:196`) bunu zaten
+> söylüyormuş — raporun ilk hâli o notu görmemiş.
+>
+> ### Geriye kalan GERÇEK madde
+>
+> `AIR_TEMP` içinde **7. bölüm** (balık figürü + konfor etiketi) ve **8. bölüm**
+> (kumsal/kıyı şeridi) karada doğru şekilde kapatılmış. Ama **6. bölüm hâlâ deniz
+> zeminini basıyor.**
+>
+> **Bu zaten biliniyordu: `ACIK-ISLER.md` §4.18, `KARAR BEKLİYOR`.** Yeni bir
+> bulgu değil — raporun ilk hâli onu şişirilmiş bir sayımla yeniden keşfetmiş.
+> Karar hâlâ kullanıcıda: zemin kalkarsa yerine ne gelecek?
+
+### Bulgunun kaydı (şişirilmiş ilk hâli)
 
 Denetleyenler: rüzgâr (`:3361`, `:3365`) · hava sıcaklığı (`:3736`, `:3757`) ·
 termoklin (`:4025`). Bir de maske üretimi (`:638`).
