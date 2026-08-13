@@ -223,7 +223,33 @@ yalnız hava sıcaklığı modu için biliyordu — **sorun daha geniş.**
 
 ---
 
-## 7 · DÜŞÜK — bilerek uydurulan trend
+## 7 · ~~DÜŞÜK — bilerek uydurulan trend~~ **DÜZELTİLDİ** (2026-08-13)
+
+> **Bulgu ilk yazıldığından daha somut çıktı.** Sorun "uydurma" değil,
+> **SÜREKSİZLİK**: `effectiveTrend` iki farklı fiziksel büyüklüğü eşikte
+> birbirine bağlıyordu — `|trend| >= 0.1` iken **trend**, altında
+> `(pressure − 1013)/5` **mutlak basınç**.
+>
+> **Ölçüm (1000 hPa'da):**
+>
+> | trend | `effectiveTrend` | yüzme kesesi |
+> |---|---|---|
+> | −0,099 | −2,60 | **2,50×** |
+> | −0,101 | −0,101 | **1,07×** |
+>
+> Trendde **0,002**'lik fark keseyi **2,34 kat** oynatıyordu. §4.21'deki
+> derinlik süreksizliğinin görsel katmandaki aynısı.
+>
+> **Düzeltme:** yüzme kesesi **mutlak basınca** tepki verir (Boyle, hacim ∝ 1/P),
+> trende değil. Trend *beslenme davranışını* etkiler ve o zaten
+> `isStressed`/`isRelaxed` ile ayrıca modelleniyor — **dokunulmadı**. Kese artık
+> yalnız mutlak basınçtan sürülüyor: tek büyüklük, eşik yok, süreksizlik yok.
+>
+> **Abartı bilinçli ve kayda geçti:** gerçek Boyle etkisi 13 hPa'da ~%1,3'tür,
+> gözle görülmez. Buradaki ölçek görselleştirme içindir, **ölçüm iddiası
+> taşımaz**.
+
+### Bulgunun kaydı (düzeltilmeden önceki hâli)
 
 ```java
 // :7119-7120
