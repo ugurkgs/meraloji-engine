@@ -1304,6 +1304,55 @@ ve ikisi de ciddiye alınmalı:
 > verisi yok, ertelendi" diye duruyordu. Artık biliniyor ki `4.1` aynı zamanda
 > **listenin tepesini istilacı türlere veren mekanizma.**
 
+#### 🎯 KULLANICI SAHA BİLGİSİ (2026-08-13) — İKİ OLASILIKTAN BİRİ ELENDİ
+
+Kullanıcı, yukarıdaki iki olasılık arasında **kesici bilgiyi verdi**:
+
+1. **"Evet çipura, karagöz gibi değerli balıklar tutuluyor."**
+   → *"Model doğru olabilir, istilacılar gerçekten baskın"* olasılığı **ELENDİ**.
+   Ölçümde çipura 21., karagöz 52. sırada. Gerçekte tutuluyorlarsa motor
+   onları hak ettiğinden aşağıda tutuyor demektir.
+   → Kalan açıklama: **`tempRange` yerli türlerde soğuk kalibre** = madde `4.1`.
+
+2. **⚠️ GÖZLEM YANLILIĞI — `4.2` için KRİTİK.**
+   *"Balon balığı tutan 'ben balon balığı tuttum' demiyor, bunu belgelemiyor."*
+
+   Bu, gözlem hattının (`4.2`, `SAHA-GOZLEMLERI.md`) tasarımını doğrudan
+   etkiliyor: saha verisi **bycatch'i sistematik olarak eksik gösterecek.**
+   Yani `4.1`'i doğrulamak için beklenen veri, tam da onu doğrulayamayacak
+   biçimde yanlı. "Örtük negatif" fikri (§5) bu yanlılığı düzeltmez —
+   aksine büyütür: kimse tutmadığı balığı da yazmaz, tuttuğu değersiz balığı da.
+
+   **Sonuç:** `4.1` saha gözlemiyle çözülemez. Başka bir kanıt kaynağı gerekir
+   (literatür sıcaklık aralıkları, uydu SST + tutulma tarihi eşlemesi, ya da
+   uygulamada açık "ne tuttun?" sorusu — ki o da gönüllü ve yanlı olur).
+
+#### SLOT MALİYETİ ÖLÇÜLDÜ — liste sabit boyutlu, bycatch slot yiyor
+
+Ağustos Ege 26 °C, ilk 10:
+
+| | gündüz | akşam (DUSK) |
+|---|---|---|
+| ilk 10'da bycatch | **5** | **5** (üstelik ilk **dördü**) |
+| dışarı atılan hedef türler | İskatarya 54,5 · Kırlangıç 51,8 · Baraküda 51,5 · Müren 49,4 · İstavrit 48,4 | Kolyoz 54,1 · İstavrit 50,7 · Tekir 50,3 · İskatarya 47,2 · **Mırmır 45,8** |
+
+Kullanıcının o noktada bulunduğunu **bildiği** Mırmır, akşam listesinde 16.
+sırada — beş bycatch türü yüzünden ilk 10'a giremiyor. Yalnız hedef türlerden
+liste yapılsaydı **10. sırada** olurdu.
+
+> **Bu bir SKOR sorunu değil.** Deniz iğnesinin 12,3 puanı, mırmırın 45,8'ini
+> düşürmüyor — skorlar birbirinden bağımsız. Sorun **LİSTE**: `fishList` en
+> yüksek 10 skoru alıyor ve sınıf ayrımı yapmıyor.
+>
+> **`1.4` (targetClass) bu sorunun cevabı ama TEK BAŞINA YETMEZ:** sunucu
+> `fishList`'i saf skorla 10'a kırptığı için, etiket gelse bile istemcinin
+> elinde yalnız **5 hedef tür** oluyor. "Hedef türler" bölümü 5 satırla açılır.
+>
+> **Aday çözüm (uygulanmadı, onay bekliyor):** yanıta AYRI bir alan eklemek —
+> ör. `targetFishList` = yalnız hedef türlerden ilk 10. `fishList` **aynen
+> kalır** (yayındaki APK etkilenmez, geriye dönük risk sıfır); yeni APK iki
+> bölümlü listeyi bu alandan kurar. Skorlara ve sıralamaya dokunulmaz.
+
 Denetimin bakmadığı katmanlardan ilki incelendi (`s_trigger`, 12 puan, ~40 dal).
 **Yapısal hata BULUNAMADI** — `asymptoticTriggerSum` gerçekten var, gerçekten
 uygulanıyor (`:4864`) ve bandı `[-12, +12]` içinde tutuyor. Kodun kendi ölçüm
