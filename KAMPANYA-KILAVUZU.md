@@ -12,6 +12,47 @@ Bu kriterler araçların içinde yazılı, elle süzmen gerekmiyor.
 
 ---
 
+## ⚠️ 0.0 · ACİL — APK GECİKİRSE KAMPANYA PENCERESİNİ KAPAT
+
+**Durum (2026-08-13):** kullanıcı APK güncellemesini **1-2 hafta** erteledi
+(art arda sürüm göndermemek için). Kampanya penceresi ise varsayılan olarak
+**2026-08-27**'de kapanıyor.
+
+**Sorun:** damga **tek seferlik** ve kullanıcı analiz yapınca **otomatik**
+yazılıyor — kampanya penceresi açık olduğu sürece, APK olmadan da yazılıyor.
+Uygulama içi hediye ekranı ise yeni APK'da. Yani:
+
+> Bugün süresi dolmuş bir kullanıcı uygulamayı açıp analiz yaparsa, **72 saatlik
+> tek seferlik hediyesini görmeden yakar.** Bir daha alamaz.
+
+Bu tam olarak 2026-07-28 turunda yaşananın aynısı: 55 kullanıcı damgalandı,
+72 saatlik pencere içinde satın alan **0**.
+
+**YAPILACAK — Render → Environment:**
+
+```
+COMEBACK_CAMPAIGN_END = 2026-08-13T00:00:00Z      (bugün veya geçmiş bir tarih)
+```
+
+Bu **yeni damga yazılmasını durdurur**. Damgası olanın 72 saati kendiliğinden
+tamamlanır, PRO'lar ve denemesi sürenler her koşulda kapsam dışı — kimseden
+bir şey geri alınmaz (`server.js:1965` GÜVENCE 2).
+
+**APK yayına çıkınca** pencereyi yeniden aç:
+
+```
+COMEBACK_CAMPAIGN_END = 2026-09-30T00:00:00Z      (ya da istenen tarih)
+```
+
+Sonra `tools/kampanya-hedef.js` ile kimlerin hâlâ damgasız olduğunu gör,
+`tools/kampanya-gonder.js` ile bildirimi at.
+
+> **Kapatılmazsa ne kaybedilir:** 2026-08-13 denetiminde 106 kullanıcının 55'i
+> damgalıydı. Kalan ~51 kullanıcının her biri, uygulamayı her açtığında hediyesini
+> sessizce yakma riski taşıyor. Pencere 14 gün daha açık kalırsa bu havuz erir.
+
+---
+
 ## 0 · Önce bunu bil: damga TEK SEFERLİKTİR
 
 3 günlük hediye, kullanıcı **analiz yaptığında** otomatik başlar
