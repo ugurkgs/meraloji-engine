@@ -2350,20 +2350,43 @@ function getGaussianScore(val, min, opt, max, optMin, optMax) {
         return Math.max(0.06, Math.exp(-0.5 * Math.pow((d - core) / sigma, 2)));
     }
 
-    // ── GAUSSIAN modu (eski davranış, geriye dönük uyumluluk) ──
+    // ── GAUSSIAN modu (türlerin %99,7'si burayı kullanıyor) ──
+    //
+    // [DÜZELTİLDİ 2026-08-13 — madde 4.26] Aralık içi ve aralık dışı dallar
+    // SINIRDA BİRBİRİNE BAĞLANMIYORDU:
+    //     içeride sınırda : Math.max(0.1, ...)   → taban 0.100
+    //     dışarıda hemen  : 0.25 * exp(...)      → 0.250'den başlıyordu
+    // Sonuç: 871 türün 856'sında `max` sınırını GEÇMEK puanı 2,0 katına
+    // çıkarıyordu (min tarafında 863 tür). Yani su türün azami sıcaklığını
+    // aştıkça balık daha uygun görünüyordu. 4.21'deki derinlik hatasının aynısı.
+    //
+    // Somut (ölçüldü): palamut max=24 → 24°C'de 0,100 · 24,5°C'de 0,204.
+    // Ağustos Ege yüzeyi 25-27 °C olduğu için palamut/lüfer/mercan tam bu banttaydı.
+    //
+    // ÇÖZÜM: aralık dışı dal artık 0.25 sabitinden değil, ARALIK İÇİ DALIN
+    // SINIRDAKİ DEĞERİNDEN başlıyor. `overshoot = 0` iken exp(0) = 1 olduğu için
+    // sınırda iki dal BİREBİR eşitleniyor — süreklilik tanım gereği garanti.
+    // Düşüş eğrisinin ŞEKLİ ve bölenleri (min*0.3 / max*0.15) DEĞİŞMEDİ.
+    //
+    // ÖLÇÜM: sıçrama 856 → 0 ve 863 → 0. 851 tür düşüyor, 23 tür ARTIYOR —
+    // artanlarda eski kod TERS yönde uçurum yapıyordu (plato sınıra taştığı için
+    // içeride 1,0, hemen dışarıda 0,25); düzeltme onu da kapatıyor.
+    const icDeger = (v) => {
+        if (v >= opt - 2 && v <= opt + 2) return 1.0;
+        const distance = Math.abs(v - opt);
+        const range = Math.max(opt - min, max - opt, 0.1);
+        return Math.max(0.1, Math.exp(-Math.pow(distance / (range * 0.5), 2)));
+    };
+
     if (val < min) {
         const overshoot = (min - val) / Math.max(1, min * 0.3);
-        return Math.max(0.03, 0.25 * Math.exp(-overshoot * overshoot));
+        return Math.max(0.03, icDeger(min) * Math.exp(-overshoot * overshoot));
     }
     if (val > max) {
         const overshoot = (val - max) / Math.max(1, max * 0.15);
-        return Math.max(0.03, 0.25 * Math.exp(-overshoot * overshoot));
+        return Math.max(0.03, icDeger(max) * Math.exp(-overshoot * overshoot));
     }
-    if (val >= opt - 2 && val <= opt + 2) return 1.0;
-    const distance = Math.abs(val - opt);
-    const range = Math.max(opt - min, max - opt, 0.1);
-    const score = Math.exp(-Math.pow(distance / (range * 0.5), 2));
-    return Math.max(0.1, score);
+    return icDeger(val);
 }
 
 // [DÜZELTME: Lethal Gate] — Balığın yaşayamayacağı sıcaklıkta skoru sıfırla

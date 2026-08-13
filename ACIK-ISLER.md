@@ -983,7 +983,46 @@ Etkisi: bu türler şu an ne bonus ne ceza alıyor (×1,0). Düzeltilirse eşle�
 > **Küçük ve düşük riskli**, ama yine de canlı skoru oynatıyor — onay ister.
 > Not: ceza (−%15) genelci bonusundan (+%10) büyük; bilinçli mi, kayda değer.
 
-### 4.26 Sıcaklık eğrisi aralığın DIŞINDA daha yüksek puan veriyor `KARAR BEKLİYOR` · **871 TÜR**
+### ~~4.26 Sıcaklık eğrisi aralığın DIŞINDA daha yüksek puan veriyor~~ **DÜZELTİLDİ** (2026-08-13)
+
+> **YAPILDI.** Aralık dışı dal artık `0.25` sabitinden değil, **aralık içi dalın
+> sınırdaki değerinden** başlıyor. `overshoot = 0` iken `exp(0) = 1` olduğu için
+> sınırda iki dal birebir eşitleniyor — süreklilik tanım gereği garanti.
+> Düşüş eğrisinin şekli ve bölenleri (`min*0.3` / `max*0.15`) **değişmedi**.
+> Trapez modu **hiç dokunulmadı**.
+>
+> **ÖLÇÜM (düzeltme öncesi/sonrası, 874 tür):**
+>
+> | | eski | yeni |
+> |---|---|---|
+> | `max` sınırında sıçrama | **856** | **0** |
+> | `min` sınırında sıçrama | **863** | **0** |
+>
+> - **851 tür düşüyor**, ortalama −0,054 (aralık dışı, 0,1-4,0 °C bandı)
+> - **23 tür ARTIYOR** — bunlarda eski kod **ters yönde** uçurum yapıyordu:
+>   ±2 °C platosu aralık sınırına taştığı için içeride 1,0, hemen dışarıda 0,25.
+>   Düzeltme o uçurumu da kapatıyor. En büyük artış +0,726.
+>
+> **Türkiye türleri, Ağustos Ege (asıl hedef):**
+>
+> | tür | 25 °C | 26 °C | 27 °C |
+> |---|---|---|---|
+> | Palamut (max 24) | 0,154 → **0,062** | 0,061 → **0,024** | 0 → 0 |
+> | Lüfer (max 25) | 0,100 → 0,100 | 0,155 → **0,062** | 0,063 → **0,025** |
+> | Mercan (max 26) | 0,100 → 0,100 | 0,100 → 0,100 | 0,156 → **0,062** |
+> | Barbun (max 25) | 0,141 → 0,141 | 0,155 → **0,087** | 0,063 → **0,035** |
+> | *Levrek, İstavrit (trapez)* | değişmedi | değişmedi | değişmedi |
+>
+> **Test:** `tools/kontrol-sicaklik-sureklilik.js` **6/6**, 874 tür taranarak —
+> süreklilik (iki sınır), sınırda değer eşitliği, monotonluk, **trapez modunun
+> değişmediği**, ve **pozitif kontrol** (eski kodda 1. test kırmızı veriyor,
+> ~856 tür sıçrıyor). Diğer üç test takımında gerileme yok.
+>
+> **KALAN, DÜZELTİLMEDİ:** ±2 °C platosu 3-4 türde aralık sınırına taşıyor
+> (ör. Köpekdiş Orkinos 24/28/30). Bu **aralık içi** bir özellik ve bu
+> düzeltmenin konusu değil; ayrı ele alınmalı.
+
+### 4.26 (eski kayıt) Sıcaklık eğrisi aralığın DIŞINDA daha yüksek puan veriyordu · **871 TÜR**
 
 **4.21'deki derinlik hatasının birebir aynısı, bu kez sıcaklık katmanında (28 puan)
 ve şu an CANLI.** Ölçüm: `tools/olcum-sicaklik-egrisi.js` (fonksiyonlar
