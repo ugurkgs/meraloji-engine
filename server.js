@@ -1397,14 +1397,13 @@ const SUBSTRATE_PREFS = {
     kalkan: ['SAND', 'MUD', 'MIXED'],
     pisi: ['SAND', 'MUD'],
     kefal: ['MUD', 'MIXED', 'SEAGRASS'],
-    // [4.27] `altinbas` species.js'te YOK. Muhtemel hedef: `sarikulak`
-    // ("Sarıkulak Kefal", Chelon auratus, LAGUN, 0-20 m) — "altınbaş kefal" ve
-    // "sarıkulak kefal" aynı türün iki yaygın adı. Kategori ve derinlik de
-    // SEAGRASS/SAND ile uyumlu.
-    // DEĞİŞTİRİLMEDİ: bu bir ÇIKARIM, `dil_baligi` gibi kesin değil. Tür adı
-    // eşlemesi kullanıcı onayı ister — yanlış türe zemin kuralı yazmak, hiç
-    // yazmamaktan kötüdür. Bkz. ACIK-ISLER 4.27.
-    altinbas: ['SEAGRASS', 'SAND'],   // ← ölü anahtar (hedef: sarikulak? ONAY BEKLİYOR)
+    // [DÜZELTİLDİ 2026-08-13 — madde 4.27] `altinbas` anahtarı species.js'te YOK;
+    // gerçek anahtar `sarikulak` ("Sarıkulak Kefal", Chelon auratus, LAGUN, 0-20 m).
+    // "Altınbaş kefal" ve "sarıkulak kefal" AYNI türün iki yaygın adı — kullanıcı
+    // 2026-08-13'te doğruladı. Kural yazılmış ama HİÇ UYGULANMIYORDU (×1.0).
+    // Mükerrer bırakılmadı: tek anahtar, `sarikulak`.
+    // altinbas: ['SEAGRASS', 'SAND'],   ← ÖLÜ ANAHTAR, aşağıdaki satırla değiştirildi
+    sarikulak: ['SEAGRASS', 'SAND'],
     // Pelajik (dip yapısı önemsiz)
     lufer: null,
     palamut: null,

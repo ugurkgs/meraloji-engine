@@ -1166,7 +1166,71 @@ ve tek `sigma` yüzünden opt'un iki yanı aynı hızda düşüyor. Oysa gate so
 Aralığı asimetrik olan **35 tür** var (ör. levrek 8/20/27: sol 12, sağ 7).
 Etkisi dar, öncelik düşük.
 
-### 4.25 Tetikleyici katmanı: negatif taraf çok hızlı doyuyor `KARAR BEKLİYOR` · **ÖLÇÜLDÜ**
+### ~~4.25 Tetikleyici katmanı: negatif taraf çok hızlı doyuyor~~ **ÖLÇÜLDÜ → DEĞİŞTİRİLMEDİ** (2026-08-13)
+
+> **TEŞHİS DOĞRU, DÜZELTMESİ FAYDASIZ.** §4.1b deseninin bir örneği daha:
+> mekanizma gerçekten öyle çalışıyor ama değiştirmenin ölçülebilir faydası yok.
+>
+> **Ölçüm:** `tools/olcum-425-kalibrasyon.js` — **GERÇEK `calculateFishScore`**
+> (`tools/motor.js` ile sökülerek), 27 senaryo (Ağustos Ege / Kasım Marmara /
+> Ekim Akdeniz × gündüz-gece-şafak × sakin-dalgalı-puslu), Türkiye bölgeli türler.
+> Aday kalibrasyon kaynağa **dokunmadan**, geçici yamayla uygulandı.
+>
+> **Metrik §4.1b ile aynı:** ilk 10'daki *değerli* (target) tür sayısı.
+> Eşik ve `AV_DEGERI` tablosu kaynaktan sökülüyor, elle kopyalanmıyor.
+>
+> | aday | ilk 10'da değerli | ort. skor |
+> |---|---|---|
+> | **mevcut (bölen 3)** | **202 / 270** | 30,74 |
+> | bölen 4 | 201 | +0,15 |
+> | bölen 5 | **201** | +0,26 |
+> | bölen 6 | 201 | +0,35 |
+>
+> 27 senaryonun **25'i değişmiyor**, 1'i artıyor, 1'i azalıyor — gürültü.
+> Ortalama skor artışı yarım puanın altında.
+>
+> **Sonuç: bölen 3 kalıyor.** Asimetri (6×) ve hızlı doyma gerçek, ama kodun
+> kendi gerekçesi ("cezalar daha hızlı etki eder") ölçümle çelişmiyor.
+
+### 4.29 ⚠️ YENİ — İlk 10 listesi Ege'de değersiz türlerle doluyor `KARAR BEKLİYOR` · **ÖLÇÜLDÜ**
+
+4.25 ölçümünün yan ürünü, ama ondan **çok daha önemli.** `1.4` maddesindeki
+*"liste başı yem balığı / istilacı / zehirli türlerle doldu"* şikâyeti ilk kez
+**sayıyla** doğrulandı.
+
+**İlk 10'da değerli tür sayısı (10 üzerinden):**
+
+| bölge | gündüz | gece | şafak |
+|---|---|---|---|
+| **Ağustos Ege** | **5** | **5** | **5** |
+| Ekim Akdeniz | 7 | 8 | 9 |
+| Kasım Marmara | **9** | **10** | **10** |
+
+**Ağustos Ege'de ilk 3 (mevcut kod):**
+
+```
+DAY   · sakin  : balon_baligi(73)  trakun(72)  yazili_orkinos(71)
+NIGHT · sakin  : muren(63)         aslan_baligi(61)  balon_baligi(59)
+DAWN  · sakin  : aslan_baligi(73)  balon_baligi(68)  trakun(67)
+```
+
+**Balon balığı** (istilacı, toksik, Türkiye'de satışı yasak) ve **aslan balığı**
+(istilacı, zehirli) listenin tepesinde. Kasım Marmara'da ise ilk 3 kirlangıç /
+tekir / iskatarya — yani sorun motorun tamamında değil, **Ağustos Ege
+koşullarında**.
+
+> **Bu bir SIRALAMA sorunu değil.** `1.4` zaten sıralamanın saf skorla yapılmasına
+> ve `targetClass` etiketiyle çözülmesine karar vermişti (istemci tarafı, APK
+> bekliyor). Buradaki bulgu şu: **etiket gelse bile Ağustos Ege'de ilk 10'un
+> yarısı bycatch olacak.** Yani etiket gerekli ama yeterli değil.
+>
+> **Muhtemel kök sebep** (ölçülmedi): ağustos suyu 26 °C ve Lesepsiyen istilacılar
+> (balon, aslan, lokum) sıcak suya *daha* uyumlu; yerli türlerin çoğu 24-25 °C
+> `max` ile o sıcaklıkta zaten cezalı. Yani bu, `4.1` (`tempRange` kalibrasyonu,
+> ENGELLİ) ve `4.22` (eylül "yaz" sayılıyor) ile aynı kökten geliyor olabilir.
+>
+> **Yapılacak iş: ölçüm, kod değil.** Artık `tools/motor.js` var; hipotez
+> doğrudan sınanabilir.
 
 Denetimin bakmadığı katmanlardan ilki incelendi (`s_trigger`, 12 puan, ~40 dal).
 **Yapısal hata BULUNAMADI** — `asymptoticTriggerSum` gerçekten var, gerçekten
