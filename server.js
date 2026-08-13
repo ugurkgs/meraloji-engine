@@ -2443,20 +2443,30 @@ function getTempGateMultiplier(temp, min, max) {
 // Bu fonksiyon calculateFishScore içinde rawScore'a çarpan olarak uygulanır.
 // Güven Skoru — API veri kalitesine göre hesaplanır
 // Eksik veya bayat veri varsa skor düşer
-function calculateConfidence(params) {
+// [2026-08-14] İkinci parametre OPSİYONEL bir toplayıcı dizidir. Verilirse
+// hangi verilerin eksik olduğu ANAHTAR olarak içine yazılır.
+//
+// NEDEN BÖYLE: kullanıcı "veri kalitesi %68" görüp neyin eksik olduğunu
+// bilemiyordu. Eksik listesini AYRI bir fonksiyonda üretmek en kolay yoldu ama
+// iki liste zamanla birbirinden kayardı — ceza burada değişir, liste orada
+// kalırdı. Tek kaynak: cezayı veren satır listeyi de yazar.
+//
+// Mevcut iki çağrı yeri ikinci argümanı geçmiyor; onlar için davranış AYNEN aynı.
+function calculateConfidence(params, eksikler) {
     let score = 100;
+    const ekle = (k) => { if (Array.isArray(eksikler)) eksikler.push(k); };
 
-    if (!params.tempWater || params.tempWater === 0) score -= 35; // Su sıcaklığı yok — KRİTİK
-    if (params.wave === null || params.wave === undefined) score -= 25; // Dalga verisi yok — KRİTİK
-    if (params.depth === null || params.depth === undefined) score -= 20;  // Derinlik yok — KRİTİK
-    if (!params.wavePeriod || params.wavePeriod === 0) score -= 5;  // Dalga periyodu yok
-    if (!params.chlorophyll) score -= 10; // Klorofil yok
-    if (params.chlorophyllStale) score -= 5;  // Klorofil bayat (7+ gün)
-    if (!params.oceanCurrent) score -= 5;  // Akıntı tahmini kullanıldı
+    if (!params.tempWater || params.tempWater === 0) { score -= 35; ekle('tempWater'); } // KRİTİK
+    if (params.wave === null || params.wave === undefined) { score -= 25; ekle('wave'); } // KRİTİK
+    if (params.depth === null || params.depth === undefined) { score -= 20; ekle('depth'); } // KRİTİK
+    if (!params.wavePeriod || params.wavePeriod === 0) { score -= 5; ekle('wavePeriod'); }
+    if (!params.chlorophyll) { score -= 10; ekle('chlorophyll'); }
+    if (params.chlorophyllStale) { score -= 5; ekle('chlorophyllStale'); }
+    if (!params.oceanCurrent) { score -= 5; ekle('oceanCurrent'); }
 
     // YENİ (1E)
-    if (!params.waveDirection) score -= 3;  // Dalga yönü yok
-    if (params.visibility === undefined) score -= 2;  // Görüş verisi yok
+    if (!params.waveDirection) { score -= 3; ekle('waveDirection'); }
+    if (params.visibility === undefined) { score -= 2; ekle('visibility'); }
 
     // ── VERİ KALİTESİ: MESAFE + SEBEP  [yenilendi 2026-08-14] ────────────
     // ESKİSİ: 3/6/9 km basamakları, 9 km üstü SABİT −20. Yani 22,5 km ile
@@ -2475,11 +2485,13 @@ function calculateConfidence(params) {
     // Izgara düğümü BAŞKA DENİZ HAVZASINDA: veri "biraz sapmış" değil,
     // yanlış denizin verisi. Boğaz'ın kuzeyi Karadeniz'i, güneyi Marmara'yı
     // kullanıyor — aynı boğazda 2,08 m ve 0,46 m.
-    if (params.basinMismatch) score -= 25;
+    if (params.basinMismatch) { score -= 25; ekle('basinMismatch'); }
 
     // Kapalı su: model dalgası fetch tavanıyla kırpıldı. Sayı artık fiziksel
     // olarak savunulabilir ama MODELDEN gelmiyor — kullanıcı bunu bilmeli.
-    if (params.waveCapped) score -= 10;
+    if (params.waveCapped) { score -= 10; ekle('waveCapped'); }
+
+    if (d > 3) ekle('gridDistance');
 
     return Math.max(0, Math.round(score)); // Artık taban yok, veri yoksa güven 0'dır.
 }
@@ -6234,6 +6246,11 @@ app.get('/api/forecast', async (req, res) => {
             ? (getRegion(lat, lon) !== getRegion(marine.latitude, marine.longitude))
             : false;
 
+        // Anlık güven hesabında hangi verilerin eksik olduğu buraya toplanır ve
+        // yanıtta `qualityReasons` olarak gider. Kullanıcı "%68" görüp neyin
+        // eksik olduğunu bilemiyordu; artık somut satır gösterilebiliyor.
+        const _kaliteEksikleri = [];
+
         for (let i = 0; i < 7; i++) {
             const targetDate = new Date();
             targetDate.setDate(targetDate.getDate() + i);
@@ -6915,6 +6932,11 @@ app.get('/api/forecast', async (req, res) => {
                 swellPeriod: parseFloat(i_swellPeriod.toFixed(1)),
                 visibility: i_visibility,
                 weatherCode: i_weatherCode,
+                // [2026-08-14] İkinci argüman eksik listesini TOPLAR. Kullanıcı
+                // "%68" görüp neyin eksik olduğunu bilemiyordu; istemci artık
+                // "Klorofil (uydu) alınamadı" gibi somut satırlar gösteriyor.
+                // Liste, cezayı veren satırın kendisinden geliyor — ayrı bir
+                // fonksiyonda üretilseydi zamanla cezalardan kayardı.
                 confidence: calculateConfidence({
                     tempWater: i_tempWater,
                     wave: i_waveRaw,
@@ -6928,7 +6950,7 @@ app.get('/api/forecast', async (req, res) => {
                     waveCapped: !!(fetchTavan && fetchTavan.kirpilanSaat > 0),
                     waveDirection: i_waveDirection,
                     visibility: i_visibility
-                }),
+                }, _kaliteEksikleri),
                 ripCurrentRisk: buildRipCurrentWarning(i_ripRisk, lang), // [YENİ] additive — shoreBearingInfo yoksa null
                 shoreBearing: serializeShoreBearing(shoreBearingInfo)    // [YENİ] kıyı geometrisi — simülasyon çizimi için
             };
@@ -7146,6 +7168,14 @@ app.get('/api/forecast', async (req, res) => {
             pointBasin: getRegion(lat, lon),
             dataBasin: (marine && marine.latitude != null)
                 ? getRegion(marine.latitude, marine.longitude) : null,
+
+            // qualityReasons: güven puanını DÜŞÜREN her kalemin anahtarı.
+            // calculateConfidence'ın kendisi dolduruyor — ceza satırı ile liste
+            // aynı yerde, birbirinden kayamaz.
+            // Anahtarlar: tempWater, wave, depth, wavePeriod, chlorophyll,
+            // chlorophyllStale, oceanCurrent, waveDirection, visibility,
+            // gridDistance, basinMismatch, waveCapped
+            qualityReasons: _kaliteEksikleri,
 
             // waveCap: kapalı suda fetch tavanı uygulandıysa ayrıntısı.
             // applied=false ise hiçbir değer değişmemiştir (model zaten tavanın

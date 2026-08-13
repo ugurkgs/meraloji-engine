@@ -114,6 +114,39 @@ function testler(m, etiket) {
     ol('Boğaz senaryosu güveni 40 altına indirir (yanıp sönme eşiği)', dzHK < 40, String(dzHK));
     ol('güven asla negatif olmaz', G({ gridDistance: 99, basinMismatch: true, waveCapped: true, tempWater: 0, wave: null, depth: null }) >= 0);
 
+    // ── 10. EKSİK LİSTESİ: ceza satırıyla AYNI yerden geliyor mu ───────────
+    // Ayrı bir fonksiyonda üretilseydi cezalar değişince liste kayardı.
+    // Bu testler listenin cezalarla senkron kaldığını garanti eder.
+    {
+        const e = [];
+        m.calculateConfidence({ ...temel, gridDistance: 2 }, e);
+        ol('tam veride eksik listesi BOŞ', e.length === 0, e.join(','));
+    }
+    {
+        const e = [];
+        m.calculateConfidence({ ...temel, gridDistance: 4, chlorophyll: null }, e);
+        ol('klorofil yoksa listede chlorophyll var', e.includes('chlorophyll'), e.join(','));
+        ol('4 km sapma listede gridDistance üretir', e.includes('gridDistance'), e.join(','));
+    }
+    {
+        const e = [];
+        m.calculateConfidence({ ...temel, gridDistance: 22.5, basinMismatch: true, waveCapped: true }, e);
+        ol('havza + tavan listeye giriyor',
+            e.includes('basinMismatch') && e.includes('waveCapped'), e.join(','));
+    }
+    {
+        const e = [];
+        m.calculateConfidence({ ...temel, gridDistance: 1, tempWater: 0, wave: null, depth: null }, e);
+        ol('kritik üçlü listede', e.includes('tempWater') && e.includes('wave') && e.includes('depth'), e.join(','));
+        ol('3 km altı sapma gridDistance ÜRETMEZ', !e.includes('gridDistance'), e.join(','));
+    }
+    {
+        // Toplayıcı verilmezse eski çağrılar aynen çalışmalı (2 çağrı yeri böyle)
+        const a = m.calculateConfidence({ ...temel, gridDistance: 4, chlorophyll: null });
+        const b = m.calculateConfidence({ ...temel, gridDistance: 4, chlorophyll: null }, []);
+        ol('toplayıcısız çağrı aynı puanı verir (geriye dönük)', a === b, `${a} vs ${b}`);
+    }
+
     return { g: gecti - g0, k: kaldi - k0 };
 }
 
@@ -132,7 +165,8 @@ function testler(m, etiket) {
     console.log('\n═══ POZİTİF KONTROL (bozulmuş sürüm KIRMIZI olmalı) ═══');
     let bozuk = src
         .replace('const FETCH_TAVAN_ACIK_YON_ESIK = 2;', 'const FETCH_TAVAN_ACIK_YON_ESIK = 16;')
-        .replace('if (params.basinMismatch) score -= 25;', 'if (params.basinMismatch) score -= 0;')
+        .replace(`if (params.basinMismatch) { score -= 25; ekle('basinMismatch'); }`,
+                 `if (params.basinMismatch) { score -= 0; ekle('basinMismatch'); }`)
         .replace('const enUzunKm = Math.max(...yonler.map(v => v === null ? FETCH_AZAMI_KM : v));',
                  'const enUzunKm = Math.min(...yonler.map(v => v === null ? FETCH_AZAMI_KM : v));');
     if (bozuk === src) { console.log('  ✗ POZİTİF KONTROL KURULAMADI'); process.exit(1); }
