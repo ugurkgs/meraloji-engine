@@ -903,6 +903,63 @@ kadar oynatıyor. **Veriye dokunulmadı.**
 **Doğrulama:** `node --check` temiz · 4 `strings.xml` XML geçerli, karakterler
 doğru · `compileReleaseJavaWithJavac` **BUILD SUCCESSFUL**.
 
+### 4.25 Tetikleyici katmanı: negatif taraf çok hızlı doyuyor `KARAR BEKLİYOR` · **ÖLÇÜLDÜ**
+
+Denetimin bakmadığı katmanlardan ilki incelendi (`s_trigger`, 12 puan, ~40 dal).
+**Yapısal hata BULUNAMADI** — `asymptoticTriggerSum` gerçekten var, gerçekten
+uygulanıyor (`:4864`) ve bandı `[-12, +12]` içinde tutuyor. Kodun kendi ölçüm
+notu da doğru (`:4866`, 43.735 senaryoda −12,00 … +8,40).
+
+**Ama bir kalibrasyon sorusu çıktı.** Ölçüm: `tools/olcum-tetikleyici.js`
+(sıkıştırıcı kaynaktan sökülerek koşuldu).
+
+```
+pozitif:  12 × (1 − e^(−ham/18))        negatif:  −12 × (1 − e^(ham/3))
+```
+
+**Bir ham puanın değeri sıfır civarında:**
+
+| taraf | eğim |
+|---|---|
+| pozitif | **0,667** puan |
+| negatif | **3,999** puan |
+| **asimetri** | **6,0×** |
+
+Bu **bilinçli** (`:3001` "Bonuslar daha zor kazanılır, cezalar daha hızlı etki
+eder"). Sorun asimetrinin varlığı değil, **büyüklüğü**.
+
+**TEK BİR DAL bandın çoğunu yiyor:**
+
+| dal | ham | sıkışmış | bandın %'i |
+|---|---|---|---|
+| Yoğun sis (görsel avcı) | −12,0 | **−11,78** | %98 |
+| Düşük oksijen | −8,2 | −11,21 | %93 |
+| **Azalan görüş (görsel avcı)** | **−6,0** | **−10,38** | **%86** |
+| Ay ışığı — karanlık seven | −5,0 | −9,73 | %81 |
+
+**En dikkat çekeni üçüncüsü.** `visibility < 5000 m` ordinary pustur — açık gün
+10-20 km'dir, 5 km hafif puslu bir gündür. Görsel avcı için
+`(4) × visMod(1,5) = 6` ham → **−10,38**, yani 12 puanlık katmanın **%86'sı**
+sıradan bir puslu günde gidiyor.
+
+**Sonuç — ayırt edicilik kaybı.** Ham −9'dan sonra ek ceza görünmez oluyor
+(−11,4 → −12,0 arası 19 ham puan alıyor). Yani **sis + düşük oksijen + ters ay
+= yalnız sis** ile aynı skoru veriyor. Katman kötü koşulda ikili anahtara
+dönüşüyor.
+
+Pozitif taraf tersi: pratikte ulaşılabilir azami ham ~+45 → **+11,0**, ama %95
+doyma için ham +53,9 gerekiyor — **hiç ulaşılamaz**. En güçlü tek bonus (gelgit,
+ham +10) yalnız **+5,11** veriyor.
+
+> **DÜZELTİLMEDİ — ölçüm işi, tasarım kararı.** §4.1b'de çöken toplu değişikliğin
+> aynı şekli: teşhis sağlam ama etkisi ancak ölçümle bilinir. Değiştirilecekse
+> tek aday **negatif bölen 3 → 5-6**; bu, sıradan pusu %86'dan ~%65'e indirir ve
+> ayırt ediciliği geri getirir. Metrik §4.1b'dekiyle aynı olmalı: ilk 10'daki
+> değerli tür sayısı.
+>
+> **Kalan katmanlar henüz incelenmedi:** sıcaklık trapezoidi · substrate ·
+> solunar.
+
 ### 4.23 Uykuda tuzaklar — şu an zarar vermiyor `HAZIR` (düşük öncelik)
 
 Aynı denetimden; üçü de doğrulandı, üçü de bugün zararsız.
