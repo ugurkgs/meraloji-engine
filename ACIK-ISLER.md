@@ -903,6 +903,62 @@ kadar oynatıyor. **Veriye dokunulmadı.**
 **Doğrulama:** `node --check` temiz · 4 `strings.xml` XML geçerli, karakterler
 doğru · `compileReleaseJavaWithJavac` **BUILD SUCCESSFUL**.
 
+### 4.26 Sıcaklık eğrisi aralığın DIŞINDA daha yüksek puan veriyor `KARAR BEKLİYOR` · **871 TÜR**
+
+**4.21'deki derinlik hatasının birebir aynısı, bu kez sıcaklık katmanında (28 puan)
+ve şu an CANLI.** Ölçüm: `tools/olcum-sicaklik-egrisi.js` (fonksiyonlar
+`server.js`'ten sökülerek koşuldu).
+
+`getGaussianScore` iki moda sahip. **Trapez modu yalnız 3 türde etkin**
+(`optMin`/`optMax` alanı olanlar: levrek, istavrit, +1). Kalan **871 tür** eski
+GAUSSIAN dalını kullanıyor ve orada:
+
+```js
+// aralık İÇİ, sınırda:   Math.max(0.1, score)          → taban 0.100
+// aralık DIŞI, hemen ötesinde:  0.25 * Math.exp(...)   → 0.250'den başlıyor
+```
+
+**Sonuç: 871 türün 856'sında `max` sınırını geçmek puanı ARTIRIYOR.**
+(`min` tarafında 863 tür.)
+
+| tür | max | max'ta | max+0,5 | anomali bandı |
+|---|---|---|---|---|
+| **Palamut** | 24 | 0,100 | **0,204** | +1,6 °C |
+| **Lüfer** | 25 | 0,100 | **0,205** | +1,6 °C |
+| **Mercan** | 26 | 0,100 | **0,205** | +1,6 °C |
+| Çipura | 28 | 0,100 | 0,205 | +1,6 °C |
+| Kalkan / Mezgit | 18 | 0,100 | 0,201 | +1,4 °C |
+| *Levrek (trapez)* | 27 | 0,421 | 0,304 | **+0,0** ✅ |
+
+Sıcaklık faktörü **2,0×** oluyor. Katman 28 puan olduğu için `s_temp`
+**2,8 → 5,7**, yani **+2,9 puan** — ve yönü ters: **su türün azami sıcaklığını
+aştıkça balık daha uygun görünüyor.**
+
+**ŞU AN GERÇEKLEŞİYOR.** Ağustos Ege yüzey suyu 25-27 °C; palamut (24), lüfer (25)
+ve mercan (26) tam bu bantta.
+
+**Kök sebep:** aralık içi dalın **tabanı 0,10**, aralık dışı dalın **başlangıcı
+0,25**. Gate çarpanı bunu kapatmıyor — sınırda gate ≈ 1,0. Gate soğukta 4,5 °C,
+sıcakta 3,0 °C içinde sıfıra indiği için anomali bandı sonlu: `max` üstünde
+~1,6 °C, `min` altında ~2,7 °C.
+
+> **DÜZELTİLMEDİ.** `calculateFishScore` §3 dokunulmazlar listesinde ve
+> düzeltme canlı skorları oynatır. 4.21'de olduğu gibi doğru cevap tartışmasız
+> (sınırı geçmek puanı artıramaz) ama **ölçülüp onaylanmalı.**
+> Aday düzeltme: aralık dışı dalın başlangıcını aralık içi tabana eşitlemek —
+> `0.25` yerine iç dalın sınır değeri. 4.21'de kullanılan yöntemin aynısı.
+
+**İKİNCİ BULGU — trapez modu neredeyse ölü.** `:2336`'daki
+`[DÜZELTME - KRİTİK]` notu "optMin..optMax bandında herkese 1.0 veriliyordu,
+türler ayırt edilemiyordu" diyor ve sivrilen Gauss'u anlatıyor. Ama o kod yolu
+**874 türün 3'ünde** çalışıyor. Düzeltme yazılmış, veriye yayılmamış.
+
+**ÜÇÜNCÜ BULGU (küçük) — eğri simetrik, biyoloji değil.** `Math.abs(val - opt)`
+ve tek `sigma` yüzünden opt'un iki yanı aynı hızda düşüyor. Oysa gate soğuğa
+4,5 °C, sıcağa 3,0 °C pay veriyor — kodun kendisi asimetriyi kabul ediyor.
+Aralığı asimetrik olan **35 tür** var (ör. levrek 8/20/27: sol 12, sağ 7).
+Etkisi dar, öncelik düşük.
+
 ### 4.25 Tetikleyici katmanı: negatif taraf çok hızlı doyuyor `KARAR BEKLİYOR` · **ÖLÇÜLDÜ**
 
 Denetimin bakmadığı katmanlardan ilki incelendi (`s_trigger`, 12 puan, ~40 dal).
