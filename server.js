@@ -9693,6 +9693,19 @@ app.post('/api/catch-report', async (req, res) => {
             engineVersion: ENGINE_VERSION,
             createdAt: Date.now(),
 
+            // ÖLÇÜMÜ SAPTIRAN GİZLİ DEĞİŞKEN — analizde MUTLAKA kontrol edilmeli.
+            // applySanitization (~5461) ücretsiz kullanıcıya fishList'in yalnız
+            // İLK 3 türünü gönderiyor, PRO 10 görüyor. Yani istemcideki onay
+            // kutusu listesi ücretsizde 3, PRO'da 10 satır. Ücretsiz kullanıcı
+            // 5. sıradaki balığı tuttuysa aramadan bulmak zorunda — yani ilk 3
+            // FAZLA, 4-10 arası EKSİK bildirilir.
+            //
+            // Bu bir hata değil, ücretli sınırın kendisi. Ama kontrol edilmezse
+            // "motor ilk 3'te çok isabetli" gibi sahte bir sonuç üretir.
+            // predictedOutOfList bundan ETKİLENMEZ: sunucu tam listeyi
+            // önbellekten okuyor, istemcinin gördüğü kırpılmış listeyi değil.
+            userTier: req.isPremium ? 'pro' : 'free',
+
             outcome,                                  // 'caught' | 'empty'
             caught: valid,
             wentButEmpty: outcome === 'empty',        // yokluk gözlemi — EN DEĞERLİSİ

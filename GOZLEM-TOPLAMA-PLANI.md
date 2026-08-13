@@ -152,6 +152,7 @@ bulanık eşleştirme, kalıcı elle iş demektir. Veri kümesinin bütün değe
 uid, createdAt
 lat, lon                  analiz noktası
 engineVersion             ← model değişince kohort ayrılsın
+userTier                  'free' | 'pro'  ← ölçümü saptıran gizli değişken, aşağı bak
 ─── MOTOR NE DEDİ ────────────────────────────────
 predicted[]               { key, score } — o saatteki ilk ~15
 predictedTop
@@ -173,6 +174,19 @@ motorun isabeti sanılır — `2.2`'deki sürüm kohortu tuzağının aynısı.
 **Koşullar neden sonradan çekilmez:** önbellek 3 saat, uydu SST arkadan gelir,
 model güncellenir. Bir hafta sonra aynı koordinattan çekilen veri, motorun o an
 gördüğü veri **değildir.**
+
+**⚠ `userTier` — analizde MUTLAKA kontrol edilmeli.** `applySanitization`
+(`server.js:5461`) ücretsiz kullanıcıya `fishList`'in yalnız **ilk 3 türünü**
+gönderiyor; PRO 10 görüyor. Yani istemcideki onay kutusu listesi ücretsizde
+3 satır, PRO'da 10. Ücretsiz kullanıcı 5. sıradaki balığı tuttuysa aramadan
+bulmak zorunda — sonuçta **ilk 3 fazla, 4-10 arası eksik bildirilir.**
+
+Bu bir hata değil, ücretli sınırın kendisi. Ama kontrol edilmezse *"motor ilk
+3'te çok isabetli"* diye **sahte bir sonuç** üretir. Kullanıcıların ~%75'i
+ücretsiz olduğu için etki küçük değil.
+
+`predictedOutOfList` bundan **etkilenmez**: sunucu tam listeyi önbellekten
+okuyor, istemcinin gördüğü kırpılmış listeyi değil.
 
 ### B tipi — `spotNotes/{id}` ("Daha önce")
 

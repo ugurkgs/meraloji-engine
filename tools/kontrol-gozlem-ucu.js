@@ -75,8 +75,8 @@ function sahteRes() {
 }
 
 const UID = 'kullanici_abc123';
-function sahteReq(govde, girisli = true) {
-    return { user: girisli ? { uid: UID } : null, body: govde };
+function sahteReq(govde, girisli = true, pro = false) {
+    return { user: girisli ? { uid: UID } : null, isPremium: pro, body: govde };
 }
 
 // Önbelleğe gerçekçi bir analiz yanıtı koy (server.js:6945'teki şekliyle)
@@ -262,7 +262,25 @@ async function testleriCalistir(govde, etiket) {
         ol('listedeki tür işaretlenmez', d && !d.predictedOutOfList.includes('cipura'));
     }
 
-    // 13 — hız sınırı
+    // 13 — kullanıcı katmanı damgalanır (ölçümü saptıran gizli değişken)
+    // Ücretsizde onay kutusu listesi 3, PRO'da 10 satır (applySanitization).
+    // Kaydedilmezse "motor ilk 3'te çok isabetli" diye sahte sonuç çıkar.
+    {
+        const o = ortamKur(); const h = isleyiciKur(govde, o.bagimliliklar);
+        onbellegeAnalizKoy(o.ram, 38.937, 26.9235, 9);
+        const govdeIstek = {
+            lat: 38.937, lon: 26.9235, hour: 9, outcome: 'caught',
+            when: 'now', species: ['cipura']
+        };
+        await h(sahteReq(govdeIstek, true, false), sahteRes());
+        await h(sahteReq(govdeIstek, true, true), sahteRes());
+        ol('ücretsiz kullanıcı free damgalanır', o.yazilan.catchReports[0]?.userTier === 'free',
+            String(o.yazilan.catchReports[0]?.userTier));
+        ol('PRO kullanıcı pro damgalanır', o.yazilan.catchReports[1]?.userTier === 'pro',
+            String(o.yazilan.catchReports[1]?.userTier));
+    }
+
+    // 14 — hız sınırı
     {
         const o = ortamKur(); const h = isleyiciKur(govde, o.bagimliliklar);
         onbellegeAnalizKoy(o.ram, 38.937, 26.9235, 9);
