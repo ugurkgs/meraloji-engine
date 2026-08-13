@@ -2242,6 +2242,10 @@ async function verifyAuth(req, res, next) {
                     req.isGracePeriod = true;
                     req.isComebackTrial = true;
                     req.graceDaysLeft = Math.max(1, Math.ceil((COMEBACK_TRIAL_MS - cbElapsed) / 86400000));
+                    // [2026-08-13] SAAT cinsinden kalan. `graceDaysLeft` 72 saatlik bir
+                    // hediye için fazla kaba: son 20 dakikada da "1 gün kaldı" diyor.
+                    // İstemci "18 saat kaldı" diyebilsin diye ayrı alan.
+                    req.comebackHoursLeft = Math.max(1, Math.ceil((COMEBACK_TRIAL_MS - cbElapsed) / 3600000));
                 }
             } catch (e) {
                 // Comeback altyapısı patlarsa isteği reddetme — kullanıcı eski
@@ -7388,6 +7392,16 @@ app.get('/api/subscription-status', async (req, res) => {
         isPremium: req.isPremium,
         isGracePeriod: req.isGracePeriod,
         graceDaysLeft: req.graceDaysLeft,
+        // [GERİ DÖNÜŞ 2026-08-13] Kampanya İSTEMCİYE GÖRÜNMEZ DURUMDAYDI.
+        // `isComebackTrial` sunucuda 2026-07-28'den beri hesaplanıyordu ama HİÇBİR
+        // yanıtta gönderilmiyordu; istemci de `graceDaysLeft`i hiç okumuyordu.
+        // Sonuç: kullanıcı 72 saat tam sürümü alıyor ve ne aldığını, ne kadar
+        // süreceğini, ne zaman bittiğini ÖĞRENMİYORDU.
+        // Ölçüldü (tools/denetim-comeback.js, 55 damgalı kullanıcı):
+        // 72 saatlik pencere İÇİNDE satın alan 0. Haber verilmeyen hediye satmıyor.
+        // Alan EKLEME — yayındaki APK bunları yok sayar, davranışı değişmez.
+        isComebackTrial: req.isComebackTrial === true,
+        comebackHoursLeft: (typeof req.comebackHoursLeft === 'number') ? req.comebackHoursLeft : null,
         // [DENEME 7 GÜN] Deneme süresi artık SUNUCUDAN geliyor. İstemci kendi
         // sabitinden hesaplarsa kesim tarihinin iki yanındaki kullanıcılara
         // yanlış sayı gösterir (eski kayıt 14 gün alır ama yeni APK 7 yazardı).

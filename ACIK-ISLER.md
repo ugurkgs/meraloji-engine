@@ -456,6 +456,58 @@ Kampanya **canlıda ve penceresi 2026-08-27'ye kadar açık**
 Bu sayı 3.2'yi doğrudan cevaplar: ürünü geri alan insanlar ödüyorsa, cevap
 "daha çok kısıtla" değil **"daha sık tattır"**.
 
+### ÖLÇÜM SONUCU (2026-08-13) — kampanya BAŞARISIZ OLMADI, HİÇ ÇALIŞMADI
+
+`tools/denetim-comeback.js` · 106 kullanıcı · 55 damgalı:
+
+| | |
+|---|---|
+| damgalanan | **55** (kullanıcıların %52'si: denemesi dolmuş + ödememiş) |
+| abone olan | 3 (%5,5) |
+| **72 saatlik pencere İÇİNDE satın alan** | **0 / 2** |
+| pencere kapandıktan 2,4 saat sonra alan | 1 (74,4 sa) |
+| 15 gün sonra alan | 1 (368 sa) |
+
+**KÖK SEBEP — kampanya kullanıcıya GÖRÜNMÜYORDU.** Koddan doğrulandı:
+
+- `isComebackTrial` **hiçbir yanıtta gönderilmiyordu**
+- `graceDaysLeft` istemcide **sıfır kez** okunuyor
+- `isGracePeriod` yalnız özellik kilidini açmak için kullanılıyor
+
+Yani kullanıcı 72 saat tam sürümü alıyor ve **ne aldığını, ne kadar süreceğini,
+ne zaman bittiğini hiç öğrenmiyordu.** Haber verilmeyen hediye satmaz; bitişi
+duyurulmayan hediye kayıp hissi de yaratmaz.
+
+> **%5,5 (damgalı) vs %47 (damgasız) KARŞILAŞTIRMASI HİÇBİR ŞEY ÖLÇMEZ.**
+> Damga yalnızca `!isPremium && !isGracePeriod` olana yazılıyor — yani tanımı
+> gereği "denemesini bitirmiş ve ödememiş" kişiye. PRO abone asla damgalanamaz,
+> dolayısıyla damgasız grup kurgu gereği bütün ödeyenleri içeriyor. Bu sayıya
+> dayanarak karar verilmemeli.
+
+**YAPILDI (2026-08-13) — kampanya görünür hale getirildi:**
+
+- **Sunucu:** `/api/subscription-status`'a `isComebackTrial` +
+  `comebackHoursLeft` eklendi (alan ekleme, geriye dönük etki yok).
+- **İstemci:** `users/{uid}.comebackTrialStart` doğrudan Firestore'dan okunuyor
+  (zaten yapılan okumaya bir alan eklendi, **ek maliyet yok**) ve hediye
+  diyaloğu gösteriliyor — **günde en fazla bir kez**, yani 72 saatte azami 3
+  kez. "PRO'ya geç" düğmesi paywall'a bağlı, `comeback_gift_shown` olayı
+  analitiğe düşüyor. 4 dilde.
+- **Kime gösterilmez:** PRO aboneler ve denemesi süren kullanıcılar. Damganın
+  varlığı bu iki şartı zaten garanti ediyor (`server.js:2227`); istemcide ayrıca
+  `!mIsFirestorePro` kapısı var.
+
+**YENİ ARAÇ — `tools/kampanya-hedef.js`** (salt okunur, bildirim GÖNDERMEZ):
+bildirim kampanyası için hedef listesi üretir. Kriter kullanıcının şartı:
+denemesi dolmuş · PRO değil · denemesi sürmüyor · `fcmToken` var. Deneme süresi
+`graceGunSayisi` ile aynı hesaplanır (Auth `creationTime` + 7/14 gün).
+
+> **KRİTİK — damga TEK SEFERLİK.** `server.js:2227` yalnız `stamp === 0` iken
+> yazıyor. Damgası olana tekrar bildirim atmak **yeni bir 3 gün AÇMAZ.** Araç
+> bu yüzden listeyi ikiye ayırıyor: "henüz damgalanmamış" (yeni kampanyanın
+> hedefi) ve "hediyesini almış". İkinci bir tur istenirse önce damga
+> sıfırlama / ikinci-tur mantığı yazılmalı — hiçbir araç bunu yapmıyor.
+
 ### ~~3.3 Fırtınada boş liste~~ **YAPILDI** (2026-08-12) · APK bekliyor
 
 **MADDEDEKİ TEŞHİS YANLIŞTI — liste hiç boşalmıyor.** Ölçüldü (gerçek
