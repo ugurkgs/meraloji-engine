@@ -1125,6 +1125,22 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 3000;
 const cache = new NodeCache({ stdTTL: 10800, checkperiod: 600 }); // 3 saat — OM isteğini 3x azaltır
 
+// ═══════════════════════════════════════════════════════════════════════════
+// MOTOR SÜRÜMÜ — av bildirimi kohortlarını ayırmak için
+// ═══════════════════════════════════════════════════════════════════════════
+// Yanıttaki "F.I.S.H. v3.0" pazarlama etiketidir; skorlama değişince DEĞİŞMEZ.
+// Bu sabit ise SKORU ETKİLEYEN her değişiklikte ELLE artırılır ve her av
+// bildirimine damgalanır.
+//
+// NEDEN GEREKLİ: 2026-08-13'te derinlik (4.21) ve sıcaklık (4.26) eğrilerindeki
+// süreksizlikler düzeltildi — 874 ve 856 türü etkiledi. Damga olmasaydı, eski
+// eğriyle toplanmış bir gözlem yeni eğrinin isabeti sanılırdı. Bu, GA4'te bir
+// kez yaşanmış hata deseninin aynısı (bkz. ACIK-ISLER 2.2 sürüm kohortu).
+//
+// KURAL: calculateFishScore veya beslediği herhangi bir eğri/katsayı değişirse
+// tarihi güncelle. Metin, çeviri, arayüz değişikliği için DOKUNMA.
+const ENGINE_VERSION = '2026-08-13';
+
 // Bathymetry sonuçlarını 24 saat cache'le — aynı bölgede tekrar taramada API çağrısı yok
 const bathyCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
 
@@ -9572,6 +9588,150 @@ app.delete('/api/favorites/:id', async (req, res) => {
     } catch (e) {
         console.error('[FAV-DELETE]', e.message);
         res.status(500).json({ error: 'Favori silinemedi' });
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AV BİLDİRİMİ — motorun isabetini ölçmek için (bkz. GOZLEM-TOPLAMA-PLANI.md)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// TAMAMEN EKLEMELİ: yeni uç, yeni koleksiyonlar. Mevcut hiçbir uç, alan veya
+// davranış değişmiyor. Eski APK bu ucu hiç çağırmaz.
+//
+// ┌─ NEDEN İSTEMCİ KOŞULLARI GÖNDERMİYOR ─────────────────────────────────┐
+// │ Ham (sanitize edilmemiş) yanıtın TAMAMI zaten 3 saat RAM'de duruyor:  │
+// │ `forecast_v24_{gLat}_{gLon}_h{saat}` (bkz. cache.set, ~6945).         │
+// │ Kullanıcı "şimdi tuttum" dediğinde analiz saniyeler öncesindedir —    │
+// │ yani önbellek isabeti neredeyse kesin. Koşulları BURADAN okuyoruz:    │
+// │ istemci yükü yok, istemciye güvenmek de gerekmiyor.                   │
+// └───────────────────────────────────────────────────────────────────────┘
+//
+// ┌─ NEDEN SKOR DEĞİL KOŞUL SAKLIYORUZ ───────────────────────────────────┐
+// │ Skor saklarsak gözlem o motora çakılı kalır. Koşul saklarsak, motoru  │
+// │ değiştirdiğimizde ESKİ GÖZLEMLERİ YENİDEN PUANLAYABİLİRİZ. fishList   │
+// │ yalnız "o gün ne demiştik"in kaydı olarak duruyor, hesabın temeli     │
+// │ değil.                                                                 │
+// └───────────────────────────────────────────────────────────────────────┘
+app.post('/api/catch-report', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
+    if (!db) return res.status(503).json({ error: 'Veritabanı hazır değil' });
+
+    const { lat, lon, hour, outcome, when, species, freeText } = req.body || {};
+
+    if (lat === undefined || lon === undefined)
+        return res.status(400).json({ error: 'lat, lon gerekli' });
+    const fLat = parseFloat(lat), fLon = parseFloat(lon);
+    if (!isFinite(fLat) || !isFinite(fLon) || Math.abs(fLat) > 90 || Math.abs(fLon) > 180)
+        return res.status(400).json({ error: 'lat/lon geçersiz' });
+
+    // outcome: 'caught' = tuttu | 'empty' = GİTTİ ama tutamadı
+    // 'empty' belirsiz DEĞİLDİR: istemcide buton metni "Gittim, tutamadım".
+    // "Hiç gitmedim" diye bir seçenek YOK — olsaydı sahte yokluk kaydı üretir,
+    // tempRange.min/max'i yanlış daraltırdı (GOZLEM-TOPLAMA-PLANI §3.1).
+    if (outcome !== 'caught' && outcome !== 'empty')
+        return res.status(400).json({ error: 'outcome: caught | empty' });
+
+    // when: 'now' = bugün, bu koşullarda | 'past' = daha önce (koşul bilinmiyor)
+    // 'past' için kabaca ne zaman: week | month | old
+    const w = (when === 'past') ? 'past' : 'now';
+    const bucket = ['week', 'month', 'old'].includes(req.body.whenBucket)
+        ? req.body.whenBucket : null;
+
+    // Tür anahtarları SPECIES_DB'ye karşı doğrulanır. Serbest metin ASLA tür
+    // yerine geçmez — "kupez/küpeş/Kupes" gibi varyantları eşleştirmek kalıcı
+    // elle iş demektir (§3.3). Eşleşmeyen metin freeText'te durur, elle okunur.
+    const keys = Array.isArray(species) ? species : [];
+    const valid = [...new Set(keys.filter(k => typeof k === 'string' && SPECIES_DB[k]))].slice(0, 20);
+    const note = typeof freeText === 'string' ? freeText.trim().slice(0, 200) : null;
+
+    if (outcome === 'caught' && valid.length === 0 && !note)
+        return res.status(400).json({ error: 'En az bir tür veya not gerekli' });
+
+    // Basit hız sınırı — RAM'de, Firestore OKUMASI YOK. Amaç kötüye kullanımı
+    // değil kazara tekrar göndermeyi kesmek; gerçek tekrarlar analiz aşamasında
+    // ayıklanır (aynı uid + nokta + tür).
+    const rateKey = `cr_rate_${req.user.uid}`;
+    const used = cache.get(rateKey) || 0;
+    if (used >= 40) return res.status(429).json({ error: 'Çok fazla bildirim' });
+    cache.set(rateKey, used + 1, 3600);
+
+    try {
+        // ── "Daha önce" → B tipi. Koşul YOK, kalibrasyona GİRMEZ. ──────────
+        if (w === 'past') {
+            const ref = await db.collection('spotNotes').add({
+                uid: req.user.uid,
+                lat: fLat, lon: fLon,
+                species: valid,
+                outcome,                 // 'caught' | 'empty'
+                whenBucket: bucket,      // week | month | old | null
+                freeText: note,
+                engineVersion: ENGINE_VERSION,
+                createdAt: Date.now()
+            });
+            console.log(`[GOZLEM-B] ${req.user.uid.slice(0, 6)} ${fLat.toFixed(3)},${fLon.toFixed(3)} ${outcome} [${valid.join(',')}] ${bucket || '?'}`);
+            return res.json({ success: true, id: ref.id, type: 'spotNote' });
+        }
+
+        // ── "Şimdi" → A tipi. Koşulları ÖNBELLEKTEN oku. ───────────────────
+        const h = Number.isInteger(hour) ? hour : new Date().getHours();
+        const { gLat, gLon } = snapToGrid(fLat, fLon);
+        const cached = cache.get(`forecast_v24_${gLat}_${gLon}_h${h}`);
+
+        // Önbellek ıskası mümkün: Render yeniden başlar (RAM uçar) ya da uydu
+        // SST arkadan gelince kayıt bilerek düşürülür (~1775). ISKA KAYBI DEĞİL:
+        // koordinat + tam zaman damgası elimizde, koşullar Open-Meteo arşivinden
+        // sonradan kurtarılabilir. Bayrakla işaretleyip kaydı yine de alıyoruz.
+        const f = cached?.forecast?.[0] || null;
+        const inst = cached?.instant || null;
+        const src = f || inst;
+        const pick = (k) => (inst && inst[k] != null) ? inst[k] : (f ? f[k] : null);
+
+        const doc = {
+            uid: req.user.uid,
+            lat: fLat, lon: fLon,
+            hour: h,
+            engineVersion: ENGINE_VERSION,
+            createdAt: Date.now(),
+
+            outcome,                                  // 'caught' | 'empty'
+            caught: valid,
+            wentButEmpty: outcome === 'empty',        // yokluk gözlemi — EN DEĞERLİSİ
+            freeText: note,
+
+            conditionsSource: src ? 'server-cache' : 'miss',
+            conditions: src ? {
+                tempWater: pick('temp'), wave: pick('wave'), wavePeriod: pick('wavePeriod'),
+                windSpeed: pick('wind'), windDir: pick('windDirection'), windGust: pick('windGust'),
+                pressure: pick('pressure'), pressureTrend: pick('pressureTrend'),
+                clarity: pick('clarity'), cloud: pick('cloud'), rain: pick('rain'),
+                salinity: pick('salinity'), current: pick('current'),
+                swellHeight: pick('swellHeight'), waveDirection: pick('waveDirection'),
+                visibility: pick('visibility'), weatherCode: pick('weatherCode'),
+                moonPhase: pick('moonPhase'), thermoclineDepth: pick('thermoclineDepth'),
+                chlorophyll: pick('chlorophyll')?.value ?? null,
+                depthAvg: cached?.depth?.avg ?? null,
+                substrate: cached?.substrate?.habitat ?? cached?.substrate ?? null,
+                region: cached?.region ?? null,
+                localTime: pick('localTime')
+            } : null,
+
+            // "O gün ne demiştik"in kaydı. Hesabın temeli DEĞİL — asıl hesap
+            // conditions'tan yeniden puanlanarak yapılır. Yanıt yalnız ilk 10'u
+            // taşıyor; 10 dışından tutulan balık en değerli sinyaldir, çünkü
+            // motorun onu düşük sıraladığını gösterir.
+            predicted: Array.isArray(src?.fishList)
+                ? src.fishList.slice(0, 10).map(x => ({ key: x.key, score: x.score, cls: x.targetClass }))
+                : [],
+            predictedOutOfList: valid.filter(k => !(src?.fishList || []).some(x => x.key === k))
+        };
+
+        const ref = await db.collection('catchReports').add(doc);
+        console.log(`[GOZLEM-A] ${req.user.uid.slice(0, 6)} ${fLat.toFixed(3)},${fLon.toFixed(3)} h${h} ${outcome} [${valid.join(',')}] koşul:${doc.conditionsSource}`);
+        res.json({ success: true, id: ref.id, type: 'catchReport' });
+
+    } catch (e) {
+        console.error('[GOZLEM]', e.message);
+        res.status(500).json({ error: 'Bildirim kaydedilemedi' });
     }
 });
 

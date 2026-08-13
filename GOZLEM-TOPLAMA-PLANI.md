@@ -278,7 +278,68 @@ kararı); o süre boşa gitmesin.
 
 ---
 
-## 9 · Bu plan neyi kabul ediyor
+## 9 · KURULUM — senin yapacakların
+
+Aşama 1-2 **yazıldı ve test edildi.** Sunucu kodu canlıya çıkmadan önce
+Firebase Console'da tek bir şey yapman gerekiyor.
+
+### 9.1 · Firebase Console → Firestore → Rules
+
+Mevcut kuralları **SİLME.** Aşağıdaki iki bloğu, `match /databases/{database}/documents {`
+içine, var olan blokların **yanına** ekle:
+
+```
+    // ── Av bildirimi (A tipi) — kalibrasyon verisi ──
+    // Kullanıcı YALNIZ kendi kaydını okur. Yazma tamamen sunucuya ait:
+    // istemci yazabilseydi koşulları da uydurabilirdi ve veri kümesi
+    // doğrulanamaz hale gelirdi.
+    match /catchReports/{docId} {
+      allow read: if request.auth != null
+                  && resource.data.uid == request.auth.uid;
+      allow write: if false;          // yalnız Admin SDK (sunucu)
+    }
+
+    // ── Mera notu (B tipi) — koşulsuz gözlem ──
+    match /spotNotes/{docId} {
+      allow read: if request.auth != null
+                  && resource.data.uid == request.auth.uid;
+      allow write: if false;          // yalnız Admin SDK (sunucu)
+    }
+```
+
+**`allow write: if false` neden:** Admin SDK (sunucumuz) kuralları **atlar**,
+yani sunucu yine yazar. Bu satır yalnız **istemcinin doğrudan yazmasını**
+engeller. Koşulları istemci yazabilseydi kimse veriye güvenemezdi.
+
+**`allow read` neden var:** aşama 4'teki "kendi av günlüğüm" ekranı için.
+Kullanıcı yalnız kendi kayıtlarını görür — başkasının merasını **asla**.
+
+> Kuralları kaydettikten sonra Console sana "Rules published" der. Bu kadar.
+> Koleksiyonları elle oluşturman **gerekmiyor** — ilk kayıt geldiğinde
+> Firestore kendisi yaratır.
+
+### 9.2 · Render → hiçbir şey
+
+Yeni ortam değişkeni yok. Sunucu kodu `main`'e push edilince canlıya çıkar.
+
+### 9.3 · Doğrulama — canlıda ne göreceksin
+
+Uç çağrıldığında sunucu logunda tek satır çıkar:
+
+```
+[GOZLEM-A] abc123 38.937,26.923 h9 caught [cipura,karagoz] koşul:server-cache
+[GOZLEM-B] abc123 38.937,26.923 caught [karagoz] week
+```
+
+`koşul:miss` görürsen önbellek ıskalanmış demektir (Render yeniden başlamış
+olabilir) — kayıt yine alınmıştır, kaybolmaz.
+
+> **APK çıkana kadar bu logda hiçbir şey görünmez** — ucu çağıran istemci kodu
+> aşama 3'te geliyor. Sunucu tarafı hazır bekler, kimseyi etkilemez.
+
+---
+
+## 10 · Bu plan neyi kabul ediyor
 
 - **Katılım düşük olabilir.** %2'de kalırsa ölçüm 4 ay sürer. Yine de tek yol bu.
 - **Kayıtların çoğu B tipi olacak** (§2). Hızı A tipi payı belirler.
