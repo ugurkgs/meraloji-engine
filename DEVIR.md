@@ -265,5 +265,6 @@ doğruymuş)* · `stats/pro_count` *(kullanıcı elle düzeltiyor)* ·
   Koddaki olası değerler: `user_cancelled` · `billing_error_<kod>` ·
   `billing_unavailable` · `not_signed_in` · `firebase_auth_failed` ·
   `api_exception_<kod>`
-- Eber gölünün `MEVSIMLIK` etiketi **doğrulanmalı** (plan yalnız "Akşehir, Meke"
-  diyordu, `Eber`'i asistan ekledi)
+- ~~Eber gölünün `MEVSIMLIK` etiketi doğrulanmalı~~ — **2026-08-13: LİSTEDEN
+  ÇIKARILDI.** Tatlı su planı gündemde değil; madde göl projesi yeniden
+  açılırsa `TATLISU-PLAN.md` içinde ele alınır, burada takip edilmiyor.

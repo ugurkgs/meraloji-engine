@@ -2412,45 +2412,53 @@ function calculateConfidence(params) {
 
 function getWeatherIconicDescription(code, lang, rain = 0, wind = 0) {
     const weatherMap = {
-        0: { tr: "☀️ Güneşli", en: "☀️ Sunny", es: "☀️ Soleado" },
-        1: { tr: "🌤️ Az Bulutlu", en: "🌤️ Mainly Clear", es: "🌤️ Mayormente despejado" },
-        2: { tr: "⛅ Parçalı Bulutlu", en: "⛅ Partly Cloudy", es: "⛅ Parcialmente nublado" },
-        3: { tr: "☁️ Bulutlu", en: "☁️ Overcast", es: "☁️ Nublado" },
-        45: { tr: "🌫️ Sisli", en: "🌫️ Foggy", es: "🌫️ Niebla" },
-        48: { tr: "🌫️ Kırağılı Sis", en: "🌫️ Depositing Rime Fog", es: "🌫️ Niebla con escarcha" },
-        51: { tr: "🌦️ Hafif Çiseleme", en: "🌦️ Light Drizzle", es: "🌦️ Llovizna ligera" },
-        53: { tr: "🌦️ Çiseleme", en: "🌦️ Moderate Drizzle", es: "🌦️ Llovizna moderada" },
-        55: { tr: "🌦️ Şiddetli Çiseleme", en: "🌦️ Dense Drizzle", es: "🌦️ Llovizna intensa" },
-        61: { tr: "🌧️ Hafif Yağmurlu", en: "🌧️ Slight Rain", es: "🌧️ Lluvia ligera" },
-        63: { tr: "🌧️ Yağmurlu", en: "🌧️ Moderate Rain", es: "🌧️ Lluvia" },
-        65: { tr: "🌧️ Şiddetli Yağmurlu", en: "🌧️ Heavy Rain", es: "🌧️ Lluvia fuerte" },
-        71: { tr: "🌨️ Hafif Kar Yağışlı", en: "🌨️ Slight Snow", es: "🌨️ Nieve ligera" },
-        73: { tr: "🌨️ Kar Yağışlı", en: "🌨️ Moderate Snow", es: "🌨️ Nieve" },
-        75: { tr: "🌨️ Şiddetli Kar Yağışlı", en: "🌨️ Heavy Snow", es: "🌨️ Nieve fuerte" },
-        80: { tr: "🌦️ Hafif Sağanak", en: "🌦️ Slight Rain Showers", es: "🌦️ Chubascos ligeros" },
-        81: { tr: "🌦️ Sağanak Yağışlı", en: "🌦️ Rain Showers", es: "🌦️ Chubascos" },
-        82: { tr: "🌦️ Şiddetli Sağanak", en: "🌦️ Violent Rain Showers", es: "🌦️ Chubascos violentos" },
-        95: { tr: "⛈️ Gök Gürültülü Fırtına", en: "⛈️ Thunderstorm", es: "⛈️ Tormenta eléctrica" },
-        96: { tr: "⛈️ Dolu ve Fırtına", en: "⛈️ Thunderstorm with Hail", es: "⛈️ Tormenta con granizo" },
-        99: { tr: "⛈️ Ağır Fırtına ve Dolu", en: "⛈️ Heavy Thunderstorm with Hail", es: "⛈️ Tormenta fuerte con granizo" }
+        // [YUNANCA 2026-08-13] `el` HİÇ YOKTU. Aşağıdaki `res[lang] || res.tr`
+        // yüzünden Yunan kullanıcı TÜRKÇE hava metni görüyordu — fırtınada değil,
+        // HER hava kodunda. Uygulama 4 dil destekliyor ama bu tablo 3 taşıyordu.
+        // Fırtına kodlarının hepsi "καταιγίδα" içeriyor: istemcideki
+        // `hasStormText` anahtarı (WaveSimulationView) bu kelimeyi arıyor.
+        0: { tr: "☀️ Güneşli", en: "☀️ Sunny", es: "☀️ Soleado", el: "☀️ Ηλιόλουστα" },
+        1: { tr: "🌤️ Az Bulutlu", en: "🌤️ Mainly Clear", es: "🌤️ Mayormente despejado", el: "🌤️ Λίγα σύννεφα" },
+        2: { tr: "⛅ Parçalı Bulutlu", en: "⛅ Partly Cloudy", es: "⛅ Parcialmente nublado", el: "⛅ Μερική συννεφιά" },
+        3: { tr: "☁️ Bulutlu", en: "☁️ Overcast", es: "☁️ Nublado", el: "☁️ Συννεφιά" },
+        45: { tr: "🌫️ Sisli", en: "🌫️ Foggy", es: "🌫️ Niebla", el: "🌫️ Ομίχλη" },
+        48: { tr: "🌫️ Kırağılı Sis", en: "🌫️ Depositing Rime Fog", es: "🌫️ Niebla con escarcha", el: "🌫️ Ομίχλη με πάχνη" },
+        51: { tr: "🌦️ Hafif Çiseleme", en: "🌦️ Light Drizzle", es: "🌦️ Llovizna ligera", el: "🌦️ Ασθενές ψιχάλισμα" },
+        53: { tr: "🌦️ Çiseleme", en: "🌦️ Moderate Drizzle", es: "🌦️ Llovizna moderada", el: "🌦️ Ψιχάλισμα" },
+        55: { tr: "🌦️ Şiddetli Çiseleme", en: "🌦️ Dense Drizzle", es: "🌦️ Llovizna intensa", el: "🌦️ Πυκνό ψιχάλισμα" },
+        61: { tr: "🌧️ Hafif Yağmurlu", en: "🌧️ Slight Rain", es: "🌧️ Lluvia ligera", el: "🌧️ Ασθενής βροχή" },
+        63: { tr: "🌧️ Yağmurlu", en: "🌧️ Moderate Rain", es: "🌧️ Lluvia", el: "🌧️ Βροχή" },
+        65: { tr: "🌧️ Şiddetli Yağmurlu", en: "🌧️ Heavy Rain", es: "🌧️ Lluvia fuerte", el: "🌧️ Ισχυρή βροχή" },
+        71: { tr: "🌨️ Hafif Kar Yağışlı", en: "🌨️ Slight Snow", es: "🌨️ Nieve ligera", el: "🌨️ Ασθενής χιονόπτωση" },
+        73: { tr: "🌨️ Kar Yağışlı", en: "🌨️ Moderate Snow", es: "🌨️ Nieve", el: "🌨️ Χιονόπτωση" },
+        75: { tr: "🌨️ Şiddetli Kar Yağışlı", en: "🌨️ Heavy Snow", es: "🌨️ Nieve fuerte", el: "🌨️ Ισχυρή χιονόπτωση" },
+        80: { tr: "🌦️ Hafif Sağanak", en: "🌦️ Slight Rain Showers", es: "🌦️ Chubascos ligeros", el: "🌦️ Ασθενείς μπόρες" },
+        81: { tr: "🌦️ Sağanak Yağışlı", en: "🌦️ Rain Showers", es: "🌦️ Chubascos", el: "🌦️ Μπόρες" },
+        82: { tr: "🌦️ Şiddetli Sağanak", en: "🌦️ Violent Rain Showers", es: "🌦️ Chubascos violentos", el: "🌦️ Ισχυρές μπόρες" },
+        95: { tr: "⛈️ Gök Gürültülü Fırtına", en: "⛈️ Thunderstorm", es: "⛈️ Tormenta eléctrica", el: "⛈️ Καταιγίδα" },
+        96: { tr: "⛈️ Dolu ve Fırtına", en: "⛈️ Thunderstorm with Hail", es: "⛈️ Tormenta con granizo", el: "⛈️ Καταιγίδα με χαλάζι" },
+        99: { tr: "⛈️ Ağır Fırtına ve Dolu", en: "⛈️ Heavy Thunderstorm with Hail", es: "⛈️ Tormenta fuerte con granizo", el: "⛈️ Ισχυρή καταιγίδα με χαλάζι" }
     };
-    const res = weatherMap[code] || { tr: "☁️ Değişken", en: "☁️ Variable", es: "☁️ Variable" };
+    const res = weatherMap[code] || { tr: "☁️ Değişken", en: "☁️ Variable", es: "☁️ Variable", el: "☁️ Μεταβλητός καιρός" };
     let desc = res[lang] || res.tr;
-    
+
     // Fırtına kodları için dinamik isimlendirme
     if (code >= 95 && code <= 99) {
         if (rain > 0) {
             if (lang === 'tr') desc = "⛈️ Yağmurlu Fırtına";
             else if (lang === 'en') desc = "⛈️ Rainy Storm";
             else if (lang === 'es') desc = "⛈️ Tormenta Lluviosa";
+            else if (lang === 'el') desc = "⛈️ Καταιγίδα με βροχή";
         } else if (wind > 20) {
             if (lang === 'tr') desc = "🌩️ Rüzgarlı Fırtına";
             else if (lang === 'en') desc = "🌩️ Windy Storm";
             else if (lang === 'es') desc = "🌩️ Tormenta Ventosa";
+            else if (lang === 'el') desc = "🌩️ Καταιγίδα με άνεμο";
         } else {
             if (lang === 'tr') desc = "🌩️ Kuru Fırtına";
             else if (lang === 'en') desc = "🌩️ Dry Thunderstorm";
             else if (lang === 'es') desc = "⛈️ Tormenta Seca";
+            else if (lang === 'el') desc = "🌩️ Ξηρή καταιγίδα";
         }
     }
     return desc;

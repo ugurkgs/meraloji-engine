@@ -285,6 +285,16 @@ iş listesinde takip edilmiyor.
 **Eşik düşürülmeden ÖNCE APK yayınlanmalı** — ters sırada bildirim alan
 kullanıcının onu susturma yolu olmaz.
 
+> ### ✅ 2026-08-13 — KARAR VERİLDİ, MADDE TAMAMEN KAPANDI
+>
+> **APK yayına çıktı ve kullanıcı eşiği 80'de BIRAKMAYA karar verdi.**
+> `SHORE_ALERT_ESIK = 80` kalıyor, 75'e indirilmeyecek.
+>
+> Yani "birkaç gün log izle, 75'e çek" planı **artık geçerli değil**. Aşağıdaki
+> eylül kontrolü ve dağılım logu notu **bilgi olarak** duruyor; kullanıcı fikir
+> değiştirirse tek yapılacak Render'da `SHORE_ALERT_ESIK` değerini düşürmek.
+> Kod tarafında yapılacak hiçbir şey yok.
+
 **EYLÜL KONTROLÜ.** Sezonda skorlar yükselecek. Logda şu satıra bakılacak:
 ```
 [SHORE-ALERT/CANLI] 29 aday → 25 farklı hücre  · 4 iç bölge adayı elendi
