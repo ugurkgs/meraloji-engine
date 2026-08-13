@@ -79,9 +79,19 @@ function sahteReq(govde, girisli = true, pro = false) {
     return { user: girisli ? { uid: UID } : null, isPremium: pro, body: govde };
 }
 
-// Önbelleğe gerçekçi bir analiz yanıtı koy (server.js:6945'teki şekliyle)
-function onbellegeAnalizKoy(ram, la, lo, saat) {
+// Önbelleğe gerçekçi bir analiz yanıtı koy (server.js:6945'teki şekliyle).
+//
+// SAAT = SUNUCU SAATİ. /api/forecast anahtarı `new Date().getHours()` ile
+// kuruluyor ve Render UTC'de çalışıyor. Testin ilk sürümü burada sabit 9
+// kullanıyordu ve istek de hour:9 gönderiyordu — ikisi uyduğu için 2026-08-13
+// canlı hatası (istemci saatiyle anahtar kurma) teste HİÇ TAKILMADI.
+// Artık gerçek sunucu saati kullanılıyor; kaydırma sınır durumu içindir.
+function onbellegeAnalizKoy(ram, la, lo, saatKaydir = 0) {
+    const saat = (new Date().getHours() + 24 + saatKaydir) % 24;
     ram.set(`forecast_v24_${Math.round(la * 100) / 100}_${Math.round(lo * 100) / 100}_h${saat}`, {
+        // NOKTANIN yerel saati — sunucu saatinden de cihaz saatinden de farklı
+        // olabilir. localHour bunu almalı.
+        clickHour: 14,
         region: 'Çandarlı Açıkları',
         depth: { avg: 24.5 },
         substrate: { habitat: 'SAND' },
@@ -156,10 +166,10 @@ async function testleriCalistir(govde, etiket) {
     // 6 — ŞİMDİ + önbellek isabeti: koşullar sunucudan gelir
     {
         const o = ortamKur(); const h = isleyiciKur(govde, o.bagimliliklar);
-        onbellegeAnalizKoy(o.ram, 38.937, 26.9235, 9);
+        onbellegeAnalizKoy(o.ram, 38.937, 26.9235);
         const r = sahteRes();
         await h(sahteReq({
-            lat: 38.937, lon: 26.9235, hour: 9, outcome: 'caught',
+            lat: 38.937, lon: 26.9235, hour: 22, outcome: 'caught',
             when: 'now', species: ['cipura', 'karagoz']
         }), r);
         const d = o.yazilan.catchReports[0];
@@ -177,10 +187,10 @@ async function testleriCalistir(govde, etiket) {
     // 7 — DAHA ÖNCE → B tipi, koşul YOK, ayrı koleksiyon
     {
         const o = ortamKur(); const h = isleyiciKur(govde, o.bagimliliklar);
-        onbellegeAnalizKoy(o.ram, 38.937, 26.9235, 9);   // önbellek DOLU ama kullanılmamalı
+        onbellegeAnalizKoy(o.ram, 38.937, 26.9235);   // önbellek DOLU ama kullanılmamalı
         const r = sahteRes();
         await h(sahteReq({
-            lat: 38.937, lon: 26.9235, hour: 9, outcome: 'caught',
+            lat: 38.937, lon: 26.9235, hour: 22, outcome: 'caught',
             when: 'past', whenBucket: 'week', species: ['karagoz']
         }), r);
         ol('daha önce → spotNotes\'a yazılır', o.yazilan.spotNotes.length === 1);
@@ -206,10 +216,10 @@ async function testleriCalistir(govde, etiket) {
     // 9 — "Gittim, tutamadım" → yokluk gözlemi, koşullarla birlikte
     {
         const o = ortamKur(); const h = isleyiciKur(govde, o.bagimliliklar);
-        onbellegeAnalizKoy(o.ram, 38.937, 26.9235, 9);
+        onbellegeAnalizKoy(o.ram, 38.937, 26.9235);
         const r = sahteRes();
         await h(sahteReq({
-            lat: 38.937, lon: 26.9235, hour: 9, outcome: 'empty', when: 'now'
+            lat: 38.937, lon: 26.9235, hour: 22, outcome: 'empty', when: 'now'
         }), r);
         const d = o.yazilan.catchReports[0];
         ol('tutamadım → tür gerekmiyor, kayıt alınır', r.kod === 200 && !!d, `kod=${r.kod}`);
@@ -224,7 +234,7 @@ async function testleriCalistir(govde, etiket) {
         // önbellek BİLEREK boş — Render yeniden başladı senaryosu
         const r = sahteRes();
         await h(sahteReq({
-            lat: 38.937, lon: 26.9235, hour: 9, outcome: 'caught',
+            lat: 38.937, lon: 26.9235, hour: 22, outcome: 'caught',
             when: 'now', species: ['cipura']
         }), r);
         const d = o.yazilan.catchReports[0];
@@ -236,10 +246,10 @@ async function testleriCalistir(govde, etiket) {
     // 11 — bilinmeyen tür anahtarları ayıklanır
     {
         const o = ortamKur(); const h = isleyiciKur(govde, o.bagimliliklar);
-        onbellegeAnalizKoy(o.ram, 38.937, 26.9235, 9);
+        onbellegeAnalizKoy(o.ram, 38.937, 26.9235);
         const r = sahteRes();
         await h(sahteReq({
-            lat: 38.937, lon: 26.9235, hour: 9, outcome: 'caught', when: 'now',
+            lat: 38.937, lon: 26.9235, hour: 22, outcome: 'caught', when: 'now',
             species: ['cipura', 'uydurma_balik', 'cipura', 'mirmir']
         }), r);
         const d = o.yazilan.catchReports[0];
@@ -251,10 +261,10 @@ async function testleriCalistir(govde, etiket) {
     // 12 — ilk 10 DIŞINDAN tutulan balık işaretlenir (en değerli sinyal)
     {
         const o = ortamKur(); const h = isleyiciKur(govde, o.bagimliliklar);
-        onbellegeAnalizKoy(o.ram, 38.937, 26.9235, 9);
+        onbellegeAnalizKoy(o.ram, 38.937, 26.9235);
         const r = sahteRes();
         await h(sahteReq({
-            lat: 38.937, lon: 26.9235, hour: 9, outcome: 'caught', when: 'now',
+            lat: 38.937, lon: 26.9235, hour: 22, outcome: 'caught', when: 'now',
             species: ['cipura', 'mirmir']   // mirmir tahmin listesinde YOK
         }), r);
         const d = o.yazilan.catchReports[0];
@@ -262,14 +272,73 @@ async function testleriCalistir(govde, etiket) {
         ol('listedeki tür işaretlenmez', d && !d.predictedOutOfList.includes('cipura'));
     }
 
-    // 13 — kullanıcı katmanı damgalanır (ölçümü saptıran gizli değişken)
+    // 13 — GERİLEME TESTİ: cihaz saati önbellek anahtarında YOK SAYILIR
+    // 2026-08-13 canlı hatası: anahtar istemcinin cihaz saatiyle kuruluyordu.
+    // Render UTC, kullanıcı TR (UTC+3) → 22:12'de gönderilen bildirim h22
+    // aradı, kayıt h19'daydı. Her A tipi kayıt koşulsuz kalıyordu.
+    {
+        const o = ortamKur(); const h = isleyiciKur(govde, o.bagimliliklar);
+        onbellegeAnalizKoy(o.ram, 38.937, 26.9235);          // SUNUCU saatine kondu
+        const r = sahteRes();
+        await h(sahteReq({
+            lat: 38.937, lon: 26.9235, hour: (new Date().getHours() + 3) % 24,  // +3 saatlik cihaz
+            outcome: 'caught', when: 'now', species: ['cipura']
+        }), r);
+        const d = o.yazilan.catchReports[0];
+        ol('cihaz saati 3 saat kaymışken önbellek YİNE bulunur',
+            d && d.conditionsSource === 'server-cache', d && d.conditionsSource);
+        ol('koşullar dolu geldi', d && d.conditions?.tempWater === 26.4);
+    }
+
+    // 14 — saat sınırı: analiz 19:59, bildirim 20:01 → bir önceki saate bakılır
+    {
+        const o = ortamKur(); const h = isleyiciKur(govde, o.bagimliliklar);
+        onbellegeAnalizKoy(o.ram, 38.937, 26.9235, -1);      // ÖNCEKİ saate kondu
+        const r = sahteRes();
+        await h(sahteReq({
+            lat: 38.937, lon: 26.9235, outcome: 'caught', when: 'now', species: ['cipura']
+        }), r);
+        const d = o.yazilan.catchReports[0];
+        ol('bir önceki saatteki önbellek de bulunur',
+            d && d.conditionsSource === 'server-cache', d && d.conditionsSource);
+    }
+
+    // 15 — localHour NOKTANIN saatinden gelir, cihazınkinden değil
+    // Balık aktivitesi yerel saate bağlı (mırmır DAY 49 → DUSK 74). Cihaz
+    // başka saat diliminde olabilir; kalibrasyon noktanın saatini kullanmalı.
+    {
+        const o = ortamKur(); const h = isleyiciKur(govde, o.bagimliliklar);
+        onbellegeAnalizKoy(o.ram, 38.937, 26.9235);          // clickHour: 14
+        const r = sahteRes();
+        await h(sahteReq({
+            lat: 38.937, lon: 26.9235, hour: 22,             // cihaz 22 diyor
+            outcome: 'caught', when: 'now', species: ['cipura']
+        }), r);
+        const d = o.yazilan.catchReports[0];
+        ol('localHour önbellekteki clickHour (14)', d && d.localHour === 14, d && String(d.localHour));
+        ol('deviceHour istemcininki (22) olarak saklanır', d && d.deviceHour === 22, d && String(d.deviceHour));
+    }
+
+    // 16 — önbellek ıskasında localHour cihaz saatine düşer (uydurulmaz)
+    {
+        const o = ortamKur(); const h = isleyiciKur(govde, o.bagimliliklar);
+        const r = sahteRes();                                 // önbellek BOŞ
+        await h(sahteReq({
+            lat: 38.937, lon: 26.9235, hour: 22,
+            outcome: 'caught', when: 'now', species: ['cipura']
+        }), r);
+        const d = o.yazilan.catchReports[0];
+        ol('ıskada localHour cihaz saatine düşer', d && d.localHour === 22, d && String(d.localHour));
+    }
+
+    // 17 — kullanıcı katmanı damgalanır (ölçümü saptıran gizli değişken)
     // Ücretsizde onay kutusu listesi 3, PRO'da 10 satır (applySanitization).
     // Kaydedilmezse "motor ilk 3'te çok isabetli" diye sahte sonuç çıkar.
     {
         const o = ortamKur(); const h = isleyiciKur(govde, o.bagimliliklar);
-        onbellegeAnalizKoy(o.ram, 38.937, 26.9235, 9);
+        onbellegeAnalizKoy(o.ram, 38.937, 26.9235);
         const govdeIstek = {
-            lat: 38.937, lon: 26.9235, hour: 9, outcome: 'caught',
+            lat: 38.937, lon: 26.9235, hour: 22, outcome: 'caught',
             when: 'now', species: ['cipura']
         };
         await h(sahteReq(govdeIstek, true, false), sahteRes());
@@ -283,12 +352,12 @@ async function testleriCalistir(govde, etiket) {
     // 14 — hız sınırı
     {
         const o = ortamKur(); const h = isleyiciKur(govde, o.bagimliliklar);
-        onbellegeAnalizKoy(o.ram, 38.937, 26.9235, 9);
+        onbellegeAnalizKoy(o.ram, 38.937, 26.9235);
         let sonKod = 200;
         for (let i = 0; i < 45; i++) {
             const r = sahteRes();
             await h(sahteReq({
-                lat: 38.937, lon: 26.9235, hour: 9, outcome: 'caught',
+                lat: 38.937, lon: 26.9235, hour: 22, outcome: 'caught',
                 when: 'now', species: ['cipura']
             }), r);
             sonKod = r.kod;
@@ -317,9 +386,14 @@ async function testleriCalistir(govde, etiket) {
     //   1. B tipini A koleksiyonuna yaz  → kalibrasyon verisi kirlenir
     //   2. Önbellek ıskasında koşul uydur → sahte veri üretilir
     console.log('\n═══ POZİTİF KONTROL (bozulmuş sürüm KIRMIZI olmalı) ═══');
+    //   3. Anahtarı istemcinin cihaz saatiyle kur → 2026-08-13 canlı hatasının
+    //      TA KENDİSİ. Bu mutasyon özellikle önemli: testin ilk sürümü sahte
+    //      saati sabit tuttuğu için bu hatayı yakalayamamıştı.
     const bozuk = govde
         .replace(`db.collection('spotNotes')`, `db.collection('catchReports')`)
-        .replace(`conditionsSource: src ? 'server-cache' : 'miss'`, `conditionsSource: 'server-cache'`);
+        .replace(`conditionsSource: src ? 'server-cache' : 'miss'`, `conditionsSource: 'server-cache'`)
+        .replace(`const suSaat = new Date().getHours();`,
+                 `const suSaat = Number.isInteger(hour) ? hour : new Date().getHours();`);
 
     if (bozuk === govde) {
         console.log('  ✗ POZİTİF KONTROL KURULAMADI — bozma deseni kaynakla eşleşmedi');

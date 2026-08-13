@@ -9673,9 +9673,26 @@ app.post('/api/catch-report', async (req, res) => {
         }
 
         // ── "Şimdi" → A tipi. Koşulları ÖNBELLEKTEN oku. ───────────────────
-        const h = Number.isInteger(hour) ? hour : new Date().getHours();
         const { gLat, gLon } = snapToGrid(fLat, fLon);
-        const cached = cache.get(`forecast_v24_${gLat}_${gLon}_h${h}`);
+
+        // ┌─ ÖNBELLEK ANAHTARI SUNUCU SAATİYLE KURULUR ────────────────────┐
+        // │ /api/forecast anahtarı `new Date().getHours()` ile üretiyor    │
+        // │ (~5542) ve Render UTC'de çalışıyor. İstemcinin CİHAZ saati ise │
+        // │ yerel (TR = UTC+3).                                            │
+        // │                                                                │
+        // │ ÖLÇÜLDÜ (2026-08-13 canlı): saat 22:12 TR'de gönderilen        │
+        // │ bildirim h22 aradı, kayıt h19'daydı → conditionsSource:'miss', │
+        // │ conditions:null. Yani A tipi kayıt koşulsuz kalıyordu ve       │
+        // │ kalibrasyona hiç yaramıyordu. İstemcinin saatiyle anahtar      │
+        // │ kurmak, saat farkı olan HER kullanıcıda bunu üretir.           │
+        // └────────────────────────────────────────────────────────────────┘
+        //
+        // Ayrıca saat sınırı: analiz 19:59'da, bildirim 20:01'de yapılırsa
+        // anahtar değişir. Bu yüzden bir önceki saate de bakılıyor.
+        const suSaat = new Date().getHours();
+        const oncekiSaat = (suSaat + 23) % 24;
+        let cached = cache.get(`forecast_v24_${gLat}_${gLon}_h${suSaat}`);
+        if (!cached) cached = cache.get(`forecast_v24_${gLat}_${gLon}_h${oncekiSaat}`);
 
         // Önbellek ıskası mümkün: Render yeniden başlar (RAM uçar) ya da uydu
         // SST arkadan gelince kayıt bilerek düşürülür (~1775). ISKA KAYBI DEĞİL:
@@ -9689,9 +9706,23 @@ app.post('/api/catch-report', async (req, res) => {
         const doc = {
             uid: req.user.uid,
             lat: fLat, lon: fLon,
-            hour: h,
             engineVersion: ENGINE_VERSION,
             createdAt: Date.now(),
+
+            // AVIN YEREL SAATİ — kalibrasyonda hourlyScores[localHour] ile
+            // eşleştirilecek. Balık aktivitesi yerel saate bağlı: aynı nokta,
+            // aynı gün, mırmır DAY 49 → DUSK 74. Yanlış saatle eşleşen kayıt
+            // motorun isabetini olduğundan KÖTÜ gösterir.
+            //
+            // Önbellek varsa sunucunun konuma göre düzelttiği saat kullanılıyor
+            // (rawResponseData.clickHour = correctedClickHour, ~6905) — cihazın
+            // saat diliminden değil, NOKTANIN saat diliminden. Cihaz saati
+            // yalnız yedek ve ayrıca deviceHour'da saklanıyor ki ikisi
+            // ayrıştığında sonradan görülebilsin.
+            localHour: (cached && Number.isInteger(cached.clickHour))
+                ? cached.clickHour
+                : (Number.isInteger(hour) ? hour : null),
+            deviceHour: Number.isInteger(hour) ? hour : null,
 
             // ÖLÇÜMÜ SAPTIRAN GİZLİ DEĞİŞKEN — analizde MUTLAKA kontrol edilmeli.
             // applySanitization (~5461) ücretsiz kullanıcıya fishList'in yalnız
@@ -9739,7 +9770,7 @@ app.post('/api/catch-report', async (req, res) => {
         };
 
         const ref = await db.collection('catchReports').add(doc);
-        console.log(`[GOZLEM-A] ${req.user.uid.slice(0, 6)} ${fLat.toFixed(3)},${fLon.toFixed(3)} h${h} ${outcome} [${valid.join(',')}] koşul:${doc.conditionsSource}`);
+        console.log(`[GOZLEM-A] ${req.user.uid.slice(0, 6)} ${fLat.toFixed(3)},${fLon.toFixed(3)} yerel:h${doc.localHour} sunucu:h${suSaat} ${outcome} [${valid.join(',')}] koşul:${doc.conditionsSource}`);
         res.json({ success: true, id: ref.id, type: 'catchReport' });
 
     } catch (e) {
