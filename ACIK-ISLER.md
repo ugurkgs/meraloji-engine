@@ -1353,6 +1353,56 @@ liste yapılsaydı **10. sırada** olurdu.
 > kalır** (yayındaki APK etkilenmez, geriye dönük risk sıfır); yeni APK iki
 > bölümlü listeyi bu alandan kurar. Skorlara ve sıralamaya dokunulmaz.
 
+#### 🛑 KULLANICI KARARI (2026-08-13): HİÇBİR ŞEY YAPILMAYACAK, BÖYLE KALSIN
+
+Kullanıcı bu maddeyi **kapattı**. Ne `targetFishList` eklenecek, ne
+`calcAvgScore` değişecek. Aşağıdaki ölçümler **kayıt için** duruyor; madde
+tekrar açılırsa baştan ölçmeye gerek yok.
+
+**Kullanıcı doğru bir risk sordu:** *"Hedef listesi yaparsak skor şişmez mi,
+kullanıcıyı yanıltmış olur muyuz?"* Ölçüldü — **risk gerçek ama TERS yönde:**
+
+| senaryo | tam liste | hedef liste | fark |
+|---|---|---|---|
+| Ağustos Ege gündüz | 71,5 | 68,3 | **−3,2** |
+| Ağustos Ege akşam | 64,3 | 61,9 | **−2,4** |
+| Ekim Akdeniz | 69,3 | 69,3 | 0,0 |
+| Kasım Marmara | 73,2 | 73,2 | 0,0 |
+
+Skor şişmiyor, **düşüyor** — çünkü bycatch türler şu an daha yüksek skor alıyor.
+Ege dışında fark yok.
+
+**ASIL BULGU — tutarsızlık ZATEN VAR, düzeltme yapılmadan da:**
+
+`calcAvgScore` (`server.js:2802`) genel skoru **ilk 3 türün ağırlıklı
+ortalamasından** (60/30/10) üretiyor ve `category === 'İSTİLACI'` olanları
+dışlıyor — ama o kategoride **yalnız 3 tür** var (aslan, balon, fugu).
+
+Ağustos Ege gündüz, bugün canlıda olan:
+
+```
+Listede 1. sırada  : Balon Balığı 73   ← genel skora GİRMİYOR (İSTİLACI)
+Genel skoru üreten : Trakun 72 · Yazılı Orkinos 71 · Lokum 70
+Ekranda yazan      : 71,5
+```
+
+Yani kullanıcı **listenin birinci balığının manşet sayıya girmediği** bir ekran
+görüyor. Bu tam olarak `1.4`'ün uyardığı "sayılarla liste çelişiyor" durumu.
+
+**İKİ FARKLI "SAYILMAZ" TANIMI var** ve bu maddenin asıl kalıcı notu bu:
+
+| tanım | nerede | kapsam |
+|---|---|---|
+| `category === 'İSTİLACI'` | `calcAvgScore` | **3 tür** |
+| `avDegeri < 0.6` | `avSinifi` | **14 tür** |
+
+Trakun (0,50), lokum (0,45), çütre (0,50) bycatch sayılıyor **ama genel skoru
+sürüyor**. Bu madde ileride açılırsa, çözülmesi gereken ilk şey bu ikilik —
+manşet skoru üreten küme, ekranda görünen listeyle aynı olmalı.
+
+> **Kapatma gerekçesi kullanıcının:** model şu an çalışıyor, abone geliyor,
+> ve değişiklik Ege'de manşet skoru düşürüyor. Bilinçli bir "böyle kalsın".
+
 Denetimin bakmadığı katmanlardan ilki incelendi (`s_trigger`, 12 puan, ~40 dal).
 **Yapısal hata BULUNAMADI** — `asymptoticTriggerSum` gerçekten var, gerçekten
 uygulanıyor (`:4864`) ve bandı `[-12, +12]` içinde tutuyor. Kodun kendi ölçüm
