@@ -2458,11 +2458,28 @@ function calculateConfidence(params) {
     if (!params.waveDirection) score -= 3;  // Dalga yönü yok
     if (params.visibility === undefined) score -= 2;  // Görüş verisi yok
 
-    // Grid mesafesi cezası — API verisi farklı noktadan geliyorsa deniz verisi sapabilir
+    // ── VERİ KALİTESİ: MESAFE + SEBEP  [yenilendi 2026-08-14] ────────────
+    // ESKİSİ: 3/6/9 km basamakları, 9 km üstü SABİT −20. Yani 22,5 km ile
+    // 9,1 km sistem için aynıydı. Boğaz'da (41.1747,29.0844) düğüm 22,5 km
+    // uzakta VE BAŞKA DENİZDE olmasına rağmen ceza, 9 km sapmayla eşitti;
+    // kullanıcı ayna gibi denizin üstünde "2,08 m" görüyordu ve güven puanı
+    // bunu haber verecek kadar düşmüyordu.
+    //
+    // YENİSİ: mesafe sürekli fonksiyon + SEBEBE göre ek cezalar. Böylece
+    // "veri 4 km yakından geldi" ile "veri başka denizden geldi" birbirinden
+    // ayrılıyor. Tipik kıyı noktasında ceza AZALIYOR (3,5 km: −10 → −6),
+    // gerçekten bozuk yerde ARTIYOR (22,5 km + havza: −20 → −65).
     const d = params.gridDistance || 0;
-    if (d > 9) score -= 20;
-    else if (d > 6) score -= 15;
-    else if (d > 3) score -= 10;
+    score -= Math.min(30, Math.round(d * 1.6));   // 3km→5, 6km→10, 9km→14, 19km+→30 (tavan)
+
+    // Izgara düğümü BAŞKA DENİZ HAVZASINDA: veri "biraz sapmış" değil,
+    // yanlış denizin verisi. Boğaz'ın kuzeyi Karadeniz'i, güneyi Marmara'yı
+    // kullanıyor — aynı boğazda 2,08 m ve 0,46 m.
+    if (params.basinMismatch) score -= 25;
+
+    // Kapalı su: model dalgası fetch tavanıyla kırpıldı. Sayı artık fiziksel
+    // olarak savunulabilir ama MODELDEN gelmiyor — kullanıcı bunu bilmeli.
+    if (params.waveCapped) score -= 10;
 
     return Math.max(0, Math.round(score)); // Artık taban yok, veri yoksa güven 0'dır.
 }
@@ -3314,6 +3331,20 @@ const acikSuCache = new NodeCache({ stdTTL: 2592000, checkperiod: 86400 }); // 3
 const ACIK_SU_SEKTOR = 16;
 const ACIK_SU_ADIMLAR = [0.5, 1, 2, 3];
 
+// [FETCH 2026-08-14] Aynı istekte 5 ve 8 km de örnekleniyor: 16×6 = 96 nokta,
+// Open-Meteo elevation sınırı 100 → EK MALİYET YOK, tek istek aynı kalıyor.
+//
+// NEDEN GEREKLİ: dalga yüksekliği, rüzgârın üzerinden estiği açık su mesafesiyle
+// (fetch) sınırlıdır. 3 km'lik örnekleme "kapalı mı" sorusunu yanıtlıyordu ama
+// "ne kadar kapalı" sorusunu yanıtlamıyordu — dalga tavanı için o lazım.
+//
+// ÖNEMLİ: `acik` ve `karaKm` alanlarının anlamı DEĞİŞMEDİ (hâlâ yalnız ≤3 km
+// adımlarından üretiliyor). Dalga yönü düzeltmesi (dalgaYonuDuzelt) onlara
+// bakıyor; 5-8 km eklenseydi 3 km'de açık olan bir yön "kara" sayılabilir ve
+// düzeltme sessizce gerilerdi. Yeni bilgi AYRI alanda: `fetchKm`.
+const ACIK_SU_FETCH_ADIMLAR = [0.5, 1, 2, 3, 5, 8];
+const FETCH_AZAMI_KM = 8;   // örneklemenin ulaştığı en uzak mesafe
+
 function _yayKaydir(la, lo, bearing, km) {
     const R = 6371, d = km / R, b = bearing * Math.PI / 180, rl = la * Math.PI / 180;
     const l2 = Math.asin(Math.sin(rl) * Math.cos(d) + Math.cos(rl) * Math.sin(d) * Math.cos(b));
@@ -3333,7 +3364,7 @@ async function acikSuYayiGetir(lat, lon) {
     const ps = [], meta = [], ADIM_OF = [];
     for (let sIdx = 0; sIdx < ACIK_SU_SEKTOR; sIdx++) {
         const b = sIdx * (360 / ACIK_SU_SEKTOR);
-        for (const km of ACIK_SU_ADIMLAR) {
+        for (const km of ACIK_SU_FETCH_ADIMLAR) {
             ps.push(_yayKaydir(latF, lonF, b, km)); meta.push(b); ADIM_OF.push(km);
         }
     }
@@ -3351,25 +3382,92 @@ async function acikSuYayiGetir(lat, lon) {
         if (!Array.isArray(el) || el.length !== ps.length) return null;
         // Her yön için: kara İLK hangi mesafede çıkıyor (yoksa null).
         // Mesafe lazım çünkü sığ suda çizim EN YAKIN karaya kilitlenecek.
-        const acik = [], karaKm = {};
+        //
+        // İKİ AYRI ÖLÇÜM, BİLEREK:
+        //   acik / karaKm → yalnız ≤3 km adımları. ANLAMI DEĞİŞMEDİ; dalga yönü
+        //                   düzeltmesi bunlara bakıyor, gerilememeli.
+        //   fetchKm       → 8 km'ye kadar. Dalga TAVANI için; null = 8 km'de
+        //                   hâlâ açık (yani fetch ≥ 8 km).
+        const acik = [], karaKm = {}, fetchKm = {};
         for (let sIdx = 0; sIdx < ACIK_SU_SEKTOR; sIdx++) {
             const b = sIdx * (360 / ACIK_SU_SEKTOR);
-            let ilkKara = null;
-            for (const km of ACIK_SU_ADIMLAR) {
+            let ilkKaraTum = null;      // tüm adımlar (fetch için)
+            for (const km of ACIK_SU_FETCH_ADIMLAR) {
                 for (let i = 0; i < meta.length; i++) {
                     if (meta[i] === b && ps[i] && ADIM_OF[i] === km
-                        && typeof el[i] === 'number' && el[i] > 0) { ilkKara = km; break; }
+                        && typeof el[i] === 'number' && el[i] > 0) { ilkKaraTum = km; break; }
                 }
-                if (ilkKara !== null) break;
+                if (ilkKaraTum !== null) break;
             }
-            if (ilkKara === null) acik.push(b); else karaKm[b] = ilkKara;
+            fetchKm[b] = ilkKaraTum;    // null = 8 km'de açık
+
+            // Eski davranış birebir: yalnız ≤3 km'de kara varsa "kara" sayılır.
+            const ilkKara3 = (ilkKaraTum !== null && ilkKaraTum <= 3) ? ilkKaraTum : null;
+            if (ilkKara3 === null) acik.push(b); else karaKm[b] = ilkKara3;
         }
-        const sonuc = { acik, karaKm };
+        const sonuc = { acik, karaKm, fetchKm };
         acikSuCache.set(key, sonuc);
         return sonuc;
     } catch (e) {
         return null;   // veri yoksa uydurmuyoruz — düzeltme uygulanmaz
     }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FETCH-SINIRLI DALGA TAVANI  [2026-08-14]
+// ═══════════════════════════════════════════════════════════════════════════
+// SORUN (kullanıcı bildirdi): İstanbul Boğazı 41.1747,29.0844 — deniz ayna gibi,
+// uygulama 2,08 m dalga diyordu.
+//
+// SEBEBİ: Open-Meteo dalga ızgarası Boğaz'ı GÖREMİYOR. Boğaz 1–3 km geniş,
+// hücre ~4,6 km; içerideki düğümler kara maskesine takılıyor ve API en yakın
+// ISLAK düğümü döndürüyor. Ölçüldü: bu nokta 41.3750,29.1250 düğümünü
+// kullanıyor — 22,5 km uzakta, AÇIK KARADENİZ'de. Şile açıklarıyla BİREBİR
+// AYNI düğüm. Yani Boğaz'a Karadeniz'in dalgası yazılıyordu.
+//
+// SKOR ETKİSİ ÖLÇÜLDÜ: 56 Marmara türünde ortalama 20,1 puan; hedef türlerde
+// 25,6 puan. Kırlangıç 19 → 58, Kolyoz 18 → 55. Kullanıcı "bugün olmaz" diyordu.
+//
+// FİZİK: dalga, rüzgârın üzerinden estiği açık su mesafesiyle (fetch) sınırlıdır.
+// JONSWAP fetch-sınırlı bağıntısı:   Hs = 0.0016 · U · √(F/g)
+// Boğaz'ın 5 km fetch'iyle 30 km/h rüzgârda azami 0,30 m — pencereden görülenle
+// uyuşan değer bu.
+//
+// NE ZAMAN UYGULANIR — eşik TAHMİN DEĞİL, 14 noktada ölçülerek seçildi:
+//     KAPALI (Boğaz, Haliç, İzmit, Gemlik, Çanakkale, İzmir Körfezi) → 0–2 / 16
+//     AÇIK   (Çandarlı, Kuşadası, Şile, Ege ortası)                  → 5–16 / 16
+// Eşik 2'de: kapalı suların hepsi yakalanıyor, açık kıyıların HİÇBİRİ
+// yakalanmıyor. Açık kıyıda uygulamak tehlikeli olurdu — örneklememiz 8 km'de
+// bitiyor, gerçek Ege fetch'i yüzlerce km; tavan dalgayı olduğundan DÜŞÜK
+// gösterirdi. Yanılma yönümüz bilerek "dokunma" tarafında.
+//
+// TAVAN YALNIZ AŞAĞI ÇEKER: çağıran taraf min(model, tavan) uygular. Model
+// zaten düşükse hiçbir şey olmaz — bu yüzden makul değer veren Haliç, Çanakkale,
+// İzmir gibi yerlerde pratikte devreye girmez.
+const FETCH_TAVAN_ACIK_YON_ESIK = 2;   // 16 yönün en fazla kaçı 8 km'de açık olabilir
+
+function fetchDalgaTavani(yay, ruzgarKmh) {
+    if (!yay || !yay.fetchKm) return null;                  // veri yok → dokunma
+    if (typeof ruzgarKmh !== 'number' || !isFinite(ruzgarKmh) || ruzgarKmh < 0) return null;
+
+    const yonler = Object.values(yay.fetchKm);
+    if (yonler.length === 0) return null;
+
+    // null = 8 km'de hâlâ açık. Çok sayıda açık yön varsa burası açık su:
+    // gerçek fetch ölçebildiğimizden büyüktür, tavan uydurmak olur.
+    const acikYon = yonler.filter(v => v === null).length;
+    if (acikYon > FETCH_TAVAN_ACIK_YON_ESIK) return null;
+
+    // EN UZUN fetch alınıyor (yönlerin ortalaması veya rüzgâr yönü değil):
+    // kasıtlı olarak EN CÖMERT seçim. Rüzgâr yönü verisi sapabilir; en uzun
+    // fetch'i almak, tavanı olabilecek en yüksek yerde tutar ve "gerçek dalgayı
+    // bastırma" riskini asgariye indirir.
+    const enUzunKm = Math.max(...yonler.map(v => v === null ? FETCH_AZAMI_KM : v));
+    const U = ruzgarKmh / 3.6;                               // m/s
+    const F = enUzunKm * 1000;                               // m
+    const hs = 0.0016 * U * Math.sqrt(F / 9.81);
+
+    return { tavanM: hs, fetchKm: enUzunKm, acikYon };
 }
 
 // En yakın karanın yönü (yoksa null).
@@ -6022,6 +6120,68 @@ app.get('/api/forecast', async (req, res) => {
         // eski poligon yöntemine düşülür — davranış gerilemez.
         const shoreBearingInfo = kiyiNormaliYaydan(acikSuYayi) || getShoreNormalBearing(lat, lon);
 
+        // ══════════════════════════════════════════════════════════════════
+        // [FETCH TAVANI 2026-08-14] Kapalı suda model dalgasını fizikle sınırla
+        // ══════════════════════════════════════════════════════════════════
+        // KAYNAKTA düzeltiliyor — marine dizilerinin kendisi. Sebebi: dalga
+        // aşağıda EN AZ dört ayrı yerden okunuyor (günlük döngü, saatlik skorlar
+        // ×2, anlık veri) ve ayrıca simülasyona/metriklere gidiyor. Tek tek
+        // yamansaydı biri unutulur ve skor ile çizim birbirini tutmazdı.
+        //
+        // RÜZGÂRDA GÜNLÜK AZAMİ KULLANILIYOR, saatlik değil. İki sebep:
+        //   1) weather ve marine dizileri farklı ofsetlerle indeksleniyor
+        //      (hourlyStartIdx / mStartIdx); saatlik hizalamayı burada kurmak
+        //      kırılgan olurdu.
+        //   2) Bu bir TAHMİN değil ÜST SINIR. Pencerenin en yüksek rüzgârını
+        //      kullanmak tavanı olabilecek en cömert yerde tutar; gerçek dalgayı
+        //      bastırma riski sıfıra yaklaşır. Boğaz'da 0,30 ile 0,40 m arasındaki
+        //      fark skoru oynatmıyor — 2,08 m ile arasındaki fark her şeyi oynatıyor.
+        let fetchTavan = null;
+        if (!isLand && marine?.hourly?.wave_height) {
+            const gunlukRuzgar = Array.isArray(weather?.daily?.wind_speed_10m_max)
+                ? weather.daily.wind_speed_10m_max.filter(v => typeof v === 'number' && isFinite(v))
+                : [];
+            const azamiRuzgar = gunlukRuzgar.length ? Math.max(...gunlukRuzgar) : null;
+            fetchTavan = (azamiRuzgar != null) ? fetchDalgaTavani(acikSuYayi, azamiRuzgar) : null;
+
+            if (fetchTavan) {
+                const T = fetchTavan.tavanM;
+                let kirpilan = 0, enBuyukOnce = 0;
+                // YALNIZ AŞAĞI ÇEKER. Model zaten tavanın altındaysa hiçbir şey
+                // olmaz — Haliç, Çanakkale, İzmir Körfezi gibi makul değer veren
+                // yerlerde bu blok pratikte devreye girmiyor (ölçüldü).
+                for (const alan of ['wave_height', 'wind_wave_height', 'swell_wave_height']) {
+                    const dizi = marine.hourly[alan];
+                    if (!Array.isArray(dizi)) continue;
+                    for (let k = 0; k < dizi.length; k++) {
+                        if (typeof dizi[k] === 'number' && dizi[k] > T) {
+                            if (alan === 'wave_height') {
+                                kirpilan++;
+                                if (dizi[k] > enBuyukOnce) enBuyukOnce = dizi[k];
+                            }
+                            dizi[k] = parseFloat(T.toFixed(2));
+                        }
+                    }
+                }
+                fetchTavan.kirpilanSaat = kirpilan;
+                fetchTavan.enBuyukOnce = enBuyukOnce;
+                if (kirpilan > 0) {
+                    console.log(`[FETCH-TAVAN] [${logUser}] (${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}) `
+                        + `kapalı su: açık yön ${fetchTavan.acikYon}/16, fetch ${fetchTavan.fetchKm} km, `
+                        + `rüzgâr azami ${azamiRuzgar.toFixed(0)} km/h → tavan ${T.toFixed(2)} m; `
+                        + `${kirpilan} saat kırpıldı (en yüksek ${enBuyukOnce.toFixed(2)} m)`);
+                }
+            }
+        }
+
+        // Izgara düğümü BAŞKA DENİZ HAVZASINDA mı? Boğaz'ın kuzeyi Karadeniz'in,
+        // güneyi Marmara'nın düğümünü kullanıyor — aynı boğazda 2,08 m ve 0,46 m.
+        // Bu, "veri biraz uzaktan geliyor"dan kategorik olarak farklıdır ve güven
+        // puanında ayrıca cezalandırılır.
+        const havzaUyusmazligi = (!isLand && marine && marine.latitude != null && marine.longitude != null)
+            ? (getRegion(lat, lon) !== getRegion(marine.latitude, marine.longitude))
+            : false;
+
         for (let i = 0; i < 7; i++) {
             const targetDate = new Date();
             targetDate.setDate(targetDate.getDate() + i);
@@ -6352,7 +6512,10 @@ app.get('/api/forecast', async (req, res) => {
                     depth: depthData ? depthData.avg : null,
                     waveDirection: marine.hourly?.wave_direction?.[i * 24 + 12],
                     visibility: weather.hourly?.visibility?.[i * 24 + 12],
-                    gridDistance: gridDistanceKm
+                    gridDistance: gridDistanceKm,
+                    // [2026-08-14] Sebebe duyarlı güven — bkz. calculateConfidence
+                    basinMismatch: havzaUyusmazligi,
+                    waveCapped: !!(fetchTavan && fetchTavan.kirpilanSaat > 0)
                 }), tacticKey, tacticData, weatherSummary,
                 fishList: fishList.slice(0, 10), moonPhase: moon.phase,
                 moonPhaseName: getMoonPhaseName(moon.phase, lang), airTemp: tempAir, timeMode,
@@ -6709,6 +6872,8 @@ app.get('/api/forecast', async (req, res) => {
                     oceanCurrent: i_oceanCurrent,
                     depth: depthData ? depthData.avg : null,
                     gridDistance: gridDistanceKm,
+                    basinMismatch: havzaUyusmazligi,
+                    waveCapped: !!(fetchTavan && fetchTavan.kirpilanSaat > 0),
                     waveDirection: i_waveDirection,
                     visibility: i_visibility
                 }),
@@ -6914,6 +7079,35 @@ app.get('/api/forecast', async (req, res) => {
             snapInfo,                // null veya { distanceM, snapLat, snapLon } — kıyı snap bilgisi
             gridDistanceKm: parseFloat(gridDistanceKm.toFixed(2)), // Marine API grid sapması (km)
             gridWarning: gridDistanceKm > 10,                      // true ise veri 10km+ uzak noktadan
+
+            // [2026-08-14] VERİ KALİTESİNİN SEBEBİ — YENİ ALANLAR, eski APK
+            // görmezden gelir (yanıt sözleşmesi: alan eklemek güvenli).
+            //
+            // "Veri kalitesi düşük" tek başına kullanıcıya hiçbir şey söylemiyor.
+            // Bu alanlar NEDEN düşük olduğunu taşıyor ki istemci somut cümle
+            // kurabilsin: "Dalga verisi 22 km uzaktaki Karadeniz noktasından —
+            // kapalı su için fiziksel tavan uygulandı."
+            //
+            // basinMismatch: ızgara düğümü BAŞKA deniz havzasında. Boğaz'ın
+            // kuzeyi Karadeniz'in, güneyi Marmara'nın düğümünü kullanıyor.
+            basinMismatch: havzaUyusmazligi,
+            pointBasin: getRegion(lat, lon),
+            dataBasin: (marine && marine.latitude != null)
+                ? getRegion(marine.latitude, marine.longitude) : null,
+
+            // waveCap: kapalı suda fetch tavanı uygulandıysa ayrıntısı.
+            // applied=false ise hiçbir değer değişmemiştir (model zaten tavanın
+            // altındaydı). null ise tavan hiç hesaplanmadı (açık deniz / veri yok).
+            waveCap: fetchTavan ? {
+                applied: (fetchTavan.kirpilanSaat || 0) > 0,
+                capM: parseFloat(fetchTavan.tavanM.toFixed(2)),
+                fetchKm: fetchTavan.fetchKm,
+                openDirs: fetchTavan.acikYon,      // 16 yönün kaçı 8 km'de açık
+                originalMaxM: fetchTavan.enBuyukOnce
+                    ? parseFloat(fetchTavan.enBuyukOnce.toFixed(2)) : null,
+                hours: fetchTavan.kirpilanSaat || 0
+            } : null,
+
             apiGrid: (marine && marine.latitude) ? { lat: marine.latitude, lon: marine.longitude } : null,
             // [VERİ NOKTASI] YENİ ALANLAR — eski APK görmezden gelir (alan eklemek güvenli).
             // İstemci bunlarla model HÜCRESİNİ çizebilir; nokta çizmek, olmayan bir
