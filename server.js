@@ -7248,6 +7248,101 @@ app.get('/api/forecast', async (req, res) => {
 // BALIK ARAMA API — Tüm türleri listele + seçilen türün detaylı skorunu ver
 // ═══════════════════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════════════════
+// DUYURU — uygulama açılışında gösterilecek tek mesaj
+// ═══════════════════════════════════════════════════════════════════════════
+// AMAÇ: APK çıkarmadan kullanıcıya bir şey söyleyebilmek. Metin Firestore'da
+// `system/announcement` dokümanında durur; Firebase Console'dan (telefondan
+// bile) değiştirilir, DEPLOY GEREKTİRMEZ.
+//
+// ⚠️ BİLDİRİM (PUSH) DEĞİLDİR. FCM'e dokunmaz — telefonda bildirim çıkmaz,
+//    titremez. Kullanıcı uygulamayı AÇTIĞINDA görür.
+//
+// Doküman şeması — zorunlu alanlar:
+//   id      "2026-08-20-surum"  İstemci gösterdiğini bu kimlikle işaretler.
+//                               ⚠️ Kimliği DEĞİŞTİRMEDEN metni değiştirirsen
+//                               mesajı görmüş kullanıcı YENİSİNİ GÖRMEZ.
+//   active  true
+//   title   { tr, en, es, el }  en az biri dolu
+//   body    { tr, en, es, el }  en az biri dolu
+// İsteğe bağlı:
+//   startsAt / endsAt  ms — pencere dışındaysa gönderilmez (kendiliğinden söner,
+//                           "silmeyi unuttum" derdi olmaz)
+//   audience  'all' (varsayılan) | 'free' | 'pro' | 'trial_expired'
+//   severity  'info' (varsayılan) | 'warning'
+//   actionUrl http(s) bağlantı — istemci ikinci bir buton gösterir
+//
+// GÜVENLİK: doküman yoksa, bozuksa veya bir alan eksikse BOŞ yanıt döner.
+// Duyuru gitmez ama AÇILIŞ ASLA BOZULMAZ — bu uç kullanıcıya görünen ilk
+// isteklerden biri, burada atılan bir hata uygulamayı açılışta vurur.
+// Sessiz gönderilmeme durumunu teşhis etmek için: tools/duyuru-kontrol.js
+const duyuruCache = new NodeCache({ stdTTL: 300 });   // 5 dk — Firestore okuması ~288/gün
+
+/** Dilde metin seç: istenen dil → İngilizce → Türkçe. Hiçbiri yoksa null. */
+function duyuruMetniSec(alan, lang) {
+    if (!alan || typeof alan !== 'object') return null;
+    for (const l of [lang, 'en', 'tr']) {
+        const v = alan[l];
+        if (typeof v === 'string' && v.trim()) return v.trim();
+    }
+    return null;
+}
+
+app.get('/api/announcement', async (req, res) => {
+    const lang = String(req.query.lang || 'tr').slice(0, 5);
+    try {
+        let dok = duyuruCache.get('doc');
+        if (dok === undefined) {
+            dok = null;
+            if (db) {
+                const snap = await db.collection('system').doc('announcement').get();
+                dok = snap.exists ? snap.data() : null;
+            }
+            duyuruCache.set('doc', dok);
+        }
+        if (!dok || dok.active !== true) return res.json({});
+
+        const now = Date.now();
+        if (typeof dok.startsAt === 'number' && now < dok.startsAt) return res.json({});
+        if (typeof dok.endsAt   === 'number' && now > dok.endsAt)   return res.json({});
+
+        // Hedef kitle. Anonim kullanıcıda PRO bilgisi yok; 'all' ve 'free'
+        // onlara da ulaşır, 'pro' ve 'trial_expired' ulaşmaz — doğrusu da bu.
+        const kitle = typeof dok.audience === 'string' ? dok.audience : 'all';
+        if (kitle !== 'all') {
+            const pro = req.isPremium === true;
+            const denemeBitti = !!req.user && !pro && req.isGracePeriod !== true;
+            if (kitle === 'pro'            && !pro)          return res.json({});
+            if (kitle === 'free'           &&  pro)          return res.json({});
+            if (kitle === 'trial_expired'  && !denemeBitti)  return res.json({});
+        }
+
+        const id     = typeof dok.id === 'string' ? dok.id.trim() : '';
+        const baslik = duyuruMetniSec(dok.title, lang);
+        const govde  = duyuruMetniSec(dok.body,  lang);
+        // Kimliksiz duyuru GÖNDERİLMEZ: istemci "bunu gösterdim" diye
+        // işaretleyemez, mesaj her açılışta yeniden çıkardı.
+        if (!id || !baslik || !govde) return res.json({});
+
+        // Yalnız http(s). Düzenli ifade bilerek KULLANILMADI: `\/\/` içindeki iki
+        // ardışık eğik çizgi, kaynağı ayrıştıran araçlarda satır yorumu sanılıyor.
+        const hamUrl = typeof dok.actionUrl === 'string' ? dok.actionUrl.trim() : '';
+        const kucuk  = hamUrl.toLowerCase();
+        const url = (kucuk.startsWith('https://') || kucuk.startsWith('http://')) ? hamUrl : null;
+
+        return res.json({
+            id,
+            severity: dok.severity === 'warning' ? 'warning' : 'info',
+            title: baslik,
+            body: govde,
+            actionUrl: url
+        });
+    } catch (e) {
+        console.warn('[DUYURU] okunamadı:', e && e.message);
+        return res.json({});   // duyuru gitmesin ama açılış bozulmasın
+    }
+});
+
 app.get('/api/species-list', (req, res) => {
     const lang = req.query.lang || 'tr';
     if (!SPECIES_DB) return res.status(503).json({ error: i18n(lang).errors.dbLoading });
