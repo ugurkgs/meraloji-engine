@@ -1,100 +1,77 @@
-# Uygulama İçi Duyuru — Kullanım Kılavuzu
+# Uygulama İçi Duyuru
 
-APK çıkarmadan kullanıcıya mesaj göstermek için. Metin Firestore'da durur,
-Firebase Console'dan (telefondan bile) değiştirilir, **deploy gerektirmez**.
+Kullanıcıya tek cümlelik bir haber söylemek için. APK çıkarmaya gerek yok.
 
-> **Bu bir BİLDİRİM (push) DEĞİLDİR.** Telefonda bildirim çıkmaz, titremez, ses
-> çıkarmaz. Kullanıcı uygulamayı **açtığında** görür, **bir kez**, sonra kapatır.
+> *"Analiz motoru güncellendi. Artık kıyıda daha isabetli skor üretiyor."*
 
----
+Kullanıcı uygulamayı açar → küçük bir kutu çıkar → okur → kapatır. Bitti.
+Aynı mesaj bir daha çıkmaz.
 
-## Ön koşul (bir kereye mahsus)
-
-Mesajı gösterecek olan istemci tarafı, **2026-08 sürümüyle** gitti. Bu sürüm
-kullanıcıya ulaşmadan yayınladığın duyuruyu kimse göremez. Yayılma birkaç gün
-sürer (Android güncellemeyi WiFi + şarjda yapıyor).
+**Bildirim (push) DEĞİLDİR.** Telefonda bildirim çıkmaz, titremez, ses çıkmaz.
 
 ---
 
-## Adım adım: duyuru yayınlama
+## Nasıl yayınlanır
 
-### 1. Firebase Console'u aç
-
-**Firestore Database** → **Veri** sekmesi.
-
-### 2. Dokümanı bul veya oluştur
-
-Koleksiyon **`system`** → doküman kimliği **`announcement`**.
-
-İlk kez yapıyorsan: "Koleksiyon başlat" → koleksiyon kimliği `system` →
-doküman kimliği **elle** `announcement` yaz (otomatik kimlik KULLANMA).
-
-### 3. Alanları gir
-
-**Zorunlu dört alan** — biri eksikse duyuru gitmez:
-
-| alan | tip | değer |
-|---|---|---|
-| `id` | string | `2026-08-20-yeni-surum` |
-| `active` | **boolean** | `true` |
-| `title` | **map** | `tr`, `en`, `es`, `el` → string |
-| `body` | **map** | `tr`, `en`, `es`, `el` → string |
-
-**İsteğe bağlı:**
-
-| alan | tip | ne işe yarar |
-|---|---|---|
-| `endsAt` | timestamp | Bu andan sonra kendiliğinden söner |
-| `startsAt` | timestamp | Bu andan önce görünmez |
-| `audience` | string | `all` (varsayılan) · `free` · `pro` · `trial_expired` |
-| `severity` | string | `info` (varsayılan) · `warning` → ikon ⚠️ olur |
-| `actionUrl` | string | `https://…` — ikinci bir buton çıkar |
-
-### 4. Doğrula
-
-Render → Shell:
+Render → **Environment** → değişkenleri gir → **Save** (deploy tetiklenir).
+Deploy bitince duyuru yayında.
 
 ```
-node tools/duyuru-kontrol.js
+DUYURU_ID   2026-08-16-kiyi-skoru
+DUYURU_TR   Analiz motoru güncellendi. Artık kıyıda daha isabetli skor üretiyor.
+DUYURU_EN   The analysis engine was updated. Nearshore scores are now more accurate.
+DUYURU_ES   El motor de análisis se actualizó. Las puntuaciones costeras son más precisas.
+DUYURU_EL   Ο μηχανισμός ανάλυσης ενημερώθηκε. Οι βαθμολογίες στην ακτή είναι πιο ακριβείς.
 ```
 
-"Şu anda kime gidiyor, gitmiyorsa **neden** gitmiyor" sorusunu satır satır
-cevaplar. `✅ YAYINDA` görene kadar yayınlanmış sayma.
+Hepsi düz metin. JSON yok, tırnak yok, tip seçimi yok.
 
-### 5. Bekle
+### İsteğe bağlı: zamanlama
 
-Sunucu duyuruyu **5 dakika** önbelleklir. Değişikliğin görünmesi bu kadar
-sürebilir.
+```
+DUYURU_BASLANGIC   2026-08-16 10:30      → o ana kadar görünmez
+DUYURU_BITIS       2026-08-20 23:59      → sonrasında kendiliğinden söner
+```
+
+Sabah deploy edip "10:30'da çıksın" diyebilirsin; mesaj kuyrukta bekler.
 
 ---
 
-## Alan tipleri — en sık yapılan hata burada
+## Saat dilimi
 
-Firebase Console'da alan eklerken **tip seçimi** kritik:
+**Yazdığın saat Türkiye saatidir.** Render UTC çalışıyor ama sunucu, dilim
+yazılmamış tarihleri UTC+3 sayacak şekilde ayarlandı — `10:30` yazınca
+Türkiye'de 10:30'da çıkar.
 
-- **`active` mutlaka `boolean`.** `"true"` diye **string** seçersen duyuru
-  gitmez — sunucu tam olarak boolean `true` arıyor. Sessizce gitmez, hata
-  vermez. `duyuru-kontrol.js` bunu yakalar.
-- **`title` ve `body` `map` olmalı**, string değil. Map'in içine `tr`, `en`,
-  `es`, `el` adında string alanlar koyarsın.
-- **`endsAt` / `startsAt`**: `timestamp` de olur, `number` (ms) de. İkisi de
-  kabul ediliyor. Ama **string olursa okunmaz** — tarih yokmuş gibi davranır,
-  yani duyuru hiç sönmez.
+Açıkça yazmak istersen bu da geçerli: `2026-08-16T10:30:00+03:00`
+
+> Bu tuzak `COMEBACK_CAMPAIGN_END`'de bir kez yaşandı (3 saat kayma). Burada
+> baştan kapatıldı ve testle sabitlendi.
 
 ---
 
-## Kritik kural: `id` değiştirmeden metin değiştirme
+## Zorunlu olan tek şey
 
-`id` "bu mesajı gördüm" anlamına geliyor; istemci gösterdiği kimliği kaydediyor.
+| değişken | zorunlu mu |
+|---|---|
+| `DUYURU_ID` | **evet** — boşsa duyuru kapalı |
+| `DUYURU_TR` / `_EN` / `_ES` / `_EL` | **en az biri** |
+| `DUYURU_BASLANGIC` / `DUYURU_BITIS` | hayır |
 
-**Metni değiştirip `id`'yi aynı bırakırsan**, mesajı daha önce görmüş kullanıcı
-yeni metni **GÖRMEZ**. Yalnızca hiç görmemiş olanlar görür.
+Eksik dilde ne olur: **kullanıcının dili → İngilizce → Türkçe** sırayla düşer.
+Yani `TR` ve `EN` doldurmak yeter; İspanyol ve Yunan kullanıcılar İngilizce görür.
 
-Yeni bir şey söyleyecekesen **her zaman yeni bir `id` ver**. Tarih + kısa
-etiket iyi bir kalıp:
+---
+
+## En önemli kural: `DUYURU_ID`
+
+`ID`, istemcinin "bu mesajı gösterdim" diye kaydettiği damgadır.
+
+**Metni değiştirip ID'yi aynı bırakırsan, mesajı görmüş kullanıcı yenisini
+GÖRMEZ.** Yeni bir şey söyleyeceksen her zaman yeni bir ID ver:
 
 ```
-2026-08-20-yeni-surum
+2026-08-16-kiyi-skoru
 2026-09-01-sezon-acildi
 2026-09-15-bakim
 ```
@@ -103,68 +80,55 @@ etiket iyi bir kalıp:
 
 ## Duyuruyu kaldırma
 
-Üç yol, hepsi geçerli:
+**`DUYURU_ID`'yi boşalt.** Metinler dursun, sorun değil — ID boşsa hiçbir şey
+gönderilmez.
 
-1. **`active` → `false`** (en hızlı, metni saklar)
-2. **`endsAt`'i geçmişe al**
-3. Baştan `endsAt` koy, kendiliğinden sönsün — **tercih edilen**, çünkü
-   "kapatmayı unuttum" diye bir durum kalmıyor
-
----
-
-## Hedef kitle
-
-| `audience` | kime gider |
-|---|---|
-| `all` | herkese — **giriş yapmamış (anonim) kullanıcılar dahil** |
-| `free` | PRO olmayanlara (anonim dahil) |
-| `pro` | yalnız PRO abonelere — anonim görmez |
-| `trial_expired` | giriş yapmış, denemesi bitmiş, ödememiş olanlara |
-
-Bilinmeyen bir değer yazarsan (`Pro`, `hepsi` gibi) duyuru **kimseye gitmez** —
-yanlışlıkla herkese gitmesindense hiç gitmesin diye böyle.
+Daha iyisi: baştan `DUYURU_BITIS` koy, kendiliğinden sönsün. "Kapatmayı
+unuttum" diye bir durum kalmaz.
 
 ---
 
-## Örnek: yeni sürüm duyurusu
+## Kontrol
+
+Render → Shell:
 
 ```
-id        : "2026-08-20-yeni-surum"
-active    : true                        (boolean)
-endsAt    : 1 Eylül 2026 00:00          (timestamp)
-audience  : "all"
-severity  : "info"
-title     : { tr: "Yeni sürüm yayında"
-              en: "New version is live"
-              es: "Nueva versión disponible"
-              el: "Νέα έκδοση διαθέσιμη" }
-body      : { tr: "Artık analiz ekranından balık bildirimi gönderebilirsin…"
-              en: "You can now report your catch from the analysis screen…"
-              es: "Ahora puedes reportar tu captura desde la pantalla…"
-              el: "Μπορείς πλέον να αναφέρεις την ψαριά σου…" }
+node tools/duyuru-kontrol.js            # gidiyor mu, gitmiyorsa neden
+node tools/duyuru-kontrol.js --onizle   # 4 dilde metni de göster
 ```
 
----
+`✅ YAYINDA` görmeden yayınlanmış sayma. Uç, eksik ayarda sessizce boş dönüyor
+(açılışı bozmamak için) — bu araç o sessizliği açan tek şey.
 
-## Eksik dil ne olur?
+Örnek çıktı:
 
-Sunucu sırayla dener: **kullanıcının dili → İngilizce → Türkçe**.
+```
+  DUYURU_ID        : 2026-08-16-kiyi-skoru
+  dolu diller      : tr, en
+  ⚠ eksik dil      : es, el  → o kullanıcılar İngilizce görecek
+  DUYURU_BITIS     : 2026-08-20 23:59  →  2026-08-20 23:59 (TR)
 
-Yani en azından `tr` ve `en` doldur; İspanyolca ve Yunanca kullanıcılar
-İngilizce görür. Hiçbiri yoksa duyuru gitmez.
-`duyuru-kontrol.js` hangi dillerin eksik olduğunu yazar.
+  ✅ YAYINDA — şu anda tüm kullanıcılara gidiyor.
+```
 
 ---
 
 ## Sorun giderme
 
-| belirti | bak |
+| belirti | sebep |
 |---|---|
-| Mesaj hiç çıkmıyor | `node tools/duyuru-kontrol.js` — sebebi yazar |
-| `duyuru-kontrol` "YAYINDA" diyor ama telefonda yok | 5 dk önbelleği bekle; sonra uygulamayı tamamen kapatıp aç |
-| Bir kez gördüm, tekrar göremiyorum | Normal. Test için `id`'yi değiştir |
-| Metni değiştirdim, kimse yenisini görmüyor | `id`'yi de değiştirmen gerekiyordu |
-| Sadece bazı kullanıcılar görüyor | `audience` alanına bak |
+| Mesaj hiç çıkmıyor | `duyuru-kontrol.js` çalıştır, sebebi yazar |
+| "YAYINDA" diyor ama telefonda yok | Uygulamayı tamamen kapatıp aç. Duyuru açılışta çekiliyor |
+| Bir kez gördüm, tekrar göremiyorum | Normal. Test için `DUYURU_ID`'yi değiştir |
+| Metni değiştirdim, kimse yenisini görmüyor | `DUYURU_ID`'yi de değiştirmen gerekiyordu |
+| Saat yazdım ama erken/geç çıktı | `duyuru-kontrol.js` yazdığın saatin TR karşılığını gösteriyor |
+
+---
+
+## Ön koşul (bir kereye mahsus)
+
+Mesajı gösterecek istemci **2026-08 sürümüyle** gidiyor. O sürüm kullanıcıya
+ulaşmadan yayınladığın duyuruyu kimse göremez. Yayılma birkaç gün sürer.
 
 ---
 
@@ -172,7 +136,7 @@ Yani en azından `tr` ve `en` doldur; İspanyolca ve Yunanca kullanıcılar
 
 | dosya | ne |
 |---|---|
-| `server.js` → `/api/announcement` | uç; doğrulama ve önbellek |
-| `tools/duyuru-kontrol.js` | canlı dokümanı okur, neden gitmediğini söyler |
-| `tools/kontrol-duyuru.js` | ucun testi (32/32, kaynaktan sökerek) |
+| `server.js` → `/api/announcement` | uç; env okur, saat hesabı yapar |
+| `tools/duyuru-kontrol.js` | gidiyor mu / neden gitmiyor |
+| `tools/kontrol-duyuru.js` | ucun testi (26/26, kaynaktan sökerek, UTC'de koşar) |
 | istemci `MainActivity.duyuruyuCek()` | açılışta çeker, sürüm notundan sonra gösterir |

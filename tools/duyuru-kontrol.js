@@ -2,131 +2,94 @@
 /**
  * DUYURU KONTROLÜ — SALT OKUNUR
  * ═══════════════════════════════════════════════════════════════════════════
- * `system/announcement` dokümanını okur ve "şu anda kime gider, gitmezse NEDEN
- * gitmez" sorusunu satır satır cevaplar.
+ * Ortam değişkenlerini okur ve "duyuru şu anda gidiyor mu, gitmiyorsa NEDEN"
+ * sorusunu cevaplar. Hiçbir şey yazmaz, hiçbir şey göndermez.
  *
- *     node tools/duyuru-kontrol.js
+ *     node tools/duyuru-kontrol.js          → durum
+ *     node tools/duyuru-kontrol.js --onizle → 4 dilde metni de göster
  *
- * NEDEN GEREKLİ: /api/announcement ucu hatalı dokümanda SESSİZCE boş dönüyor —
- * açılışı bozmamak için bilinçli bir tercih. Ama o sessizlik yüzünden "mesajım
- * neden çıkmıyor?" sorusunun cevabı görünmez. Bu araç o kapıyı açar.
- *
- * Hiçbir şey yazmaz, hiçbir şey göndermez.
+ * ASIL İŞİ SAAT HESABI: Render UTC çalışıyor, sen Türkiye saatiyle yazıyorsun.
+ * "10:30 yazdım ama çıkmadı" sorusunun cevabı burada görünür.
  */
-const admin = require('firebase-admin');
-
-if (!admin.apps.length) {
-    const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
-    if (!raw) {
-        console.error('HATA: FIREBASE_SERVICE_ACCOUNT env değişkeni yok.');
-        console.error('Bu betik Render Shell içinde çalıştırılmalı.');
-        process.exit(1);
-    }
-    admin.initializeApp({ credential: admin.credential.cert(JSON.parse(raw)) });
-}
-const db = admin.firestore();
+const ONIZLE = process.argv.includes('--onizle');
 const NOW = Date.now();
-const DILLER = ['tr', 'en', 'es', 'el'];
 
-/** server.js:duyuruZaman ile AYNI kural — sayı, Firestore Timestamp veya _seconds. */
-function zaman(v) {
-    if (typeof v === 'number' && isFinite(v)) return v;
-    if (v && typeof v.toMillis === 'function') return v.toMillis();
-    if (v && typeof v._seconds === 'number') return v._seconds * 1000;
-    return null;
+/** server.js:duyuruZaman ile AYNI kural — dilim yoksa Türkiye saati. */
+function zaman(metin) {
+    if (typeof metin !== 'string') return null;
+    const s = metin.trim();
+    if (!s) return null;
+    const dilimVar = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(s);
+    const norm = (dilimVar ? s : s.replace(' ', 'T') + '+03:00').replace(' ', 'T');
+    const t = Date.parse(norm);
+    return isFinite(t) ? t : null;
 }
-const tarih = v => {
-    const ms = zaman(v);
-    return ms === null ? '—' : new Date(ms).toISOString().slice(0, 16).replace('T', ' ') + ' UTC';
+
+const trYaz = (ms) => ms === null ? '—'
+    : new Date(ms + 3 * 3600000).toISOString().slice(0, 16).replace('T', ' ') + ' (TR)';
+
+console.log('\n═══ DUYURU KONTROLÜ ═══');
+console.log('şimdi: ' + trYaz(NOW) + '\n');
+
+const id = String(process.env.DUYURU_ID || '').trim();
+const metinler = {
+    tr: (process.env.DUYURU_TR || '').trim(),
+    en: (process.env.DUYURU_EN || '').trim(),
+    es: (process.env.DUYURU_ES || '').trim(),
+    el: (process.env.DUYURU_EL || '').trim()
 };
+const dolu = Object.keys(metinler).filter(l => metinler[l]);
 
-(async () => {
-    console.log('\n═══ DUYURU KONTROLÜ ═══');
-    console.log('şimdi: ' + tarih(NOW) + '   (SALT OKUNUR)\n');
+const engel = [];
 
-    const snap = await db.collection('system').doc('announcement').get();
-    if (!snap.exists) {
-        console.log('  Doküman YOK: system/announcement');
-        console.log('  → Hiç duyuru gönderilmiyor. Oluşturmak için Firebase Console:');
-        console.log('    Firestore → koleksiyon "system" → doküman kimliği "announcement"\n');
-        process.exit(0);
+console.log('  DUYURU_ID        : ' + (id || '‼ BOŞ'));
+if (!id) engel.push('DUYURU_ID boş → duyuru KAPALI. (Kapatmanın doğru yolu da budur.)');
+
+console.log('  dolu diller      : ' + (dolu.length ? dolu.join(', ') : '‼ hiçbiri'));
+if (!dolu.length) engel.push('Hiçbir dilde metin yok (DUYURU_TR / _EN / _ES / _EL)');
+
+const eksik = ['tr', 'en', 'es', 'el'].filter(l => !metinler[l]);
+if (eksik.length && dolu.length) {
+    const yedek = metinler.en ? 'İngilizce' : 'Türkçe';
+    console.log('  ⚠ eksik dil      : ' + eksik.join(', ') + '  → o kullanıcılar ' + yedek + ' görecek');
+}
+
+// ── Zaman ────────────────────────────────────────────────────────────────
+const hamBas = process.env.DUYURU_BASLANGIC, hamSon = process.env.DUYURU_BITIS;
+const bas = zaman(hamBas), son = zaman(hamSon);
+
+console.log('  DUYURU_BASLANGIC : ' + (hamBas ? hamBas + '  →  ' + trYaz(bas) : '— (hemen başlar)'));
+if (hamBas && bas === null) engel.push('DUYURU_BASLANGIC okunamadı: "' + hamBas + '" (biçim: 2026-08-16 10:30)');
+if (bas !== null && NOW < bas) {
+    const kalan = Math.round((bas - NOW) / 60000);
+    engel.push('Henüz başlamadı — ' + kalan + ' dakika sonra çıkacak');
+}
+
+console.log('  DUYURU_BITIS     : ' + (hamSon ? hamSon + '  →  ' + trYaz(son) : '— (kendiliğinden sönmez)'));
+if (hamSon && son === null) engel.push('DUYURU_BITIS okunamadı: "' + hamSon + '" (biçim: 2026-08-20 23:59)');
+if (son !== null && NOW > son) engel.push('Süresi dolmuş — ' + trYaz(son) + ' tarihinde sona erdi');
+if (!hamSon && id) {
+    console.log('  ⚠ bitiş yok → elle kapatman gerekir (DUYURU_ID\'yi boşalt)');
+}
+
+// ── Önizleme ─────────────────────────────────────────────────────────────
+if (ONIZLE && dolu.length) {
+    console.log('\n  ── kullanıcı ne görecek ──');
+    for (const l of ['tr', 'en', 'es', 'el']) {
+        const m = metinler[l] || (metinler.en || metinler.tr) + '   (yedek)';
+        console.log('  [' + l + '] ' + m);
     }
-    const d = snap.data();
-    const engel = [];
+}
 
-    // ── Zorunlu alanlar ───────────────────────────────────────────────────
-    const id = typeof d.id === 'string' ? d.id.trim() : '';
-    console.log('  id        : ' + (id || '‼ YOK'));
-    if (!id) engel.push('id yok/boş — istemci "gösterdim" diye işaretleyemez, gönderilmez');
-
-    console.log('  active    : ' + d.active);
-    if (d.active !== true) engel.push('active true DEĞİL (tam olarak boolean true olmalı, "true" metni değil)');
-
-    // ── Dil dolulukları ───────────────────────────────────────────────────
-    const dolu = (alan) => DILLER.filter(l => alan && typeof alan[l] === 'string' && alan[l].trim());
-    const bt = dolu(d.title), bg = dolu(d.body);
-    console.log('  title     : ' + (bt.length ? bt.join(', ') : '‼ hiçbir dilde yok'));
-    console.log('  body      : ' + (bg.length ? bg.join(', ') : '‼ hiçbir dilde yok'));
-    if (!bt.length) engel.push('title hiçbir dilde dolu değil');
-    if (!bg.length) engel.push('body hiçbir dilde dolu değil');
-
-    const eksikDil = DILLER.filter(l => !bt.includes(l) || !bg.includes(l));
-    if (eksikDil.length && bt.length && bg.length) {
-        console.log('  ⚠ eksik dil: ' + eksikDil.join(', ') +
-            '  → bu dildeki kullanıcı ' + (bt.includes('en') ? 'İngilizce' : 'Türkçe') + ' görecek');
-    }
-
-    // ── Zaman penceresi ───────────────────────────────────────────────────
-    console.log('  startsAt  : ' + tarih(d.startsAt));
-    console.log('  endsAt    : ' + tarih(d.endsAt));
-    const zBas = zaman(d.startsAt), zSon = zaman(d.endsAt);
-    if (zBas !== null && NOW < zBas) engel.push('startsAt GELECEKTE — henüz başlamadı');
-    if (zSon !== null && NOW > zSon) engel.push('endsAt GEÇMİŞTE — süresi dolmuş');
-    if (zSon === null) {
-        console.log('  ⚠ endsAt yok → duyuru kendiliğinden sönmez, elle kapatman gerekir');
-        if (d.endsAt !== undefined) {
-            console.log('  ‼ endsAt DOLU ama okunamadı — tipi sayı/timestamp değil (metin mi?)');
-        }
-    }
-
-    // ── Hedef kitle ───────────────────────────────────────────────────────
-    const kitle = typeof d.audience === 'string' ? d.audience : 'all';
-    const gecerliKitle = ['all', 'free', 'pro', 'trial_expired'];
-    console.log('  audience  : ' + kitle);
-    if (!gecerliKitle.includes(kitle)) {
-        console.log('  ⚠ bilinmeyen audience → sunucu bunu "herkes dışı" sayar ve KİMSEYE göndermez');
-        engel.push('audience geçersiz: "' + kitle + '" (geçerli: ' + gecerliKitle.join(', ') + ')');
-    }
-    if (kitle === 'pro' || kitle === 'trial_expired') {
-        console.log('  ↳ anonim (giriş yapmamış) kullanıcılar bu duyuruyu GÖRMEZ');
-    }
-
-    // ── Diğer ─────────────────────────────────────────────────────────────
-    console.log('  severity  : ' + (d.severity || 'info (varsayılan)'));
-    if (d.severity && d.severity !== 'info' && d.severity !== 'warning') {
-        console.log('  ⚠ bilinmeyen severity → "info" olarak gönderilir');
-    }
-    const ham = typeof d.actionUrl === 'string' ? d.actionUrl.trim() : '';
-    const k = ham.toLowerCase();
-    if (ham) {
-        const gecerli = k.startsWith('https://') || k.startsWith('http://');
-        console.log('  actionUrl : ' + ham + (gecerli ? '' : '   ‼ http(s) değil → null gönderilir'));
-    }
-
-    // ── Sonuç ─────────────────────────────────────────────────────────────
+// ── Sonuç ────────────────────────────────────────────────────────────────
+console.log();
+if (engel.length === 0) {
+    console.log('  ✅ YAYINDA — şu anda tüm kullanıcılara gidiyor.');
+    console.log('     Kullanıcı bunu BİR KEZ görür (id: ' + id + ').');
+    console.log('     ⚠ Metni değiştirirsen DUYURU_ID\'yi de değiştir — yoksa');
+    console.log('       görmüş olan kullanıcı yenisini görmez.\n');
+} else {
+    console.log('  ⛔ GÖNDERİLMİYOR. Sebepler:');
+    engel.forEach(e => console.log('     · ' + e));
     console.log();
-    if (engel.length === 0) {
-        console.log('  ✅ YAYINDA — şu anda gönderiliyor.');
-        console.log('     Kitle: ' + kitle);
-        console.log('     Kullanıcı bunu bir KEZ görür (id: ' + id + ').');
-        console.log('     ⚠ Metni değiştirirsen id\'yi de değiştir — yoksa görmüş olan yenisini görmez.\n');
-    } else {
-        console.log('  ⛔ GÖNDERİLMİYOR. Sebepler:');
-        engel.forEach(e => console.log('     · ' + e));
-        console.log();
-    }
-    process.exit(0);
-})().catch(e => {
-    console.error('HATA:', e && e.message ? e.message : e);
-    process.exit(1);
-});
+}

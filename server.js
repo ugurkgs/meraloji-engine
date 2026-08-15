@@ -7249,116 +7249,93 @@ app.get('/api/forecast', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 // ═══════════════════════════════════════════════════════════════════════════
-// DUYURU — uygulama açılışında gösterilecek tek mesaj
 // ═══════════════════════════════════════════════════════════════════════════
-// AMAÇ: APK çıkarmadan kullanıcıya bir şey söyleyebilmek. Metin Firestore'da
-// `system/announcement` dokümanında durur; Firebase Console'dan (telefondan
-// bile) değiştirilir, DEPLOY GEREKTİRMEZ.
+// DUYURU — uygulama açılışında gösterilecek tek cümlelik mesaj
+// ═══════════════════════════════════════════════════════════════════════════
+// AMAÇ: APK çıkarmadan kullanıcıya bir şey söyleyebilmek. Örnek: "Analiz motoru
+// güncellendi, artık kıyıda daha isabetli skor üretiyor."
 //
-// ⚠️ BİLDİRİM (PUSH) DEĞİLDİR. FCM'e dokunmaz — telefonda bildirim çıkmaz,
-//    titremez. Kullanıcı uygulamayı AÇTIĞINDA görür.
+// ⚠️ BİLDİRİM (PUSH) DEĞİLDİR. FCM'e dokunmaz — telefonda bildirim çıkmaz.
+//    Kullanıcı uygulamayı AÇTIĞINDA küçük bir kutuda görür, kapatır, biter.
 //
-// Doküman şeması — zorunlu alanlar:
-//   id      "2026-08-20-surum"  İstemci gösterdiğini bu kimlikle işaretler.
-//                               ⚠️ Kimliği DEĞİŞTİRMEDEN metni değiştirirsen
-//                               mesajı görmüş kullanıcı YENİSİNİ GÖRMEZ.
-//   active  true
-//   title   { tr, en, es, el }  en az biri dolu
-//   body    { tr, en, es, el }  en az biri dolu
-// İsteğe bağlı:
-//   startsAt / endsAt  ms — pencere dışındaysa gönderilmez (kendiliğinden söner,
-//                           "silmeyi unuttum" derdi olmaz)
-//   audience  'all' (varsayılan) | 'free' | 'pro' | 'trial_expired'
-//   severity  'info' (varsayılan) | 'warning'
-//   actionUrl http(s) bağlantı — istemci ikinci bir buton gösterir
+// KAYNAK: Render ortam değişkenleri. Firestore DEĞİL — ilk tasarım Firestore
+// dokümanıydı ama Console'da iç içe map girmek pratikte zahmetli çıktı.
+// Burada her şey DÜZ METİN: JSON yok, tip seçimi yok, iç içe yapı yok.
 //
-// GÜVENLİK: doküman yoksa, bozuksa veya bir alan eksikse BOŞ yanıt döner.
-// Duyuru gitmez ama AÇILIŞ ASLA BOZULMAZ — bu uç kullanıcıya görünen ilk
-// isteklerden biri, burada atılan bir hata uygulamayı açılışta vurur.
-// Sessiz gönderilmeme durumunu teşhis etmek için: tools/duyuru-kontrol.js
-const duyuruCache = new NodeCache({ stdTTL: 300 });   // 5 dk — Firestore okuması ~288/gün
+//   DUYURU_ID        zorunlu  "2026-08-16-kiyi-skoru"
+//                             İstemci "bunu gösterdim" diye bunu kaydeder.
+//                             ⚠️ Metni değiştirip ID'yi aynı bırakırsan mesajı
+//                             görmüş kullanıcı YENİSİNİ GÖRMEZ.
+//   DUYURU_TR        en az biri dolu olmalı
+//   DUYURU_EN
+//   DUYURU_ES
+//   DUYURU_EL
+//   DUYURU_BASLANGIC isteğe bağlı  "2026-08-16 10:30"  → o ana kadar gönderilmez
+//   DUYURU_BITIS     isteğe bağlı  "2026-08-20 23:59"  → sonrasında kendiliğinden söner
+//
+// SAAT DİLİMİ TUZAĞI: Render UTC çalışıyor. Saat dilimi yazılmamış tarihler
+// TÜRKİYE saati (UTC+3) sayılır — "10:30" yazınca Türkiye'de 10:30'da çıkar.
+// Bu tuzak COMEBACK_CAMPAIGN_END'de bir kez yaşandı; burada baştan kapatıldı.
+// Açıkça yazmak istersen "2026-08-16T10:30:00+03:00" biçimi de kabul edilir.
+//
+// Duyuruyu kaldırmak: DUYURU_ID'yi boşalt (veya DUYURU_BITIS'i geçmişe al).
+// Kılavuz: DUYURU-KILAVUZU.md
 
 /**
- * Zaman alanını ms'ye çevirir.
- *
- * Firebase Console'da tarih alanı eklerken doğal seçim "timestamp" tipidir ve
- * Admin SDK bunu Timestamp NESNESİ olarak döndürür — sayı değil. Yalnızca sayı
- * kabul edilseydi kullanıcının koyduğu bitiş tarihi SESSİZCE yok sayılır,
- * duyuru hiç sönmezdi. Üç biçim de kabul ediliyor.
+ * Tarih metnini ms'ye çevirir. Saat dilimi belirtilmemişse TÜRKİYE saati sayar.
+ * Geçersizse null döner — geçersiz tarih yüzünden duyuru kaybolmasın diye
+ * çağıran taraf null'ı "sınır yok" olarak yorumluyor.
  */
-function duyuruZaman(v) {
-    if (typeof v === 'number' && isFinite(v)) return v;
-    if (v && typeof v.toMillis === 'function') return v.toMillis();       // Firestore Timestamp
-    if (v && typeof v._seconds === 'number') return v._seconds * 1000;    // düz nesne hâli
-    return null;
+function duyuruZaman(metin) {
+    if (typeof metin !== 'string') return null;
+    const s = metin.trim();
+    if (!s) return null;
+    // Sonda Z veya ±HH:MM yoksa Türkiye saati varsay
+    const dilimVar = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(s);
+    const norm = (dilimVar ? s : s.replace(' ', 'T') + '+03:00').replace(' ', 'T');
+    const t = Date.parse(norm);
+    return isFinite(t) ? t : null;
 }
 
 /** Dilde metin seç: istenen dil → İngilizce → Türkçe. Hiçbiri yoksa null. */
-function duyuruMetniSec(alan, lang) {
-    if (!alan || typeof alan !== 'object') return null;
+function duyuruMetniSec(lang) {
+    const hepsi = {
+        tr: process.env.DUYURU_TR,
+        en: process.env.DUYURU_EN,
+        es: process.env.DUYURU_ES,
+        el: process.env.DUYURU_EL
+    };
     for (const l of [lang, 'en', 'tr']) {
-        const v = alan[l];
+        const v = hepsi[l];
         if (typeof v === 'string' && v.trim()) return v.trim();
     }
     return null;
 }
 
-app.get('/api/announcement', async (req, res) => {
-    const lang = String(req.query.lang || 'tr').slice(0, 5);
+app.get('/api/announcement', (req, res) => {
     try {
-        let dok = duyuruCache.get('doc');
-        if (dok === undefined) {
-            dok = null;
-            if (db) {
-                const snap = await db.collection('system').doc('announcement').get();
-                dok = snap.exists ? snap.data() : null;
-            }
-            duyuruCache.set('doc', dok);
-        }
-        if (!dok || dok.active !== true) return res.json({});
+        const lang = String(req.query.lang || 'tr').slice(0, 5);
+        const id = String(process.env.DUYURU_ID || '').trim();
+        if (!id) return res.json({});
 
         const now = Date.now();
-        const bas = duyuruZaman(dok.startsAt);
-        const son = duyuruZaman(dok.endsAt);
+        const bas = duyuruZaman(process.env.DUYURU_BASLANGIC);
+        const son = duyuruZaman(process.env.DUYURU_BITIS);
         if (bas !== null && now < bas) return res.json({});
         if (son !== null && now > son) return res.json({});
 
-        // Hedef kitle. Anonim kullanıcıda PRO bilgisi yok; 'all' ve 'free'
-        // onlara da ulaşır, 'pro' ve 'trial_expired' ulaşmaz — doğrusu da bu.
-        const kitle = typeof dok.audience === 'string' ? dok.audience : 'all';
-        if (kitle !== 'all') {
-            const pro = req.isPremium === true;
-            const denemeBitti = !!req.user && !pro && req.isGracePeriod !== true;
-            if (kitle === 'pro'            && !pro)          return res.json({});
-            if (kitle === 'free'           &&  pro)          return res.json({});
-            if (kitle === 'trial_expired'  && !denemeBitti)  return res.json({});
-        }
+        const metin = duyuruMetniSec(lang);
+        if (!metin) return res.json({});
 
-        const id     = typeof dok.id === 'string' ? dok.id.trim() : '';
-        const baslik = duyuruMetniSec(dok.title, lang);
-        const govde  = duyuruMetniSec(dok.body,  lang);
-        // Kimliksiz duyuru GÖNDERİLMEZ: istemci "bunu gösterdim" diye
-        // işaretleyemez, mesaj her açılışta yeniden çıkardı.
-        if (!id || !baslik || !govde) return res.json({});
-
-        // Yalnız http(s). Düzenli ifade bilerek KULLANILMADI: `\/\/` içindeki iki
-        // ardışık eğik çizgi, kaynağı ayrıştıran araçlarda satır yorumu sanılıyor.
-        const hamUrl = typeof dok.actionUrl === 'string' ? dok.actionUrl.trim() : '';
-        const kucuk  = hamUrl.toLowerCase();
-        const url = (kucuk.startsWith('https://') || kucuk.startsWith('http://')) ? hamUrl : null;
-
-        return res.json({
-            id,
-            severity: dok.severity === 'warning' ? 'warning' : 'info',
-            title: baslik,
-            body: govde,
-            actionUrl: url
-        });
+        return res.json({ id, text: metin });
     } catch (e) {
-        console.warn('[DUYURU] okunamadı:', e && e.message);
-        return res.json({});   // duyuru gitmesin ama açılış bozulmasın
+        // Bu uç kullanıcıya görünen ilk isteklerden biri; burada atılan hata
+        // uygulamayı AÇILIŞTA vurur. Duyuru gitmesin, açılış bozulmasın.
+        console.warn('[DUYURU] hata:', e && e.message);
+        return res.json({});
     }
 });
+
 
 app.get('/api/species-list', (req, res) => {
     const lang = req.query.lang || 'tr';
