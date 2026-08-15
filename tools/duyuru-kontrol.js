@@ -28,8 +28,17 @@ const db = admin.firestore();
 const NOW = Date.now();
 const DILLER = ['tr', 'en', 'es', 'el'];
 
-const tarih = ms => (typeof ms === 'number' && isFinite(ms))
-    ? new Date(ms).toISOString().slice(0, 16).replace('T', ' ') + ' UTC' : '—';
+/** server.js:duyuruZaman ile AYNI kural — sayı, Firestore Timestamp veya _seconds. */
+function zaman(v) {
+    if (typeof v === 'number' && isFinite(v)) return v;
+    if (v && typeof v.toMillis === 'function') return v.toMillis();
+    if (v && typeof v._seconds === 'number') return v._seconds * 1000;
+    return null;
+}
+const tarih = v => {
+    const ms = zaman(v);
+    return ms === null ? '—' : new Date(ms).toISOString().slice(0, 16).replace('T', ' ') + ' UTC';
+};
 
 (async () => {
     console.log('\n═══ DUYURU KONTROLÜ ═══');
@@ -70,14 +79,14 @@ const tarih = ms => (typeof ms === 'number' && isFinite(ms))
     // ── Zaman penceresi ───────────────────────────────────────────────────
     console.log('  startsAt  : ' + tarih(d.startsAt));
     console.log('  endsAt    : ' + tarih(d.endsAt));
-    if (typeof d.startsAt === 'number' && NOW < d.startsAt) {
-        engel.push('startsAt GELECEKTE — henüz başlamadı');
-    }
-    if (typeof d.endsAt === 'number' && NOW > d.endsAt) {
-        engel.push('endsAt GEÇMİŞTE — süresi dolmuş');
-    }
-    if (typeof d.endsAt !== 'number') {
+    const zBas = zaman(d.startsAt), zSon = zaman(d.endsAt);
+    if (zBas !== null && NOW < zBas) engel.push('startsAt GELECEKTE — henüz başlamadı');
+    if (zSon !== null && NOW > zSon) engel.push('endsAt GEÇMİŞTE — süresi dolmuş');
+    if (zSon === null) {
         console.log('  ⚠ endsAt yok → duyuru kendiliğinden sönmez, elle kapatman gerekir');
+        if (d.endsAt !== undefined) {
+            console.log('  ‼ endsAt DOLU ama okunamadı — tipi sayı/timestamp değil (metin mi?)');
+        }
     }
 
     // ── Hedef kitle ───────────────────────────────────────────────────────

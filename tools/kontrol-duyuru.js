@@ -143,6 +143,19 @@ async function testleriKos(mutasyonlar = []) {
     ok('pencere içindeyse gönderilir',
         (await senaryo(Object.assign(GECERLI(), { startsAt: NOW - GUN, endsAt: NOW + GUN }))).id === 'test-1');
 
+    // Firebase Console'da tarih alani "timestamp" tipiyle eklenir → Timestamp
+    // NESNESI gelir, sayi degil. Sadece sayi kabul edilse kullanicinin koydugu
+    // bitis tarihi sessizce yok sayilirdi.
+    const ts = (ms) => ({ toMillis: () => ms });
+    ok('Timestamp nesnesi: endsAt geçmişse boş',
+        bos(await senaryo(Object.assign(GECERLI(), { endsAt: ts(NOW - GUN) }))));
+    ok('Timestamp nesnesi: startsAt gelecekse boş',
+        bos(await senaryo(Object.assign(GECERLI(), { startsAt: ts(NOW + GUN) }))));
+    ok('Timestamp nesnesi: pencere içindeyse gönderilir',
+        (await senaryo(Object.assign(GECERLI(), { startsAt: ts(NOW - GUN), endsAt: ts(NOW + GUN) }))).id === 'test-1');
+    ok('_seconds biçimi de anlaşılır',
+        bos(await senaryo(Object.assign(GECERLI(), { endsAt: { _seconds: Math.floor((NOW - GUN) / 1000) } }))));
+
     // Hedef kitle
     const proDok = Object.assign(GECERLI(), { audience: 'pro' });
     ok('audience=pro → PRO görür',
@@ -196,7 +209,8 @@ async function testleriKos(mutasyonlar = []) {
 const MUTASYONLAR = [
     ['active denetimi kalksa',      [['if (!dok || dok.active !== true) return res.json({});', 'if (!dok) return res.json({});']]],
     ['id zorunlulugu kalksa',       [['if (!id || !baslik || !govde) return res.json({});', 'if (!baslik || !govde) return res.json({});']]],
-    ['endsAt denetimi kalksa',      [['if (typeof dok.endsAt   === \'number\' && now > dok.endsAt)   return res.json({});', '']]],
+    ['endsAt denetimi kalksa',      [['if (son !== null && now > son) return res.json({});', '']]],
+    ['Timestamp cevirisi kalksa',   [["if (v && typeof v.toMillis === 'function') return v.toMillis();", '']]],
     ['hedef kitle denetimi kalksa', [['if (kitle !== \'all\') {', 'if (false) {']]],
     ['actionUrl dogrulamasi kalksa',[["(kucuk.startsWith('https://') || kucuk.startsWith('http://'))", 'true']]]
 ];

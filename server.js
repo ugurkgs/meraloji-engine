@@ -7278,6 +7278,21 @@ app.get('/api/forecast', async (req, res) => {
 // Sessiz gönderilmeme durumunu teşhis etmek için: tools/duyuru-kontrol.js
 const duyuruCache = new NodeCache({ stdTTL: 300 });   // 5 dk — Firestore okuması ~288/gün
 
+/**
+ * Zaman alanını ms'ye çevirir.
+ *
+ * Firebase Console'da tarih alanı eklerken doğal seçim "timestamp" tipidir ve
+ * Admin SDK bunu Timestamp NESNESİ olarak döndürür — sayı değil. Yalnızca sayı
+ * kabul edilseydi kullanıcının koyduğu bitiş tarihi SESSİZCE yok sayılır,
+ * duyuru hiç sönmezdi. Üç biçim de kabul ediliyor.
+ */
+function duyuruZaman(v) {
+    if (typeof v === 'number' && isFinite(v)) return v;
+    if (v && typeof v.toMillis === 'function') return v.toMillis();       // Firestore Timestamp
+    if (v && typeof v._seconds === 'number') return v._seconds * 1000;    // düz nesne hâli
+    return null;
+}
+
 /** Dilde metin seç: istenen dil → İngilizce → Türkçe. Hiçbiri yoksa null. */
 function duyuruMetniSec(alan, lang) {
     if (!alan || typeof alan !== 'object') return null;
@@ -7303,8 +7318,10 @@ app.get('/api/announcement', async (req, res) => {
         if (!dok || dok.active !== true) return res.json({});
 
         const now = Date.now();
-        if (typeof dok.startsAt === 'number' && now < dok.startsAt) return res.json({});
-        if (typeof dok.endsAt   === 'number' && now > dok.endsAt)   return res.json({});
+        const bas = duyuruZaman(dok.startsAt);
+        const son = duyuruZaman(dok.endsAt);
+        if (bas !== null && now < bas) return res.json({});
+        if (son !== null && now > son) return res.json({});
 
         // Hedef kitle. Anonim kullanıcıda PRO bilgisi yok; 'all' ve 'free'
         // onlara da ulaşır, 'pro' ve 'trial_expired' ulaşmaz — doğrusu da bu.
