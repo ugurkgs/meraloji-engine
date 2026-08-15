@@ -41,6 +41,38 @@ ortalama 3 kez gördü" demektir. Huni hesabında **kullanıcı** sütununu kull
 
 ---
 
+## Parametreler görünmüyorsa: GA4 özel tanımları
+
+Bu belgedeki parametrelerin çoğu (`source`, `result`, `trigger_point`…)
+**GA4'te "özel boyut" olarak kaydedilmemişse raporlarda görünmez.** Kaydedilmemiş
+bir parametreyle `paywall_shown 12` satırını görürsün ama "12'sinin kaçı
+`heatmap`'ten geldi" sorusunu **soramazsın** — ki asıl değer orada.
+
+**Nerede:** Firebase Console'da DEĞİL. → **analytics.google.com** → mülkü seç →
+sol altta **dişli (Yönetici)** → **Veri görüntüleme → Özel tanımlar** →
+**Özel boyut oluştur**. Üç alan: boyut adı (serbest), kapsam **Etkinlik**,
+etkinlik parametresi (koddaki tam ad).
+
+Öncelik sırası (50 boyut hakkı var, hepsini harcamaya gerek yok):
+
+| Parametre | Neyi açar |
+|---|---|
+| `source` | **En değerlisi** — hangi özellik insanı paywall'a getiriyor |
+| `result` | `scan_result`, `rewarded_ad_result`, `location_prompt_result` kırılımı |
+| `trigger_point` | Duvar/reklam hangi limitten tetiklendi |
+| `plan` | Aylık/yıllık tercihi |
+| `user_state` | Anonim mi, denemesi bitmiş mi |
+| `error_reason` | Giriş/satın alma neden düştü |
+
+`duration_ms` sayısaldır → özel boyut değil, **özel metrik** olarak ekle
+(birim: milisaniye).
+
+**İki uyarı:** Kayıt **ileriye dönüktür**, geçmiş veri geri doldurulmaz.
+Raporlarda görünmesi 24-48 saat sürebilir; hemen görmek için **Gerçek zamanlı**
+veya **DebugView** ekranlarına bak (oralarda kayıt gerekmez).
+
+---
+
 ## Firebase'in kendi otomatik event'leri (kodda YOK)
 
 Bunları biz atmıyoruz, Firebase SDK kendisi üretiyor.
@@ -92,9 +124,18 @@ Yüksekse teklif ya anlaşılmıyor ya da o anda cazip değil.
 dönüşüm oranın.
 
 ### `signup_wall_buy_tap`
-Denemeyi atlayıp doğrudan "satın al" dendi → paywall `source=anon_wall` ile açılır.
+Kullanıcı duvardan **paywall'a doğru** çıktı. İki daldan da atılır:
+- Anonim kullanıcı "satın al" dedi → paywall `source=anon_wall`
+- Denemesi bitmiş kullanıcı "PRO'ya geç" dedi → paywall `source=click_limit`
 
-**Yorum:** Yüksek = iyi (güçlü niyet) ama nadir olması normal.
+**Yorum:** Yüksek = iyi (güçlü niyet). `trigger_point` ile hangi daldan geldiği
+ayrılır.
+
+> **2026-08-15 düzeltmesi.** Denemesi bitmiş dal **sessizdi**: butona basınca
+> `actionTaken=true` olduğu için `signup_wall_dismiss` de atılmıyordu, olumlu
+> eylem için de bir event yoktu. Sonuç: o dalda duvarın `shown` ve `dismiss`
+> sayısı vardı ama **başarı sayısı yoktu** — huni olduğundan kötü görünüyordu.
+> Bu tarihten önceki veride o dalın dönüşümü **eksik sayılıdır**.
 
 ### `signin_result`
 Google ile giriş denemesi sonuçlandı. `method=google`, `success=true/false`,
@@ -192,19 +233,26 @@ Kullanıcıya bir API hatası **gösterildi**. `endpoint`, `result`.
 **Yorum: Yüksek = KÖTÜ.** `scan_result`'tan farkı: bu, kullanıcının hatayı
 gerçekten gördüğü andır. İdeali sıfırdır.
 
-### `feature_used`
-⚠️ **Adı yanıltıcı.** Genel bir "özellik kullanıldı" sayacı DEĞİL. Şu anda
-kaynakta **yalnızca üç** değer üretiliyor (`feature_name`):
+### `location_prompt_result`
+Uygulama içi konum izni penceresinde karar verildi (işletim sisteminin kendi
+izin penceresi değil). `result=yes|no`.
 
-| değer | ne zaman |
-|---|---|
-| `loc_prompt_yes` | Konum izni penceresinde "evet" dendi |
-| `loc_prompt_no` | Konum izni penceresinde "hayır" dendi |
-| `rewarded_ad_tap` | Limit penceresinde "reklam izle +1 hak" butonuna basıldı |
+**Yorum:** `no` oranı yüksekse konum izninin **gerekçesi** kullanıcıya yeterince
+anlatılmıyor demektir — izin metnini gözden geçir.
 
-**Yorum:** Toplam sayısı tek başına bir şey söylemez; **mutlaka `feature_name`
-kırılımıyla** bak. `loc_prompt_no` yüksekse konum izni gerekçesi kullanıcıya
-yeterince anlatılmıyor demektir.
+### ~~`feature_used`~~ — KALDIRILDI (2026-08-15)
+Adı "bir özellik kullanıldı" diyordu ama gerçekte **üç ilgisiz şeyi** taşıyordu:
+konum izninde evet, konum izninde hayır, ödüllü reklam tıklaması. Raporda tek bir
+`feature_used: 4` satırı çıkıyordu ve `feature_name` kırılımı açılmadan
+**hiçbir anlamı yoktu** — yani sayının kendisi ölçüsüzdü.
+
+Yerine iki ayrı, adından ne olduğu anlaşılan event kondu:
+`location_prompt_result` ve `rewarded_ad_tap`.
+
+⚠️ Bu **tek** event'te süreklilik kırıldı: `feature_used` yeni sürümden itibaren
+akmayacak, geçmiş verisi (4 event) olduğu yerde kalacak. Yorumlanamaz olduğu için
+kaybedilen bir şey yok. **Geri eklemeyin** — tek bir çöp kutusu event'e farklı
+anlamlar doldurmak ölçümü yine bozar; yeni ihtiyaca yeni ad verin.
 
 ### `favori_eklendi`
 Bir mera favorilere eklendi.
@@ -232,6 +280,14 @@ GDPR reklam izni **çözümlendi**. `status`, `result` (`can_request_ads` / `blo
 **daha sık** görünebilir — bu normaldir, aktivite yeniden oluşunca tekrar çalışır.
 `blocked` oranı yüksekse reklam geliri düşer; hata değildir, kullanıcı tercihidir.
 
+### `rewarded_ad_tap`
+Limit penceresinde "reklam izle, +1 hak" butonuna basıldı — reklam akışı
+başlamadan **hemen önce**. `trigger_point` taşır.
+
+**Yorum:** Bu **niyet**, `rewarded_ad_result` ise **sonuçtur**. İkisinin oranı
+"kullanıcı +1 hak istedi ama alamadı" kaybını doğrudan verir:
+`rewarded_ad_result(rewarded) / rewarded_ad_tap` → 1'e yakın olmalı.
+
 ### `rewarded_ad_result`
 Ödüllü reklam akışının sonucu. `result`:
 - `not_loaded` → reklam hazır değildi (kullanıcı bastı, reklam yok)
@@ -258,6 +314,7 @@ Payda daima **kullanıcı** sütunudur.
 | `signup_wall_dismiss / signup_wall_shown` | Reddedilme | Düşük = iyi |
 | `paywall_purchase_tap / paywall_shown` | Paywall ikna ediyor mu | Yüksek = iyi |
 | `purchase_result(success) / paywall_purchase_tap` | Ödeme akışı kaybı | 1'e yakın = iyi |
+| `rewarded_ad_result(rewarded) / rewarded_ad_tap` | "+1 hak istedi, alamadı" kaybı | 1'e yakın = iyi |
 | `app_remove / first_open` | Erken terk | Düşük = iyi |
 | `mera_tarama / kullanıcı` | Bağlılık | Yüksek = iyi |
 
@@ -270,7 +327,8 @@ Bir event'in raporda hiç olmaması da bilgidir:
 | Event | Görünmüyorsa |
 |---|---|
 | `api_error_shown` | Kimse hata görmemiş — **iyi** |
-| `rewarded_ad_result` | Kimse "+1 hak için reklam izle" dememiş, ya da buton hiç görünmemiş |
+| `rewarded_ad_tap` | Kimse "+1 hak için reklam izle" dememiş, ya da buton hiç görünmemiş |
+| `rewarded_ad_result` | Reklam akışı hiç başlamamış (`rewarded_ad_tap` da yoksa tutarlı) |
 | `catch_report_sent` | Özellik henüz yayındaki APK'da yok |
 | `comeback_gift_shown` | Kampanya penceresi kapalı (`COMEBACK_CAMPAIGN_END` geçmiş) |
 | `purchase_result` | Hiç satın alma **denemesi** olmamış |
