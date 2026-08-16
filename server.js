@@ -9389,6 +9389,24 @@ async function icBolgeYaniti(lat, lon, gLat, gLon, lang, city, logUser) {
         city
     };
 
+    // ══════════════════════════════════════════════════════════════════════
+    // ⛔ ACİL GERİ ALMA — 2026-08-16
+    // Sahadaki APK'nın "karada veri bulunamazsa çökme" bildirimi geldi. Bu
+    // fonksiyon aynı gün INLAND yanıtına İLK KEZ `instant` eklemişti; yani
+    // yayındaki APK bugüne dek hiç girmediği bir dala giriyor. Sebep bu mu
+    // kesin değil, ama canlıda çökme varken kanıt beklenmez: tel biçimi
+    // aylardır çalışan haline döndürüldü.
+    //
+    // Bayrak açılmadan ÖNCE yapılacaklar:
+    //   1. Yayındaki APK'nın (versionCode 44) kaynağından refreshScore ve
+    //      updateUI yolundaki TÜM kutudan-çıkarma noktaları çıkarılacak.
+    //      Bugünkü denetim GÜNCEL kaynağa bakıyordu; yayındaki sürüm o değil.
+    //   2. Çökme yığın izi (Crashlytics) görülecek — hangi satır, hangi alan.
+    //   3. Ancak ondan sonra INLAND_HAVA=true ile kademeli açılacak.
+    const INLAND_HAVA_ACIK = process.env.INLAND_HAVA === 'true';
+    if (!INLAND_HAVA_ACIK) return bos;
+    // ══════════════════════════════════════════════════════════════════════
+
     let weather = null;
     try {
         const url = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lat}&longitude=${lon}`

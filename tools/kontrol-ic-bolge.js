@@ -54,14 +54,18 @@ for (const iz of ['utc_offset_seconds', 'landReason', 'score:', 'current:']) {
 }
 
 let kodAktif = KOD_ORJ;
-function kur(stub) {
-    return new Function('omKey', 'OM_HOST', 'i18n', 'deduplicatedFetch', 'queuedFetch', 'console',
+// INLAND_HAVA bayrağı: acil geri almadan sonra hava verisi yalnız bayrak
+// açıkken gönderiliyor. Testlerin çoğu AÇIK durumu ölçer; kapalı durumun
+// eski tel biçimini koruduğu ayrıca test edilir.
+function kur(stub, bayrak = 'true') {
+    return new Function('omKey', 'OM_HOST', 'i18n', 'deduplicatedFetch', 'queuedFetch', 'console', 'process',
         kodAktif + '\nreturn { saatIndeksi, icBolgeYaniti };')(
         (u) => u, 'om.test',
         () => ({ scan: { landError: 'Kara' } }),
         (k, f) => f(),
         stub.getir,
-        { log: (...a) => stub.kayit.push(a.join(' ')) }
+        { log: (...a) => stub.kayit.push(a.join(' ')) },
+        { env: bayrak === null ? {} : { INLAND_HAVA: bayrak } }
     );
 }
 
@@ -169,10 +173,37 @@ async function testleriKos() {
     t('basınç null gelse bile pressure sayı', typeof y4.instant.pressure === 'number');
     t('eksik hava alanı null kalabilir (airTemp dolu)', y4.instant.airTemp === 17.4);
 
+    // ══ ACİL GERİ ALMA BAYRAĞI ══
+    // Bayrak kapalıyken tel biçimi, aylardır sahada çalışan haliyle AYNI olmalı.
+    // Sahadaki APK "karada veri yok" durumunda çöküyor; instant göndermek onu
+    // bugüne dek hiç girmediği bir dala sokuyor.
+    // DİKKAT: stub ÇALIŞAN veri döndürmeli. Hata fırlatan bir stub kullanırsam
+    // bayrak açıkken de boş yanıt döner ve test bayrağı değil ağ hatasını ölçer —
+    // mutasyon da yakalanmaz. (Bir kez öyle yazıldı, mutasyon "geçti" gösterdi.)
+    const cagriSayaci = { n: 0 };
+    const calisanStub = {
+        kayit: [],
+        getir: async () => { cagriSayaci.n++; return sahteHava(); }
+    };
+    const MK = kur(calisanStub, null);
+    const yk = await MK.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test');
+    t('bayrak YOK → instant gönderilmez',   yk.instant === undefined);
+    t('bayrak YOK → isLand true',           yk.isLand === true);
+    t('bayrak YOK → landReason INLAND',     yk.landReason === 'INLAND');
+    t('bayrak YOK → city geçer',            yk.city === 'Kars');
+    t('bayrak YOK → Open-Meteo hiç çağrılmadı (kota da harcanmıyor)', cagriSayaci.n === 0);
+
+    const MK2 = kur({ kayit: [], getir: async () => sahteHava() }, 'false');
+    const yk2 = await MK2.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test');
+    t('bayrak "false" → instant gönderilmez', yk2.instant === undefined);
+
     return { gecen, kalan: kalanlar.length, kalanlar };
 }
 
 const MUTASYONLAR = [
+    ['acil geri alma bayrağı yok sayılırsa (sahadaki APK çöker)',
+        k => k.replace("const INLAND_HAVA_ACIK = process.env.INLAND_HAVA === 'true';",
+                       'const INLAND_HAVA_ACIK = true;')],
     ['score gönderilmezse (sahada NPE)',    k => k.replace('score:    0,', '')],
     ['temp gönderilmezse (sahada NPE)',     k => k.replace('temp:     0,', '')],
     ['current gönderilmezse (sahada NPE)',  k => k.replace('current: -1,', '')],
