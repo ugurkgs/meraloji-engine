@@ -80,15 +80,35 @@ function kur(stub, bayrak = 'true') {
 
 // ── Sahte Open-Meteo yanıtı ──────────────────────────────────────────────
 // Sarıkamış gerçek verisiyle aynı biçim. utc_offset ayarlanabilir.
+// ŞİMDİnin dizideki indeksi. Üretimde past_days=1 ile ~24-26 arası olur
+// (saat dilimine göre değişir).
+//
+// 24'ÜN KATI OLMAMALI. 24 iken "dizi baştan başlıyor" mutasyonu yakalanamadı:
+// dizi saatlik olduğu için 24 saatlik kayma AYNI "HH:MM" etiketini üretiyor ve
+// hata görünmez kalıyordu. 26 seçildi ki kayma saat etiketinde de belli olsun.
+const SIMDI_IDX = 26;
+
 function sahteHava({ ofsSaat = 3, bosla = [], eksikDizi = false } = {}) {
     if (eksikDizi) return { utc_offset_seconds: ofsSaat * 3600, hourly: {} };
-    const zaman = [], n = 48;
-    // Dizinin başlangıcı: bugünün yerel 00:00'ı (past_days=1 taklidi için dün de var)
-    const bas = Date.UTC(2026, 7, 15, 0, 0, 0);
+
+    // DİKKAT: dizi GERÇEK ZAMANA göre kurulur. Önce sabit tarihli (2026-08-15)
+    // bir dizi kullanılıyordu; üretim kodu ise Date.now() ile arıyor. Test
+    // başka bir günde koşunca indeks kayıyor, dizinin sonuna 3 saat kalıyor ve
+    // "24 saat" testi patlıyordu. Tekdüze değerler bunu da gizliyordu — testler
+    // yeşil görünürken aslında yanlış indeksi ölçüyorlardı.
+    const zaman = [];
+    const ofsMs = ofsSaat * 3600e3;
+    const simdiYerel = new Date(Date.now() + ofsMs);
+    simdiYerel.setUTCMinutes(0, 0, 0);
+    const bas = simdiYerel.getTime() - SIMDI_IDX * 3600e3;
+    const n = SIMDI_IDX + 72;                    // ŞİMDİ + 72 saat ileri
     for (let k = 0; k < n; k++) {
         zaman.push(new Date(bas + k * 3600e3).toISOString().slice(0, 16));
     }
-    const dizi = (v) => zaman.map((_, k) => (k === 43 ? v : v));
+    // Her saat FARKLI değer. Tekdüze veri indeks hatalarını gizler —
+    // "dizi baştan başlıyor" mutasyonu tekdüze veriyle yakalanamıyordu.
+    // ŞİMDİ (SIMDI_IDX) tam olarak taban değeri verir; diğerleri sapar.
+    const dizi = (v) => zaman.map((_, k) => Math.round((v + (k - SIMDI_IDX) * 0.7) * 100) / 100);
     const h = {
         time: zaman,
         temperature_2m:            dizi(17.4),
@@ -106,8 +126,9 @@ function sahteHava({ ofsSaat = 3, bosla = [], eksikDizi = false } = {}) {
     return { utc_offset_seconds: ofsSaat * 3600, hourly: h };
 }
 
-// Bu sahte dizide "şu an"a denk gelen zaman damgası
-const SIMDI = Date.UTC(2026, 7, 15, 19, 0, 0) - 3 * 3600e3;  // yerel 19:00, ofs +3
+// saatIndeksi birim testleri için: sahte dizide ŞİMDİye denk gelen an.
+// (icBolgeYaniti kendi içinde Date.now() kullanır — sahteHava da ona göre kurulur.)
+const SIMDI = Date.now();
 
 // ── İstemcinin KORUMASIZ kutudan çıkardığı alanlar ───────────────────────
 // (1) İlkel yerele ATANANLAR — atama anında NPE
@@ -132,11 +153,16 @@ async function testleriKos() {
     // ══ saatIndeksi: saat dilimi tuzağı ══
     const hv = sahteHava({ ofsSaat: 3 });
     const i = M.saatIndeksi(hv, SIMDI);
-    t('saatIndeksi doğru saati buldu', i !== null && hv.hourly.time[i].slice(11) === '19:00');
-    // Aynı an, FARKLI ofset → FARKLI indeks olmalı (yoksa ofset yok sayılıyordur)
-    const hv2 = sahteHava({ ofsSaat: 0 });
-    const i2 = M.saatIndeksi(hv2, SIMDI);
-    t('farklı utc_offset farklı indeks verir', i2 !== null && i2 !== i);
+    t('saatIndeksi ŞİMDİyi buldu', i === SIMDI_IDX);
+
+    // Saat dilimi tuzağı: AYNI dizi, ofset değiştirilince indeks KAYMALI.
+    // Dizi +3 için kuruldu; utc_offset 0 dersek "şu an" 3 saat geride görünür.
+    // Kaymıyorsa kod ofseti yok sayıyordur (Render UTC, geliştirme UTC+3 —
+    // bu depoda bir kez hataya yol açtı, bkz. d33f79e).
+    const hvKaydir = JSON.parse(JSON.stringify(hv));
+    hvKaydir.utc_offset_seconds = 0;
+    const iKaydir = M.saatIndeksi(hvKaydir, SIMDI);
+    t('utc_offset yok sayılmıyor (indeks kayıyor)', iKaydir === SIMDI_IDX - 3);
     t('boş dizi null döner', M.saatIndeksi({ hourly: { time: [] } }, SIMDI) === null);
     t('hourly yoksa null döner', M.saatIndeksi({}, SIMDI) === null);
     t('null yanıt null döner', M.saatIndeksi(null, SIMDI) === null);
@@ -191,6 +217,34 @@ async function testleriKos() {
     t('rüzgâr null gelse bile wind sayı', typeof y4.instant.wind === 'number');
     t('basınç null gelse bile pressure sayı', typeof y4.instant.pressure === 'number');
     t('eksik hava alanı null kalabilir (airTemp dolu)', y4.instant.airTemp === 17.4);
+
+    // ══ SAATLİK DİZİ (zaman kaydırıcısı) ══
+    const tl = y.instant.hourlyTimeline;
+    t('hourlyTimeline var',            Array.isArray(tl));
+    t('24 saat gönderiliyor',          Array.isArray(tl) && tl.length === 24);
+    // Kaydırıcı hourOffset == konum eşleşmesi yapıyor; 0..23 kesintisiz olmalı
+    t('hourOffset 0..23 kesintisiz',
+        Array.isArray(tl) && tl.every((x, k) => x.hourOffset === k));
+    t('ilk kayıt ŞİMDİ (offset 0)',    tl[0].hourOffset === 0);
+    t('ilk kaydın havası instant ile aynı', tl[0].airTemp === y.instant.airTemp);
+    t('saat biçimi HH:MM',             /^\d{2}:\d{2}$/.test(tl[0].time || ''));
+    // SAAT ETİKETİ ile VERİ aynı indeksten gelmeli. Bu ayrı test edilmezse
+    // dizinin baştan başlaması (etiket kayar, değer doğru kalır) fark edilmez —
+    // kullanıcı 19:00 yazan satırda 03:00 verisini görür.
+    const hvRef = sahteHava();
+    t('ilk kaydın saati ŞİMDİ',
+        tl[0].time === hvRef.hourly.time[SIMDI_IDX].slice(11, 16));
+    t('saatler ardışık',
+        tl.every((x, k) => x.time === hvRef.hourly.time[SIMDI_IDX + k].slice(11, 16)));
+    t('her kayıtta airTemp var',       tl.every(x => x.airTemp !== undefined));
+    t('her kayıtta pressure var',      tl.every(x => x.pressure !== undefined));
+    t('score 0 (karada balık yok)',    tl.every(x => x.score === 0));
+    // Deniz alanları gönderilmemeli: karada gizli, hepsi null korumalı okunuyor
+    t('deniz alanları gönderilmiyor',
+        tl.every(x => x.wave === undefined && x.salinity === undefined && x.current === undefined));
+    // Dizi sonuna yaklaşırken kırpılıyorsa bile hourOffset bozulmamalı
+    t('windGust tamsayıya yuvarlandı', tl.every(x => x.windGust === null || Number.isInteger(x.windGust)));
+    t('windDirection tamsayıya yuvarlandı', tl.every(x => x.windDirection === null || Number.isInteger(x.windDirection)));
 
     // ══ ACİL GERİ ALMA BAYRAĞI ══
     // Bayrak kapalıyken tel biçimi, aylardır sahada çalışan haliyle AYNI olmalı.
@@ -263,6 +317,12 @@ const MUTASYONLAR = [
         k => k.replace(/moonPhase:\s+SunCalc[^\n]*\n/, '')],
     ['confidence gönderilmezse (sahada NPE — üçüncü vaka)',
         k => k.replace(/confidence: 0,/, '')],
+    ['hourlyTimeline gönderilmezse (kaydırıcı çalışmaz)',
+        k => k.replace(/hourlyTimeline: h\.time\.slice\(i, i \+ 24\)/, 'hourlyTimeline: [].slice(0, 0)')],
+    ['hourOffset yerine mutlak saat yazılırsa (eşleşme bozulur)',
+        k => k.replace('hourOffset:    k,', 'hourOffset:    i + k,')],
+    ['dizi ŞİMDİden değil baştan başlarsa',
+        k => k.replace('h.time.slice(i, i + 24)', 'h.time.slice(0, 24)')],
     ['başlık ayrıştırıcı çöpü sayıya çevirirse',
         k => k.replace('const m = h.match(/^(\\d{1,6})\\b/);', 'const m = [null, parseInt(h) || 99];')],
     ['score gönderilmezse (sahada NPE)',    k => k.replace('score:    0,', '')],

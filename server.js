@@ -9511,7 +9511,42 @@ async function icBolgeYaniti(lat, lon, gLat, gLon, lang, city, logUser, istemciS
 
             // Deniz alanları — hepsi korumalı okunuyor, yine de açıkça sıfırla
             wave: 0, wavePeriod: 0, swellHeight: 0, swellPeriod: 0, salinity: 0,
-            timeMode: 'inland'
+            timeMode: 'inland',
+
+            // ── SAATLİK DİZİ — zaman kaydırıcısı için ────────────────────
+            // Kaydırıcı `hourlyTimeline` içinde hourOffset == kaydırıcı konumu
+            // olan kaydı arıyor (MainActivity ~1775). Dizi yoksa kaydırıcı
+            // hiçbir şey bulamıyor ve değerler sabit kalıyordu.
+            //
+            // GÜVENLİK: bu kod yolu SAHADAKİ APK için de yeni. Göndermeden önce
+            // HourlyMetric alanlarından ilkel tipe giden TÜM yollar tarandı
+            // (atama / ilkel parametre / aritmetik — üç biçim de): 236 erişimin
+            // hepsi null korumalı, korumasız yol YOK. Bu yüzden deniz alanları
+            // gönderilmiyor; okunmaya çalışılsa bile korumaya takılır.
+            //
+            // Deniz kutuları karada zaten gizleniyor (applyLandMode), o yüzden
+            // null bırakmak "eski değer kalır" sorunu da yaratmaz.
+            hourlyTimeline: h.time.slice(i, i + 24).map((zaman, k) => {
+                const j = i + k;
+                const al = (a) => (Array.isArray(a) && a[j] !== null && a[j] !== undefined) ? a[j] : null;
+                const yon = al(h.wind_direction_10m);
+                const ham = al(h.wind_gusts_10m);
+                return {
+                    hourOffset:    k,
+                    time:          typeof zaman === 'string' ? zaman.slice(11, 16) : null,
+                    score:         0,                      // karada balık skoru yok
+                    airTemp:       al(h.temperature_2m),
+                    wind:          al(h.wind_speed_10m),
+                    windDirection: yon !== null ? Math.round(yon) : null,
+                    windGust:      ham !== null ? Math.round(ham) : null,
+                    pressure:      al(h.surface_pressure),
+                    rain:          al(h.precipitation),
+                    weatherCode:   al(h.weather_code),
+                    visibility:    al(h.visibility),
+                    cloud:         al(h.cloud_cover) !== null ? String(al(h.cloud_cover)) : null
+                    // Deniz alanları BİLEREK yok — bkz. yukarıdaki not.
+                };
+            })
         }
     };
 }
