@@ -5914,16 +5914,37 @@ app.get('/api/forecast', async (req, res) => {
         if (!weather) {
             const isBackoff = cache && cache.get(_OM_BACKOFF_KEY);
             // Aynı grid noktası için önceki saatlerden kalmış forecast var mı?
+            // [DÜZELTME 2026-08-16] Eskiden döngü h=0'dan başlıyor ve İLK bulduğunu
+            // alıyordu — yani saate göre değil, ANAHTAR SIRASINA göre. Saat 19:00'da
+            // önbellekte h=17, h=18, h=19 varken h=17'yi (en eskisini) döndürüyordu.
+            // Artık TIKLANAN SAATTEN GERİYE doğru taranıyor: en taze kayıt kazanır.
+            //
+            // Yalnız geriye bakılıyor, ileriye değil: kayıt, tıklamanın olduğu saatin
+            // verisidir; gelecek saatin kaydı ancak dünden kalmış olabilirdi ve
+            // önbellek ömrü 3 saat olduğu için öyle bir kayıt zaten yaşayamaz.
             let staleData = null;
-            for (let h = 0; h < 24; h++) {
-                staleData = cache.get(`forecast_v24_${gLat}_${gLon}_h${h}`);
-                if (staleData) break;
+            let staleSaat = null;
+            for (let geri = 0; geri < 24; geri++) {
+                const h = (clickHour - geri + 24) % 24;
+                const bulunan = cache.get(`forecast_v24_${gLat}_${gLon}_h${h}`);
+                if (bulunan) { staleData = bulunan; staleSaat = h; break; }
             }
             if (staleData) {
-                console.log(`[BACKOFF] Eski cache verisi döndürülüyor: ${gLat},${gLon}`);
+                const yas = (clickHour - staleSaat + 24) % 24;
+                console.log(`[BACKOFF] Eski cache verisi döndürülüyor: ${gLat},${gLon}`
+                          + ` — ${staleSaat}:00 kaydı (${yas} saat önce)`);
                 // [GÜVENLİK - Y3] Bayat veri de sanitizasyondan geçer — eskiden bu yol
                 // ücretsiz kullanıcıya tam PRO verisi sızdırıyordu.
-                return res.json({ ...applySanitization(staleData, isProUser), _stale: true });
+                //
+                // _staleHour: istemci "hangi saatin verisi" olduğunu kullanıcıya
+                // gösterebilsin diye. Eskiden yalnız _stale vardı ve istemci onu hiç
+                // kullanmıyordu; kullanıcı saatler öncesinin verisini "ŞİMDİ" sanıyordu.
+                return res.json({
+                    ...applySanitization(staleData, isProUser),
+                    _stale: true,
+                    _staleHour: staleSaat,
+                    _staleAgeHours: yas
+                });
             }
             const errMsg = isBackoff
                 ? i18n(lang).errors.apiBusy
