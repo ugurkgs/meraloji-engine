@@ -5841,8 +5841,18 @@ app.get('/api/forecast', async (req, res) => {
             // farklı yanıt alıyor, aynı kutuya konamaz. Konsaydı, yeni bir istemcinin
             // doldurduğu önbellek eski bir istemciye servis edilir ve onu çökertirdi.
             const icSurum = istemciSurumKodu(req);
-            const icKapi = (process.env.INLAND_HAVA === 'true'
-                            && istemciYeter(icSurum, INLAND_HAVA_MIN_SURUM)) ? 'hava' : 'bos';
+            const icBayrak = process.env.INLAND_HAVA === 'true';
+            const icSurumYeter = istemciYeter(icSurum, INLAND_HAVA_MIN_SURUM);
+            const icKapi = (icBayrak && icSurumYeter) ? 'hava' : 'bos';
+            // [2026-08-16] Kapı kararı loglanıyor. Sahada hava verisi gelmiyordu
+            // ve sebebin bayrak mı sürüm mü olduğu logdan anlaşılmıyordu; süreyi
+            // (35 ms) görüp "çağrı yapılmamış" diye çıkarım yapmak zorunda kaldık.
+            // Ham başlık da yazılıyor: istemci hiç göndermiyor mu, yoksa
+            // gönderip de ayrıştırılamıyor mu — ikisi çok farklı sorunlar.
+            console.log(`[INLAND] [${logUser}] kapı=${icKapi}`
+                      + ` bayrak=${icBayrak ? 'acik' : 'KAPALI'}`
+                      + ` surum=${icSurum === null ? 'YOK' : icSurum}(>=${INLAND_HAVA_MIN_SURUM}? ${icSurumYeter ? 'evet' : 'HAYIR'})`
+                      + ` baslik=${JSON.stringify(req.headers['x-app-version'] || null)}`);
             const icKey = `inland_v2_${icKapi}_${gLat}_${gLon}_h${clickHour}`;
             let icYanit = cache.get(icKey);
             if (!icYanit) {
