@@ -9481,6 +9481,16 @@ async function icBolgeYaniti(lat, lon, gLat, gLon, lang, city, logUser, istemciS
             visibility:    say(h.visibility),
             cloud:         say(h.cloud_cover) !== null ? String(say(h.cloud_cover)) : null,
 
+            // ── ZORUNLU (2): istemci bunu İLKEL PARAMETREYE geçiriyor ────
+            // MainActivity: getMoonPhaseName(double moonPhase, String) — parametre
+            // İLKEL. `d.moonPhase` null gelirse ÇAĞRI ANINDA kutudan çıkarma NPE'si
+            // olur; atama değil, çağrı patlar. İlk denemede bu alan gönderilmedi ve
+            // sahada çökme yaşandı (2026-08-16, ikinci vaka).
+            //
+            // Ay evresi konumdan bağımsızdır — karada da doğru ve anlamlı.
+            moonPhase:     SunCalc.getMoonIllumination(new Date()).phase,
+            moonPhaseName: getMoonPhaseName(SunCalc.getMoonIllumination(new Date()).phase, lang),
+
             // Deniz alanları — hepsi korumalı okunuyor, yine de açıkça sıfırla
             wave: 0, wavePeriod: 0, swellHeight: 0, swellPeriod: 0, salinity: 0,
             timeMode: 'inland'

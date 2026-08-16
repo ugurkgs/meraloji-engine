@@ -64,13 +64,17 @@ let kodAktif = KOD_ORJ;
 // eski tel biçimini koruduğu ayrıca test edilir.
 function kur(stub, bayrak = 'true') {
     return new Function('omKey', 'OM_HOST', 'i18n', 'deduplicatedFetch', 'queuedFetch', 'console', 'process',
+        'SunCalc', 'getMoonPhaseName',
         kodAktif + '\nreturn { saatIndeksi, icBolgeYaniti, istemciSurumKodu, istemciYeter, INLAND_HAVA_MIN_SURUM };')(
         (u) => u, 'om.test',
         () => ({ scan: { landError: 'Kara' } }),
         (k, f) => f(),
         stub.getir,
         { log: (...a) => stub.kayit.push(a.join(' ')) },
-        { env: bayrak === null ? {} : { INLAND_HAVA: bayrak } }
+        { env: bayrak === null ? {} : { INLAND_HAVA: bayrak } },
+        // Gerçek suncalc: ay evresi uydurulmasın, üretimde ne dönüyorsa o.
+        require('suncalc'),
+        (faz) => 'evre-' + faz.toFixed(2)
     );
 }
 
@@ -106,7 +110,12 @@ function sahteHava({ ofsSaat = 3, bosla = [], eksikDizi = false } = {}) {
 const SIMDI = Date.UTC(2026, 7, 15, 19, 0, 0) - 3 * 3600e3;  // yerel 19:00, ofs +3
 
 // ── İstemcinin KORUMASIZ kutudan çıkardığı alanlar ───────────────────────
-const ZORUNLU = ['score', 'temp', 'wind', 'clarity', 'pressure', 'current'];
+// (1) İlkel yerele ATANANLAR — atama anında NPE
+const ZORUNLU = ['score', 'temp', 'wind', 'clarity', 'pressure', 'current',
+// (2) İLKEL PARAMETREYE geçirilenler — ÇAĞRI anında NPE.
+//     getMoonPhaseName(double moonPhase, String) — parametre ilkel.
+//     İlk sürümde bu alan unutuldu ve sahada ikinci kez çökme yaşandı.
+                 'moonPhase'];
 
 async function testleriKos() {
     let gecen = 0; const kalanlar = [];
@@ -245,6 +254,8 @@ const MUTASYONLAR = [
                        'return surum == null || surum >= enAz;')],
     ['MIN sürüm 44e düşürülürse (çöken sürüm içeri girer)',
         k => k.replace(/const INLAND_HAVA_MIN_SURUM = \d+;/, 'const INLAND_HAVA_MIN_SURUM = 44;')],
+    ['moonPhase gönderilmezse (sahada NPE — ikinci vaka)',
+        k => k.replace(/moonPhase:\s+SunCalc[^\n]*\n/, '')],
     ['başlık ayrıştırıcı çöpü sayıya çevirirse',
         k => k.replace('const m = h.match(/^(\\d{1,6})\\b/);', 'const m = [null, parseInt(h) || 99];')],
     ['score gönderilmezse (sahada NPE)',    k => k.replace('score:    0,', '')],
