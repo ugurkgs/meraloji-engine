@@ -5837,11 +5837,17 @@ app.get('/api/forecast', async (req, res) => {
             // AYRI ÖNBELLEK ANAHTARI kullanılıyor: deniz yolunun anahtarına
             // yazsaydık, sonraki istek yukarıdaki cache-hit dalına düşer ve
             // iç bölge noktası için EMODnet derinlik çağrısı yapardı.
-            const icKey = `inland_v1_${gLat}_${gLon}_h${clickHour}`;
+            // Önbellek anahtarı SÜRÜM KAPISINI de içerir: eski ve yeni istemciler
+            // farklı yanıt alıyor, aynı kutuya konamaz. Konsaydı, yeni bir istemcinin
+            // doldurduğu önbellek eski bir istemciye servis edilir ve onu çökertirdi.
+            const icSurum = istemciSurumKodu(req);
+            const icKapi = (process.env.INLAND_HAVA === 'true'
+                            && istemciYeter(icSurum, INLAND_HAVA_MIN_SURUM)) ? 'hava' : 'bos';
+            const icKey = `inland_v2_${icKapi}_${gLat}_${gLon}_h${clickHour}`;
             let icYanit = cache.get(icKey);
             if (!icYanit) {
                 icYanit = await icBolgeYaniti(lat, lon, gLat, gLon, lang,
-                                              offlineAnalysis.city, logUser);
+                                              offlineAnalysis.city, logUser, icSurum);
                 cache.set(icKey, icYanit);
             }
             return res.json(icYanit);
@@ -9380,7 +9386,29 @@ function saatIndeksi(weather, simdiMs = Date.now()) {
  * olarak gösterdiği nöbetçi değerler veriliyor (temp/clarity 0, current -1).
  * Bu satırlara dokunmadan önce o listeyi yeniden doğrula.
  */
-async function icBolgeYaniti(lat, lon, gLat, gLon, lang, city, logUser) {
+/**
+ * İstemcinin gönderdiği X-App-Version başlığından versionCode çıkarır.
+ * Biçim: "44/4.2.0". Başlık yoksa/bozuksa null döner — çağıran taraf bunu
+ * "eski istemci" saymalı. Bilinmeyeni yeni saymak, tam da çökmeye yol açan
+ * varsayımdır.
+ */
+function istemciSurumKodu(req) {
+    const h = req && req.headers && req.headers['x-app-version'];
+    if (typeof h !== 'string') return null;
+    const m = h.match(/^(\d{1,6})\b/);
+    return m ? parseInt(m[1], 10) : null;
+}
+
+/** Sürüm bilinmiyorsa FALSE — güvenli varsayılan. */
+function istemciYeter(surum, enAz) {
+    return typeof surum === 'number' && Number.isFinite(surum) && surum >= enAz;
+}
+
+// İç bölge hava verisini güvenle işleyebilen İLK sürüm.
+// 44 = çöken yayın sürümü. 45 = null-güvenliği eklenen ilk sürüm.
+const INLAND_HAVA_MIN_SURUM = 45;
+
+async function icBolgeYaniti(lat, lon, gLat, gLon, lang, city, logUser, istemciSurumu) {
     const bos = {
         error: 'land',
         message: `${i18n(lang).scan.landError} (${city}).`,
@@ -9390,21 +9418,24 @@ async function icBolgeYaniti(lat, lon, gLat, gLon, lang, city, logUser) {
     };
 
     // ══════════════════════════════════════════════════════════════════════
-    // ⛔ ACİL GERİ ALMA — 2026-08-16
-    // Sahadaki APK'nın "karada veri bulunamazsa çökme" bildirimi geldi. Bu
-    // fonksiyon aynı gün INLAND yanıtına İLK KEZ `instant` eklemişti; yani
-    // yayındaki APK bugüne dek hiç girmediği bir dala giriyor. Sebep bu mu
-    // kesin değil, ama canlıda çökme varken kanıt beklenmez: tel biçimi
-    // aylardır çalışan haline döndürüldü.
+    // SÜRÜM KAPISI — 2026-08-16
     //
-    // Bayrak açılmadan ÖNCE yapılacaklar:
-    //   1. Yayındaki APK'nın (versionCode 44) kaynağından refreshScore ve
-    //      updateUI yolundaki TÜM kutudan-çıkarma noktaları çıkarılacak.
-    //      Bugünkü denetim GÜNCEL kaynağa bakıyordu; yayındaki sürüm o değil.
-    //   2. Çökme yığın izi (Crashlytics) görülecek — hangi satır, hangi alan.
-    //   3. Ancak ondan sonra INLAND_HAVA=true ile kademeli açılacak.
+    // İç bölge noktalarına hava verisi göndermek YENİ bir davranış. Yayındaki
+    // APK (4.2.0 / kod 44) bu yanıtta `instant` görünce bugüne dek girmediği
+    // dala giriyor ve çöküyor. Crashlytics kanıtı: MainActivity.refreshScore,
+    // "Double.doubleValue() on a null object reference" — alanları null
+    // denetimi olmadan ilkel tipe kutudan çıkarıyor.
+    //
+    // İKİ KOŞUL birden gerekli:
+    //   1. INLAND_HAVA=true            → özellik açık mı (acil kapatma kolu)
+    //   2. istemci sürümü >= MIN_SURUM → o istemci null-güvenli mi
+    //
+    // Sürüm başlığı yoksa istemci ESKİ sayılır. Güvenli varsayılan: bilmiyorsak
+    // göndermeyiz. Böylece özellik açıldığında güncel kullanıcılar hava
+    // durumunu görür, eski kullanıcılar eski (çalışan) yanıtı almaya devam eder
+    // ve kimse çökmez.
     const INLAND_HAVA_ACIK = process.env.INLAND_HAVA === 'true';
-    if (!INLAND_HAVA_ACIK) return bos;
+    if (!INLAND_HAVA_ACIK || !istemciYeter(istemciSurumu, INLAND_HAVA_MIN_SURUM)) return bos;
     // ══════════════════════════════════════════════════════════════════════
 
     let weather = null;

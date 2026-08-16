@@ -48,7 +48,12 @@ function sok(imza) {
     }
 }
 
-const KOD_ORJ = sok('function saatIndeksi(') + '\n' + sok('async function icBolgeYaniti(');
+const KOD_ORJ = sok('function saatIndeksi(') + '\n'
+    + sok('function istemciSurumKodu(') + '\n'
+    + sok('function istemciYeter(') + '\n'
+    + 'const INLAND_HAVA_MIN_SURUM = '
+    + (SRC.match(/const INLAND_HAVA_MIN_SURUM = (\d+);/) || [, '45'])[1] + ';\n'
+    + sok('async function icBolgeYaniti(');
 for (const iz of ['utc_offset_seconds', 'landReason', 'score:', 'current:']) {
     if (!KOD_ORJ.includes(iz)) throw new Error(`Sökülen kod "${iz}" içermiyor`);
 }
@@ -59,7 +64,7 @@ let kodAktif = KOD_ORJ;
 // eski tel biçimini koruduğu ayrıca test edilir.
 function kur(stub, bayrak = 'true') {
     return new Function('omKey', 'OM_HOST', 'i18n', 'deduplicatedFetch', 'queuedFetch', 'console', 'process',
-        kodAktif + '\nreturn { saatIndeksi, icBolgeYaniti };')(
+        kodAktif + '\nreturn { saatIndeksi, icBolgeYaniti, istemciSurumKodu, istemciYeter, INLAND_HAVA_MIN_SURUM };')(
         (u) => u, 'om.test',
         () => ({ scan: { landError: 'Kara' } }),
         (k, f) => f(),
@@ -123,7 +128,7 @@ async function testleriKos() {
     t('null yanıt null döner', M.saatIndeksi(null, SIMDI) === null);
 
     // ══ icBolgeYaniti: ÇÖKME KORUMASI ══
-    const y = await M.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test');
+    const y = await M.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test', 45);
     t('instant döndü', y.instant != null);
     for (const alan of ZORUNLU) {
         t(`ZORUNLU alan "${alan}" null DEĞİL`,
@@ -156,19 +161,19 @@ async function testleriKos() {
     // ══ Hava alınamazsa: ESKİ davranış, ama ASLA yarım instant ══
     const stubBos = { kayit: [], getir: async () => { throw new Error('ağ yok'); } };
     const M2 = kur(stubBos);
-    const y2 = await M2.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test');
+    const y2 = await M2.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test', 45);
     t('hava yoksa instant HİÇ gönderilmez', y2.instant === undefined);
     t('hava yoksa isLand yine true',        y2.isLand === true);
     t('hava yoksa sebep loglandı',          stubBos.kayit.some(s => s.includes('INLAND')));
 
     // Dizi var ama saat bulunamıyor → yine yarım instant OLMAMALI
     const M3 = kur({ kayit: [], getir: async () => sahteHava({ eksikDizi: true }) });
-    const y3 = await M3.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test');
+    const y3 = await M3.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test', 45);
     t('saat bulunamazsa instant gönderilmez', y3.instant === undefined);
 
     // Bazı alanlar null gelirse ZORUNLU altılı yine dolu olmalı
     const M4 = kur({ kayit: [], getir: async () => sahteHava({ bosla: ['wind_speed_10m', 'surface_pressure'] }) });
-    const y4 = await M4.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test');
+    const y4 = await M4.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test', 45);
     t('rüzgâr null gelse bile wind sayı', typeof y4.instant.wind === 'number');
     t('basınç null gelse bile pressure sayı', typeof y4.instant.pressure === 'number');
     t('eksik hava alanı null kalabilir (airTemp dolu)', y4.instant.airTemp === 17.4);
@@ -186,7 +191,7 @@ async function testleriKos() {
         getir: async () => { cagriSayaci.n++; return sahteHava(); }
     };
     const MK = kur(calisanStub, null);
-    const yk = await MK.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test');
+    const yk = await MK.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test', 45);
     t('bayrak YOK → instant gönderilmez',   yk.instant === undefined);
     t('bayrak YOK → isLand true',           yk.isLand === true);
     t('bayrak YOK → landReason INLAND',     yk.landReason === 'INLAND');
@@ -194,16 +199,54 @@ async function testleriKos() {
     t('bayrak YOK → Open-Meteo hiç çağrılmadı (kota da harcanmıyor)', cagriSayaci.n === 0);
 
     const MK2 = kur({ kayit: [], getir: async () => sahteHava() }, 'false');
-    const yk2 = await MK2.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test');
+    const yk2 = await MK2.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test', 45);
     t('bayrak "false" → instant gönderilmez', yk2.instant === undefined);
+
+    // ══ SÜRÜM KAPISI ══
+    // Asıl koruma bu: bayrak AÇIK olsa bile eski istemciye instant gitmemeli.
+    // 44 = çöken yayın sürümü. Bu testler o çökmenin tekrarını engelliyor.
+    const MS = kur({ kayit: [], getir: async () => sahteHava() }, 'true');
+    t('MIN sürüm 44ten büyük (çöken sürüm dışarıda)', MS.INLAND_HAVA_MIN_SURUM > 44);
+
+    const ESKI = [undefined, null, 1, 43, 44];
+    for (const s of ESKI) {
+        const y = await MS.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test', s);
+        t(`sürüm ${s} (eski) → instant gönderilmez`, y.instant === undefined);
+        t(`sürüm ${s} (eski) → isLand yine true`,     y.isLand === true);
+    }
+    for (const s of [45, 46, 100]) {
+        const y = await MS.icBolgeYaniti(40.33, 42.59, '40.33', '42.59', 'tr', 'Kars', 'test', s);
+        t(`sürüm ${s} (yeni) → instant gönderilir`, y.instant != null);
+    }
+
+    // ══ Başlık ayrıştırma ══
+    const H = (v) => ({ headers: v === null ? {} : { 'x-app-version': v } });
+    t('başlık "45/4.3.0" → 45',      MS.istemciSurumKodu(H('45/4.3.0')) === 45);
+    t('başlık "44/4.2.0" → 44',      MS.istemciSurumKodu(H('44/4.2.0')) === 44);
+    t('başlık sadece "45" → 45',     MS.istemciSurumKodu(H('45')) === 45);
+    t('başlık YOK → null',           MS.istemciSurumKodu(H(null)) === null);
+    t('başlık çöp → null',           MS.istemciSurumKodu(H('bozuk')) === null);
+    t('req yoksa → null',            MS.istemciSurumKodu(undefined) === null);
+    t('sürüm bilinmiyorsa YETMEZ',   MS.istemciYeter(null, 45) === false);
+    t('metin sürüm YETMEZ',          MS.istemciYeter('45', 45) === false);
+    t('NaN YETMEZ',                  MS.istemciYeter(NaN, 45) === false);
 
     return { gecen, kalan: kalanlar.length, kalanlar };
 }
 
 const MUTASYONLAR = [
-    ['acil geri alma bayrağı yok sayılırsa (sahadaki APK çöker)',
+    ['acil kapatma bayrağı yok sayılırsa',
         k => k.replace("const INLAND_HAVA_ACIK = process.env.INLAND_HAVA === 'true';",
                        'const INLAND_HAVA_ACIK = true;')],
+    ['SÜRÜM KAPISI kaldırılırsa (44 çöker)',
+        k => k.replace('!istemciYeter(istemciSurumu, INLAND_HAVA_MIN_SURUM)', 'false')],
+    ['bilinmeyen sürüm YENİ sayılırsa',
+        k => k.replace("return typeof surum === 'number' && Number.isFinite(surum) && surum >= enAz;",
+                       'return surum == null || surum >= enAz;')],
+    ['MIN sürüm 44e düşürülürse (çöken sürüm içeri girer)',
+        k => k.replace(/const INLAND_HAVA_MIN_SURUM = \d+;/, 'const INLAND_HAVA_MIN_SURUM = 44;')],
+    ['başlık ayrıştırıcı çöpü sayıya çevirirse',
+        k => k.replace('const m = h.match(/^(\\d{1,6})\\b/);', 'const m = [null, parseInt(h) || 99];')],
     ['score gönderilmezse (sahada NPE)',    k => k.replace('score:    0,', '')],
     ['temp gönderilmezse (sahada NPE)',     k => k.replace('temp:     0,', '')],
     ['current gönderilmezse (sahada NPE)',  k => k.replace('current: -1,', '')],
