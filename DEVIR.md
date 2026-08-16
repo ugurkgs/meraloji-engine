@@ -1,8 +1,12 @@
 # Devir Notu — 2026-08-12
 
-> Yeni oturuma bu dosyayla başla. Ayrıntı için: `CLAUDE-KONSOL-TALIMATI.md`
-> (kurallar), `ACIK-ISLER.md` (açık işler), `25-TEMMUZ-SONRASI-YAPILANLAR.md`
-> (yapılanlar), `TATLISU-PLAN.md` (göl projesi).
+> ⚠️ **DAHA GÜNCEL DEVİR VAR: `DEVIR-17-AGUSTOS.md`.**
+> Bu dosya uygulamanın ne olduğunu, mimariyi ve dokunulmazları anlatır —
+> hepsi hâlâ geçerli. Önce bunu, sonra 17 Ağustos notunu oku.
+>
+> Ayrıntı için: `CLAUDE-KONSOL-TALIMATI.md` (kurallar), `ACIK-ISLER.md`
+> (açık işler), `25-TEMMUZ-SONRASI-YAPILANLAR.md` (yapılanlar),
+> `TATLISU-PLAN.md` (göl projesi).
 
 ---
 
