@@ -129,10 +129,16 @@ function calistir({ dogrulamaAcik, izinVar, googleYanit, googleHata }) {
         })();
     `;
 
+    // Fren fonksiyonları da stub — burada ölçülen fren mantığı DEĞİL (o
+    // tools/kontrol-fren.js'te), zincirin freni DOĞRU YERDE çağırıp
+    // çağırmadığı. Çağrılar kaydediliyor.
+    c.fren = { say: 0, sifirla: 0 };
+
     const fn = new Function(
         'GOOGLE_PLAY_VERIFY', 'getPlayAuthClient', 'GOOGLE_PACKAGE_NAME',
         'purchaseToken', 'subId', 'req', 'res', 'i18n', 'lang',
         'VALID_SUBSCRIPTIONS', 'console', 'process', 'require',
+        'retSay', 'retSifirla', 'DOGRULAMA_RET_TAVANI',
         govde
     );
 
@@ -153,7 +159,10 @@ function calistir({ dogrulamaAcik, izinVar, googleYanit, googleHata }) {
         ['meraloji_pro_monthly', 'meraloji_pro_yearly'],
         konsol,
         { env: izinVar ? { ALLOW_UNVERIFIED_PURCHASES: 'true' } : {} },
-        require
+        require,
+        () => ++c.fren.say,
+        () => { c.fren.sifirla++; },
+        5
     ).then(r => ({ ...c, sonuc: r }));
 }
 
@@ -218,15 +227,28 @@ async function testleriKos() {
     t('400 Invalid Value: token ŞEKLİ loglandı', h.konsol.some(([s, m]) => s === 'error' && m.includes('token[uzunluk=')));
     t('400 Invalid Value: token METNİ loglanmadı', !h.konsol.some(([, m]) => m.includes('sahte_token_123')));
     t('400 Invalid Value: durum kodu loglandı',  h.konsol.some(([, m]) => m.includes('(400)')));
+    // Fren SADECE 400'de sayılmalı; 404/401 ve geçici hatalar sayılmamalı,
+    // yoksa Google kesintisinde ödeme yapmış kullanıcı kilitlenir.
+    t('400: fren sayacı arttı',        h.fren.say === 1);
+    t('açık+ACTIVE: fren sıfırlandı',  c.fren.sifirla === 1);
+    t('açık+ACTIVE: fren sayılmadı',   c.fren.say === 0);
+    t('açık+EXPIRED: fren sayılmadı',  d.fren.say === 0);
 
     // ══ Diğer hata sınıfları ayrı ele alınıyor ══
     const i = await calistir({ dogrulamaAcik: true, googleHata: hata('Not Found', 404) });
     t('404: PRO VERİLMEDİ', i.sonuc.PRO_VERILDI !== true);
     t('404: 403 döndü',     i.status === 403);
+    t('404: fren SAYILMADI (yayılma gecikmesi olabilir)', i.fren.say === 0);
 
     const j = await calistir({ dogrulamaAcik: true, googleHata: hata('Unauthorized', 401) });
     t('401: PRO VERİLMEDİ', j.sonuc.PRO_VERILDI !== true);
     t('401: 503 döndü',     j.status === 503);
+    t('401: fren SAYILMADI (Google tarafı arıza)', j.fren.say === 0);
+
+    // Geçici hata (durum kodu yok = ağ/zaman aşımı) da sayılmamalı.
+    const k = await calistir({ dogrulamaAcik: true, googleHata: new Error('ETIMEDOUT') });
+    t('zaman aşımı: PRO VERİLMEDİ',  k.sonuc.PRO_VERILDI !== true);
+    t('zaman aşımı: fren SAYILMADI', k.fren.say === 0);
 
     return { gecen, kalan: kalanlar.length, kalanlar };
 }

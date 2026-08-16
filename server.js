@@ -8008,6 +8008,48 @@ function tokenSekli(t) {
          + (supheli ? ' ⚠ ŞEKİL ŞÜPHELİ' : '');
 }
 
+// ── Doğrulama freni ───────────────────────────────────────────────────────
+// [2026-08-16] Bir kullanıcı arka arkaya BİÇİMİ DOĞRU ama Google'ın tanımadığı
+// token'lar gönderiyordu (144 karakter, base64url temiz, her denemede FARKLI
+// parmak izi → üretilmiş). Kapı kapalıydı ama her deneme bir Google Play API
+// çağrısı harcıyordu; o kotayı gerçek PRO kullanıcıların doğrulaması da
+// kullanıyor. Fren, kesin retten sonra Google'a HİÇ sormadan reddeder.
+//
+// YALNIZ 400 SAYILIR. Bilerek dar tutuldu:
+//   400 → token Play token'ı olarak ayrıştırılamadı. Meşru akışta olmaz.
+//   404 → SAYILMAZ. Yeni satın alma Google'a yayılmadan sorulursa çıkabilir;
+//         gerçek alıcıyı kilitlememek için dışarıda.
+//   503/zaman aşımı/401/403 → SAYILMAZ. Bunlar Google tarafındaki arızadır;
+//         sayarsak kısa bir kesinti ödeme yapmış kullanıcıyı kilitler.
+// Başarılı doğrulamada sayaç sıfırlanır.
+//
+// Bellekte tutulur: süreç yeniden başlarsa sıfırlanır ve bu KABUL EDİLEBİLİR —
+// fren bir güvenlik sınırı değil, kota koruması. Güvenliği sağlayan, Google
+// doğrulamasının kendisi.
+const DOGRULAMA_RET_TAVANI   = 5;
+const DOGRULAMA_RET_PENCERE  = 60 * 60 * 1000;   // 1 saat
+const _dogrulamaRetleri = new Map();             // uid -> { sayac, sifirlaAt }
+
+function retFreniKapali(uid) {
+    const k = _dogrulamaRetleri.get(uid);
+    if (!k) return false;
+    if (Date.now() > k.sifirlaAt) { _dogrulamaRetleri.delete(uid); return false; }
+    return k.sayac >= DOGRULAMA_RET_TAVANI;
+}
+
+function retSay(uid) {
+    const simdi = Date.now();
+    const k = _dogrulamaRetleri.get(uid);
+    if (!k || simdi > k.sifirlaAt) {
+        _dogrulamaRetleri.set(uid, { sayac: 1, sifirlaAt: simdi + DOGRULAMA_RET_PENCERE });
+        return 1;
+    }
+    k.sayac++;
+    return k.sayac;
+}
+
+function retSifirla(uid) { _dogrulamaRetleri.delete(uid); }
+
 // Google Play API erişimi için auth client — lazy init, bir kez oluşturulur
 let _playAuthClient = null;
 async function getPlayAuthClient() {
@@ -8067,6 +8109,13 @@ app.post('/api/verify-subscription', async (req, res) => {
     // ── Geçerli abonelik ID kontrolü ──
     if (!VALID_SUBSCRIPTIONS.includes(subId)) {
         return res.status(400).json({ error: i18n(lang).errors.invalidPlan });
+    }
+
+    // Fren: arka arkaya kesin ret almış kullanıcıyı Google'a hiç sormadan reddet.
+    if (retFreniKapali(req.user.uid)) {
+        console.warn(`[VERIFY] 🛑 FREN — uid:${req.user.uid} son ${DOGRULAMA_RET_TAVANI} denemesi`
+                   + ` geçersiz token, Google'a sorulmadı`);
+        return res.status(429).json({ error: i18n(lang).errors.authFailed });
     }
 
     // [Y2] Google'ın bildirdiği GERÇEK bitiş zamanı (iptal/iade yansır). Doğrulama
@@ -8145,6 +8194,7 @@ app.post('/api/verify-subscription', async (req, res) => {
                 return res.status(403).json({ error: i18n(lang).errors.subNotActive, state });
             }
 
+            retSifirla(req.user.uid);   // geçerli token geldi → fren sayacı sıfırlanır
             console.log(`[VERIFY] ✅ Google Play doğrulandı — uid:${req.user.uid} sub:${subId} state:${state}${googleExpiryMs ? ' bitiş:' + new Date(googleExpiryMs).toISOString().slice(0, 10) : ''}`);
 
         } catch (verifyError) {
@@ -8161,8 +8211,11 @@ app.post('/api/verify-subscription', async (req, res) => {
             // Play token'ı olarak ayrıştıramadı. Sahte satın alma denemesinde
             // görülen imza budur (404 değil — 404 yukarıda ayrı yakalanıyor).
             // Token'ın kendisi DEĞİL, yalnız şekli loglanır; bkz. tokenSekli().
+            // Fren sayacı YALNIZ 400'de artar (bkz. retSay üstündeki not).
+            const retSayisi = (status === 400) ? retSay(req.user.uid) : null;
             console.error(`[VERIFY] ❌ Google Play API hatası (${status || 'durum-yok'}): ${verifyError.message}`
-                        + ` — uid:${req.user.uid} sub:${subId} ${tokenSekli(purchaseToken)}`);
+                        + ` — uid:${req.user.uid} sub:${subId} ${tokenSekli(purchaseToken)}`
+                        + (retSayisi ? ` ret:${retSayisi}/${DOGRULAMA_RET_TAVANI}` : ''));
             return res.status(503).json({ error: i18n(lang).errors.authFailed });
         }
     } else if (process.env.ALLOW_UNVERIFIED_PURCHASES === 'true') {
