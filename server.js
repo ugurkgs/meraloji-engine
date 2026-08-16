@@ -5829,14 +5829,22 @@ app.get('/api/forecast', async (req, res) => {
         }
 
         if (offlineAnalysis.status === 'INLAND') {
-            // İç bölge: sıfır API, anında reddet
-            return res.json({
-                error: 'land',
-                message: `${i18n(lang).scan.landError} (${offlineAnalysis.city}).`,
-                isLand: true,
-                landReason: 'INLAND',
-                city: offlineAnalysis.city
-            });
+            // [2026-08-16] İç bölge: deniz verisi yok ama HAVA verisi var.
+            // Eskiden sıfır API ile boş dönüyordu; istemci de boş yanıtta
+            // metrik kutularına dokunmadığı için bir ÖNCEKİ analizin havası
+            // ekranda kalıyordu. Gerekçe ve sahadaki örnek: icBolgeYaniti().
+            //
+            // AYRI ÖNBELLEK ANAHTARI kullanılıyor: deniz yolunun anahtarına
+            // yazsaydık, sonraki istek yukarıdaki cache-hit dalına düşer ve
+            // iç bölge noktası için EMODnet derinlik çağrısı yapardı.
+            const icKey = `inland_v1_${gLat}_${gLon}_h${clickHour}`;
+            let icYanit = cache.get(icKey);
+            if (!icYanit) {
+                icYanit = await icBolgeYaniti(lat, lon, gLat, gLon, lang,
+                                              offlineAnalysis.city, logUser);
+                cache.set(icKey, icYanit);
+            }
+            return res.json(icYanit);
         }
         // SEA → EMODnet çağrısı atlanmaz (derinlik bilgisi lazım)
         // COASTAL_LAND → mevcut snap sistemi devreye girer (EMODnet ile doğrulama)
@@ -9309,6 +9317,105 @@ function snapToGrid(lat, lon, precision = 2) {
     const gLat = (Math.round(parseFloat(lat) * factor) / factor).toFixed(precision);
     const gLon = (Math.round(parseFloat(lon) * factor) / factor).toFixed(precision);
     return { gLat, gLon };
+}
+
+/**
+ * Open-Meteo saatlik dizisinde "şu an"ın indeksini bulur.
+ *
+ * Sunucunun kendi saat dilimine ASLA bakmaz. Render UTC koşar, geliştirme
+ * makinesi UTC+3; yerel saatle indeks aramak bir kez daha ısırdı (bkz. commit
+ * d33f79e). Open-Meteo `timezone=auto` ile hem yerel saat dizisini hem
+ * utc_offset_seconds'u döndürüyor — doğru olan ikisini birleştirmek.
+ *
+ * Bulamazsa null döner; çağıran taraf buna göre davranmalı (uydurma indeks
+ * kullanmaktansa veri yok demek yeğdir).
+ */
+function saatIndeksi(weather, simdiMs = Date.now()) {
+    const zaman = weather && weather.hourly && weather.hourly.time;
+    if (!Array.isArray(zaman) || zaman.length === 0) return null;
+    const ofsMs = (weather.utc_offset_seconds || 0) * 1000;
+    // "YYYY-MM-DDTHH" — Open-Meteo saatlik damgaları bu biçimde başlar.
+    const anahtar = new Date(simdiMs + ofsMs).toISOString().slice(0, 13);
+    const i = zaman.findIndex(t => typeof t === 'string' && t.slice(0, 13) === anahtar);
+    return i >= 0 ? i : null;
+}
+
+/**
+ * İç bölge (INLAND) yanıtı — deniz verisi yok, HAVA verisi var.
+ *
+ * [2026-08-16] Eskiden bu noktalara sıfır API ile boş bir `{error:'land'}`
+ * dönüyordu: ne instant ne forecast. İstemcinin refreshScore() metodu ise
+ * `instant`/`forecast` ikisi de yoksa `else return;` ile çıkıyor ve metrik
+ * kutularına HİÇ dokunmuyor — yani BİR ÖNCEKİ analizin değerleri yeni
+ * koordinatın altında kalıyordu. Sahada görüldü: Sarıkamış analiz edildi,
+ * ekranda 24 dk önceki İzmir noktasının havası durdu (31°C, 18 km/h, 1002 hPa
+ * — altı değerin altısı da İzmir'in).
+ *
+ * ⚠️ SAHADAKİ APK'LAR: İstemci şu alanları null denetimi OLMADAN ilkel tipe
+ * kutudan çıkarıyor (MainActivity.refreshScore):
+ *      score · temp · wind · clarity · pressure · current
+ * Bunlardan biri eksik gelirse GÜNCELLEME YAPMAMIŞ kullanıcıda NPE → çökme.
+ * Hepsi aşağıda dolduruluyor; denizle ilgili olanlara istemcinin zaten "—"
+ * olarak gösterdiği nöbetçi değerler veriliyor (temp/clarity 0, current -1).
+ * Bu satırlara dokunmadan önce o listeyi yeniden doğrula.
+ */
+async function icBolgeYaniti(lat, lon, gLat, gLon, lang, city, logUser) {
+    const bos = {
+        error: 'land',
+        message: `${i18n(lang).scan.landError} (${city}).`,
+        isLand: true,
+        landReason: 'INLAND',
+        city
+    };
+
+    let weather = null;
+    try {
+        const url = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lat}&longitude=${lon}`
+            + `&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,`
+            + `surface_pressure,cloud_cover,precipitation,precipitation_probability,weather_code,visibility`
+            + `&past_days=1&timezone=auto`);
+        weather = await deduplicatedFetch(`icw_${gLat}_${gLon}`, () => queuedFetch(url));
+    } catch (e) {
+        console.log(`[INLAND] [${logUser}] hava alınamadı: ${e.message}`);
+    }
+
+    const i = saatIndeksi(weather);
+    if (i === null) {
+        // Veri yok → eski davranış. İstemci artık kutuları temizliyor.
+        console.log(`[INLAND] [${logUser}] hava verisi yok — boş yanıt (${city})`);
+        return bos;
+    }
+
+    const h = weather.hourly;
+    const say = (a) => (Array.isArray(a) && a[i] !== null && a[i] !== undefined) ? a[i] : null;
+
+    return {
+        ...bos,
+        instant: {
+            // ── İstemcinin korumasız kutudan çıkardığı ALTI alan ──────────
+            // Denizle ilgili olanlar nöbetçi: istemci bunları "—" gösterir.
+            score:    0,      // kara → balık skoru yok
+            temp:     0,      // su sıcaklığı yok  (istemci: temp > 0 ? .. : "—")
+            clarity:  0,      // berraklık yok
+            current: -1,      // akıntı yok        (istemci: current >= 0 ? .. : "—")
+            wind:     say(h.wind_speed_10m) !== null ? say(h.wind_speed_10m) : 0,
+            pressure: say(h.surface_pressure) !== null ? say(h.surface_pressure) : 0,
+
+            // ── Gerçek hava verisi ────────────────────────────────────────
+            airTemp:       say(h.temperature_2m),
+            rain:          say(h.precipitation),
+            precipProb:    say(h.precipitation_probability),
+            windDirection: say(h.wind_direction_10m) !== null ? Math.round(say(h.wind_direction_10m)) : null,
+            windGust:      say(h.wind_gusts_10m) !== null ? Math.round(say(h.wind_gusts_10m)) : null,
+            weatherCode:   say(h.weather_code),
+            visibility:    say(h.visibility),
+            cloud:         say(h.cloud_cover) !== null ? String(say(h.cloud_cover)) : null,
+
+            // Deniz alanları — hepsi korumalı okunuyor, yine de açıkça sıfırla
+            wave: 0, wavePeriod: 0, swellHeight: 0, swellPeriod: 0, salinity: 0,
+            timeMode: 'inland'
+        }
+    };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
