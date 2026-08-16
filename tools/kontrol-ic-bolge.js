@@ -115,7 +115,12 @@ const ZORUNLU = ['score', 'temp', 'wind', 'clarity', 'pressure', 'current',
 // (2) İLKEL PARAMETREYE geçirilenler — ÇAĞRI anında NPE.
 //     getMoonPhaseName(double moonPhase, String) — parametre ilkel.
 //     İlk sürümde bu alan unutuldu ve sahada ikinci kez çökme yaşandı.
-                 'moonPhase'];
+                 'moonPhase',
+// (3) ZİNCİRLİ erişimle ilkel yerele atananlar — atama zinciri üç parçalı
+//     olduğu için "nesne.alan" arayan denetimden kaçtı:
+//         conf = lastResponse.instant.confidence;   (MainActivity:4949)
+//     Sahadaki ÜÇÜNCÜ çökmenin sebebi buydu.
+                 'confidence'];
 
 async function testleriKos() {
     let gecen = 0; const kalanlar = [];
@@ -256,6 +261,8 @@ const MUTASYONLAR = [
         k => k.replace(/const INLAND_HAVA_MIN_SURUM = \d+;/, 'const INLAND_HAVA_MIN_SURUM = 44;')],
     ['moonPhase gönderilmezse (sahada NPE — ikinci vaka)',
         k => k.replace(/moonPhase:\s+SunCalc[^\n]*\n/, '')],
+    ['confidence gönderilmezse (sahada NPE — üçüncü vaka)',
+        k => k.replace(/confidence: 0,/, '')],
     ['başlık ayrıştırıcı çöpü sayıya çevirirse',
         k => k.replace('const m = h.match(/^(\\d{1,6})\\b/);', 'const m = [null, parseInt(h) || 99];')],
     ['score gönderilmezse (sahada NPE)',    k => k.replace('score:    0,', '')],

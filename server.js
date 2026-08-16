@@ -9491,6 +9491,14 @@ async function icBolgeYaniti(lat, lon, gLat, gLon, lang, city, logUser, istemciS
             visibility:    say(h.visibility),
             cloud:         say(h.cloud_cover) !== null ? String(say(h.cloud_cover)) : null,
 
+            // ── ZORUNLU (3): ZİNCİRLİ erişimle ilkel yerele atanıyor ─────
+            // MainActivity:4949  conf = lastResponse.instant.confidence;
+            // `conf` ilkel double. Bu satır ÜÇ PARÇALI zincir olduğu için
+            // "nesne.alan" arayan denetimden kaçtı ve sahada ÜÇÜNCÜ çökmeye
+            // yol açtı. Karada balık skoru yok, güven de yok — 0 dürüst değer
+            // ve istemci zaten kara modunda güven göstergesini gizliyor.
+            confidence: 0,
+
             // ── ZORUNLU (2): istemci bunu İLKEL PARAMETREYE geçiriyor ────
             // MainActivity: getMoonPhaseName(double moonPhase, String) — parametre
             // İLKEL. `d.moonPhase` null gelirse ÇAĞRI ANINDA kutudan çıkarma NPE'si
