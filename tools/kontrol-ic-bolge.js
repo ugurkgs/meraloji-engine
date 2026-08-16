@@ -141,7 +141,12 @@ const ZORUNLU = ['score', 'temp', 'wind', 'clarity', 'pressure', 'current',
 //     olduğu için "nesne.alan" arayan denetimden kaçtı:
 //         conf = lastResponse.instant.confidence;   (MainActivity:4949)
 //     Sahadaki ÜÇÜNCÜ çökmenin sebebi buydu.
-                 'confidence'];
+                 'confidence',
+// (4) KUTULANMIS YEREL degiskende karsilastirma:
+//         if (oxygen == 0 && hm.oxygen != null) ...   (MainActivity:4714)
+//     Yerel 'oxygen' bir Double; '== 0' onu kutudan cikarir. Ayni satirdaki
+//     'hm.oxygen != null' korumasi YEREL degiskeni korumaz. DORDUNCU cokme.
+                 'oxygen', 'upwelling'];
 
 async function testleriKos() {
     let gecen = 0; const kalanlar = [];
@@ -315,6 +320,10 @@ const MUTASYONLAR = [
         k => k.replace(/const INLAND_HAVA_MIN_SURUM = \d+;/, 'const INLAND_HAVA_MIN_SURUM = 44;')],
     ['moonPhase gönderilmezse (sahada NPE — ikinci vaka)',
         k => k.replace(/moonPhase:\s+SunCalc[^\n]*\n/, '')],
+    ['oxygen gönderilmezse (sahada NPE — dördüncü vaka)',
+        k => k.replace(/oxygen: 0,/, '')],
+    ['upwelling gönderilmezse (sahada NPE — dördüncü vaka)',
+        k => k.replace(/upwelling: 0,/, '')],
     ['confidence gönderilmezse (sahada NPE — üçüncü vaka)',
         k => k.replace(/confidence: 0,/, '')],
     ['hourlyTimeline gönderilmezse (kaydırıcı çalışmaz)',

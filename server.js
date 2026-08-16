@@ -9491,6 +9491,17 @@ async function icBolgeYaniti(lat, lon, gLat, gLon, lang, city, logUser, istemciS
             visibility:    say(h.visibility),
             cloud:         say(h.cloud_cover) !== null ? String(say(h.cloud_cover)) : null,
 
+            // ── ZORUNLU (4): KUTULANMIŞ YEREL değişkende karşılaştırma ───
+            // MainActivity:4714  if (oxygen == 0 && hm.oxygen != null) ...
+            // `oxygen` YEREL bir Double; `oxygen == 0` onu kutudan çıkarır ve
+            // null iken NPE olur. Aynı satırdaki `hm.oxygen != null` koruması
+            // hm.oxygen İÇİNDİR — yerel değişkeni korumaz. Sahadaki DÖRDÜNCÜ
+            // çökmenin sebebi buydu; ikinci bir kopyası da ~4647'de var.
+            // 0 göndermek "bilinmiyor" anlamına gelir ve o kutular karada
+            // zaten gizli (applyLandMode).
+            oxygen: 0,
+            upwelling: 0,
+
             // ── ZORUNLU (3): ZİNCİRLİ erişimle ilkel yerele atanıyor ─────
             // MainActivity:4949  conf = lastResponse.instant.confidence;
             // `conf` ilkel double. Bu satır ÜÇ PARÇALI zincir olduğu için
