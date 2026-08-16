@@ -7974,6 +7974,40 @@ app.post('/api/use-click', async (req, res) => {
 const GOOGLE_PLAY_VERIFY = process.env.GOOGLE_PLAY_VERIFY === 'true'; // Env'den oku, default false
 const GOOGLE_PACKAGE_NAME = 'com.meraloji.fish';
 
+/**
+ * Satın alma token'ının ŞEKLİNİ döner — token'ın KENDİSİNİ ASLA döndürmez.
+ *
+ * Neden var (2026-08-16): bir kullanıcı için Google Play API 400 "Invalid Value"
+ * dönüyordu ve logda ayırt edecek hiçbir şey yoktu. Play Console siparişlerinde
+ * o e-posta KAYITLI DEĞİLDİ — yani cihazdaki Play katmanı PURCHASED durumunda
+ * uydurma bir token bildirmişti (istemci verify'ı yalnız PURCHASED için çağırır,
+ * bkz. BillingManager.handlePurchase). Sunucu doğru davranıp reddetti; sorun
+ * teşhisin körlüğüydü.
+ *
+ * TOKEN LOGLANMAZ. Play satın alma token'ı Developer API'ye karşı bir kimlik
+ * bilgisidir; logda durması bir sızıntıdır. Onun yerine:
+ *   - uzunluk       → gerçek token 100+ karakterdir, uydurmalar genelde kısadır
+ *   - alfabe        → gerçek token base64url'dür (A-Za-z0-9_-); dışına çıkması
+ *                     token'ın Play'den gelmediğinin güçlü işaretidir
+ *   - parmak izi    → sha256'nın ilk 8 hane'si. Geri döndürülemez ama AYNI sahte
+ *                     token'ın tekrar denendiğini görmeye yeter (tek kullanıcının
+ *                     ısrarı mı, yoksa üretilmiş farklı token'lar mı).
+ *
+ * 400 Invalid Value ile 404 farkı: 404 "biçimi doğru, böyle satın alma yok"
+ * demektir; 400 token'ın Play token'ı olarak AYRIŞTIRILAMADIĞINI söyler.
+ */
+function tokenSekli(t) {
+    if (typeof t !== 'string' || t.length === 0) return 'token=yok';
+    const alfabeTemiz = /^[A-Za-z0-9_.-]+$/.test(t);
+    const parmak = require('crypto').createHash('sha256').update(t).digest('hex').slice(0, 8);
+    // Eşik 60: gözlenen gerçek örnekler 100+ karakter. 60 bilerek gevşek tutuldu;
+    // amaç kesin sınıflandırma değil, loga bakarken göze çarpması.
+    // (Bu satırlarda kesme işareti YOK — kaynak sökücü onu dize başlangıcı sanıyor.)
+    const supheli = !alfabeTemiz || t.length < 60;
+    return `token[uzunluk=${t.length} alfabe=${alfabeTemiz ? 'ok' : 'BOZUK'} iz=${parmak}]`
+         + (supheli ? ' ⚠ ŞEKİL ŞÜPHELİ' : '');
+}
+
 // Google Play API erişimi için auth client — lazy init, bir kez oluşturulur
 let _playAuthClient = null;
 async function getPlayAuthClient() {
@@ -8123,13 +8157,35 @@ app.post('/api/verify-subscription', async (req, res) => {
                 console.error(`[VERIFY] ❌ Yetki hatası (${status}) — Play Console SA izinlerini kontrol edin`);
                 return res.status(503).json({ error: 'Doğrulama servisi yapılandırma hatası' });
             }
-            console.error('[VERIFY] ❌ Google Play API hatası:', verifyError.message);
+            // [2026-08-16] Buraya 400 "Invalid Value" düşüyor: Google token'ı
+            // Play token'ı olarak ayrıştıramadı. Sahte satın alma denemesinde
+            // görülen imza budur (404 değil — 404 yukarıda ayrı yakalanıyor).
+            // Token'ın kendisi DEĞİL, yalnız şekli loglanır; bkz. tokenSekli().
+            console.error(`[VERIFY] ❌ Google Play API hatası (${status || 'durum-yok'}): ${verifyError.message}`
+                        + ` — uid:${req.user.uid} sub:${subId} ${tokenSekli(purchaseToken)}`);
             return res.status(503).json({ error: i18n(lang).errors.authFailed });
         }
+    } else if (process.env.ALLOW_UNVERIFIED_PURCHASES === 'true') {
+        // Yalnız yerel geliştirme. Değişkenin adı bilerek uzun ve rahatsız edici:
+        // canlıya yanlışlıkla konmasın diye.
+        console.warn(`[VERIFY] ⚠️ DOĞRULAMASIZ KABUL (ALLOW_UNVERIFIED_PURCHASES) — uid:${req.user.uid}`);
     } else {
-        // ⚠️ UYARI: Google Play doğrulaması kapalı — herhangi bir token kabul ediliyor!
-        // Production'da GOOGLE_PLAY_VERIFY=true env variable'ı ekleyin.
-        console.warn(`[VERIFY] ⚠️ DOĞRULAMA KAPALI — uid:${req.user.uid} token kabul ediliyor`);
+        // ═══ FAIL-CLOSED [2026-08-16] ═══
+        // Eskiden bu dal token'ı SESSİZCE KABUL EDİP aşağıda isPro:true yazıyordu.
+        // Yani GOOGLE_PLAY_VERIFY değişkeni unutulursa/silinirse herkese bedava PRO.
+        //
+        // Bunun teorik olmadığı ölçüldü: aynı gün bir kullanıcı için Google Play
+        // 400 "Invalid Value" döndü ve Play Console siparişlerinde o e-posta
+        // KAYITLI DEĞİLDİ — cihaz uydurma bir satın alma bildirmişti. Doğrulama
+        // açık olduğu için reddedildi; kapalı olsaydı anında PRO olacaktı.
+        //
+        // Artık doğrulama yapılamıyorsa PRO VERİLMEZ. Ödeme yapmış gerçek bir
+        // kullanıcı için bu geçici bir gecikmedir (istemci her açılışta
+        // queryPurchases ile yeniden dener, bkz. BillingManager); açık ise kalıcı
+        // ve sessizdir. Gecikme, sessiz açığa tercih edildi.
+        console.error(`[VERIFY] ⛔ DOĞRULAMA KAPALI — PRO VERİLMEDİ. uid:${req.user.uid}`
+                    + ` — GOOGLE_PLAY_VERIFY=true ayarlanmalı (Render → Environment)`);
+        return res.status(503).json({ error: i18n(lang).errors.authServiceError });
     }
 
     // ── Firestore'a Kaydet ──
@@ -10143,6 +10199,37 @@ app.post('/api/catch-report', async (req, res) => {
         res.status(500).json({ error: 'Bildirim kaydedilemedi' });
     }
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AÇILIŞ KİLİDİ — PRO kapısı doğrulamasız açılamaz (fail-closed, 2. katman)
+// ═══════════════════════════════════════════════════════════════════════════
+// 1. katman /api/verify-subscription içinde: doğrulama kapalıysa PRO verilmez.
+// Bu katman daha gürültülü: yanlış yapılandırma SESSİZCE çalışmasın, hemen
+// görülsün. İkisi ayrı ayrı deliği kapatır; biri sonradan kaldırılırsa diğeri
+// durur.
+//
+// MEVCUT PRO KULLANICILAR ETKİLENMEZ: bu kilit yalnız GOOGLE_PLAY_VERIFY
+// ayarlı DEĞİLKEN devreye girer. Canlıda ayarlı (log: "✅ Google Play
+// doğrulandı" satırı yalnız o bayrağın açık olduğu daldan çıkar), dolayısıyla
+// deploy sonrası davranış birebir aynıdır.
+//
+// Yerel geliştirmede satın alma akışını doğrulamasız denemek gerekirse
+// ALLOW_UNVERIFIED_PURCHASES=true koyun. Adı bilerek uzun: canlıya
+// yanlışlıkla konmasın diye.
+if (!GOOGLE_PLAY_VERIFY && process.env.ALLOW_UNVERIFIED_PURCHASES !== 'true') {
+    console.error(`
+╔═══════════════════════════════════════════════════════════════╗
+║  ⛔ SUNUCU BAŞLATILMADI — GÜVENLİK KİLİDİ                      ║
+╠═══════════════════════════════════════════════════════════════╣
+║  GOOGLE_PLAY_VERIFY ayarlı değil (beklenen: "true").          ║
+║  Bu bayrak olmadan satın alma doğrulaması yapılamaz.          ║
+║                                                               ║
+║  ÇÖZÜM : Render → Environment → GOOGLE_PLAY_VERIFY=true       ║
+║  Yerel  : ALLOW_UNVERIFIED_PURCHASES=true (SADECE geliştirme) ║
+╚═══════════════════════════════════════════════════════════════╝
+`);
+    process.exit(1);
+}
 
 app.listen(PORT, () => {
     console.log(`
