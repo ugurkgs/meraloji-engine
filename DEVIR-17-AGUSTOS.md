@@ -13,11 +13,25 @@
 
 | | |
 |---|---|
-| Yayındaki sürüm | **4.2.0 (44)** — Play'de |
-| Hazır bekleyen | **4.3.0 (45)** — imzalı release APK derlendi, doğrulandı, **henüz yayınlanmadı** |
-| Sunucu | 11 commit canlıda, son: `d1d9a77` |
+| Yayındaki sürüm | **4.3.0 (45)** — 17 Ağustos'ta Play'e çıkarıldı |
+| Bir önceki | 4.2.0 (44) — kullanıcıların bir kısmı hâlâ bunda, yayılma birkaç gün sürer |
+| Sunucu | 11 commit canlıda, son kod: `d1d9a77` |
 | Kritik bayrak | `INLAND_HAVA=true` (Render) — kapatılırsa iç bölge hava durumu susar, başka hiçbir şey etkilenmez |
 | Bu oturumda çökme | **4 kez** sahada çökme yaşandı, dördü de çözüldü (bkz. §4) |
+
+### İLK İŞ: Crashlytics'i izle
+
+45 yeni çıktı ve bu sürüm, istemcide **daha önce hiç çalışmamış kod yollarını**
+geniş kitleye açıyor (iç bölge hava durumu + saatlik dizi). Bu oturumda aynı
+alanda dört çökme yaşandı; dördü de kapatıldı ama sahada doğrulanan tek cihaz
+geliştiricinin telefonuydu.
+
+```
+Firebase → Crashlytics → sürüm filtresi 4.3.0 (45)
+```
+
+Yeni bir `refreshScore` NPE'si görünürse: **önce `INLAND_HAVA=false`** (tek tık,
+deploy beklemez, gerisi etkilenmez), sonra yığın izine bak. §1.2 ve §4 oku.
 
 **Android yolu:** `C:\Users\Ugur Kogus\Downloads\files (12)\meraloji-twa-package\meraloji-twa`
 **Sunucu yolu:** `C:\Users\Ugur Kogus\Downloads\files (12)\meraloji-engine` — `main`'e push = **CANLI DEPLOY**
@@ -235,6 +249,10 @@ Sunucu tarafı (`meraloji-engine/tools/`): `kontrol-ic-bolge.js` (92/92),
 INLAND_HAVA=true  (Render)         VE   istemci sürümü >= 45
 ```
 
+45 yayınlandığı için özellik **artık sahada canlı** — güncelleyen her kullanıcı
+görüyor. 44'te kalanlar eski (çalışan) yanıtı almaya devam ediyor; sürüm kapısı
+onları koruyor. Yayılma birkaç gün sürer, o süreçte iki davranış aynı anda var.
+
 **Sahada doğrulandı:** Sarıkamış 17 °C / 798 hPa / deniz kutuları "—", zaman
 çubuğu çalışıyor. Basınç ~798 hPa **doğrudur** (2076 m yüzey basıncı), deniz
 seviyesindeki 1013 değil.
@@ -275,14 +293,17 @@ dalga, gelgit, termoklin) hâlâ seçilebiliyor ve anlamsız görünüyor. Doğr
 
 | öncelik | iş | not |
 |---|---|---|
-| **1** | **4.3.0'ı Play'e yayınla** | APK hazır, doğrulandı. Sürüm notu: `scratchpad/surum-notu.txt` |
-| 2 | "Yenilikler" listesi sıralaması | Bkz. aşağıdaki **AÇIK SORU** |
+| **1** | **Crashlytics izle (4.3.0)** | Yayın taze. Yeni NPE çıkarsa önce `INLAND_HAVA=false`. Bkz. §0 |
+| 2 | "Yenilikler" listesi sıralaması | 45 için geçti, **46'da düzelt**. Bkz. **AÇIK SORU** |
 | 3 | Karada deniz simülasyon modlarını gizle | §8 sonu |
 | 4 | **Veri Noktası** düzenlemesi | İki dikdörtgen kafa karıştırıyor. Araştırma yapıldı: NOAA/NWS aynısını yapıyor ama kutu **kullanıcıyı içine alıyor**; bizde uzakta duruyor, "başka bir bölge" diye okunuyor. Öneri: **B (tek kutuya in) + D (etiketli çıkma)** |
 | 5 | RTDN | Pub/Sub konusu `play-subs` **var**, Play Console alanı **boş**, sunucuda tüketici yok |
 | 6 | Faz 4-5, birim çevirici, JA/PT dilleri | ertelenenler |
 
-### ⚠️ AÇIK SORU — devralan oturum bunu çözsün
+### ⚠️ AÇIK SORU — 45 ile yayınlandı, 46'da düzeltilecek
+
+> **Not:** 45 çıktığı için bu artık geriye alınamaz. Güncelleyen kullanıcı
+> aşağıdaki dağılımı görüyor. Karar bir sonraki sürüm (46) için geçerli.
 
 "Yenilikler" penceresindeki maddeler **yanlış bölümde olabilir.**
 
