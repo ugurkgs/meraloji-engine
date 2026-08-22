@@ -4259,29 +4259,100 @@ const ABUNDANCE = {
 //
 // Bu bir ÜRÜN kararıdır, biyoloji değil — o yüzden species.js'te değil burada.
 // species.js "bu tür nedir" der; bu tablo "kullanıcı bunu istiyor mu" der.
+// [GENİŞLETME 2026-08-22] Tablo 16 kayıttan 31'e çıkarıldı ve TEHLİKE ayrı bir
+// eksene alındı. Eskiden 874 türün yalnızca 16'sı sınıflandırılmıştı; kalan her
+// tür sessizce `target` sayılıyordu. Türkiye sularında listelenebilen 76 türün
+// TAMAMI artık karara bağlı.
+//
+// KAYNAK: 76 türün her biri altı ayrı yapay zekâya bağımsız olarak soruldu
+// (chatgpt · Gemini · Grok · Kimi · Manus · Gemini DeepResearch); altısı da 76
+// satırın tamamını döndürdü. 57 türde 5/6 veya 6/6 uzlaşma çıktı ve doğrudan
+// alındı; kalan 19 türe kullanıcı tek tek karar verdi. Oy dökümü ve her satırın
+// kaynağı: `TUR-DEGER-NIHAI.xlsx`.
+//
+// Bu tablodaki 14 kayıt, AI'ların güvenilirliğini ölçen KONTROL GRUBU olarak da
+// kullanıldı (cevaplar alınırken gizlendi). Zehirli dört türü ıskalayan tek model
+// oldu; koruma altındaki orfoz ve mersini altısı da doğru işaretledi.
+//
+// NEDEN TEHLİKE AYRI EKSEN: İskorpit ve Lipsoz gerçekten zehirlidir AMA
+// Türkiye'de bilerek avlanır (iskorpit çorbalık olarak aranır). Tehlike ile değer
+// aynı listede sorulduğunda altı AI'dan beşi "tehlikeli" deyip değer veremedi —
+// yani bu iki tür hedef listesinden büsbütün düşecekti. Tehlike artık değerden
+// BAĞIMSIZ bir bayrak: bir tür hem `target` hem tehlikeli olabilir.
+//
+// SAYILAR: yalnızca iki değer kullanılıyor (0.15 / 0.45) ve her biri bir etikete
+// birebir karşılık geliyor. Eski tablodaki 0.10 ve 0.50 ara değerleri kaldırıldı:
+// sayı yalnızca `avSinifi()` içindeki 0.6 eşiğiyle karşılaştırılıyor, başka hiçbir
+// yerde okunmuyor, dolayısıyla ara kademeler davranış üretmiyordu — yalnızca
+// "bu 0.10 ne demek?" sorusunu doğuruyordu.
+//
+// `trakun` (Caranx crysos) TABLODAN ÇIKARILDI: eski kayıt 0.50 ile onu `bycatch`
+// sayıyordu, dört AI ve kullanıcı `hedef` dedi. Tabloda yer almayan anahtar 1.0
+// döndüğü için satırın silinmesi onu `target` yapar. Yön değiştiren TEK kayıt bu.
 const AV_DEGERI = {
-    // ── Hedeflenmeyen (0.15) — yakalanır, kimse peşine düşmez ──
-    deniz_ignesi: 0.10,   // Syngnathus acus — tutmaya giden yok
-    kurbaga: 0.10,        // Uranoscopus scaber — zehirli, yenmez
-    aterin: 0.15,         // Atherina — yem balığı
-    trakonya: 0.15,       // ZEHİRLİ, yan yakalanır (uyarı için listede kalmalı)
+    // ── Hedeflenmez (0.15) — oltayla tutulmaz, yem olur ya da geri atılır ──
     aslan_baligi: 0.15,   // İSTİLACI + zehirli
     balon_baligi: 0.15,   // İSTİLACI + toksik (Türkiye'de satışı yasak)
+    caca: 0.15,           // ağ balığı, olta hedefi değil
+    deniz_ignesi: 0.15,   // Syngnathus acus — tutmaya giden yok
+    dulger: 0.15,         // Zeus faber — derin, amatör erişimi sınırlı
+    hani: 0.15,           // Serranus cabrilla
+    kikla: 0.15,          // Labrus viridis — ot balığı
+    kurbaga: 0.15,        // Uranoscopus scaber — zehirli, yenmez
+    lapin: 0.15,          // Labrus spp.
+    mersin: 0.15,         // KORUMA ALTINDA — skoru zaten 0
+    muren: 0.15,          // Muraena helena — ciddi ısırır
+    orfoz: 0.15,          // KORUMA ALTINDA — skoru zaten 0
+    papalina: 0.15,       // ağ balığı
+    sardalya: 0.15,       // ticari ağ balıkçılığının türü; olta hedefi değil
+    trakonya: 0.15,       // ZEHİRLİ, yan yakalanır (uyarı için listede kalmalı)
+    vatoz: 0.15,          // species.js kendi notu: "tutan genellikle bırakır"
+    yilan_baligi: 0.15,   // Anguilla anguilla
 
-    // ── Düşük (0.45-0.50) — yenir ama nadiren hedeflenir ──
-    sarpa: 0.45,          // otçul, et kalitesi düşük
+    // ── Düşük (0.45) — yenir/alıkonur ama peşine düşülmez ──
+    aterin: 0.45,         // Atherina — yem balığı ama gümüş tavası da yenir
+    cutre: 0.45,          // Balistes capriscus
+    fener: 0.45,          // Lophius piscatorius
+    gelincik: 0.45,       // Gaidropsarus mediterraneus — çoğunlukla tesadüfi
+    iskorpit: 0.45,       // ZEHİRLİ dikenler; çorbalık, ama hedef sayılmadı
+    isparoz: 0.45,        // Diplodus annularis — oltaya sık gelir
+    kizil_kirlangic: 0.45,
+    lipsoz: 0.45,         // ZEHİRLİ dikenler (Scorpaena scrofa)
     lokum: 0.45,          // Sillago suezensis — Lesepsiyen göçmen
-    ustura_baligi: 0.45,
-    caca: 0.45,           // ağ balığı, olta hedefi değil
-    papalina: 0.45,       // ağ balığı
-    hani: 0.50,
-    cutre: 0.50,
-    trakun: 0.50,         // Caranx crysos — yenir ama hedeflenmez
-    // [BELİRSİZ] trakun ve cutre için emin değilim; kullanıcı onayına açık.
+    migri: 0.45,          // Conger conger
+    pisi: 0.45,           // Platichthys flesus
+    sarpa: 0.45,          // otçul, et kalitesi düşük
+    tirsi: 0.45,          // Alosa fallax
+    ustura_baligi: 0.45,  // Xyrichtys novacula
 };
 function avDegeri(key) {
     const v = AV_DEGERI[key];
     return (typeof v === 'number') ? v : 1.0;
+}
+
+// ── TEHLİKE BAYRAĞI — değerden BAĞIMSIZ eksen ────────────────────────────
+// Zehirli / sokan / ısıran türler. Değerle ilgisi YOKTUR: iskorpit hem tutulur
+// hem sokar. Amaç kullanıcıyı uyarabilmek, listeden eleme YAPMAK DEĞİL — bu
+// yüzden ayrı bir küme olarak duruyor ve `avSinifi()` ile karışmıyor.
+//
+// Kullanılacağı yer istemci tarafıdır (uyarı rozeti). Sunucu şu an bu bayrağı
+// yanıtta GÖNDERMİYOR; alan eklemek istemcide daha önce hiç çalışmamış kod
+// yollarını açar (bkz. DEVIR-17-AGUSTOS.md §1.1 — aynı hata dört kez çökertti).
+// Önce istemci sertleştirilip yayınlanacak, alan ondan sonra gönderilecek.
+const TEHLIKELI_TURLER = new Set([
+    'aslan_baligi',   // zehirli dikenler + istilacı
+    'balon_baligi',   // tetrodotoksin + güçlü ısırık; satışı yasak
+    'iskorpit',       // Scorpaena porcus — zehirli sırt dikenleri
+    'kurbaga',        // Uranoscopus scaber — zehirli + elektrik organı
+    'lipsoz',         // Scorpaena scrofa — iskorpitin iri akrabası
+    'muren',          // Muraena helena — derin, enfeksiyon riski yüksek ısırık
+    'trakonya',       // Trachinus draco — Türkiye kıyılarının en sık sokan türü
+    'vatoz',          // Dasyatis pastinaca — kuyruk dikeni
+]);
+/** Tür zehirli/sokan mı? Bilinmeyen anahtar FALSE döner (yeni tür güvenli sayılmaz,
+ *  yalnızca "bilgi yok" sayılır — uyarı üretmez ama eleme de yapmaz). */
+function tehlikeliMi(key) {
+    return TEHLIKELI_TURLER.has(key);
 }
 // İstemciye gönderilecek etiket. SIRALAMAYI ETKİLEMEZ — sıralama saf skorla yapılır.
 // 'target'  : peşine düşülen tür
