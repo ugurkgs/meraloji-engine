@@ -144,17 +144,28 @@ test('POZİTİF KONTROL: eski kodda 1. test KIRMIZI verir', async () => {
 // ── Yapısal kontrol: kota muafiyeti ────────────────────────────────────────
 // Bu bölüm davranış değil KAYNAK sınar; dürüstlük için ayrı başlık altında.
 // Gerçek kota akışı Firestore'a bağlı, yerelde koşturulamıyor.
-test('YAPISAL: isRetry tanımlı ve kota koşulundan muaf', async () => {
+// [2026-08-23] MUAFİYETİN ANLAMI DEĞİŞTİ. Eskiden `isRetry`'nin kendisi muaftı;
+// `source` bir query parametresi olduğu için bu, istemciye "beni sayma" deme
+// yetkisi vermek demekti (bkz. ACIKLAR-21-AGUSTOS-2026 §1). Artık muafiyet
+// `retryMuaf` ile geliyor: retry YALNIZCA sunucunun açtığı hakkı tükettiyse muaf.
+// Bu test o yeni değişmezi savunuyor; hakkın kendi testi kontrol-retry-hakki.js.
+test('YAPISAL: tekrar denemesi muafiyeti HAKKA bağlı, query parametresine değil', async () => {
     if (!/const isRetry = req\.query\.source === 'retry';/.test(src)) {
         throw new Error('isRetry tanımı bulunamadı');
     }
+    if (!/const retryMuaf = isRetry && retryHakkiTuket\(/.test(src)) {
+        throw new Error('retryMuaf hakka bağlanmamış — muafiyet yine istemcinin sözüne kalmış');
+    }
     const kotaSatiri = src.match(/if \(req\.user && !req\.isPremium && !req\.isGracePeriod && ([^)]*)&& db\)/);
     if (!kotaSatiri) throw new Error('kota koşulu bulunamadı — koşul yeniden yazılmış olabilir');
-    if (!kotaSatiri[1].includes('!isRetry')) {
-        throw new Error('kota koşulu isRetry\'yi muaf tutmuyor — tekrar denemeleri kotayı yer');
+    if (!kotaSatiri[1].includes('!retryMuaf')) {
+        throw new Error('kota koşulu retryMuaf kullanmıyor — ya açık geri geldi ya da meşru zincir kotayı yiyor');
     }
-    if (!/if \(!isRetry\) anonFreeIpCache\.set/.test(src)) {
-        throw new Error('anon IP tavanı tekrar denemesinde de tüketiliyor');
+    if (kotaSatiri[1].includes('!isRetry')) {
+        throw new Error('kota koşulunda hâlâ ham !isRetry var — açık geri gelmiş');
+    }
+    if (!/if \(!retryMuaf\) anonFreeIpCache\.set/.test(src)) {
+        throw new Error('anon IP tavanı retryMuaf kullanmıyor — anonFree+retry açığı geri gelmiş');
     }
 });
 

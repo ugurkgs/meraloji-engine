@@ -49,7 +49,7 @@ for (;;) {
     i++;
 }
 const BLOK_ORJ = SRC.slice(BAS, son);
-for (const iz of ['clickHour', 'staleSaat', '_staleHour', 'applySanitization']) {
+for (const iz of ['clickHour', 'staleSaat', '_staleHour', '_gonder']) {
     if (!BLOK_ORJ.includes(iz)) throw new Error(`Sökülen blok "${iz}" içermiyor`);
 }
 
@@ -101,12 +101,12 @@ function calistir({ clickHour, dolusaatler, gLat = '40.33', gLon = '42.59' }) {
     // gerçekte olmayan bir ortamda koşardı.
     const fn = new Function('cache', 'clickHour', 'gLat', 'gLon', 'res',
         'applySanitization', 'isProUser', 'console',
-        'listeyiSurumeGoreKes', '_istemciSurum',
+        '_gonder',
         blokAktif + '\nreturn null;');
     fn(cache, clickHour, gLat, gLon, res,
        (x) => ({ ...x, sanitize: true }), true,
        { log: (...a) => kayit.konsol.push(a.join(' ')) },
-       KAPI, 46);
+       (d) => ({ ...KAPI(d, 46), sanitize: true }));
     return kayit;
 }
 
@@ -169,7 +169,7 @@ const MUTASYONLAR = [
     // (`listeyiSurumeGoreKes`). Eski dize aranmaya devam etseydi replace SESSİZCE
     // hiçbir şey yapmaz, mutasyon kırmızıya dönmez ve test kendini kandırırdı.
     ['sanitizasyon atlanırsa (PRO verisi sizar)',
-        b => b.replace('...applySanitization(listeyiSurumeGoreKes(staleData, _istemciSurum), isProUser),', '...staleData,')],
+        b => b.replace('..._gonder(staleData),', '...staleData,')],
     ['yas hesabi modulosuz olursa',
         b => b.replace('const yas = (clickHour - staleSaat + 24) % 24;', 'const yas = clickHour - staleSaat;')],
 ];

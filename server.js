@@ -2045,6 +2045,74 @@ const comebackTrialCache = new NodeCache({ stdTTL: 86400 });
 const anonFreeIpCache = new NodeCache({ stdTTL: 86400 });
 const ANON_FREE_IP_DAILY_MAX = 30;
 
+// ── TEKRAR DENEMESİ HAKKI (source=retry) ─────────────────────────────────
+// [2026-08-22 açık · 2026-08-23 kapatıldı]
+//
+// AÇIK NEYDİ: `source` bir QUERY PARAMETRESİ, yani tamamen istemcinin yazdığı
+// bir değer. Sunucu onu doğrulamadan "bu isteği sayma" emri olarak kabul
+// ediyordu. Sonuç:
+//     /api/forecast?lat=..&lon=..&anonFree=true&source=retry
+// Bu URL ile HESAPSIZ biri sınırsız TAM PRO verisi çekebiliyordu: kota kapısı
+// atlanıyor, anonim IP sayacı hiç artmıyor, tavan hiç dolmuyordu.
+//
+// ÇÖZÜM: hakkı artık SUNUCU veriyor. Kotaya sayılan bir yanıt eksik veri
+// bildirdiğinde (dataQuality) o kimlik+hücre için 3 adet, 60 saniyelik hak
+// açılır. `source=retry` yalnız o hak varken muaftır; hak yoksa NORMAL
+// TIKLAMA sayılır.
+//
+// MEŞRU KULLANICI ETKİLENMEZ — istemcinin zinciri (MainActivity, [4.9]):
+// aynı hücre için 3 sn / 5 sn / 10 sn sonra en fazla 3 deneme. En geç 10.
+// saniyede biter, hak 60 saniye yaşar: 6 kat pay. Adet de birebir 3.
+//
+// RETRY YANITLARI HAKKI YENİDEN AÇMAZ (`retryHakkiAc` yalnız isRetry=false
+// yolunda çağrılır). Açsaydı saldırgan sonsuz döngü kurardı: her retry bir
+// sonrakinin hakkını doğururdu.
+//
+// SALDIRGAN İÇİN KALAN PAY: 3 bedava retry almak için önce 1 tane kotaya
+// sayılan istek harcaması gerekir — sınırsız değil, 3 kat çarpan, üstelik
+// yalnız veri gerçekten eksikken.
+//
+// PRO ABONELER: kota kapısı `!req.isPremium && !req.isGracePeriod` koşuluna
+// bağlı, yani PRO ve deneme süresindekiler bu yolun HİÇBİRİNE girmez. Onlar
+// için hiçbir şey değişmez.
+const RETRY_HAK_ADET = 3;
+const RETRY_HAK_MS   = 60 * 1000;
+const retryHakCache  = new NodeCache({ stdTTL: 120, checkperiod: 60 });
+
+const _retryAnahtar = (kimlik, hucre) => `rh_${kimlik}_${hucre}`;
+
+/**
+ * Kotaya sayılan bir yanıt eksik veri bildiriyorsa hak açar.
+ * İstemcinin zinciri `satelliteSst` VEYA `chlorophyll` false olduğunda
+ * kuruluyor (bkz. DataQuality.eksikVarMi) — ikisine de bakılır. Yalnız SST'ye
+ * bakılsaydı klorofilin eksik olduğu noktalarda denemeler kotadan düşerdi.
+ */
+function retryHakkiAc(kimlik, hucre, data) {
+    if (!kimlik || !hucre || !data) return;
+    const dq = data.dataQuality;
+    if (!dq) return;
+    if (dq.satelliteSst !== false && dq.chlorophyll !== false) return;   // eksik yok
+    retryHakCache.set(_retryAnahtar(kimlik, hucre),
+                      { kalan: RETRY_HAK_ADET, biter: Date.now() + RETRY_HAK_MS });
+}
+
+/** Hak varsa BİR adet tüketir ve true döner. Yoksa false — istek sayılır. */
+function retryHakkiTuket(kimlik, hucre) {
+    if (!kimlik || !hucre) return false;
+    const k = _retryAnahtar(kimlik, hucre);
+    const h = retryHakCache.get(k);
+    if (!h || typeof h.kalan !== 'number' || h.kalan <= 0 || Date.now() > h.biter) return false;
+    const kalan = h.kalan - 1;
+    if (kalan <= 0) {
+        retryHakCache.del(k);
+    } else {
+        // TTL'i UZATMA: pencere ilk yanıtta başladı, tüketim onu ötelememeli.
+        const kalanSn = Math.max(1, Math.ceil((h.biter - Date.now()) / 1000));
+        retryHakCache.set(k, { kalan, biter: h.biter }, kalanSn);
+    }
+    return true;
+}
+
 // ── GELİŞTİRİCİ BYPASS LİSTESİ ───────────────────────────────────────────
 const DEVELOPER_UIDS = ['zhCzPS20wneS2njZKVGFAwOvc5m2'];
 
@@ -5811,6 +5879,22 @@ app.get('/api/forecast', async (req, res) => {
         const isRetry = req.query.source === 'retry';
         const logUser = req.user ? (req.user.email || req.user.uid) : 'anonim';
 
+        // ── Tekrar denemesi hakkı — bkz. retryHakkiAc / retryHakkiTuket ──
+        // Kimlik: giriş yapmışta uid, anonimde IP. IP `req.ip`'ten alınıyor
+        // (Express `trust proxy` ile proxy'nin yazdığı gerçek adres); istemcinin
+        // gönderdiği ham `X-Forwarded-For` başlığına GÜVENİLMEZ.
+        // Hücre: sunucunun kendi ızgarası. İstemci zinciri de aynı hassasiyeti
+        // (%.2f) kullandığı ve AYNI koordinatı tekrar istediği için birebir eşleşir.
+        const _kimlik = req.user ? ('u_' + req.user.uid) : ('i_' + (req.ip || 'bilinmiyor'));
+        const _hucre  = (() => { const g = snapToGrid(lat, lon); return g.gLat + '_' + g.gLon; })();
+        // TÜKETİR: retry ise ve hak varsa muaf olur. Bu satır isteğin başında bir
+        // kez çalışır; aşağıdaki İKİ koruma da (kota kapısı + anonim IP tavanı)
+        // aynı sonucu kullanır, yani tek retry tek hak yer.
+        const retryMuaf = isRetry && retryHakkiTuket(_kimlik, _hucre);
+        if (isRetry && !retryMuaf) {
+            console.log(`[RETRY] [${logUser}] hak YOK (${_hucre}) → normal istek sayılıyor`);
+        }
+
         // [YENİ] Son görülen konumu kaydet — kıyı bildirimi cron'u bunu kullanır.
         // Ateşle-ve-unut; bu satır analiz akışını hiçbir koşulda etkilemez.
         // Oto-yükleme isteklerinde YAZILMIYOR: kullanıcının bilinçli seçimi değil,
@@ -5844,7 +5928,12 @@ app.get('/api/forecast', async (req, res) => {
         //   • autoload (sıcak başlangıç) sayılmaz — kullanıcı tıklaması değil
         //   • retry (4.9 tekrar denemesi) sayılmaz — aynı gerekçe, bkz. isRetry
         //   • db yoksa AÇIK KALIR (altyapı hatası kullanıcıyı kilitlemesin)
-        if (req.user && !req.isPremium && !req.isGracePeriod && !isAutoLoad && !isRetry && db) {
+        // [2026-08-23] `!isRetry` → `!retryMuaf`. Fark: retry artık kendiliğinden
+        // muaf DEĞİL, yalnız sunucunun açtığı hakkı tükettiyse muaf. Hak yoksa
+        // koşul true olur ve istek normal tıklama gibi sayılır.
+        // PRO/deneme kullanıcıları bu kapıya zaten hiç girmiyor (aşağıdaki iki
+        // olumsuzlama) — onlar için değişen tek şey yok.
+        if (req.user && !req.isPremium && !req.isGracePeriod && !isAutoLoad && !retryMuaf && db) {
             try {
                 const uid = req.user.uid;
                 const today = new Date().toISOString().split('T')[0];
@@ -5910,7 +5999,13 @@ app.get('/api/forecast', async (req, res) => {
                 if (used < ANON_FREE_IP_DAILY_MAX) {
                     // Tekrar denemesi tavanı TÜKETMEZ — hakkı ilk istek zaten ödedi.
                     // Sayılsaydı tek analiz 4 hak yer, 30'luk tavan 7 analize düşerdi.
-                    if (!isRetry) anonFreeIpCache.set(key, used + 1);
+                    //
+                    // [2026-08-23] `!isRetry` → `!retryMuaf`. ASIL AÇIK BURADAYDI:
+                    // `?anonFree=true&source=retry` ile sayaç hiç artmıyor, `used`
+                    // sonsuza kadar 0'da kalıyor ve tavan hiç dolmuyordu — hesapsız
+                    // biri sınırsız tam PRO verisi çekebiliyordu. Artık yalnız
+                    // sunucunun açtığı hakkı tüketen retry bedava.
+                    if (!retryMuaf) anonFreeIpCache.set(key, used + 1);
                     anonFreeGranted = true;
                 } else {
                     console.log(`[ANON-FREE] ⚠️ ${ip} günlük tavanı aştı (${used}/${ANON_FREE_IP_DAILY_MAX}) → sanitize edilmiş veri`);
@@ -5921,6 +6016,23 @@ app.get('/api/forecast', async (req, res) => {
         // Uzun balık listesi sürüm kapısı — bkz. listeyiSurumeGoreKes.
         // Tek yerde okunup dört gönderim noktasına da uygulanıyor.
         const _istemciSurum = istemciSurumKodu(req);
+
+        /**
+         * TEK GÖNDERİM YOLU — dört çıkışın dördü de buradan geçer:
+         * taze yanıt · önbellek isabeti · taze derinlikli birleştirme · bayat veri.
+         *
+         * NEDEN SARMALAYICI: hakkın açılması yalnız bir yola konsaydı, önbellekten
+         * dönen yanıtta hak açılmaz, istemcinin 3 denemesi kotadan düşer ve
+         * ücretsiz kullanıcının günlük 2 hakkı 1'e inerdi. Aynı hata sınıfı uzun
+         * liste kapısında da vardı; orada da dört yol birden bağlanmıştı.
+         *
+         * Hak YALNIZ retry OLMAYAN isteklerde açılır — retry'ın kendi yanıtı yeni
+         * hak doğurursa zincir hiç bitmez.
+         */
+        const _gonder = (data) => {
+            if (!isRetry) retryHakkiAc(_kimlik, _hucre, data);
+            return applySanitization(listeyiSurumeGoreKes(data, _istemciSurum), isProUser);
+        };
 
         // Cache varsa hava/deniz verisini oradan al, ama derinliği taze çek
         if (cachedData) {
@@ -5944,11 +6056,11 @@ app.get('/api/forecast', async (req, res) => {
                         if (merged.forecast && merged.forecast.length > 0 && merged.forecast[0].fishList) {
                             merged.forecast[0].fishList = merged.forecast[0].fishList.map(f => ({ ...f }));
                         }
-                        return res.json(applySanitization(listeyiSurumeGoreKes(merged, _istemciSurum), isProUser));
+                        return res.json(_gonder(merged));
                     }
                 } catch (e) { }
             }
-            return res.json(applySanitization(listeyiSurumeGoreKes(cachedData, _istemciSurum), isProUser));
+            return res.json(_gonder(cachedData));
         }
 
         // ── OFFLİNE KONUM ANALİZİ ─────────────────────────────────────────
@@ -6098,7 +6210,7 @@ app.get('/api/forecast', async (req, res) => {
                 // gösterebilsin diye. Eskiden yalnız _stale vardı ve istemci onu hiç
                 // kullanmıyordu; kullanıcı saatler öncesinin verisini "ŞİMDİ" sanıyordu.
                 return res.json({
-                    ...applySanitization(listeyiSurumeGoreKes(staleData, _istemciSurum), isProUser),
+                    ..._gonder(staleData),
                     _stale: true,
                     _staleHour: staleSaat,
                     _staleAgeHours: yas
@@ -7418,7 +7530,7 @@ app.get('/api/forecast', async (req, res) => {
             cache.set(`raw_marine_${gLat}_${gLon}`, marine, 10800);
         }
 
-        res.json(applySanitization(listeyiSurumeGoreKes(rawResponseData, _istemciSurum), isProUser));
+        res.json(_gonder(rawResponseData));
 
         // [4.9] Yanıt GÖNDERİLDİKTEN SONRA: NOAA 2 saniyede yetişemediyse arka planda
         // uzun timeout ile bir kez daha dene ve önbelleğe yaz. Kullanıcı beklemiyor;
