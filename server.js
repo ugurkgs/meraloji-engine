@@ -5988,8 +5988,23 @@ app.get('/api/forecast', async (req, res) => {
         // aynı kalır. Tavana takılan da hata almaz, yalnızca ücretsiz seviye veri alır.
         let anonFreeGranted = false;
         if (!req.user && req.query.anonFree === 'true') {
-            const fwd = req.headers['x-forwarded-for'];
-            const ip = (typeof fwd === 'string' && fwd.length ? fwd.split(',')[0] : '').trim() || req.ip || 'unknown';
+            // [2026-08-23 GÜVENLİK] Eskiden `X-Forwarded-For` başlığının SOL UCU
+            // okunuyordu:
+            //     fwd.split(',')[0]
+            // Zincirin sol ucu İSTEMCİNİN YAZDIĞI değerdir; Render gerçek adresi
+            // sağ uca ekler. Yani saldırgan her istekte uydurma bir başlık yollayıp
+            // yeni bir kova açabiliyordu — 30'luk tavan hiç bağlamıyordu.
+            // Canlıda doğrulandı: tavanı dolmuş IP «kısıtlı» alırken
+            // `X-Forwarded-For: 5.5.5.5` yollayan aynı makine tam PRO verisi aldı.
+            //
+            // `req.ip` doğru değeri veriyor: satır ~1104'te `app.set('trust proxy', 1)`
+            // kurulu, yani Express zincirin SAĞ ucundaki (proxy'nin yazdığı) adresi
+            // alıyor ve bu taklit edilemiyor.
+            //
+            // MEŞRU KULLANICIDA DEĞİŞİKLİK YOK: başlık göndermeyen normal istemcide
+            // Render tek girdilik bir zincir yazar, o da `req.ip` ile aynıdır —
+            // anahtar birebir aynı kalır.
+            const ip = req.ip || 'unknown';
             if (ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') {
                 // localhost muaf — iç cron çağrıları kotayı yemesin (aynı gerekçe: limiter [D3])
                 anonFreeGranted = true;
