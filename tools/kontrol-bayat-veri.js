@@ -55,6 +55,33 @@ for (const iz of ['clickHour', 'staleSaat', '_staleHour', 'applySanitization']) 
 
 let blokAktif = BLOK_ORJ;
 
+// Sürüm kapısı fonksiyonu — bloğun içinden çağrılıyor, KAYNAKTAN sökülür.
+const KAPI = (() => {
+    const al = (ad) => {
+        const b = SRC.indexOf('function ' + ad + '(');
+        if (b === -1) throw new Error(`function ${ad}( bulunamadı`);
+        let d = 0;
+        for (let i = SRC.indexOf('{', b); i < SRC.length; i++) {
+            if (SRC[i] === '{') d++;
+            else if (SRC[i] === '}') { d--; if (d === 0) return SRC.slice(b, i + 1); }
+        }
+        throw new Error(`${ad} kapanmıyor`);
+    };
+    const say = (ad) => {
+        const m = new RegExp('const ' + ad + '\\s*=\\s*(\\d+)').exec(SRC);
+        if (!m) throw new Error(`const ${ad} bulunamadı`);
+        return parseInt(m[1], 10);
+    };
+    return eval(`(function () {
+        const UZUN_LISTE_N = ${say('UZUN_LISTE_N')},
+              ESKI_LISTE_N = ${say('ESKI_LISTE_N')},
+              UZUN_LISTE_MIN_SURUM = ${say('UZUN_LISTE_MIN_SURUM')};
+        ${al('istemciYeter')}
+        ${al('listeyiSurumeGoreKes')}
+        return listeyiSurumeGoreKes;
+    })()`);
+})();
+
 /** Bloğu, sahte bir önbellek ve res ile çalıştırır. */
 function calistir({ clickHour, dolusaatler, gLat = '40.33', gLon = '42.59' }) {
     const kayit = { json: null, konsol: [] };
@@ -67,12 +94,19 @@ function calistir({ clickHour, dolusaatler, gLat = '40.33', gLon = '42.59' }) {
         }
     };
     const res = { json: (o) => { kayit.json = o; return o; } };
+    // [2026-08-22] Blok artık gönderim anında `listeyiSurumeGoreKes` çağırıyor
+    // (uzun balık listesi sürüm kapısı). Bu test BAYAT VERİ SEÇİMİNİ ölçüyor,
+    // kapıyı değil — kapının kendi testi tools/kontrol-uzun-liste.js. Burada
+    // GERÇEK fonksiyon kaynaktan sökülüp veriliyor; sahte geçilseydi blok
+    // gerçekte olmayan bir ortamda koşardı.
     const fn = new Function('cache', 'clickHour', 'gLat', 'gLon', 'res',
         'applySanitization', 'isProUser', 'console',
+        'listeyiSurumeGoreKes', '_istemciSurum',
         blokAktif + '\nreturn null;');
     fn(cache, clickHour, gLat, gLon, res,
        (x) => ({ ...x, sanitize: true }), true,
-       { log: (...a) => kayit.konsol.push(a.join(' ')) });
+       { log: (...a) => kayit.konsol.push(a.join(' ')) },
+       KAPI, 46);
     return kayit;
 }
 
@@ -131,8 +165,11 @@ const MUTASYONLAR = [
         b => b.replace('_stale: true,', '')],
     ['_staleHour kaldırılırsa',
         b => b.replace('_staleHour: staleSaat,', '')],
+    // [2026-08-22] Hedef metin güncellendi: blok artık sürüm kapısından geçiyor
+    // (`listeyiSurumeGoreKes`). Eski dize aranmaya devam etseydi replace SESSİZCE
+    // hiçbir şey yapmaz, mutasyon kırmızıya dönmez ve test kendini kandırırdı.
     ['sanitizasyon atlanırsa (PRO verisi sizar)',
-        b => b.replace('...applySanitization(staleData, isProUser),', '...staleData,')],
+        b => b.replace('...applySanitization(listeyiSurumeGoreKes(staleData, _istemciSurum), isProUser),', '...staleData,')],
     ['yas hesabi modulosuz olursa',
         b => b.replace('const yas = (clickHour - staleSaat + 24) % 24;', 'const yas = clickHour - staleSaat;')],
 ];
