@@ -48,15 +48,16 @@ const BLOK = BLOK_HAM
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/\/\/[^\r\n]*/g, '');
 
-console.log('── 1. Kova anahtarı istemci başlığından türetilmiyor ──');
+console.log('── 1. Kova anahtarı zincirin SAĞ ucundan alınıyor ──');
 {
-    bekle(!/x-forwarded-for/i.test(BLOK),
-        'blok hâlâ x-forwarded-for okuyor — anahtar taklit edilebilir');
-    bekle(!/split\(','\)/.test(BLOK),
-        'blokta hâlâ zincir ayrıştırması var (split) — sol uç istemcinin yazdığı değerdir');
-    bekle(/const ip = req\.ip \|\| /.test(BLOK),
-        'ip `req.ip`\'ten alınmıyor');
-    console.log('  ip kaynağı: req.ip · başlık okuması yok ✓');
+    // Sol uç (`[0]`) saldırganın yazdığı değerdir — orada olmamalı.
+    bekle(!/split\(','\)\[0\]/.test(BLOK) && !/_zincir\[0\]/.test(BLOK),
+        'zincirin SOL ucu okunuyor — anahtar taklit edilebilir (asıl açık buydu)');
+    bekle(/_zincir\[_zincir\.length - 1\]/.test(BLOK),
+        'zincirin sağ ucu okunmuyor — proxy\'nin yazdığı gerçek adres kullanılmalı');
+    bekle(/req\.ip/.test(BLOK),
+        'başlık yokken req.ip\'e düşülmüyor (iç çağrı / yerel geliştirme)');
+    console.log('  ip kaynağı: X-Forwarded-For son girdi, yoksa req.ip ✓');
 }
 
 console.log('\n── 2. trust proxy kurulu (req.ip anlamlı olsun diye) ──');
@@ -88,19 +89,32 @@ console.log('\n── 5. Tavan sayacı retry hakkına bağlı kalmalı (önceki 
     console.log('  sayaç retryMuaf ile korunuyor ✓');
 }
 
-console.log('\n── 6. DAVRANIŞ: sahte başlık anahtarı değiştiremiyor ──');
+console.log('\n── 6. DAVRANIŞ: kaynaktaki ip mantığı gerçek isteklerle ──');
 {
-    // Bloktaki ip satırının AYNISINI, sahte başlıklı sahte req ile koşturuyoruz.
-    const ipSatiri = /const ip = ([^;]+);/.exec(BLOK)[1];
-    const anahtar = (req) => {
-        const ip = eval(ipSatiri.replace(/req\.ip/g, JSON.stringify(req.ip)));
-        return `af_${ip}_2026-08-23`;
+    // Blokta ip'yi üreten ÜÇ satırı söküp aynen koşturuyoruz — kopya değil.
+    const parca = BLOK.match(/const _xff = [\s\S]*?const ip = [^;]+;/);
+    if (!parca) throw new Error('ip üretim bloğu bulunamadı');
+    const ipUret = (req) => {
+        let kod = parca[0].replace(/req\.headers/g, 'H').replace(/req\.ip/g, 'R');
+        return Function('H', 'R', kod + ' return ip;')(req.headers, req.ip);
     };
-    const gercek = { ip: '88.88.88.88', headers: { 'x-forwarded-for': '5.5.5.5' } };
-    const temiz  = { ip: '88.88.88.88', headers: {} };
-    bekle(anahtar(gercek) === anahtar(temiz),
-        'sahte başlık anahtarı değiştirdi: ' + anahtar(gercek) + ' ≠ ' + anahtar(temiz));
-    console.log('  başlıklı ve başlıksız aynı anahtar: ' + anahtar(temiz) + ' ✓');
+
+    // Render davranışı: saldırgan soldan yazar, proxy gerçek adresi SONA ekler.
+    const sahteli = { ip: '88.88.88.88', headers: { 'x-forwarded-for': '5.5.5.5, 88.88.88.88' } };
+    const temiz   = { ip: '88.88.88.88', headers: { 'x-forwarded-for': '88.88.88.88' } };
+    bekle(ipUret(sahteli) === '88.88.88.88',
+        'sahte sol girdi kazandı: ' + ipUret(sahteli) + ' (taklit hâlâ mümkün)');
+    bekle(ipUret(sahteli) === ipUret(temiz),
+        'sahte başlık farklı kova açtı: ' + ipUret(sahteli) + ' ≠ ' + ipUret(temiz));
+    console.log('  «5.5.5.5, 88.88.88.88» → ' + ipUret(sahteli) + ' (sağ uç) ✓');
+
+    // Çok katmanlı zincir: yine en sağdaki
+    const cok = { ip: 'x', headers: { 'x-forwarded-for': '1.1.1.1, 2.2.2.2, 88.88.88.88' } };
+    bekle(ipUret(cok) === '88.88.88.88', 'çok katmanlı zincirde sağ uç alınmadı: ' + ipUret(cok));
+
+    // Başlık yoksa req.ip
+    bekle(ipUret({ ip: '10.0.0.5', headers: {} }) === '10.0.0.5', 'başlık yokken req.ip kullanılmadı');
+    console.log('  başlık yok → req.ip ✓ · çok katmanlı zincir → sağ uç ✓');
 }
 
 console.log('\n── POZİTİF KONTROL (denetim kırmızı verebiliyor mu) ──');

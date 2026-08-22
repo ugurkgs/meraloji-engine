@@ -6001,10 +6001,27 @@ app.get('/api/forecast', async (req, res) => {
             // kurulu, yani Express zincirin SAĞ ucundaki (proxy'nin yazdığı) adresi
             // alıyor ve bu taklit edilemiyor.
             //
-            // MEŞRU KULLANICIDA DEĞİŞİKLİK YOK: başlık göndermeyen normal istemcide
-            // Render tek girdilik bir zincir yazar, o da `req.ip` ile aynıdır —
-            // anahtar birebir aynı kalır.
-            const ip = req.ip || 'unknown';
+            // [2026-08-23 · İKİNCİ DENEME] İlk düzeltme `req.ip` kullanıyordu ve
+            // CANLIDA TAVANI TAMAMEN DEVRE DIŞI BIRAKTI: 34 art arda istek de tam
+            // PRO verisi aldı. Sebep, aşağıdaki localhost muafiyeti — Render'da
+            // `req.ip` loopback dönüyor, istek "iç cron" sanılıp sayaç hiç artmıyor.
+            //
+            // Altyapının ne döndürdüğünü uzaktan göremediğimiz için artık TAHMİNE
+            // DAYANMAYAN yol kullanılıyor: zincirin SAĞ UCU.
+            //
+            //   X-Forwarded-For: "5.5.5.5, 88.88.88.88"
+            //                     ^saldırgan   ^proxy'nin yazdığı GERÇEK adres
+            //
+            // Saldırgan zincire soldan istediğini ekleyebilir ama proxy'nin SONA
+            // eklediğini silemez veya değiştiremez. Bu yüzden sağ uç güvenlidir;
+            // eski kod tam tersini, sol ucu okuyordu.
+            //
+            // Başlık hiç yoksa `req.ip`e düşülür (yerel geliştirme, iç çağrı).
+            const _xff = req.headers['x-forwarded-for'];
+            const _zincir = (typeof _xff === 'string' && _xff.length)
+                ? _xff.split(',').map(s => s.trim()).filter(Boolean)
+                : [];
+            const ip = _zincir.length ? _zincir[_zincir.length - 1] : (req.ip || 'unknown');
             if (ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') {
                 // localhost muaf — iç cron çağrıları kotayı yemesin (aynı gerekçe: limiter [D3])
                 anonFreeGranted = true;
