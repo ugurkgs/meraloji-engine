@@ -5656,6 +5656,60 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
 // API ROUTES
 // ═══════════════════════════════════════════════════════════════════════════
 
+// ── UZUN BALIK LİSTESİ — «Yalnızca hedef türler» süzgeci için ────────────
+// [2026-08-22] İstemcideki süzgeç yalnız GELEN listeyi süzebiliyor. Sunucu 10
+// balık gönderdiğinde süzgeç açılınca liste 4'e düşüyordu: 11. sıradaki hedef
+// türler pakette YOK, istemci onları çağıramaz.
+//
+// ÖLÇÜM (9 nokta × 4 mevsim × gündüz/gece = 72 senaryo): 10 hedef tür toplamak
+// için tam listede inilmesi gereken sıra — ortanca 15, en kötü 25.
+//     10 balık → senaryoların %1'i · 15 → %51 · 20 → %96 · 25 → %100
+// Bu yüzden 25.
+//
+// YALNIZ «ŞİMDİ» VE BUGÜN uzun gönderiliyor; 1-6. günler 10'da kalıyor.
+// Gerekçe payload: bir balık kaydı ~2 KB ve bunun %65'i scoreDetails. Sekiz
+// listenin hepsini 25'e çıkarmak 160 KB → 400 KB demekti. Bu haliyle 225 KB.
+// scoreDetails KIRPILMADI: fetchFishDetails API'ye gitmiyor, detay penceresini
+// elindeki kayıttan çiziyor — kırpsaydık süzgecin öne çıkardığı balığın analiz
+// ekranı boş kalırdı.
+const UZUN_LISTE_N = 25;         // «şimdi» + bugün
+const ESKI_LISTE_N = 10;         // eski istemcilerin gördüğü uzunluk (bugünkü davranış)
+const UZUN_LISTE_MIN_SURUM = 46; // süzgeci taşıyan ilk istemci sürümü
+
+/**
+ * Uzun listeyi ESKİ istemciler için 10'a indirir.
+ *
+ * NEDEN GÖNDERİM ANINDA: önbelleğe HAM (25'lik) gövde yazılıyor ve kesme burada
+ * yapılıyor. Böylece önbellek anahtarına sürüm koymaya gerek kalmıyor — aksi
+ * halde aynı nokta için iki ayrı kayıt tutulur, ve yeni istemcinin doldurduğu
+ * önbellek eski istemciye servis edilirse onun listesi uzardı (DEVIR-17 §1.1'de
+ * dört çökmeye yol açan tuzağın aynısı).
+ *
+ * MUTASYON YOK: önbellekteki nesne paylaşılıyor; slice yerinde yapılsaydı
+ * önbellek kalıcı olarak bozulurdu. Sığ kopya üretilir.
+ *
+ * Sürüm bilinmiyorsa ESKİ sayılır — bilinmeyeni yeni saymak, tam da çökmeye yol
+ * açan varsayımdır.
+ */
+function listeyiSurumeGoreKes(data, istemciSurumu) {
+    if (!data) return data;
+    if (istemciYeter(istemciSurumu, UZUN_LISTE_MIN_SURUM)) return data;   // yeni istemci: dokunma
+    const uzunMu = l => Array.isArray(l) && l.length > ESKI_LISTE_N;
+    let dokunuldu = false;
+    const out = { ...data };
+    if (data.instant && uzunMu(data.instant.fishList)) {
+        out.instant = { ...data.instant, fishList: data.instant.fishList.slice(0, ESKI_LISTE_N) };
+        dokunuldu = true;
+    }
+    if (Array.isArray(data.forecast)) {
+        out.forecast = data.forecast.map(g => {
+            if (g && uzunMu(g.fishList)) { dokunuldu = true; return { ...g, fishList: g.fishList.slice(0, ESKI_LISTE_N) }; }
+            return g;
+        });
+    }
+    return dokunuldu ? out : data;
+}
+
 function applySanitization(data, isProUser) {
     if (isProUser) {
         return { ...data, isPro: true };
@@ -5673,6 +5727,13 @@ function applySanitization(data, isProUser) {
         base.fishList = day.fishList.slice(0, 3).map(f => ({
             key: f.key, name: f.name, icon: f.icon, score: f.score, // Balık skorunu göster
             category: f.category, reason: f.reason,
+            // [2026-08-22] targetClass beyaz listeye eklendi. PRO kullanıcı bu alanı
+            // zaten alıyordu; ücretsiz kullanıcının gövdesi burada YENİDEN KURULDUĞU
+            // için alan düşüyordu ve "Yalnızca hedef türler" süzgeci onlarda ölü
+            // kalıyordu. Bu bir VERİ SIZINTISI DEĞİL: 'target'/'bycatch' etiketi
+            // ücretli bir bilgi değil, listenin nasıl okunacağını söyleyen bir sınıf.
+            // Eski APK alanı tanımlamadığı için Gson onu sessizce yok sayar.
+            targetClass: f.targetClass,
             triggers: f.triggers ? f.triggers.slice(0, 2) : [],
             hourlyScores: isProUser ? (f.hourlyScores || []) : [],
             bestHour: f.bestHour,
@@ -5690,6 +5751,13 @@ function applySanitization(data, isProUser) {
         base.fishList = data.instant.fishList.slice(0, 3).map(f => ({
             key: f.key, name: f.name, icon: f.icon, score: f.score, // Balık skorunu göster
             category: f.category, reason: f.reason,
+            // [2026-08-22] targetClass beyaz listeye eklendi. PRO kullanıcı bu alanı
+            // zaten alıyordu; ücretsiz kullanıcının gövdesi burada YENİDEN KURULDUĞU
+            // için alan düşüyordu ve "Yalnızca hedef türler" süzgeci onlarda ölü
+            // kalıyordu. Bu bir VERİ SIZINTISI DEĞİL: 'target'/'bycatch' etiketi
+            // ücretli bir bilgi değil, listenin nasıl okunacağını söyleyen bir sınıf.
+            // Eski APK alanı tanımlamadığı için Gson onu sessizce yok sayar.
+            targetClass: f.targetClass,
             triggers: f.triggers ? f.triggers.slice(0, 2) : [],
             hourlyScores: isProUser ? (f.hourlyScores || []) : [],
             bestHour: f.bestHour,
@@ -5850,6 +5918,9 @@ app.get('/api/forecast', async (req, res) => {
             }
         }
         const isProUser = req.isPremium || req.isGracePeriod || anonFreeGranted;
+        // Uzun balık listesi sürüm kapısı — bkz. listeyiSurumeGoreKes.
+        // Tek yerde okunup dört gönderim noktasına da uygulanıyor.
+        const _istemciSurum = istemciSurumKodu(req);
 
         // Cache varsa hava/deniz verisini oradan al, ama derinliği taze çek
         if (cachedData) {
@@ -5873,11 +5944,11 @@ app.get('/api/forecast', async (req, res) => {
                         if (merged.forecast && merged.forecast.length > 0 && merged.forecast[0].fishList) {
                             merged.forecast[0].fishList = merged.forecast[0].fishList.map(f => ({ ...f }));
                         }
-                        return res.json(applySanitization(merged, isProUser));
+                        return res.json(applySanitization(listeyiSurumeGoreKes(merged, _istemciSurum), isProUser));
                     }
                 } catch (e) { }
             }
-            return res.json(applySanitization(cachedData, isProUser));
+            return res.json(applySanitization(listeyiSurumeGoreKes(cachedData, _istemciSurum), isProUser));
         }
 
         // ── OFFLİNE KONUM ANALİZİ ─────────────────────────────────────────
@@ -6027,7 +6098,7 @@ app.get('/api/forecast', async (req, res) => {
                 // gösterebilsin diye. Eskiden yalnız _stale vardı ve istemci onu hiç
                 // kullanmıyordu; kullanıcı saatler öncesinin verisini "ŞİMDİ" sanıyordu.
                 return res.json({
-                    ...applySanitization(staleData, isProUser),
+                    ...applySanitization(listeyiSurumeGoreKes(staleData, _istemciSurum), isProUser),
                     _stale: true,
                     _staleHour: staleSaat,
                     _staleAgeHours: yas
@@ -6702,7 +6773,10 @@ app.get('/api/forecast', async (req, res) => {
                     basinMismatch: havzaUyusmazligi,
                     waveCapped: !!(fetchTavan && fetchTavan.kirpilanSaat > 0)
                 }), tacticKey, tacticData, weatherSummary,
-                fishList: fishList.slice(0, 10), moonPhase: moon.phase,
+                // BUGÜN (i === 0) uzun gider; 1-6. günler 10'da kalır (payload).
+                // Kesme gönderim anında sürüme göre yeniden yapılıyor — bkz.
+                // listeyiSurumeGoreKes.
+                fishList: fishList.slice(0, i === 0 ? UZUN_LISTE_N : ESKI_LISTE_N), moonPhase: moon.phase,
                 moonPhaseName: getMoonPhaseName(moon.phase, lang), airTemp: tempAir, timeMode,
                 // [madde 3] Günün gündüz/gece hava sıcaklığı ortalaması. airTemp
                 // (analiz saatinin değeri) yerine DEĞİL, ONA EK olarak gidiyor.
@@ -6982,7 +7056,9 @@ app.get('/api/forecast', async (req, res) => {
                 // ÜST KISIM: Sadece İkonlu TR Hava Durumu (Ham veri gelmez)
                 weatherSummary: getWeatherIconicDescription(i_weatherCode, lang, i_rain, i_wind),
                 tacticKey: instantTacticKey, tacticData: instantTacticData,
-                fishList: instantFishList.slice(0, 10),
+                // «Şimdi» listesi uzun gider — süzgeç açıldığında 10 hedef tür
+                // kalabilmesi için. Eski istemciye gönderimde 10'a iniyor.
+                fishList: instantFishList.slice(0, UZUN_LISTE_N),
                 temp: i_tempWater,
                 wave: parseFloat(i_wave.toFixed(2)),
                 airTemp: safeNum(weather.hourly?.temperature_2m?.[instantIdx]),
@@ -7342,7 +7418,7 @@ app.get('/api/forecast', async (req, res) => {
             cache.set(`raw_marine_${gLat}_${gLon}`, marine, 10800);
         }
 
-        res.json(applySanitization(rawResponseData, isProUser));
+        res.json(applySanitization(listeyiSurumeGoreKes(rawResponseData, _istemciSurum), isProUser));
 
         // [4.9] Yanıt GÖNDERİLDİKTEN SONRA: NOAA 2 saniyede yetişemediyse arka planda
         // uzun timeout ile bir kez daha dene ve önbelleğe yaz. Kullanıcı beklemiyor;
