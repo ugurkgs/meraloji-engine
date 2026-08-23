@@ -10429,7 +10429,18 @@ const SHORE_ALERT_ENABLED = process.env.SHORE_ALERT_ENABLED === 'true';
 // DİKKAT: ağustos verisi kovalanmış olduğu için (70-79 tek bant) 75'in GERÇEK
 // oranı ölçülmedi — 0 ile %4.7 arasında. Bu yüzden aşağıdaki dağılım logu
 // 5 puanlık bantlara çevrildi; eylülde net sayı elde olacak.
-const SHORE_ALERT_ESIK = parseFloat(process.env.SHORE_ALERT_ESIK || '75');
+// [2026-08-23] GEÇERSİZ DEĞER KORUMASI. Render'a sayı olmayan bir şey yazılırsa
+// (ör. "%78") parseFloat NaN döner ve `skor >= NaN` HER ZAMAN false olur:
+// bildirim sessizce ölür, hata da vermez, log'da "eşik %NaN" yazar. Artık
+// varsayılana düşüyor ve açılışta bağırıyor.
+// Eşik Render env'de KALIYOR — değeri değiştirmek için koda dokunulmaz,
+// yalnız SHORE_ALERT_ESIK güncellenir ve servis yeniden başlatılır.
+const _shoreEsikHam  = process.env.SHORE_ALERT_ESIK;
+const _shoreEsikSayi = parseFloat(_shoreEsikHam);
+const SHORE_ALERT_ESIK = Number.isFinite(_shoreEsikSayi) ? _shoreEsikSayi : 75;
+if (_shoreEsikHam !== undefined && !Number.isFinite(_shoreEsikSayi)) {
+    console.error(`[SHORE-ALERT] ⚠ SHORE_ALERT_ESIK="${_shoreEsikHam}" sayıya çevrilemedi — %75 kullanılıyor. Render'a yalnız sayı yaz (ör. 78), "%" koyma.`);
+}
 const SHORE_ALERT_YEREL_SAAT = parseInt(process.env.SHORE_ALERT_SAAT || '17', 10);
 const SHORE_ALERT_SOGUMA_SAAT = 20;    // aynı kullanıcıya tekrar göndermeden önce
 const SHORE_ALERT_KONUM_TAZE_GUN = 21; // bundan eski lastSeen kullanılmaz
@@ -10449,14 +10460,28 @@ cron.schedule('5 * * * *', async () => {
             Date.now() - SHORE_ALERT_KONUM_TAZE_GUN * 86400000).get();
         if (snap.empty) return;
 
+        const t0 = Date.now();
+        const toplamKullanici = snap.docs.length;
         const nowUtcSaat = new Date().getUTCHours();
         const adaylar = [];
-        let icBolgeElenen = 0;
-        let kapatanElenen = 0;
+        // [2026-08-23] SAYAÇLAR + SÜZGEÇ SIRASI.
+        // Eskiden yalnız iki sayaç vardı ve sıra yüzünden YANLIŞ ŞEYİ sayıyorlardı:
+        // iç bölge ve kapatma kontrolü SAAT kontrolünden önce çalıştığı için
+        // "4 iç bölge adayı elendi" satırı o saatin adaylarını değil, dünyadaki
+        // TÜM iç bölge kullanıcılarını sayıyordu — 5 adaylık bir koşuda bile 4
+        // yazıyordu ve log'u anlamsızlaştırıyordu.
+        // Saat süzgeci öne alındı. Aday listesi BİREBİR AYNI kalır (süzgeçler
+        // AND'li, sıra sonucu değiştirmez); değişen tek şey sayaçların anlamı.
+        // Yan fayda: her saat yüzlerce kullanıcı için boşuna poligon testi yok.
+        let saatUymayan = 0, tokensuz = 0, kapatanElenen = 0, icBolgeElenen = 0, sogumada = 0;
         for (const doc of snap.docs) {
             const d = doc.data();
             const ls = d.lastSeen;
-            if (!ls || !d.fcmToken) continue;
+            if (!ls || !d.fcmToken) { tokensuz++; continue; }
+            // Kullanıcının kendi yerel saati — boylamdan türetilir
+            const ofset = Math.round(ls.lon / 15);
+            const yerel = ((nowUtcSaat + ofset) % 24 + 24) % 24;
+            if (yerel !== SHORE_ALERT_YEREL_SAAT) { saatUymayan++; continue; }
             // [1.5 — KAPATMA SEÇENEĞİ, 2026-08-11] Bu bildirim kullanıcının SON
             // KONUMUNA dayanıyor; konuma dayalı bir bildirimi kapatamamak kabul
             // edilemezdi ve özelliğin önündeki son engel buydu.
@@ -10476,27 +10501,31 @@ cron.schedule('5 * * * *', async () => {
             // 39.370, 32.377) aday listesine giriyor, hücresi için boşuna forecast
             // çağrısı yapılıyor ve skor 0 dönüyordu. Zararsızdı (0 asla eşiği geçmez)
             // ama 2026-08 koşusunda adayların %14'ü buydu — hem gereksiz iş hem de
-            // dağılım raporunu kirletiyor, eşik kararını zorlaştırıyordu.
+            // raporu kirletiyor, eşik kararını zorlaştırıyordu.
             // analyzeLocationOffline bellek içi poligon testi, maliyeti yok.
             if (analyzeLocationOffline(ls.lat, ls.lon).status === 'INLAND') { icBolgeElenen++; continue; }
-            // Kullanıcının kendi yerel saati — boylamdan türetilir
-            const ofset = Math.round(ls.lon / 15);
-            const yerel = ((nowUtcSaat + ofset) % 24 + 24) % 24;
-            if (yerel !== SHORE_ALERT_YEREL_SAAT) continue;
             // Soğuma: aynı kullanıcıya çok sık gönderme
             const son = d.lastShoreAlert?.at || 0;
-            if (Date.now() - son < SHORE_ALERT_SOGUMA_SAAT * 3600000) continue;
+            if (Date.now() - son < SHORE_ALERT_SOGUMA_SAAT * 3600000) { sogumada++; continue; }
             adaylar.push({ uid: doc.id, token: d.fcmToken, lang: d.lang || 'tr',
                 lat: ls.lat, lon: ls.lon, hucre: shoreHucreAnahtari(ls.lat, ls.lon) });
         }
-        if (!adaylar.length) return;
+        // [2026-08-23] Eskiden burada SESSİZCE return ediliyordu: cron gerçekten
+        // çalıştı mı, yoksa hiç mi tetiklenmedi — log'dan ayırt edilemiyordu.
+        // Tek satır bırakılıyor.
+        if (!adaylar.length) {
+            console.log(`[SHORE-ALERT/${mod}] aday yok — ${toplamKullanici} kullanıcı tarandı, ` +
+                `${saatUymayan} kişide yerel saat ${SHORE_ALERT_YEREL_SAAT}:00 değil` +
+                (sogumada       ? ` · ${sogumada} soğumada`            : '') +
+                (kapatanElenen  ? ` · ${kapatanElenen} kapatmış`       : '') +
+                (icBolgeElenen  ? ` · ${icBolgeElenen} iç bölgede`     : ''));
+            return;
+        }
 
         // ── 2) HÜCRE bazında skor — kullanıcı başına DEĞİL ────────────────
         const hucreler = new Map();
         for (const a of adaylar) if (!hucreler.has(a.hucre)) hucreler.set(a.hucre, a);
-        console.log(`[SHORE-ALERT/${mod}] ${adaylar.length} aday → ${hucreler.size} farklı hücre` +
-            (icBolgeElenen ? `  · ${icBolgeElenen} iç bölge adayı elendi` : '') +
-            (kapatanElenen ? `  · ${kapatanElenen} kullanıcı bildirimi kapatmış` : ''));
+        console.log(`[SHORE-ALERT/${mod}] ▶ koşu başladı — ${adaylar.length} aday, ${hucreler.size} hücre analiz edilecek (~${Math.round(hucreler.size * 2.3)} sn sürer)`);
 
         const port = process.env.PORT || 3000;
         const hucreSkor = new Map();
@@ -10514,18 +10543,41 @@ cron.schedule('5 * * * *', async () => {
 
         // ── 3) Eşiği geçenler ────────────────────────────────────────────
         const gidecek = adaylar.filter(a => (hucreSkor.get(a.hucre) || 0) >= SHORE_ALERT_ESIK);
-        // [1.5] Bantlar 10 → 5 puan. 10'luk bantla "%70+:3" görülüyordu ama o üçünün
-        // 71 mi 78 mi olduğu bilinmiyordu, dolayısıyla 75 eşiğinin oranı hesaplanamıyordu.
-        // 5 puanlık bantla eşik kararı doğrudan logdan okunabiliyor.
-        const dagilim = {};
-        for (const s of hucreSkor.values()) {
-            const b = Math.floor(s / 5) * 5; dagilim[b] = (dagilim[b] || 0) + 1;
-        }
-        // Eşiği geçen hücre sayısını da ayrıca yaz — bant toplamı yapmak zorunda kalma.
-        const esigiGecenHucre = [...hucreSkor.values()].filter(v => v >= SHORE_ALERT_ESIK).length;
-        console.log(`[SHORE-ALERT/${mod}] eşik %${SHORE_ALERT_ESIK} → ${gidecek.length}/${adaylar.length} kullanıcı` +
-            `  (${esigiGecenHucre}/${hucreSkor.size} hücre)` +
-            `  · hücre skor dağılımı: ${Object.entries(dagilim).sort((a, b) => b[0] - a[0]).map(([k, v]) => `%${k}+:${v}`).join(' ')}`);
+        // ── Rapor ─────────────────────────────────────────────────────────
+        // [2026-08-23] Tek eşiğe göre yeniden yazıldı. Eskiden 5 puanlık bant
+        // dağılımı basılıyordu ("%65+:7") ama o yazım KÜMÜLATİF sanılıyordu;
+        // aslında "65-69 arası 7 hücre" demekti ve yanlış okunuyordu.
+        // Eşik Render'dan tek değer olarak geliyor ve "başka eşikte ne olurdu"
+        // sorusu sorulmuyor — dağılım yerine EN YÜKSEK ÜÇ HÜCRE yazılıyor:
+        // "0 kişiye gitti" satırının eşiğe 2 puan mı 40 puan mı uzak kaldığını
+        // tek bakışta gösteriyor. Karar için gereken tek ek bilgi buydu.
+        const basarisizHucre = hucreler.size - hucreSkor.size;
+        const sirali = [...hucreSkor.entries()].sort((a, b) => b[1] - a[1]);
+        const enIyiler = sirali.slice(0, 3).map(([anahtar, s]) => {
+            const o = hucreler.get(anahtar);
+            const ad = (o && getCoastalLocality(o.lat, o.lon, o.lang)) || anahtar;
+            return `%${Math.round(s)} ${ad}`;
+        }).join('  ·  ');
+        const enYuksek = sirali.length ? sirali[0][1] : 0;
+        const esigiGecenHucre = sirali.filter(([, v]) => v >= SHORE_ALERT_ESIK).length;
+        const sure = Math.round((Date.now() - t0) / 1000);
+        const P = (s) => console.log(`[SHORE-ALERT/${mod}] ${s}`);
+        P('══════════════ 🎣 KIYI BİLDİRİMİ RAPORU ══════════════');
+        P(SHORE_ALERT_ENABLED
+            ? ' MOD     : CANLI — bildirim gerçekten gönderiliyor'
+            : ' MOD     : KURU — hiçbir bildirim gönderilmiyor, yalnız rapor');
+        P(` TARANDI : ${toplamKullanici} kullanıcı  (son ${SHORE_ALERT_KONUM_TAZE_GUN} günde uygulamayı açmış olanlar)`);
+        P(` ELENDİ  : ${saatUymayan} kişide yerel saat ${SHORE_ALERT_YEREL_SAAT}:00 değil  ·  ${icBolgeElenen} iç bölgede` +
+          `  ·  ${kapatanElenen} bildirimi kapatmış  ·  ${sogumada} soğumada (${SHORE_ALERT_SOGUMA_SAAT} sa)  ·  ${tokensuz} konum/token yok`);
+        P(` ADAY    : ${adaylar.length} kullanıcı → ${hucreler.size} ayrı hücre  (5 km ızgara; aynı hücredekiler tek analizle)`);
+        P(` EŞİK    : %${SHORE_ALERT_ESIK}   (Render env: SHORE_ALERT_ESIK)`);
+        P(` SONUÇ   : ${gidecek.length} kullanıcıya bildirim ${SHORE_ALERT_ENABLED ? 'GİDİYOR' : 'giderdi (kuru)'}` +
+          `   ·   ${esigiGecenHucre}/${hucreSkor.size} hücre eşiği geçti`);
+        P(` EN İYİ  : ${enIyiler || '—'}` +
+          (esigiGecenHucre === 0 && sirali.length
+              ? `   →  eşiğe ${(SHORE_ALERT_ESIK - enYuksek).toFixed(1)} puan kaldı` : ''));
+        P(` SÜRE    : ${sure} sn` + (basarisizHucre ? `   ⚠ ${basarisizHucre} hücrenin skoru ALINAMADI` : ''));
+        P('══════════════════════════════════════════════════════');
 
         // ── 4) Gönder (veya kuru çalışmada yalnızca kaydet) ───────────────
         for (const a of gidecek) {
