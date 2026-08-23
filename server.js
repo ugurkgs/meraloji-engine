@@ -5989,6 +5989,35 @@ app.get('/api/forecast', async (req, res) => {
         let anonFreeGranted = false;
         if (!req.user && req.query.anonFree === 'true') {
             const fwd = req.headers['x-forwarded-for'];
+
+            // ── [GEÇİCİ TEŞHİS · 2026-08-23] KALDIRILACAK ────────────────────
+            // Bu satır bir SORUYU cevaplamak için var: Render'da gerçek istemci
+            // adresi hangi alanda?
+            //
+            // NEDEN GEREKLİ: anonFree kovasının anahtarı şu an X-Forwarded-For'un
+            // SOL ucundan üretiliyor ve sol uç istemcinin yazdığı değerdir — yani
+            // tavan sahte başlıkla aşılabiliyor (canlıda kanıtlandı: tavanı dolmuş
+            // makine `X-Forwarded-For: 5.5.5.5` ile tam PRO verisi aldı).
+            //
+            // Düzeltme iki kez denendi ve İKİSİ DE TAVANI TAMAMEN DEVRE DIŞI
+            // BIRAKTI (`req.ip` → loopback → localhost muafiyeti; zincirin sağ ucu
+            // → tek girdilik başlıkta yine saldırganın değeri). Üçüncü kez tahmin
+            // yürütmek yerine ÖLÇÜYORUZ — DEVIR-17 §1.2: "iz olmadan tahmin
+            // yürütme".
+            //
+            // Bakılacak: xff zincirinde kaç girdi var, Render sona kendi ekliyor
+            // mu, req.ip ve socket hangi değeri veriyor. Doğru kaynak seçildikten
+            // SONRA bu satır silinecek.
+            //
+            // Kişisel veri notu: IP zaten aşağıdaki tavan logunda yazılıyor
+            // ([ANON-FREE] ⚠️ ...), yeni bir veri türü açılmıyor.
+            console.log('[ANON-IP-TESHIS]'
+                + ' xff='    + JSON.stringify(fwd || null)
+                + ' req.ip=' + JSON.stringify(req.ip || null)
+                + ' ips='    + JSON.stringify(req.ips || [])
+                + ' socket=' + JSON.stringify((req.socket && req.socket.remoteAddress) || null));
+            // ─────────────────────────────────────────────────────────────────
+
             const ip = (typeof fwd === 'string' && fwd.length ? fwd.split(',')[0] : '').trim() || req.ip || 'unknown';
             if (ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') {
                 // localhost muaf — iç cron çağrıları kotayı yemesin (aynı gerekçe: limiter [D3])
