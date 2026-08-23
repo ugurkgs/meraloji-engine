@@ -2,7 +2,7 @@
 
 > **Son güncelleme: 2026-08-23.** Başlangıçta 6 bulgu vardı ve hiçbiri
 > düzeltilmemişti; bugün itibarıyla **10 bulgu, 3'ü kapalı, 1'i yanlış alarm.**
-> Güncel tablo §0'da, sıra ve öncelik §11'de.
+> Güncel tablo §0'da, sıra ve öncelik §12'de.
 >
 > Kapsam: `server.js` (10.550 satır, denetim commit'i `4051f7a`) ve istemci
 > tarafından ilgili yollar. Her bulgunun altında **nasıl bulunduğu** yazılı —
@@ -20,14 +20,15 @@
 |---|---|---|---|
 | 1 | Günlük kota `source=retry` ile atlanıyor | 🔴 yüksek | ✅ **KAPANDI** `96211bb` |
 | 2 | anonFree IP tavanı sahte başlıkla aşılıyor | 🔴 yüksek | ✅ **KAPANDI** `4babee4` |
-| 3 | `visibility` çift anahtar — §2.1 düzeltmesi ölü kod | 🟡 orta | açık |
-| 4 | Tarama sayacı cache-hit yolunda atomik değil | 🟡 orta | açık |
-| 5 | `isComebackTrial` çift anahtar | 🟢 düşük | açık |
-| 6 | Marine indeksinde koruma yok — 7 gün eski veri riski | 🟢 düşük | açık |
+| 3 | `visibility` çift anahtar — §2.1 düzeltmesi ölü kod | 🟡 orta | ✅ **KAPANDI** |
+| 4 | Tarama sayacı cache-hit yolunda atomik değil | 🟡 orta | ⏸ ertelendi |
+| 5 | `isComebackTrial` çift anahtar | 🟢 düşük | ✅ **KAPANDI** |
+| 6 | Marine indeksinde koruma yok — 7 gün eski veri riski | 🟢 düşük | ⏸ ertelendi |
 | 7 | Ay evresi üç ayrı yerde farklı bantlarla + Türkçe dize yanlış | 🟡 orta | ✅ **KAPANDI** istemci 4.4.0 |
 | 8 | ~~Gelgit: gösterilen değer skora giren değer değil~~ | — | ❌ **YANLIŞ ALARM** |
 | 9 | `express-rate-limit` de aynı kök sebepten hiç bağlamıyor | 🔴 yüksek | açık |
 | 10 | anonFree sayacı her deploy'da sıfırlanıyor | 🟡 orta | açık |
+| 11 | `species.js` — 15 çift `huntingMode`, 6'sı farklı değerli | 🟢 düşük | açık |
 
 **Kapanan ikisi para kaybettiriyordu:** hesapsız biri sınırsız tam PRO verisi
 çekebiliyordu. İkisi de canlıda doğrulanarak kapatıldı (aşağıda).
@@ -165,7 +166,15 @@ kullanıldı. Doğru cevap yukarıdaki kutuda — ve **ölçülerek** bulundu.
 
 ---
 
-## 3 · `visibility` iki kez yazılmış — §2.1 düzeltmesi ölü kod 🟡
+## 3 · `visibility` iki kez yazılmış — §2.1 düzeltmesi ölü kod 🟡 ✅ KAPANDI
+
+> **KAPATILDI 2026-08-23.** İkinci satır silindi; artık üstündeki dürüst satır
+> çalışıyor ve görüş mesafesi bilinmiyorken `null` gidiyor (§2.1).
+>
+> **Yayındaki APK güvenli — doğrulandı:** alan üç modelde de `Double`
+> (kutulanmış) ve YEDİ okuma yerinin hepsi `!= null` korumalı
+> (`MainActivity` 1886, 1890, 1896, 2000, 4873, 4905, 5024). Null gelince
+> kendi 20.0 varsayılanlarına düşüyorlar, çökme yok.
 
 **Yer:** `server.js:7135` ve `7162` — **aynı** `hourlyTimeline.push({...})`
 nesnesi (nesne ~7102'de başlıyor).
@@ -196,7 +205,10 @@ istemcinin null karşılığı 20.0 km (`MainActivity.java:4697`).
 
 ---
 
-## 4 · Tarama sayacı cache-hit yolunda atomik değil — kayıp güncelleme 🟡
+## 4 · Tarama sayacı cache-hit yolunda atomik değil — kayıp güncelleme 🟡 ⏸
+
+> **ERTELENDİ (kullanıcı kararı, 2026-08-23).** Tek satırlık değişiklik ama
+> Firestore yazma davranışını değiştiriyor; testiyle birlikte ayrı ele alınacak.
 
 **Yer:** `server.js:8988` (hatalı) ile `8998` (doğru) — arada 10 satır var.
 
@@ -226,7 +238,11 @@ ile hesaplanmaya devam edebilir.
 
 ---
 
-## 5 · `isComebackTrial` iki kez yazılmış 🟢
+## 5 · `isComebackTrial` iki kez yazılmış 🟢 ✅ KAPANDI
+
+> **KAPATILDI 2026-08-23.** Ham değeri yazan ikinci satır silindi, `=== true`
+> normalizasyonu artık çalışıyor. Davranış değişikliği yok (değer zaten her
+> koşulda boolean'dı); ileriye dönük tip güvenliği için yapıldı.
 
 **Yer:** `server.js:7932` ve `7941` — `/api/subscription-status` yanıt nesnesi.
 
@@ -245,7 +261,11 @@ sayı) istemciye beklenmedik tip gider.
 
 ---
 
-## 6 · Marine indeksinde koruma yok — sessizce 7 gün eski veri 🟢
+## 6 · Marine indeksinde koruma yok — sessizce 7 gün eski veri 🟢 ⏸
+
+> **ERTELENDİ (kullanıcı kararı, 2026-08-23).** Önce karar gerekiyor: marine
+> indeksi bulunamazsa 168'e mi düşülecek, yoksa deniz alanları `null` mı
+> gidecek. İkincisi §2.1'e daha uygun ama yayındaki APK'da test ister.
 
 **Yer:** `server.js:6172` · `7596` · `8741` (üç çağrı yerinin üçünde de aynı)
 
@@ -462,20 +482,68 @@ maliyeti ölçülmeli.
 
 ---
 
-## 11 · Önerilen sıra
+## 11 · `species.js` — 15 çift `huntingMode`, altısı farklı değerli 🟢
+
+**Nasıl bulundu:** `tools/cift-anahtar.js` kalıcı hâle getirilip `species.js` ve
+`rivermouth.js` üzerinde de koşturuldu. `server.js` temiz çıktı, `species.js`
+15 çift anahtar verdi — hepsi `huntingMode`.
+
+```js
+"blastal": {
+    photoId: 340, category: "KAYALIK",
+    huntingMode: "visual",          // ← sessizce yok sayılıyor
+
+    huntingMode: "visual",peakHours: "DAY", ...
+}
+```
+
+Toplu bir düzenlemede satırın iki kez eklenmesinden kalma. **Dokuzunda iki değer
+aynı** (zararsız), ama **altısında FARKLI** — yani ilki sessizce eziliyor:
+
+| tür | yazan | motorun gördüğü |
+|---|---|---|
+| `rock_greenling` | visual | **ambush** |
+| `tusk_ice` | visual | **ambush** |
+| `med_blue_shark` | chemosensory | **visual** |
+| `redsea_hawksbill_turtle` | visual | **ambush** |
+| `redsea_blue_triggerfish` | visual | **ambush** |
+| `nz_blue_cod` | visual | **ambush** |
+
+**Etkilediği yerler:** `huntingMode === 'visual'` iki katmanda okunuyor — gece
+avcılarının `moonPref` türetimi (`server.js:4185`) ve sis/görüş cezası
+(`server.js:5240`, `isVisualPredator`). Yani bu altı türün ay ışığı ve sis
+davranışı yazılanın tersi.
+
+**ÖNCELİK DÜŞÜK — Türk sularını etkilemiyor:** altısının da `regions` alanı boş
+ya da `NEW_ZEALAND`; habitat kutuları Türkiye deniz alanıyla kesişmiyor.
+Kızıldeniz, Yeni Zelanda, Nordik buz suları ve Pasifik türleri.
+
+**DİKKAT — `species.js` dokunulmaz listesinde.** Tür parametrelerini değiştirmek
+`CLAUDE-KONSOL-TALIMATI §3` gereği onay ister. Burada yapılacak şey bir
+parametre değişikliği değil, **yinelenen satırın silinmesi** — ama hangi değerin
+doğru olduğu (yazılan mı, çalışan mı) tür bazında karara bağlanmalı.
+
+---
+
+## 12 · Önerilen sıra
 
 ```
-✅ 1 → 2   KAPANDI (2026-08-23, ikisi de canlıda doğrulandı)
+✅ 1 · 2   KAPANDI (2026-08-23, ikisi de canlıda doğrulandı)
+✅ 3 · 5   KAPANDI (2026-08-23, çift anahtarlar silindi)
 ✅ 7       KAPANDI (istemci 4.4.0)
 ❌ 8       yanlış alarm, geri çekildi
 
    9       SIRADAKİ — 1 ve 2 ile aynı kök sebep, kapsamı daha geniş
              (tüm /api/ uçları). ÖNCE ÖLÇ: bir analiz kaç istek üretiyor,
              ağır kullanan PRO 15 dk / 100 eşiğine çarpıyor mu.
-   4       tarama sayacı — atomik olmayan yazma, kayıp güncelleme
+   4       ⏸ ertelendi — tarama sayacı, atomik olmayan yazma
+   6       ⏸ ertelendi — marine indeks koruması (önce davranış kararı)
    10      anonFree sayacı deploy'da sıfırlanıyor (Firestore'a taşıma kararı)
-   3 → 6 → 5   veri dürüstlüğü ve temizlik
+   11      species.js çift huntingMode (Türk sularını etkilemiyor)
 ```
+
+**Kalan beşinin hiçbiri acil değil.** 9 hariç: o, fiilen kapalı olan bir
+korumayı açacağı için hem en etkilisi hem en dikkat isteyeni.
 
 **9 için uyarı:** düzeltme, bugüne kadar fiilen hiç uygulanmamış bir sınırı
 AÇAR. Ölçmeden yapılırsa gerçek kullanıcılar habersiz 429 almaya başlar.
@@ -487,7 +555,7 @@ regresyonu (8 nokta × gündüz/gece × 385 tür = 6160 skor, sapma 0) koşturul
 
 ---
 
-## 12 · Denetimde temiz çıkanlar
+## 13 · Denetimde temiz çıkanlar
 
 Bulgu üretmeyen ama bakılan yerler — bir dahaki denetimde tekrar taranmasın:
 
@@ -507,7 +575,7 @@ Bulgu üretmeyen ama bakılan yerler — bir dahaki denetimde tekrar taranmasın
 - Sınırsız büyüyen bellek yapısı yok: `_dogrulamaRetleri` süreli, NodeCache'ler
   TTL'li
 
-## 13 · Yöntem notu
+## 14 · Yöntem notu
 
 Çift anahtar bulguları (§3, §5) elle değil, bu iş için yazılan bir tarayıcıyla
 bulundu (dize/yorum/şablon ifadesi atlar, süslü parantez yığını tutar).

@@ -7455,7 +7455,17 @@ app.get('/api/forecast', async (req, res) => {
                         : null,
                     weatherCode: hCode,
                     weatherSummary: hSummary,
-                    visibility: safeNum(weather.hourly?.visibility?.[wIdx], 20000),
+                    // [2026-08-23] Burada İKİNCİ bir `visibility` vardı:
+                    //     visibility: safeNum(weather.hourly?.visibility?.[wIdx], 20000),
+                    // Aynı nesnede iki kez geçtiği için JS SON yazılanı alıyordu ve
+                    // yukarıdaki (~7431) §2.1 düzeltmesi — "veri yoksa null gider" —
+                    // ÖLÜ KODDU: görüş mesafesi bilinmiyorken hâlâ 20 km uyduruluyordu.
+                    // Silindi; artık yukarıdaki dürüst satır çalışıyor.
+                    //
+                    // YAYINDAKİ APK GÜVENLİ: alan üç modelde de `Double` (kutulanmış)
+                    // ve yedi okuma yerinin hepsi `!= null` korumalı
+                    // (MainActivity 1886, 1890, 1896, 2000, 4873, 4905, 5024) —
+                    // null gelince kendi 20.0 varsayılanına düşüyorlar.
                     cape: safeNum(weather.hourly?.cape?.[wIdx]),
                     // capeAlert daha önce timeline'a EKLENMİYORDU → oraj/yıldırım
                     // güvenlik uyarısı saatlik slider'da hiç görünmüyordu. Artık
@@ -8232,9 +8242,13 @@ app.get('/api/subscription-status', async (req, res) => {
         // yanlış sayı gösterir (eski kayıt 14 gün alır ama yeni APK 7 yazardı).
         // Bu kullanıcı için geçerli süre; bilinmiyorsa yeni kayıt süresi.
         trialDays: (typeof req.trialDays === 'number') ? req.trialDays : yeniKayitGraceGun(),
-        // Mevcut istemci bu alanı kullanmaz (Gson bilinmeyen alanı yok sayar).
-        // İleride "3 gün PRO açtık" dialogu eklenecekse hazır dursun diye var.
-        isComebackTrial: req.isComebackTrial,
+        // [2026-08-23] Burada İKİNCİ bir `isComebackTrial` vardı:
+        //     isComebackTrial: req.isComebackTrial,
+        // Aynı nesnede iki kez geçtiği için JS SON yazılanı alıyor ve yukarıdaki
+        // `=== true` normalizasyonu ölü kalıyordu. Şu an zararsızdı (değer 2054'te
+        // false, 2277'de true atanıyor, yani hep boolean) ama alan ileride
+        // boolean olmayan bir şey alırsa (zaman damgası, sayı) istemciye
+        // beklenmedik tip giderdi. Silindi; normalize eden satır yukarıda duruyor.
         uid: req.user.uid,
         email: req.user.email,
         name: req.user.name || req.user.email,
