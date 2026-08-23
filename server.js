@@ -5990,35 +5990,43 @@ app.get('/api/forecast', async (req, res) => {
         if (!req.user && req.query.anonFree === 'true') {
             const fwd = req.headers['x-forwarded-for'];
 
-            // ── [GEÇİCİ TEŞHİS · 2026-08-23] KALDIRILACAK ────────────────────
-            // Bu satır bir SORUYU cevaplamak için var: Render'da gerçek istemci
-            // adresi hangi alanda?
-            //
-            // NEDEN GEREKLİ: anonFree kovasının anahtarı şu an X-Forwarded-For'un
-            // SOL ucundan üretiliyor ve sol uç istemcinin yazdığı değerdir — yani
-            // tavan sahte başlıkla aşılabiliyor (canlıda kanıtlandı: tavanı dolmuş
-            // makine `X-Forwarded-For: 5.5.5.5` ile tam PRO verisi aldı).
-            //
-            // Düzeltme iki kez denendi ve İKİSİ DE TAVANI TAMAMEN DEVRE DIŞI
-            // BIRAKTI (`req.ip` → loopback → localhost muafiyeti; zincirin sağ ucu
-            // → tek girdilik başlıkta yine saldırganın değeri). Üçüncü kez tahmin
-            // yürütmek yerine ÖLÇÜYORUZ — DEVIR-17 §1.2: "iz olmadan tahmin
-            // yürütme".
-            //
-            // Bakılacak: xff zincirinde kaç girdi var, Render sona kendi ekliyor
-            // mu, req.ip ve socket hangi değeri veriyor. Doğru kaynak seçildikten
-            // SONRA bu satır silinecek.
-            //
-            // Kişisel veri notu: IP zaten aşağıdaki tavan logunda yazılıyor
-            // ([ANON-FREE] ⚠️ ...), yeni bir veri türü açılmıyor.
-            console.log('[ANON-IP-TESHIS]'
-                + ' xff='    + JSON.stringify(fwd || null)
-                + ' req.ip=' + JSON.stringify(req.ip || null)
-                + ' ips='    + JSON.stringify(req.ips || [])
-                + ' socket=' + JSON.stringify((req.socket && req.socket.remoteAddress) || null));
-            // ─────────────────────────────────────────────────────────────────
 
-            const ip = (typeof fwd === 'string' && fwd.length ? fwd.split(',')[0] : '').trim() || req.ip || 'unknown';
+            // ── [2026-08-23] GERÇEK İSTEMCİ ADRESİ — ÖLÇÜLEREK BULUNDU ──────
+            // Canlı logdan çıkan zincir yapısı (üç ayrı istekte aynı):
+            //
+            //   xff = "5.5.5.5, 6.6.6.6, 151.250.74.93, 172.71.144.81"
+            //          └─ saldırganın eklediği ─┘  └gerçek┘  └Cloudflare┘
+            //
+            // Mimari: istemci → Cloudflare → Render. Cloudflare zincire gerçek
+            // istemciyi yazıyor, Render de kendi gördüğü karşı ucu (Cloudflare
+            // çıkışını) SONA ekliyor. Yani doğru değer SONDAN İKİNCİ.
+            //
+            // Saldırgan zincire yalnız SOLDAN ekleyebilir; sağ taraftaki iki
+            // girdiyi ne silebilir ne değiştirebilir. Bu yüzden sağdan sayarak
+            // bulunan bu değer taklit edilemez — eski kod tam tersini, en soldaki
+            // (yani saldırganın yazdığı) değeri okuyordu.
+            //
+            // NEDEN req.ip DEĞİL: `trust proxy` 1 olduğu için req.ip en sağdaki
+            // Cloudflare çıkışını veriyor ve o adres HER İSTEKTE DEĞİŞİYOR
+            // (172.71.144.81 · 172.71.247.128 · 172.68.195.178). req.ip denendi ve
+            // tavanı tamamen devre dışı bıraktı; bu satır o hatanın kaydıdır.
+            //
+            // `cf-connecting-ip` öncelikli: Cloudflare bu başlığı istemcininkini
+            // EZEREK yazar, dolayısıyla zincir sayımından da sağlamdır.
+            //
+            // ARTIK RİSK: Render'ın *.onrender.com adresi Cloudflare'i atlayarak
+            // doğrudan çağrılırsa zincir kısalır ve sondan ikinci saldırganın
+            // değeri olabilir. Kapatmak için Cloudflare IP aralığı doğrulaması
+            // gerekir — ayrı iş, ACIKLAR dosyasına yazıldı.
+            const _cfIp = req.headers['cf-connecting-ip'];
+            const _zincir = (typeof fwd === 'string' && fwd.length)
+                ? fwd.split(',').map(s => s.trim()).filter(Boolean)
+                : [];
+            const ip = (typeof _cfIp === 'string' && _cfIp.trim())
+                ? _cfIp.trim()
+                : (_zincir.length >= 2 ? _zincir[_zincir.length - 2]
+                  : _zincir.length === 1 ? _zincir[0]
+                  : (req.ip || 'unknown'));
             if (ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') {
                 // localhost muaf — iç cron çağrıları kotayı yemesin (aynı gerekçe: limiter [D3])
                 anonFreeGranted = true;
