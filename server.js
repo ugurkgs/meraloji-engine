@@ -192,8 +192,11 @@ const SERVER_i18n = {
             body: (spot) => `${spot} bölgesinde basınç hızla düşüyor, balıklar aşırı iştahlı!`,
             dailyBestTitle: '🌟 Bugün En İyi Meran',
             dailyBestBody: (spot, score) => `Bugün ${spot} merasında balık aktivitesi %${score} seviyesinde! Fırsatı kaçırma.`,
-            shoreAlertTitle: '🎣 Yakınında Skor Yükseldi',
-            shoreAlertBody: (spot, score) => `${spot} skor %${score}. Şansını denemek ister misin?`
+            comebackTitle: (spot, gun, score) => `🎣 ${spot} · ${gun} %${score}`,
+            comebackBody: (spot, gun, score) =>
+                `Son analiz ettiğin noktada bu haftanın en iyi günü ${gun}. Bakmak ister misin?`,
+            days: { bugun: 'bugün', yarin: 'yarın', adlar:
+                ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'] }
         },
         tactic: {
             dominantNote: '⭐ Baskın tür tespit edildi — ticari değeri olan bir balık ise, av için ideal koşullar.',
@@ -365,8 +368,11 @@ const SERVER_i18n = {
             body: (spot) => `Pressure dropping fast at ${spot} — fish may be active!`,
             dailyBestTitle: '🌟 Best Spot Today',
             dailyBestBody: (spot, score) => `Fish activity at ${spot} is at ${score}% today! Don't miss out.`,
-            shoreAlertTitle: '🎣 Score Is Up Near You',
-            shoreAlertBody: (spot, score) => `${spot} is at ${score}%. Fancy trying your luck?`
+            comebackTitle: (spot, gun, score) => `🎣 ${spot} · ${gun} ${score}%`,
+            comebackBody: (spot, gun, score) =>
+                `${gun} is the best day this week at the spot you last checked. Want a look?`,
+            days: { bugun: 'today', yarin: 'tomorrow', adlar:
+                ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] }
         },
         tactic: {
             dominantNote: '⭐ Dominant species detected — if commercially valued, ideal conditions for a catch.',
@@ -538,8 +544,11 @@ const SERVER_i18n = {
             body: (spot) => `La presión cae rápido en ${spot} — ¡los peces pueden estar activos!`,
             dailyBestTitle: '🌟 Mejor lugar de hoy',
             dailyBestBody: (spot, score) => `¡La actividad de pesca en ${spot} es del ${score}% hoy! No te lo pierdas.`,
-            shoreAlertTitle: '🎣 La puntuación ha subido cerca de ti',
-            shoreAlertBody: (spot, score) => `${spot} está al ${score}%. ¿Te animas a probar suerte?`
+            comebackTitle: (spot, gun, score) => `🎣 ${spot} · ${gun} ${score}%`,
+            comebackBody: (spot, gun, score) =>
+                `El ${gun} es el mejor día de la semana en el punto que analizaste. ¿Lo vemos?`,
+            days: { bugun: 'hoy', yarin: 'mañana', adlar:
+                ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'] }
         },
         tactic: {
             dominantNote: '⭐ Especie dominante detectada — si tiene valor comercial, condiciones ideales.',
@@ -711,8 +720,11 @@ const SERVER_i18n = {
             body: (spot) => `Η πίεση πέφτει γρήγορα στο ${spot} — τα ψάρια μπορεί να είναι ενεργά!`,
             dailyBestTitle: '🌟 Καλύτερο σημείο σήμερα',
             dailyBestBody: (spot, score) => `Η δραστηριότητα των ψαριών στο ${spot} είναι στο ${score}% σήμερα! Μην το χάσετε.`,
-            shoreAlertTitle: '🎣 Η βαθμολογία ανέβηκε κοντά σου',
-            shoreAlertBody: (spot, score) => `${spot} στο ${score}%. Θέλεις να δοκιμάσεις την τύχη σου;`
+            comebackTitle: (spot, gun, score) => `🎣 ${spot} · ${gun} ${score}%`,
+            comebackBody: (spot, gun, score) =>
+                `${gun} είναι η καλύτερη μέρα της εβδομάδας στο σημείο που ανέλυσες. Να δούμε;`,
+            days: { bugun: 'σήμερα', yarin: 'αύριο', adlar:
+                ['Κυριακή', 'Δευτέρα', 'Τρίτη', 'Τετάρτη', 'Πέμπτη', 'Παρασκευή', 'Σάββατο'] }
         },
         tactic: {
             dominantNote: '⭐ Κυρίαρχο είδος εντοπίστηκε — ιδανικές συνθήκες για αλιεία.',
@@ -10390,60 +10402,81 @@ app.get('/api/hotspot', (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🎣 KIYI SKORU BİLDİRİMİ — kullanıcının son baktığı yerde skor yükselince haber ver
+// 🎣 SPOT HATIRLATMA — dönmeyen kullanıcıya son analiz ettiği noktayı hatırlat
 // ═══════════════════════════════════════════════════════════════════════════
 //
-// [YENİ 2026-08-07] "Urla Kıyısında Skor %72, Şansını Denemek İster misin"
+// [2026-08-23 · YENİDEN YAZILDI] Bu cron eskiden "kıyı skoru bildirimi"ydi:
+// HER kullanıcıya, her gün, yerel 17:00'de, son baktığı noktanın BUGÜNKÜ skoru
+// eşiği geçiyorsa bildirim gönderirdi. İki kusuru vardı:
 //
-// VARSAYILAN OLARAK KURU ÇALIŞMA. SHORE_ALERT_ENABLED=true env değişkeni
-// verilmedikçe HİÇBİR BİLDİRİM GÖNDERİLMEZ — yalnızca "kime ne giderdi"
-// raporu log'a ve Firestore'a yazılır. Eşik ve hacim ölçülmeden canlıya
-// açılmamalı: gönderilen bildirim geri alınamaz.
+//   1) "Kullanıcı geri geldi mi" diye HİÇ sormuyordu. Uygulamayı 10 dakika önce
+//      kapatmış birine de aynısı gidiyordu. Amaç kullanıcıyı geri getirmekti;
+//      aktif kullanıcıya günlük hava raporu atmak değil.
+//   2) Eşik 80'di ve pratikte HİÇ ateşlemiyordu. 2026-08-23 ölçümü: 16 gerçek
+//      kullanıcı noktası × 7 gün = 112 skorun en yükseği 73.8. Ağustos kuru
+//      çalışması da aynı sonucu vermişti (64 gözlem, 0 tetikleme). Hiç
+//      gönderilmeyen bir bildirim hiçbir kullanıcıyı geri getirmez.
 //
-// ── MALİYET ─────────────────────────────────────────────────────────────
-// Kullanıcı sayısı ≠ analiz sayısı. Kullanıcılar coğrafi olarak kümelenir ve
-// Open-Meteo çözünürlüğü zaten ~4-5 km — 2 km arayla duran iki kullanıcı AYNI
-// model hücresinden veri alır. O yüzden kullanıcı değil HÜCRE analiz edilir.
-// 1000 kullanıcı pratikte ~100-150 hücreye düşer; maliyet kullanıcı sayısıyla
-// neredeyse düz kalır.
+// ── YENİ KURGU ──────────────────────────────────────────────────────────────
+//   • Yalnız DÖNMEYEN kullanıcı: lastSeen.at 3-10 gün arası.
+//     3 günden yeni → balıkçı hafta içi iki gün girmez, bu normal, dokunma.
+//     10 günden eski → konum bayat (tatile gelip dönmüş olabilir), bırak.
+//   • BUGÜNE değil, 7 GÜNÜN EN İYİSİNE bakılır. Aynı çağrı zaten 7 günü
+//     getiriyordu, yalnız forecast[0] okunuyordu. 17:00'de "bugün 74" demek
+//     geç kalmış bir bilgidir; "Cumartesi 74" plan yapılabilir bir şeydir.
+//   • Taban 65 (GERI_DONUS_TABAN). Altındaysa hiç gönderilmez — Mersin'de
+//     yaşayan kullanıcıya "skor %35 oldu, gel" demek yalan olurdu. Coğrafi
+//     olarak talihsiz kullanıcıyı geri getirmenin yolu sahte iyi haber değil.
+//   • Yokluk dönemi başına EN FAZLA 1 bildirim. Yedi gün üst üste tabanı geçen
+//     bir Çeşme kullanıcısına 7 bildirim atmak kanalı yakmanın en hızlı yolu.
+//   • Kullanıcı geri gelince sayaç KENDİLİĞİNDEN sıfırlanır: analiz yapınca
+//     lastSeen.at yenilenir ve `lastComebackAlert.at > lastSeen.at` koşulu
+//     bozulur. Temizlenecek ayrı bir alan yok.
+//   • Saat: users/{uid}.utcOffsetSec (Open-Meteo'dan gelen, yaz saati dahil
+//     GERÇEK ofset). Boylam tahmini yalnız kaydı olmayana yedek. Eski kod
+//     sadece boylama bakıyordu ve Türkiye'nin batısı bildirimi 1 saat GEÇ
+//     alıyordu: lon 28.21 → round(28.21/15) = 2, oysa gerçek ofset 3.
 //
-// ── SAAT DİLİMİ ─────────────────────────────────────────────────────────
-// Mevcut cron'lar Türkiye saatine sabitlenmiş (`Date.now() + 3*3600*1000`).
-// Uygulama artık Endonezya ve İspanya'da da kullanılıyor; aynı mantık orada
-// gece 03:00'te bildirim gönderirdi. Burada saat dilimi kullanıcının kendi
-// boylamından türetiliyor (boylam/15 ≈ UTC ofseti) ve herkes kendi yerel
-// saatinde bildirim alır.
+// ── MALİYET ─────────────────────────────────────────────────────────────────
+// Firestore sorgusu doğrudan yokluk penceresini çekiyor (lastSeen.at üzerinde
+// çift eşitsizlik — tek alan, ek indeks gerekmiyor), yani tüm kullanıcılar
+// okunmuyor. Analiz KULLANICI değil HÜCRE başına: Open-Meteo çözünürlüğü ~5 km,
+// 2 km arayla duran iki kullanıcı aynı model hücresinden veri alır.
 //
-// ── APK GÜNCELLEMESİ GEREKMİYOR ─────────────────────────────────────────
+// ── APK GEREKMİYOR ──────────────────────────────────────────────────────────
 // Mevcut kanal ('meraloji_notifications') ve mevcut data.type ('daily_best')
-// kullanılıyor — uygulama bu ikisini zaten tanıyor, bildirime tıklayınca
-// doğru noktaya gider. Yeni bir kanal veya yeni bir type APK gerektirirdi.
-// Ayrıştırma analyticsLabel ile yapılıyor (Analytics tarafı, istemci değil).
+// kullanılıyor — 4.0.5 dahil tüm sürümler tanıyor, tıklayınca doğru noktaya
+// gider. BİLİNEN KISIT: uygulama o noktayı BUGÜN için açar, "Cumartesi"ye
+// kullanıcı kendisi geçer. data.targetDate gönderiliyor; ileride istemci onu
+// okuyup doğrudan o güne atlayabilir (eski sürümler bilinmeyen alanı yok sayar).
 const SHORE_ALERT_ENABLED = process.env.SHORE_ALERT_ENABLED === 'true';
-// [1.5] Varsayılan 80'den 75'e çekildi. 2026-08 kuru çalışma verisi (64 aday-gözlem,
-// üç ayrı koşu) eşik 80'de **hiç** tetiklenmediğini gösterdi — özellik o eşikte ölü.
-// Bantlar: %70-79 → 3 hücre (%4.7) · %60-69 → 14 · %50-59 → 20 · altı → 27.
-// 70 seçilseydi kullanıcı başına ~21 günde bir bildirim (ayda ~1.5) çıkardı; 60
-// ayda ~8 ederdi ve "istisnai koşul" iddiası anlamını kaybederdi.
-// 75, ikisinin arasında ve eylül sezonunda skorlar yükselirse tampon bırakıyor.
-// DİKKAT: ağustos verisi kovalanmış olduğu için (70-79 tek bant) 75'in GERÇEK
-// oranı ölçülmedi — 0 ile %4.7 arasında. Bu yüzden aşağıdaki dağılım logu
-// 5 puanlık bantlara çevrildi; eylülde net sayı elde olacak.
-// [2026-08-23] GEÇERSİZ DEĞER KORUMASI. Render'a sayı olmayan bir şey yazılırsa
-// (ör. "%78") parseFloat NaN döner ve `skor >= NaN` HER ZAMAN false olur:
-// bildirim sessizce ölür, hata da vermez, log'da "eşik %NaN" yazar. Artık
-// varsayılana düşüyor ve açılışta bağırıyor.
-// Eşik Render env'de KALIYOR — değeri değiştirmek için koda dokunulmaz,
-// yalnız SHORE_ALERT_ESIK güncellenir ve servis yeniden başlatılır.
-const _shoreEsikHam  = process.env.SHORE_ALERT_ESIK;
-const _shoreEsikSayi = parseFloat(_shoreEsikHam);
-const SHORE_ALERT_ESIK = Number.isFinite(_shoreEsikSayi) ? _shoreEsikSayi : 75;
-if (_shoreEsikHam !== undefined && !Number.isFinite(_shoreEsikSayi)) {
-    console.error(`[SHORE-ALERT] ⚠ SHORE_ALERT_ESIK="${_shoreEsikHam}" sayıya çevrilemedi — %75 kullanılıyor. Render'a yalnız sayı yaz (ör. 78), "%" koyma.`);
+
+// GEÇERSİZ DEĞER KORUMASI. Render'a "%65" gibi bir şey yazılırsa parseFloat NaN
+// döner ve `skor >= NaN` HER ZAMAN false olur: özellik hata vermeden sessizce
+// ölür, logda "taban %NaN" yazar. Varsayılana düşüp açılışta bağırıyoruz.
+function spotEnvSayi(ad, varsayilan) {
+    const ham = process.env[ad];
+    if (ham === undefined || ham === '') return varsayilan;
+    const s = parseFloat(ham);
+    if (!Number.isFinite(s)) {
+        console.error(`[SPOT-HATIRLATMA] ⚠ ${ad}="${ham}" sayıya çevrilemedi — ` +
+            `${varsayilan} kullanılıyor. Render'a yalnız sayı yaz, "%" koyma.`);
+        return varsayilan;
+    }
+    return s;
 }
-const SHORE_ALERT_YEREL_SAAT = parseInt(process.env.SHORE_ALERT_SAAT || '17', 10);
-const SHORE_ALERT_SOGUMA_SAAT = 20;    // aynı kullanıcıya tekrar göndermeden önce
-const SHORE_ALERT_KONUM_TAZE_GUN = 21; // bundan eski lastSeen kullanılmaz
+const GERI_DONUS_TABAN      = spotEnvSayi('GERI_DONUS_TABAN', 65);
+const GERI_DONUS_BASLA_GUN  = spotEnvSayi('GERI_DONUS_BASLA_GUN', 3);
+const GERI_DONUS_BITIS_GUN  = spotEnvSayi('GERI_DONUS_BITIS_GUN', 10);
+const SHORE_ALERT_YEREL_SAAT = Math.round(spotEnvSayi('SHORE_ALERT_SAAT', 17));
+// Eski değişken artık OKUNMUYOR. Render'da duruyorsa kullanıcı "ben 78 yaptım"
+// sanıp yanılmasın diye açılışta bir kez söylüyoruz.
+if (process.env.SHORE_ALERT_ESIK !== undefined) {
+    console.warn(`[SPOT-HATIRLATMA] ⚠ SHORE_ALERT_ESIK="${process.env.SHORE_ALERT_ESIK}" ` +
+        `ARTIK KULLANILMIYOR. Taban artık GERI_DONUS_TABAN (şu an %${GERI_DONUS_TABAN}). ` +
+        `Eski değişken Render'dan silinebilir.`);
+}
+
 const SHORE_HUCRE_LAT = 0.045;         // ~5 km — Open-Meteo çözünürlüğüyle uyumlu
 const SHORE_HUCRE_LON = 0.055;
 
@@ -10451,174 +10484,203 @@ const _snap = (v, s) => Math.round(v / s) * s;
 const shoreHucreAnahtari = (lat, lon) =>
     `${_snap(lat, SHORE_HUCRE_LAT).toFixed(3)},${_snap(lon, SHORE_HUCRE_LON).toFixed(3)}`;
 
+// forecast[idx] = bugün + idx. Gün adı kullanıcının KENDİ yerel gününden
+// türetiliyor; tarih dizgisi ayrıştırılmıyor (saat dilimi tuzağı yok).
+function spotGunAdi(gunler, idx, ofsetSaat) {
+    if (idx === 0) return gunler.bugun;
+    if (idx === 1) return gunler.yarin;
+    const bugunIdx = new Date(Date.now() + ofsetSaat * 3600000).getUTCDay();  // 0 = Pazar
+    return gunler.adlar[(bugunIdx + idx) % 7];
+}
+
 cron.schedule('5 * * * *', async () => {
     if (!db || !admin) return;
     const mod = SHORE_ALERT_ENABLED ? 'CANLI' : 'KURU';
+    const t0 = Date.now();
     try {
-        // ── 1) Konumu ve token'ı olan kullanıcılar ────────────────────────
-        const snap = await db.collection('users').where('lastSeen.at', '>',
-            Date.now() - SHORE_ALERT_KONUM_TAZE_GUN * 86400000).get();
-        if (snap.empty) return;
+        // ── 1) YOKLUK PENCERESİ — sorgu doğrudan aralığı çekiyor ──────────
+        const enEski = t0 - (GERI_DONUS_BITIS_GUN + 1) * 86400000;
+        const enYeni = t0 - GERI_DONUS_BASLA_GUN * 86400000;
+        const snap = await db.collection('users')
+            .where('lastSeen.at', '>=', enEski)
+            .where('lastSeen.at', '<=', enYeni)
+            .get();
 
-        const t0 = Date.now();
-        const toplamKullanici = snap.docs.length;
+        const penceredeki = snap.size;
         const nowUtcSaat = new Date().getUTCHours();
         const adaylar = [];
-        // [2026-08-23] SAYAÇLAR + SÜZGEÇ SIRASI.
-        // Eskiden yalnız iki sayaç vardı ve sıra yüzünden YANLIŞ ŞEYİ sayıyorlardı:
-        // iç bölge ve kapatma kontrolü SAAT kontrolünden önce çalıştığı için
-        // "4 iç bölge adayı elendi" satırı o saatin adaylarını değil, dünyadaki
-        // TÜM iç bölge kullanıcılarını sayıyordu — 5 adaylık bir koşuda bile 4
-        // yazıyordu ve log'u anlamsızlaştırıyordu.
-        // Saat süzgeci öne alındı. Aday listesi BİREBİR AYNI kalır (süzgeçler
-        // AND'li, sıra sonucu değiştirmez); değişen tek şey sayaçların anlamı.
-        // Yan fayda: her saat yüzlerce kullanıcı için boşuna poligon testi yok.
-        let saatUymayan = 0, tokensuz = 0, kapatanElenen = 0, icBolgeElenen = 0, sogumada = 0;
+        let saatUymayan = 0, tokensuz = 0, kapatanElenen = 0,
+            icBolgeElenen = 0, zatenGonderildi = 0;
+
         for (const doc of snap.docs) {
             const d = doc.data();
             const ls = d.lastSeen;
             if (!ls || !d.fcmToken) { tokensuz++; continue; }
-            // Kullanıcının kendi yerel saati — boylamdan türetilir
-            const ofset = Math.round(ls.lon / 15);
-            const yerel = ((nowUtcSaat + ofset) % 24 + 24) % 24;
-            if (yerel !== SHORE_ALERT_YEREL_SAAT) { saatUymayan++; continue; }
+
+            // Kullanıcının GERÇEK yerel saati. utcOffsetSec analiz sırasında
+            // Open-Meteo'nun timezone=auto cevabından yazılıyor (yaz saati
+            // dahil). Kaydı yoksa boylam tahminine düşülür.
+            const _ofsSec = d.utcOffsetSec;
+            const ofset = Number.isFinite(_ofsSec)
+                ? Math.round(_ofsSec / 3600)
+                : ofsetSaatBoylamdan(ls.lon);
+            if (kullaniciYerelSaat(nowUtcSaat, ofset) !== SHORE_ALERT_YEREL_SAAT) {
+                saatUymayan++; continue;
+            }
+
             // [1.5 — KAPATMA SEÇENEĞİ, 2026-08-11] Bu bildirim kullanıcının SON
             // KONUMUNA dayanıyor; konuma dayalı bir bildirimi kapatamamak kabul
-            // edilemezdi ve özelliğin önündeki son engel buydu.
-            //
-            // OPT-OUT (varsayılan AÇIK) seçildi, opt-in değil: alan yoksa bildirim
-            // gider. Sebep — özellik zaten 2026-08-11'de eşik 80 ile canlıya alındı
-            // ve o eşikte pratikte hiç tetiklenmiyor (64 gözlemde 0). Varsayılanı
-            // KAPALI yapmak, uygulamayı güncellemeyen kullanıcılar için hiçbir şeyi
-            // değiştirmezken, güncelleyenler için özelliği sessizce öldürürdü.
-            // Konum saklama ayrıca privacy.html'de anlatılıyor (1.5 adım 2).
-            //
-            // Alanı istemci yazıyor: users/{uid}.notifyShoreAlert (Bildirim Ayarları).
-            // KESİN false karşılaştırması bilinçli — undefined/null "kullanıcı henüz
-            // seçim yapmadı" demektir, "kapattı" demek değildir.
+            // edilemezdi. Alanı istemci yazıyor: users/{uid}.notifyShoreAlert.
+            // KESİN false karşılaştırması bilinçli — undefined/null "kullanıcı
+            // henüz seçim yapmadı" demektir, "kapattı" demek değildir.
             if (d.notifyShoreAlert === false) { kapatanElenen++; continue; }
-            // [1.5] İÇ BÖLGE SÜZGECİ. lastSeen'i karada olan kullanıcı (ör. Ankara
-            // 39.370, 32.377) aday listesine giriyor, hücresi için boşuna forecast
-            // çağrısı yapılıyor ve skor 0 dönüyordu. Zararsızdı (0 asla eşiği geçmez)
-            // ama 2026-08 koşusunda adayların %14'ü buydu — hem gereksiz iş hem de
-            // raporu kirletiyor, eşik kararını zorlaştırıyordu.
-            // analyzeLocationOffline bellek içi poligon testi, maliyeti yok.
-            if (analyzeLocationOffline(ls.lat, ls.lon).status === 'INLAND') { icBolgeElenen++; continue; }
-            // Soğuma: aynı kullanıcıya çok sık gönderme
-            const son = d.lastShoreAlert?.at || 0;
-            if (Date.now() - son < SHORE_ALERT_SOGUMA_SAAT * 3600000) { sogumada++; continue; }
-            adaylar.push({ uid: doc.id, token: d.fcmToken, lang: d.lang || 'tr',
-                lat: ls.lat, lon: ls.lon, hucre: shoreHucreAnahtari(ls.lat, ls.lon) });
+
+            // [1.5] İÇ BÖLGE SÜZGECİ. lastSeen'i karada olan kullanıcı için
+            // boşuna forecast çağrısı yapılıyor ve skor 0 dönüyordu.
+            // analyzeLocationOffline bellek içi poligon testi, ağ maliyeti yok.
+            if (analyzeLocationOffline(ls.lat, ls.lon).status === 'INLAND') {
+                icBolgeElenen++; continue;
+            }
+
+            // YOKLUK DÖNEMİ BAŞINA TEK BİLDİRİM. Kullanıcı geri gelip analiz
+            // yapınca lastSeen.at yenileniyor ve bu koşul kendiliğinden
+            // bozuluyor — yani sayaç sıfırlanması bedava geliyor.
+            const sonBildirim = (d.lastComebackAlert && d.lastComebackAlert.at) || 0;
+            if (sonBildirim > (ls.at || 0)) { zatenGonderildi++; continue; }
+
+            adaylar.push({
+                uid: doc.id, token: d.fcmToken, lang: d.lang || 'tr',
+                lat: ls.lat, lon: ls.lon, ofset,
+                gecenGun: (t0 - (ls.at || 0)) / 86400000,
+                hucre: shoreHucreAnahtari(ls.lat, ls.lon)
+            });
         }
-        // [2026-08-23] Eskiden burada SESSİZCE return ediliyordu: cron gerçekten
-        // çalıştı mı, yoksa hiç mi tetiklenmedi — log'dan ayırt edilemiyordu.
-        // Tek satır bırakılıyor.
+
         if (!adaylar.length) {
-            console.log(`[SHORE-ALERT/${mod}] aday yok — ${toplamKullanici} kullanıcı tarandı, ` +
+            console.log(`[SPOT-HATIRLATMA/${mod}] aday yok — pencerede ` +
+                `(${GERI_DONUS_BASLA_GUN}-${GERI_DONUS_BITIS_GUN} gün) ${penceredeki} kullanıcı var, ` +
                 `${saatUymayan} kişide yerel saat ${SHORE_ALERT_YEREL_SAAT}:00 değil` +
-                (sogumada       ? ` · ${sogumada} soğumada`            : '') +
-                (kapatanElenen  ? ` · ${kapatanElenen} kapatmış`       : '') +
-                (icBolgeElenen  ? ` · ${icBolgeElenen} iç bölgede`     : ''));
+                (zatenGonderildi ? ` · ${zatenGonderildi} bu dönemde zaten aldı` : '') +
+                (kapatanElenen ? ` · ${kapatanElenen} kapatmış` : '') +
+                (icBolgeElenen ? ` · ${icBolgeElenen} iç bölgede` : '') +
+                (tokensuz ? ` · ${tokensuz} token yok` : ''));
             return;
         }
 
-        // ── 2) HÜCRE bazında skor — kullanıcı başına DEĞİL ────────────────
+        // ── 2) HÜCRE bazında 7 GÜNÜN EN İYİSİ — kullanıcı başına DEĞİL ────
         const hucreler = new Map();
         for (const a of adaylar) if (!hucreler.has(a.hucre)) hucreler.set(a.hucre, a);
-        console.log(`[SHORE-ALERT/${mod}] ▶ koşu başladı — ${adaylar.length} aday, ${hucreler.size} hücre analiz edilecek (~${Math.round(hucreler.size * 2.3)} sn sürer)`);
+        console.log(`[SPOT-HATIRLATMA/${mod}] ▶ koşu başladı — ${adaylar.length} aday, ` +
+            `${hucreler.size} hücre analiz edilecek (~${Math.round(hucreler.size * 2.3)} sn sürer)`);
 
         const port = process.env.PORT || 3000;
-        const hucreSkor = new Map();
+        const hucreEnIyi = new Map();
         for (const [anahtar, ornek] of hucreler) {
             try {
                 const r = await safeFetchJSON(
                     `http://localhost:${port}/api/forecast?lat=${ornek.lat}&lon=${ornek.lon}&_internal=1`, 20000);
-                const s = (r && r.forecast && r.forecast[0] && r.forecast[0].score) || 0;
-                hucreSkor.set(anahtar, s);
+                const gunler = (r && Array.isArray(r.forecast)) ? r.forecast : [];
+                let enIyi = null;
+                for (let i = 0; i < gunler.length; i++) {
+                    const s = Number(gunler[i] && gunler[i].score);
+                    if (!Number.isFinite(s)) continue;
+                    // Kesin `>`: eşitlikte ERKEN gün kazanır (yakın gün daha değerli)
+                    if (!enIyi || s > enIyi.skor) {
+                        enIyi = { skor: s, idx: i, tarih: (gunler[i].date || null) };
+                    }
+                }
+                if (enIyi) hucreEnIyi.set(anahtar, enIyi);
             } catch (e) {
-                console.error(`[SHORE-ALERT] hücre ${anahtar} skoru alınamadı:`, e.message);
+                console.error(`[SPOT-HATIRLATMA] hücre ${anahtar} analiz edilemedi:`, e.message);
             }
             await new Promise(r => setTimeout(r, 300));   // API'ye nazik davran
         }
 
-        // ── 3) Eşiği geçenler ────────────────────────────────────────────
-        const gidecek = adaylar.filter(a => (hucreSkor.get(a.hucre) || 0) >= SHORE_ALERT_ESIK);
-        // ── Rapor ─────────────────────────────────────────────────────────
-        // [2026-08-23] Tek eşiğe göre yeniden yazıldı. Eskiden 5 puanlık bant
-        // dağılımı basılıyordu ("%65+:7") ama o yazım KÜMÜLATİF sanılıyordu;
-        // aslında "65-69 arası 7 hücre" demekti ve yanlış okunuyordu.
-        // Eşik Render'dan tek değer olarak geliyor ve "başka eşikte ne olurdu"
-        // sorusu sorulmuyor — dağılım yerine EN YÜKSEK ÜÇ HÜCRE yazılıyor:
-        // "0 kişiye gitti" satırının eşiğe 2 puan mı 40 puan mı uzak kaldığını
-        // tek bakışta gösteriyor. Karar için gereken tek ek bilgi buydu.
-        const basarisizHucre = hucreler.size - hucreSkor.size;
-        const sirali = [...hucreSkor.entries()].sort((a, b) => b[1] - a[1]);
-        const enIyiler = sirali.slice(0, 3).map(([anahtar, s]) => {
+        // ── 3) Tabanı geçenler ───────────────────────────────────────────
+        const gidecek = adaylar.filter(a => {
+            const e = hucreEnIyi.get(a.hucre);
+            return e && e.skor >= GERI_DONUS_TABAN;
+        });
+
+        // ── Rapor ────────────────────────────────────────────────────────
+        const basarisizHucre = hucreler.size - hucreEnIyi.size;
+        const sirali = [...hucreEnIyi.entries()].sort((a, b) => b[1].skor - a[1].skor);
+        const enIyiler = sirali.slice(0, 3).map(([anahtar, e]) => {
             const o = hucreler.get(anahtar);
             const ad = (o && getCoastalLocality(o.lat, o.lon, o.lang)) || anahtar;
-            return `%${Math.round(s)} ${ad}`;
+            return `%${Math.round(e.skor)} ${ad}`;
         }).join('  ·  ');
-        const enYuksek = sirali.length ? sirali[0][1] : 0;
-        const esigiGecenHucre = sirali.filter(([, v]) => v >= SHORE_ALERT_ESIK).length;
-        const sure = Math.round((Date.now() - t0) / 1000);
-        const P = (s) => console.log(`[SHORE-ALERT/${mod}] ${s}`);
-        P('══════════════ 🎣 KIYI BİLDİRİMİ RAPORU ══════════════');
+        const enYuksek = sirali.length ? sirali[0][1].skor : 0;
+        const gecenHucre = sirali.filter(([, e]) => e.skor >= GERI_DONUS_TABAN).length;
+        const P = (s) => console.log(`[SPOT-HATIRLATMA/${mod}] ${s}`);
+        P('════════ 🎣 SPOT HATIRLATMA RAPORU ════════');
         P(SHORE_ALERT_ENABLED
-            ? ' MOD     : CANLI — bildirim gerçekten gönderiliyor'
-            : ' MOD     : KURU — hiçbir bildirim gönderilmiyor, yalnız rapor');
-        P(` TARANDI : ${toplamKullanici} kullanıcı  (son ${SHORE_ALERT_KONUM_TAZE_GUN} günde uygulamayı açmış olanlar)`);
-        P(` ELENDİ  : ${saatUymayan} kişide yerel saat ${SHORE_ALERT_YEREL_SAAT}:00 değil  ·  ${icBolgeElenen} iç bölgede` +
-          `  ·  ${kapatanElenen} bildirimi kapatmış  ·  ${sogumada} soğumada (${SHORE_ALERT_SOGUMA_SAAT} sa)  ·  ${tokensuz} konum/token yok`);
-        P(` ADAY    : ${adaylar.length} kullanıcı → ${hucreler.size} ayrı hücre  (5 km ızgara; aynı hücredekiler tek analizle)`);
-        P(` EŞİK    : %${SHORE_ALERT_ESIK}   (Render env: SHORE_ALERT_ESIK)`);
-        P(` SONUÇ   : ${gidecek.length} kullanıcıya bildirim ${SHORE_ALERT_ENABLED ? 'GİDİYOR' : 'giderdi (kuru)'}` +
-          `   ·   ${esigiGecenHucre}/${hucreSkor.size} hücre eşiği geçti`);
-        P(` EN İYİ  : ${enIyiler || '—'}` +
-          (esigiGecenHucre === 0 && sirali.length
-              ? `   →  eşiğe ${(SHORE_ALERT_ESIK - enYuksek).toFixed(1)} puan kaldı` : ''));
-        P(` SÜRE    : ${sure} sn` + (basarisizHucre ? `   ⚠ ${basarisizHucre} hücrenin skoru ALINAMADI` : ''));
-        P('══════════════════════════════════════════════════════');
+            ? ' MOD      : CANLI — bildirim gerçekten gönderiliyor'
+            : ' MOD      : KURU — hiçbir bildirim gönderilmiyor, yalnız rapor');
+        P(` PENCEREDE: ${penceredeki} kullanıcı  (${GERI_DONUS_BASLA_GUN}-${GERI_DONUS_BITIS_GUN} gündür analiz yapmamış)`);
+        P(` ELENDİ   : ${saatUymayan} kişide yerel saat ${SHORE_ALERT_YEREL_SAAT}:00 değil` +
+          `  ·  ${zatenGonderildi} bu dönemde zaten aldı  ·  ${icBolgeElenen} iç bölgede` +
+          `  ·  ${kapatanElenen} bildirimi kapatmış  ·  ${tokensuz} token yok`);
+        P(` ADAY     : ${adaylar.length} kullanıcı → ${hucreler.size} ayrı hücre  (5 km ızgara)`);
+        P(` TABAN    : %${GERI_DONUS_TABAN}   (Render env: GERI_DONUS_TABAN)`);
+        P(` SONUÇ    : ${gidecek.length} kullanıcıya bildirim ${SHORE_ALERT_ENABLED ? 'GİDİYOR' : 'giderdi (kuru)'}` +
+          `   ·   ${gecenHucre}/${hucreEnIyi.size} hücre tabanı geçti`);
+        P(` EN İYİ   : ${enIyiler || '—'}` +
+          (gecenHucre === 0 && sirali.length
+              ? `   →  tabana ${(GERI_DONUS_TABAN - enYuksek).toFixed(1)} puan kaldı` : ''));
+        P(` SÜRE     : ${Math.round((Date.now() - t0) / 1000)} sn` +
+          (basarisizHucre ? `   ⚠ ${basarisizHucre} hücre analiz EDİLEMEDİ` : ''));
+        P('═══════════════════════════════════════════');
 
         // ── 4) Gönder (veya kuru çalışmada yalnızca kaydet) ───────────────
         for (const a of gidecek) {
-            const skor = Math.round(hucreSkor.get(a.hucre));
+            const e = hucreEnIyi.get(a.hucre);
+            const skor = Math.round(e.skor);
             const yerAdi = getCoastalLocality(a.lat, a.lon, a.lang) || 'Kıyı';
-            const i18nN = SERVER_i18n[a.lang] || SERVER_i18n.tr;
+            const i18nN = (SERVER_i18n[a.lang] || SERVER_i18n.tr).notification;
+            const gun = spotGunAdi(i18nN.days, e.idx, a.ofset);
 
             if (!SHORE_ALERT_ENABLED) {
-                console.log(`[SHORE-ALERT/KURU] → uid:${a.uid} ${yerAdi} %${skor} (gönderilmedi)`);
+                console.log(`[SPOT-HATIRLATMA/KURU] → uid:${a.uid} ${yerAdi} ${gun} %${skor} ` +
+                    `(${a.gecenGun.toFixed(1)} gündür yok, gönderilmedi)`);
             } else {
                 try {
                     await admin.messaging().send({
                         token: a.token,
                         notification: {
-                            title: i18nN.notification.shoreAlertTitle || i18nN.notification.dailyBestTitle,
-                            body: (i18nN.notification.shoreAlertBody || i18nN.notification.dailyBestBody)(yerAdi, skor)
+                            title: i18nN.comebackTitle(yerAdi, gun, skor),
+                            body: i18nN.comebackBody(yerAdi, gun, skor)
                         },
-                        // type ve channelId MEVCUT değerler — uygulama bunları zaten tanıyor
-                        data: { type: 'daily_best', spotName: String(yerAdi), score: String(skor),
-                                lat: String(a.lat), lon: String(a.lon) },
+                        // type ve channelId MEVCUT değerler — eski APK'lar tanıyor
+                        data: {
+                            type: 'daily_best', spotName: String(yerAdi), score: String(skor),
+                            lat: String(a.lat), lon: String(a.lon),
+                            targetDate: String(e.tarih || '')   // ileride istemci o güne atlayabilir
+                        },
                         android: { priority: 'high',
                                    notification: { sound: 'default', channelId: 'meraloji_notifications' } },
                         apns: { payload: { aps: { sound: 'default', badge: 1 } } },
-                        fcmOptions: { analyticsLabel: 'shore_alert' }   // ← ölçüm burada ayrışır
+                        fcmOptions: { analyticsLabel: 'spot_hatirlatma' }   // ← ölçüm burada ayrışır
                     });
                     await db.collection('users').doc(a.uid)
-                        .set({ lastShoreAlert: { at: Date.now(), hucre: a.hucre } }, { merge: true });
-                    console.log(`[SHORE-ALERT/CANLI] ✅ uid:${a.uid} ${yerAdi} %${skor}`);
-                } catch (e) {
-                    console.error(`[SHORE-ALERT] gönderilemedi uid:${a.uid}:`, e.message);
+                        .set({ lastComebackAlert: { at: Date.now(), hucre: a.hucre, skor } }, { merge: true });
+                    console.log(`[SPOT-HATIRLATMA/CANLI] ✅ uid:${a.uid} ${yerAdi} ${gun} %${skor} ` +
+                        `(${a.gecenGun.toFixed(1)} gündür yok)`);
+                } catch (err) {
+                    console.error(`[SPOT-HATIRLATMA] gönderilemedi uid:${a.uid}:`, err.message);
                 }
                 await new Promise(r => setTimeout(r, 200));
             }
-            // Her iki modda da kalıcı kayıt — eşik seçimi bu veriden yapılacak
+            // Her iki modda da kalıcı kayıt — taban kararı bu veriden yapılacak
             db.collection('notifyLog').add({
-                tur: 'shore_alert', mod, uid: a.uid, hucre: a.hucre,
-                skor, yer: String(yerAdi), esik: SHORE_ALERT_ESIK, at: Date.now()
+                tur: 'spot_hatirlatma', mod, uid: a.uid, hucre: a.hucre,
+                skor, gunIdx: e.idx, tarih: e.tarih || null,
+                gecenGun: Number(a.gecenGun.toFixed(2)),
+                yer: String(yerAdi), taban: GERI_DONUS_TABAN, at: Date.now()
             }).catch(() => { });
         }
     } catch (e) {
-        console.error(`[SHORE-ALERT/${mod}] hata:`, e.message);
+        console.error(`[SPOT-HATIRLATMA/${mod}] hata:`, e.message);
     }
 });
 

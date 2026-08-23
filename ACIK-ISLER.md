@@ -224,7 +224,12 @@ güvenlik değeri taşıyor, gizlenmemeli.
 Sınıflandırma tablosu: `server.js` → `AV_DEGERI` (14 tür 'bycatch').
 Bilinmeyen anahtar `'target'` döner → yeni tür eklendiğinde davranış değişmez.
 
-### 1.5 Kıyı skoru bildirimi — `CANLI, EŞİK 80` (kapatma ayarı açık)
+### ~~1.5 Kıyı skoru bildirimi~~ — **1.6 İLE DEĞİŞTİRİLDİ** (2026-08-23)
+
+> Bu madde artık geçerli değil. Özellik 2026-08-23'te baştan yazıldı:
+> yalnız dönmeyen kullanıcıya gidiyor, taban 65, 7 günün en iyisine bakılıyor.
+> **Geçerli tasarım § 1.6.** Aşağısı tarihsel kayıt olarak duruyor.
+
 
 **2026-08-11: özellik açıldı.** Render → Environment:
 `SHORE_ALERT_ENABLED=true` · `SHORE_ALERT_ESIK=80` · `SHORE_ALERT_SAAT=17`.
@@ -323,6 +328,160 @@ da 2.3'te aynı hizaya getirildi.
 ---
 
 ## 2 · Analitik ve ölçüm
+
+### 1.6 Spot hatırlatma — kıyı bildirimi BAŞTAN YAZILDI `CANLI` (2026-08-23)
+
+**1.5 bu maddeyle değiştirildi.** Aşağıdaki her şey onun yerine geçer.
+
+#### Neden değişti
+
+Amaç baştan beri **retention**'dı: kullanıcıyı uygulamaya geri getirmek. Yazılan
+kod bunu yapmıyordu. İki kusur:
+
+**1) "Kullanıcı geri geldi mi" diye hiç sormuyordu.** Uygulamayı 10 dakika önce
+kapatmış birine de, 9 gündür açmayan yıllık PRO aboneye de aynı bildirim
+gidiyordu. Bu bir geri-getirme aracı değil, günlük hava raporudur.
+
+**2) Eşik 80'di ve hiç ateşlemiyordu.** 2026-08-23 canlı ölçümü — Render
+loglarından alınan 16 gerçek kullanıcı noktası, her biri 7 günlük tahmin:
+
+| eşik | BUGÜNE bakarsak | 7 GÜNÜN EN İYİSİNE bakarsak |
+|---|---|---|
+| %80 | 0/16 (%0) | **0/16 (%0)** |
+| %75 | 0/16 (%0) | 0/16 (%0) |
+| %72 | 2/16 (%13) | 3/16 (%19) |
+| %70 | 3/16 (%19) | 4/16 (%25) |
+| %65 | 4/16 (%25) | **5/16 (%31)** |
+
+112 skorun en yükseği **73.8**. Ağustos kuru çalışması da aynıydı: 64 gözlem,
+0 tetikleme. Hiç gönderilmeyen bildirim hiçbir kullanıcıyı geri getirmez.
+
+#### Yeni kural
+
+Bildirim şu **beş koşulun hepsi** sağlanınca gider:
+
+1. `lastSeen.at` **3-10 gün** arası (Firestore sorgusu doğrudan bu aralığı çeker).
+2. Kullanıcının **gerçek yerel saati** `SHORE_ALERT_SAAT` (17:00).
+3. `notifyShoreAlert !== false` ve `fcmToken` var, `lastSeen` iç bölgede değil.
+4. Bu yokluk döneminde **henüz bildirim gitmemiş**.
+5. O hücrenin **7 günlük tahmininin en iyisi ≥ `GERI_DONUS_TABAN`** (65).
+
+**Neden 3 gün:** balıkçı hafta içi iki gün girmez, bu normal. 3 gün gerçek bir
+kopuş sinyali ama nokta hâlâ akılda.
+
+**Neden 10 günde kesiliyor:** konum bayatlıyor. Kuşadası'na tatile gelip
+Ankara'ya dönmüş olabilir; 15. günde ona hâlâ Kuşadası'ndan bahsetmek işe
+yaramaz, tuhaf kaçar.
+
+**Neden 3-10 arası HER GÜN bakılıyor, tek atış değil:** hava değişiyor. Perşembe
+61 olan bir hafta Cumartesi 67 olabilir. Tek atış yapılsaydı özellik neredeyse
+hiç ateşlemezdi. Gönderim yine **dönem başına bir tane**.
+
+**Neden bugüne değil 7 günün en iyisine bakılıyor:** aynı çağrı zaten 7 günü
+getiriyordu, yalnız `forecast[0]` okunuyordu. 17:00'de "bugün 74" demek geç
+kalmış bir bilgidir — adam işte. "Cumartesi 74" plan yapılabilir bir şeydir.
+Ateşleme oranı da %19'dan %25'e çıkıyor, aynı maliyetle. Beraberlikte **erken
+gün** kazanır (yakın gün daha değerli).
+
+**Neden taban var:** Mersin'de yaşayan kullanıcıya "skor %35 oldu, gel" demek
+yalan olurdu. Coğrafi olarak talihsiz kullanıcıyı geri getirmenin yolu sahte
+iyi haber değil, başka bir kampanyadır.
+
+#### Dönem sayacı bedava sıfırlanıyor
+
+Ayrı bir temizleme işi yok. Kullanıcı analiz yapınca `lastSeen.at` yenileniyor
+ve tek karşılaştırma kendiliğinden bozuluyor:
+
+```js
+if (sonBildirim > (ls.at || 0)) { zatenGonderildi++; continue; }
+```
+
+#### Saat dilimi hatası da düzeltildi
+
+Eski kod yalnız boylama bakıyordu: `Math.round(lon / 15)`. Türkiye kalıcı
+UTC+3 ama boylamı 26-45 arasında, yani **ikiye bölünüyordu**:
+
+| boylam | kod ne sanıyordu | gerçek | bildirim TSİ |
+|---|---|---|---|
+| 22.5°–37.5° (İzmir, İstanbul, Antalya…) | UTC+2 | UTC+3 | **18:05** |
+| 37.5°–52.5° (Trabzon, Rize…) | UTC+3 | UTC+3 | 17:05 |
+
+Gerçek kullanıcı kaydıyla doğrulandı: `lon 28.21` → tahmin +2, ama aynı kayıtta
+`utcOffsetSec: 10800` (+3) zaten duruyordu. İspanya'da fark iki saatti.
+
+Artık `users/{uid}.utcOffsetSec` okunuyor (Open-Meteo `timezone=auto`
+cevabından, yaz saati dahil). Boylam tahmini yalnız kaydı olmayana yedek.
+
+#### Env değişkenleri
+
+| değişken | varsayılan | not |
+|---|---|---|
+| `SHORE_ALERT_ENABLED` | (yok = KURU) | **SİLİNİRSE BİLDİRİM DURUR.** `true` olmalı. |
+| `GERI_DONUS_TABAN` | 65 | taban skor |
+| `GERI_DONUS_BASLA_GUN` | 3 | yokluk penceresi başı |
+| `GERI_DONUS_BITIS_GUN` | 10 | yokluk penceresi sonu |
+| `SHORE_ALERT_SAAT` | 17 | kullanıcının yerel saati |
+| ~~`SHORE_ALERT_ESIK`~~ | — | **ARTIK OKUNMUYOR.** Render'da duruyorsa silinebilir; sunucu açılışta uyarı basıyor. |
+
+Sayı olmayan değer (`"%65"` gibi) `parseFloat`'ta `NaN` olur ve `skor >= NaN`
+**her zaman false** döner — özellik hata vermeden ölürdü. Artık varsayılana
+düşüyor ve açılışta bağırıyor.
+
+#### Mesaj
+
+```
+🎣 Kuşadası Kıyıları · Cumartesi %71
+Son analiz ettiğin noktada bu haftanın en iyi günü Cumartesi. Bakmak ister misin?
+```
+
+Dört dilde (`comebackTitle` / `comebackBody` / `days`). Gün adı kullanıcının
+kendi yerel gününden türetiliyor, tarih dizgisi ayrıştırılmıyor (saat dilimi
+tuzağı yok). Bugünse "bugün", yarınsa "yarın".
+
+Eski başlık **"Yakınında Skor Yükseldi"** idi ve **yalandı**: yükselme hiç
+ölçülmüyordu, yalnız mutlak eşiğe bakılıyordu. Kullanıcı skoru düşmüşken bile
+o başlığı görebilirdi.
+
+#### APK gerekmiyor
+
+Mevcut kanal (`meraloji_notifications`) ve mevcut `data.type` (`daily_best`) —
+4.0.5 dahil tüm sürümler tanıyor.
+
+**BİLİNEN KISIT:** bildirime tıklayınca uygulama o noktayı **bugün** için açar;
+"Cumartesi"ye kullanıcı kendisi geçer. `data.targetDate` gönderiliyor, ileride
+istemci onu okuyup doğrudan o güne atlayabilir. Eski sürümler bilinmeyen alanı
+yok sayar, bozulmaz.
+
+#### Ölçüm
+
+Analytics etiketi `shore_alert` → **`spot_hatirlatma`** oldu. Eski etikette
+ölçülecek geçmiş yok (hiç gönderilmemişti). `notifyLog` koleksiyonuna her
+gönderim `{ tur:'spot_hatirlatma', skor, gunIdx, tarih, gecenGun, taban }`
+olarak yazılıyor — taban kararı bu veriden yapılacak.
+
+#### Test
+
+`tools/kontrol-spot-hatirlatma.js` — cron gövdesini `server.js`'ten **metin
+olarak** söküp kum havuzunda gerçek Firestore semantiğiyle (aralık sorgusu
+dahil) koşturur. 12 sahte kullanıcı her kuralı ayrı ayrı sınar; mesaj içeriği
+(doğru gün, doğru skor, beraberlikte erken gün) ayrıca doğrulanır.
+
+**Dört pozitif kontrol var**: yokluk alt sınırı, taban karşılaştırması,
+dönem-başına-tek kuralı ve gerçek-ofset okuması tek tek sökülüp koşturulur.
+Bozuk sürüm testi geçerse o kural aslında test EDİLMİYOR demektir — araç bunu
+bildirir.
+
+#### Açık kalan
+
+- **Taban 65 ölçülmedi, seçildi.** 16 noktanın 5'i geçiyor (%31). Birkaç hafta
+  `notifyLog` biriktikten sonra gerçek oran görülecek. Değiştirmek deploy
+  gerektirmiyor.
+- **Gördüğü skorla karşılaştırma yok.** Çeşme'de 72 görüp çıkan kullanıcıya
+  "Cumartesi %70" denebilir — zaten bildiği bir şey. Bilinçli olarak
+  eklenmedi: `lastSeen.skor` yazmak ikinci bir Firestore yazması demekti.
+  İstenirse sonradan eklenebilir.
+
+---
 
 ### 2.1 `mera_tarama` → `scan_result` uçurumu `ARAŞTIRMA`
 
