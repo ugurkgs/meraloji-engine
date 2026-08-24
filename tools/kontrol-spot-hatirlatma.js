@@ -71,7 +71,8 @@ const skorAl = (lon) => SKORLAR[Number(lon).toFixed(2)] || [10, 10, 10, 10, 10, 
 
 // ── Sahte kullanıcılar ──────────────────────────────────────────────────────
 // bekleniyor: bildirim gitmeli mi?
-function kullanicilar() {
+// ek: senaryoya özgü kullanıcılar (2026-08-24 — dil ve ölü token testleri)
+function kullanicilar(ek) {
     const t = (gun) => SIMDI - gun * GUN;
     return [
         { id: 'A_yeni',        bekleniyor: false, not: '1 gündür yok — pencereye girmemeli',
@@ -101,15 +102,21 @@ function kullanicilar() {
           d: { lastSeen: { lat: 36.99, lon: 28.21, at: t(5) }, fcmToken: 'K', lang: 'tr' } },
         { id: 'L_beraberlik',  bekleniyor: true,  not: '0. ve 1. gün eşit (70) → ERKEN gün seçilmeli',
           d: { lastSeen: { lat: 36.85, lon: 30.95, at: t(5) }, fcmToken: 'L', lang: 'tr', utcOffsetSec: 10800 } }
-    ];
+    ].concat(ek || []);
 }
 
 // ── Kum havuzu ──────────────────────────────────────────────────────────────
-function kos(src, govde) {
-    const kisiler = kullanicilar();
+// [2026-08-24] Senaryo — canlı logdan çıkan iki kuralı koşturmak için:
+//   gonderimHatasi : { token: {code, message} } — FCM send o tokende patlar
+//   adsizLonlar    : ["26.43"] — getCoastalLocality null döner (gazetteer dışı)
+//   ekKisiler      : temel listeye eklenecek sahte kullanıcılar
+function kos(src, govde, senaryo) {
+    const S = senaryo || {};
+    const kisiler = kullanicilar(S.ekKisiler);
     const gonderilen = [];
     const yazilan = [];
     const ciktilar = [];
+    const silinenTokenlar = [];
 
     class SahteDate extends Date {
         getUTCHours() { return SAAT_UTC; }
@@ -133,8 +140,18 @@ function kos(src, govde) {
                 date: new Date(SIMDI + i * GUN).toISOString()
             })) };
         },
-        getCoastalLocality: (lat, lon) => 'Yer' + Number(lon).toFixed(2),
-        admin: { messaging: () => ({ send: async (m) => { gonderilen.push(m); } }) },
+        getCoastalLocality: (lat, lon) =>
+            (S.adsizLonlar || []).includes(Number(lon).toFixed(2))
+                ? null : 'Yer' + Number(lon).toFixed(2),
+        admin: {
+            messaging: () => ({ send: async (m) => {
+                const h = (S.gonderimHatasi || {})[m.token];
+                if (h) { const e = new Error(h.message); e.code = h.code; throw e; }
+                gonderilen.push(m);
+            } }),
+            // FieldValue.delete() sentinel — update() bunu görünce silme sayılır
+            firestore: { FieldValue: { delete: () => '__SIL__' } }
+        },
         db: {
             collection: (ad) => ({
                 // GERÇEK Firestore semantiği: aralık sorgusu uygulanır,
@@ -156,7 +173,13 @@ function kos(src, govde) {
                     })).map(k => ({ id: k.id, data: () => k.d }));
                     return { size: docs.length, empty: !docs.length, docs };
                 },
-                doc: () => ({ set: async (o) => { yazilan.push(o); return {}; } }),
+                doc: (id) => ({
+                    set: async (o) => { yazilan.push(o); return {}; },
+                    update: async (o) => {
+                        if (o && o.fcmToken === '__SIL__') silinenTokenlar.push(id);
+                        return {};
+                    }
+                }),
                 add: async () => ({})
             })
         }
@@ -185,7 +208,8 @@ function kos(src, govde) {
         '`${_snap(lat, SHORE_HUCRE_LAT).toFixed(3)},${_snap(lon, SHORE_HUCRE_LON).toFixed(3)}`;', kum);
 
     const fn = vm.runInContext('(' + govde + ')', kum);
-    return fn().then(() => ({ gonderilen, yazilan, ciktilar, kisiler }));
+    return fn().then(() =>
+        ({ gonderilen, yazilan, ciktilar, kisiler, silinenTokenlar }));
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -244,6 +268,69 @@ function kos(src, govde) {
     console.log('  ' + (yazimOk ? '✓' : '✗') + ' lastComebackAlert ' + yazim.length +
         ' kez yazıldı (' + r.gonderilen.length + ' bildirim için)');
 
+    // ══ [2026-08-24] ÖLÜ TOKEN TEMİZLİĞİ ══════════════════════
+    // Canlıda görüldü: uid:GuTUNBDNhZVxsmCK9VzDpnY9YaH2 → NotRegistered.
+    // lastComebackAlert yalnız BAŞARILI gönderimden sonra yazıldığı için, token
+    // silinmezse bu kullanıcı her gün yeniden aday olur ve hep aynı hatayla düşer.
+    console.log('\n  ─── ölü token temizliği ───');
+
+    const OLU_KOD = { code: 'messaging/registration-token-not-registered',
+                      message: 'Requested entity was not found.' };
+    // Canlıda err.message düz 'NotRegistered' geldi — kod boş olabilir.
+    const OLU_MESAJ = { code: '', message: 'NotRegistered' };
+    // Geçici hata: token SAĞLAM. Silinirse kullanıcı bildirimleri kalıcı kaybeder.
+    const GECICI = { code: 'messaging/internal-error', message: 'Internal server error' };
+
+    for (const [ad, err, silinmeli] of [
+        ['FCM hata kodu   ', OLU_KOD,   true],
+        ['err.message     ', OLU_MESAJ, true],
+        ['geçici hata     ', GECICI,    false],
+    ]) {
+        const s = await kos(src, govde, { gonderimHatasi: { B: err } });
+        const silindi = s.silinenTokenlar.includes('B_normal');
+        const dustu   = s.gonderilen.length === r.gonderilen.length - 1;
+        const yazildi = s.yazilan.filter(o => o.lastComebackAlert).length
+                        === r.gonderilen.length - 1;
+        const ok = (silindi === silinmeli) && dustu && yazildi;
+        if (!ok) hata++;
+        console.log('  ' + (ok ? '✓' : '✗') + ' ' + ad + ' → token ' +
+            (silindi ? 'SİLİNDİ   ' : 'DURUYOR  ') +
+            '(beklenen: ' + (silinmeli ? 'silinmeli' : 'DURMALI') + ')' +
+            (yazildi ? '' : '  ← lastComebackAlert yanlış sayıda yazıldı'));
+    }
+
+    // ══ [2026-08-24] GAZETTEER DIŞI YER ADI — 4 DİL ═════════════════
+    // Canlı örnek: 38.520,-9.185 (Lizbon) — getCoastalLocality null döndü, eski
+    // kodda fallback hardcode 'Kıyı' idi. Yabancı dilli kullanıcı Türkçe başlık alırdı.
+    console.log('\n  ─── gazetteer dışı yer adı (4 dil) ───');
+
+    const ekDilKisi = (tok, dil) => ({
+        id: 'Y_' + dil, bekleniyor: true, not: 'gazetteer dışı · ' + dil,
+        d: { lastSeen: { lat: 38.48, lon: 26.43, at: SIMDI - 5 * GUN },
+             fcmToken: tok, lang: dil, utcOffsetSec: 10800 }
+    });
+    const yabanci = await kos(src, govde, {
+        adsizLonlar: ['26.43'],
+        ekKisiler: ['en', 'es', 'el'].map((d, i) => ekDilKisi('Y' + i, d))
+    });
+    const basligi = (tok) => {
+        const m = yabanci.gonderilen.find(x => x.token === tok);
+        return m ? m.notification.title : '(mesaj yok)';
+    };
+    for (const [tok, dil, beklenen] of [
+        ['B',  'tr', 'Kıyı'],
+        ['Y0', 'en', 'The coast'],
+        ['Y1', 'es', 'La costa'],
+        ['Y2', 'el', 'Η ακτή'],
+    ]) {
+        const t = basligi(tok);
+        // Türkçe dışındaki dilde 'Kıyı' GÖRÜNMEMELİ — aslında yakalanan hata buydu.
+        const ok = t.includes(beklenen) && (dil === 'tr' || !t.includes('Kıyı'));
+        if (!ok) hata++;
+        console.log('  ' + (ok ? '✓' : '✗') + ' ' + dil + '  "' + t +
+            '"   (beklenen: "' + beklenen + '")');
+    }
+
     // ── POZİTİF KONTROLLER ───────────────────────────────────────────────
     // Her mutasyon bir kuralı söker. Test hâlâ geçerse o kural test EDİLMİYOR.
     console.log('\n  ─── POZİTİF KONTROLLER (bozuk sürüm yakalanmalı) ───');
@@ -270,6 +357,42 @@ function kos(src, govde) {
         console.log('  ' + (farkli ? '✓' : '✗') + ' ' + ad.padEnd(34) +
             r.gonderilen.length + ' → ' + bozukSonuc.gonderilen.length + ' bildirim' +
             (farkli ? '  (yakalandı)' : '  ← TEST BU KURALI GÖRMÜYOR'));
+    }
+
+    // Yeni iki kural için ayrı pozİtif kontrol: bunlar senaryo gerektirdiği için
+    // yukarıdaki genel mutasyon döngüsüne sığmıyor.
+    console.log('\n  ─── POZİTİF KONTROL (2026-08-24 kuralları) ───');
+
+    const M1 = ['const olu = kod ===', 'const olu = false && kod ==='];
+    if (!govde.includes(M1[0])) {
+        console.log('  ✗ ölü token temizliği sökülü: MUTASYON HEDEFİ YOK');
+        hata++;
+    } else {
+        const b = await kos(src, govde.replace(M1[0], M1[1]),
+            { gonderimHatasi: { B: OLU_KOD } });
+        const yakalandi = b.silinenTokenlar.length === 0;
+        if (!yakalandi) hata++;
+        console.log('  ' + (yakalandi ? '✓' : '✗') +
+            ' ölü token temizliği sökülü  → ' + b.silinenTokenlar.length +
+            ' silme (0 bekleniyordu)' + (yakalandi ? '  (yakalandı)' : '  ← GÖRÜLMÜYOR'));
+    }
+
+    const M2 = ["|| i18nN.genericShore || 'Kıyı'", "|| 'Kıyı'"];
+    if (!govde.includes(M2[0])) {
+        console.log('  ✗ yer adı fallbackı sökülü: MUTASYON HEDEFİ YOK');
+        hata++;
+    } else {
+        const b = await kos(src, govde.replace(M2[0], M2[1]), {
+            adsizLonlar: ['26.43'],
+            ekKisiler: [ekDilKisi('Y0', 'en')]
+        });
+        const m = b.gonderilen.find(x => x.token === 'Y0');
+        const yakalandi = !!m && m.notification.title.includes('Kıyı');
+        if (!yakalandi) hata++;
+        console.log('  ' + (yakalandi ? '✓' : '✗') +
+            ' yer adı fallbackı sökülü   → en başlığı: "' +
+            (m ? m.notification.title : '(yok)') + '"' +
+            (yakalandi ? '  (yakalandı)' : '  ← GÖRÜLMÜYOR'));
     }
 
     console.log('\n─── RAPOR ÇIKTISI ───');

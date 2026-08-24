@@ -195,6 +195,9 @@ const SERVER_i18n = {
             comebackTitle: (spot, gun, score) => `🎣 ${spot} · ${gun} %${score}`,
             comebackBody: (spot, gun, score) =>
                 `Son analiz ettiğin noktada bu haftanın en iyi günü ${gun}. Bakmak ister misin?`,
+            // getCoastalLocality() gazetteer'i yalnız Türkiye'yi kapsar.
+            // Kapsam dışı bir noktada bildirim başlığı bu değerle kurulur.
+            genericShore: 'Kıyı',
             days: { bugun: 'bugün', yarin: 'yarın', adlar:
                 ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'] }
         },
@@ -371,6 +374,9 @@ const SERVER_i18n = {
             comebackTitle: (spot, gun, score) => `🎣 ${spot} · ${gun} ${score}%`,
             comebackBody: (spot, gun, score) =>
                 `${gun} is the best day this week at the spot you last checked. Want a look?`,
+            // getCoastalLocality() gazetteer'i yalnız Türkiye'yi kapsar.
+            // Kapsam dışı bir noktada bildirim başlığı bu değerle kurulur.
+            genericShore: 'The coast',
             days: { bugun: 'today', yarin: 'tomorrow', adlar:
                 ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] }
         },
@@ -547,6 +553,9 @@ const SERVER_i18n = {
             comebackTitle: (spot, gun, score) => `🎣 ${spot} · ${gun} ${score}%`,
             comebackBody: (spot, gun, score) =>
                 `El ${gun} es el mejor día de la semana en el punto que analizaste. ¿Lo vemos?`,
+            // getCoastalLocality() gazetteer'i yalnız Türkiye'yi kapsar.
+            // Kapsam dışı bir noktada bildirim başlığı bu değerle kurulur.
+            genericShore: 'La costa',
             days: { bugun: 'hoy', yarin: 'mañana', adlar:
                 ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'] }
         },
@@ -723,6 +732,9 @@ const SERVER_i18n = {
             comebackTitle: (spot, gun, score) => `🎣 ${spot} · ${gun} ${score}%`,
             comebackBody: (spot, gun, score) =>
                 `${gun} είναι η καλύτερη μέρα της εβδομάδας στο σημείο που ανέλυσες. Να δούμε;`,
+            // getCoastalLocality() gazetteer'i yalnız Türkiye'yi kapsar.
+            // Kapsam dışı bir noktada bildirim başlığı bu değerle kurulur.
+            genericShore: 'Η ακτή',
             days: { bugun: 'σήμερα', yarin: 'αύριο', adlar:
                 ['Κυριακή', 'Δευτέρα', 'Τρίτη', 'Τετάρτη', 'Πέμπτη', 'Παρασκευή', 'Σάββατο'] }
         },
@@ -10647,7 +10659,10 @@ cron.schedule('5 * * * *', async () => {
           `  ·  ${kapatanElenen} bildirimi kapatmış  ·  ${tokensuz} token yok`);
         P(` ADAY     : ${adaylar.length} kullanıcı → ${hucreler.size} ayrı hücre  (5 km ızgara)`);
         P(` TABAN    : %${GERI_DONUS_TABAN}   (Render env: GERI_DONUS_TABAN)`);
-        P(` SONUÇ    : ${gidecek.length} kullanıcıya bildirim ${SHORE_ALERT_ENABLED ? 'GİDİYOR' : 'giderdi (kuru)'}` +
+        // "GİDİYOR" yanıltıcıydı: bu rapor gönderim döngüsünden ÖNCE basılıyor.
+        // 2026-08-24'te 7 dedi, 6 gitti (biri ölü token). Gerçekleşen sonuç
+        // döngünün sonundaki "GÖNDERİM" satırında.
+        P(` SONUÇ    : ${gidecek.length} kullanıcıya bildirim ${SHORE_ALERT_ENABLED ? 'GÖNDERİLECEK' : 'giderdi (kuru)'}` +
           `   ·   ${gecenHucre}/${hucreEnIyi.size} hücre tabanı geçti`);
         P(` EN İYİ   : ${enIyiler || '—'}` +
           (gecenHucre === 0 && sirali.length
@@ -10657,11 +10672,17 @@ cron.schedule('5 * * * *', async () => {
         P('═══════════════════════════════════════════');
 
         // ── 4) Gönder (veya kuru çalışmada yalnızca kaydet) ───────────────
+        let gonderildi = 0, gonderilemedi = 0, oluToken = 0;
         for (const a of gidecek) {
             const e = hucreEnIyi.get(a.hucre);
             const skor = Math.round(e.skor);
-            const yerAdi = getCoastalLocality(a.lat, a.lon, a.lang) || 'Kıyı';
             const i18nN = (SERVER_i18n[a.lang] || SERVER_i18n.tr).notification;
+            // [2026-08-24] Gazetteer yalnız Türkiye'yi kapsadığı için yurt dışındaki
+            // kullanıcı buraya düşüyor (canlı örnek: 38.520,-9.185 Lizbon). Eski hâlde
+            // fallback hardcode 'Kıyı' idi — İngiliz/İspanyol/Yunan kullanıcıya Türkçe
+            // başlık gidiyordu. Son 'Kıyı' eksik i18n'de "undefined" yazmasın diye durur.
+            const yerAdi = getCoastalLocality(a.lat, a.lon, a.lang)
+                        || i18nN.genericShore || 'Kıyı';
             const gun = spotGunAdi(i18nN.days, e.idx, a.ofset);
 
             if (!SHORE_ALERT_ENABLED) {
@@ -10688,10 +10709,39 @@ cron.schedule('5 * * * *', async () => {
                     });
                     await db.collection('users').doc(a.uid)
                         .set({ lastComebackAlert: { at: Date.now(), hucre: a.hucre, skor } }, { merge: true });
+                    gonderildi++;
                     console.log(`[SPOT-HATIRLATMA/CANLI] ✅ uid:${a.uid} ${yerAdi} ${gun} %${skor} ` +
                         `(${a.gecenGun.toFixed(1)} gündür yok)`);
                 } catch (err) {
-                    console.error(`[SPOT-HATIRLATMA] gönderilemedi uid:${a.uid}:`, err.message);
+                    gonderilemedi++;
+                    // [2026-08-24] ÖLÜ TOKEN TEMİZLİĞİ.
+                    //
+                    // lastComebackAlert yalnız BAŞARILI gönderimden sonra yazılıyor.
+                    // Token ölüsse (uygulama silinmiş / token yenilenmiş) kullanıcı
+                    // her gün yeniden aday oluyor, hücresi boşuna analiz ediliyor
+                    // (bir Open-Meteo çağrısı) ve gönderim hep aynı hatayla düşüyor.
+                    // Canlıda görüldü: uid:GuTUNBDNhZVxsmCK9VzDpnY9YaH2 → NotRegistered.
+                    //
+                    // Eski bildirim cron'u bunu zaten yapıyordu ("Geçersiz tokenları
+                    // Firestore'dan temizle" bloğu); bu yol atlamıştı.
+                    //
+                    // YALNIZ token'a özgü kodlar silmeyi tetikler. messaging/invalid-argument
+                    // BİLEREK dışarıda: o hata bozuk payload'da da gelir ve bütün
+                    // kullanıcıların token'ını sildirebilirdi.
+                    const kod = err.code || '';
+                    const olu = kod === 'messaging/registration-token-not-registered'
+                             || kod === 'messaging/invalid-registration-token'
+                             || /not[\s-]?registered/i.test(err.message || '');
+                    if (olu) {
+                        oluToken++;
+                        await db.collection('users').doc(a.uid)
+                            .update({ fcmToken: admin.firestore.FieldValue.delete() })
+                            .catch(() => { });
+                        console.warn(`[SPOT-HATIRLATMA] ✖ uid:${a.uid} ölü token ` +
+                            `(${kod || err.message}) — fcmToken silindi, bir daha denenmeyecek`);
+                    } else {
+                        console.error(`[SPOT-HATIRLATMA] gönderilemedi uid:${a.uid}:`, err.message);
+                    }
                 }
                 await new Promise(r => setTimeout(r, 200));
             }
@@ -10702,6 +10752,13 @@ cron.schedule('5 * * * *', async () => {
                 gecenGun: Number(a.gecenGun.toFixed(2)),
                 yer: String(yerAdi), taban: GERI_DONUS_TABAN, at: Date.now()
             }).catch(() => { });
+        }
+
+        // Gerçekleşen sonuç — yukarıdaki rapor gönderimden ÖNCE basıldığı için
+        // orada yalnızca "kaç kişiye denenecek" yazıyor.
+        if (SHORE_ALERT_ENABLED && gidecek.length) {
+            P(` GÖNDERİM : ${gonderildi} ulaştı  ·  ${gonderilemedi} düştü` +
+              (oluToken ? `  (${oluToken} ölü token silindi — bir daha denenmeyecek)` : ''));
         }
     } catch (e) {
         console.error(`[SPOT-HATIRLATMA/${mod}] hata:`, e.message);
