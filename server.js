@@ -6080,7 +6080,31 @@ app.get('/api/forecast', async (req, res) => {
          */
         const _gonder = (data) => {
             if (!isRetry) retryHakkiAc(_kimlik, _hucre, data);
-            return applySanitization(listeyiSurumeGoreKes(data, _istemciSurum), isProUser);
+            const cikti = applySanitization(listeyiSurumeGoreKes(data, _istemciSurum), isProUser);
+            // [2026-08-24] DENEME DURUMU ARTIK İSTEMCİYE BİLDİRİLİYOR.
+            //
+            // SORUN: deneme kullanıcısı `isPro:true` alıyordu (6064: isProUser =
+            // isPremium || isGracePeriod || anonFree) ama DENEMEDE OLDUĞU bilgisi bu
+            // uçta hiç gönderilmiyordu — yalnız /api/subscription-status gönderiyordu.
+            // İstemci gerçek aboneyi denemeliden ayırt edemediği için menüdeki
+            // "PRO'ya Yükselt" düğmesini İKİSİNDE DE gizliyordu.
+            //
+            // SONUÇ: denemedeki kullanıcının satın almak için görünür hiçbir yolu
+            // yoktu. Koddaki 16 paywall girişinin 14'ü özellik kapısı (denemede
+            // erişim zaten var, hiç tetiklenmiyor), biri anonim duvarı, biri de
+            // gizlenen bu düğme. Geriye yalnız menüdeki "N/7 GÜN KALDI" rozeti
+            // kalıyordu ve o bir durum etiketi gibi görünüyor, düğme gibi değil.
+            // Satın alma isteğinin en yüksek olduğu an, teklifin hiç görünmediği andı.
+            //
+            // ESKİ İSTEMCİLER ETKİLENMEZ — üç sebeple:
+            //   1) Gson bilinmeyen alanı sessizce yok sayar.
+            //   2) 4.4.0'ın ForecastResponse modeli bu iki alanı ZATEN tanımlıyor.
+            //   3) İstemcideki her `isGracePeriod` okuması `isPro` ile OR'lu; deneme
+            //      kullanıcısı zaten isPro:true aldığı için sonuç değişmiyor
+            //      (true||false → true||true). Davranış farkı YOK.
+            cikti.isGracePeriod = req.isGracePeriod === true;
+            cikti.graceDaysLeft = (typeof req.graceDaysLeft === 'number') ? req.graceDaysLeft : null;
+            return cikti;
         };
 
         // Cache varsa hava/deniz verisini oradan al, ama derinliği taze çek
