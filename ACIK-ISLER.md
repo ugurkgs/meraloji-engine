@@ -417,7 +417,7 @@ cevabından, yaz saati dahil). Boylam tahmini yalnız kaydı olmayana yedek.
 | değişken | varsayılan | not |
 |---|---|---|
 | `SHORE_ALERT_ENABLED` | (yok = KURU) | **SİLİNİRSE BİLDİRİM DURUR.** `true` olmalı. |
-| `GERI_DONUS_TABAN` | 65 | taban skor |
+| `GERI_DONUS_TABAN` | 65 | taban skor — **ekimde yükseltilmesi gerekebilir, bkz. EKİM UYARISI** |
 | `GERI_DONUS_BASLA_GUN` | 3 | yokluk penceresi başı |
 | `GERI_DONUS_BITIS_GUN` | 10 | yokluk penceresi sonu |
 | `SHORE_ALERT_SAAT` | 17 | kullanıcının yerel saati |
@@ -466,10 +466,125 @@ olarak** söküp kum havuzunda gerçek Firestore semantiğiyle (aralık sorgusu
 dahil) koşturur. 12 sahte kullanıcı her kuralı ayrı ayrı sınar; mesaj içeriği
 (doğru gün, doğru skor, beraberlikte erken gün) ayrıca doğrulanır.
 
-**Dört pozitif kontrol var**: yokluk alt sınırı, taban karşılaştırması,
-dönem-başına-tek kuralı ve gerçek-ofset okuması tek tek sökülüp koşturulur.
-Bozuk sürüm testi geçerse o kural aslında test EDİLMİYOR demektir — araç bunu
-bildirir.
+2026-08-24'te eklendi: **3 ölü token senaryosu** (FCM hata kodu / `err.message` /
+geçici hata) ve **4 dil başlığı** (gazetteer dışı yer adı). Üçüncü ölü token
+senaryosu en kritik olanı: **geçici hatada token SİLİNMEMELİ.** Silinseydi
+Google tarafındaki anlık bir aksaklık sağlam kullanıcıların bildirimlerini
+kalıcı olarak kapatırdı.
+
+**Altı pozitif kontrol var**: yokluk alt sınırı, taban karşılaştırması,
+dönem-başına-tek kuralı, gerçek-ofset okuması, ölü token temizliği ve yer adı
+fallbackı tek tek sökülüp koşturulur. Bozuk sürüm testi geçerse o kural
+aslında test EDİLMİYOR demektir — araç bunu bildirir.
+
+#### 2026-08-24 düzeltmeleri — ilk tam günün canlı logundan
+
+İlk tam gün: **8 bildirim denendi, 7 ulaştı.** Saat dilimi düzeltmesi gerçek
+kullanıcıda doğrulandı — Türkiye 14:05 UTC (TSİ 17:05), Portekiz 16:05 UTC
+(yerel 17:05). Eski `Math.round(lon/15)` yedeği ikisini de kaçırıyordu.
+
+Aynı gün üç kusur çıktı ve düzeltildi (commit `80d8039`):
+
+**1 · Ölü token temizlenmiyordu.** `lastComebackAlert` yalnız BAŞARILI
+gönderimden sonra yazılıyor. Token ölüyse (uygulama silinmiş) kullanıcı her gün
+yeniden aday oluyor, hücresi boşuna analiz ediliyor (bir Open-Meteo çağrısı) ve
+gönderim hep aynı hatayla düşüyordu — sonsuza kadar. Eski bildirim cron'u bunu
+zaten yapıyordu, bu yol atlamıştı.
+
+> Silme yalnız **token'a özgü** iki hata koduyla ve `NotRegistered` mesajıyla
+> tetikleniyor. `messaging/invalid-argument` **BİLEREK dışarıda**: o hata bozuk
+> payload'da da gelir ve tek bir kod hatası bütün kullanıcıların token'ını
+> sildirebilirdi. Bu sınırı genişletmeden önce iki kez düşünün.
+
+Temizlik o kullanıcıyı **geri kazanmıyor** — uygulama zaten silinmiş. Yaptığı
+şey, her gün tekrarlanan boş analizi durdurmak. O kişi bundan sonra "aday"dan
+çıkıp "token yok"a katılıyor; rakam dürüstleşiyor.
+
+**2 · Yer adı fallback'i hardcode Türkçeydi.** `getCoastalLocality()` gazetteer'i
+yalnız Türkiye'yi kapsıyor; yurt dışındaki kullanıcı (canlı örnek 38.520,-9.185
+Lizbon) fallback'e düşüyor ve İngiliz/İspanyol/Yunan kullanıcıya Türkçe başlık
+gidiyordu. `genericShore` 4 dile eklendi: `Kıyı` / `The coast` / `La costa` /
+`Η ακτή`.
+
+**3 · Rapor "GİDİYOR" diyordu ama gönderimden ÖNCE basılıyordu.** 7 dedi, 6
+gitti. `GÖNDERİLECEK` oldu; döngü sonuna gerçekleşen sonuç satırı eklendi:
+
+```
+GÖNDERİM : 6 ulaştı  ·  1 düştü  (1 ölü token silindi — bir daha denenmeyecek)
+```
+
+---
+
+#### ⚠ EKİM UYARISI — taban 65 sonbaharda taşacak
+
+Taban ağustos verisiyle seçildi. **Sonbaharda skorlar yapısal olarak yükselecek**
+ve aynı taban çok daha fazla bildirim üretecek. Bu bir hata değil, mevsim — ama
+müdahale edilmezse bildirim spam'e döner.
+
+Sebep `species.js`'in kendi verisinde (`s_season = seasonalEff × 22` puan):
+
+| tür | yaz | sonbahar | `s_season` farkı | bölgesel zirve |
+|---|---|---|---|---|
+| lüfer | 0,15 | **0,95** | **+17,6 puan** | Marmara Eki-Kas-Ara `+0,35` |
+| palamut | 0,55 | **0,90** | +7,7 puan | Marmara Eki-Kas `+0,40` |
+| hamsi | 0,20 | 0,70 → kış **0,95** | +16,5 puan | Karadeniz Eki-Oca `+0,35` |
+| levrek | 0,50 | 0,80 | +6,6 puan | Marmara Ara-Şub |
+
+Üstüne `s_temp` (28 puan) biniyor: su 27°C→18-20°C inerken çoğu tür optimuma
+yaklaşıyor. **Aylar 0-indeksli** (`server.js:4507`, `getMonth()`, 0=Ocak) —
+lüfer Marmara `[9,10,11]` = **Ekim, Kasım, Aralık**.
+
+##### Nasıl izlenir
+
+Render logunda günlük **14:05 UTC** koşusuna bak (TSİ 17:05 — Türk
+kullanıcılarının toplandığı saat, en kalabalık koşu). İzlenecek tek satır:
+
+```
+SONUÇ    : 7 kullanıcıya bildirim GÖNDERİLECEK   ·   7/27 hücre tabanı geçti
+                                                     ↑↑↑↑↑
+```
+
+Haftada bir bu oranı not et.
+
+| oran | anlam | yapılacak |
+|---|---|---|
+| ~%26 | ağustos tabanı (7/27) | normal, dokunma |
+| %50-80 | mevsim dönüyor | izlemeye al, hafta hafta bak |
+| **%80 üstü** | taban anlamsızlaştı | **tabanı yükselt** |
+
+##### Nasıl yükseltilir — deploy GEREKMİYOR
+
+1. Render → servis → **Environment**
+2. `GERI_DONUS_TABAN` değerini değiştir (ör. `65` → `75`)
+3. Kaydet → servis kendiliğinden yeniden başlar
+4. Sonraki `:05` koşusunda rapordaki `TABAN : %75` satırından doğrula
+
+> **Yalnız sayı yaz.** `"%75"` gibi bir değer `parseFloat`'ta `NaN` olur;
+> `spotEnvSayi()` bunu yakalar, varsayılana düşer ve açılışta uyarı basar — ama
+> senin ayarladığın değer uygulanmamış olur.
+
+##### Hangi değere yükseltmeli — şu an BİLEMİYORUZ
+
+`notifyLog` yalnız **tabanı GEÇEN** hücreleri kaydediyor (yazma döngüsü
+`gidecek` üzerinde). Yani geçemeyenlerin skorları hiçbir yerde durmuyor ve
+**dağılımı göremiyoruz.** Rapordaki `EN İYİ` satırı yalnız ilk 3'ü veriyor.
+
+Elde iki yol var:
+
+- **Kaba (şimdi kullanılabilir):** oran %80'i geçince tabanı 5'er puan yükselt,
+  bir hafta izle, tekrarla. Hedef: oranı %25-35 bandına geri getirmek.
+- **Doğru (küçük bir ekleme gerekir):** her koşuda **tüm** hücre skorlarını
+  logla ya da `notifyLog`'a geçemeyenleri de yaz. O zaman gerçek dağılıma bakıp
+  üst %25-30'u yakalayan değeri **seçersin**, deneme yanılma gerekmez.
+  APK gerektirmez, kullanıcıya etkisi yok. **Ekimden ÖNCE yapılmalı.**
+
+##### İlgili beklenti
+
+Sonbahar yükselişi yalnız bildirimi değil, **skor tavanını** da ilgilendiriyor.
+Ağustosta ölçülen tavan 74'tü (112 skor + 30 gerçek hücre, ikisinde de 74).
+Bu bir **ağustos** tavanı olabilir, motorun tavanı değil — lüferde tek başına
+`s_season` +17,6 puan geliyor. Ekimde aynı ölçümü tekrarlamak, ayırt ediciliğin
+mevsimsel mi yapısal mı olduğunu söyler.
 
 #### Açık kalan
 
@@ -480,6 +595,10 @@ bildirir.
   "Cumartesi %70" denebilir — zaten bildiği bir şey. Bilinçli olarak
   eklenmedi: `lastSeen.skor` yazmak ikinci bir Firestore yazması demekti.
   İstenirse sonradan eklenebilir.
+- **13 kullanıcıda token yok** (pencerenin %28'i, dört koşuda da aynı sayı).
+  Geri getirme sisteminin dörtte biri ölü. Sebep bilinmiyor: Android 13+
+  bildirim izni reddi mi, eski APK token kaydetmemiş mi, anonim kullanıcı mı?
+  Ölçüm işi — önce sebebi çıkar, sonra karar ver.
 
 ---
 
