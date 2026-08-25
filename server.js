@@ -851,6 +851,48 @@ function _isLoopback(req) {
     const a = req.socket && req.socket.remoteAddress;
     return a === '127.0.0.1' || a === '::1' || a === '::ffff:127.0.0.1';
 }
+// ══ İSTEMCİ SÜRÜMÜ ─ [2026-08-25] ══════════════════════════════
+//
+// İstemci X-App-Version başlığını zaten gönderiyordu (ApiClient.java, OkHttp
+// interceptor — her isteğe) ve sunucu da zaten ayrıştırıyordu (istemciSurumKodu),
+// ama yalnız iç bölge sürüm kapısında kullanılıyordu. Loga hiç yazılmıyordu, bu
+// yüzden "şu çökme hangi sürümde" ve "kaç kişi hâlâ eski APK'da" soruları
+// logdan cevaplanamıyordu. Artık her istek satırında ve saatlik özette var.
+
+/**
+ * Başlık "44/4.2.0" biçiminde gelir → "📱 v4.2.0 (44)".
+ *
+ * GÜVENLİK: bu değer İSTEMCİDEN gelir, yani saldırgan kontrolündedir. Ham
+ * basılsaydı içine satır sonu koyup sahte log satırları uydurabilirdi (log
+ * injection). Bu yüzden hem beyaz liste karakter süzgeci hem uzunluk sınırı var.
+ */
+function _surumEtiketi(req) {
+    const h = req && req.headers && req.headers['x-app-version'];
+    if (typeof h !== 'string') return null;
+    const temiz = h.replace(/[^A-Za-z0-9._\/-]/g, '').slice(0, 24);
+    return temiz || null;
+}
+function _surumRozeti(req) {
+    const e = _surumEtiketi(req);
+    if (!e) return '📵 sürüm yok';
+    const m = e.match(/^(\d{1,6})\/(.+)$/);
+    return m ? `📱 v${m[2]} (${m[1]})` : `📱 ${e}`;
+}
+
+// Sürüm → { istek, kisi:Set(uid) }. Saatlik özetten sonra temizlenir.
+const _surumSayac = new Map();
+// Anahtar istemciden geldiği için Map sınırsız büyüyebilirdi: rastgele başlık
+// gönderen biri belleği şişirirdi. Tavanı aşan her şey tek kovaya düşer.
+const _SURUM_MAX_ANAHTAR = 40;
+function _surumSay(req) {
+    let k = _surumEtiketi(req) || 'YOK';
+    if (!_surumSayac.has(k) && _surumSayac.size >= _SURUM_MAX_ANAHTAR) k = 'DİĞER';
+    let r = _surumSayac.get(k);
+    if (!r) { r = { istek: 0, kisi: new Set() }; _surumSayac.set(k, r); }
+    r.istek++;
+    if (req.user && req.user.uid) r.kisi.add(req.user.uid);
+}
+
 // İstek sonunda çağrılır. Analiz/tarama/arama isteklerinde tam blok, diğerlerinde tek satır.
 function printRequestLog(req, timeMs) {
     const p = req.path;
@@ -875,6 +917,11 @@ function printRequestLog(req, timeMs) {
         return;
     }
 
+    // Sayaç bu satırdan sonra besleniyor: sunucunun kendi iç çağrıları başlık
+    // göndermez, sayılsalardı "sürüm yok" kovasını doldurup dağılımı yalancı
+    // çıkarırlardı — gerçekte eski APK olmayan onlarca satır.
+    _surumSay(req);
+
     if (kind) {
         const s = req._story || {};
         const lat = req.query.lat, lon = req.query.lon;
@@ -898,11 +945,11 @@ function printRequestLog(req, timeMs) {
         // kullanıcıya ait olduğu anlaşılmayan tek satır oydu.
         _origConsoleLog(
             '*'.repeat(80) + '\n' +
-            `👤 ${who}   [${plan}]` + '\n' +
+            `👤 ${who}   [${plan}]   ${_surumRozeti(req)}` + '\n' +
             `${kind}   ${parts.join('  ·  ')}  ·  ⏱ ${ms} ms`
         );
     } else {
-        _origConsoleLog(`· ${who} [${plan.split(' ')[0]}]  ${req.method} ${p}  ${ms}ms`);
+        _origConsoleLog(`· ${who} [${plan.split(' ')[0]}] ${_surumRozeti(req)}  ${req.method} ${p}  ${ms}ms`);
     }
 }
 
@@ -10528,6 +10575,26 @@ function spotGunAdi(gunler, idx, ofsetSaat) {
     const bugunIdx = new Date(Date.now() + ofsetSaat * 3600000).getUTCDay();  // 0 = Pazar
     return gunler.adlar[(bugunIdx + idx) % 7];
 }
+
+// ══ SAATLİK SÜRÜM DAĞILIMI ─ [2026-08-25] ═════════════════════════
+//
+// Tek tek istek satırları "bu çökme hangi sürümde" sorusunu cevaplıyor; bu özet
+// "filoda kaç kişi hâlâ eski APK'da" sorusunu cevaplıyor. İkincisi olmadan
+// yayın kararı veremiyoruz: eski sürümde kimse kalmadıysa sürüm kapıları
+// (INLAND_HAVA_MIN_SURUM, UZUN_LISTE_MIN_SURUM) kaldırılabilir.
+//
+// "kişi" = o saatteki AYRI uid sayısı. Anonim istek kişi olarak sayılmaz
+// (uid yok), yalnız istek olarak sayılır — iki sütun bu yüzden farklı.
+// Sayaç bellekte; Render yeniden başlatırsa o saatin verisi kaybolur. Kabul
+// edilebilir: bu bir metrik değil, bir gözlem aracı.
+cron.schedule('10 * * * *', () => {
+    if (_surumSayac.size === 0) return;
+    const satirlar = [..._surumSayac.entries()]
+        .sort((a, b) => b[1].istek - a[1].istek)
+        .map(([v, r]) => `${v}: ${r.istek} istek/${r.kisi.size} kişi`);
+    console.log(`[SÜRÜM] son saat — ${satirlar.join('  ·  ')}`);
+    _surumSayac.clear();
+});
 
 cron.schedule('5 * * * *', async () => {
     if (!db || !admin) return;
