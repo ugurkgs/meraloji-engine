@@ -187,6 +187,24 @@ const SERVER_i18n = {
             boatRequired: 'Tekne gerektirir',
             highWave: 'Yüksek dalga',
         },
+            ozelUyari: {
+                baslikHirsiz: 'Harami balık alarmı',
+                baslikYemGider: 'Yemin çabuk gidecek',
+                baslikFirsat: 'Canlı yem fırsatı',
+                hirsizMetin: (tur, skor, hedef, hedefSkor) =>
+                    `${tur} %${skor} aktif, ${hedef} %${hedefSkor}. Yemini onlar alacak.`,
+                hirsizMetinHedefsiz: (tur, skor) => `${tur} %${skor} aktif. Yemini onlar alacak.`,
+                yemGiderMetin: (tur, skor) => `${tur} %${skor} aktif. Yem çabuk tükenecek.`,
+                firsatMetin: (tur, skor, avci, avciSkor) =>
+                    `${tur} %${skor} — çapariyle birkaç tane tut, iri iğneye canlı tak. ${avci} %${avciSkor}.`,
+                tavsiye: {
+                    kucukAgiz: 'İğneyi büyüt — küçük ağız iri iğneyi alamaz',
+                    sertGaga: 'Çelik köstek kullan — misinayı keser',
+                    gagalar: 'Yemi iplikle sararak bağla',
+                    sertYem: 'Sert yem seç: kalamar veya uskumru fileto',
+                    bolYem: 'Yanına normalden fazla yem al',
+                },
+            },
         notification: {
             title: '🌪️ Fırtına Öncesi Fırsatı Kaçırma!',
             body: (spot) => `${spot} bölgesinde basınç hızla düşüyor, balıklar aşırı iştahlı!`,
@@ -366,6 +384,24 @@ const SERVER_i18n = {
             boatRequired: 'Boat required',
             highWave: 'High waves',
         },
+            ozelUyari: {
+                baslikHirsiz: 'Bait thief alert',
+                baslikYemGider: 'Your bait will go fast',
+                baslikFirsat: 'Live bait opportunity',
+                hirsizMetin: (tur, skor, hedef, hedefSkor) =>
+                    `${tur} at ${skor}%, ${hedef} at ${hedefSkor}%. They will strip your bait.`,
+                hirsizMetinHedefsiz: (tur, skor) => `${tur} at ${skor}%. They will strip your bait.`,
+                yemGiderMetin: (tur, skor) => `${tur} at ${skor}%. Your bait will run out fast.`,
+                firsatMetin: (tur, skor, avci, avciSkor) =>
+                    `${tur} at ${skor}% — catch a few on a sabiki and hook one live. ${avci} at ${avciSkor}%.`,
+                tavsiye: {
+                    kucukAgiz: 'Use a bigger hook — small mouths cannot take it',
+                    sertGaga: 'Use a wire trace — it cuts through line',
+                    gagalar: 'Bind the bait on with elastic thread',
+                    sertYem: 'Choose tough bait: squid or mackerel strip',
+                    bolYem: 'Bring more bait than usual',
+                },
+            },
         notification: {
             title: '🌪️ Pre-Storm Opportunity!',
             body: (spot) => `Pressure dropping fast at ${spot} — fish may be active!`,
@@ -545,6 +581,24 @@ const SERVER_i18n = {
             boatRequired: 'Requiere embarcación',
             highWave: 'Oleaje alto',
         },
+            ozelUyari: {
+                baslikHirsiz: 'Alerta de ladrones de cebo',
+                baslikYemGider: 'Tu cebo se acabará rápido',
+                baslikFirsat: 'Oportunidad de cebo vivo',
+                hirsizMetin: (tur, skor, hedef, hedefSkor) =>
+                    `${tur} al ${skor}%, ${hedef} al ${hedefSkor}%. Se llevarán tu cebo.`,
+                hirsizMetinHedefsiz: (tur, skor) => `${tur} al ${skor}%. Se llevarán tu cebo.`,
+                yemGiderMetin: (tur, skor) => `${tur} al ${skor}%. El cebo se agotará rápido.`,
+                firsatMetin: (tur, skor, avci, avciSkor) =>
+                    `${tur} al ${skor}% — captura algunos con sabiki y usa uno vivo. ${avci} al ${avciSkor}%.`,
+                tavsiye: {
+                    kucukAgiz: 'Usa un anzuelo más grande — las bocas pequeñas no lo cogen',
+                    sertGaga: 'Usa cable de acero — corta el sedal',
+                    gagalar: 'Ata el cebo con hilo elástico',
+                    sertYem: 'Elige cebo duro: calamar o tira de caballa',
+                    bolYem: 'Lleva más cebo de lo normal',
+                },
+            },
         notification: {
             title: '🌪️ ¡Oportunidad pre-tormenta!',
             body: (spot) => `La presión cae rápido en ${spot} — ¡los peces pueden estar activos!`,
@@ -724,6 +778,24 @@ const SERVER_i18n = {
             boatRequired: 'Απαιτεί σκάφος',
             highWave: 'Ψηλά κύματα',
         },
+            ozelUyari: {
+                baslikHirsiz: 'Συναγερμός κλεφτών δολώματος',
+                baslikYemGider: 'Το δόλωμα θα τελειώσει γρήγορα',
+                baslikFirsat: 'Ευκαιρία για ζωντανό δόλωμα',
+                hirsizMetin: (tur, skor, hedef, hedefSkor) =>
+                    `${tur} στο ${skor}%, ${hedef} στο ${hedefSkor}%. Θα σου φάνε το δόλωμα.`,
+                hirsizMetinHedefsiz: (tur, skor) => `${tur} στο ${skor}%. Θα σου φάνε το δόλωμα.`,
+                yemGiderMetin: (tur, skor) => `${tur} στο ${skor}%. Το δόλωμα θα τελειώσει γρήγορα.`,
+                firsatMetin: (tur, skor, avci, avciSkor) =>
+                    `${tur} στο ${skor}% — πιάσε μερικά με σαμπίκι και δόλωσε ζωντανό. ${avci} στο ${avciSkor}%.`,
+                tavsiye: {
+                    kucukAgiz: 'Βάλε μεγαλύτερο αγκίστρι — τα μικρά στόματα δεν το παίρνουν',
+                    sertGaga: 'Χρησιμοποίησε ατσαλόσυρμα — κόβει την πετονιά',
+                    gagalar: 'Δέσε το δόλωμα με ελαστική κλωστή',
+                    sertYem: 'Διάλεξε σκληρό δόλωμα: καλαμάρι ή φιλέτο σκουμπρί',
+                    bolYem: 'Πάρε περισσότερο δόλωμα από ό,τι συνήθως',
+                },
+            },
         notification: {
             title: '🌪️ Ευκαιρία Προ-Καταιγίδας!',
             body: (spot) => `Η πίεση πέφτει γρήγορα στο ${spot} — τα ψάρια μπορεί να είναι ενεργά!`,
@@ -4493,11 +4565,191 @@ const TEHLIKELI_TURLER = new Set([
 function tehlikeliMi(key) {
     return TEHLIKELI_TURLER.has(key);
 }
+
+// ── YEM HIRSIZI — "boş iğne" ekseni ────────────────────────────
+// [2026-08-25]
+//
+// SORU: bu balık iğnedeki yemi yer ama KENDİSİ takılmaz mı? Yani balıkçı
+// iğneyi BOŞ mu çeker? Bu bir SIKLIK sorusudur, imkân sorusu değil —
+// neredeyse her balık bazen takılır.
+//
+// DEĞERLE İLGİSİ YOKTUR. İzmarit pazarda satılır ve tavası yenir, ama
+// Türkiye'nin en bilinen yem hırsızıdır. Bu yüzden AV_DEGERI'den AYRI
+// bir küme; ikisini birleştirme denemesi iki kez battı.
+//
+// NEDEN ELLE YAZILDI: species.js ağız büyüklüğünü, beslenme
+// saldırganlığını, yeme yaklaşım biçimini KODLAMIYOR. Otomatik
+// sınıflandırma iki kez denendi, ikisi de battı — ikincisinde izmarit
+// "hırsız değil" çıktı (AV_DEGERI'de yok → varsayılan 1.0 → hedef tür).
+//
+// KÜME NASIL KURULDU: beş bağımsız AI'a aynı soru soruldu; çıktılar
+// tools/denetle-ai-cikti.js süzgecinden geçirildi (gizli sınama türleri,
+// "E" şişmesi tavanı/tabanı, eksen bazında "?" oranı). Elenen çıktılar
+// oya katılmadı. Satır sonundaki n/5 geçerli oy sayısıdır.
+const YEM_HIRSIZI = new Set([
+    'izmarit',   // 5/5 · küçük ağız didikler, iğne boş gelir — klasik harami
+    'aterin',    // 5/5 · kıyıya çok yakın sürüler; AYNI ZAMANDA YEM_BALIGI
+    'isparoz',   // 5/5 · ekmeği didikler, sürü hâlinde iğneyi soyar
+    'kupes',     // 5/5 · orta suda yemi parçalar; AYNI ZAMANDA YEM_BALIGI
+    'sarpa',     // 4/5 · otobur ama ekmeği tırtıklar
+    'cutre',     // 4/5 · sert gaga yemi koparır, misinayı bile keser
+    'lapin',     // 4/5 · kayalıkta sürekli gagalar
+    'hani',      // 3/5 · SAHİBİN KARARI: "tam yem yiyici, harami türü"
+    'lokum',     // 3/5 · SAHİBİN KARARI: "hem yemci hem hedef"
+]);
+// KASTEN DIŞARIDA — AI'ların çoğu "hırsız" dediği hâlde elendiler.
+// Gerekçe sahibin kendi balıkçılık bilgisi; oy çokluğu tek başına yeterli
+// değil (v1 turunda üç AI birden çipuraya "hırsız" demişti):
+//   kefal, sarikulak → hedef balık, yem tüketici değil
+//   tekir, barbun    → değerli; yasal boyu küçük ama sepete gider
+//   iskorpit, gelincik → hedef değil ama denk gelince alınır, geri atılmaz
+//   ustura           → kıyıdan çok seyrek karşılaşılıyor
+
+// ── YEM BALIĞI — "çapariyle tut, iri iğneye tak" ekseni ────────────
+// SORU: kıyıdan bu balığı çapariyle/küçük iğneyle tutup, AYNI GÜN canlı ya
+// da ölü olarak iri iğneye takmak Türkiye'de yaygın bir pratik mi?
+//
+// "Besin zincirinde yem olur" YETMEZ — balıkçının fiilen böyle kullanması
+// gerekir. Bu yüzden lüfer/palamut gibi avcıların avladığı her küçük balık
+// burada değil.
+//
+// İKİ KÜMENİN KESİŞMESİ KASITLI: aterin ve kupes hem yemi soyar hem
+// değerli yemdir. Uyarı mantığı bunu şikâyeti fırsata çevirmek için
+// kullanacak — "yemini o alıyor, çapariyle tut ve iri iğneye tak".
+const YEM_BALIGI = new Set([
+    'aterin',    // 5/5 · levrek-lüfer için birinci sınıf canlı yem
+    'caca',      // 5/5 · avcıların ana yem zinciri (hırsız DEĞİL: süzücü)
+    'kupes',     // 5/5 · çapariyle tutulup canlı takılır
+    'hamsi',     // 5/5 · süzücü, iğneyi soyamaz; ölü yem olarak yaygın
+    'istavrit',  // 5/5 · çapariyle kova doldurulur, lüfere canlı takılır
+    'papalina',  // 5/5 · notunda "istavrit yemi olarak kritik" yazıyor
+    'sardalya',  // 5/5 · gece çapariyle tutulup ölü yem yapılır
+    'zargana',   // 5/5 · lüfer avında tercih edilen yem
+    'zurna',     // 4/5 · İskarmoz — notunda lüfer/kofana yemi yazıyor
+    'kolyoz',    // 4/5 · bütün ya da parça yem
+]);
+/** İğnedeki yemi soyup kaçan tür mü? Bilinmeyen anahtar FALSE. */
+function yemHirsiziMi(key) {
+    return YEM_HIRSIZI.has(key);
+}
+/** Avcı balık için fiilen yem olarak kullanılan tür mü? Bilinmeyen anahtar FALSE. */
+function yemBaligiMi(key) {
+    return YEM_BALIGI.has(key);
+}
+
+// ── ÖZEL UYARILAR ─────────────────────────────────────────────────────────
+// [2026-08-25] Analiz sonucunda kendi başına duran bir bölüm. Doluysa açılır,
+// boşsa istemcide hiç görünmez — bu yüzden "uyarı yok" diye bir metin YOK.
+//
+// TETİKLEYİCİ NEDEN MUTLAK DEĞİL, FARK: "izmarit > 60" tek başına yetmez.
+// Levrek 80 / izmarit 70 olan bir günde uyarıya gerek yoktur — zaten levrek
+// tutulacak. Uyarı, hırsızın hedefe belirgin fark attığı durumda anlamlı.
+// Her yerde fırlayan uyarı, uyarı değildir.
+const OZEL_UYARI_HIRSIZ_ESIK = 60;   // altında hiç uyarı üretilmez
+const OZEL_UYARI_HIRSIZ_FARK = 15;   // hedefe bu kadar fark atarsa "alarm"
+const OZEL_UYARI_FIRSAT_ESIK = 60;   // yem balığı bu skorun üstündeyse fırsat
+const OZEL_UYARI_AVCI_ESIK   = 50;   // fırsat yalnız peşine düşülecek avcı varsa
+
+// Hırsızlık mekanizması → tavsiye. Hepsine aynı şeyi yazmak yanlış olurdu:
+// çütre'nin sorunu ağız büyüklüğü değil, misinayı kesen gagası.
+const HIRSIZ_MEKANIZMA = {
+    izmarit: 'kucukAgiz', aterin: 'kucukAgiz', isparoz: 'kucukAgiz',
+    kupes:   'kucukAgiz', hani:   'kucukAgiz', lokum:   'kucukAgiz',
+    cutre:   'sertGaga',
+    sarpa:   'gagalar',   lapin:  'gagalar',
+};
+
+/**
+ * Skor listesinden özel uyarıları üretir. Liste SKORA GÖRE AZALAN sıralı
+ * gelmelidir (fishList.sort zaten öyle yapıyor); [0] en yüksek demektir.
+ *
+ * Boş dizi döner — null değil. İstemcide `isEmpty()` tek kontrolle bölümü
+ * gizler; null denetimi ayrıca gerekmez.
+ */
+function ozelUyarilariUret(fishList, lang) {
+    if (!Array.isArray(fishList) || fishList.length === 0) return [];
+    const t = i18n(lang).ozelUyari;
+    if (!t) return [];   // dil bloğu eksikse sessizce boş dön, çökme
+    const uyarilar = [];
+    const yuvarla = (s) => Math.round(Number(s) || 0);
+
+    const hirsizlar = fishList.filter(f => yemHirsiziMi(f.key));
+    // Hedef = peşine düşülen tür. Hırsız, zehirli ve istilacı olanlar dışarıda;
+    // 'İSTİLACI' zaten kullanıcının süzgecinde kapalı, karşılaştırmaya girerse
+    // "hedefin var" yanılsaması üretir.
+    const hedefler = fishList.filter(f =>
+        !yemHirsiziMi(f.key) && !tehlikeliMi(f.key) && f.category !== 'İSTİLACI');
+
+    const enHirsiz = hirsizlar[0] || null;
+    const enHedef  = hedefler[0] || null;
+
+    if (enHirsiz && enHirsiz.score >= OZEL_UYARI_HIRSIZ_ESIK) {
+        // Hedef hiç yoksa fark sonsuz sayılır: ortada tutulacak bir şey yok,
+        // gelen her vuruş hırsız demektir.
+        const fark = enHedef ? (enHirsiz.score - enHedef.score) : Infinity;
+        const alarm = fark >= OZEL_UYARI_HIRSIZ_FARK;
+        const mek = HIRSIZ_MEKANIZMA[enHirsiz.key];
+        const tavsiyeler = [];
+        if (mek && t.tavsiye[mek]) tavsiyeler.push(t.tavsiye[mek]);
+        tavsiyeler.push(t.tavsiye.sertYem, t.tavsiye.bolYem);
+
+        uyarilar.push({
+            tip: 'YEM_HIRSIZI',
+            seviye: alarm ? 'yuksek' : 'orta',
+            baslik: alarm ? t.baslikHirsiz : t.baslikYemGider,
+            metin: alarm
+                ? (enHedef
+                    ? t.hirsizMetin(enHirsiz.name, yuvarla(enHirsiz.score), enHedef.name, yuvarla(enHedef.score))
+                    : t.hirsizMetinHedefsiz(enHirsiz.name, yuvarla(enHirsiz.score)))
+                : t.yemGiderMetin(enHirsiz.name, yuvarla(enHirsiz.score)),
+            tavsiyeler,
+            turler: hirsizlar
+                .filter(f => f.score >= OZEL_UYARI_HIRSIZ_ESIK)
+                .slice(0, 3)
+                .map(f => ({ key: f.key, ad: f.name, skor: yuvarla(f.score) })),
+        });
+    }
+
+    // CANLI YEM FIRSATI — şikâyeti fırsata çeviren kısım.
+    //
+    // Yalnız peşine düşülecek bir avcı da varsa gösterilir. Avcı yoksa
+    // "çapariyle yem tut" tavsiyesi havada kalır ve her analizde fırlayan
+    // bir başka gürültü olur. Aterin/kupes iki kümede birden olduğu için
+    // aynı balık hem hırsız hem fırsat satırında görünebilir — kasıtlı.
+    const yemler = fishList.filter(f => yemBaligiMi(f.key));
+    const enYem = yemler[0] || null;
+    const avci  = hedefler.find(f => !yemBaligiMi(f.key)) || null;
+    if (enYem && enYem.score >= OZEL_UYARI_FIRSAT_ESIK &&
+        avci && avci.score >= OZEL_UYARI_AVCI_ESIK) {
+        uyarilar.push({
+            tip: 'YEM_FIRSATI',
+            seviye: 'bilgi',
+            baslik: t.baslikFirsat,
+            metin: t.firsatMetin(enYem.name, yuvarla(enYem.score), avci.name, yuvarla(avci.score)),
+            tavsiyeler: [],
+            turler: [{ key: enYem.key, ad: enYem.name, skor: yuvarla(enYem.score) }],
+        });
+    }
+
+    return uyarilar;
+}
 // İstemciye gönderilecek etiket. SIRALAMAYI ETKİLEMEZ — sıralama saf skorla yapılır.
 // 'target'  : peşine düşülen tür
 // 'bycatch' : yakalanır ama hedeflenmez (yem balığı, istilacı, zehirli, düşük değerli)
 // Bilinmeyen anahtar 'target' döner → yeni tür eklendiğinde davranış değişmez.
 function avSinifi(key) {
+    // [2026-08-25] YEM_HIRSIZI ÖNCE bakılır.
+    //
+    // HATA: avDegeri() tabloda OLMAYAN türe 1.0 döndürüyor, o da 0.6 eşiğini
+    // geçip 'target' oluyordu. Yani AV_DEGERI'ye hiç yazılmamış bir tür
+    // sessizce "hedef balık" sayılıyordu. İki tür tam olarak buradan
+    // sızıyordu: izmarit ve kupes — ikisi de klasik yem hırsızı.
+    //
+    // Kullanıcının "yalnız hedef türler" toggle'ı bu yüzden izmariti
+    // filtrelemiyordu. Varsayılanı 1.0'dan düşürmek TÜM tablosuz türleri
+    // etkilerdi (874 türün çoğu); onun yerine yalnız bilinen hırsızlar
+    // dışarı alınıyor — dar ve geri dönülür bir düzeltme.
+    if (YEM_HIRSIZI.has(key)) return 'bycatch';
     return avDegeri(key) < 0.6 ? 'bycatch' : 'target';
 }
 
@@ -5849,6 +6101,29 @@ function listeyiSurumeGoreKes(data, istemciSurumu) {
     return dokunuldu ? out : data;
 }
 
+// Özel uyarılar bölümü istemcide YEPYENİ bir görünüm. Yayındaki APK (46)
+// bu alanı tanımıyor; Gson bilinmeyen alanı yok sayar ama bölüm hiç
+// çizilmez — kullanıcı uyarıyı GÖREMEZ. Daha kötüsü, alan eklemek istemcide
+// daha önce hiç çalışmamış kod yollarını açar (DEVIR-17-AGUSTOS §1.1: aynı
+// hata dört kez çökertti). Bu yüzden alan yalnız tanıyan sürüme gider.
+// 47 = özel uyarılar bölümünü çizen ilk istemci.
+const OZEL_UYARI_MIN_SURUM = 47;
+
+/**
+ * Özel uyarıları TANIMAYAN istemciden alanı tamamen kaldırır.
+ *
+ * MUTASYON YOK: gövde önbellekten geliyor ve paylaşılıyor; delete yerinde
+ * yapılsaydı bir sonraki YENİ istemci de uyarısız kalırdı. Sığ kopya.
+ * Sürüm bilinmiyorsa ESKİ sayılır — bilinmeyeni yeni saymak çökertir.
+ */
+function ozelUyariKapisi(data, istemciSurumu) {
+    if (!data || !data.instant || data.instant.ozelUyarilar === undefined) return data;
+    if (istemciYeter(istemciSurumu, OZEL_UYARI_MIN_SURUM)) return data;
+    const out = { ...data, instant: { ...data.instant } };
+    delete out.instant.ozelUyarilar;
+    return out;
+}
+
 function applySanitization(data, isProUser) {
     if (isProUser) {
         return { ...data, isPro: true };
@@ -6139,7 +6414,9 @@ app.get('/api/forecast', async (req, res) => {
          */
         const _gonder = (data) => {
             if (!isRetry) retryHakkiAc(_kimlik, _hucre, data);
-            const cikti = applySanitization(listeyiSurumeGoreKes(data, _istemciSurum), isProUser);
+            const cikti = applySanitization(
+                ozelUyariKapisi(listeyiSurumeGoreKes(data, _istemciSurum), _istemciSurum),
+                isProUser);
             // [2026-08-24] DENEME DURUMU ARTIK İSTEMCİYE BİLDİRİLİYOR.
             //
             // SORUN: deneme kullanıcısı `isPro:true` alıyordu (6064: isProUser =
@@ -7303,6 +7580,10 @@ app.get('/api/forecast', async (req, res) => {
                 // «Şimdi» listesi uzun gider — süzgeç açıldığında 10 hedef tür
                 // kalabilmesi için. Eski istemciye gönderimde 10'a iniyor.
                 fishList: instantFishList.slice(0, UZUN_LISTE_N),
+                // KESİLMEMİŞ listeden üretiliyor: uyarı, gösterilen ilk 25 türe
+                // değil o hücrenin tamamına bakmalı. Kesilmiş listeden üretseydik
+                // eski istemcide (10 tür) uyarı sessizce kaybolurdu.
+                ozelUyarilar: ozelUyarilariUret(instantFishList, lang),
                 temp: i_tempWater,
                 wave: parseFloat(i_wave.toFixed(2)),
                 airTemp: safeNum(weather.hourly?.temperature_2m?.[instantIdx]),
