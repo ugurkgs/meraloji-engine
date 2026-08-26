@@ -1291,6 +1291,16 @@ const ENGINE_VERSION = '2026-08-13';
 // Bathymetry sonuçlarını 24 saat cache'le — aynı bölgede tekrar taramada API çağrısı yok
 const bathyCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
 
+// Kıyı snap araması için AYRI önbellek. Neden bathyCache kullanılamıyor:
+// onun anahtarı 0.01° (~1,1 km) — snap noktaları birbirine 100-300 m uzakta,
+// hepsi aynı kovaya düşer ve komşu noktalar birbirinin derinliğini okur.
+// Burada anahtar 4 ondalık (~11 m), yani sorgulanan noktanın kendisi.
+//
+// Snap ÖNCEDEN HİÇ ÖNBELLEKLENMİYORDU: aynı kara noktasına ikinci kez
+// tıklayan kullanıcı 8-24 EMODnet çağrısını baştan ödüyordu. Deniz tabanı
+// gün içinde değişmediği için bu tekrarın hiçbir karşılığı yok.
+const snapBathyCache = new NodeCache({ stdTTL: 604800, checkperiod: 7200 });
+
 // Uydu SST önbelleği — 3 saat. ESKİDEN HİÇ ÖNBELLEK YOKTU: her analiz isteği
 // NOAA ERDDAP'a gidiyordu, yani hem gecikme hem hata riski her istekte ödeniyordu.
 // nesdisVHNSQsstDaily GÜNLÜK bir üründür; gün içinde aynı hücre için aynı değeri
@@ -9328,15 +9338,26 @@ async function fetchBathymetry(lat, lon, timeoutMs = 5000) {
 
 // Snap için hassas (non-fuzzy) bathymetry fetch
 async function fetchBathymetrySnap(lat, lon) {
+    // Anahtar tam nokta (4 ondalık ~11 m) — snap ızgarası bundan daha ince
+    // adım atmıyor, dolayısıyla çakışma olmaz.
+    const ck = 's_' + parseFloat(lat).toFixed(4) + '_' + parseFloat(lon).toFixed(4);
+    const hit = snapBathyCache.get(ck);
+    if (hit !== undefined) return hit;
+
     // Snap işlemi için 4 saniye timeout yeterli (hızlı sonuç için)
-    return await _fetchBathymetryBase(lat, lon, 4000);
+    const val = await _fetchBathymetryBase(lat, lon, 4000);
+    // null'ı KISA tut: kaynak o an düşmüş olabilir, bir haftalık "burada veri
+    // yok" yanlış bir kalıcılık olurdu.
+    snapBathyCache.set(ck, val, val === null ? 600 : 604800);
+    return val;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // KIYI SNAP — Kara (bathyRaw > 0) tespit edildiğinde en yakın deniz noktasını
 // bulur. Sadece CERTAIN_LAND durumunda çağrılır (iç bölge/dalga-yok için değil).
 //
-// Algoritma: 8 pusula yönünde 3 kademeli halka arama (300m → 700m → 1200m).
+// Algoritma: 8 pusula yönünde 6 kademeli halka arama (100 → 200 → 300 → 500
+//            → 800 → 1200 m). İlk deniz bulunan halkada durur.
 // Her halkada 8 bathymetry çağrısı paralel yapılır (4s timeout).
 // İlk bulunan ≥1m derin noktayı döner.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -9361,27 +9382,47 @@ async function findNearestSeaPoint(lat, lon) {
     ];
 
     // Türkiye enlemi ~39°N için derece/metre yaklaşımı
-    // 1° lat ≈ 111,320m → 300m ≈ 0.00270°
-    // 1° lon ≈ 86,500m (cos39°×111320) → 300m ≈ 0.00347°
-    const BASE_LAT = 0.0027;
-    const BASE_LON = 0.0035;
+    // 1° lat ≈ 111,320m → 100m ≈ 0.00090°
+    // 1° lon ≈ 86,500m (cos39°×111320) → 100m ≈ 0.00116°
+    const BASE_LAT = 0.0009;
+    const BASE_LON = 0.00116;
 
-    // 3 halka: ~300m, ~700m, ~1200m
-    const RINGS = [
-        { dLat: BASE_LAT * 1, dLon: BASE_LON * 1 },
-        { dLat: BASE_LAT * 2.5, dLon: BASE_LON * 2.5 },
-        { dLat: BASE_LAT * 4.5, dLon: BASE_LON * 4.5 },
-    ];
+    // [2026-08-26] 3 halka (300/700/1200 m) yerine 6 halka.
+    //
+    // SORUN: kullanıcıya gösterilen "Kıyıdan Uzaklık" neredeyse HER ZAMAN
+    // 301 m çıkıyordu. Sebep mesafenin gerçekten 301 m olması değil, ilk
+    // halkanın yarıçapının 301 m olmasıydı — 0.0027° × 111.320 = 300,6 m.
+    // Kardinal yönler (301/303 m) çaprazlardan (~427 m) hep daha yakın
+    // olduğu için sıralama da hep onları seçiyordu. Yani ekrandaki sayı bir
+    // ölçüm değil, arama ızgarasının adım boyuydu; gerçek mesafe 40 m de
+    // olabilirdi 295 m de.
+    //
+    // Halkalar sıklaşınca sayı gerçeğe yaklaşıyor. Maliyet artışı görünenden
+    // küçük: arama İLK deniz bulunan halkada duruyor ve kıyıya yakın
+    // tıklamaların çoğu 100 m halkasında bitiyor — o durumda çağrı sayısı
+    // eskisiyle AYNI (8). Artış yalnız gerçekten uzak noktalarda oluyor,
+    // üstelik artık önbelleklenerek.
+    //
+    // Türkiye kıyıları EMODnet'ten okunuyor (isEmodnetArea), GEBCO değil;
+    // GEBCO yalnız Avrupa dışı noktalarda devreye giriyor.
+    const RINGS = [1, 2, 3, 5, 8, 12].map(k => ({
+        dLat: BASE_LAT * k, dLon: BASE_LON * k,
+    }));
 
     for (const ring of RINGS) {
         const candidates = DIRS.map(([dy, dx]) => {
             const cLat = (latF + dy * ring.dLat).toFixed(4);
             const cLon = (lonF + dx * ring.dLon).toFixed(4);
             // Gerçek mesafe (Pisagor — düz dünya yaklaşımı, <2km için yeterli)
-            const dm = Math.round(Math.sqrt(
+            // 10 m'ye yuvarlanıyor. Halka yarıçapından türeyen bir sayıyı
+            // metre metre yazmak, olmayan bir hassasiyeti varmış gibi gösterir:
+            // "101 m" okuyan kullanıcı ölçüldüğünü sanır, oysa değer ızgaranın
+            // kendisinden geliyor.
+            const ham = Math.sqrt(
                 Math.pow(dy * ring.dLat * 111320, 2) +
                 Math.pow(dx * ring.dLon * 86500, 2)
-            ));
+            );
+            const dm = Math.max(10, Math.round(ham / 10) * 10);
             return { lat: cLat, lon: cLon, distM: dm };
         });
 
