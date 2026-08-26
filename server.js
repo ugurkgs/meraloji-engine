@@ -189,20 +189,20 @@ const SERVER_i18n = {
         },
             ozelUyari: {
                 baslikHirsiz: 'Harami istilası',
-                baslikYemGider: 'Yemleriniz hızlı tükenebilir',
+                baslikYemGider: 'Haramiler yemi tüketebilir',
                 baslikFirsat: 'Canlı yem fırsatı',
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
-                    `${tur} %${skor}, ${hedef} %${hedefSkor} aktif görünüyor. Yeminiz hedefe ulaşmadan alınabilir.`,
-                hirsizMetinHedefsiz: (tur, skor) => `${tur} %${skor} aktif görünüyor. Yeminiz beklediğinizden hızlı gidebilir.`,
+                    `${tur} %${skor}, ${hedef} %${hedefSkor} aktif görünüyor. Uyarı; Yemleri haramilere kaptırabilirsiniz.`,
+                hirsizMetinHedefsiz: (tur, skor) => `${tur} %${skor} aktif görünüyor. Uyarı; Yeminiz hızlı tükenebilir.`,
                 yemGiderMetin: (tur, skor) => `${tur} %${skor} aktif görünüyor. Yemleriniz normalden hızlı tükenebilir.`,
                 firsatMetin: (tur, skor, avci, avciSkor) =>
                     `${tur} %${skor} — çapariyle birkaç tane tutup iri iğneye canlı takmayı deneyebilirsiniz. Bölgede ${avci} %${avciSkor}.`,
                 tavsiye: {
-                    kucukAgiz: 'İğneyi büyütmek, küçük ağızlı balıkların yemi almasını zorlaştırabilir',
-                    sertGaga: 'Çelik köstek düşünebilirsiniz — misinayı kesebiliyorlar',
-                    gagalar: 'Yemi iplikle bağlamak, daha uzun dayanmasına yardımcı olabilir',
-                    sertYem: 'Sert yem tercih etmek işinize yarayabilir: kalamar veya uskumru fileto',
-                    bolYem: 'Yanınıza normalden fazla yem almak iyi bir fikir olabilir',
+                    kucukAgiz: 'Yemi bağlayın veya iğneyi büyütün',
+                    sertGaga: 'Sert gagalı tür: Çelik köstek kullanmalısınız',
+                    gagalar: 'Yem hırsızı: Yemi iple bağlamalısınız',
+                    sertYem: 'Sert yemleri tercih edebilirsiniz',
+                    bolYem: 'Normalden fazla yem almalısınız',
                 },
             },
         notification: {
@@ -385,21 +385,21 @@ const SERVER_i18n = {
             highWave: 'High waves',
         },
             ozelUyari: {
-                baslikHirsiz: 'Bait thieves about',
-                baslikYemGider: 'Your bait may go quickly',
+                baslikHirsiz: 'Bait thieves swarming',
+                baslikYemGider: 'Thieves may strip your bait',
                 baslikFirsat: 'Live bait opportunity',
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
-                    `${tur} at ${skor}%, ${hedef} at ${hedefSkor}%. Your bait may be taken before it reaches the target.`,
-                hirsizMetinHedefsiz: (tur, skor) => `${tur} at ${skor}%. Your bait may go faster than you expect.`,
+                    `${tur} at ${skor}%, ${hedef} at ${hedefSkor}%. Heads up — the thieves may take your bait first.`,
+                hirsizMetinHedefsiz: (tur, skor) => `${tur} at ${skor}%. Heads up — your bait may run out fast.`,
                 yemGiderMetin: (tur, skor) => `${tur} at ${skor}%. Your bait could run down quicker than usual.`,
                 firsatMetin: (tur, skor, avci, avciSkor) =>
                     `${tur} at ${skor}% — you could catch a few on a sabiki and try one live on a bigger hook. ${avci} at ${avciSkor}% nearby.`,
                 tavsiye: {
-                    kucukAgiz: 'A bigger hook may make it harder for small mouths to take the bait',
-                    sertGaga: 'A wire trace might be worth considering — they can cut through line',
-                    gagalar: 'Binding the bait with elastic thread may help it last longer',
-                    sertYem: 'Tougher bait could serve you well: squid or mackerel strip',
-                    bolYem: 'Bringing more bait than usual may be a good idea',
+                    kucukAgiz: 'Bind the bait on, or go up a hook size',
+                    sertGaga: 'Hard-beaked species: use a wire trace',
+                    gagalar: 'Bait pickers: bind the bait with thread',
+                    sertYem: 'Tougher bait may serve you better',
+                    bolYem: 'Bring more bait than usual',
                 },
             },
         notification: {
@@ -582,21 +582,21 @@ const SERVER_i18n = {
             highWave: 'Oleaje alto',
         },
             ozelUyari: {
-                baslikHirsiz: 'Ladrones de cebo cerca',
-                baslikYemGider: 'Tu cebo podría acabarse rápido',
+                baslikHirsiz: 'Invasión de ladrones de cebo',
+                baslikYemGider: 'Los ladrones pueden acabar el cebo',
                 baslikFirsat: 'Oportunidad de cebo vivo',
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
-                    `${tur} al ${skor}%, ${hedef} al ${hedefSkor}%. Podrían llevarse el cebo antes de que llegue al objetivo.`,
-                hirsizMetinHedefsiz: (tur, skor) => `${tur} al ${skor}%. El cebo podría irse más rápido de lo que esperas.`,
+                    `${tur} al ${skor}%, ${hedef} al ${hedefSkor}%. Atención: los ladrones podrían llevarse el cebo antes.`,
+                hirsizMetinHedefsiz: (tur, skor) => `${tur} al ${skor}%. Atención: tu cebo podría acabarse rápido.`,
                 yemGiderMetin: (tur, skor) => `${tur} al ${skor}%. El cebo podría agotarse antes de lo normal.`,
                 firsatMetin: (tur, skor, avci, avciSkor) =>
                     `${tur} al ${skor}% — podrías capturar algunos con sabiki y probar uno vivo en un anzuelo grande. ${avci} al ${avciSkor}% en la zona.`,
                 tavsiye: {
-                    kucukAgiz: 'Un anzuelo más grande podría dificultar que las bocas pequeñas tomen el cebo',
-                    sertGaga: 'Quizá convenga un cable de acero — pueden cortar el sedal',
-                    gagalar: 'Atar el cebo con hilo elástico puede ayudar a que dure más',
-                    sertYem: 'Un cebo más duro podría venirte bien: calamar o tira de caballa',
-                    bolYem: 'Llevar más cebo de lo normal puede ser buena idea',
+                    kucukAgiz: 'Ata el cebo o sube de tamaño de anzuelo',
+                    sertGaga: 'Especie de pico duro: usa cable de acero',
+                    gagalar: 'Picoteadores: ata el cebo con hilo',
+                    sertYem: 'Un cebo más duro puede convenirte',
+                    bolYem: 'Lleva más cebo de lo normal',
                 },
             },
         notification: {
@@ -779,21 +779,21 @@ const SERVER_i18n = {
             highWave: 'Ψηλά κύματα',
         },
             ozelUyari: {
-                baslikHirsiz: 'Κλέφτες δολώματος στην περιοχή',
-                baslikYemGider: 'Το δόλωμα μπορεί να τελειώσει γρήγορα',
+                baslikHirsiz: 'Πλήθος κλεφτών δολώματος',
+                baslikYemGider: 'Οι κλέφτες μπορεί να φάνε το δόλωμα',
                 baslikFirsat: 'Ευκαιρία για ζωντανό δόλωμα',
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
-                    `${tur} στο ${skor}%, ${hedef} στο ${hedefSkor}%. Το δόλωμα μπορεί να φύγει πριν φτάσει στον στόχο.`,
-                hirsizMetinHedefsiz: (tur, skor) => `${tur} στο ${skor}%. Το δόλωμα μπορεί να φύγει πιο γρήγορα απ᾽ ό,τι περιμένετε.`,
+                    `${tur} στο ${skor}%, ${hedef} στο ${hedefSkor}%. Προσοχή: μπορεί να σας φάνε πρώτοι το δόλωμα.`,
+                hirsizMetinHedefsiz: (tur, skor) => `${tur} στο ${skor}%. Προσοχή: το δόλωμα μπορεί να τελειώσει γρήγορα.`,
                 yemGiderMetin: (tur, skor) => `${tur} στο ${skor}%. Το δόλωμα μπορεί να τελειώσει νωρίτερα από το συνηθισμένο.`,
                 firsatMetin: (tur, skor, avci, avciSkor) =>
                     `${tur} στο ${skor}% — μπορείτε να πιάσετε μερικά με σαμπίκι και να δοκιμάσετε ένα ζωντανό σε μεγάλο αγκίστρι. ${avci} στο ${avciSkor}% στην περιοχή.`,
                 tavsiye: {
-                    kucukAgiz: 'Ένα μεγαλύτερο αγκίστρι ίσως δυσκολέψει τα μικρά στόματα να πάρουν το δόλωμα',
-                    sertGaga: 'Ίσως αξίζει ατσαλόσυρμα — μπορούν να κόψουν την πετονιά',
-                    gagalar: 'Δένοντας το δόλωμα με ελαστική κλωστή μπορεί να αντέξει περισσότερο',
-                    sertYem: 'Ένα πιο σκληρό δόλωμα ίσως σας βολέψει: καλαμάρι ή φιλέτο σκουμπρί',
-                    bolYem: 'Ίσως είναι καλή ιδέα να πάρετε περισσότερο δόλωμα από το συνηθισμένο',
+                    kucukAgiz: 'Δέστε το δόλωμα ή βάλτε μεγαλύτερο αγκίστρι',
+                    sertGaga: 'Είδος με σκληρό ράμφος: βάλτε ατσαλόσυρμα',
+                    gagalar: 'Τσιμπολογούν: δέστε το δόλωμα με κλωστή',
+                    sertYem: 'Ένα πιο σκληρό δόλωμα ίσως σας βολέψει',
+                    bolYem: 'Πάρτε περισσότερο δόλωμα από το συνηθισμένο',
                 },
             },
         notification: {
@@ -4649,8 +4649,21 @@ function yemBaligiMi(key) {
 // Levrek 80 / izmarit 70 olan bir günde uyarıya gerek yoktur — zaten levrek
 // tutulacak. Uyarı, hırsızın hedefe belirgin fark attığı durumda anlamlı.
 // Her yerde fırlayan uyarı, uyarı değildir.
-const OZEL_UYARI_HIRSIZ_ESIK = 60;   // altında hiç uyarı üretilmez
-const OZEL_UYARI_HIRSIZ_FARK = 15;   // hedefe bu kadar fark atarsa "alarm"
+// [2026-08-26] EŞİKLER ÖLÇÜLEREK YENİDEN KURULDU.
+//
+// Önceki model "hırsız hedeften 15 puan öndeyse alarm" diyordu. 20 kıyı
+// noktasında ölçüldü: gerçek fark dağılımı -8, -5, 0, 0, 1, 2, 2 — EN YÜKSEK
+// FARK 2. Skorlama motoru türleri dar bir banda topluyor (Ege'de her şey
+// 63-81 arası), dolayısıyla 15 puanlık fark diye bir dünya yok. Kırmızı kart
+// matematiksel olarak imkânsızdı ve 20 noktanın hiçbirinde çalmadı.
+//
+// Fark anlamlı sinyal değil; ÇOKLUK anlamlı. Aynı ölçümde tablo şu:
+//   3 harami birden aktif -> 4 nokta  (Ayvalık, Dikili, Güzelbahçe, Selçuk)
+//   1-2 harami           -> 4 nokta
+//   hiç                  -> 12 nokta (Marmara ve Karadeniz'in tamamı)
+// "İstila" kelimesinin karşılığı tam olarak burada.
+const OZEL_UYARI_HIRSIZ_ESIK = 65;   // altında hiç uyarı üretilmez
+const OZEL_UYARI_ISTILA_SAYI = 3;    // bu kadar harami birden aktifse "istila"
 const OZEL_UYARI_FIRSAT_ESIK = 60;   // yem balığı bu skorun üstündeyse fırsat
 const OZEL_UYARI_AVCI_ESIK   = 50;   // fırsat yalnız peşine düşülecek avcı varsa
 
@@ -4687,11 +4700,14 @@ function ozelUyarilariUret(fishList, lang) {
     const enHirsiz = hirsizlar[0] || null;
     const enHedef  = hedefler[0] || null;
 
+    // Eşiği geçen haramiler. Kaç tane olduğu hem seviyeyi belirliyor hem de
+    // kullanıcıya gösteriliyor — tek lokum ile üç tür birden aynı şey değil.
+    const aktifHirsizlar = hirsizlar.filter(f => f.score >= OZEL_UYARI_HIRSIZ_ESIK);
+
     if (enHirsiz && enHirsiz.score >= OZEL_UYARI_HIRSIZ_ESIK) {
-        // Hedef hiç yoksa fark sonsuz sayılır: ortada tutulacak bir şey yok,
-        // gelen her vuruş hırsız demektir.
-        const fark = enHedef ? (enHirsiz.score - enHedef.score) : Infinity;
-        const alarm = fark >= OZEL_UYARI_HIRSIZ_FARK;
+        // İstila = çokluk. Hedef hiç yoksa da istila sayılır: ortada tutulacak
+        // bir şey kalmamış, gelen her vuruş harami demektir.
+        const alarm = aktifHirsizlar.length >= OZEL_UYARI_ISTILA_SAYI || !enHedef;
         const mek = HIRSIZ_MEKANIZMA[enHirsiz.key];
         const tavsiyeler = [];
         if (mek && t.tavsiye[mek]) tavsiyeler.push(t.tavsiye[mek]);
@@ -4707,8 +4723,7 @@ function ozelUyarilariUret(fishList, lang) {
                     : t.hirsizMetinHedefsiz(enHirsiz.name, yuvarla(enHirsiz.score)))
                 : t.yemGiderMetin(enHirsiz.name, yuvarla(enHirsiz.score)),
             tavsiyeler,
-            turler: hirsizlar
-                .filter(f => f.score >= OZEL_UYARI_HIRSIZ_ESIK)
+            turler: aktifHirsizlar
                 .slice(0, 3)
                 .map(f => ({ key: f.key, ad: f.name, skor: yuvarla(f.score) })),
         });

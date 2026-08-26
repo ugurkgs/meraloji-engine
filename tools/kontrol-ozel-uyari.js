@@ -36,7 +36,7 @@ const PARCA = [
     sok('function yemHirsiziMi(key) {', '\r\n}'),
     sok('function yemBaligiMi(key) {', '\r\n}'),
     sok('const OZEL_UYARI_HIRSIZ_ESIK', '\r\n'),
-    sok('const OZEL_UYARI_HIRSIZ_FARK', '\r\n'),
+    sok('const OZEL_UYARI_ISTILA_SAYI', '\r\n'),
     sok('const OZEL_UYARI_FIRSAT_ESIK', '\r\n'),
     sok('const OZEL_UYARI_AVCI_ESIK', '\r\n'),
     sok('const HIRSIZ_MEKANIZMA = {', '\r\n};'),
@@ -73,11 +73,14 @@ console.log('\n── sahibin senaryosu: levrek 45, hani 65 ──────�
     const g = kos(uret(liste(['hani', 'Hani', 65], ['levrek', 'Levrek', 45])));
     const h = g.u.find(x => x.tip === 'YEM_HIRSIZI');
     ol('harami alarmı üretildi', !!h);
-    ol('seviye "yuksek" (fark 20 ≥ 15)', h && h.seviye === 'yuksek');
-    ol('metinde her iki tür ve skor var',
-        h && h.metin.includes('Hani') && h.metin.includes('65') && h.metin.includes('Levrek') && h.metin.includes('45'));
+    // [2026-08-26] Eskiden 'yuksek' beklerdi (fark 20 >= 15). 20 kıyı noktasında
+    // ölçüldü: gerçek fark hiç 2'yi geçmiyor, yani o eşik hiç çalışmıyordu.
+    // Yeni modelde seviyeyi ÇOKLUK belirliyor — tek harami istila değildir.
+    ol('tek harami -> seviye "orta"', h && h.seviye === 'orta');
+    ol('metinde tür ve skoru var',
+        h && h.metin.includes('Hani') && h.metin.includes('65'));
     ol('iğneyi büyüt tavsiyesi var (hani = küçük ağız)',
-        h && h.tavsiyeler.some(x => x.includes('İğneyi büyüt')));
+        h && h.tavsiyeler.some(x => x.includes('iğneyi büyütün')));
     ol('bol yem tavsiyesi var', h && h.tavsiyeler.some(x => x.includes('fazla yem')));
     if (h) console.log(`     → "${h.baslik}: ${h.metin}"`);
 }
@@ -88,7 +91,7 @@ console.log('\n── levrek 80, izmarit 70 → alarm OLMAMALI ─────�
     const g = kos(uret(liste(['izmarit', 'İzmarit', 70], ['levrek', 'Levrek', 80])));
     const h = g.u.find(x => x.tip === 'YEM_HIRSIZI');
     ol('uyarı var ama seviye "orta"', h && h.seviye === 'orta');
-    ol('başlık "Yemleriniz hızlı tükenebilir"', h && h.baslik === 'Yemleriniz hızlı tükenebilir');
+    ol('başlık "Haramiler yemi tüketebilir"', h && h.baslik === 'Haramiler yemi tüketebilir');
     ol('metin "yemini onlar alacak" DEMİYOR', h && !h.metin.includes('onlar alacak'));
     if (h) console.log(`     → "${h.baslik}: ${h.metin}"`);
 }
@@ -147,6 +150,38 @@ console.log('\n── hamsi 90 (süzücü) → harami alarmı OLMAMALI ───
     ol('ama fırsat uyarısı var', g.u.some(x => x.tip === 'YEM_FIRSATI'));
 }
 
+// ── 8b) İSTİLA: üç harami birden ────────────────────────────────────────────
+// Ölçümde gerçekten görülen desen (Dikili: Lokum 81, Çütre 75, Sarpa 71).
+// Bu dal eski modelde ulaşılamazdı, dolayısıyla hiç test edilmemişti.
+console.log('\n── üç harami birden -> istila ─────────────────────────────');
+{
+    const g = kos(uret(liste(['lokum', 'Lokum', 81], ['cutre', 'Çütre', 75],
+        ['sarpa', 'Sarpa', 71], ['levrek', 'Levrek', 79])));
+    const h = g.u.find(x => x.tip === 'YEM_HIRSIZI');
+    ol('seviye "yuksek" (3 harami >= 65)', h && h.seviye === 'yuksek');
+    ol('başlık "Harami istilası"', h && h.baslik === 'Harami istilası');
+    // Hedef levrek 79, en güçlü harami 81 -> fark 2. Eski model bunu "orta"
+    // sayardı; ölçüm gerçekte farkın hiç büyümediğini gösterdi.
+    ol('hedef listede olmasına rağmen istila sayıldı', h && h.seviye === 'yuksek');
+    ol('üç tür de kullanıcıya gösteriliyor', h && h.turler.length === 3);
+    if (h) console.log(`     -> "${h.baslik}: ${h.metin}"`);
+}
+{
+    // Sınır: iki harami istila DEĞİL.
+    const g = kos(uret(liste(['lokum', 'Lokum', 81], ['cutre', 'Çütre', 75],
+        ['levrek', 'Levrek', 79])));
+    const h = g.u.find(x => x.tip === 'YEM_HIRSIZI');
+    ol('iki harami -> hâlâ "orta"', h && h.seviye === 'orta');
+}
+{
+    // Sınır: üçüncüsü eşiğin ALTINDA kalırsa istila değil (64 < 65).
+    const g = kos(uret(liste(['lokum', 'Lokum', 81], ['cutre', 'Çütre', 75],
+        ['sarpa', 'Sarpa', 64], ['levrek', 'Levrek', 79])));
+    const h = g.u.find(x => x.tip === 'YEM_HIRSIZI');
+    ol('üçüncü harami 64 ise istila DEĞİL', h && h.seviye === 'orta');
+    ol('eşiği geçmeyen tür listeye de girmiyor', h && h.turler.length === 2);
+}
+
 // ── 9) İstilacı ve tehlikeli türler "hedef" sayılmıyor ──────────────────────
 console.log('\n── istilacı/tehlikeli tür hedef yerine geçmemeli ──────────');
 {
@@ -173,15 +208,15 @@ console.log('\n── tavsiye mekanizmaya göre değişiyor mu ─────�
     const cutre = kos(uret(liste(['cutre', 'Çütre', 75])));
     const sarpa = kos(uret(liste(['sarpa', 'Sarpa', 75])));
     ol('çütre → çelik köstek', cutre.u[0].tavsiyeler.some(x => x.includes('Çelik köstek')));
-    ol('sarpa → yemi bağla', sarpa.u[0].tavsiyeler.some(x => x.includes('iplikle')));
-    ol('çütre iğne büyüt DEMİYOR', !cutre.u[0].tavsiyeler.some(x => x.includes('İğneyi büyüt')));
+    ol('sarpa → yemi bağla', sarpa.u[0].tavsiyeler.some(x => x.includes('iple bağlamalısınız')));
+    ol('çütre iğne büyüt DEMİYOR', !cutre.u[0].tavsiyeler.some(x => x.includes('iğneyi büyütün')));
 }
 
 // ── 11) Dört dil ────────────────────────────────────────────────────────────
 console.log('\n── dört dil ───────────────────────────────────────────────');
 {
     const l = liste(['izmarit', 'İzmarit', 72], ['levrek', 'Levrek', 45]);
-    for (const [dil, bekle] of [['tr', 'Harami'], ['en', 'Bait thieves'], ['es', 'Ladrones'], ['el', 'Κλέφτες']]) {
+    for (const [dil, bekle] of [['tr', 'Harami'], ['en', 'Thieves'], ['es', 'ladrones'], ['el', 'κλέφτες']]) {
         const g = kos(uret(l, dil));
         const h = g.u.find(x => x.tip === 'YEM_HIRSIZI');
         ol(`${dil}: "${bekle}" geçiyor`, h && h.baslik.includes(bekle));
@@ -214,11 +249,11 @@ console.log('\n── sürüm kapısı ─────────────�
 console.log('\n── pozitif kontroller (kırılmaları BEKLENİYOR) ────────────');
 const kontroller = [
     ['fark kuralı kaldırılırsa levrek 80/izmarit 70 alarm verir mi',
-        k => k.replace('const alarm = fark >= OZEL_UYARI_HIRSIZ_FARK;', 'const alarm = true;'),
+        k => k.replace('aktifHirsizlar.length >= OZEL_UYARI_ISTILA_SAYI || !enHedef', 'true'),
         uret(liste(['izmarit', 'İzmarit', 70], ['levrek', 'Levrek', 80])),
         g => g.u[0].seviye === 'yuksek'],
     ['eşik 0 olsaydı izmarit 55 de uyarı üretir miydi',
-        k => k.replace('const OZEL_UYARI_HIRSIZ_ESIK = 60;', 'const OZEL_UYARI_HIRSIZ_ESIK = 0;'),
+        k => k.replace('const OZEL_UYARI_HIRSIZ_ESIK = 65;', 'const OZEL_UYARI_HIRSIZ_ESIK = 0;'),
         uret(liste(['izmarit', 'İzmarit', 55], ['levrek', 'Levrek', 20])),
         g => g.u.length > 0],
     ['istilacı süzgeci kaldırılırsa alarm "orta"ya düşer mi',
