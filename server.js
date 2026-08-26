@@ -10977,6 +10977,56 @@ cron.schedule('10 * * * *', () => {
 // ═════════════════════════════════════════════════════════════════════════════
 const ADMIN_RAPOR_ANAHTARI = process.env.ADMIN_RAPOR_ANAHTARI || null;
 
+// ═════════════════════════════════════════════════════════════════════════════
+// İSTATİSTİK DIŞI HESAPLAR
+//
+// Geliştirici gün içinde onlarca test analizi yapıyor. 146 kullanıcılı bir
+// tabanda bu, "günlük aktif 11" gibi sayıları tek başına oynatıyor ve
+// rakamlar gerçeği değil test trafiğini anlatmaya başlıyor.
+//
+// Bu hesaplar YALNIZ SAYAÇLARDAN çıkarılıyor. Loglarda görünmeye devam
+// ediyorlar — testin ne yaptığını izlemek gerekiyor, sadece istatistiğe
+// karışması istenmiyor.
+//
+// E-posta ile tanımlanıyor çünkü users koleksiyonunda e-posta alanı yok
+// (146 dokümandan yalnız 2'sinde var); UID'ye Firebase Auth üzerinden
+// çevriliyor.
+// ═════════════════════════════════════════════════════════════════════════════
+// Liste hem UID hem e-posta kabul ediyor. UID DOĞRUDAN kullanılıyor; e-posta
+// Firebase Auth üzerinden çevriliyor ve o çağrı başarısız olabilir (ağ, izin,
+// hesap silinmiş). UID vermek bu yüzden daha sağlam — çevrilecek bir şey yok,
+// sunucu açılır açılmaz geçerli.
+const ISTATISTIK_HARIC = String(
+    process.env.ISTATISTIK_HARIC
+    || 'zhCzPS20wneS2njZKVGFAwOvc5m2,ugurkogus@gmail.com,meralojifishsystem@gmail.com'
+).split(',').map(x => x.trim()).filter(Boolean);
+
+const _haricUid = new Set(
+    ISTATISTIK_HARIC.filter(x => !x.includes('@'))          // UID'ler hemen geçerli
+);
+const _haricMail = ISTATISTIK_HARIC.filter(x => x.includes('@')).map(x => x.toLowerCase());
+
+async function haricUidleriYukle() {
+    for (const mail of _haricMail) {
+        try {
+            const u = await admin.auth().getUserByEmail(mail);
+            if (u && u.uid) _haricUid.add(u.uid);
+        } catch (e) {
+            // Hesap yoksa sessiz geç: liste sabit, kurulum ortamına göre
+            // hepsi bulunmayabilir. UID ile verilenler zaten etkilenmiyor.
+        }
+    }
+    console.log(`[İSTATİSTİK] ${_haricUid.size} hesap sayaç dışı (test/geliştirici)`);
+}
+// Auth hazır olduktan sonra, isteklerden bağımsız. UID ile verilenler bu
+// çağrıyı BEKLEMİYOR — sunucu açılır açılmaz sayaç dışındalar.
+setTimeout(() => { haricUidleriYukle().catch(() => {}); }, 4000);
+
+/** Bu uid istatistiklere sayılmalı mı? */
+function sayilirMi(uid) {
+    return !!uid && !_haricUid.has(uid);
+}
+
 function adminAnahtariGecerli(sunulan) {
     if (!ADMIN_RAPOR_ANAHTARI || typeof sunulan !== 'string' || !sunulan) return false;
     const h = (x) => crypto.createHash('sha256').update(String(x)).digest();
@@ -11012,6 +11062,7 @@ async function kullaniciOzetiTara() {
 
     const snap = await db.collection('users').get();
     snap.forEach(doc => {
+        if (!sayilirMi(doc.id)) return;   // test/geliştirici hesabı
         const d = doc.data() || {};
         ozet.toplam++;
         for (const k of Object.keys(d)) ozet.alanlar[k] = (ozet.alanlar[k] || 0) + 1;
@@ -11055,6 +11106,8 @@ async function tiklamaOzetiTara(gunSayisi) {
         const id = doc.id;
         const g = id.slice(-10);
         if (!/^d{4}-d{2}-d{2}$/.test(g) || !gunler.has(g)) return;
+        // Doküman kimliği "uid_TARİH"; tarih ve alt çizgi çıkınca uid kalır.
+        if (!sayilirMi(id.slice(0, id.length - 11))) return;
         const n = Number((doc.data() || {}).count) || 0;
         if (!gun[g]) gun[g] = { kisi: 0, analiz: 0 };
         gun[g].kisi++;
@@ -11113,10 +11166,12 @@ app.post('/api/av-modu', async (req, res) => {
 
     const logUser = req.user.email || req.user.uid;
     const surum = _surumEtiketi(req) || '?';
-    console.log(`[AV-MODU] [${logUser}] ${olay === 'basla' ? '▶ oturum açıldı' : '■ oturum kapandı'} · ${surum}`);
+    const sayilir = sayilirMi(req.user.uid);
+    console.log(`[AV-MODU] [${logUser}] ${olay === 'basla' ? '▶ oturum açıldı' : '■ oturum kapandı'} · ${surum}`
+        + (sayilir ? '' : ' · (sayaç dışı)'));
 
     // Günlük sayaç. Tek doküman, iki alan — kullanıcı başına kayıt TUTULMUYOR.
-    if (db) {
+    if (db && sayilir) {
         try {
             const gun = new Date().toISOString().slice(0, 10);
             await db.collection('stats').doc('avmodu_' + gun).set({
@@ -11188,6 +11243,7 @@ cron.schedule('20 0 * * *', async () => {
         let dunAktif = 0, toplam = 0, pro = 0;
         const snap = await db.collection('users').get();
         snap.forEach(doc => {
+            if (!sayilirMi(doc.id)) return;
             const d = doc.data() || {};
             toplam++;
             if (d.isPro === true) pro++;
@@ -11200,6 +11256,7 @@ cron.schedule('20 0 * * *', async () => {
         const cu = await db.collection('clickUsage').get();
         cu.forEach(doc => {
             if (doc.id.slice(-10) !== dun) return;
+            if (!sayilirMi(doc.id.slice(0, doc.id.length - 11))) return;
             ucretsizKisi++;
             ucretsizAnaliz += Number((doc.data() || {}).count) || 0;
         });
