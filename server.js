@@ -8,6 +8,9 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+// node:crypto — global crypto WebCrypto'dur ve createHash TAŞIMAZ;
+// admin anahtarı karşılaştırması buna bağlı (bkz. adminAnahtariGecerli).
+const crypto = require('crypto');
 const SunCalc = require('suncalc');
 const rateLimit = require('express-rate-limit');
 const NodeCache = require('node-cache');
@@ -10953,6 +10956,213 @@ cron.schedule('10 * * * *', () => {
     console.log(`[SÜRÜM] son saat — ${satirlar.join('  ·  ')}`);
     _surumSayac.clear();
 });
+
+// ═════════════════════════════════════════════════════════════════════════════
+// KULLANIM RAPORU
+//
+// NEDEN VAR: Firebase Auth dışa aktarımındaki "Signed In" alanı son KİMLİK
+// DOĞRULAMA tarihidir, son kullanım değil. Uygulama oturumu açık tutup token'ı
+// sessizce yenilediği için, her gün analiz yapan kullanıcının bile o tarihi
+// değişmez. 26 Ağustos'taki kohort analizinde 453 kullanıcının %92,9'u "bir
+// daha girmemiş" göründü; bu sayı gerçeği değil ölçüm aracının sınırını
+// anlatıyordu.
+//
+// users.lastSeen ise GERÇEK kullanımda yazılıyor (bkz. kaydetSonKonum), yani
+// aradığımız veri zaten elimizde — Render loglarını ayrıştırmaya gerek yok.
+//
+// GÜVENLİK: endpoint FAIL-CLOSED. ADMIN_RAPOR_ANAHTARI tanımlı değilse hiç
+// açılmaz. Anahtar karşılaştırması sabit zamanlı; uzunluk sızdırmamak için
+// önce hash alınıyor. Yanıt YALNIZCA toplu sayı içerir — e-posta, uid ve
+// koordinat hiçbir koşulda dönmez.
+// ═════════════════════════════════════════════════════════════════════════════
+const ADMIN_RAPOR_ANAHTARI = process.env.ADMIN_RAPOR_ANAHTARI || null;
+
+function adminAnahtariGecerli(sunulan) {
+    if (!ADMIN_RAPOR_ANAHTARI || typeof sunulan !== 'string' || !sunulan) return false;
+    const h = (x) => crypto.createHash('sha256').update(String(x)).digest();
+    // Hash'ler her zaman 32 bayt — timingSafeEqual uzunluk farkında atmaz ve
+    // karşılaştırma anahtarın uzunluğunu sızdırmaz.
+    return crypto.timingSafeEqual(h(sunulan), h(ADMIN_RAPOR_ANAHTARI));
+}
+
+const GUN_MS = 86400000;
+const gunAnahtari = (ms) => new Date(ms).toISOString().slice(0, 10);
+
+/**
+ * users koleksiyonunu tarayıp toplu sayı üretir.
+ *
+ * Tam tarama bilinçli: 453 kullanıcıda maliyeti önemsiz ve doğru sonucu
+ * garanti ediyor. Koleksiyon büyürse burası gecelik özete (stats/gunluk_*)
+ * devredilmeli — endpoint o zaman taramak yerine birikmiş satırları okur.
+ */
+async function kullaniciOzetiTara() {
+    const simdi = Date.now();
+    const ozet = {
+        toplam: 0,
+        lastSeenVar: 0,
+        pro: 0,
+        bildirimAcik: 0,
+        tokenVar: 0,
+        aktif: { g1: 0, g7: 0, g14: 0, g30: 0, g60: 0, g90: 0 },
+        // Şema sağlığı: hangi alan kaç dokümanda var. Ölü ve tutarsız alanları
+        // ancak canlı veriye bakarak görebiliyoruz; kod bunu söylemiyor.
+        alanlar: {},
+        gunlukSonGorulme: {},
+    };
+
+    const snap = await db.collection('users').get();
+    snap.forEach(doc => {
+        const d = doc.data() || {};
+        ozet.toplam++;
+        for (const k of Object.keys(d)) ozet.alanlar[k] = (ozet.alanlar[k] || 0) + 1;
+
+        if (d.isPro === true) ozet.pro++;
+        if (d.notifyShoreAlert === true) ozet.bildirimAcik++;
+        if (d.fcmToken) ozet.tokenVar++;
+
+        const at = d.lastSeen && Number(d.lastSeen.at);
+        if (!at || !isFinite(at)) return;
+        ozet.lastSeenVar++;
+        const gunFark = (simdi - at) / GUN_MS;
+        if (gunFark <= 1) ozet.aktif.g1++;
+        if (gunFark <= 7) ozet.aktif.g7++;
+        if (gunFark <= 14) ozet.aktif.g14++;
+        if (gunFark <= 30) ozet.aktif.g30++;
+        if (gunFark <= 60) ozet.aktif.g60++;
+        if (gunFark <= 90) ozet.aktif.g90++;
+
+        // Son 60 günün gün gün son-görülme dağılımı. Bu bir "günlük aktif
+        // kullanıcı" serisi DEĞİLDİR: her kullanıcı yalnız SON gününde
+        // görünür. Gerçek seri gecelik özetten birikecek.
+        const g = gunAnahtari(at);
+        if (simdi - at <= 60 * GUN_MS) ozet.gunlukSonGorulme[g] = (ozet.gunlukSonGorulme[g] || 0) + 1;
+    });
+    return ozet;
+}
+
+/** clickUsage: ücretsiz kullanıcıların günlük analiz sayacı. */
+async function tiklamaOzetiTara(gunSayisi) {
+    const sinir = Date.now() - gunSayisi * GUN_MS;
+    const gunler = new Set();
+    for (let i = 0; i <= gunSayisi; i++) gunler.add(gunAnahtari(Date.now() - i * GUN_MS));
+
+    const snap = await db.collection('clickUsage').get();
+    const gun = {};
+    let toplamAnaliz = 0, dokuman = 0;
+    snap.forEach(doc => {
+        // Dokuman kimligi "uid_YYYY-MM-DD" bicimindedir. Tarihi SONDAN
+        // aliyoruz: uid icinde alt cizgi olabilir, split kirardi.
+        const id = doc.id;
+        const g = id.slice(-10);
+        if (!/^d{4}-d{2}-d{2}$/.test(g) || !gunler.has(g)) return;
+        const n = Number((doc.data() || {}).count) || 0;
+        if (!gun[g]) gun[g] = { kisi: 0, analiz: 0 };
+        gun[g].kisi++;
+        gun[g].analiz += n;
+        toplamAnaliz += n;
+        dokuman++;
+    });
+    return { gun, toplamAnaliz, dokuman, kapsam: gunSayisi, sinirTarih: gunAnahtari(sinir) };
+}
+
+/** Gecelik özetten birikmiş gerçek günlük seri. */
+async function gunlukSeriOku(gunSayisi) {
+    const out = {};
+    const snap = await db.collection('stats')
+        .where('tip', '==', 'gunluk')
+        .orderBy('gun', 'desc')
+        .limit(Math.min(gunSayisi, 180))
+        .get()
+        .catch(() => null);
+    if (!snap) return out;   // dizin yoksa sessizce boş dön — rapor yine çalışsın
+    snap.forEach(doc => { const d = doc.data() || {}; if (d.gun) out[d.gun] = d; });
+    return out;
+}
+
+app.get('/api/admin/kullanim', async (req, res) => {
+    if (!ADMIN_RAPOR_ANAHTARI) {
+        // FAIL-CLOSED. Anahtar silinirse endpoint açılmaz; bu tasarım gereği.
+        return res.status(503).json({ hata: 'rapor kapalı' });
+    }
+    const sunulan = req.get('X-Admin-Key') || req.query.anahtar || '';
+    if (!adminAnahtariGecerli(sunulan)) {
+        console.log('[RAPOR] ⛔ geçersiz anahtar denemesi');
+        return res.status(403).json({ hata: 'yetkisiz' });
+    }
+    if (!db) return res.status(503).json({ hata: 'veritabanı yok' });
+
+    try {
+        const gunSayisi = Math.min(Math.max(parseInt(req.query.gun, 10) || 30, 1), 180);
+        const t0 = Date.now();
+        const [kullanici, tiklama, gunluk] = await Promise.all([
+            kullaniciOzetiTara(),
+            tiklamaOzetiTara(gunSayisi),
+            gunlukSeriOku(gunSayisi),
+        ]);
+        console.log(`[RAPOR] ✅ kullanım özeti üretildi — ${kullanici.toplam} kullanıcı, ${Date.now() - t0} ms`);
+        res.json({
+            uretim: new Date().toISOString(),
+            surelerMs: Date.now() - t0,
+            kullanici,
+            tiklama,
+            gunluk,
+            not: 'Tüm alanlar toplu sayıdır; e-posta, uid ve koordinat dönmez.',
+        });
+    } catch (e) {
+        console.error('[RAPOR] hata:', e.message);
+        res.status(500).json({ hata: 'rapor üretilemedi' });
+    }
+});
+
+// ── Gecelik özet ─────────────────────────────────────────────────────────────
+// Her gece dünün özetini stats/gunluk_<tarih> altına yazar.
+//
+// NEDEN BELLEKTE SAYMIYORUZ: Render kapsayıcıyı sık yeniden başlatıyor;
+// bellekteki gün içi sayaç her restartta sıfırlanır ve sessizce eksik veri
+// üretir. Firestore taraması restart'tan etkilenmez.
+//
+// Gün başına tek doküman — koleksiyon yılda ~365 satır büyür.
+cron.schedule('20 0 * * *', async () => {
+    if (!db) return;
+    try {
+        const dun = gunAnahtari(Date.now() - GUN_MS);
+        const bas = new Date(dun + 'T00:00:00.000Z').getTime();
+        const son = bas + GUN_MS;
+
+        let dunAktif = 0, toplam = 0, pro = 0;
+        const snap = await db.collection('users').get();
+        snap.forEach(doc => {
+            const d = doc.data() || {};
+            toplam++;
+            if (d.isPro === true) pro++;
+            const at = d.lastSeen && Number(d.lastSeen.at);
+            if (at && at >= bas && at < son) dunAktif++;
+        });
+
+        // clickUsage'dan dünün ücretsiz kullanım yoğunluğu
+        let ucretsizKisi = 0, ucretsizAnaliz = 0;
+        const cu = await db.collection('clickUsage').get();
+        cu.forEach(doc => {
+            if (doc.id.slice(-10) !== dun) return;
+            ucretsizKisi++;
+            ucretsizAnaliz += Number((doc.data() || {}).count) || 0;
+        });
+
+        await db.collection('stats').doc('gunluk_' + dun).set({
+            tip: 'gunluk', gun: dun,
+            aktifKullanici: dunAktif,
+            toplamKullanici: toplam,
+            proKullanici: pro,
+            ucretsizKisi, ucretsizAnaliz,
+            yazildi: Date.now(),
+        });
+        console.log(`[GÜNLÜK-ÖZET] ${dun} — aktif ${dunAktif}/${toplam} · PRO ${pro} · ücretsiz ${ucretsizKisi} kişi/${ucretsizAnaliz} analiz`);
+    } catch (e) {
+        console.error('[GÜNLÜK-ÖZET] yazılamadı:', e.message);
+    }
+}, { timezone: 'Europe/Istanbul' });
+
+
 
 cron.schedule('5 * * * *', async () => {
     if (!db || !admin) return;
