@@ -11212,6 +11212,9 @@ app.get('/api/admin/kullanim', async (req, res) => {
         console.log(`[RAPOR] ✅ kullanım özeti üretildi — ${kullanici.toplam} kullanıcı, ${Date.now() - t0} ms`);
         res.json({
             uretim: new Date().toISOString(),
+            // Kaç hesabın sayaç dışı tutulduğu — hariç tutmanın gerçekten
+            // çalıştığı ancak böyle görülüyor. UID/e-posta DÖNMÜYOR, yalnız sayı.
+            haricTutulan: _haricUid.size,
             surelerMs: Date.now() - t0,
             kullanici,
             tiklama,
