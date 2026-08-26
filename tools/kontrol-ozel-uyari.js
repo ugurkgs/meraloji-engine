@@ -88,7 +88,7 @@ console.log('\n── levrek 80, izmarit 70 → alarm OLMAMALI ─────�
     const g = kos(uret(liste(['izmarit', 'İzmarit', 70], ['levrek', 'Levrek', 80])));
     const h = g.u.find(x => x.tip === 'YEM_HIRSIZI');
     ol('uyarı var ama seviye "orta"', h && h.seviye === 'orta');
-    ol('başlık "Yemin çabuk gidecek"', h && h.baslik === 'Yemin çabuk gidecek');
+    ol('başlık "Yemleriniz hızlı tükenebilir"', h && h.baslik === 'Yemleriniz hızlı tükenebilir');
     ol('metin "yemini onlar alacak" DEMİYOR', h && !h.metin.includes('onlar alacak'));
     if (h) console.log(`     → "${h.baslik}: ${h.metin}"`);
 }
@@ -181,7 +181,7 @@ console.log('\n── tavsiye mekanizmaya göre değişiyor mu ─────�
 console.log('\n── dört dil ───────────────────────────────────────────────');
 {
     const l = liste(['izmarit', 'İzmarit', 72], ['levrek', 'Levrek', 45]);
-    for (const [dil, bekle] of [['tr', 'Harami'], ['en', 'Bait thief'], ['es', 'ladrones'], ['el', 'κλεφτών']]) {
+    for (const [dil, bekle] of [['tr', 'Harami'], ['en', 'Bait thieves'], ['es', 'Ladrones'], ['el', 'Κλέφτες']]) {
         const g = kos(uret(l, dil));
         const h = g.u.find(x => x.tip === 'YEM_HIRSIZI');
         ol(`${dil}: "${bekle}" geçiyor`, h && h.baslik.includes(bekle));
