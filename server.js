@@ -6925,13 +6925,14 @@ app.get('/api/forecast', async (req, res) => {
                     ? Object.values(acikSuYayi.fetchKm).filter(v => v === null).length : null;
                 // Yalnız ŞÜPHELİ durumda bas: dalga yüksek ama tavan yok.
                 if (azamiDalga != null && azamiDalga > 1.0) {
-                    console.log(`[FETCH-TAVAN] [${logUser}] (${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}) `
-                        + `TAVAN YOK — sebep: `
-                        + (!acikSuYayi ? 'açık su yayı alınamadı'
-                            : !acikSuYayi.fetchKm ? 'yay ESKİ biçimde (fetchKm yok, önbellekten)'
+                    console.log(`[DALGA-SINIRI] [${logUser}] (${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}) `
+                        + `SINIR UYGULANMADI — sebep: `
+                        + (!acikSuYayi ? 'kıyı yönü haritası alınamadı'
+                            : !acikSuYayi.fetchKm ? 'harita ESKİ biçimde (mesafe bilgisi yok, önbellekten geldi)'
                                 : azamiRuzgar == null ? 'günlük rüzgâr verisi yok'
-                                    : `açık su (açık yön ${yonSayi}/16 > eşik ${FETCH_TAVAN_ACIK_YON_ESIK})`)
-                        + `; model azami dalga ${azamiDalga.toFixed(2)} m`);
+                                    : `burası korunaklı değil (16 yönden ${yonSayi} tanesi açık denize bakıyor, `
+                                      + `sınır ancak ${FETCH_TAVAN_ACIK_YON_ESIK} ve altında uygulanır)`)
+                        + `. Model bu noktada ${azamiDalga.toFixed(2)} m'ye kadar çıkıyor.`);
                 }
             }
 
@@ -6956,12 +6957,21 @@ app.get('/api/forecast', async (req, res) => {
                 }
                 fetchTavan.kirpilanSaat = kirpilan;
                 fetchTavan.enBuyukOnce = enBuyukOnce;
-                console.log(`[FETCH-TAVAN] [${logUser}] (${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}) `
-                    + `kapalı su: açık yön ${fetchTavan.acikYon}/16, fetch ${fetchTavan.fetchKm} km, `
-                    + `rüzgâr azami ${azamiRuzgar.toFixed(0)} km/h → tavan ${T.toFixed(2)} m; `
+                // [2026-08-26] Log yeniden yazıldı. Eski hâli şuydu:
+                //   "kapalı su: açık yön 1/16, fetch 8 km, rüzgâr azami 28 km/h
+                //    → tavan 0.35 m; 261 saat KIRPILDI"
+                // Okuyanın hem 'fetch' terimini (rüzgârın kesintisiz su üzerinde
+                // estiği mesafe) hem de neyin neden kırpıldığını önceden bilmesi
+                // gerekiyordu. Log kendi kendini anlatmalı; anlaşılmayan teşhis
+                // satırı, olmayan teşhis satırıdır.
+                const toplamSaat = marine.hourly.wave_height.length;
+                console.log(`[DALGA-SINIRI] [${logUser}] (${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}) `
+                    + `korunaklı koy: 16 yönden ${fetchTavan.acikYon} tanesi açık denize bakıyor, `
+                    + `o yönde su üzerinde ${fetchTavan.fetchKm} km mesafe var. `
+                    + `${azamiRuzgar.toFixed(0)} km/h rüzgâr bu mesafede en çok ${T.toFixed(2)} m dalga büyütebilir. `
                     + (kirpilan > 0
-                        ? `${kirpilan} saat KIRPILDI (en yüksek ${enBuyukOnce.toFixed(2)} m → ${T.toFixed(2)} m)`
-                        : `kırpma YOK — model zaten tavanın altındaydı`));
+                        ? `Model ${enBuyukOnce.toFixed(2)} m'ye kadar çıkıyordu → ${kirpilan}/${toplamSaat} saat ${T.toFixed(2)} m'ye çekildi.`
+                        : `Model zaten bu sınırın altındaydı, düzeltme gerekmedi.`));
             }
         }
 
