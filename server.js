@@ -1247,7 +1247,11 @@ app.use(express.json());
 app.set('trust proxy', 1); // Render proxy arkasında
 
 const publicPath = path.join(__dirname, 'public');
-app.use(express.static(publicPath));
+// extensions:['html'] -> /balik/levrek isteği balik/levrek.html dosyasını bulur.
+// SEO sayfalarının bağlantıları ve canonical'ı uzantısız; bu satır olmadan
+// hepsi 404 döner. Yalnızca dosya BULUNAMAYINCA .html deneniyor, dolayısıyla
+// hâlihazırda çalışan hiçbir yol etkilenmez.
+app.use(express.static(publicPath, { extensions: ['html'] }));
 
 // .well-known (TWA Digital Asset Links)
 app.use('/.well-known', express.static(path.join(publicPath, '.well-known'), {

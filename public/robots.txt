@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /delete-account.html
+
+Sitemap: https://meraloji.com/sitemap.xml
