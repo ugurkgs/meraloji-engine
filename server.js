@@ -9414,15 +9414,22 @@ async function findNearestSeaPoint(lat, lon) {
             const cLat = (latF + dy * ring.dLat).toFixed(4);
             const cLon = (lonF + dx * ring.dLon).toFixed(4);
             // Gerçek mesafe (Pisagor — düz dünya yaklaşımı, <2km için yeterli)
-            // 10 m'ye yuvarlanıyor. Halka yarıçapından türeyen bir sayıyı
-            // metre metre yazmak, olmayan bir hassasiyeti varmış gibi gösterir:
-            // "101 m" okuyan kullanıcı ölçüldüğünü sanır, oysa değer ızgaranın
-            // kendisinden geliyor.
-            const ham = Math.sqrt(
+            // Bir ondalık, yuvarlama YOK.
+            //
+            // Önce 10 m'ye yuvarlanıyordu; o sırada metin "Kıyıdan Uzaklık"
+            // diyordu ve sayı gerçekten uydurmaydı — kıyıya olan mesafe hiç
+            // ölçülmüyor. Metin "analiz noktası şu kadar açığa alındı"ya
+            // dönünce sayının anlamı da değişti: tıklanan nokta ile kaydırılan
+            // nokta arasındaki mesafe TAM olarak hesaplanabiliyor. Artık
+            // yuvarlamak doğru bilgiyi köreltmek olur.
+            //
+            // Değerler yine halka yarıçaplarında toplanacak (100,2 / 200,5 /
+            // 141,8 ...) çünkü arama ızgarası öyle kuruluyor; ondalık bunu
+            // gizlemiyor, yalnız olduğu gibi gösteriyor.
+            const dm = Math.round(Math.sqrt(
                 Math.pow(dy * ring.dLat * 111320, 2) +
                 Math.pow(dx * ring.dLon * 86500, 2)
-            );
-            const dm = Math.max(10, Math.round(ham / 10) * 10);
+            ) * 10) / 10;
             return { lat: cLat, lon: cLon, distM: dm };
         });
 
