@@ -11065,6 +11065,20 @@ async function tiklamaOzetiTara(gunSayisi) {
     return { gun, toplamAnaliz, dokuman, kapsam: gunSayisi, sinirTarih: gunAnahtari(sinir) };
 }
 
+/** Av Modu günlük açılış/kapanış sayaçları. */
+async function avModuOzeti(gunSayisi) {
+    const out = {};
+    if (!db) return out;
+    for (let i = 0; i < Math.min(gunSayisi, 60); i++) {
+        const g = gunAnahtari(Date.now() - i * GUN_MS);
+        try {
+            const d = await db.collection('stats').doc('avmodu_' + g).get();
+            if (d.exists) out[g] = { basla: d.data().basla || 0, bitir: d.data().bitir || 0 };
+        } catch (e) { /* tek gün okunamazsa rapor yine dönsün */ }
+    }
+    return out;
+}
+
 /** Gecelik özetten birikmiş gerçek günlük seri. */
 async function gunlukSeriOku(gunSayisi) {
     const out = {};
@@ -11078,6 +11092,46 @@ async function gunlukSeriOku(gunSayisi) {
     snap.forEach(doc => { const d = doc.data() || {}; if (d.gun) out[d.gun] = d; });
     return out;
 }
+
+// ═════════════════════════════════════════════════════════════════════════════
+// AV MODU KULLANIM KAYDI
+//
+// Av Modu tamamen İSTEMCİDE çalışıyor — olaylar orada hesaplanıyor, alarmlar
+// orada kuruluyor, sunucu hiçbir şey bilmiyor. Bu tasarım gereği (pil vaadi),
+// ama kaç kişinin kullandığını da göremiyoruz.
+//
+// Bu uç yalnız SAYMAK için. Konum, olay listesi, uyarı içeriği GÖNDERİLMİYOR;
+// yalnız "biri oturum açtı/kapattı" bilgisi. Analiz kotasına da dokunmuyor.
+// ═════════════════════════════════════════════════════════════════════════════
+app.post('/api/av-modu', async (req, res) => {
+    if (!req.user) return res.status(401).json({ hata: 'auth' });
+
+    const olay = String((req.body && req.body.olay) || req.query.olay || '').slice(0, 12);
+    if (olay !== 'basla' && olay !== 'bitir') {
+        return res.status(400).json({ hata: 'olay' });
+    }
+
+    const logUser = req.user.email || req.user.uid;
+    const surum = _surumEtiketi(req) || '?';
+    console.log(`[AV-MODU] [${logUser}] ${olay === 'basla' ? '▶ oturum açıldı' : '■ oturum kapandı'} · ${surum}`);
+
+    // Günlük sayaç. Tek doküman, iki alan — kullanıcı başına kayıt TUTULMUYOR.
+    if (db) {
+        try {
+            const gun = new Date().toISOString().slice(0, 10);
+            await db.collection('stats').doc('avmodu_' + gun).set({
+                tip: 'avmodu', gun,
+                [olay]: admin.firestore.FieldValue.increment(1),
+                guncel: Date.now(),
+            }, { merge: true });
+        } catch (e) {
+            // Sayaç yazılamazsa istek yine başarılı döner: kullanım kaydı
+            // tutulamadı diye kullanıcının av modu açılmasın.
+            console.error('[AV-MODU] sayaç yazılamadı:', e.message);
+        }
+    }
+    res.json({ ok: true });
+});
 
 app.get('/api/admin/kullanim', async (req, res) => {
     if (!ADMIN_RAPOR_ANAHTARI) {
@@ -11094,10 +11148,11 @@ app.get('/api/admin/kullanim', async (req, res) => {
     try {
         const gunSayisi = Math.min(Math.max(parseInt(req.query.gun, 10) || 30, 1), 180);
         const t0 = Date.now();
-        const [kullanici, tiklama, gunluk] = await Promise.all([
+        const [kullanici, tiklama, gunluk, avModu] = await Promise.all([
             kullaniciOzetiTara(),
             tiklamaOzetiTara(gunSayisi),
             gunlukSeriOku(gunSayisi),
+            avModuOzeti(gunSayisi),
         ]);
         console.log(`[RAPOR] ✅ kullanım özeti üretildi — ${kullanici.toplam} kullanıcı, ${Date.now() - t0} ms`);
         res.json({
@@ -11106,6 +11161,7 @@ app.get('/api/admin/kullanim', async (req, res) => {
             kullanici,
             tiklama,
             gunluk,
+            avModu,
             not: 'Tüm alanlar toplu sayıdır; e-posta, uid ve koordinat dönmez.',
         });
     } catch (e) {
