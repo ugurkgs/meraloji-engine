@@ -8871,6 +8871,25 @@ if (GOOGLE_PLAY_VERIFY) {
     getPlayAuthClient().catch(() => { });
 }
 
+/**
+ * Google Play sipariş numarasından YENİLEME SAYISINI çıkarır.
+ *
+ *   GPA.1234-5678-9012-34567       -> 0   (ilk satın alma)
+ *   GPA.1234-5678-9012-34567..0    -> 1   (1. yenileme)
+ *   GPA.1234-5678-9012-34567..1    -> 2   (2. yenileme)
+ *
+ * Aylık ve yıllıkta biçim aynı; Google her yenilemede sondaki sayacı bir artırıyor.
+ *
+ * NEDEN KENDİ SAYACIMIZI TUTMUYORUZ: /api/verify-subscription yalnız yenilemede
+ * değil, HER UYGULAMA AÇILIŞINDA ve satın alma geri yüklemesinde de çağrılıyor.
+ * Burada bir sayaç artırsaydık yenilemeyi değil açılışı sayardı. Google'ın kendi
+ * numarası tek doğru kaynak ve sunucu yeniden başlasa da bozulmuyor.
+ */
+function yenilemeSayisi(orderId) {
+    const m = String(orderId || '').match(/\.\.(\d+)$/);
+    return m ? parseInt(m[1], 10) + 1 : 0;
+}
+
 app.post('/api/verify-subscription', async (req, res) => {
     const lang = getLang(req);
     if (!req.user) return res.status(401).json({ error: i18n(lang).errors.authRequired });
@@ -8897,6 +8916,10 @@ app.post('/api/verify-subscription', async (req, res) => {
 
     // [Y3] Google'ın bildirdiği GERÇEK başlangıç zamanı. Bkz. aşağıdaki startedAt notu.
     let googleStartMs = null;
+
+    // [Y4] Google'ın son sipariş numarası (GPA.xxxx-xxxx-xxxx-xxxxx[..N]).
+    // Yenileme sayısı bundan TÜRETİLİYOR — bkz. yenilemeSayisi().
+    let googleOrderId = null;
 
     // ── Google Play Doğrulaması ──
     if (GOOGLE_PLAY_VERIFY) {
@@ -8959,6 +8982,10 @@ app.post('/api/verify-subscription', async (req, res) => {
                 const _sms = new Date(_startStr).getTime();
                 if (!isNaN(_sms)) googleStartMs = _sms;
             }
+
+            // [Y4] Son sipariş numarası. Hem "bu sipariş kimin" sorusunu çözüyor
+            // (Play Console kimlik vermiyor) hem de yenileme sayısını taşıyor.
+            if (purchase.latestOrderId) googleOrderId = String(purchase.latestOrderId);
 
             // CANCELED için GERÇEK gelecekteki bitiş ZORUNLU. Bitiş yok/geçmişse
             // sabit süre fallback'iyle (30/365 gün) erişimi UZATMA — süresi dolmuş say.
@@ -9052,18 +9079,48 @@ app.post('/api/verify-subscription', async (req, res) => {
                 || (_samePurchase ? _prev.startedAt : null)
                 || Date.now();
 
-            await userSubRef.set({
+            const _simdi = Date.now();
+            const _kayit = {
                 status: 'active',
                 subscriptionId: subId,
                 purchaseToken: purchaseToken,
                 isYearly,
                 startedAt: effectiveStartedAt,
                 expiresAt: effectiveExpiresAt,
-                updatedAt: Date.now(),
+                updatedAt: _simdi,
                 email: userEmail,
                 displayName: userDisplayName,
                 verifiedByGoogle: GOOGLE_PLAY_VERIFY  // Doğrulama yapılıp yapılmadığını kaydet
-            }, { merge: true });
+            };
+
+            // [Y4 - 2026-08-27] KONSOLDA OKUNABİLİR ZAMAN DAMGALARI.
+            //
+            // Sayı alanları (startedAt/expiresAt/updatedAt) AYNEN duruyor: hem
+            // istemci hem sunucu onları okuyup karşılaştırıyor, tipi değiştirmek
+            // erişim kontrolünü bozardı. Bunlar YANLARINA ekleniyor ve Firebase
+            // konsolunda ham epoch yerine tarih görünsün diye varlar.
+            //
+            // Alan adları bilerek "...Ts" ile bitiyor ki hiçbir okuyucu yanlışlıkla
+            // sayı beklerken Timestamp almasın.
+            if (admin && admin.firestore && admin.firestore.Timestamp) {
+                const T = admin.firestore.Timestamp;
+                _kayit.startedAtTs = T.fromMillis(effectiveStartedAt);
+                _kayit.expiresAtTs = T.fromMillis(effectiveExpiresAt);
+                _kayit.updatedAtTs = T.fromMillis(_simdi);
+            }
+
+            // [Y4] YENİLEME SAYISI — yalnız Google doğrulaması açıkken ve sipariş
+            // numarası geldiyse yazılıyor. Gelmediğinde alan HİÇ yazılmıyor;
+            // merge:true olduğu için önceki doğru değer korunuyor (null yazsaydık
+            // doğrulamanın kapalı olduğu bir çağrı iyi veriyi silerdi).
+            if (googleOrderId) {
+                const _y = yenilemeSayisi(googleOrderId);
+                _kayit.latestOrderId = googleOrderId;
+                _kayit.yenileme = _y;
+                _kayit.yenilemeStr = _y === 0 ? 'İlk satın alma' : (_y + '. yenileme');
+            }
+
+            await userSubRef.set(_kayit, { merge: true });
 
             // ++ EKLENEN KISIM: Native app uyumluluğu için users koleksiyonunu da güncelle
             const userDocRef = db.collection('users').doc(req.user.uid);
