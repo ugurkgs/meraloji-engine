@@ -1967,13 +1967,34 @@ async function _fetchSatelliteSSTBase(lat, lon, logUser = null, timeoutMs = 2000
 
     // Son 5 gün — bulutlu günlerde en son geçerli değeri al
     const now = new Date();
-    const end = now.toISOString().split('T')[0] + 'T00:00:00Z';
     const startDate = new Date(now);
     startDate.setDate(startDate.getDate() - 5);
     const start = startDate.toISOString().split('T')[0] + 'T00:00:00Z';
 
-    const url = `https://coastwatch.pfeg.noaa.gov/erddap/griddap/nesdisVHNSQsstDaily.json` +
-        `?sst[(${start}):(${end})][(0)][(${latMin}):(${latMax})][(${lonMin}):(${lonMax})]`;
+    // [2026-08-29] ÜÇ AYRI ŞEY BOZUKTU, ÜÇÜ DE BURADAYDI. Ölçülerek bulundu:
+    // logdaki her [SST-SAT] satırı başarısızdı, tek bir başarı yoktu.
+    //
+    //  1) VERİ KÜMESİ EMEKLİYE AYRILMIŞ. Eski kimlik `nesdisVHNSQsstDaily`
+    //     (SQ = Science Quality) artık yok; ERDDAP 404 "Currently unknown
+    //     datasetID" dönüyor. Yerine gerçek zamanlı sürüm geçti:
+    //     `nesdisVHNsstDaily`.
+    //
+    //  2) DEĞİŞKEN ADI DEĞİŞMİŞ. `sst` yerine `sea_surface_temperature`.
+    //     Sütun sırası AYNI kaldı — [time, altitude, lat, lon, değer] — yani
+    //     aşağıdaki r[4] okuması değişmiyor. Birim de hâlâ degree_C, dolayısıyla
+    //     -2..40 süzgeci geçerli.
+    //
+    //  3) BİTİŞ TARİHİ VERİNİN ÖTESİNDEYDİ. Kod bitiş olarak BUGÜNÜ istiyordu
+    //     ama uydu SST'si 1-2 gün gecikmeli geliyor; ERDDAP "stop is greater
+    //     than the axis maximum" deyip 404 veriyordu. Yani doğru veri kümesiyle
+    //     bile her sorgu başarısız olurdu. `(last)` her zaman mevcut en son
+    //     kareyi seçiyor ve bu sorunu tamamen ortadan kaldırıyor.
+    //
+    // ZAMAN AŞIMINA DOKUNULMADI: sorun yavaşlık değildi. Satır içi çağrı bilerek
+    // 2 sn (kullanıcıyı bekletmemek için) ve arka plan tazelemesi 12 sn ile aynı
+    // veriyi tekrar deniyor — o tasarım zaten doğruydu, yalnız adres ölüydü.
+    const url = `https://coastwatch.pfeg.noaa.gov/erddap/griddap/nesdisVHNsstDaily.json` +
+        `?sea_surface_temperature[(${start}):(last)][(0)][(${latMin}):(${latMax})][(${lonMin}):(${lonMax})]`;
 
     try {
         const res = await fetchWithTimeout(url, timeoutMs);
