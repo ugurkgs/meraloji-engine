@@ -38,7 +38,7 @@ const SPECIES_DB = {
         sstTrendPref: "WARMING",
         regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
         depth: { min: 0.5, opt: 5, max: 40 },
-        advice: { bait: "Canlı Teke, Mamun, Boru Kurdu, Çin Kurdu", lure: "WTD, 10-14cm Maket, Silikon", rig: "Gezer Kurşunlu Dip, Spin", hook: "1/0 - 4/0 Geniş Pala", baitEn: "Live sand smelt, lugworm, tube worm", baitEl: "Live sand smelt, lugworm, tube worm", baitEs: "Live Galera, Gusano de tubo, Gusano de tubo, Gusano de arena", lureEn: "Walk-the-dog, 10-14cm lure, soft plastic", lureEl: "Walk-the-dog, 10-14cm lure, soft plastic", lureEs: "Walk-the-dog, 10-14cm Señuelo, Vinilo", rigEn: "Running sinker bottom, spin", rigEl: "Running sinker bottom, spin", rigEs: "Plomo corrido bottom, Spinning", hookEn: "1/0 - 4/0 wide gape", hookEl: "1/0 - 4/0 wide gape", hookEs: "1/0 - 4/0 wide gape" },
+        advice: { bait: "Canlı Teke, Mamun, Boru Kurdu, Çin Kurdu, Sülünez, Yengeç", lure: "WTD, 10-14cm Maket, Silikon", rig: "Gezer Kurşunlu Dip, Spin", hook: "1/0 - 4/0 Geniş Pala", baitEn: "Live sand smelt, lugworm, tube worm, White ragworm, Crab", baitEl: "Live sand smelt, lugworm, tube worm, White ragworm, Crab", baitEs: "Live Galera, Gusano de tubo, Gusano de tubo, Gusano de arena, Gusano blanco, Cangrejo", lureEn: "Walk-the-dog, 10-14cm lure, soft plastic", lureEl: "Walk-the-dog, 10-14cm lure, soft plastic", lureEs: "Walk-the-dog, 10-14cm Señuelo, Vinilo", rigEn: "Running sinker bottom, spin", rigEl: "Running sinker bottom, spin", rigEs: "Plomo corrido bottom, Spinning", hookEn: "1/0 - 4/0 wide gape", hookEl: "1/0 - 4/0 wide gape", hookEs: "1/0 - 4/0 wide gape" },
         legalSize: "25 cm", legalSizeEn: "25 cm", legalSizeEs: "25 cm", legalSizeEl: "25 εκ.",
         spawningBonus: {
             "MARMARA": { months: [11, 0, 1], bonus: 0.2, tempMin: 12, tempMax: 15 },
@@ -108,11 +108,11 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 0, opt: 8, max: 100 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
         advice: {
-            bait: "Canlı Teke (Gece), Yengeç",
+            bait: "Canlı Teke (Gece), Yengeç, Kaya Kurdu",
             lure: "Silikon Karides (LRF)",
             rig: "Şamandıralı (Starlight), Dip Bırakma",
             hook: "1 - 3",
-            baitEn: "Live shrimp (night), crab", baitEl: "Live shrimp (night), crab", baitEs: "Vivo shrimp (night), crab",
+            baitEn: "Live shrimp (night), crab, Rock worm", baitEl: "Live shrimp (night), crab, Rock worm", baitEs: "Vivo shrimp (night), crab, Gusano de roca",
             lureEn: "Soft plastic shrimp (LRF)", lureEl: "Soft plastic shrimp (LRF)", lureEs: "Vinilo shrimp (LRF)",
             rigEn: "Float (Starlight), bottom rig", rigEl: "Float (Starlight), bottom rig", rigEs: "Flotador (Starlight), bottom rig",
             hookEn: "1 - 3", hookEl: "1 - 3", hookEs: "1 - 3"
@@ -243,7 +243,7 @@ const SPECIES_DB = {
         salinityPref: "MEDIUM", // [2026-08-02] ANY→MEDIUM: nehir ağzı tuzluluk modeli (rivermouth.js) devreye girince ANY olan türler puanlamanın tamamen dışında kalıyordu. Bu tür estuarin/lagün bağımlısı; ANY hiçbir yerde ceza da vermiyordu, MEDIUM açık denizde 0 (aynı) ama acı suda +1.5 verir — tek yönlü düzeltme.
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 0, opt: 10, max: 150 },
-        advice: { bait: "Canlı Mamun, Yengeç, Midye, Çin Kurdu", lure: "Micro Jig", rig: "Hırsızlı Dip Takımı", hook: "Chinu No:2-4", baitEn: "Live sand smelt, crab, mussel, Lugworm", baitEl: "Live sand smelt, crab, mussel, Lugworm", baitEs: "Live Galera, Cangrejo, Mejillón, Gusano de arena", lureEn: "Micro jig", lureEl: "Micro jig", lureEs: "Micro jig", rigEn: "Running bottom rig", rigEl: "Running bottom rig", rigEs: "Running Aparejo de fondo", hookEn: "Chinu No:2-4", hookEl: "Chinu No:2-4", hookEs: "Chinu No:2-4" },
+        advice: { bait: "Canlı Mamun, Yengeç, Midye, Çin Kurdu, Teke, Sülünez", lure: "Micro Jig", rig: "Hırsızlı Dip Takımı", hook: "Chinu No:2-4", baitEn: "Live sand smelt, crab, mussel, Lugworm, Shrimp, White ragworm", baitEl: "Live sand smelt, crab, mussel, Lugworm, Shrimp, White ragworm", baitEs: "Live Galera, Cangrejo, Mejillón, Gusano de arena, Camarón, Gusano blanco", lureEn: "Micro jig", lureEl: "Micro jig", lureEs: "Micro jig", rigEn: "Running bottom rig", rigEl: "Running bottom rig", rigEs: "Running Aparejo de fondo", hookEn: "Chinu No:2-4", hookEl: "Chinu No:2-4", hookEs: "Chinu No:2-4" },
         legalSize: "20 cm", legalSizeEn: "20 cm", legalSizeEs: "20 cm", legalSizeEl: "20 εκ.",
         spawningBonus: {
             "EGE": { months: [9, 10, 11], bonus: 0.25, tempMin: 18, tempMax: 22 },
@@ -268,7 +268,7 @@ const SPECIES_DB = {
         planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 0, opt: 10, max: 160 },
-        advice: { bait: "Mamun, Yengeç, Madya, Çin Kurdu", lure: "Silikon Karides (Nadir)", rig: "Şeytan Oltası, Tek İğneli Dip", hook: "2 - 5 Sağlam Dövme", baitEn: "Sand smelt, crab, mussel, Lugworm", baitEl: "Sand smelt, crab, mussel, Lugworm", baitEs: "Galera, Cangrejo, Mejillón, Gusano de arena", lureEn: "Soft plastic shrimp (rare)", lureEl: "Soft plastic shrimp (rare)", lureEs: "Vinilo Camarón (rare)", rigEn: "Paternoster, single bottom hook", rigEl: "Paternoster, single bottom hook", rigEs: "Paternoster, single bottom Anzuelo", hookEn: "2 - 5 forged", hookEl: "2 - 5 forged", hookEs: "2 - 5 forged" },
+        advice: { bait: "Mamun, Yengeç, Madya, Çin Kurdu, Teke, Sülünez", lure: "Silikon Karides (Nadir)", rig: "Şeytan Oltası, Tek İğneli Dip", hook: "2 - 5 Sağlam Dövme", baitEn: "Sand smelt, crab, mussel, Lugworm, Shrimp, White ragworm", baitEl: "Sand smelt, crab, mussel, Lugworm, Shrimp, White ragworm", baitEs: "Galera, Cangrejo, Mejillón, Gusano de arena, Camarón, Gusano blanco", lureEn: "Soft plastic shrimp (rare)", lureEl: "Soft plastic shrimp (rare)", lureEs: "Vinilo Camarón (rare)", rigEn: "Paternoster, single bottom hook", rigEl: "Paternoster, single bottom hook", rigEs: "Paternoster, single bottom Anzuelo", hookEn: "2 - 5 forged", hookEl: "2 - 5 forged", hookEs: "2 - 5 forged" },
         legalSize: "18 cm", legalSizeEn: "18 cm", legalSizeEs: "18 cm", legalSizeEl: "18 εκ.",
         note: "Kayalık, köpüklü sularda. Misina sürtünmesine dikkat.",
         noteEn: "Rocky, foamy water. Watch for line friction.", noteEl: "Rocky, foamy water. Watch for line friction.", noteEs: "Rocky, foamy water. Watch for line friction."
@@ -292,7 +292,7 @@ const SPECIES_DB = {
         salinityPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 0, opt: 5, max: 150 }, // Daha sığ sular opt seviyesine çekildi
-        advice: { bait: "Boru Kurdu (Favori), Mamun, Kum Solucanı, Çin Kurdu", lure: "Kokulu Silikon (Kurt/Yengeç)", rig: "Hafif Gezer Kurşunlu Dip", hook: "4 - 6 İnce Pala", baitEn: "Lugworm (favourite), ragworm", baitEl: "Lugworm (favourite), ragworm", baitEs: "Gusano de tubo (favourite), ragGusano, Gusano de arena", lureEn: "Scented soft plastic", lureEl: "Scented soft plastic", lureEs: "Scented Vinilo", rigEn: "Light running sinker bottom", rigEl: "Light running sinker bottom", rigEs: "Ligero Plomo corrido bottom", hookEn: "4 - 6 fine wire", hookEl: "4 - 6 fine wire", hookEs: "4 - 6 Alambre fino" },
+        advice: { bait: "Boru Kurdu (Favori), Mamun, Kum Solucanı, Çin Kurdu, Sülünez", lure: "Kokulu Silikon (Kurt/Yengeç)", rig: "Hafif Gezer Kurşunlu Dip", hook: "4 - 6 İnce Pala", baitEn: "Lugworm (favourite), ragworm, White ragworm", baitEl: "Lugworm (favourite), ragworm, White ragworm", baitEs: "Gusano de tubo (favourite), ragGusano, Gusano de arena, Gusano blanco", lureEn: "Scented soft plastic", lureEl: "Scented soft plastic", lureEs: "Scented Vinilo", rigEn: "Light running sinker bottom", rigEl: "Light running sinker bottom", rigEs: "Ligero Plomo corrido bottom", hookEn: "4 - 6 fine wire", hookEl: "4 - 6 fine wire", hookEs: "4 - 6 Alambre fino" },
         legalSize: "20 cm (Etik)", legalSizeEn: "20 cm (ethical)", legalSizeEs: "20 cm (ético)", legalSizeEl: "20 εκ. (ηθικό όριο)",
         note: "Gece kıyıya 1m'ye kadar yaklaşır. Işık tutmayın! Kumluk mera balığıdır.",
         noteEn: "Approaches within 1m of shore at night. No flashlights! Sand bottom specialist.", noteEl: "Approaches within 1m of shore at night. No flashlights! Sand bottom specialist.", noteEs: "Approaches within 1m of shore at night. No flashlights! Sand bottom specialist."
@@ -425,7 +425,7 @@ const SPECIES_DB = {
         // olarak 10-40m çamurlu/kumlu koylar) çok altındaydı — tür trol/ticari balıkçılıkta
         // daha derine (100-200m) iniyor ama olta avcılığında yoğunlukla sığda tutuluyor.
         depth: { min: 5, opt: 30, max: 200 },
-        advice: { bait: "Karides, Kurt, Midye, Tavuk Göğsü", lure: "Genelde Yok", rig: "Üçlü Dip Oltası", hook: "9 - 11 İnce Telli", baitEn: "Shrimp, worm, mussel, chicken breast", baitEl: "Shrimp, worm, mussel, chicken breast", baitEs: "Camarón, Gusano, Mejillón, Pechuga de pollo", lureEn: "Rarely used", lureEl: "Rarely used", lureEs: "Raramente used", rigEn: "Three-hook bottom rig", rigEl: "Three-hook bottom rig", rigEs: "Three-Anzuelo Aparejo de fondo", hookEn: "9 - 11 fine wire", hookEl: "9 - 11 fine wire", hookEs: "9 - 11 Alambre fino" },
+        advice: { bait: "Karides, Kurt, Midye, Tavuk Göğsü, Sülünez, Boru Kurdu", lure: "Genelde Yok", rig: "Üçlü Dip Oltası", hook: "9 - 11 İnce Telli", baitEn: "Shrimp, worm, mussel, chicken breast, White ragworm, Tube worm", baitEl: "Shrimp, worm, mussel, chicken breast, White ragworm, Tube worm", baitEs: "Camarón, Gusano, Mejillón, Pechuga de pollo, Gusano blanco, Gusano de tubo", lureEn: "Rarely used", lureEl: "Rarely used", lureEs: "Raramente used", rigEn: "Three-hook bottom rig", rigEl: "Three-hook bottom rig", rigEs: "Three-Anzuelo Aparejo de fondo", hookEn: "9 - 11 fine wire", hookEl: "9 - 11 fine wire", hookEs: "9 - 11 Alambre fino" },
         legalSize: "13 cm", legalSizeEn: "13 cm", legalSizeEs: "13 cm", legalSizeEl: "13 εκ.",
         note: "Yumuşak dudak yapısı var — ince telli küçük iğne (9-11 no) şart. Yemi emerek alır.",
         noteEn: "Soft lips — fine wire small hook (9-11) essential. Sucks bait in gently.", noteEl: "Soft lips — fine wire small hook (9-11) essential. Sucks bait in gently.", noteEs: "Soft lips — fine wire small hook (9-11) essential. Sucks bait in gently."
@@ -574,7 +574,7 @@ const SPECIES_DB = {
         // olta balıkçılığı için pratikte anlamsız). opt=50→40, iki kaynağın (35/50) ortası ve
         // Türkiye'deki tipik jigging derinliğiyle (akıntılı burun başları) daha uyumlu.
         depth: { min: 10, opt: 40, max: 250 },
-        advice: { bait: "Canlı İstavrit, Sardalya", lure: "Popper, Stickbait, Metal Jig", rig: "Trolling, Jigging, Popping", hook: "3/0 - 6/0 + Çelik Tel", baitEn: "Live horse mackerel, sardine", baitEl: "Live horse mackerel, sardine", baitEs: "Live horse mackerel, Sardina", lureEn: "Popper, stickbait, metal jig", lureEl: "Popper, stickbait, metal jig", lureEs: "Popper, Stickbait, metal Jig", rigEn: "Trolling, jigging, popping", rigEl: "Trolling, jigging, popping", rigEs: "Curricán, Jigging, popping", hookEn: "3/0 - 6/0 + wire trace", hookEl: "3/0 - 6/0 + wire trace", hookEs: "3/0 - 6/0 + wire trace" },
+        advice: { bait: "Canlı İstavrit, Sardalya, Kalamar", lure: "Popper, Stickbait, Metal Jig", rig: "Trolling, Jigging, Popping", hook: "3/0 - 6/0 + Çelik Tel", baitEn: "Live horse mackerel, sardine, Squid", baitEl: "Live horse mackerel, sardine, Squid", baitEs: "Live horse mackerel, Sardina, Calamar", lureEn: "Popper, stickbait, metal jig", lureEl: "Popper, stickbait, metal jig", lureEs: "Popper, Stickbait, metal Jig", rigEn: "Trolling, jigging, popping", rigEl: "Trolling, jigging, popping", rigEs: "Curricán, Jigging, popping", hookEn: "3/0 - 6/0 + wire trace", hookEl: "3/0 - 6/0 + wire trace", hookEs: "3/0 - 6/0 + wire trace" },
         legalSize: "30 cm", legalSizeEn: "30 cm", legalSizeEs: "30 cm", legalSizeEl: "30 εκ.",
         note: "Güçlü avcı! Tekne gerektirir. Yaz aylarında açıklarda bollaşır.",
         noteEn: "Powerful predator! Boat required. Abundant offshore in summer.", noteEl: "Powerful predator! Boat required. Abundant offshore in summer.", noteEs: "Powerful predator! Boat required. Abundant offshore in summer."
@@ -595,7 +595,7 @@ const SPECIES_DB = {
         planktonPref: "MEDIUM",
         regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 15, opt: 30, max: 200 },
-        advice: { bait: "Canlı Kalamar, Sübye, Karides", lure: "Metal Jig, Maket Balık", rig: "Jigging, Dip Sırtısı, Trolling", hook: "2/0 - 5/0", baitEn: "Live squid, cuttlefish, shrimp", baitEl: "Live squid, cuttlefish, shrimp", baitEs: "Live Calamar, Sepia, Camarón", lureEn: "Metal jig, swim bait", lureEl: "Metal jig, swim bait", lureEs: "Metal Jig, swim bait", rigEn: "Jigging, deep bottom rig, trolling", rigEl: "Jigging, deep bottom rig, trolling", rigEs: "Jigging, deep Aparejo de fondo, Curricán", hookEn: "2/0 - 5/0", hookEl: "2/0 - 5/0", hookEs: "2/0 - 5/0" },
+        advice: { bait: "Canlı Kalamar, Sübye, Karides, Mamun", lure: "Metal Jig, Maket Balık", rig: "Jigging, Dip Sırtısı, Trolling", hook: "2/0 - 5/0", baitEn: "Live squid, cuttlefish, shrimp, Ragworm", baitEl: "Live squid, cuttlefish, shrimp, Ragworm", baitEs: "Live Calamar, Sepia, Camarón, Gusano rojo", lureEn: "Metal jig, swim bait", lureEl: "Metal jig, swim bait", lureEs: "Metal Jig, swim bait", rigEn: "Jigging, deep bottom rig, trolling", rigEl: "Jigging, deep bottom rig, trolling", rigEs: "Jigging, deep Aparejo de fondo, Curricán", hookEn: "2/0 - 5/0", hookEl: "2/0 - 5/0", hookEs: "2/0 - 5/0" },
         legalSize: "35 cm", legalSizeEn: "35 cm", legalSizeEs: "35 cm", legalSizeEl: "35 εκ.",
         note: "Denizlerin padişahı. Kayalık dip sever. legalSize 35cm — bilimsel referans.",
         noteEn: "King of the sea. Prefers rocky bottom. Legal size 35cm — scientific reference.", noteEl: "King of the sea. Prefers rocky bottom. Legal size 35cm — scientific reference.", noteEs: "King of the sea. Prefiere rocky bottom. Legal size 35cm — scientific reference."
@@ -617,7 +617,7 @@ const SPECIES_DB = {
         sstTrendPref: "STABLE",
         regions: ["MARMARA", "EGE", "AKDENİZ"],
         depth: { min: 10, opt: 60, max: 250 },
-        advice: { bait: "Karides, Kalamar, Midye, Sülünez", lure: "Jig, Silikon", rig: "Dip Takımı", hook: "2 - 6", baitEn: "Shrimp, squid, mussel, worm", baitEl: "Shrimp, squid, mussel, worm", baitEs: "Camarón, Calamar, Mejillón, Gusano", lureEn: "Jig, soft plastic", lureEl: "Jig, soft plastic", lureEs: "Jig, Vinilo", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "2 - 6", hookEl: "2 - 6", hookEs: "2 - 6" },
+        advice: { bait: "Karides, Kalamar, Midye, Sülünez, Mamun", lure: "Jig, Silikon", rig: "Dip Takımı", hook: "2 - 6", baitEn: "Shrimp, squid, mussel, worm, Ragworm", baitEl: "Shrimp, squid, mussel, worm, Ragworm", baitEs: "Camarón, Calamar, Mejillón, Gusano, Gusano rojo", lureEn: "Jig, soft plastic", lureEl: "Jig, soft plastic", lureEs: "Jig, Vinilo", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "2 - 6", hookEl: "2 - 6", hookEs: "2 - 6" },
         legalSize: "18 cm", legalSizeEn: "18 cm", legalSizeEs: "18 cm", legalSizeEl: "18 εκ.",
         note: "Kayalık-kumluk karışık dipte gezer. Yem dibe oturmalı. Hafif akıntıda daha istekli vurur.",
         noteEn: "Roams mixed rocky-sandy bottom. Bait must reach bottom. More active in light current.", noteEl: "Roams mixed rocky-sandy bottom. Bait must reach bottom. More active in light current.", noteEs: "Roams mixed rocky-sandy bottom. Bait must reach bottom. More active in light current."
@@ -750,7 +750,7 @@ const SPECIES_DB = {
         planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 0, opt: 15, max: 50 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
-        advice: { bait: "Midye, Yengeç, Mamun, Çin Kurdu", lure: "Silikon", rig: "Şeytan Oltası, Dip", hook: "1 - 4", baitEn: "Mussel, crab, sand smelt, Lugworm", baitEl: "Mussel, crab, sand smelt, Lugworm", baitEs: "Mejillón, Cangrejo, Galera, Gusano de arena", lureEn: "Soft plastic", lureEl: "Soft plastic", lureEs: "Vinilo", rigEn: "Paternoster, bottom", rigEl: "Paternoster, bottom", rigEs: "Paternoster, bottom", hookEn: "1 - 4", hookEl: "1 - 4", hookEs: "1 - 4" },
+        advice: { bait: "Midye, Yengeç, Mamun, Çin Kurdu, Sülünez", lure: "Silikon", rig: "Şeytan Oltası, Dip", hook: "1 - 4", baitEn: "Mussel, crab, sand smelt, Lugworm, White ragworm", baitEl: "Mussel, crab, sand smelt, Lugworm, White ragworm", baitEs: "Mejillón, Cangrejo, Galera, Gusano de arena, Gusano blanco", lureEn: "Soft plastic", lureEl: "Soft plastic", lureEs: "Vinilo", rigEn: "Paternoster, bottom", rigEl: "Paternoster, bottom", rigEs: "Paternoster, bottom", hookEn: "1 - 4", hookEl: "1 - 4", hookEs: "1 - 4" },
         legalSize: "23 cm", legalSizeEn: "23 cm", legalSizeEs: "23 cm", legalSizeEl: "23 εκ.",
         note: "Karagözün büyük akrabası. Köpüklü, dalgalı su sever.",
         noteEn: "Larger relative of two-banded bream. Prefers foamy, choppy water.", noteEl: "Larger relative of two-banded bream. Prefers foamy, choppy water.", noteEs: "Larger relative of two-banded bream. Prefiere foamy, choppy water."
@@ -1324,7 +1324,7 @@ const SPECIES_DB = {
         planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 0, opt: 15, max: 50 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
-        advice: { bait: "Ekmek, Kurt, Karides", lure: "Yok", rig: "Çapari, Dip", hook: "10 - 14", baitEn: "Bread, worm, shrimp", baitEl: "Bread, worm, shrimp", baitEs: "Pan, Gusano, Camarón", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Sabiki, bottom", rigEl: "Sabiki, bottom", rigEs: "Sabiki, bottom", hookEn: "10 - 14", hookEl: "10 - 14", hookEs: "10 - 14" },
+        advice: { bait: "Ekmek, Kurt, Karides, Sülünez, Boru Kurdu, Mamun", lure: "Yok", rig: "Çapari, Dip", hook: "10 - 14", baitEn: "Bread, worm, shrimp, White ragworm, Tube worm", baitEl: "Bread, worm, shrimp, White ragworm, Tube worm", baitEs: "Pan, Gusano, Camarón, Gusano blanco, Gusano de tubo, Gusano rojo", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Sabiki, bottom", rigEl: "Sabiki, bottom", rigEs: "Sabiki, bottom", hookEn: "10 - 14", hookEl: "10 - 14", hookEs: "10 - 14" },
         legalSize: "Yok", legalSizeEn: "None", legalSizeEs: "Ninguna", legalSizeEl: "Καμία",
         note: "Sürü halinde gezer. Ekmek ile bereketle avlanır.",
         noteEn: "Schools together. Easily caught with bread. Good yield.", noteEl: "Schools together. Easily caught with bread. Good yield.", noteEs: "Schools together. Easily caught with bread. Good yield."
@@ -1889,8 +1889,25 @@ const SPECIES_DB = {
         // Karadeniz'den Akdeniz'e dört denizde de yaşıyor; geniş toleranslı.
         // min 8: Karadeniz kışı (7,5-8°C) kapıyı kapatmasın — levrek kaydında
         // aynı gerekçeyle aynı düzeltme yapılmıştı.
-        tempRange: { min: 8, opt: 22, max: 28 },
-        seasons: { winter: 0.35, spring: 0.70, summer: 0.95, autumn: 0.75 },
+        // [2026-08-29 · IKINCI AKRAN BANDI DUZELTMESI] Sahip "her yerde
+        // cikiyor" dedi, olculdu ve HAKLI CIKTI: horozbina 8 noktanin 6'sinda
+        // ilk uctaydi (bir sonraki en yuksek tur 4/8).
+        //
+        // ILK DENETIMIM EKSIKTI — yalniz UC NOKTALARI (min/opt/max) karsilastirmis,
+        // ARALIK GENISLIGINI olcmemistim. Ayrica akran kumesi yanlisti: 246
+        // "KAYALIK" turunun cogu yabanci global tur. Dogru akran = Turkiye
+        // kayalik turleri (6 tur).
+        //
+        // O kumeye gore iki olcut fazlaydi:
+        //   sicaklik genisligi  20 C  (akran p90 15)   min 8 -> 14
+        //   seasons.summer      0.95  (akran p90 0.85) -> 0.85
+        //
+        // 20 derecelik tolerans hicbir kosulda ceza almamak demekti; kosullar
+        // herkes icin ortayken "en az kotu" olan tepeye cikiyordu. Kis sinyalini
+        // zaten seasons.winter (0.35) tasiyor, tempRange.min'in o kadar dusuk
+        // olmasina gerek yok.
+        tempRange: { min: 14, opt: 22, max: 28 },
+        seasons: { winter: 0.35, spring: 0.70, summer: 0.85, autumn: 0.75 },
         activity: "DAY",
         // Sığ kayalıkta yaşayan yerleşik bir tür; basınç değişimine avcı
         // balıklar kadar tepki vermiyor.

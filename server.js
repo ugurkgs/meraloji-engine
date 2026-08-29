@@ -4815,6 +4815,11 @@ const YEM_HIRSIZI = new Set([
     'lapin',     // 4/5 · kayalıkta sürekli gagalar
     'hani',      // 3/5 · SAHİBİN KARARI: "tam yem yiyici, harami türü"
     'lokum',     // 3/5 · SAHİBİN KARARI: "hem yemci hem hedef"
+    // [2026-08-29] SAHİBİN KARARI — beş AI oylamasından geçmedi.
+    // Kayalıkta iğnedeki yemi didikleyen klasik türlerden. YEM_BALIGI
+    // kümesinde de var: aterin, kupes, izmarit ve isparoz gibi ÇİFT ROL —
+    // hem yemi soyar hem kendisi değerli canlı yemdir.
+    'horozbina',
 ]);
 // KASTEN DIŞARIDA — AI'ların çoğu "hırsız" dediği hâlde elendiler.
 // Gerekçe sahibin kendi balıkçılık bilgisi; oy çokluğu tek başına yeterli
