@@ -1896,7 +1896,14 @@ const SPECIES_DB = {
         // balıklar kadar tepki vermiyor.
         pressureSensitivity: 0.15,
         // Dalga kuşağında, kayaya yapışık yaşıyor — çoğu türden dalgaya toleranslı.
-        wavePref: 0.7, clarityPref: "CLEAR",
+        //
+        // [2026-08-29 · AKRAN BANDI DÜZELTMESİ] İlk yazımda 0.7 kondu ve
+        // ölçünce 246 KAYALIK akranının HEPSİNDEN yüksek çıktı (akran p90 =
+        // 0.5). Bu "Trakonya vakası"nın aynısıydı: yeni kayıt akranlarının
+        // üstünde parametre alınca dalgalı günde bütün kayalık listelerinin
+        // tepesine çıkardı. Biyoloji yüksek toleransı destekliyor, o yüzden
+        // bandın TEPESİNE çekildi — dışına değil.
+        wavePref: 0.5, clarityPref: "CLEAR",
         currentPref: 0.3,
         // Karadeniz (~18 psu) ile Akdeniz (~39 psu) arasında yaşıyor: geniş tuzluluk.
         salinityPref: "MEDIUM",
