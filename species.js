@@ -38,7 +38,7 @@ const SPECIES_DB = {
         sstTrendPref: "WARMING",
         regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
         depth: { min: 0.5, opt: 5, max: 40 },
-        advice: { bait: "Canlı Teke, Mamun, Boru Kurdu", lure: "WTD, 10-14cm Maket, Silikon", rig: "Gezer Kurşunlu Dip, Spin", hook: "1/0 - 4/0 Geniş Pala", baitEn: "Live sand smelt, lugworm, tube worm", baitEl: "Live sand smelt, lugworm, tube worm", baitEs: "Live Galera, Gusano de tubo, Gusano de tubo", lureEn: "Walk-the-dog, 10-14cm lure, soft plastic", lureEl: "Walk-the-dog, 10-14cm lure, soft plastic", lureEs: "Walk-the-dog, 10-14cm Señuelo, Vinilo", rigEn: "Running sinker bottom, spin", rigEl: "Running sinker bottom, spin", rigEs: "Plomo corrido bottom, Spinning", hookEn: "1/0 - 4/0 wide gape", hookEl: "1/0 - 4/0 wide gape", hookEs: "1/0 - 4/0 wide gape" },
+        advice: { bait: "Canlı Teke, Mamun, Boru Kurdu, Çin Kurdu", lure: "WTD, 10-14cm Maket, Silikon", rig: "Gezer Kurşunlu Dip, Spin", hook: "1/0 - 4/0 Geniş Pala", baitEn: "Live sand smelt, lugworm, tube worm", baitEl: "Live sand smelt, lugworm, tube worm", baitEs: "Live Galera, Gusano de tubo, Gusano de tubo, Gusano de arena", lureEn: "Walk-the-dog, 10-14cm lure, soft plastic", lureEl: "Walk-the-dog, 10-14cm lure, soft plastic", lureEs: "Walk-the-dog, 10-14cm Señuelo, Vinilo", rigEn: "Running sinker bottom, spin", rigEl: "Running sinker bottom, spin", rigEs: "Plomo corrido bottom, Spinning", hookEn: "1/0 - 4/0 wide gape", hookEl: "1/0 - 4/0 wide gape", hookEs: "1/0 - 4/0 wide gape" },
         legalSize: "25 cm", legalSizeEn: "25 cm", legalSizeEs: "25 cm", legalSizeEl: "25 εκ.",
         spawningBonus: {
             "MARMARA": { months: [11, 0, 1], bonus: 0.2, tempMin: 12, tempMax: 15 },
@@ -243,7 +243,7 @@ const SPECIES_DB = {
         salinityPref: "MEDIUM", // [2026-08-02] ANY→MEDIUM: nehir ağzı tuzluluk modeli (rivermouth.js) devreye girince ANY olan türler puanlamanın tamamen dışında kalıyordu. Bu tür estuarin/lagün bağımlısı; ANY hiçbir yerde ceza da vermiyordu, MEDIUM açık denizde 0 (aynı) ama acı suda +1.5 verir — tek yönlü düzeltme.
         regions: ["EGE", "AKDENİZ", "MARMARA"],
         depth: { min: 0, opt: 10, max: 150 },
-        advice: { bait: "Canlı Mamun, Yengeç, Midye", lure: "Micro Jig", rig: "Hırsızlı Dip Takımı", hook: "Chinu No:2-4", baitEn: "Live sand smelt, crab, mussel", baitEl: "Live sand smelt, crab, mussel", baitEs: "Live Galera, Cangrejo, Mejillón", lureEn: "Micro jig", lureEl: "Micro jig", lureEs: "Micro jig", rigEn: "Running bottom rig", rigEl: "Running bottom rig", rigEs: "Running Aparejo de fondo", hookEn: "Chinu No:2-4", hookEl: "Chinu No:2-4", hookEs: "Chinu No:2-4" },
+        advice: { bait: "Canlı Mamun, Yengeç, Midye, Çin Kurdu", lure: "Micro Jig", rig: "Hırsızlı Dip Takımı", hook: "Chinu No:2-4", baitEn: "Live sand smelt, crab, mussel, Lugworm", baitEl: "Live sand smelt, crab, mussel, Lugworm", baitEs: "Live Galera, Cangrejo, Mejillón, Gusano de arena", lureEn: "Micro jig", lureEl: "Micro jig", lureEs: "Micro jig", rigEn: "Running bottom rig", rigEl: "Running bottom rig", rigEs: "Running Aparejo de fondo", hookEn: "Chinu No:2-4", hookEl: "Chinu No:2-4", hookEs: "Chinu No:2-4" },
         legalSize: "20 cm", legalSizeEn: "20 cm", legalSizeEs: "20 cm", legalSizeEl: "20 εκ.",
         spawningBonus: {
             "EGE": { months: [9, 10, 11], bonus: 0.25, tempMin: 18, tempMax: 22 },
@@ -268,7 +268,7 @@ const SPECIES_DB = {
         planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 0, opt: 10, max: 160 },
-        advice: { bait: "Mamun, Yengeç, Madya", lure: "Silikon Karides (Nadir)", rig: "Şeytan Oltası, Tek İğneli Dip", hook: "2 - 5 Sağlam Dövme", baitEn: "Sand smelt, crab, mussel", baitEl: "Sand smelt, crab, mussel", baitEs: "Galera, Cangrejo, Mejillón", lureEn: "Soft plastic shrimp (rare)", lureEl: "Soft plastic shrimp (rare)", lureEs: "Vinilo Camarón (rare)", rigEn: "Paternoster, single bottom hook", rigEl: "Paternoster, single bottom hook", rigEs: "Paternoster, single bottom Anzuelo", hookEn: "2 - 5 forged", hookEl: "2 - 5 forged", hookEs: "2 - 5 forged" },
+        advice: { bait: "Mamun, Yengeç, Madya, Çin Kurdu", lure: "Silikon Karides (Nadir)", rig: "Şeytan Oltası, Tek İğneli Dip", hook: "2 - 5 Sağlam Dövme", baitEn: "Sand smelt, crab, mussel, Lugworm", baitEl: "Sand smelt, crab, mussel, Lugworm", baitEs: "Galera, Cangrejo, Mejillón, Gusano de arena", lureEn: "Soft plastic shrimp (rare)", lureEl: "Soft plastic shrimp (rare)", lureEs: "Vinilo Camarón (rare)", rigEn: "Paternoster, single bottom hook", rigEl: "Paternoster, single bottom hook", rigEs: "Paternoster, single bottom Anzuelo", hookEn: "2 - 5 forged", hookEl: "2 - 5 forged", hookEs: "2 - 5 forged" },
         legalSize: "18 cm", legalSizeEn: "18 cm", legalSizeEs: "18 cm", legalSizeEl: "18 εκ.",
         note: "Kayalık, köpüklü sularda. Misina sürtünmesine dikkat.",
         noteEn: "Rocky, foamy water. Watch for line friction.", noteEl: "Rocky, foamy water. Watch for line friction.", noteEs: "Rocky, foamy water. Watch for line friction."
@@ -292,7 +292,7 @@ const SPECIES_DB = {
         salinityPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 0, opt: 5, max: 150 }, // Daha sığ sular opt seviyesine çekildi
-        advice: { bait: "Boru Kurdu (Favori), Mamun, Kum Solucanı", lure: "Kokulu Silikon (Kurt/Yengeç)", rig: "Hafif Gezer Kurşunlu Dip", hook: "4 - 6 İnce Pala", baitEn: "Lugworm (favourite), ragworm", baitEl: "Lugworm (favourite), ragworm", baitEs: "Gusano de tubo (favourite), ragGusano", lureEn: "Scented soft plastic", lureEl: "Scented soft plastic", lureEs: "Scented Vinilo", rigEn: "Light running sinker bottom", rigEl: "Light running sinker bottom", rigEs: "Ligero Plomo corrido bottom", hookEn: "4 - 6 fine wire", hookEl: "4 - 6 fine wire", hookEs: "4 - 6 Alambre fino" },
+        advice: { bait: "Boru Kurdu (Favori), Mamun, Kum Solucanı, Çin Kurdu", lure: "Kokulu Silikon (Kurt/Yengeç)", rig: "Hafif Gezer Kurşunlu Dip", hook: "4 - 6 İnce Pala", baitEn: "Lugworm (favourite), ragworm", baitEl: "Lugworm (favourite), ragworm", baitEs: "Gusano de tubo (favourite), ragGusano, Gusano de arena", lureEn: "Scented soft plastic", lureEl: "Scented soft plastic", lureEs: "Scented Vinilo", rigEn: "Light running sinker bottom", rigEl: "Light running sinker bottom", rigEs: "Ligero Plomo corrido bottom", hookEn: "4 - 6 fine wire", hookEl: "4 - 6 fine wire", hookEs: "4 - 6 Alambre fino" },
         legalSize: "20 cm (Etik)", legalSizeEn: "20 cm (ethical)", legalSizeEs: "20 cm (ético)", legalSizeEl: "20 εκ. (ηθικό όριο)",
         note: "Gece kıyıya 1m'ye kadar yaklaşır. Işık tutmayın! Kumluk mera balığıdır.",
         noteEn: "Approaches within 1m of shore at night. No flashlights! Sand bottom specialist.", noteEl: "Approaches within 1m of shore at night. No flashlights! Sand bottom specialist.", noteEs: "Approaches within 1m of shore at night. No flashlights! Sand bottom specialist."
@@ -750,7 +750,7 @@ const SPECIES_DB = {
         planktonPref: "MEDIUM",
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 0, opt: 15, max: 50 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
-        advice: { bait: "Midye, Yengeç, Mamun", lure: "Silikon", rig: "Şeytan Oltası, Dip", hook: "1 - 4", baitEn: "Mussel, crab, sand smelt", baitEl: "Mussel, crab, sand smelt", baitEs: "Mejillón, Cangrejo, Galera", lureEn: "Soft plastic", lureEl: "Soft plastic", lureEs: "Vinilo", rigEn: "Paternoster, bottom", rigEl: "Paternoster, bottom", rigEs: "Paternoster, bottom", hookEn: "1 - 4", hookEl: "1 - 4", hookEs: "1 - 4" },
+        advice: { bait: "Midye, Yengeç, Mamun, Çin Kurdu", lure: "Silikon", rig: "Şeytan Oltası, Dip", hook: "1 - 4", baitEn: "Mussel, crab, sand smelt, Lugworm", baitEl: "Mussel, crab, sand smelt, Lugworm", baitEs: "Mejillón, Cangrejo, Galera, Gusano de arena", lureEn: "Soft plastic", lureEl: "Soft plastic", lureEs: "Vinilo", rigEn: "Paternoster, bottom", rigEl: "Paternoster, bottom", rigEs: "Paternoster, bottom", hookEn: "1 - 4", hookEl: "1 - 4", hookEs: "1 - 4" },
         legalSize: "23 cm", legalSizeEn: "23 cm", legalSizeEs: "23 cm", legalSizeEl: "23 εκ.",
         note: "Karagözün büyük akrabası. Köpüklü, dalgalı su sever.",
         noteEn: "Larger relative of two-banded bream. Prefers foamy, choppy water.", noteEl: "Larger relative of two-banded bream. Prefers foamy, choppy water.", noteEs: "Larger relative of two-banded bream. Prefiere foamy, choppy water."
