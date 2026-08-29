@@ -4777,7 +4777,51 @@ const YEM_BALIGI = new Set([
     // eklendi. Kayalıkta elle/küçük iğneyle tutulup lahos, orfoz, sinağrit
     // ve akya için canlı takılır; Türkiye kıyısında yaygın pratik.
     'horozbina',
+
+    // ── [2026-08-29] İKİNCİ TUR — ayrı bir soruşturmadan geldi ──────────
+    // Beş AI'a + bir balıkçılık forumuna "canlı yem olarak hangi balık
+    // kullanılır" soruldu; cevaplar sayılarak özetlendi (kopyala-yapıştır
+    // denetlendi, altı kaynak da bağımsız). Satır sonundaki n/6 oy sayısı.
+    //
+    // ⚠ SAYIM TUZAĞI, tekrarlanırsa dikkat: JS'te 'İ'.toLowerCase() düz 'i'
+    // vermiyor, BİRLEŞİK NOKTALI i veriyor (i + U+0307). İlk sayımda İ ile
+    // başlayan türler eksik çıktı — İstavrit 3/6 göründü, oysa 6/6. Türkçe
+    // normalizasyon yapılmadan yapılan sayıma güvenilmez.
+    'kefal',     // 6/6 · ALTI KAYNAK DA SAYDI. Forum: "en çok yem olarak
+                 //       kullanılan kuşkusuz kefaldir". Hava kesesi sayesinde
+                 //       saatlerce canlı kalıyor — canlı yemde belirleyici olan bu.
+    'izmarit',   // 4/6 · ÇİFT ROL (aşağıdaki nota bak)
+    'isparoz',   // 4/6 · ÇİFT ROL. Forum takma tekniğini bile anlatıyor: 10-15 cm,
+                 //       sırtın üst köşesinden tek iğne, kilit bağı YOK.
+    'uskumru',   // 3/6 · SAHİBİN GEREKÇESİ: eti yağlı ve kokulu olduğu için
+                 //       uzaktaki büyük balığın dikkatini hızla çekiyor; sudaki
+                 //       enerjik hareketi saldırı içgüdüsünü tetikliyor.
+                 //       Hedef: akya, orkinos, lüfer, kofana, sarıkanat.
+                 //       (kolyoz zaten listedeydi, uskumru boşta kalmıştı)
 ]);
+// ── DIŞARIDA BIRAKILANLAR — oy aldılar ama girmediler ──────────────────
+// SAHİBİN KARARI:
+//   karagöz (3/6) → "tercih edilmiyor"
+//   barbun  (3/6) → yem olarak kullanımı ikna edici bulunmadı
+//   sarpa   (1/6) → kaynağın kendisi eliyor: "çabuk öldüğü için tercih edilmiyor"
+//
+// YASAL SEBEPLE ELENDİ — bu küme uygulamada "canlı yem fırsatı" uyarısını
+// tetikliyor; buraya konsa uygulama kullanıcıya SUÇ TAVSİYE EDERDİ:
+//   palamut/orkinos yavrusu, "tombik" → orkinos kotaya ve korumaya tabi
+//   çinekop / küçük lüfer             → lüferin yasal boyu var
+//   küçük levrek                      → yasal boy altı levrek yem yapılamaz
+// Bunları öneren AI'lar Türkiye mevzuatını bilmiyor. Oy çokluğu tek başına
+// yeterli değil — bu kümede yasa her zaman oyu yener.
+//
+// KAPSAM DIŞI: tatlı su türleri (turna, sazan, yayın, alabalık) — uygulama
+// dört denizle sınırlı. Omurgasızlar (teke, sülünez, boru kurdu, mamun,
+// kalamar, yengeç) ayrı iş; bunlar tür kümesine değil, species.js içindeki
+// advice.bait alanına ait.
+//
+// ⚠ KEFAL'İN YAN ETKİSİ: aşağıdaki `avci` seçimi `!yemBaligiMi(...)` diyor,
+// yani kefal artık "peşine düşülecek avcı" olarak SEÇİLEMİYOR. İstenen
+// davranış bu ("kefal yakala, kefalle kefal tut" saçma olurdu) ama kefalin
+// baskın olduğu noktalarda uyarı bir alt türe kayacak. Bilinerek böyle.
 /** İğnedeki yemi soyup kaçan tür mü? Bilinmeyen anahtar FALSE. */
 function yemHirsiziMi(key) {
     return YEM_HIRSIZI.has(key);
