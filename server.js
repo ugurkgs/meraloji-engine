@@ -1910,6 +1910,95 @@ async function fetchChlorophyll(lat, lon) {
  * kendiliğinden yeniden denenir; ayrıca arka plan tazelemesi (aşağıda) başarılı
  * olursa null'ın üstüne gerçek değeri yazar.
  */
+// ═══════════════════════════════════════════════════════════════════════
+// SST FÜZYONU — ters-varyans ağırlıklandırma
+//
+// ESKİDEN SERT ANAHTAR VARDI: uydu geldiyse tamamen uydu, gelmediyse tamamen
+// Open-Meteo. İki bağımsız ölçümden biri her seferinde çöpe atılıyordu ve
+// kaynak değiştikçe aynı noktanın su sıcaklığı zıplıyordu.
+//
+// ÖLÇÜLDÜ (6 gerçek kullanıcı noktası, 2026-08-29):
+//   ortalama mutlak fark 1,17 °C · en büyük 3,44 °C
+// Balıkçı suyun sıcaklığını bilir; bu fark görünür.
+//
+// FİKİR: her ölçümü KENDİ BELİRSİZLİĞİYLE ağırlıklandır. Ağırlık = 1/varyans.
+// Belirsizlikler uydurulmuyor, ikisi de elimizdeki veriden geliyor:
+//   • uydu     → piksellerin dağılımı, piksel sayısı, kaç gün bayat olduğu
+//   • Open-Meteo → ızgara düğümünün tıklanan noktaya uzaklığı (gridDistanceKm)
+//
+// KALMAN DEĞİL, BİLEREK: Kalman zaman içinde durum taşır ve her ızgara hücresi
+// için kalıcı hafıza ister. Bu sunucu istek başına durumsuz, NodeCache her
+// dağıtımda ölüyor. Aynı ANDA iki ölçümü birleştirmek için ters-varyans yeter
+// ve durum tutmaz. Zamansal takip istenirse üstüne Kalman kurulabilir.
+//
+// ⚠ TABAN SABİTLER BAŞLANGIÇ DEĞERİDİR, ölçümle ayarlanmalı. Yapı sağlam
+// (iki terim gerçek veriden geliyor) ama tabanlar fiziksel akıl yürütmeyle
+// kondu. [SST-FÜZE] logu her birleştirmeyi yazıyor; birkaç gün sonra gerçek
+// veriyle yeniden bakılmalı.
+// ═══════════════════════════════════════════════════════════════════════
+
+/** VIIRS L3 alet/algoritma tabanı (°C). */
+const SST_UYDU_TABAN = 0.40;
+/** Uydunun bayatlığı başına eklenen belirsizlik (°C/gün). */
+const SST_UYDU_GUNLUK = 0.20;
+/** Open-Meteo model tabanı (°C) — ~10 km ızgara, kıyıda model sapması. */
+const SST_OM_TABAN = 0.80;
+/** Izgara düğümü uzaklığı başına belirsizlik (°C/km) — kıyıda SST gradyanı. */
+const SST_OM_KM = 0.10;
+/**
+ * Az piksel = kirlenme şüphesi. Bu sayının altında ceza büyür.
+ *
+ * 9 KEYFİ DEĞİL, GEOMETRİK TAVAN: sorgu kutusu ±0.05° (0,1° kenar), VIIRS
+ * çözünürlüğü 0.0375° → 0,1/0,0375 = 2,67 → en fazla 3×3 = 9 piksel.
+ * Ölçümle de doğrulandı: açık havada İzmir ve Antalya tam 9 döndürdü.
+ *
+ * İLK YAZIMDA 20 KONMUŞTU VE YANLIŞTI — ulaşılamayan bir eşik, yani ceza
+ * bulutsuz günde bile sonuna kadar açık kalıyordu ve uydu hiçbir zaman hak
+ * ettiği ağırlığı alamıyordu (ölçüldü: altı noktada da uydu payı %23-41).
+ * Kutu büyütülürse bu sayı da büyütülmeli.
+ */
+const SST_YETERLI_PIKSEL = 9;
+
+/**
+ * İki SST ölçümünü belirsizlikleriyle birleştirir.
+ *
+ * @param {{deger:number,piksel:number,sapma:number,gunFark:number}} uydu
+ * @param {number} omDeger      Open-Meteo SST
+ * @param {number} izgaraKm     ızgara düğümünün tıklanan noktaya uzaklığı
+ * @returns {{deger:number, sigma:number, uyduAgirlik:number}}
+ */
+function sstBirlestir(uydu, omDeger, izgaraKm, logUser = null) {
+    // Ortalamanın standart hatası — ÖLÇÜLEN belirsizlik, varsayım değil.
+    const sem2 = uydu.piksel > 1 ? (uydu.sapma * uydu.sapma) / uydu.piksel : 0;
+
+    // Piksel cezası DOĞRUSAL DEĞİL: 3 piksel 20 pikselin 6/7'si kadar kötü
+    // değil, çok daha kötü. Bulut kenarı ve kara sızıntısı orada oluyor ve
+    // bunlar gürültü değil YANLILIK üretiyor.
+    // Katsayı 0.25: tavan 9 piksel olduğu için eksik en fazla ~8 olabiliyor.
+    // 3 pikselde ceza (6×0.25)² = 2,25 °C² — uydu payını %22'ye indirir.
+    // 9 pikselde ceza 0 — uydu payı %76'ya çıkar. İkisi de istenen davranış.
+    const eksik = Math.max(0, SST_YETERLI_PIKSEL - uydu.piksel);
+    const pikselCeza = Math.pow(eksik * 0.25, 2);
+
+    const bayatlik = Math.pow(uydu.gunFark * SST_UYDU_GUNLUK, 2);
+    const varUydu = SST_UYDU_TABAN * SST_UYDU_TABAN + sem2 + pikselCeza + bayatlik;
+    const varOm   = SST_OM_TABAN * SST_OM_TABAN + Math.pow((izgaraKm || 0) * SST_OM_KM, 2);
+
+    const wU = 1 / varUydu, wO = 1 / varOm;
+    const deger = (uydu.deger * wU + omDeger * wO) / (wU + wO);
+    const uyduAgirlik = wU / (wU + wO);
+
+    const u = logUser ? ` [${logUser}]` : '';
+    console.log(`[SST-FÜZE]${u} uydu ${uydu.deger.toFixed(2)}°C (${uydu.piksel}px, ${uydu.gunFark}g, σ${Math.sqrt(varUydu).toFixed(2)}) `
+        + `+ OM ${omDeger.toFixed(2)}°C (${(izgaraKm || 0).toFixed(1)}km, σ${Math.sqrt(varOm).toFixed(2)}) `
+        + `→ ${deger.toFixed(2)}°C  (uydu payı %${Math.round(uyduAgirlik * 100)})`);
+
+    return { deger: parseFloat(deger.toFixed(2)), sigma: Math.sqrt(1 / (wU + wO)), uyduAgirlik };
+}
+
+/** Bugün ölçülen kaynak farkının sonraki günlere taşınma oranı. */
+const SST_SAPMA_SONUMU = 0.7;
+
 async function fetchSatelliteSST(lat, lon, logUser = null, timeoutMs = 2000) {
     const key = 's_' + parseFloat(lat).toFixed(2) + '_' + parseFloat(lon).toFixed(2);
     const hit = sstSatCache.get(key);
@@ -1935,7 +2024,7 @@ function refreshSatelliteSSTInBackground(lat, lon, logUser = null, forecastCache
         .then(val => {
             if (val !== null) {
                 sstSatCache.set(key, val, 10800);
-                console.log(`[SST-BG] ${lat},${lon} arka planda geldi: ${val}°C — önbelleğe yazıldı`);
+                console.log(`[SST-BG] ${lat},${lon} arka planda geldi: ${val.deger}°C (${val.piksel} piksel) — önbelleğe yazıldı`);
 
                 // [4.9 devamı] SST'yi önbelleğe yazmak TEK BAŞINA YETMEZ.
                 // Forecast yanıtı da ayrı bir kayıtta 3 saat duruyor (cacheKey) ve o
@@ -2013,9 +2102,27 @@ async function _fetchSatelliteSSTBase(lat, lon, logUser = null, timeoutMs = 2000
         const values = latestRows.map(r => r[4]);
         const avg = values.reduce((a, b) => a + b, 0) / values.length;
 
+        // [FÜZYON 2026-08-29] Ortalamanın YANINDA belirsizlik göstergeleri de
+        // döndürülüyor. Eskiden yalnız `avg` dönüyordu ve 3 pikselli bir okuma
+        // 26 pikselli bir okumayla AYNI muameleyi görüyordu.
+        //
+        // Ölçüldü (6 kıyı noktası, 2026-08-29): uydu ile Open-Meteo arasındaki
+        // ortalama mutlak fark 1,17 °C, en büyüğü 3,44 °C — ve en büyük sapmalar
+        // en az pikselli okumalarda. Az piksel yalnız gürültü değil, KİRLENME
+        // işareti: bulut kenarı ve kara sızıntısı tam orada oluyor.
+        //   Mersin  5 px → fark +0,04     Zonguldak 3 px → fark +3,44
+        const sapma = values.length > 1
+            ? Math.sqrt(values.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / (values.length - 1))
+            : 0;
+        // Uydu kaç gün bayat — SST günler içinde değişir, eski kare az güvenilir.
+        const gunFark = Math.max(0,
+            Math.round((Date.now() - new Date(latestDate + 'T12:00:00Z').getTime()) / 86400000));
+
         const u = logUser ? ` [${logUser}]` : '';
-        console.log(`[SST-SAT]${u} ${latestDate}: ${avg.toFixed(2)}°C (${values.length} piksel)`);
-        return parseFloat(avg.toFixed(2));
+        console.log(`[SST-SAT]${u} ${latestDate}: ${avg.toFixed(2)}°C (${values.length} piksel, sapma ${sapma.toFixed(2)}, ${gunFark} gün önce)`);
+        // NESNE dönüyor, sayı değil. Tüketiciler `.deger` okuyor; null kontrolleri
+        // aynen çalışıyor (null ya da nesne).
+        return { deger: parseFloat(avg.toFixed(2)), piksel: values.length, sapma, gunFark };
     } catch (e) {
         const u = logUser ? ` [${logUser}]` : '';
         console.log(`[SST-SAT]${u} NOAA fetch failed:`, e.message);
@@ -6837,7 +6944,7 @@ app.get('/api/forecast', async (req, res) => {
         // sstSat null ise (bulutlu gün / timeout) Open-Meteo SST kullanılır.
         const sstSat = sstSatPre; // Artık yukarıda paralel çekildi — await gerekmez
         if (sstSat !== null) {
-            console.log(`[SST] [${logUser}] Uydu SST kullanılıyor: ${sstSat}°C`);
+            console.log(`[SST] [${logUser}] Uydu SST var: ${sstSat.deger}°C (${sstSat.piksel} piksel) — Open-Meteo ile birleştirilecek`);
         } else {
             console.log(`[SST] [${logUser}] Uydu SST yok — Open-Meteo SST'ye düşülüyor`);
         }
@@ -6847,6 +6954,10 @@ app.get('/api/forecast', async (req, res) => {
         // Eski kod sadece bugün (i===0) için hesaplıyordu, 6 gün null kalıyordu.
         // hourlyPressure referansı döngüde kullanılmak üzere burada tanımlanıyor.
         const hourlyPressureData = weather.hourly?.surface_pressure || null;
+
+        // [FÜZYON] Bugün ölçülen uydu-model farkı. i===0'da doldurulur, sonraki
+        // günlerde sönerek uygulanır. Uydu yoksa 0 kalır → eski davranış.
+        let sstFuzeSapma = 0;
 
         const forecast = [];
 
@@ -7046,13 +7157,37 @@ app.get('/api/forecast', async (req, res) => {
             }
 
             const rawWaterTemp = marine.hourly?.sea_surface_temperature?.[marineHourlyIdx];
-            // SST öncelik: NOAA uydu (~1km) → Open-Meteo (~10km) → bölgesel default
-            // sstSat sadece bugün için geçerli — gelecek günler Open-Meteo SST kullanır
-            let tempWater = isLand ? 0 : (
-                (i === 0 && sstSat !== null)
-                    ? sstSat
-                    : safeWaterTemp(rawWaterTemp, regionName, targetDate.getMonth())
-            );
+
+            // [FÜZYON 2026-08-29] SERT ANAHTAR KALDIRILDI.
+            //
+            // Eskiden: uydu varsa TAMAMEN uydu, yoksa TAMAMEN Open-Meteo. İki
+            // sorun üretiyordu:
+            //   1) Aynı noktada kaynak değişince sıcaklık zıplıyordu. 5 günlük
+            //      pencerede %42 bulut boşluğu ölçüldü, yani anahtar sürekli
+            //      gidip geliyor.
+            //   2) `i === 0` koşulu yüzünden BUGÜN uydu, YARIN Open-Meteo idi.
+            //      Kullanıcı "bugün 24,2 — yarın 26,3" görüp gerçek bir ısınma
+            //      sanıyordu; oysa fizik değil, kaynak değişimi.
+            //
+            // Artık bugün iki kaynak birleştiriliyor; aradaki fark (sapma)
+            // sonraki günlere SÖNEREK taşınıyor. Sönüm bilinçli: bugünkü model
+            // sapması yarın da benzer olma eğilimindedir ama garanti değildir.
+            //
+            // Uydu yoksa sstFuzeSapma 0 kalır ve davranış eskisiyle BİREBİR aynı olur.
+            let tempWater;
+            if (isLand) {
+                tempWater = 0;
+            } else {
+                const omDeger = safeWaterTemp(rawWaterTemp, regionName, targetDate.getMonth());
+                if (i === 0 && sstSat !== null) {
+                    const fuze = sstBirlestir(sstSat, omDeger, gridDistanceKm, logUser);
+                    tempWater = fuze.deger;
+                    sstFuzeSapma = fuze.deger - omDeger;
+                } else {
+                    tempWater = parseFloat(
+                        (omDeger + sstFuzeSapma * Math.pow(SST_SAPMA_SONUMU, i)).toFixed(2));
+                }
+            }
 
             // [SANITY CHECK] Kutup bölgelerinde (Lat > 60) hatalı yüksek su sıcaklığı filtresi
             if (parseFloat(lat) > 60 && tempWater > 12) {
