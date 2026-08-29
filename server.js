@@ -201,11 +201,11 @@ const SERVER_i18n = {
                 firsatMetin: (tur, skor, avci, avciSkor) =>
                     `${tur} %${skor} — çapariyle birkaç tane tutup iri iğneye canlı takmayı deneyebilirsiniz. Bölgede ${avci} %${avciSkor}.`,
                 tavsiye: {
-                    kucukAgiz: 'Yemi bağlayın veya iğneyi büyütün',
-                    sertGaga: 'Sert gagalı tür: Çelik köstek kullanmalısınız',
-                    gagalar: 'Yem hırsızı: Yemi iple bağlamalısınız',
-                    sertYem: 'Sert yemleri tercih edebilirsiniz',
-                    bolYem: 'Normalden fazla yem almalısınız',
+                    kucukAgiz: 'Yemi sağlam bağlayın veya büyük iğne deneyin',
+                    sertGaga: 'Sert gagalı türlerde çelik köstek deneyin',
+                    gagalar: 'Yem hırsızı: Yemi iple sıkıca bağlayın',
+                    sertYem: 'Sert yem kullanın: madya, kalamar veya uskumru',
+                    bolYem: 'Yeminiz tükenebilir, yanınıza ekstra yem alın',
                 },
             },
         notification: {
@@ -398,11 +398,11 @@ const SERVER_i18n = {
                 firsatMetin: (tur, skor, avci, avciSkor) =>
                     `${tur} at ${skor}% — you could catch a few on a sabiki and try one live on a bigger hook. ${avci} at ${avciSkor}% nearby.`,
                 tavsiye: {
-                    kucukAgiz: 'Bind the bait on, or go up a hook size',
-                    sertGaga: 'Hard-beaked species: use a wire trace',
-                    gagalar: 'Bait pickers: bind the bait with thread',
-                    sertYem: 'Tougher bait may serve you better',
-                    bolYem: 'Bring more bait than usual',
+                    kucukAgiz: 'Tie the bait on firmly or try a bigger hook',
+                    sertGaga: 'For hard-beaked species, try a wire trace',
+                    gagalar: 'Bait thief: bind the bait tightly with thread',
+                    sertYem: 'Use tougher bait: murex, squid or mackerel',
+                    bolYem: 'Your bait may run out, bring extra with you',
                 },
             },
         notification: {
@@ -595,11 +595,11 @@ const SERVER_i18n = {
                 firsatMetin: (tur, skor, avci, avciSkor) =>
                     `${tur} al ${skor}% — podrías capturar algunos con sabiki y probar uno vivo en un anzuelo grande. ${avci} al ${avciSkor}% en la zona.`,
                 tavsiye: {
-                    kucukAgiz: 'Ata el cebo o sube de tamaño de anzuelo',
-                    sertGaga: 'Especie de pico duro: usa cable de acero',
-                    gagalar: 'Picoteadores: ata el cebo con hilo',
-                    sertYem: 'Un cebo más duro puede convenirte',
-                    bolYem: 'Lleva más cebo de lo normal',
+                    kucukAgiz: 'Ata bien el cebo o prueba un anzuelo mayor',
+                    sertGaga: 'En especies de pico duro, prueba cable de acero',
+                    gagalar: 'Ladrón de cebo: ata el cebo firme con hilo',
+                    sertYem: 'Usa cebo duro: cañadilla, calamar o caballa',
+                    bolYem: 'Tu cebo puede acabarse, lleva de más',
                 },
             },
         notification: {
@@ -792,11 +792,11 @@ const SERVER_i18n = {
                 firsatMetin: (tur, skor, avci, avciSkor) =>
                     `${tur} στο ${skor}% — μπορείτε να πιάσετε μερικά με σαμπίκι και να δοκιμάσετε ένα ζωντανό σε μεγάλο αγκίστρι. ${avci} στο ${avciSkor}% στην περιοχή.`,
                 tavsiye: {
-                    kucukAgiz: 'Δέστε το δόλωμα ή βάλτε μεγαλύτερο αγκίστρι',
-                    sertGaga: 'Είδος με σκληρό ράμφος: βάλτε ατσαλόσυρμα',
-                    gagalar: 'Τσιμπολογούν: δέστε το δόλωμα με κλωστή',
-                    sertYem: 'Ένα πιο σκληρό δόλωμα ίσως σας βολέψει',
-                    bolYem: 'Πάρτε περισσότερο δόλωμα από το συνηθισμένο',
+                    kucukAgiz: 'Δέστε καλά το δόλωμα ή βάλτε μεγαλύτερο αγκίστρι',
+                    sertGaga: 'Σε είδη με σκληρό ράμφος, βάλτε ατσαλόσυρμα',
+                    gagalar: 'Κλέφτης δολώματος: δέστε σφιχτά με κλωστή',
+                    sertYem: 'Σκληρό δόλωμα: πορφύρα, καλαμάρι ή σκουμπρί',
+                    bolYem: 'Το δόλωμα ίσως τελειώσει, πάρτε παραπάνω',
                 },
             },
         notification: {

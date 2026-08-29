@@ -74,26 +74,26 @@ Her uyarıda **3 madde** görünür: önce türün ağız yapısına göre biri 
 
 ### 3a) Küçük ağızlı türler (izmarit, aterin, isparoz, kupes, hani, lokum)
 
-> İğneyi büyütmek, küçük ağızlı balıkların yemi almasını zorlaştırabilir
+> Yemi sağlam bağlayın veya büyük iğne deneyin
 
 ### 3b) Sert gagalı tür (çütre)
 
 Bu türün sorunu ağız değil; misinayı kesiyor. O yüzden ona "iğneyi büyüt"
 denmiyor.
 
-> Çelik köstek düşünebilirsiniz — misinayı kesebiliyorlar
+> Sert gagalı türlerde çelik köstek deneyin
 
 ### 3c) Gagalayarak didikleyen türler (sarpa, lapin)
 
-> Yemi iplikle bağlamak, daha uzun dayanmasına yardımcı olabilir
+> Yem hırsızı: Yemi iple sıkıca bağlayın
 
 ### 3d) Her hırsız uyarısında çıkar
 
-> Sert yem tercih etmek işinize yarayabilir: kalamar veya uskumru fileto
+> Sert yem kullanın: madya, kalamar veya uskumru
 
 ### 3e) Her hırsız uyarısında çıkar
 
-> Yanınıza normalden fazla yem almak iyi bir fikir olabilir
+> Yeminiz tükenebilir, yanınıza ekstra yem alın
 
 ---
 

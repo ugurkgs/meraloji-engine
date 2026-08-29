@@ -99,7 +99,7 @@ const SPECIES_DB = {
         peakHoursDesc: "22:00 - 03:00 arası en aktif",
         peakHoursDescEn: "Most active between 22:00 - 03:00", peakHoursDescEl: "Πιο δραστήρια μεταξύ 22:00 και 03:00", peakHoursDescEs: "Consultar detalles",
         tempRange: { min: 12, opt: 18, max: 27 },
-        seasons: { winter: 0.30, spring: 0.75, summer: 0.80, autumn: 0.40 },
+        seasons: { winter: 0.70, spring: 0.45, summer: 0.35, autumn: 0.90 },  // [2026-08-29] yaz zirvesi -> sonbahar. Eski yaz 0.80 tam olarak YUMURTLAMA donemine denk geliyordu (mayis sonu - agustos sonu). Saha balikcisi Eylul-Aralik basi diyor, tezgah takvimi Ekim-Ocak.
         activity: "NIGHT",
         pressureSensitivity: 0.6,
         wavePref: 0.5, clarityPref: "MODERATE",
@@ -586,7 +586,7 @@ const SPECIES_DB = {
         huntingMode: "visual",
         peakHours: "DAY", peakHoursDesc: "Gündüz kayalık dipte, bahar üreme döneminde sürüleşir", peakHoursDescEn: "Daytime rocky bottom; schools in spring", peakHoursDescEl: "Daytime rocky bottom; schools in spring", peakHoursDescEs: "Durante el día",
         tempRange: { min: 13, opt: 18, max: 27 },
-        seasons: { winter: 0.45, spring: 0.70, summer: 0.80, autumn: 0.65 },
+        seasons: { winter: 0.50, spring: 0.50, summer: 0.80, autumn: 0.90 },  // [2026-08-29] sonbahar yazin ustune alindi, ilkbahar dusuruldu. Kaynak: zirve Agustos-Kasim, yumurtlama Nisan-Temmuz. Agustos guclu kalsin diye yaz 0.80 korundu.
         activity: "DAY",
         pressureSensitivity: 0.6,
         wavePref: 0.5, clarityPref: "MODERATE",
@@ -783,7 +783,7 @@ const SPECIES_DB = {
         
         huntingMode: "filter",peakHours: "DAY", peakHoursDesc: "Sabah erken, lagün ve kıyı", peakHoursDescEn: "Early morning, lagoon and shore", peakHoursDescEl: "Early morning, lagoon and shore", peakHoursDescEs: "Durante el día",
         tempRange: { min: 10, opt: 18, max: 26 },
-        seasons: { winter: 0.45, spring: 0.70, summer: 0.80, autumn: 0.60 },
+        seasons: { winter: 0.55, spring: 0.55, summer: 0.60, autumn: 0.85 },  // [2026-08-29] sonbahar zirveye alindi. Izmir av takvimi Eyl-Eki, kitabin duzyazisi 'mavraki, sarikulak ve ceran icin Aralik ayina kadar'. Kanit ayni kaynaktan geldigi icin degisim otekilerden DAHA ILIMLI tutuldu.
         activity: "DAY",
         pressureSensitivity: 0.4,
         wavePref: 0.3, clarityPref: "TURBID",
@@ -795,6 +795,44 @@ const SPECIES_DB = {
         legalSize: "30 cm", legalSizeEn: "30 cm", legalSizeEs: "30 cm", legalSizeEl: "30 εκ.",
         note: "Solungaç kapağındaki sarı lekeyle tanınır. Lagün sever.",
         noteEn: "Identified by yellow spot on gill cover. Likes lagoons.", noteEl: "Identified by yellow spot on gill cover. Likes lagoons.", noteEs: "Identified by yellow spot on gill cover. Likes lagoons."
+    },
+    "ceran": {
+        name: "Ceran Kefal", nameEn: "Thinlip Grey Mullet", nameEl: "Μαυράκι", nameEs: "Morragute", icon: "🐟", scientificName: "Chelon ramada",
+        category: "LAGUN",
+
+        huntingMode: "filter",peakHours: "DAY", peakHoursDesc: "Gündüz; liman içleri ve nehir ağzı, gece de verir", peakHoursDescEn: "Daytime; harbours and river mouths, also productive at night", peakHoursDescEl: "Ημέρα· λιμάνια και εκβολές, αποδίδει και τη νύχτα", peakHoursDescEs: "De día; puertos y desembocaduras, también de noche",
+        tempRange: { min: 10, opt: 16, max: 24 },
+        seasons: { winter: 0.65, spring: 0.50, summer: 0.35, autumn: 0.85 },
+        activity: "DAY",
+        pressureSensitivity: 0.4,
+        wavePref: 0.25, clarityPref: "TURBID",
+        currentPref: 0.35,
+        salinityPref: "LOW",
+        regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
+        depth: { min: 0, opt: 4, max: 15 },
+        advice: { bait: "Ekmek İçi, Kıbrıs Sarma", lure: "Yok", rig: "Kıbrıs Takımı, Şamandıralı", hook: "6 - 10", baitEn: "Bread dough, Cypriot rig bait", baitEl: "Bread dough, Cypriot rig bait", baitEs: "Pan Masa, Cypriot rig bait", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Cypriot rig, float", rigEl: "Cypriot rig, float", rigEs: "Cypriot rig, flotador", hookEn: "6 - 10", hookEl: "6 - 10", hookEs: "6 - 10" },
+        legalSize: "30 cm", legalSizeEn: "30 cm", legalSizeEs: "30 cm", legalSizeEl: "30 εκ.",
+        note: "Dişsizdir, yemi emerek alır — şamandıra ilk titrediğinde değil, hareketlenip gittiğinde çekilir. Liman içlerini ve çamurlu suyu sever, nehirlerde yukarı çıkar. Geç sonbahar balığıdır.",
+        noteEn: "Toothless — it sucks the bait in, so strike when the float moves off, not on the first bob. Favours harbours and muddy water, and runs well up rivers. A late-autumn fish.", noteEl: "Χωρίς δόντια — ρουφάει το δόλωμα, γι' αυτό τραβήξτε όταν φύγει ο φελλός, όχι στο πρώτο τίναγμα. Προτιμά λιμάνια και θολά νερά. Ψάρι του όψιμου φθινοπώρου.", noteEs: "Sin dientes — succiona el cebo, así que clave cuando el flotador se desplace, no al primer temblor. Prefiere puertos y aguas turbias. Pez de finales de otoño."
+    },
+    "mavraki": {
+        name: "Mavraki Kefal", nameEn: "Thicklip Grey Mullet", nameEl: "Βελάνιτσα", nameEs: "Lisa de labio grueso", icon: "🐟", scientificName: "Chelon labrosus",
+        category: "LAGUN",
+
+        huntingMode: "filter",peakHours: "DAY", peakHoursDesc: "Gündüz, liman içleri ve lagün ağzı", peakHoursDescEn: "Daytime, harbours and lagoon mouths", peakHoursDescEl: "Daytime, harbours and lagoon mouths", peakHoursDescEs: "Durante el día",
+        tempRange: { min: 10, opt: 17, max: 25 },
+        seasons: { winter: 0.70, spring: 0.55, summer: 0.40, autumn: 0.80 },
+        activity: "DAY",
+        pressureSensitivity: 0.4,
+        wavePref: 0.3, clarityPref: "TURBID",
+        currentPref: 0.3,
+        salinityPref: "LOW",
+        regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
+        depth: { min: 0, opt: 4, max: 20 },
+        advice: { bait: "Ekmek İçi, Kıbrıs Sarma", lure: "Yok", rig: "Kıbrıs Takımı, Şamandıralı", hook: "6 - 10", baitEn: "Bread dough, Cypriot rig bait", baitEl: "Bread dough, Cypriot rig bait", baitEs: "Pan Masa, Cypriot rig bait", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Cypriot rig, float", rigEl: "Cypriot rig, float", rigEs: "Cypriot rig, flotador", hookEn: "6 - 10", hookEl: "6 - 10", hookEs: "6 - 10" },
+        legalSize: "30 cm", legalSizeEn: "30 cm", legalSizeEs: "30 cm", legalSizeEl: "30 εκ.",
+        note: "Kalın üst dudağından tanınır. Sonbahar ve kış balığıdır; lagün kapanınca dalyan ağzında toplanır.",
+        noteEn: "Recognised by its thick upper lip. An autumn and winter fish that gathers at lagoon mouths.", noteEl: "Recognised by its thick upper lip. An autumn and winter fish that gathers at lagoon mouths.", noteEs: "Recognised by its thick upper lip. An autumn and winter fish that gathers at lagoon mouths."
     },
     // ═══════════════════════════════════════════════════════════════════════════
     // YENİ EKLENEN TÜRLER - v2.4
@@ -900,7 +938,7 @@ const SPECIES_DB = {
         shoreMonths: [], // kıyıya yaklaşma ayları (0=Ocak)
         peakHours: "DAY", peakHoursDesc: "Sabah/Akşam", peakHoursDescEn: "Morning/Evening", peakHoursDescEl: "Morning/Evening", peakHoursDescEs: "Durante el día",
         tempRange: { min: 8, opt: 16, max: 22 },
-        seasons: { winter: 0.60, spring: 0.85, summer: 0.40, autumn: 0.75 },
+        seasons: { winter: 0.85, spring: 0.40, summer: 0.35, autumn: 0.90 },  // [2026-08-29] ilkbahar zirvesi -> sonbahar. Eski deger ilkbahari 0.85 ile en yuksek yapiyordu; ilkbahar-yaz uskumrunun GOC ve UREME donemi. Kaynaklar (av takvimi + tuketim takvimi) Eylul-Subat'i isaret ediyor.
         monthlyActivity: [0.55, 0.5, 0.7, 0.85, 0.9, 0.4, 0.3, 0.35, 0.6, 0.8, 0.75, 0.6],
         activity: "DAY",
         pressureSensitivity: 0.5,
