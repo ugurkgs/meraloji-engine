@@ -1872,6 +1872,47 @@ const SPECIES_DB = {
         noteEn: "Small predator in rocky areas.", noteEl: "Small predator in rocky areas.", noteEs: "Small predator in rocky areas."
     },
 
+    // [2026-08-29] Sahibin isteğiyle eklendi. Türkiye kıyısının en yaygın
+    // kayalık balıklarından; hem YEM HIRSIZI olarak bilinir hem de lahos,
+    // orfoz, sinağrit, akya gibi iri avcılar için birinci sınıf CANLI YEM.
+    // İkinci rolü sebebiyle server.js'te YEM_BALIGI kümesine de yazıldı.
+    //
+    // ⚠ SAYILARIN GÜVENİ: tür seçimi, yaşam alanı, davranışı ve iki rolü
+    // sağlam. tempRange/seasons/depth sayıları ise Akdeniz-Karadeniz kıyı
+    // gözleminden TÜRETİLDİ, hakemli kaynaktan alınmadı — levrek kaydındaki
+    // gibi literatür referansı YOK. Ölçüm geldiğinde düzeltilebilir.
+    "horozbina": {
+        name: "Horozbina", nameEn: "Rusty Blenny", nameEl: "Σαλιάρα", nameEs: "Blenio", icon: "🐟", scientificName: "Parablennius sanguinolentus",
+        category: "KAYALIK",
+        huntingMode: "visual",
+        peakHours: "DAY", peakHoursDesc: "Gündüz, kayalık sığlıkta", peakHoursDescEn: "Daytime, on shallow rocky ground", peakHoursDescEl: "Την ημέρα, σε ρηχά βραχώδη", peakHoursDescEs: "De día, en rocas someras",
+        // Karadeniz'den Akdeniz'e dört denizde de yaşıyor; geniş toleranslı.
+        // min 8: Karadeniz kışı (7,5-8°C) kapıyı kapatmasın — levrek kaydında
+        // aynı gerekçeyle aynı düzeltme yapılmıştı.
+        tempRange: { min: 8, opt: 22, max: 28 },
+        seasons: { winter: 0.35, spring: 0.70, summer: 0.95, autumn: 0.75 },
+        activity: "DAY",
+        // Sığ kayalıkta yaşayan yerleşik bir tür; basınç değişimine avcı
+        // balıklar kadar tepki vermiyor.
+        pressureSensitivity: 0.15,
+        // Dalga kuşağında, kayaya yapışık yaşıyor — çoğu türden dalgaya toleranslı.
+        wavePref: 0.7, clarityPref: "CLEAR",
+        currentPref: 0.3,
+        // Karadeniz (~18 psu) ile Akdeniz (~39 psu) arasında yaşıyor: geniş tuzluluk.
+        salinityPref: "MEDIUM",
+        regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
+        // min 0 BİLEREK: bilek hizası suda, kaya oyuklarında bulunur. min 1
+        // olsaydı server.js'teki "imkânsız derinlik" dalı (d < min/2) sığ
+        // noktalarda skoru ×0.05 ile sıfırlardı — lapin kaydında yaşanan hata.
+        depth: { min: 0, opt: 2, max: 10 },
+        advice: { bait: "Ekmek içi, midye, karides", lure: "LRF silikon", rig: "LRF / şamandıralı", hook: "No:10-14", baitEn: "Breadcrumb, mussel, shrimp", baitEl: "Ψίχα ψωμιού, μύδι, γαρίδα", baitEs: "Miga de pan, mejillón, camarón", lureEn: "LRF soft plastic", lureEl: "LRF σιλικόνη", lureEs: "Vinilo LRF", rigEn: "LRF / float", rigEl: "LRF / με φελλό", rigEs: "LRF / con flotador", hookEn: "No:10-14", hookEl: "No:10-14", hookEs: "No:10-14" },
+        legalSize: "-", legalSizeEn: "-", legalSizeEs: "-", legalSizeEl: "-",
+        note: "Kayalık sığlıkta yaşar, yemi didikler. Kendisi hedef değildir ama lahos ve akya için aranan canlı yemdir.",
+        noteEn: "Lives on shallow rocky ground and nibbles bait. Not a target itself, but a sought-after live bait for grouper and amberjack.",
+        noteEl: "Ζει σε ρηχά βραχώδη και τσιμπάει το δόλωμα. Δεν είναι στόχος, αλλά περιζήτητο ζωντανό δόλωμα για ροφό και μαγιάτικο.",
+        noteEs: "Vive en rocas someras y picotea el cebo. No es objetivo, pero es un cebo vivo muy buscado para el mero y la seriola."
+    },
+
     "kizil_kirlangic": {
         name: "Kızıl Kırlangıç", nameEn: "Red Gurnard", nameEl: "Καπόνι κόκκινο", nameEs: "Arete", icon: "🐟", scientificName: "Chelidonichthys cuculus",
         photoId: 66,

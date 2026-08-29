@@ -4653,6 +4653,7 @@ const AV_DEGERI = {
     deniz_ignesi: 0.15,   // Syngnathus acus — tutmaya giden yok
     dulger: 0.15,         // Zeus faber — derin, amatör erişimi sınırlı
     hani: 0.15,           // Serranus cabrilla
+    horozbina: 0.15,      // Parablennius sanguinolentus — yenmez, yem olur
     kikla: 0.15,          // Labrus viridis — ot balığı
     kurbaga: 0.15,        // Uranoscopus scaber — zehirli, yenmez
     lapin: 0.15,          // Labrus spp.
@@ -4772,6 +4773,10 @@ const YEM_BALIGI = new Set([
     'zargana',   // 5/5 · lüfer avında tercih edilen yem
     'zurna',     // 4/5 · İskarmoz — notunda lüfer/kofana yemi yazıyor
     'kolyoz',    // 4/5 · bütün ya da parça yem
+    // [2026-08-29] SAHİBİN KARARI — beş AI oylamasından geçmedi, doğrudan
+    // eklendi. Kayalıkta elle/küçük iğneyle tutulup lahos, orfoz, sinağrit
+    // ve akya için canlı takılır; Türkiye kıyısında yaygın pratik.
+    'horozbina',
 ]);
 /** İğnedeki yemi soyup kaçan tür mü? Bilinmeyen anahtar FALSE. */
 function yemHirsiziMi(key) {
