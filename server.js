@@ -1058,11 +1058,30 @@ function getZoneLabel(depthVal, lang) {
 // [O3] Eski Promise.race yalnızca BEKLEMEYİ bırakıyordu; fetch arkada sürüp soket
 // tutuyordu. AbortController ile istek gerçekten iptal edilir. Hata mesajı yine
 // 'API_TIMEOUT' — çağıranların retry/backoff mantığı birebir aynı çalışır.
+/**
+ * [2026-08-29] USER-AGENT EKLENDI — OLCULEREK BULUNDU.
+ *
+ * Bu islev hicbir baslik gondermiyordu. NOAA CoastWatch (coastwatch.noaa.gov)
+ * UA'siz istegi 403 ile reddediyor:
+ *
+ *   CHL basliksiz  ->  403 · 403 · 403
+ *   CHL UA ile     ->  200 · 200 · 200   (ortalama 317 ms)
+ *
+ * Klorofilin aylardir gelmemesinin sebeplerinden biri buydu. SST sunucusu
+ * (coastwatch.pfeg.noaa.gov) UA istemiyor ve olcumde hiz farki da CIKMADI
+ * (basliksiz 1865 ms, UA ile 1755 ms) — yani bu degisiklik SST'yi
+ * hizlandirmaz, yalnizca klorofilin onunu acar.
+ *
+ * Yedi cagri yerinin hepsine gidiyor (Open-Meteo, EMODnet, GEBCO dahil);
+ * kendini tanitan bir istemci olmak zaten dogru davranis.
+ */
+const ISTEMCI_KIMLIGI = 'Meraloji/1.0 (+https://meraloji.com)';
+
 function fetchWithTimeout(url, timeoutMs = 5000) {
     trackApiUsage(url);
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), timeoutMs);
-    return fetch(url, { signal: ctl.signal })
+    return fetch(url, { signal: ctl.signal, headers: { 'User-Agent': ISTEMCI_KIMLIGI } })
         .finally(() => clearTimeout(timer))
         .catch(e => {
             if (e && (e.name === 'AbortError' || e.code === 'ABORT_ERR')) throw new Error('API_TIMEOUT');
@@ -1833,63 +1852,117 @@ app.use('/api/', limiter);
 // KLOROFİL-A (PLANKTON) VERİSİ — NOAA CoastWatch ERDDAP
 // ═══════════════════════════════════════════════════════════════════════════
 
-async function fetchChlorophyll(lat, lon) {
+// ═══════════════════════════════════════════════════════════════════════
+// KLOROFIL — Copernicus Sentinel-3 OLCI (NOAA CoastWatch ERDDAP uzerinden)
+//
+// [2026-08-29] KULLANILAN VERI KUMESI OLMUSTU. Kullanicinin "skorlar dusuk
+// geliyor" gozlemi buraya cikti. Olculdu (ERDDAP allDatasets katalogu):
+//
+//   noaacwNPPVIIRSchlaDaily   son veri 2026-07-31   29 gun once   OLU
+//   noaacwN20VIIRSchlaDaily   son veri 2026-06-20   70 gun once   OLU
+//   noaacwS3AOLCIchlaDaily    son veri 2026-08-27    2 gun once   CANLI
+//   noaacwS3BOLCIchlaDaily    son veri 2026-08-26    3 gun once   CANLI
+//
+// Her iki VIIRS gercek-zamanli klorofil kumesi de yayin yapmayi birakmis.
+// Yerlerine ayni kuresel 4 km Level-3 urununu veren Sentinel-3 OLCI kondu.
+// Yapi BIREBIR ayni: degisken chlor_a, boyutlar [time][altitude][lat][lon],
+// yani satirdaki deger yine r[4]. Yalniz kimlik degisti.
+//
+// NEDEN ETKILIYORDU: klorofil null olunca (a) guven puani 10 dusuyor
+// (calculateConfidence), (b) planktonPref tasiyan 37 turde plankton bonusu
+// HIC uygulanmiyor — blok `chlorophyll !== null` kosuluna bagli. O 37 tur
+// levrek, lufer, istavrit, kefal, karagoz gibi hedef turler.
+//
+// IKI KUME PARALEL, EN TAZESI SECILIYOR. Sirali olsaydi iki 2 sn'lik cagri
+// 4 sn ederdi; paralelde toplam sure tek cagri kadar. Iki uydu farkli
+// yorungede oldugu icin bulut bosluklari ortusmuyor — kapsama artiyor.
+// Olcum: S3A uc noktada da daha taze (4/2/2 gun) , S3B (9/8/14 gun).
+//
+// PENCERE 30 -> 14 GUN. Olculdu: 14 gun ayni sonucu veriyor ama dort kat
+// hizli ve yari yuk (S3A 317-339 ms / 39 KB, 30 gunde 532-1536 ms / 77 KB).
+// ═══════════════════════════════════════════════════════════════════════
+const CHL_KUMELERI = [
+    { id: 'noaacwS3AOLCIchlaDaily', ad: 'S3A' },
+    { id: 'noaacwS3BOLCIchlaDaily', ad: 'S3B' },
+];
+/** Geriye kac gun bakilacak. Bulutlu gunlerde en son gecerli kare bulunur. */
+const CHL_PENCERE_GUN = 14;
+
+/** Tek bir veri kumesinden klorofil cek. Basarisizsa null — asla firlatmaz. */
+async function _chlKumedenCek(kume, lat, lon, timeoutMs) {
     const latMin = (parseFloat(lat) - 0.1).toFixed(4);
     const latMax = (parseFloat(lat) + 0.1).toFixed(4);
     const lonMin = (parseFloat(lon) - 0.1).toFixed(4);
     const lonMax = (parseFloat(lon) + 0.1).toFixed(4);
 
-    // Son 30 gün — bulutlu günlerde null dönebilir, en son geçerli değeri al
-    const now = new Date();
-    const startDate = new Date(now);
-    startDate.setDate(startDate.getDate() - 30);
-    const start = startDate.toISOString().split('T')[0] + 'T00:00:00Z';
+    const bas = new Date(Date.now() - CHL_PENCERE_GUN * 86400000)
+        .toISOString().split('T')[0] + 'T00:00:00Z';
 
-    const url = `https://coastwatch.noaa.gov/erddap/griddap/noaacwNPPVIIRSchlaDaily.json` +
-        `?chlor_a[(${start}):(last)][(0)][(${latMin}):(${latMax})][(${lonMin}):(${lonMax})]`;
+    // (last) SART: sabit bitis tarihi yazilirsa ERDDAP "stop is greater than
+    // the axis maximum" deyip 404 verir — uydu verisi 1-2 gun gecikmeli gelir.
+    // Ayni tuzak uydu SST'sinde de yasandi (bkz. _fetchSatelliteSSTBase).
+    const url = `https://coastwatch.noaa.gov/erddap/griddap/${kume.id}.json`
+        + `?chlor_a[(${bas}):(last)][(0)][(${latMin}):(${latMax})][(${lonMin}):(${lonMax})]`;
 
     try {
-        // NOAA bazen 302 redirect yapıyor — follow: 'follow' ile çöz
-        // [4.9] 5000 → 2000. Kullanıcı analizi NOAA'yı beklemesin; veri gelmezse
-        // klorofil null geçer (0 DEĞİL — bilinmeyen ile ölçülmüş sıfır farklı şeydir)
-        // ve analiz açılır. Arka plan yeniden denemesi önbelleği doldurur.
-        const res = await fetchWithTimeout(url, 2000);
+        const res = await fetchWithTimeout(url, timeoutMs);
         if (!res.ok) return null;
         const json = await res.json();
-
         if (!json?.table?.rows) return null;
 
-        // Null olmayan pikselleri filtrele, en son geçerli günün verisini al
         const rows = json.table.rows.filter(r => r[4] !== null && r[4] > 0);
         if (rows.length === 0) return null;
 
-        // En son tarihe göre sırala
         rows.sort((a, b) => new Date(b[0]) - new Date(a[0]));
         const latestDate = rows[0][0].split('T')[0];
         const latestRows = rows.filter(r => r[0].startsWith(latestDate));
-
         const values = latestRows.map(r => r[4]);
         const avg = values.reduce((a, b) => a + b, 0) / values.length;
 
-        // Aylık ortalama (tüm geçerli veriden)
-        const monthlyAvg = rows.slice(0, Math.min(rows.length, 200))
+        // Pencere ortalamasi. Alan adi tarihsel sebeple "monthly" kaldi ama
+        // pencere artik 14 gun — HICBIR YERDE OKUNMUYOR (tek gecis bu satir),
+        // adi degistirilmedi cunku yanit sozlesmesinde alan adi degistirmek
+        // eski istemciyi kirabilir.
+        const pencereOrt = rows.slice(0, Math.min(rows.length, 200))
             .map(r => r[4])
             .reduce((a, b) => a + b, 0) / Math.min(rows.length, 200);
 
         const daysAgoVal = Math.round((Date.now() - new Date(latestDate)) / 86400000);
         return {
             chlorophyll: parseFloat(avg.toFixed(3)),
-            chlorophyll_monthly_avg: parseFloat(monthlyAvg.toFixed(3)),
+            chlorophyll_monthly_avg: parseFloat(pencereOrt.toFixed(3)),
             date: latestDate,
             valid_pixels: values.length,
             daysAgo: daysAgoVal,
-            stale: daysAgoVal >= 7
+            stale: daysAgoVal >= 7,
+            kaynak: kume.ad,   // YENI ALAN — eklemek guvenli, eski istemci yok sayar
         };
     } catch (e) {
-        console.log('[PLANKTON] NOAA fetch failed:', e.message);
+        console.log(`[PLANKTON] ${kume.ad} fetch failed:`, e.message);
         return null;
     }
 }
+
+/**
+ * Iki Sentinel-3 kumesini PARALEL sorgular, en TAZE gecerli sonucu dondurur.
+ * Ikisi de bos donerse null — bu "olculmus sifir" degil "bilinmiyor" demektir
+ * ve cagiran taraf null'i oyle yorumluyor.
+ */
+async function fetchChlorophyll(lat, lon, timeoutMs = 2000) {
+    const sonuclar = await Promise.all(
+        CHL_KUMELERI.map(k => _chlKumedenCek(k, lat, lon, timeoutMs))
+    );
+    const gecerli = sonuclar.filter(Boolean);
+    if (gecerli.length === 0) return null;
+
+    gecerli.sort((a, b) => a.daysAgo - b.daysAgo);   // en taze basa
+    const s = gecerli[0];
+    console.log(`[PLANKTON] ${s.kaynak} ${s.date}: ${s.chlorophyll} mg/m3 `
+        + `(${s.valid_pixels} piksel, ${s.daysAgo} gun once${s.stale ? ', BAYAT' : ''})`
+        + (gecerli.length > 1 ? ` — ${gecerli.length} kumeden en tazesi` : ''));
+    return s;
+}
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 // UYDU SST — NOAA CoastWatch ERDDAP (~1km çözünürlük, VIIRS)
