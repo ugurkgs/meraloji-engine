@@ -7520,10 +7520,19 @@ app.get('/api/forecast', async (req, res) => {
             const marineStartIdx = marineHourlyOffset;                 // marine bugün başlangıcı (168)
             const instantDate = new Date();
             const rawInstantTemp = marine.hourly?.sea_surface_temperature?.[marineInstantIdx];
-            // SST öncelik: NOAA uydu → Open-Meteo → default (instant her zaman bugün)
+            // [FÜZYON 2026-08-29] Bu İKİNCİ SST YOLU. Gün döngüsündeki (~7180)
+            // birleştirmenin aynısı burada da uygulanmalı; instant bloğu ayrı
+            // kuruluyor ve ilk yazımda ATLANMIŞTI — sstSat artık nesne olduğu
+            // için `temp` alanına sayı yerine nesnenin kendisi yazılıyordu ve
+            // istemcide su sıcaklığı hiç görünmüyordu. Canlıda yakalandı.
+            //
+            // İki yol tek yere indirilebilir ama instant, gün döngüsünden FARKLI
+            // bir saat indeksi (marineInstantIdx) kullanıyor; birleştirmeden önce
+            // o farkın bilerek korunduğundan emin olmak gerekir.
+            const i_omTemp = safeWaterTemp(rawInstantTemp, regionName, currentMonth);
             const i_tempWater = (sstSat !== null)
-                ? sstSat
-                : safeWaterTemp(rawInstantTemp, regionName, currentMonth);
+                ? sstBirlestir(sstSat, i_omTemp, gridDistanceKm, logUser).deger
+                : i_omTemp;
             const i_waveRaw = safeNum(marine.hourly?.wave_height?.[marineInstantIdx]);
             const i_wind = safeNum(weather.hourly?.wind_speed_10m?.[instantIdx]);
             const i_rain = safeNum(weather.hourly?.precipitation?.[instantIdx]);
