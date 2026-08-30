@@ -2404,7 +2404,36 @@ const comebackTrialCache = new NodeCache({ stdTTL: 86400 });
 // o IP'de tam veri yerine ücretsiz seviye veri görmesi.
 // Bu bağı bozmadan önce iki tarafı da oku (favori akışı + applySanitization).
 const anonFreeIpCache = new NodeCache({ stdTTL: 86400 });
-const ANON_FREE_IP_DAILY_MAX = 30;
+//
+// [2026-08-30] 30 → 60, GEÇİCİ KÖPRÜ. 4.5.1 (48) yayına girince 30'a dönecek.
+//
+// NEDEN: yukarıdaki ⚠ uyarısının canlı karşılığı 30 Ağustos logunda görüldü —
+// PRO abonenin favori listesi tavanı yiyordu:
+//
+//   13:49:10  [VERIFY] ✅ ...PRO dogrulandi
+//   13:49:28  [ANON-FREE] ⚠️ 176.220.56.112 tavani asti (30/30)
+//   13:49:28  🔍 ANALİZ 41.6425,35.4976   94 ms   (anonim)
+//   13:49:29  🔍 ANALİZ 41.6840,35.4125   19 ms   (anonim)   ← 1,2 sn'de dort
+//   13:49:39  🔍 ANALİZ 41.6840,35.4125   38 ms   [💎 PRO]   ← ayni koordinat
+//
+// Düzeltmesi istemcide (c175b31, favoriler artık kimlik doğrulamalı çağrı
+// kullanıyor) ve 4.5.1'de hazır ama YAYINDA DEĞİL. Yayına kadar tavan meşru
+// trafikten besleniyor.
+//
+// NEDEN 60: favori önbelleği 30 dk (MainActivity:8280) ve favori sayısında
+// sınır yok → favori başına saatte 2 istek. 10 favorili bir kullanıcı listeyi
+// günde 3-4 kez açtığında 30'u aşıyor, 60'ın altında kalıyor. 50 sınırda
+// kalırdı.
+//
+// ESKİ KULLANICIYA ETKİSİ YOK — bu bir GEVŞETME. Kimse hak kaybetmiyor,
+// yeni alan gönderilmiyor, istemci değişmiyor. Tavana çarpan zaten hata
+// almıyordu (sanitize veri alıyordu), şimdi daha geç çarpacak.
+//
+// ⚠ GERİ ALMA: 4.5.1 yayıldıktan sonra logda [ANON-FREE] satırlarının
+// seyrekleşmesini izle. Seyrekleştiyse bu sayı 30'a döner — kötüye kullanıma
+// karşı asıl gerekçe hâlâ geçerli. Seyrekleşmediyse gerçek kötüye kullanım
+// var demektir, o zaman ayrı bakılır.
+const ANON_FREE_IP_DAILY_MAX = 60;
 
 // ── TEKRAR DENEMESİ HAKKI (source=retry) ─────────────────────────────────
 // [2026-08-22 açık · 2026-08-23 kapatıldı]
