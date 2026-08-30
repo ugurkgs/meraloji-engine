@@ -2405,7 +2405,7 @@ const comebackTrialCache = new NodeCache({ stdTTL: 86400 });
 // Bu bağı bozmadan önce iki tarafı da oku (favori akışı + applySanitization).
 const anonFreeIpCache = new NodeCache({ stdTTL: 86400 });
 //
-// [2026-08-30] 30 → 60, GEÇİCİ KÖPRÜ. 4.5.1 (48) yayına girince 30'a dönecek.
+// [2026-08-30] 30 → 100, GEÇİCİ KÖPRÜ. 4.5.1 (48) yayına girince 30'a dönecek.
 //
 // NEDEN: yukarıdaki ⚠ uyarısının canlı karşılığı 30 Ağustos logunda görüldü —
 // PRO abonenin favori listesi tavanı yiyordu:
@@ -2420,10 +2420,16 @@ const anonFreeIpCache = new NodeCache({ stdTTL: 86400 });
 // kullanıyor) ve 4.5.1'de hazır ama YAYINDA DEĞİL. Yayına kadar tavan meşru
 // trafikten besleniyor.
 //
-// NEDEN 60: favori önbelleği 30 dk (MainActivity:8280) ve favori sayısında
-// sınır yok → favori başına saatte 2 istek. 10 favorili bir kullanıcı listeyi
-// günde 3-4 kez açtığında 30'u aşıyor, 60'ın altında kalıyor. 50 sınırda
-// kalırdı.
+// NEDEN 100: favori önbelleği 30 dk (MainActivity:8280) ve favori sayısında
+// sınır yok → favori başına saatte 2 istek. Ölçüm: 10 favorili bir kullanıcı
+// listeyi günde 3-4 kez açtığında ~40 istek üretiyor, yani 30'u aşıyor.
+// 60 bunu karşılardı; 100 sahibin kararı — ağır favorili kullanıcıya ve
+// CGNAT arkasındaki birden çok gerçek kullanıcıya pay bırakmak için.
+//
+// KÖTÜYE KULLANIM PAYI: tavan zaten bir duvar değil, hız kesici — IP havuzu
+// döndüren biri 30'da da 100'de de aşar. 100, tek IP'den günlük tam-veri
+// çekimini üçe katlıyor; bir haftalık köprü için kabul edildi. Günde ~300
+// analiz yapılan bir sistemde tek IP'den 100 istek logda göze çarpar.
 //
 // ESKİ KULLANICIYA ETKİSİ YOK — bu bir GEVŞETME. Kimse hak kaybetmiyor,
 // yeni alan gönderilmiyor, istemci değişmiyor. Tavana çarpan zaten hata
@@ -2433,7 +2439,7 @@ const anonFreeIpCache = new NodeCache({ stdTTL: 86400 });
 // seyrekleşmesini izle. Seyrekleştiyse bu sayı 30'a döner — kötüye kullanıma
 // karşı asıl gerekçe hâlâ geçerli. Seyrekleşmediyse gerçek kötüye kullanım
 // var demektir, o zaman ayrı bakılır.
-const ANON_FREE_IP_DAILY_MAX = 60;
+const ANON_FREE_IP_DAILY_MAX = 100;
 
 // ── TEKRAR DENEMESİ HAKKI (source=retry) ─────────────────────────────────
 // [2026-08-22 açık · 2026-08-23 kapatıldı]
