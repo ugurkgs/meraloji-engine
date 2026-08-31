@@ -4824,6 +4824,31 @@ const AV_DEGERI = {
     sarpa: 0.45,          // otçul, et kalitesi düşük
     tirsi: 0.45,          // Alosa fallax
     ustura_baligi: 0.45,  // Xyrichtys novacula
+
+    // ══ UNITED_KINGDOM — KABA GEÇİŞ [2026-08-31] ══════════════════════════
+    // Türkiye kadar ayrıntılı DEĞİL, bilerek. Sahibin talimatı: "bu türkiye
+    // kadar detaylı olmayacak, daha kaba yapılacak."
+    //
+    // O bölgede üç eksenin de kapsamı %0'dı: 48 türün hepsi varsayılan 1.0
+    // alıyor, yani "yalnızca hedef türler" süzgeci ölü kalıyor ve harami
+    // uyarısı hiç çalışmıyordu. Bu geçiş o boşluğu kapatıyor.
+    //
+    // Tabloda YER ALMAYAN 39 tür 1.0 döner → hedef. Doğru olan da bu:
+    // levrek, morina, sarı mezgit, kalkan, pisi, dil, uskumru, camgözler,
+    // vatozlar, mığrı, ling, çipura, barbunya, somon, deniz alası, ballan
+    // çırçırı, halibut, brill — hepsi UK'de peşine düşülen türler.
+    //
+    // İSTİLACI: UK listesinde yok. Uydurulmadı. (UK sularının bilinen
+    // istilacısı pembe somon Oncorhynchus gorbuscha, o da species.js'de yok.)
+    uk_poor_cod: 0.15,        // Trisopterus minutus — yem olur, tutulmaz
+    uk_pouting: 0.15,         // Trisopterus luscus — "pout", yem olarak kullanılır
+    uk_rockling: 0.15,        // Gaidropsarus — küçük, yenmez
+    uk_wrasse_corkwing: 0.15, // Symphodus melops — küçük çırçır, yenmez
+    uk_dogfish: 0.45,         // Scyliorhinus canicula — yenir ama peşine düşülmez
+    uk_gurnard_grey: 0.45,    // Eutrigla gurnardus — kırmızı/mazak kadar değerli değil
+    uk_scad: 0.45,            // Trachurus trachurus — çoğunlukla yem
+    uk_spurdog: 0.45,         // Squalus acanthias — dikenli, çoğu geri atılır
+    uk_witch: 0.45,           // Glyptocephalus cynoglossus — nadiren hedeflenir
 };
 function avDegeri(key) {
     const v = AV_DEGERI[key];
@@ -4890,6 +4915,16 @@ const YEM_HIRSIZI = new Set([
     // kümesinde de var: aterin, kupes, izmarit ve isparoz gibi ÇİFT ROL —
     // hem yemi soyar hem kendisi değerli canlı yemdir.
     'horozbina',
+
+    // ── UNITED_KINGDOM, kaba geçiş [2026-08-31] ──────────────────────────
+    // Beş AI oylamasından geçmedi; UK olta balıkçılığının kendi terimi olan
+    // "bait robber" tanımına göre seçildi. Türkiye kümesi kadar ayrıntılı
+    // değil, bilerek (sahibin talimatı: "daha kaba yapılacak").
+    'uk_pouting',           // UK'de klasik yem hırsızı, kıyıdan bir numaralı şikâyet
+    'uk_poor_cod',          // aynı cins (Trisopterus), aynı davranış
+    'uk_rockling',          // küçük ağız, yemi didikler
+    'uk_wrasse_corkwing',   // küçük çırçır, yemi gagalar
+    'uk_dogfish',           // yemi bütün yutar; kıyı balıkçısının baş belası
 ]);
 // KASTEN DIŞARIDA — AI'ların çoğu "hırsız" dediği hâlde elendiler.
 // Gerekçe sahibin kendi balıkçılık bilgisi; oy çokluğu tek başına yeterli
@@ -5041,6 +5076,11 @@ const HIRSIZ_MEKANIZMA = {
     kupes:   'kucukAgiz', hani:   'kucukAgiz', lokum:   'kucukAgiz',
     cutre:   'sertGaga',
     sarpa:   'gagalar',   lapin:  'gagalar',
+    // UNITED_KINGDOM [2026-08-31]. uk_dogfish BİLEREK yok: yemi didiklemiyor,
+    // bütün yutuyor — "yemi sağlam bağla" tavsiyesi ona yanlış olurdu. Eşlemede
+    // olmayan tür sessizce genel tavsiyeye düşüyor (sertYem + bolYem).
+    uk_pouting: 'kucukAgiz', uk_poor_cod: 'kucukAgiz', uk_rockling: 'kucukAgiz',
+    uk_wrasse_corkwing: 'gagalar',
 };
 
 /**
