@@ -278,13 +278,34 @@ const SPECIES_DB = {
         photoId: 13,
         category: "KIYI",
         huntingMode: "chemosensory",
-        peakHours: "NIGHT", peakHoursDesc: "Gece kıyıya yaklaşır, 21:00-02:00", peakHoursDescEn: "Approaches shore at night, 21:00-02:00", peakHoursDescEl: "Approaches shore at night, 21:00-02:00", peakHoursDescEs: "Durante la noche",
+        peakHours: "ALL", peakHoursDesc: "Gündüz de gece de aktif, kıyıya yaklaşır", peakHoursDescEn: "Active by day and night, comes close to shore", peakHoursDescEl: "Active by day and night, comes close to shore", peakHoursDescEs: "Activo de día y de noche",
         tempRange: { min: 14, opt: 19, max: 28 },
         seasons: { winter: 0.25, spring: 0.65, summer: 0.85, autumn: 0.70 },
-        activity: "NIGHT",   // [2026-08-03] DAWN_DUSK→NIGHT: peakHours ve peakHoursDesc
-        // ("Gece kıyıya yaklaşır, 21:00-02:00") gece diyordu, activity ise şafak/akşam.
-        // Uygulama bir şey gösterip başka saate göre puanlıyordu. Sahadaki Türkiye pratiği
-        // (kıyıdan gece avı) esas alınıp SKORLAMA ekrana uyduruldu.
+        activity: "ALL",
+        // ── GEÇMİŞ: bu alan iki kez değişti, üçüncü kez açmadan önce oku ────────────
+        //
+        // [2026-08-03] DAWN_DUSK→NIGHT: peakHours ve peakHoursDesc ("Gece kıyıya
+        // yaklaşır, 21:00-02:00") gece diyordu, activity ise şafak/akşam. Uygulama bir
+        // şey gösterip başka saate göre puanlıyordu. Sahadaki Türkiye pratiği (kıyıdan
+        // gece avı) esas alınıp SKORLAMA ekrana uyduruldu.
+        //
+        // [2026-08-31] NIGHT→ALL. İki bağımsız kaynak "gündüz de" dedi:
+        //   1. SAHİBİN KENDİ GÖZLEMİ: "mırmır en azından Ege bölgesinde hem gündüz hem
+        //      gece yakalanıyor. bizzat gözlemci benim."
+        //   2. Arndt & Evans (2022), ESM Part 1 — kategori DM (esas olarak gündüzcü).
+        //      Notu: "Gündüz aktiftir (Neumann & Paulus 2005). Otolit boyu Diplodus
+        //      türlerindeki kadar küçük, bu da esas olarak gündüz etkinliğe işaret
+        //      ediyor (Cruz & Lombarte 2004)."
+        //
+        // NEDEN DAY DEĞİL DE ALL: NIGHT gündüze 1/16 puan veriyordu (yani "gündüz
+        // arama"), DAY ise geceye 2/16 verirdi (yani "gece arama"). İkisi de sahibin
+        // gözlemiyle çelişir. ALL her ikisine 9, alacakaranlığa 14 veriyor — "ikisinde
+        // de tutulur, alacakaranlık biraz daha iyi". Makalenin DM kodu da zaten geceyi
+        // dışlamıyor ("daha düşük düzeyde gece de aktif olabilir").
+        //
+        // Aynı desenin örneği: istavrit (peakHours ALL, "Tüm gün aktif, sabah/akşam yoğun").
+        //
+        // ⚠ Bunu tek kaynağa dayanarak geri çevirme. Sahibin doğrudan saha gözlemi var.
         pressureSensitivity: 0.5,
         wavePref: 0.4, // Sakin suda da aktif
         clarityPref: "MODERATE", // Berrak sudan daha az etkilenir
