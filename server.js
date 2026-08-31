@@ -4360,7 +4360,26 @@ function getHourWeight(hour, activityWindows, fishActivity) {
     }
 
     // Alacakaranlık balıkları için (Levrek, Lüfer/Kofana, Karagöz)
-    if (fishActivity === "DAWN_DUSK") {
+    //
+    // [2026-08-31] CREPUSCULAR EKLENDİ. Etiket species.js'de kullanılıyor ve
+    // motorun ÜÇ yerinde DAWN_DUSK ile eşdeğer sayılıyor (server.js:4579,
+    // 5362, 6219) — ama burada yoktu ve aşağıdaki `return 1.0`'a düşüyordu.
+    // Yani bu türlerin saatlik ağırlığı DÜMDÜZ kalıyor, şafak/akşam zirvesi
+    // günlük ortalamaya hiç yansımıyordu. s_activity doğru puanı veriyordu,
+    // günlük skor vermiyordu — kayıt kendi içinde çelişkiliydi.
+    //
+    // Etkilenen üç tür: palamut, cinekop, aslan_baligi. İlk ikisi Türk
+    // balıkçısının en çok peşinde olduğu türlerden ve ikisi de tam olarak
+    // alacakaranlık balığı.
+    //
+    // ÖLÇÜLDÜ (2026-08-31, İzmir pencereleri, getHourWeight vm kutusunda):
+    //   Urla plato eğrisi (DEVIR §7)   58.3 → 59.0   (+0.7)
+    //   alacakaranlık zirveli eğri     54.1 → 56.6   (+2.5)
+    //   düz eğri (pozitif kontrol)     60.0 → 60.0   (+0.0)
+    // Skor yalnız YUKARI gidiyor; düz eğride hiç değişmiyor. hourlyScores,
+    // bestHour ve bestHourScore ağırlıktan bağımsız (finalScore'dan geliyor),
+    // dolayısıyla saatlik eğri ve "en iyi saat" değişmiyor.
+    if (fishActivity === "DAWN_DUSK" || fishActivity === "CREPUSCULAR") {
         // Sabah suyu: x3
         if (hour >= m.startHour && hour <= m.endHour) return 3.0;
         // Akşam suyu: x3
