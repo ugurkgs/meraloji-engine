@@ -4849,6 +4849,55 @@ const AV_DEGERI = {
     uk_scad: 0.45,            // Trachurus trachurus — çoğunlukla yem
     uk_spurdog: 0.45,         // Squalus acanthias — dikenli, çoğu geri atılır
     uk_witch: 0.45,           // Glyptocephalus cynoglossus — nadiren hedeflenir
+
+    // ══ NEW_ZEALAND — kaba geçiş [2026-08-31] ═════════════════════════════
+    nz_barracouta: 0.15,      // Thyrsites atun — NZ'de baş belası, çoğu geri atılır
+    nz_carpet_shark: 0.15,    // Cephaloscyllium isabellum — yenmez
+    nz_frostfish: 0.15,       // Lepidopus caudatus — oltayla hedeflenmez
+    nz_jack_mackerel: 0.15,   // Trachurus novaezelandiae — yem balığı
+    nz_koheru: 0.15,          // Decapterus koheru — yem balığı
+    nz_piper: 0.15,           // Hyporhamphus ihi — yem balığı
+    nz_blue_warehou: 0.45,    // Seriolella brama — ticari tür, olta hedefi değil
+    nz_gemfish: 0.45,         // Rexea solandri
+    nz_red_cod: 0.45,         // Pseudophycis bachus — eti yumuşak, düşük değer
+    nz_scorp: 0.45,           // Scorpaena papillosa — dikenli, tesadüfi
+    nz_sea_perch: 0.45,       // Helicolenus percoides
+    nz_seven_gill: 0.45,      // Notorynchus cepedianus — çoğu bırakılır
+    nz_silver_warehou: 0.45,  // Seriolella punctata
+    nz_spiny_dogfish: 0.45,   // Squalus acanthias — NZ'de de pest sayılır
+
+    // ══ USA_NORTHEAST — kaba geçiş [2026-08-31] ═══════════════════════════
+    usne_cunner: 0.15,        // Tautogolabrus adspersus — "bergall", klasik yem hırsızı
+    usne_menhaden: 0.15,      // Brevoortia tyrannus — "bunker", saf yem balığı
+    usne_ocean_pout: 0.15,    // Zoarces americanus — yenmez
+    usne_sculpin: 0.15,       // Myoxocephalus — tesadüfi, geri atılır
+    usne_sea_raven: 0.15,     // Hemitripterus americanus — yenmez
+    usne_sea_robin: 0.15,     // Prionotus carolinus — çoğu geri atılır
+    usne_windowpane: 0.15,    // Scophthalmus aquosus — çok ince, yenmez
+    usne_american_plaice: 0.45,
+    usne_blue_runner: 0.45,   // Caranx crysos — US NE'de çoğunlukla yem
+    usne_red_hake: 0.45,      // Urophycis chuss
+    usne_shad_hickory: 0.45,  // Alosa mediocris — eti kılçıklı
+    usne_silver_perch: 0.45,  // Bairdiella chrysoura — küçük
+    usne_spiny_dogfish: 0.45, // Squalus acanthias — US NE'nin bir numaralı pest'i
+    usne_spot: 0.45,          // Leiostomus xanthurus — küçük, çoğu yem
+    usne_white_hake: 0.45,    // Urophycis tenuis
+    usne_witch_flounder: 0.45,
+    usne_yellowtail_flounder: 0.45,
+
+    // ══ SOUTH_AFRICA — kaba geçiş [2026-08-31] ════════════════════════════
+    // NOT: sa_snoek (Thyrsites atun) BİLEREK tabloda yok. Aynı tür NZ'de
+    // nz_barracouta olarak baş belası sayılıyor ama Güney Afrika'da makbul
+    // bir yemek balığı ve peşine düşülüyor. Anahtarlar ayrı olduğu için aynı
+    // tür iki bölgede farklı sınıflanabiliyor — kasıtlı.
+    sa_blacktail: 0.45,       // Diplodus capensis — "dassie", yemi soyar ama yenir
+    sa_zebra: 0.45,           // Diplodus hottentotus — küçük sparid
+
+    // ══ UAE / PERSIAN_GULF — kaba geçiş [2026-08-31] ══════════════════════
+    // Dört türün ikisi resif balığı, olta hedefi değil. Diğer ikisi
+    // (golden trevally, blacktip reef shark) tabloda yok → hedef.
+    uae_arabian_butterflyfish: 0.15,  // Chaetodon melapterus — akvaryum balığı
+    uae_sohal_surgeonfish: 0.15,      // Acanthurus sohal — otçul, neşterli
 };
 function avDegeri(key) {
     const v = AV_DEGERI[key];
@@ -4925,6 +4974,21 @@ const YEM_HIRSIZI = new Set([
     'uk_rockling',          // küçük ağız, yemi didikler
     'uk_wrasse_corkwing',   // küçük çırçır, yemi gagalar
     'uk_dogfish',           // yemi bütün yutar; kıyı balıkçısının baş belası
+
+    // ── NEW_ZEALAND [2026-08-31] ─────────────────────────────────────────
+    'nz_barracouta',        // dişleriyle kösteği kesip yemi alır — NZ'nin bir numaralı şikâyeti
+    'nz_spiny_dogfish',     // sürü hâlinde basar, yemi bitirir
+    'nz_carpet_shark',      // yemi yutar, çıkarması zor
+
+    // ── USA_NORTHEAST [2026-08-31] ───────────────────────────────────────
+    'usne_cunner',          // "bergall" — bölgenin klasik yem soyucusu
+    'usne_sea_robin',       // yemi alır, hedef değil
+    'usne_spiny_dogfish',   // sürü basınca av biter
+    'usne_sculpin',         // yemi yutar
+    'usne_sea_raven',       // yemi yutar
+
+    // ── SOUTH_AFRICA [2026-08-31] ────────────────────────────────────────
+    'sa_blacktail',         // "dassie" — kayadan avda yemi soyan tür
 ]);
 // KASTEN DIŞARIDA — AI'ların çoğu "hırsız" dediği hâlde elendiler.
 // Gerekçe sahibin kendi balıkçılık bilgisi; oy çokluğu tek başına yeterli
@@ -5081,6 +5145,12 @@ const HIRSIZ_MEKANIZMA = {
     // olmayan tür sessizce genel tavsiyeye düşüyor (sertYem + bolYem).
     uk_pouting: 'kucukAgiz', uk_poor_cod: 'kucukAgiz', uk_rockling: 'kucukAgiz',
     uk_wrasse_corkwing: 'gagalar',
+    // [2026-08-31] Diğer bölgeler. Yemi YUTAN türlere (camgözler, iskorpitler,
+    // halı köpekbalığı) bilerek mekanizma verilmedi — "yemi sağlam bağla"
+    // onlara yanlış tavsiye olurdu; genel tavsiyeye düşüyorlar.
+    nz_barracouta: 'sertGaga',   // dişleri kösteği kesiyor → çelik köstek doğru tavsiye
+    usne_cunner: 'kucukAgiz',
+    sa_blacktail: 'kucukAgiz',
 };
 
 /**
