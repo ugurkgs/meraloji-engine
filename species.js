@@ -584,10 +584,18 @@ const SPECIES_DB = {
         photoId: 7,
         category: "KIYI_AVCI",
         huntingMode: "visual",
-        peakHours: "DAY", peakHoursDesc: "Gündüz kayalık dipte, bahar üreme döneminde sürüleşir", peakHoursDescEn: "Daytime rocky bottom; schools in spring", peakHoursDescEl: "Daytime rocky bottom; schools in spring", peakHoursDescEs: "Durante el día",
+        peakHours: "CREPUSCULAR", peakHoursDesc: "Şafak ve akşam kayalık dipte, bahar üreme döneminde sürüleşir", peakHoursDescEn: "Dawn and dusk on rocky bottom; schools in spring", peakHoursDescEl: "Dawn and dusk on rocky bottom; schools in spring", peakHoursDescEs: "Al amanecer y al atardecer",
         tempRange: { min: 13, opt: 18, max: 27 },
         seasons: { winter: 0.50, spring: 0.50, summer: 0.80, autumn: 0.90 },  // [2026-08-29] sonbahar yazin ustune alindi, ilkbahar dusuruldu. Kaynak: zirve Agustos-Kasim, yumurtlama Nisan-Temmuz. Agustos guclu kalsin diye yaz 0.80 korundu.
-        activity: "DAY",
+        // [2026-08-31] DAY -> CREPUSCULAR. Kaynak: Arndt & Evans (2022), Reviews in Fish
+        // Biology and Fisheries, ek dosya ESM Part 1 — kategori CRE. Makalenin notu:
+        // "Bu balik esas olarak alacakaranlik donemlerinde aktiftir, cok daha dusuk
+        // duzeyde gunduz de (Sbragagli vd. 2013; Aguzzi vd. 2013)."
+        // Bagimsiz destek: Dentex dentex'in yapay resifte 8 yillik izlemesi zirvelerin
+        // fotofaz sinirlarini takip ettigini gosteriyor (Front. Mar. Sci. 2022).
+        // peakHours ve 4 dildeki aciklama da birlikte guncellendi — kayit kendi icinde
+        // celismesin (bkz. mirmir'deki 2026-08-03 notu, ayni hata).
+        activity: "CREPUSCULAR",
         pressureSensitivity: 0.6,
         wavePref: 0.5, clarityPref: "MODERATE",
         currentPref: 0.5,
@@ -678,10 +686,14 @@ const SPECIES_DB = {
         photoId: 15,
         category: "KIYI",
         huntingMode: "visual",
-        peakHours: "DAY", peakHoursDesc: "Gündüz, sığ kayalık alanlarda", peakHoursDescEn: "Daytime, shallow rocky areas", peakHoursDescEl: "Daytime, shallow rocky areas", peakHoursDescEs: "Durante el día",
+        peakHours: "CREPUSCULAR", peakHoursDesc: "Şafak ve akşam, sığ kayalık alanlarda", peakHoursDescEn: "Dawn and dusk, shallow rocky areas", peakHoursDescEl: "Dawn and dusk, shallow rocky areas", peakHoursDescEs: "Al amanecer y al atardecer",
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.40, spring: 0.65, summer: 0.80, autumn: 0.60 },
-        activity: "DAY",
+        // [2026-08-31] DAY -> CREPUSCULAR. Kaynak: Arndt & Evans (2022), ESM Part 1 —
+        // kategori CRE. Makalenin notu: "Esas olarak alacakaranlik donemlerinde aktif,
+        // cok daha dusuk duzeyde gunduz de (Aguzzi vd. 2013)."
+        // peakHours ve 4 dildeki aciklama da birlikte guncellendi.
+        activity: "CREPUSCULAR",
         pressureSensitivity: 0.4,
         wavePref: 0.4, clarityPref: "CLEAR",
         currentPref: 0.3,
@@ -1413,12 +1425,18 @@ const SPECIES_DB = {
         name: "İskatarya (Sarıgöz)", nameEn: "Black Seabream", nameEl: "Σκαθάρι", nameEs: "Chopa", icon: "🐟", scientificName: "Spondyliosoma cantharus",
         category: "DIP_KIYI",
         huntingMode: "visual",
-        peakHours: "DAY", peakHoursDesc: "Gündüz, çayır ve kayalık kenarları", peakHoursDescEn: "Daytime, seagrass and rocky edges", peakHoursDescEl: "Daytime, seagrass and rocky edges", peakHoursDescEs: "Durante el día",
+        peakHours: "NIGHT", peakHoursDesc: "Gece, çayır ve kayalık kenarları", peakHoursDescEn: "At night, seagrass and rocky edges", peakHoursDescEl: "At night, seagrass and rocky edges", peakHoursDescEs: "Por la noche",
         // esp_chopa'da max 24 yazıyor; kullanıcı 4 Temmuz'da ~25,5°C suda yakaladı.
         // Ege gerçeğine göre 27'ye çekildi. Bkz. SAHA-GOZLEMLERI.md.
         tempRange: { min: 9, opt: 19, max: 27 },
         seasons: { winter: 0.7, spring: 0.95, summer: 0.75, autumn: 0.85 },
-        activity: "DAY",
+        // [2026-08-31] DAY -> NIGHT. Kaynak: Arndt & Evans (2022), ESM Part 1 —
+        // kategori NM (esas olarak gececi). Makalenin notu: "Gece aktiftir
+        // (Reina-Hervas & Serrano 1987). Otolit orta buyuklukte (Cruz & Lombarte 2004).
+        // Yumurtlama gece erken saatte (22:00), cok erken sabah ve muhtemelen gecenin
+        // geri kalaninda da olur (Wilson 1958)."
+        // peakHours ve 4 dildeki aciklama da birlikte guncellendi.
+        activity: "NIGHT",
         pressureSensitivity: 0.35,
         wavePref: 0.35, clarityPref: "ANY",
         currentPref: 0.45,
