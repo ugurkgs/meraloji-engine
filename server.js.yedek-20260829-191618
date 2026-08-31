@@ -194,9 +194,6 @@ const SERVER_i18n = {
                 baslikHirsiz: 'Harami istilası',
                 baslikYemGider: 'Haramiler yemi tüketebilir',
                 baslikFirsat: 'Canlı yem fırsatı',
-                baslikTrakonya: 'Trakonya: basma riski',
-                trakonyaMetin: (skor) =>
-                    `Trakonya %${skor} aktif. Kumlu sığ zemin ve bulanık su — üzerine basma riski artıyor.`,
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
                     `${tur} %${skor}, ${hedef} %${hedefSkor} aktif görünüyor. Uyarı; Yemleri haramilere kaptırabilirsiniz.`,
                 hirsizMetinHedefsiz: (tur, skor) => `${tur} %${skor} aktif görünüyor. Uyarı; Yeminiz hızlı tükenebilir.`,
@@ -204,12 +201,11 @@ const SERVER_i18n = {
                 firsatMetin: (tur, skor, avci, avciSkor) =>
                     `${tur} %${skor} — çapariyle birkaç tane tutup iri iğneye canlı takmayı deneyebilirsiniz. Bölgede ${avci} %${avciSkor}.`,
                 tavsiye: {
-                    kucukAgiz: 'Yemi sağlam bağlayın veya büyük iğne deneyin',
-                    sertGaga: 'Sert gagalı türlerde çelik köstek deneyin',
-                    gagalar: 'Yem hırsızı: Yemi iple sıkıca bağlayın',
-                    sertYem: 'Sert yem kullanın: madya, kalamar veya uskumru',
-                    bolYem: 'Yeminiz tükenebilir, yanınıza ekstra yem alın',
-                    ayakSuru: 'Sığda ayağınızı sürüyerek yürüyün',
+                    kucukAgiz: 'Yemi bağlayın veya iğneyi büyütün',
+                    sertGaga: 'Sert gagalı tür: Çelik köstek kullanmalısınız',
+                    gagalar: 'Yem hırsızı: Yemi iple bağlamalısınız',
+                    sertYem: 'Sert yem işinize yarayabilir: madya, kalamar veya uskumru fileto',
+                    bolYem: 'Normalden fazla yem almalısınız',
                 },
             },
         notification: {
@@ -395,9 +391,6 @@ const SERVER_i18n = {
                 baslikHirsiz: 'Bait thieves swarming',
                 baslikYemGider: 'Thieves may strip your bait',
                 baslikFirsat: 'Live bait opportunity',
-                baslikTrakonya: 'Weever fish: step risk',
-                trakonyaMetin: (skor) =>
-                    `Weever ${skor}% active. Sandy shallows and murky water raise the risk of stepping on one.`,
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
                     `${tur} at ${skor}%, ${hedef} at ${hedefSkor}%. Heads up — the thieves may take your bait first.`,
                 hirsizMetinHedefsiz: (tur, skor) => `${tur} at ${skor}%. Heads up — your bait may run out fast.`,
@@ -405,12 +398,11 @@ const SERVER_i18n = {
                 firsatMetin: (tur, skor, avci, avciSkor) =>
                     `${tur} at ${skor}% — you could catch a few on a sabiki and try one live on a bigger hook. ${avci} at ${avciSkor}% nearby.`,
                 tavsiye: {
-                    kucukAgiz: 'Tie the bait on firmly or try a bigger hook',
-                    sertGaga: 'For hard-beaked species, try a wire trace',
-                    gagalar: 'Bait thief: bind the bait tightly with thread',
-                    sertYem: 'Use tougher bait: murex, squid or mackerel',
-                    bolYem: 'Your bait may run out, bring extra with you',
-                    ayakSuru: 'Shuffle your feet in the shallows',
+                    kucukAgiz: 'Bind the bait on, or go up a hook size',
+                    sertGaga: 'Hard-beaked species: use a wire trace',
+                    gagalar: 'Bait pickers: bind the bait with thread',
+                    sertYem: 'Tougher bait may serve you better: murex, squid or mackerel fillet',
+                    bolYem: 'Bring more bait than usual',
                 },
             },
         notification: {
@@ -596,9 +588,6 @@ const SERVER_i18n = {
                 baslikHirsiz: 'Invasión de ladrones de cebo',
                 baslikYemGider: 'Los ladrones pueden acabar el cebo',
                 baslikFirsat: 'Oportunidad de cebo vivo',
-                baslikTrakonya: 'Araña: riesgo de pisarla',
-                trakonyaMetin: (skor) =>
-                    `Araña ${skor}% activa. Fondo arenoso poco profundo y agua turbia aumentan el riesgo.`,
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
                     `${tur} al ${skor}%, ${hedef} al ${hedefSkor}%. Atención: los ladrones podrían llevarse el cebo antes.`,
                 hirsizMetinHedefsiz: (tur, skor) => `${tur} al ${skor}%. Atención: tu cebo podría acabarse rápido.`,
@@ -606,12 +595,11 @@ const SERVER_i18n = {
                 firsatMetin: (tur, skor, avci, avciSkor) =>
                     `${tur} al ${skor}% — podrías capturar algunos con sabiki y probar uno vivo en un anzuelo grande. ${avci} al ${avciSkor}% en la zona.`,
                 tavsiye: {
-                    kucukAgiz: 'Ata bien el cebo o prueba un anzuelo mayor',
-                    sertGaga: 'En especies de pico duro, prueba cable de acero',
-                    gagalar: 'Ladrón de cebo: ata el cebo firme con hilo',
-                    sertYem: 'Usa cebo duro: cañadilla, calamar o caballa',
-                    bolYem: 'Tu cebo puede acabarse, lleva de más',
-                    ayakSuru: 'Arrastra los pies en aguas someras',
+                    kucukAgiz: 'Ata el cebo o sube de tamaño de anzuelo',
+                    sertGaga: 'Especie de pico duro: usa cable de acero',
+                    gagalar: 'Picoteadores: ata el cebo con hilo',
+                    sertYem: 'Un cebo más duro puede convenirte: cañadilla, calamar o caballa',
+                    bolYem: 'Lleva más cebo de lo normal',
                 },
             },
         notification: {
@@ -797,9 +785,6 @@ const SERVER_i18n = {
                 baslikHirsiz: 'Πλήθος κλεφτών δολώματος',
                 baslikYemGider: 'Οι κλέφτες μπορεί να φάνε το δόλωμα',
                 baslikFirsat: 'Ευκαιρία για ζωντανό δόλωμα',
-                baslikTrakonya: 'Δράκαινα: κίνδυνος',
-                trakonyaMetin: (skor) =>
-                    `Δράκαινα ${skor}% ενεργή. Αμμώδη ρηχά και θολό νερό αυξάνουν τον κίνδυνο να την πατήσετε.`,
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
                     `${tur} στο ${skor}%, ${hedef} στο ${hedefSkor}%. Προσοχή: μπορεί να σας φάνε πρώτοι το δόλωμα.`,
                 hirsizMetinHedefsiz: (tur, skor) => `${tur} στο ${skor}%. Προσοχή: το δόλωμα μπορεί να τελειώσει γρήγορα.`,
@@ -807,12 +792,11 @@ const SERVER_i18n = {
                 firsatMetin: (tur, skor, avci, avciSkor) =>
                     `${tur} στο ${skor}% — μπορείτε να πιάσετε μερικά με σαμπίκι και να δοκιμάσετε ένα ζωντανό σε μεγάλο αγκίστρι. ${avci} στο ${avciSkor}% στην περιοχή.`,
                 tavsiye: {
-                    kucukAgiz: 'Δέστε καλά το δόλωμα ή βάλτε μεγαλύτερο αγκίστρι',
-                    sertGaga: 'Σε είδη με σκληρό ράμφος, βάλτε ατσαλόσυρμα',
-                    gagalar: 'Κλέφτης δολώματος: δέστε σφιχτά με κλωστή',
-                    sertYem: 'Σκληρό δόλωμα: πορφύρα, καλαμάρι ή σκουμπρί',
-                    bolYem: 'Το δόλωμα ίσως τελειώσει, πάρτε παραπάνω',
-                    ayakSuru: 'Σύρετε τα πόδια σας στα ρηχά',
+                    kucukAgiz: 'Δέστε το δόλωμα ή βάλτε μεγαλύτερο αγκίστρι',
+                    sertGaga: 'Είδος με σκληρό ράμφος: βάλτε ατσαλόσυρμα',
+                    gagalar: 'Τσιμπολογούν: δέστε το δόλωμα με κλωστή',
+                    sertYem: 'Πιο σκληρό δόλωμα ίσως σας βολέψει: πορφύρα, καλαμάρι ή σκουμπρί',
+                    bolYem: 'Πάρτε περισσότερο δόλωμα από το συνηθισμένο',
                 },
             },
         notification: {
@@ -2420,42 +2404,7 @@ const comebackTrialCache = new NodeCache({ stdTTL: 86400 });
 // o IP'de tam veri yerine ücretsiz seviye veri görmesi.
 // Bu bağı bozmadan önce iki tarafı da oku (favori akışı + applySanitization).
 const anonFreeIpCache = new NodeCache({ stdTTL: 86400 });
-//
-// [2026-08-30] 30 → 100, GEÇİCİ KÖPRÜ. 4.5.1 (48) yayına girince 30'a dönecek.
-//
-// NEDEN: yukarıdaki ⚠ uyarısının canlı karşılığı 30 Ağustos logunda görüldü —
-// PRO abonenin favori listesi tavanı yiyordu:
-//
-//   13:49:10  [VERIFY] ✅ ...PRO dogrulandi
-//   13:49:28  [ANON-FREE] ⚠️ 176.220.56.112 tavani asti (30/30)
-//   13:49:28  🔍 ANALİZ 41.6425,35.4976   94 ms   (anonim)
-//   13:49:29  🔍 ANALİZ 41.6840,35.4125   19 ms   (anonim)   ← 1,2 sn'de dort
-//   13:49:39  🔍 ANALİZ 41.6840,35.4125   38 ms   [💎 PRO]   ← ayni koordinat
-//
-// Düzeltmesi istemcide (c175b31, favoriler artık kimlik doğrulamalı çağrı
-// kullanıyor) ve 4.5.1'de hazır ama YAYINDA DEĞİL. Yayına kadar tavan meşru
-// trafikten besleniyor.
-//
-// NEDEN 100: favori önbelleği 30 dk (MainActivity:8280) ve favori sayısında
-// sınır yok → favori başına saatte 2 istek. Ölçüm: 10 favorili bir kullanıcı
-// listeyi günde 3-4 kez açtığında ~40 istek üretiyor, yani 30'u aşıyor.
-// 60 bunu karşılardı; 100 sahibin kararı — ağır favorili kullanıcıya ve
-// CGNAT arkasındaki birden çok gerçek kullanıcıya pay bırakmak için.
-//
-// KÖTÜYE KULLANIM PAYI: tavan zaten bir duvar değil, hız kesici — IP havuzu
-// döndüren biri 30'da da 100'de de aşar. 100, tek IP'den günlük tam-veri
-// çekimini üçe katlıyor; bir haftalık köprü için kabul edildi. Günde ~300
-// analiz yapılan bir sistemde tek IP'den 100 istek logda göze çarpar.
-//
-// ESKİ KULLANICIYA ETKİSİ YOK — bu bir GEVŞETME. Kimse hak kaybetmiyor,
-// yeni alan gönderilmiyor, istemci değişmiyor. Tavana çarpan zaten hata
-// almıyordu (sanitize veri alıyordu), şimdi daha geç çarpacak.
-//
-// ⚠ GERİ ALMA: 4.5.1 yayıldıktan sonra logda [ANON-FREE] satırlarının
-// seyrekleşmesini izle. Seyrekleştiyse bu sayı 30'a döner — kötüye kullanıma
-// karşı asıl gerekçe hâlâ geçerli. Seyrekleşmediyse gerçek kötüye kullanım
-// var demektir, o zaman ayrı bakılır.
-const ANON_FREE_IP_DAILY_MAX = 100;
+const ANON_FREE_IP_DAILY_MAX = 30;
 
 // ── TEKRAR DENEMESİ HAKKI (source=retry) ─────────────────────────────────
 // [2026-08-22 açık · 2026-08-23 kapatıldı]
@@ -4376,26 +4325,7 @@ function getHourWeight(hour, activityWindows, fishActivity) {
     }
 
     // Alacakaranlık balıkları için (Levrek, Lüfer/Kofana, Karagöz)
-    //
-    // [2026-08-31] CREPUSCULAR EKLENDİ. Etiket species.js'de kullanılıyor ve
-    // motorun ÜÇ yerinde DAWN_DUSK ile eşdeğer sayılıyor (server.js:4579,
-    // 5362, 6219) — ama burada yoktu ve aşağıdaki `return 1.0`'a düşüyordu.
-    // Yani bu türlerin saatlik ağırlığı DÜMDÜZ kalıyor, şafak/akşam zirvesi
-    // günlük ortalamaya hiç yansımıyordu. s_activity doğru puanı veriyordu,
-    // günlük skor vermiyordu — kayıt kendi içinde çelişkiliydi.
-    //
-    // Etkilenen üç tür: palamut, cinekop, aslan_baligi. İlk ikisi Türk
-    // balıkçısının en çok peşinde olduğu türlerden ve ikisi de tam olarak
-    // alacakaranlık balığı.
-    //
-    // ÖLÇÜLDÜ (2026-08-31, İzmir pencereleri, getHourWeight vm kutusunda):
-    //   Urla plato eğrisi (DEVIR §7)   58.3 → 59.0   (+0.7)
-    //   alacakaranlık zirveli eğri     54.1 → 56.6   (+2.5)
-    //   düz eğri (pozitif kontrol)     60.0 → 60.0   (+0.0)
-    // Skor yalnız YUKARI gidiyor; düz eğride hiç değişmiyor. hourlyScores,
-    // bestHour ve bestHourScore ağırlıktan bağımsız (finalScore'dan geliyor),
-    // dolayısıyla saatlik eğri ve "en iyi saat" değişmiyor.
-    if (fishActivity === "DAWN_DUSK" || fishActivity === "CREPUSCULAR") {
+    if (fishActivity === "DAWN_DUSK") {
         // Sabah suyu: x3
         if (hour >= m.startHour && hour <= m.endHour) return 3.0;
         // Akşam suyu: x3
@@ -5005,35 +4935,6 @@ const OZEL_UYARI_ISTILA_SAYI = 3;    // bu kadar harami birden aktifse "istila"
 const OZEL_UYARI_FIRSAT_ESIK = 60;   // yem balığı bu skorun üstündeyse fırsat
 const OZEL_UYARI_AVCI_ESIK   = 50;   // fırsat yalnız peşine düşülecek avcı varsa
 
-// ── TRAKONYA + BULANIK SU ────────────────────────────────────────────────
-// [2026-08-31] Kaynak: Ege Ü. "İzmir Balıkçılığı", zehirli türler bölümü.
-// Kitabın tarif ettiği kaza mekanizması ŞARTA BAĞLI, sabit değil:
-//
-//   "Düşmanlarından korunmak veya avlarından gizlenmek amacıyla genelde
-//    kendilerini zeminin altına gömerler... İnsanların yaklaşması karşısında
-//    bulundukları yerden birkaç metre uzaklaşıp tekrar gizlenirler. ANCAK EĞER
-//    dip dalgalar veya insanların oluşturduğu yoğunluk sebebiyle bulanık bir
-//    vaziyette ise normal olarak yaklaşan insanları farkına varamaz ve üzerine
-//    basılması sonucu... ÖLÜMLE SONUÇLANAN yaralanmalar meydana gelebilir."
-//
-// Yani "balık listede var" başka, "bugün üzerine basma riski yüksek" başka.
-// Dört şart birlikte aranıyor: tür aktif + sığ + kumlu/çamurlu zemin +
-// bulanık ya da dip dalgası. Hepsinin verisi elimizde.
-//
-// ⚠ EŞİKLER SAHADA AYARLANACAK. İlk değerler kitabın tarifinden türetildi,
-// ölçümden değil. Uyarı her tetiklendiğinde loga satır düşüyor; birkaç
-// haftalık logdan sonra bu dört sayı gerçek dağılıma göre sıkılır.
-//
-// VARSAM (Echiichthys vipera) KAPSAM DIŞI — sahibin kararı, 2026-08-31:
-// "varsam ekleme, türkiyede bilinen balık değil." Kaynak kitap onu "ailenin en
-// kuvvetli zehirlisi" diye işaretliyor ama species.js'e girmeyecek. Bu uyarı
-// yalnız trakonya üzerinden çalışır. YENİDEN AÇMA.
-const OZEL_UYARI_TRAKONYA_ESIK       = 45;   // tür bu skorun altındaysa uyarı yok
-const OZEL_UYARI_TRAKONYA_DERINLIK_M = 15;   // bundan derinse üzerine basılmaz
-const OZEL_UYARI_TRAKONYA_BERRAKLIK  = 55;   // calculateClarity 5-100; altı "bulanık"
-const OZEL_UYARI_TRAKONYA_DALGA_M    = 0.5;  // dip dalgası — kitabın ikinci şartı
-const OZEL_UYARI_TRAKONYA_ZEMIN      = ['SAND', 'MUD', 'MIXED'];  // gömülebildiği zemin
-
 // Hırsızlık mekanizması → tavsiye. Hepsine aynı şeyi yazmak yanlış olurdu:
 // çütre'nin sorunu ağız büyüklüğü değil, misinayı kesen gagası.
 const HIRSIZ_MEKANIZMA = {
@@ -5050,7 +4951,7 @@ const HIRSIZ_MEKANIZMA = {
  * Boş dizi döner — null değil. İstemcide `isEmpty()` tek kontrolle bölümü
  * gizler; null denetimi ayrıca gerekmez.
  */
-function ozelUyarilariUret(fishList, lang, kosul) {
+function ozelUyarilariUret(fishList, lang) {
     if (!Array.isArray(fishList) || fishList.length === 0) return [];
     const t = i18n(lang).ozelUyari;
     if (!t) return [];   // dil bloğu eksikse sessizce boş dön, çökme
@@ -5115,35 +5016,6 @@ function ozelUyarilariUret(fishList, lang, kosul) {
             tavsiyeler: [],
             turler: [{ key: enYem.key, ad: enYem.name, skor: yuvarla(enYem.score) }],
         });
-    }
-
-    // ── TRAKONYA + BULANIK SU ────────────────────────────────────────────
-    // Gerekçe ve eşikler: OZEL_UYARI_TRAKONYA_* tanımlarının üstünde.
-    // `kosul` VERİLMEZSE bu blok hiç çalışmaz — eski çağrı yerleri (varsa)
-    // birebir eski davranışı sürdürür, geriye dönük uyumlu.
-    if (kosul && t.baslikTrakonya) {
-        const trak = fishList.find(f => f && f.key === 'trakonya');
-        const derinlik = Number(kosul.derinlik);
-        const zeminUygun = OZEL_UYARI_TRAKONYA_ZEMIN.includes(kosul.zemin);
-        const bulanik = Number(kosul.berraklik) < OZEL_UYARI_TRAKONYA_BERRAKLIK;
-        const dipDalgasi = Number(kosul.dalga) >= OZEL_UYARI_TRAKONYA_DALGA_M;
-        const sig = Number.isFinite(derinlik) && derinlik > 0 && derinlik <= OZEL_UYARI_TRAKONYA_DERINLIK_M;
-
-        if (trak && Number(trak.score) >= OZEL_UYARI_TRAKONYA_ESIK
-            && sig && zeminUygun && (bulanik || dipDalgasi)) {
-            uyarilar.push({
-                tip: 'TEHLIKE_ZEMIN',
-                seviye: 'yuksek',
-                baslik: t.baslikTrakonya,
-                metin: t.trakonyaMetin(yuvarla(trak.score)),
-                tavsiyeler: t.tavsiye && t.tavsiye.ayakSuru ? [t.tavsiye.ayakSuru] : [],
-                turler: [{ key: trak.key, ad: trak.name, skor: yuvarla(trak.score) }],
-            });
-            // Eşikler sahada ayarlanacak; hangi koşulda çaldığını logdan görelim.
-            console.log(`[TRAKONYA] uyarı verildi — skor ${yuvarla(trak.score)}, `
-                + `derinlik ${derinlik.toFixed(1)} m, zemin ${kosul.zemin}, `
-                + `berraklık ${Math.round(Number(kosul.berraklik))}, dalga ${Number(kosul.dalga).toFixed(2)} m`);
-        }
     }
 
     return uyarilar;
@@ -8045,12 +7917,7 @@ app.get('/api/forecast', async (req, res) => {
                 // KESİLMEMİŞ listeden üretiliyor: uyarı, gösterilen ilk 25 türe
                 // değil o hücrenin tamamına bakmalı. Kesilmiş listeden üretseydik
                 // eski istemcide (10 tür) uyarı sessizce kaybolurdu.
-                ozelUyarilar: ozelUyarilariUret(instantFishList, lang, {
-                    derinlik: depthData && depthData.avg,
-                    zemin: substrateData,
-                    berraklik: i_clarity,
-                    dalga: i_wave,
-                }),
+                ozelUyarilar: ozelUyarilariUret(instantFishList, lang),
                 temp: i_tempWater,
                 wave: parseFloat(i_wave.toFixed(2)),
                 airTemp: safeNum(weather.hourly?.temperature_2m?.[instantIdx]),

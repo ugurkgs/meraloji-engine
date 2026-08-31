@@ -1,0 +1,66 @@
+anahtar | SOYAR | UFAK_AV | YEM_BALIGI | tek cümle gerekçe
+deniz_ignesi | H | E | H | Boru ağızlı yapısı yemi didiklemeye uygun değildir, küçük ve işe yaramaz türdür.
+aterin | E | E | E | Kıyıda sürü halinde yemi didikler, küçük boyu nedeniyle ufak avdır ve levrek/lüfer için değerli canlı yemdir.
+zurna | H | H | E | Yüzey avcısı hedef türdür, yemi alıp takılır, ayrıca büyük avcılar için yem olarak kullanılır.
+kefal | E | H | H | Kefal yemi ağızla didikleyip kaçabilir, ancak hedef türdür ve yem olarak kullanılmaz.
+levrek | H | H | H | Hedef avcı türdür, yemi alır ve takılır, yem olarak kullanılmaz.
+mirmir | H | H | H | Kumluk mera balığı hedef türdür, yemi alır ve takılır, yem değildir.
+sarikulak | E | H | H | Kefal grubundan olup yemi didikleyebilir, hedef türdür, yem değildir.
+sarpa | E | E | H | Otobur olmasına rağmen ekmekle avlanır ve yemi didikler, yenmediği için ufak avdır.
+yilan_baligi | H | H | H | Gece avcısı hedef türdür, yemi yutarak takılır, yem değildir.
+eskina | H | H | H | Gece avlanan hedef türdür, yemi alıp takılır.
+lufer | H | H | H | Agresif pelajik avcı hedef türdür.
+minekop | H | H | H | Büyük dip avcısı hedef türdür.
+zargana | H | H | E | Uzun çenesi yemi soymaz, hedef türdür, ancak büyük avcılar için yem olarak kullanılabilir.
+ahtapot | H | H | H | Kollarıyla yemi sarar ve takılır, hedef kafadanbacaklıdır, yem değildir.
+cipura | H | H | H | Yemi ezer ancak hedef türdür, takılır.
+karagoz | H | H | H | Kayalık hedef türdür, yemi didiklese de çoğunlukla takılır.
+kikla | H | H | H | Güçlü çeneli hedef balıktır, yemi alır ve takılır.
+lambuga | H | H | H | Açık su avcısı hedef türdür.
+lapin | E | E | H | Kayalıkta yemi didikleyen küçük balıktır, genellikle geri atılır.
+lokum | E | E | H | Kumda yemi didikler, 15 cm yasal boyuyla ufak avdır, yem değildir.
+subye | H | H | H | Eging ile avlanan hedef türdür, yemi kavrar, yem değildir.
+iskorpit | E | E | H | Pusu avcısı yemi alabilir, zehirli ve küçük olduğu için ufak avdır.
+barakuda | H | H | H | Keskin dişli pelajik avcı hedef türdür.
+cinekop | H | E | H | Lüfer yavrusu hedef türdür, yemi alır ve takılır, yasal boy altı olduğu için ufak avdır.
+cutre | E | H | H | Sert çenesiyle yemi koparır, iğne boş gelebilir, ancak hedef dışı türdür.
+dil_baligi | E | H | H | Kumda yemi alabilir, hedef türdür, yem değildir.
+ustura_baligi | E | H | H | Keskin dişleriyle yemi parçalayabilir, ancak lezzetli hedef türdür.
+gelincik | E | E | H | Gece kayalıkta yemi alabilir, küçük ve istenmez.
+isparoz | E | E | H | Sürü halinde yemi didikler, küçük boyu nedeniyle ufak avdır.
+melanur | H | H | H | Kayalık hedef türdür, yemi didiklese de takılır.
+muren | H | H | H | Gece avcısı yemi koparabilir, hedef dışı büyük türdür.
+pisi | H | H | H | Kumda yemi alabilir, hedef türdür.
+sargoz | H | H | H | Kayalık hedef türdür, yemi didiklese de takılır.
+sivriburun | H | H | H | Kayalık hedef türdür, yemi didiklese de takılır.
+tirsi | H | H | E | Planktonik sürü balığı iğne yemini soymaz, büyük avcılar için yemdir.
+trakonya | E | E | H | Kuma gömülü pusu avcısı yemi alabilir, zehirli ve tehlikeli olduğu için ufak avdır.
+aslan_baligi | H | E | H | Zehirli istilacı türdür, yemi alıp takılabilir, ancak tehlikeli ve istenmeyen türdür.
+balon_baligi | E | E | H | Güçlü gagasıyla yemi koparır, zehirli istilacı tür olduğu için ufak avdır.
+istavrit | H | E | E | Sürü balığı iğne yemini soymaz, küçük boyuyla ufak avdır ve canlı yem olarak değerlidir.
+kalamar | H | H | E | Dokunaçlarıyla yemi kavrar, hedef türdür, ancak yem olarak kullanılabilir.
+kupes | E | E | E | Sürü halinde yemi didikler, küçük boyutlu ve canlı yem olarak kullanılır.
+kurbaga | E | E | H | Kuma gömülü yemi alabilir, zehirli ve küçük olduğu için ufak avdır.
+trakun | H | H | H | Sürü balığı olarak yemi alabilir, ancak hedef türdür, yem değildir.
+uskumru | H | H | E | Sürü balığı iğne yemini soymaz, lezzetli hedef türdür, ancak canlı yem olarak da kullanılır.
+vatoz | E | E | H | Yemi alabilir, zehirli dikeni ve düşük et değeri nedeniyle genellikle geri atılır.
+granyoz | H | H | H | Büyük dip avcısı hedef türdür.
+hamsi | H | E | E | Planktonik sürü balığı iğne yemini soymaz, küçük boyuyla ufak avdır ve avcılar için yemdir.
+hani | E | E | H | Kayalıkta yemi didikler, küçük boyu nedeniyle ufak avdır, yem değildir.
+iskatarya | H | H | H | Sparid hedef türdür, yemi didiklese de takılır.
+izmarit | E | E | E | Gerçek ağzıyla yemi didikler, küçük boyuyla ufak avdır ve canlı yem olarak kullanılabilir.
+kolyoz | H | H | E | Sürü balığı iğne yemini soymaz, hedef türdür, ancak avcılar için yemdir.
+migri | H | H | H | Gece avcısı yemi alabilir, hedef dışı büyük türdür.
+papalina | H | E | E | Planktonik sürü balığı iğne yemini soymaz, küçük boyuyla ufak avdır ve avcılar için kritik yemdir.
+sardalya | H | E | E | Planktonik sürü balığı iğne yemini soymaz, küçük boyuyla ufak avdır ve avcılar için yemdir.
+tekir | E | E | H | Dipte yemi alabilir, küçük boyuyla ufak avdır, yem olarak kullanılmaz.
+barbun | E | E | H | Yumuşak dudaklarıyla yemi emer, küçük boyuyla ufak avdır, yem değildir.
+caca | H | E | E | Planktonik sürü balığı iğne yemini soymaz, küçük boyuyla ufak avdır ve avcılar için yemdir.
+palamut | H | H | H | Pelajik avcı hedef türdür, yemi soymaz, yem değildir.
+sinarit | H | H | H | Büyük dip avcısı hedef türdür.
+kirlangic | H | H | H | Dipte yemi alabilir, ancak hedef türdür.
+akya | H | H | H | Açık su avcısı, kıyıdan gelmez, hedef türdür.
+lahoz | H | H | H | Büyük dip avcısı hedef türdür, koruma altındadır.
+yazili_orkinos | H | H | H | Pelajik avcı, trolling hedefidir.
+mercan | H | H | H | Dipte yemi alabilir, ancak hedef türdür.
+mirlan | E | E | E | Dipte yemi alabilir, küçük boyuyla ufak avdır ve avcılar için yem olarak kullanılabilir.

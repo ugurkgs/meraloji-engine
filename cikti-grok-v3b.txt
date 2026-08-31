@@ -1,0 +1,66 @@
+anahtar | SOYAR | UFAK_AV | YEM_BALIGI | tek cümle gerekçe
+deniz_ignesi | H | H | H | Boru ağız yapısı iğnedeki yemi didikleyemez, küçük ve pratikte işe yaramaz türdür.
+aterin | E | H | E | Kıyıya yakın sürülerle yemi didikleyerek soyar ama levrek-lüfer için birinci sınıf canlı yemdir.
+zurna | H | H | E | Hızlı yüzey avcısıdır, yemi soymadan takılır ve lüfer/kofana için fiilen yem olarak kullanılır.
+kefal | E | H | H | Güçlü dudaklarıyla ekmek ve yemi didikler ama avcılar için standart canlı yem pratiği yoktur.
+levrek | H | H | H | Yemi alır ve iğneye takılır, hedef avcı türdür.
+mirmir | H | H | H | Dipte kurt arayan ağız yapısı yemi alır ama genellikle hedef dip balığıdır.
+sarikulak | E | H | H | Kefal gibi yemi ağızla alır ancak avcılar için yaygın yem kullanımı belirsizdir.
+sarpa | E | H | H | Otobur olsa da ekmekle avlanırken yemi didikler, tipik avcı yemi değildir.
+yilan_baligi | H | H | H | Gece avlanan uzun gövdeli balık yemi kavrayıp götürebilir ama kıyı yem balığı değildir.
+eskina | H | H | H | Gece dipte güçlü ağızla yemi alabilir ama tipik yem balığı olarak kullanılmaz.
+lufer | H | H | H | Keskin dişli büyük hedef avcıdır, hiçbir sınıfa girmez.
+minekop | H | H | H | Gece dipte yırtıcı olarak yemi alabilir ama esasen hedef türdür.
+zargana | H | H | E | Klasik dip yemini soyması beklenmez, kendisi büyük avcılar için değerli canlı yemdir.
+ahtapot | H | H | H | Yemi kollarıyla sarıp yapışır, boş iğne çektirmez ve tipik yem balığı değildir.
+cipura | H | H | H | Yemi ezer ama sonunda iğneye takılır, hedef dip balığıdır.
+karagoz | H | H | H | Güçlü çeneli sparid yemi didikleyebilir ama tipik yem balığı değildir.
+kikla | E | H | H | Güçlü çenesiyle yemi kırar, küçük kayalık balığıdır ve standart yem değildir.
+lambuga | H | H | H | Açık su büyük avcı hedefidir, kıyı oltasında ufak veya yem sayılmaz.
+lapin | E | E | H | Kayalık wrasse yemi didikler, tipik boyu küçük ve işe yaramazdır.
+lokum | E | E | H | Dipte karides-solucanla yemi alır, 15 cm yasal boy nedeniyle küçükleri işe yaramazdır.
+subye | H | H | H | Eging hedefi kafadanbacaklıdır, klasik iğne yemini soymadan avlanır.
+iskorpit | E | E | H | Pusu avcısı yemi yutar, küçük bireyleri sık gelir ama zehirli dikenleri nedeniyle kullanışsızdır.
+barakuda | H | H | H | Keskin dişli büyük avcı hedef türdür, yem hırsızı sınıfına girmez.
+cinekop | H | E | H | Lüferin 20 cm altı yasak yavru evresidir, tutulunca geri atılır.
+cutre | E | H | H | Sert çenesiyle iğneyi koparıp yemi çalar, tipik yem balığı değildir.
+dil_baligi | H | H | H | Kumda boru kurdu gibi yemi alır ama normalde hedef dip balığıdır.
+ustura_baligi | E | H | H | Keskin dişleri yemi/misinayı koparabilir ama tipik avcı yemi değildir.
+gelincik | E | E | H | Gece kayalıkta yemi alabilir, çoğu birey ufak kalır ve işe yaramazdır.
+isparoz | E | E | H | Sürü halinde ekmekle avlanırken yemi didikler, genellikle küçük ve düşük faydalıdır.
+melanur | H | H | H | Kayalık sparid yemi didikleyebilir ama avcılar için özel yem değildir.
+muren | H | H | H | Keskin dişli gece avcısı yemi kavrayıp götürebilir, hedef kayalık balığıdır.
+pisi | H | H | H | Gece kumlukta yemi alabilir, 20 cm altı bireyler işe yaramazdır.
+sargoz | H | H | H | Güçlü çeneli kayalık balık yemi didikler ama esasen hedef türdür.
+sivriburun | H | H | H | Sparid güçlü çenesi yemi alır, kıyı avında çoğunlukla hedef balıktır.
+tirsi | H | E | E | Planktonik sürü balığı iğnedeki kurdu soyamaz, küçük bireyleri avcılar için yem olabilir.
+trakonya | E | E | H | Kumda pusu kuran zehirli balık yemi alabilir, küçük ve tehlikeli olduğu için değer düşüktür.
+aslan_baligi | H | E | H | Pusu avcısı küçük yemi alabilir ama zehirli istilacı olduğu için yem olarak kullanılmaz.
+balon_baligi | E | E | H | Güçlü gagamsı dişleriyle yemi kemirir ama öldürücü zehirli istilacıdır, kullanılamaz.
+istavrit | H | E | E | Sürü balığı klasik yemi soymaz, çapariyle bol tutulur ve avcı yemi olarak kullanılır.
+kalamar | H | H | E | Eging ile avlanır, kendisi büyük balıklar için doğal yem olarak kullanılır.
+kupes | E | E | E | Gerçek ağızla sürü halinde yemi didikler ve canlı yem olarak fiilen kullanılır.
+kurbaga | E | E | H | Kuma gömülü pusu avcısı yemi alabilir, küçük zehirli ve hedef dışıdır.
+trakun | H | H | H | Pelajik carangid dip yemini soyması beklenmez, çoğunlukla hedef avcıdır.
+uskumru | H | H | E | Plankton ve küçük avla beslenen sürü balığı dip yemini soymaz, değerli yem balığıdır.
+vatoz | H | H | H | Dipte yemi emerek alabilir ama büyük dikenli gövdesi nedeniyle genellikle bırakılır.
+granyoz | H | H | H | Büyük dip avcısı hedef türdür, kıyı ufak yem hırsızı değildir.
+hamsi | H | E | E | Plankton süzen sürü balığı iğnedeki kurdu soyamaz, küçük bireyleri avcı yemidir.
+hani | E | E | H | Kayalıkta pusu kuran küçük balık yemi alır, küçük gövdesi nedeniyle ufak avdır.
+iskatarya | H | H | H | Güçlü çeneli sparid yemi alabilir ama tipik avcı yemi olduğuna dair pratik yoktur.
+izmarit | E | E | H | Gerçek ağzıyla yemi didikler, küçük bireyleri sık takılır ve işe yaramazdır.
+kolyoz | H | H | E | Sürü halinde küçük avlarla beslenir, iğnedeki kurdu soymaz ve avcılar için yemdir.
+migri | H | H | H | Gece güçlü çeneli yılan balığı yemi götürebilir, büyük ve tipik yem değildir.
+papalina | H | E | E | Planktonik sürü balığı kurdu soyamaz, istavrit ve avcılar için kritik yemdir.
+sardalya | H | E | E | Planktonla beslenen süzücü tür yemi soymaz, küçük sürü balığı olarak avcı yemidir.
+tekir | E | E | H | Dipte kurt arayan ağız yemi alır, 11 cm asgari boy nedeniyle küçükleri ufaktır.
+barbun | E | E | H | Yumuşak dudaklarıyla yemi emerek alır, 13 cm altı bireyler ufaktır.
+caca | H | H | E | Süzücü sürü balığı kurdu fiziksel olarak soyamaz, büyük avcıların yem zincirindedir.
+palamut | H | H | H | Büyük pelajik avcı hedefidir, dip yemini soyan ufak av değildir.
+sinarit | H | H | H | Büyük kayalık dip avcısı hedef türdür, kıyı ufak hırsız sınıfına girmez.
+kirlangic | H | H | H | Dipte küçük canlılarla beslenen ağız yemi alabilir ama yem balığı olarak belirgin değildir.
+akya | H | H | H | Güçlü açık su avcısıdır, tekne gerektirir ve kıyı yem hırsızı değildir.
+lahoz | H | H | H | Güçlü kayalık dip avcısı hedef ve koruma altındadır, yem balığı değildir.
+yazili_orkinos | H | H | H | Açık deniz pelajik avcısı trolling hedefidir, kıyı iğnesinde ufak av değildir.
+mercan | H | H | H | Kayalık-kumluk dipte yemi alır ama çoğunlukla hedef mercan balığıdır.
+mirlan | E | E | E | Dipte küçük avlarla beslenen mezgit yemi alabilir, küçük bireyleri avcı yemi olabilir.

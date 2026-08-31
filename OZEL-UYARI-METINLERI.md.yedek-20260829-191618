@@ -1,0 +1,117 @@
+# ÖZEL UYARILAR — TÜM CÜMLE KALIPLARI
+
+Düzenlemen için. **Sadece `>` ile başlayan satırları değiştir**, başlıkları ve
+açıklamaları olduğu gibi bırak — hangi metnin nereye gittiğini onlardan bulacağım.
+
+`${...}` işaretleri koddan gelen değerlerdir. **Yerlerini değiştirebilirsin ama
+silme** — silersen o bilgi kullanıcıya hiç ulaşmaz.
+
+| İşaret | Ne gelir | Örnek |
+|---|---|---|
+| `${tur}` | Hırsız/yem balığının adı | Aterin-Gümüş |
+| `${skor}` | O türün aktiflik skoru | 68 |
+| `${hedef}` | Listedeki en iyi hedef balık | Levrek |
+| `${hedefSkor}` | Hedef balığın skoru | 45 |
+| `${avci}` | Canlı yemi yiyecek avcı | Trakun |
+| `${avciSkor}` | Avcının skoru | 74 |
+
+---
+
+## 1. BAŞLIKLAR
+
+Kartın en üstünde, kalın ve renkli çıkar. Yanında bir ikon var (⚠️ / 🦐 / 🎣).
+
+### 1a) Hırsız skoru ≥ 60 **ve** hedeften ≥ 15 puan fazla → kırmızı kart
+
+> Harami istilası
+
+### 1b) Hırsız skoru ≥ 60 ama fark 15'ten az → sarı kart
+
+Bu ayrım kasıtlı: levrek 80 / izmarit 70 olan günde alarm çalmaz, sadece
+"yem çabuk gidecek" der.
+
+> Yemleriniz hızlı tükenebilir
+
+### 1c) Canlı yem fırsatı → camgöbeği kart
+
+> Canlı yem fırsatı
+
+---
+
+## 2. GÖVDE METİNLERİ
+
+Başlığın altında, tek paragraf.
+
+### 2a) Kırmızı kart gövdesi (hedef balık listede varken)
+
+> ${tur} %${skor}, ${hedef} %${hedefSkor} aktif görünüyor. Yeminiz hedefe ulaşmadan alınabilir.
+
+### 2b) Kırmızı kart gövdesi (listede hiç hedef balık yokken)
+
+Nadir ama oluyor: bütün liste hırsız veya tehlikeli türden ibaretse.
+
+> ${tur} %${skor} aktif görünüyor. Yeminiz beklediğinizden hızlı gidebilir.
+
+### 2c) Sarı kart gövdesi
+
+> ${tur} %${skor} aktif görünüyor. Yemleriniz normalden hızlı tükenebilir.
+
+### 2d) Camgöbeği kart gövdesi
+
+Yalnız peşine düşülecek gerçek bir avcı da ≥ 50 skorlayınca çıkar — yoksa
+"çapari at" tavsiyesi havada kalırdı.
+
+> ${tur} %${skor} — çapariyle birkaç tane tutup iri iğneye canlı takmayı deneyebilirsiniz. Bölgede ${avci} %${avciSkor}.
+
+---
+
+## 3. TAVSİYE MADDELERİ
+
+Gövdenin altında `•` ile listelenir. **Sadece kırmızı ve sarı kartta çıkar.**
+
+Her uyarıda **3 madde** görünür: önce türün ağız yapısına göre biri (3a/3b/3c'den
+**yalnız bir tanesi**), sonra 3d ve 3e her zaman.
+
+### 3a) Küçük ağızlı türler (izmarit, aterin, isparoz, kupes, hani, lokum)
+
+> İğneyi büyütmek, küçük ağızlı balıkların yemi almasını zorlaştırabilir
+
+### 3b) Sert gagalı tür (çütre)
+
+Bu türün sorunu ağız değil; misinayı kesiyor. O yüzden ona "iğneyi büyüt"
+denmiyor.
+
+> Çelik köstek düşünebilirsiniz — misinayı kesebiliyorlar
+
+### 3c) Gagalayarak didikleyen türler (sarpa, lapin)
+
+> Yemi iplikle bağlamak, daha uzun dayanmasına yardımcı olabilir
+
+### 3d) Her hırsız uyarısında çıkar
+
+> Sert yem işinize yarayabilir: madya, kalamar veya uskumru fileto
+
+### 3e) Her hırsız uyarısında çıkar
+
+> Yanınıza normalden fazla yem almak iyi bir fikir olabilir
+
+---
+
+## 4. BÖLÜM BAŞLIĞI
+
+Uyarı kartlarının üstünde, iki çizgi arasında, küçük ve harfleri aralıklı.
+Uyarı yoksa bu başlık da görünmez.
+
+> ÖZEL UYARILAR
+
+---
+
+## NOTLAR
+
+- Bu metinler **sunucudan** geliyor, APK'dan değil. Değiştirince telefona yeni
+  sürüm kurmak gerekmiyor, sunucu deploy'u yetiyor.
+- Türkçe'yi düzenle; İngilizce, İspanyolca ve Yunancasını senin son hâline göre
+  ben uyarlarım. Dört dilin aynı yumuşaklıkta olması gerekiyor.
+- Uzunluğa dikkat: gövde metni telefonda **2 satırı** geçince kart şişiyor.
+  Şu anki en uzun gövde (2d) tam sınırda.
+- Tavsiye maddeleri tek satırda durmalı; şu an 3d en uzun olanı.

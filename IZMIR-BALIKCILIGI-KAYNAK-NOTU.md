@@ -779,7 +779,7 @@ Kılkuyruk mercan dış görünüşü mercanı andırdığı için o adı almı�
 | ~~2~~ | ~~İç Körfez yasak poligonu~~ | **İPTAL — sahip 2026-08-29'da "düzeltme yapma" dedi. Yeniden açma.** | — |
 | ~~3~~ | ~~Sazkayası → `YEM_BALIGI`~~ | **İPTAL — sahip 2026-08-31: "bunu kayıtlardan sil, yapılmayacak." Yeniden açma.** | — |
 | **4** | **21 olta türünün `seasons` denetimi** | **YAPILACAK** (sahip 2026-08-31). Doğrulama sonucu aşağıda §4-DOĞRULAMA | Orta |
-| **5** | **Trakonya + bulanık su uyarısı** | **YAPILACAK** (sahip 2026-08-31). Güvenlik. Veri elimizde | Orta |
+| ~~5~~ | ~~Trakonya + bulanık su uyarısı~~ | **YAPILDI ve KAPANDI** (2026-08-31). `TEHLIKE_ZEMIN` uyarısı, dört şart birlikte: tür aktif + sığ + kumlu/çamurlu + bulanık ya da dip dalgası. Eşikler `OZEL_UYARI_TRAKONYA_*`, sahada ayarlanacak (log satırı var). **Varsam KAPSAM DIŞI** — sahip: *"varsam ekleme, türkiyede bilinen balık değil."* | — |
 | ~~6~~ | ~~Zehirli tür künyeleri + ilk yardım~~ | **YAPILMAYACAK — sahip 2026-08-31: "olduğu gibi bırak."** | — |
 | 7 | **Yapay resif noktaları** | **SONRAYA PLANLANDI** (sahip 2026-08-31: "bunu çalışacağız, sonrası için planla"). Önce koordinat doğrulaması şart | Orta |
 | 8 | **Lagün soğuma / furya** modeli | **SONRAYA PLANLANDI** (sahip 2026-08-31). En ilginç ama en spekülatif | Büyük |
@@ -806,6 +806,48 @@ BOŞ, yani bölge kapısından geçemiyorlar (`server.js:4207` → `return false
 
 **Gerçek iş: 19 tür karşılaştırılabilir, 17'sinde `seasons` düzeltmesi etki eder,
 2'sinde `monthlyActivity` dizisi düzeltilmeli.**
+
+### §4-KARŞILAŞTIRMA SONUCU (2026-08-31) — karar BEKLİYOR
+
+⚠ Takvim bir **VARLIK** çizelgesi (X / ·), yoğunluk değil. **Mevsim sıralayamaz.**
+İlk denemede zirveleri karşılaştırdım; altı türde takvim tüm mevsimlerde X
+gösterdiği için "zirve" beraberlik çıktı ve sahte sapma ürettim — §3.5'teki
+hatanın aynısı. Doğru test iki yönlü çelişki:
+
+- **A)** biz ≥ 0,70 diyoruz ama kaynak o mevsimde **%0** diyor
+- **B)** biz ≤ 0,40 diyoruz ama kaynak o mevsimin **%100'ünde** tutuluyor diyor
+
+| durum | adet |
+|---|---|
+| Çelişki yok | 9 |
+| **Çelişki var** | **7** |
+| `monthlyActivity` yüzünden `seasons` ölü | 3 — `uskumru`, `kolyoz`, `lufer` |
+| `species.js`'de yok (`kastroz`, silinmişti) | 1 |
+
+**A — biz yüksek, kaynak "hiç tutulmuyor":**
+
+| tür | mevsim | bizde | kaynak takvimi |
+|---|---|---|---|
+| `iskatarya` | sonbahar | 0,85 | Şub–Haz |
+| `eskina` | sonbahar | 0,90 | Ara–Nis |
+| `levrek` | sonbahar | 0,80 | Şub–Ağu |
+| `mirmir` | sonbahar | 0,70 | Mar–Eyl |
+| `tranca` | ilkbahar 0,70 · sonbahar 0,75 | | yalnız Haz–Tem |
+| `zargana` | yaz | 0,80 | Kas–Oca |
+
+**B — biz düşük, kaynak "her ay":** `sargoz` yaz 0,40 · takvim 12/12 ✓
+
+**Üç uyarı — karar vermeden önce oku:**
+
+1. **Yedi bulgunun beşi aynı mevsimde: sonbahar.** Motorun sonbaharı yalnız iki ay
+   (Eki–Kas). Tek yönlü sistematik sapma önce kaynaktan şüphelenmeyi gerektirir.
+2. **`eskina` kendi kaynağıyla çelişiyor.** Sonbahar 0,90 değeri 2026-08-29'da
+   *bu kitaptan* konmuştu ("zirve Ağustos–Kasım"). Şimdi aynı kitabın av takvimi
+   sonbaharda %0 diyor. Kitabın iki bölümü birbirini tutmuyor.
+3. **`zargana` için artık ikinci sinyal var.** DEVIR "tek kaynak, yetersiz —
+   dokunma" demişti; takvim de aynı yöne işaret ediyor (Kas–Oca, yaz değil).
+
+Notun kendi kuralı uygulandı: **hiçbir `seasons` değerine dokunulmadı.**
 
 ---
 

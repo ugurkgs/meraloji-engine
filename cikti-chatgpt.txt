@@ -1,0 +1,60 @@
+anahtar | SOYAR | UFAK_AV | YEM_BALIGI | tek cümle gerekçe
+deniz_ignesi | H | ? | ? | İnce ve uzun ağız yapısı nedeniyle klasik olta yemini soyan bir tür olduğuna dair yeterli dayanak yoktur.
+aterin | E | ? | E | Kıyıya çok yakın sürüler yapan küçük türdür; yemi didikleyebilir ve levrek-lüfer için fiilen canlı yem olarak kullanılır.
+zurna | H | ? | E | Hızlı avcıdır ve yemi agresif biçimde alıp iğneye takılabilir; notta lüfer/kofana yemi olarak kullanıldığı belirtilmiştir.
+kefal | H | ? | ? | Ekmek ve benzeri yemleri alabilse de iğneye takılan hedef avdır ve yem balığı olarak fiili kullanım açıkça belirtilmemiştir.
+levrek | H | H | H | Yemi alıp iğneye takılan hedef avdır ve küçük bireyleri de doğrudan hedef türün yavrularıdır.
+mirmir | H | ? | H | Dipte yem arayan güçlü ağızlı bir hedef balıktır ve yem balığı olarak fiili kullanımına dair dayanak yoktur.
+sarikulak | H | ? | ? | Lagün ve sığ kıyılarda yemle avlanan bir kefal türüdür ancak iğneye takılmayan yem hırsızı olduğuna dair dayanak yoktur.
+sarpa | H | ? | H | Otobur olup ekmekle kolayca yakalanır; yemi tüketip iğneden kaçan tipik bir tür olduğuna dair dayanak yoktur.
+yilan_baligi | H | ? | H | Gece avlanan etçil bir balıktır ve yem alabilir ancak küçük bireylerinin kıyıdan yem olarak fiilen kullanıldığı belirtilmemiştir.
+eskina | H | ? | H | Gece aktif hedef bir dip balığıdır ve verilen bilgiler yemi alıp iğneye takıldığını destekler.
+lufer | H | H | H | Keskin dişli aktif avcıdır ve hedef tür olduğundan iğnedeki yemi soyan küçük balık sınıfına girmez.
+minekop | H | ? | H | Büyük dip avcısıdır ve verilen bilgiler yemi almasını destekler ancak yem balığı olarak fiili kullanım belirtilmemiştir.
+zargana | H | ? | ? | Yüzeyde avlanan yırtıcıdır ve yemleri alıp iğneye takılabilir; küçük yem balığı olarak kullanıldığına dair kaynak verisi yoktur.
+ahtapot | H | ? | H | Yeme sarılıp yapıştığı ve ağırlık hissedince sert tasma gerektiği belirtilmiştir; bu nedenle soyucu değildir.
+cipura | H | ? | H | Yemi ezse de örnekte açıkça iğneye takılan av olarak tanımlanmıştır.
+karagoz | H | ? | H | Kayalık ve köpüklü sularda yem alan hedef bir dip balığıdır ve soyucu olduğuna dair dayanak yoktur.
+kikla | H | ? | H | Güçlü çeneleriyle kabukluları kırabilen hedef dip balığıdır ve yemi alıp iğneye takılması beklenir.
+lambuga | H | ? | H | Büyük pelajik avcıdır ve yemleri agresif biçimde tüketen hedef balıktır.
+lapin | H | ? | H | Kayalık bölgede küçük avlarla beslenen bir balıktır ancak iğnedeki yemi soyduğuna dair yeterli veri yoktur.
+lokum | E | ? | H | Sığ kumlu-çamurlu dipte solucan ve karidesle beslenen küçük tür olduğundan yemle uğraşıp iğneyi boş bırakabilir.
+subye | H | ? | H | Eging ile hedeflenen ve yeme yapışan kafadanbacaklıdır; tipik yem hırsızı değildir.
+iskorpit | H | ? | H | Kayalık dipte pusu kuran yırtıcıdır ve yemi alıp iğneye takılan hedef avdır.
+barakuda | H | ? | H | Keskin dişli aktif avcıdır ve yemi koparsa bile iğneye takılan avdır, soyucu değildir.
+cinekop | H | E | H | Lüferin 20 cm altındaki yavru evresidir; küçük bireyler iğneye takılır ancak yasal boyun altındadır.
+cutre | H | ? | H | Sert çeneleriyle yemi koparabilecek olsa da güçlü çene yapısı nedeniyle iğneye takılabilen hedef balıktır.
+dil_baligi | H | ? | H | Dipte kuma gömülerek avlanan ve boru kurduyla hedeflenen bir dip balığıdır.
+ustura_baligi | H | ? | H | Keskin dişleri misinayı kesebilse de verilen bilgiler iğnedeki yemi soyduğunu değil avlandığını gösterir.
+gelincik | H | ? | H | Gece kayalık aralarında avlanan küçük etçil dip balığıdır ve yemi alabilir.
+isparoz | H | ? | H | Ekmekle bereketle avlanan ve iğneye gelen küçük sürü balığıdır; yem hırsızı olduğuna dair dayanak yoktur.
+melanur | H | ? | H | Kayalıkta yaşayan hedef bir spariddir ve yemi alıp iğneye takılması beklenir.
+muren | H | ? | H | Keskin dişli gece avcısıdır ve yemi parçalayabilse de iğneye takılan avdır.
+pisi | H | ? | H | Gece dipte avlanan yassı balıktır ve yemle beslenen hedef avdır.
+sargoz | H | ? | H | Köpüklü ve dalgalı sularda yem alan hedef spariddir; soyucu olduğuna dair veri yoktur.
+sivriburun | H | ? | H | Kayalık-köpüklü suda yaşayan bir karagöz türüdür ve yemi alıp iğneye takılması beklenir.
+tirsi | H | ? | H | Göç eden sürü balığıdır ve iğnedeki yemi fiziksel olarak soyan küçük dip balığı değildir.
+trakonya | H | ? | H | Kuma gömülü pusu avcısıdır ve yem alabilecek etçil ağız yapısına sahiptir.
+aslan_baligi | H | ? | H | Zehirli dikenli istilacı bir avcıdır ve küçük balıklarla beslenen hedef avdır.
+balon_baligi | H | ? | H | Güçlü gagamsı çeneleriyle yemi koparabilir ancak iğneye takılan avcıdır, tipik soyucu değildir.
+istavrit | H | ? | E | Sürü balığıdır ve notta çapariyle bol avlandığı belirtilirken aynı zamanda fiilen canlı yem olarak kullanılmaktadır.
+kalamar | H | ? | H | Berrak su ve ay ışığında hedeflenen bir kafadanbacaklıdır; iğnedeki yemi soyan küçük balık değildir.
+kupes | H | ? | E | Sürü halinde yaşayan ve çapariyle bol avlanan türdür; notta canlı yem olarak kullanıldığı açıkça belirtilmiştir.
+kurbaga | H | ? | H | Kuma gömülü pusu avcısıdır ve yemi alan küçük bir dip balığıdır.
+hani | H | ? | H | Küçük kayalık dip avcısıdır ve karides/küçük canlıları alan bir avcıdır; yem hırsızı olduğuna dair kanıt yoktur.
+uskumru | H | ? | H | Sürü halinde yaşayan aktif avcıdır ve yemi fiziksel olarak soyan küçük dip balığı değildir.
+vatoz | H | ? | H | Dipte yem alan büyük bir vatozdur ve yemi soyduğuna dair veri yoktur.
+caca | H | ? | E | Plankton ağırlıklı sürü balığı iğnedeki klasik yemi soymaz ancak notta büyük avcıların ana yem zincirinde olduğu belirtilmiştir.
+hamsi | H | ? | E | Plankton süzen sürü balığı iğnedeki kurdu soymaz fakat küçük yem olarak kullanılabilir ve prompt bunu özellikle yem balığı sınıfına dahil eder.
+papalina | H | ? | E | Küçük pelajik sürü balığıdır ve notta istavrit yemi olarak kritik olduğu açıkça belirtilmiştir.
+sardalya | H | ? | E | Küçük sürü balığıdır ve gece çapariyle tutulabilmesi nedeniyle pratik yem olarak kullanılabilir.
+tekir | H | ? | ? | Dipte yaşayan hedef balıktır ve yemi alır ancak fiilen başka avcılar için aynı gün yem olarak kullanıldığına dair veri yoktur.
+barbun | H | ? | ? | Yumuşak dudaklı olup yemi emerek aldığı belirtilmiştir; bu davranış soyucudan ziyade iğneye gelen avı destekler.
+palamut | H | ? | H | Güçlü pelajik avcıdır ve yemi agresif biçimde alan hedef balıktır.
+sinarit | H | ? | H | Büyük kayalık dip avcısıdır ve hedef tür olarak yemi alıp iğneye takılır.
+kirlangic | H | ? | H | Dipte küçük canlılarla beslenen hedef balıktır ve yem hırsızı olduğuna dair yeterli veri yoktur.
+akya | H | ? | H | Güçlü açık su avcısıdır ve notta tekne gerektirdiği belirtilerek kıyıdaki yem hırsızı sınıfından ayrılır.
+lahoz | H | ? | H | Büyük kayalık dip avcısıdır ve koruma altındaki hedef türdür; yem hırsızı olduğuna dair veri yoktur.
+yazili_orkinos | H | ? | H | Hızlı ve güçlü pelajik avcıdır ve verilen notta trolling ile hedeflendiği belirtilmiştir.
+mercan | H | ? | H | Kayalık-kumluk dipte yem alan hedef spariddir ve yemi dibe oturarak alması soyucu olmadığını destekler.
+mirlan | H | ? | ? | Küçük dip avları ve omurgasızlarla beslenebilir ancak kıyıdan başka avcılar için fiilen yem olarak kullanıldığına dair yeterli veri yoktur.
