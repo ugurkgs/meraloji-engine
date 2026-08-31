@@ -13,6 +13,20 @@ CRE crepuscular             CAT cathemeral (gece de gündüz de)
 DVM diel vertical migration UK  bilinmiyor / yetersiz
 ```
 
+## VERİLEN KARARLAR (2026-08-31) — bu dört tür KAPANDI, yeniden açma
+
+| tür | karar | gerekçe |
+|---|---|---|
+| `sinarit` | DAY → **CREPUSCULAR** ✔ uygulandı | makale CRE, iki atıf; Dentex dentex'in 8 yıllık resif izlemesi de destekliyor |
+| `melanur` | DAY → **CREPUSCULAR** ✔ uygulandı | makale CRE |
+| `iskatarya` | DAY → **NIGHT** ✔ uygulandı | makale NM, gece yumurtlama kaydı |
+| `mirmir` | NIGHT → **ALL** ✔ uygulandı | sahibin kendi Ege gözlemi ("hem gündüz hem gece") + makale DM. Ayrıntı `species.js` içindeki kayıtta. |
+| `kurbaga` | **DEĞİŞTİRİLMEDİ** — kapandı | kayıtta bilinçli "biyolojik düzelti" notu var ve makalenin kendi notu onu destekliyor (gündüz kuma gömülü yem uzantısıyla besleniyor). Ayrıca Uranoscopidae'de tek tür → familya bandı dejenere. |
+
+Üçünde de `peakHours` ve dört dildeki `peakHoursDesc` birlikte güncellendi.
+
+---
+
 ## ⚠ ÖNCE BUNU OKU — bu tablo doğrudan kopyalanmaz
 
 Makale **BESLENME** etkinliğini sınıflıyor (kendi ifadesi: "based on the main activity, i.e. feeding"). `activity` alanı ise **balıkçının ne zaman tutacağını** kodluyor. İkisi örtüşür ama aynı değil.
