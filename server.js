@@ -8726,6 +8726,33 @@ app.get('/api/species-list', (req, res) => {
     if (!SPECIES_DB) return res.status(503).json({ error: i18n(lang).errors.dbLoading });
     const speciesResultsMap = new Map();
     Object.entries(SPECIES_DB).forEach(([key, fish]) => {
+        // ┌─ BÖLGESİZ TÜR ARAMAYA GİRMEZ [2026-09-02] ────────────────────────┐
+        // │ SPECIES_DB'nin 877 kaydının 632'sinde `regions` BOŞ. Bunlar       │
+        // │ açılmamış bölgeler için hazırda bekleyen paketler (brazil,        │
+        // │ thailand, redsea, idn, esp…) ve canlı türlerin ölü kopyaları.     │
+        // │ Skor motoru bölgeye göre süzdüğü için HİÇBİRİ hiçbir kullanıcının │
+        // │ listesinde çıkamaz — ama arama listesi onları sunuyordu.          │
+        // │                                                                   │
+        // │ SAHADA GÖRÜLDÜ: "Akya" araması 8 sonuç veriyordu; 7'si Türkiye'de │
+        // │ asla çıkamayacak kayıtlardı (esp_medregal "Sarıkuyruk Akya",      │
+        // │ redsea/safrica/uae varyantları). Sahibi ikisini mükerrer sanıp    │
+        // │ "yanlış olanı silelim" dedi — mükerrer değillerdi, biri İspanya   │
+        // │ paketinden sızıyordu.                                             │
+        // │                                                                   │
+        // │ Kullanıcı böyle bir türü seçerse /api/fish-search onu hiçbir      │
+        // │ noktada bulamaz: çıkmaz sokak. Aramada olmaları zarar, fayda yok. │
+        // │                                                                   │
+        // │ ÖLÇÜLDÜ: yanıt 566 → 180 tür. "Akya" araması 8 → 3, Türkçe olan  │
+        // │ başta; kalan ikisi gerçekten canlı (NZ, BAE) ve o bölgelerin      │
+        // │ kullanıcısı için doğru sonuç.                                     │
+        // │                                                                   │
+        // │ NEDEN BÖLGEYE GÖRE DEĞİL, VARLIĞA GÖRE: bu uç konum almıyor,      │
+        // │ yalnız `lang`. Kullanıcının bölgesini bilmiyoruz, o yüzden        │
+        // │ "hiçbir bölgede yok" olanlar eleniyor — "senin bölgende yok"      │
+        // │ olanlar değil. NZ kullanıcısı NZ türlerini aramaya devam eder.    │
+        // └───────────────────────────────────────────────────────────────────┘
+        if (!Array.isArray(fish.regions) || fish.regions.length === 0) return;
+
         const scientificName = (fish.scientificName || fish.name).toLowerCase().trim();
         const currentName = getLoc(fish, 'name', lang);
 

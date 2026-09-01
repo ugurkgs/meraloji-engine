@@ -572,7 +572,18 @@ const SPECIES_DB = {
         // [DÜZELTME] "sarikuyruk" anahtarı aynı bilimsel türün (Seriola dumerili) çelişkili
         // verilerle ikinci kez girilmiş, hiçbir kodda referans edilmeyen bir duplikeydi.
         // Silindi; iki common-name Türkçe'de birbirinin yerine kullanıldığı için isimde korundu.
-        name: "Akya (Sarıkuyruk)", nameEn: "Greater Amberjack", nameEl: "Μαγιάτικο", nameEs: "Lecha (Pez Limón)",
+        //
+        // [2026-09-02] AD DÜZELTİLDİ: "Akya (Sarıkuyruk)" → "Sarıkuyruk (Kuzu Balığı)".
+        // Yukarıdaki eski not "iki common-name birbirinin yerine kullanılıyor" diyor;
+        // doğru ama BU TÜR AKYA DEĞİL. Akya = Lichia amia, ayrı bir tür ve artık
+        // `med_leerfish` anahtarıyla canlı. Seriola dumerili'nin Türkçe adları
+        // sarıkuyruk ve kuzu balığı; "akya" halk arasındaki bir karışıklık.
+        //
+        // NEDEN ÖNEMLİ: bu kayıt PELAJIK, optimum derinlik 40 m, notu
+        // "Tekne gerektirir". Kıyıdan "akya" arayan kullanıcı bunu bulup
+        // tekne balığının tavsiyesini alıyordu. Artık aynı arama gerçek
+        // akyayı (KIYI_AVCI, 0/5/30 m) da getiriyor.
+        name: "Sarıkuyruk (Kuzu Balığı)", nameEn: "Greater Amberjack", nameEl: "Μαγιάτικο", nameEs: "Lecha (Pez Limón)",
         icon: "🐟", scientificName: "Seriola dumerili",
         photoId: 6,
         category: "PELAJIK",
@@ -6330,15 +6341,39 @@ const SPECIES_DB = {
         note: "Gövdesindeki dikey soluk bantlar ve maviye çalan rengiyle tanınır. Oldukça büyük boyutlara ulaşır.",
         noteEn: "Identified by pale vertical bands and a bluish tint. Grows to considerable sizes.", noteEl: "Identified by pale vertical bands and a bluish tint. Grows to considerable sizes.", noteEs: "Identified by pale vertical bands and a bluish tint. Grows to considerable sizes."
     },
+    // ┌─ [2026-09-02] TÜRKİYE'YE AÇILDI — GERÇEK AKYA BU ────────────────────┐
+    // │ Kayıt hazırdı ama `regions: []` olduğu için hiçbir kullanıcıya       │
+    // │ ulaşmıyordu. Oysa Lichia amia Türkiye'de kıyıdan spinle avlanan      │
+    // │ klasik bir hedef — "akya" ya da "çıplak" denen balık BUDUR.          │
+    // │                                                                      │
+    // │ SORUN NEYDİ: `akya` anahtarı Seriola dumerili taşıyor, yani KUZU     │
+    // │ BALIĞI. Adı "Akya (Sarıkuyruk)" olduğu için kıyıdan "akya" arayan    │
+    // │ kullanıcı onu buluyordu — ama o kayıt PELAJIK, optimum derinliği     │
+    // │ 40 m ve notunda "Tekne gerektirir" yazıyor. Kıyı balıkçısına tekne   │
+    // │ balığının tavsiyesi veriliyordu. Bu kayıt ise KIYI_AVCI, 0/5/30 m.   │
+    // │                                                                      │
+    // │ İki tür gerçekten karıştırılıyor (sahibin aktardığı kaynak da bunu   │
+    // │ söylüyor: "zaman zaman balıkçılar tarafından akya ile karıştırılır,  │
+    // │ hatta akya olarak satılır"). Artık ikisi ayrı ve doğru adlarıyla.    │
+    // │                                                                      │
+    // │ BÖLGELER: Ege/Akdeniz/Marmara. Karadeniz KONMADI — seyrek.           │
+    // │ habitatBboxes'a Ege+Doğu Akdeniz kutusu eklendi; eski kutular Batı   │
+    // │ Akdeniz ve İber kıyısıydı, Türkiye boylamı (26-36) hiçbirinin        │
+    // │ içinde değildi. Kutular yalnız GLOBAL bölge ADI sözlüğünü besliyor,  │
+    // │ görünürlük kapısı değil — ama veri kendi içinde tutarlı olmalı.      │
+    // │                                                                      │
+    // │ legalSize YOK ve bu sorun değil: 245 canlı türün 166'sında da yok,   │
+    // │ istemci null kontrolü yapıyor (MainActivity:7575). Uydurulmadı.      │
+    // └──────────────────────────────────────────────────────────────────────┘
     "med_leerfish": {
-        name: "Çıplak / Akya", nameEn: "Leerfish / Garrick", nameEl: "Λίτσα", nameEs: "Palometón", icon: "🐟", scientificName: "Lichia amia",
+        name: "Akya (Çıplak)", nameEn: "Leerfish / Garrick", nameEl: "Λίτσα", nameEs: "Palometón", icon: "🐟", scientificName: "Lichia amia",
         photoId: 714, category: "KIYI_AVCI",
         huntingMode: "visual",
         peakHours: "DAWN_DUSK", peakHoursDesc: "Alacakaranlık sığ kıyılar ve nehir ağızları",
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.8 },
         activity: "DAWN_DUSK", pressureSensitivity: 0.6, wavePref: 0.6, currentPref: 0.4, salinityPref: "MEDIUM", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: ["EGE", "AKDENİZ", "MARMARA"], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 34.0, lon1: 25.0, lat2: 41.5, lon2: 37.0, name: "Ege & Doğu Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
         depth: { min: 0, opt: 5, max: 30 },
         advice: { bait: "Canlı Kefal, Zargana", lure: "Popper, Skipping Lure", rig: "Spinning / Live Bait Trolling", hook: "5/0 - 7/0", baitEn: "Live mullet, garfish", baitEl: "Live mullet, garfish", baitEs: "Live mullet, garfish", lureEn: "Popper, skipping lure", lureEl: "Popper, skipping lure", lureEs: "Popper, skipping Señuelo", rigEn: "Spinning / live bait trolling", rigEl: "Spinning / live bait trolling", rigEs: "Spinningning / Cebo vivo Curricán", hookEn: "5/0 - 7/0", hookEl: "5/0 - 7/0", hookEs: "5/0 - 7/0" },
         note: "Çok hırçın ve inatçı bir savaşçıdır. Kıyılara çok sokulur ve sığ suda büyük avlar peşindedir.",
