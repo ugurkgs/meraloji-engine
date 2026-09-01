@@ -1324,7 +1324,12 @@ const cache = new NodeCache({ stdTTL: 10800, checkperiod: 600 }); // 3 saat — 
 //
 // KURAL: calculateFishScore veya beslediği herhangi bir eğri/katsayı değişirse
 // tarihi güncelle. Metin, çeviri, arayüz değişikliği için DOKUNMA.
-const ENGINE_VERSION = '2026-08-13';
+// [2026-09-01] 13 Ağustos'tan beri puanı besleyen üç şey değişti ve damga
+// güncellenmemişti: getHourWeight'in CREPUSCULAR dalı (DAWN_DUSK ile eş
+// tutuldu), species.js'te 4 türün `activity`si ve sarıkulak/ceran/mavraki'nin
+// `seasons` değerleri (29 Ağu, İzmir av takvimi). Üçü de calculateFishScore'u
+// besliyor, yani kuralın tam kapsamında.
+const ENGINE_VERSION = '2026-09-01';
 
 // Bathymetry sonuçlarını 24 saat cache'le — aynı bölgede tekrar taramada API çağrısı yok
 const bathyCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
@@ -12273,7 +12278,39 @@ app.post('/api/catch-report', async (req, res) => {
         // sonradan kurtarılabilir. Bayrakla işaretleyip kaydı yine de alıyoruz.
         const f = cached?.forecast?.[0] || null;
         const inst = cached?.instant || null;
+
+        // ┌─ `predicted` ANIN LİSTESİNDEN OKUNUR, GÜNÜN DEĞİL ─────────────────┐
+        // │ [2026-09-01] Eski satır `const src = f || inst` idi: günlük kayıt   │
+        // │ varsa HER ZAMAN o seçiliyordu. Ama `pick` (hemen altta) koşulları   │
+        // │ `inst`ten okuyor. Yani aynı belgede iki zaman tabanı vardı —        │
+        // │ koşullar tıklanan ANa, tahminler TÜM GÜNe aitti.                    │
+        // │                                                                     │
+        // │ ÖLÇÜLDÜ (2026-09-01, Fatsa, per85W6pyOC5Iwc0gAqH): kullanıcının     │
+        // │ ekranında sarıkulak 62 puanla 3. sıradaydı, kayda 40,31 ile 5. sıra │
+        // │ yazıldı. İstemci `instant.score` gösteriyor (bkz. ~2418 notu), yani │
+        // │ kaydedilen liste kullanıcının GÖRDÜĞÜ liste değildi.                │
+        // │                                                                     │
+        // │ Bu kalibrasyonun temeli: `localHour` alanı "hourlyScores[localHour] │
+        // │ ile eşleştirilecek" diye konmuş, ama gün ortalamasının saati yok.   │
+        // │                                                                     │
+        // │ ŞEKİL UYUMLU: instant döngüsü de `targetClass: avSinifi(key)`       │
+        // │ yazıyor (~8092), gün döngüsüyle birebir aynı (~7719).               │
+        // │                                                                     │
+        // │ NEDEN fishList.length KONTROLÜ: karada instant.fishList BOŞ kalır   │
+        // │ (~7243 `if (isLand) break`). Boş listeyi seçmek `predicted: []` +   │
+        // │ `predictedOutOfList: [tutulan]` üretir — yani motorun ıskaladığı    │
+        // │ sanılır. Tersi de oluyor: ~8015'e göre forecast[].fishList boşken   │
+        // │ instant DOLU dönebiliyor.                                           │
+        // │                                                                     │
+        // │ NEDEN `src` AYRI BIRAKILDI: eskiden tek değişken hem koşul kapısını │
+        // │ hem liste kaynağını besliyordu. `listeKaynagi`'nı doğrudan `src`e   │
+        // │ yazsaydım, karadaki bir noktada (instant dolu ama fishList boş, f   │
+        // │ null) `src` null olur ve `conditions` da null yazılırdı — bugüne    │
+        // │ kadar YAZILAN bir veri kaybolurdu. `src` olduğu gibi kaldı; koşul   │
+        // │ davranışı birebir eskisi. Değişen YALNIZ predicted/OutOfList.       │
+        // └─────────────────────────────────────────────────────────────────────┘
         const src = f || inst;
+        const listeKaynagi = (inst && Array.isArray(inst.fishList) && inst.fishList.length) ? inst : f;
         const pick = (k) => (inst && inst[k] != null) ? inst[k] : (f ? f[k] : null);
 
         const doc = {
@@ -12308,7 +12345,27 @@ app.post('/api/catch-report', async (req, res) => {
             // "motor ilk 3'te çok isabetli" gibi sahte bir sonuç üretir.
             // predictedOutOfList bundan ETKİLENMEZ: sunucu tam listeyi
             // önbellekten okuyor, istemcinin gördüğü kırpılmış listeyi değil.
-            userTier: req.isPremium ? 'pro' : 'free',
+            // [2026-09-01] DENEME KULLANICISI 'free' YAZILIYORDU — ALAN KENDİ
+            // AMACININ TERSİNİ SÖYLÜYORDU.
+            //
+            // Yukarıdaki not bu alanı "kullanıcı kaç satır gördü" sorusunu
+            // cevaplasın diye koymuş. Ama `req.isPremium` YALNIZ ödeyen aboneyi
+            // kapsıyor; deneme `req.isGracePeriod`'da duruyor. Sanitizasyon ise
+            // (~6923) `isProUser = isPremium || isGracePeriod || anonFreeGranted`
+            // diyor — yani deneme kullanıcısı 10 SATIR GÖRÜYOR, kayıt "3 satır
+            // gördü" diyordu. Analiz tam ters yönde yanılırdı.
+            //
+            // ÖLÇÜLDÜ (2026-09-01, per85W6pyOC5Iwc0gAqH): denemedeki kullanıcı
+            // 10 satırlık listeyi görmüşken kayıtta userTier:'free' yazıyordu.
+            //
+            // NEDEN ÜÇÜNCÜ DEĞER: 'trial'ı 'pro'ya katmak da yanlış olurdu —
+            // ikisi aynı listeyi görüyor ama deneme kullanıcısı ÖDEMEMİŞ bir
+            // kohort. Liste uzunluğu ile ödeme durumu ayrı sorular; alan ikisini
+            // birden taşısın ki analizde istenen şekilde gruplanabilsin.
+            //
+            // anonFreeGranted BURAYA GİRMEZ: o değişken /api/forecast'a özel ve
+            // bu uçta yok. Gözlem gönderen kullanıcı zaten kimlik doğrulamış.
+            userTier: req.isPremium ? 'pro' : (req.isGracePeriod ? 'trial' : 'free'),
 
             outcome,                                  // 'caught' | 'empty'
             caught: valid,
@@ -12336,10 +12393,16 @@ app.post('/api/catch-report', async (req, res) => {
             // conditions'tan yeniden puanlanarak yapılır. Yanıt yalnız ilk 10'u
             // taşıyor; 10 dışından tutulan balık en değerli sinyaldir, çünkü
             // motorun onu düşük sıraladığını gösterir.
-            predicted: Array.isArray(src?.fishList)
-                ? src.fishList.slice(0, 10).map(x => ({ key: x.key, score: x.score, cls: x.targetClass }))
+            predicted: Array.isArray(listeKaynagi?.fishList)
+                ? listeKaynagi.fishList.slice(0, 10).map(x => ({ key: x.key, score: x.score, cls: x.targetClass }))
                 : [],
-            predictedOutOfList: valid.filter(k => !(src?.fishList || []).some(x => x.key === k))
+            predictedOutOfList: valid.filter(k => !(listeKaynagi?.fishList || []).some(x => x.key === k)),
+
+            // Hangi listeden okunduğu KAYDA yazılıyor: 1 Eylül öncesi kayıtlar
+            // gün ortalamasından geliyor, sonrakiler andan. Damga olmadan iki
+            // kohort birbirine karışır ve puanlar kıyaslanamaz.
+            predictedSource: (listeKaynagi && listeKaynagi === inst) ? 'instant'
+                : (listeKaynagi ? 'daily' : 'none')
         };
 
         const ref = await db.collection('catchReports').add(doc);

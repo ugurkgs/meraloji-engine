@@ -12,3 +12,19 @@ android/*/*.iml
 android/captures/
 android/.externalNativeBuild/
 android/.cxx/
+
+# ── Calisma dosyalari (2026-09-01 temizligi) ────────────────────────────────
+# 2026-08-31'de `git add -A` ile 34 gecici dosya repoya girmisti. Diskte
+# duruyorlar, yalnizca git'ten dusuruldu.
+#
+# DIKKAT: burada duz `*.xlsx` YOK. `SAHA-GOZLEM-DEFTERI.xlsx` kendi commit'iyle
+# (18b7e3d) bilerek eklenmis gercek bir veri dosyasi; genel kural onu da
+# gizlerdi. Desenler bu yuzden dar tutuldu.
+*.yedek-*
+cikti-*.txt
+TUR-DEGER-*.xlsx
+TUR-DEGER-LISTESI-AI.txt
+YEM-HIRSIZI-*.xlsx
+YEM-HIRSIZI-PROMPT*.md
+YEM-HIRSIZI-AI-CIKTISI.txt
+AI-PROMPT-*.md
