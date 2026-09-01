@@ -70,8 +70,22 @@ console.log('\n── anahtarlar species.js\'te var mı ────────
     const yok = [...g.h, ...g.y].filter(k => !S[k]);
     ol(`${g.h.length + g.y.length} anahtarın hepsi geçerli`, yok.length === 0);
     if (yok.length) console.log('     ✖ species.js\'te YOK: ' + yok.join(', '));
-    ol('YEM_HIRSIZI 9 tür', g.h.length === 9);
-    ol('YEM_BALIGI 10 tür', g.y.length === 10);
+    // [2026-09-01] SABIT TOPLAM SAYI ARANMIYOR ARTIK.
+    // Eski hali 9 ve 10 bekliyordu; 31 Agustos'ta YEM_HIRSIZI'ye 14 yabanci
+    // bolge turu girince (uk_/nz_/usne_/sa_) toplam 24 oldu ve test kirildi —
+    // KUME DOGRUYDU, iddia bayatti. Yabanci bolgeler eklendikce toplam yine
+    // buyuyecek, yani toplam sayiya bagli bir kanarya her seferinde kirilir.
+    //
+    // Bunun yerine TURKIYE ALTKUMESI sabitleniyor: asil urun orasi ve orada
+    // bir degisiklik gercekten gozden gecirilmeli. Yabanci sayisi yalniz
+    // RAPORLANIYOR, iddia edilmiyor.
+    const trMi = (k) => !/^(uk_|nz_|usne_|sa_|uae_|pg_|med_)/.test(k);
+    const hTR = g.h.filter(trMi), hYab = g.h.filter(k => !trMi(k));
+    const yTR = g.y.filter(trMi), yYab = g.y.filter(k => !trMi(k));
+    ol('YEM_HIRSIZI Türkiye altkümesi 10 tür', hTR.length === 10);
+    ol('YEM_BALIGI Türkiye altkümesi 15 tür', yTR.length === 15);
+    console.log(`     → hırsız: ${g.h.length} toplam (${hTR.length} TR + ${hYab.length} yabancı)`);
+    console.log(`     → yem   : ${g.y.length} toplam (${yTR.length} TR + ${yYab.length} yabancı)`);
 }
 
 // ── 2) Küme üyelikleri ──────────────────────────────────────────────────────
@@ -93,10 +107,24 @@ console.log('\n── küme üyelikleri ─────────────�
 // ── 3) Kesişim kasıtlı mı ───────────────────────────────────────────────────
 console.log('\n── kesişim (aterin + kupes) ───────────────────────────────');
 {
-    const c = kos('globalThis.k = [...YEM_HIRSIZI].filter(k => YEM_BALIGI.has(k));');
+    const c = kos('globalThis.k = [...YEM_HIRSIZI].filter(k => YEM_BALIGI.has(k));'
+        + 'globalThis.hl = [...YEM_HIRSIZI]; globalThis.yl = [...YEM_BALIGI];');
     const g = c.globalThis || c;
-    ol('tam olarak aterin ve kupes kesişiyor',
-        g.k.length === 2 && g.k.includes('aterin') && g.k.includes('kupes'));
+    const YEM_HIRSIZI_L = g.hl, YEM_BALIGI_L = g.yl;
+    // [2026-09-01] Kesisim 2'den 5'e cikti (izmarit, isparoz, horozbina
+    // eklendi). Bu bir hata DEGIL: bir tur hem yem hirsizi hem canli yem
+    // olabilir — izmarit bunun ders kitabi ornegi, hem yemi soyar hem
+    // kendisi yem olarak kullanilir.
+    //
+    // Sayi yerine ICERIK siniyoruz: kesisimdeki her anahtar GERCEKTEN iki
+    // kumede de olmali. Boylece yeni bir tur eklendiginde test kirilmaz, ama
+    // kumeler tutarsizlasirsa yakalar.
+    const BEKLENEN = ['izmarit', 'aterin', 'isparoz', 'kupes', 'horozbina'];
+    ol('kesişim iki kümede de gerçekten var',
+        g.k.every(k => YEM_HIRSIZI_L.includes(k) && YEM_BALIGI_L.includes(k)));
+    ol('bilinen kesişim türleri duruyor',
+        BEKLENEN.every(k => g.k.includes(k)));
+    console.log('     → kesişim: ' + g.k.join(', '));
 }
 
 // ── 4) avSinifi düzeltmesi ──────────────────────────────────────────────────

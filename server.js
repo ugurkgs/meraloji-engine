@@ -4263,11 +4263,50 @@ function getSalinity(region, lat, lon) {
 }
 
 // Mevsim
+//
+// ┌─ [2026-09-01] EYLÜL YAZDAN SONBAHARA ALINDI (ACIK-ISLER §4.22) ─────────┐
+// │ Eski sınırlar yılı eşit bölmüyordu: yaz 4 ay (Haz-Tem-Ağu-EYLÜL),      │
+// │ sonbahar 2 ay (Eki-Kas). JS'te ay 0-tabanlı olduğu için `month <= 8`   │
+// │ eylülü yaza katıyordu. Mevsim katmanı 22 puan; koca bir ay yanlış      │
+// │ kovadaydı.                                                             │
+// │                                                                        │
+// │ ÖLÇÜLDÜ ÖNCE, SONRA DEĞİŞTİRİLDİ. §4.1b'de aynı gerekçeyle ("değerli   │
+// │ türler listeye çıksın") ölçülmeden yapılan bir değişiklik, ölçüldüğünde │
+// │ KÖTÜLEŞMİŞTİ (ilk 10'da değerli tür 61→51) ve geri alınmıştı. Bu kez   │
+// │ aynı metrik önce koşturuldu — `tools/motor.js` ile motor server.js'ten │
+// │ sökülüp, dosyaya dokunulmadan iki senaryo yan yana ölçüldü:            │
+// │                                                                        │
+// │   12 nokta · 15 Eylül · metrik: ilk 10'daki HEDEF tür sayısı           │
+// │     mevcut (eylül=yaz)          : 68                                   │
+// │     eylül=sonbahar (bu değişiklik): 72   ← +4, hiçbir noktada düşüş yok │
+// │     yalnız kuzeyde sonbahar      : 69   ← denendi, daha zayıf          │
+// │                                                                        │
+// │ Girdiler motorun KENDİ iklim tablosundan değil, Open-Meteo Marine      │
+// │ arşivinden alındı (2021-2025 eylül ortalaması): Karadeniz 23,4 ·       │
+// │ Marmara 23,6 · Ege 25,1 · Akdeniz 29,0 °C. Kendi tablomuz Akdeniz'i    │
+// │ ~2 °C soğuk gösteriyor, onunla ölçseydik girdi yanlı olurdu.           │
+// │                                                                        │
+// │ BÖLGESEL SINIR DENENDİ VE ELENDİ: "eylül Ege/Akdeniz'de sıcak,         │
+// │ Karadeniz'de değil" sezgisi mutlak sıcaklıkta doğru (23,4 vs 29,0) ama │
+// │ MEVSİMSEL KONUMDA değil — dört bölgede de eylül ağustosa ekimden 2-4   │
+// │ kat daha yakın (Eyl−Ağu −0,8..−1,5 · Eyl−Eki +2,8..+3,5). Yani eylül   │
+// │ her yerde eşit ölçüde "geç yaz"; bölgeye göre ayırmak kazancı yarıya   │
+// │ indiriyordu.                                                           │
+// │                                                                        │
+// │ SICAKLIK KATMANIYLA ÇAKIŞMA YOK: sıcaklık (28 puan) ÖLÇÜLEN gerçek su  │
+// │ sıcaklığını okuyor, bu katman (22 puan) DAVRANIŞI kodluyor. Eylülü     │
+// │ sonbahar kovasına almak motora "su soğudu" dedirtmez.                  │
+// │                                                                        │
+// │ monthlyActivity'si olan 14 tür ETKİLENMEZ (~4105 önceliği): lüfer,     │
+// │ palamut, çinekop, hamsi, uskumru, istavrit, sardalya, kolyoz,          │
+// │ papalina, çaça, tirsi, aterin, yazılı orkinos, lahoz. Eylülün vitrin   │
+// │ türleri zaten doğruydu; bu düzeltme dip/kıyı türlerini ilgilendirir.   │
+// └────────────────────────────────────────────────────────────────────────┘
 function getSeason(month, lat = 40) {
     const isSouth = (lat < 0);
     if (month >= 2 && month <= 4) return isSouth ? "autumn" : "spring";
-    if (month >= 5 && month <= 8) return isSouth ? "winter" : "summer";
-    if (month >= 9 && month <= 10) return isSouth ? "spring" : "autumn";
+    if (month >= 5 && month <= 7) return isSouth ? "winter" : "summer";
+    if (month >= 8 && month <= 10) return isSouth ? "spring" : "autumn";
     return isSouth ? "summer" : "winter";
 }
 
@@ -11466,11 +11505,20 @@ const HOT_SPOT_SEASONAL = {
 };
 
 app.get('/api/hotspot', (req, res) => {
+    // [2026-09-01] getSeason (~4305) ile EŞİTLENDİ — eylül artık sonbahar.
+    // Burası mevsim sınırlarını İKİNCİ kez, elle yazıyor; §4.22 düzeltilirken
+    // yalnız getSeason değiştirilseydi açılış noktası eylülde hâlâ "Bodrum
+    // Açıkları" (yaz noktası) döndürecekti ve iki yer birbirini yalanlardı.
+    //
+    // Kopya kaldırılıp doğrudan getSeason çağrılabilirdi; çağrılmadı çünkü
+    // getSeason güney yarıküre için ters çeviriyor ve bu uç Türkiye'ye sabit
+    // dört nokta döndürüyor — lat'siz çağrı varsayılan 40'a düşerdi, yani
+    // sessiz bir varsayım eklenirdi. İki satırın eşit tutulması daha dürüst.
     const month = new Date().getMonth(); // 0=Ocak
     let season;
     if (month >= 2 && month <= 4) season = 'spring';
-    else if (month >= 5 && month <= 8) season = 'summer';
-    else if (month >= 9 && month <= 10) season = 'autumn';
+    else if (month >= 5 && month <= 7) season = 'summer';
+    else if (month >= 8 && month <= 10) season = 'autumn';
     else season = 'winter';
 
     const spot = HOT_SPOT_SEASONAL[season];

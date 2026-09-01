@@ -40,7 +40,13 @@ const PARCA = [
     sok('const OZEL_UYARI_FIRSAT_ESIK', '\r\n'),
     sok('const OZEL_UYARI_AVCI_ESIK', '\r\n'),
     sok('const HIRSIZ_MEKANIZMA = {', '\r\n};'),
-    sok('function ozelUyarilariUret(fishList, lang) {', '\r\n}'),
+    // [2026-09-01] İMZA DEĞİŞTİ, ARAÇ SESSİZCE ÖLMÜŞTÜ.
+    // 29 Ağustos'ta trakonya uyarısı eklenirken üçüncü parametre geldi
+    // (`kosul`) ve buradaki düz metin araması tutmaz oldu. Araç bir gün
+    // boyunca çöktü; o arada bu dosyaya hem yeni bir uyarı tipi hem PRO
+    // kapısı girdi ve ikisi de denetlenmedi.
+    // Parametre listesi artık aranmıyor — imza yine değişirse araç ölmesin.
+    sok('function ozelUyarilariUret(', '\r\n}'),
     sok('const OZEL_UYARI_MIN_SURUM', '\r\n'),
     sok('function istemciYeter(surum, enAz) {', '\r\n}'),
     sok('function ozelUyariKapisi(data, istemciSurumu) {', '\r\n}'),
@@ -67,6 +73,24 @@ console.log('═'.repeat(72));
 console.log('ÖZEL UYARILAR DENETİMİ');
 console.log('═'.repeat(72));
 
+// ── TAVSIYE ANAHTARI YARDIMCISI ─────────────────────────────────────────────
+// [2026-09-01] Testler ONCE kullaniciya gorunen CUMLEYI ariyordu
+// ('igneyi buyutun', 'Celik kostek', 'iple baglamalisiniz', 'fazla yem').
+// Metinler bir ara yeniden yazildi (simdi 'buyuk igne deneyin', 'celik kostek
+// deneyin', 'Yemi iple sikica baglayin', 'yaniniza ekstra yem alin') ve dort
+// testin dordu de kirildi — OZELLIK CALISIYORDU, test bayatti.
+//
+// Cumle sinamak bu projede kirilgan: metinler sik degisiyor ve dort dilde.
+// Artik dogru MEKANIZMA ANAHTARININ secildigi sinaniyor; metin degisse de
+// gecer, yanlis mekanizma secilirse yine yakalar.
+// Metinler sandbox'ın İÇİNDE yaşıyor (i18n oradan sökülüyor), bu yüzden
+// kos() ile oradan alınıyor — teste elle kopyalanmıyor.
+const TAVSIYE_TR = kos("globalThis.u = i18n('tr').ozelUyari.tavsiye;").u;
+function tavsiyeVar(tavsiyeler, anahtar) {
+    const beklenen = TAVSIYE_TR[anahtar];
+    return Array.isArray(tavsiyeler) && !!beklenen && tavsiyeler.includes(beklenen);
+}
+
 // ── 1) Sahibin senaryosu ────────────────────────────────────────────────────
 console.log('\n── sahibin senaryosu: levrek 45, hani 65 ──────────────────');
 {
@@ -79,9 +103,9 @@ console.log('\n── sahibin senaryosu: levrek 45, hani 65 ──────�
     ol('tek harami -> seviye "orta"', h && h.seviye === 'orta');
     ol('metinde tür ve skoru var',
         h && h.metin.includes('Hani') && h.metin.includes('65'));
-    ol('iğneyi büyüt tavsiyesi var (hani = küçük ağız)',
-        h && h.tavsiyeler.some(x => x.includes('iğneyi büyütün')));
-    ol('bol yem tavsiyesi var', h && h.tavsiyeler.some(x => x.includes('fazla yem')));
+    ol('küçük ağız tavsiyesi var (hani = kucukAgiz)',
+        h && tavsiyeVar(h.tavsiyeler, 'kucukAgiz'));
+    ol('bol yem tavsiyesi var', h && tavsiyeVar(h.tavsiyeler, 'bolYem'));
     if (h) console.log(`     → "${h.baslik}: ${h.metin}"`);
 }
 
@@ -207,9 +231,9 @@ console.log('\n── tavsiye mekanizmaya göre değişiyor mu ─────�
 {
     const cutre = kos(uret(liste(['cutre', 'Çütre', 75])));
     const sarpa = kos(uret(liste(['sarpa', 'Sarpa', 75])));
-    ol('çütre → çelik köstek', cutre.u[0].tavsiyeler.some(x => x.includes('Çelik köstek')));
-    ol('sarpa → yemi bağla', sarpa.u[0].tavsiyeler.some(x => x.includes('iple bağlamalısınız')));
-    ol('çütre iğne büyüt DEMİYOR', !cutre.u[0].tavsiyeler.some(x => x.includes('iğneyi büyütün')));
+    ol('çütre → sertGaga', tavsiyeVar(cutre.u[0].tavsiyeler, 'sertGaga'));
+    ol('sarpa → gagalar', tavsiyeVar(sarpa.u[0].tavsiyeler, 'gagalar'));
+    ol('çütre kucukAgiz DEMİYOR', !tavsiyeVar(cutre.u[0].tavsiyeler, 'kucukAgiz'));
 }
 
 // ── 11) Dört dil ────────────────────────────────────────────────────────────
@@ -285,7 +309,10 @@ for (const [ad, boz, govde, bekle] of kontroller) {
 
 // ── 14) Bağlanma denetimi ───────────────────────────────────────────────────
 console.log('\n── bağlanma denetimi ──────────────────────────────────────');
-ol('instantData.ozelUyarilar bağlı', src.includes('ozelUyarilar: ozelUyarilariUret(instantFishList, lang)'));
+// [2026-09-01] Parametre listesi ARANMIYOR. Eski hali
+// 'ozelUyarilariUret(instantFishList, lang)' idi; 29 Agustos'ta ucuncu
+// parametre (kosul) eklenince bu satir da kirildi — bagliliK duruyordu.
+ol('instantData.ozelUyarilar bağlı', src.includes('ozelUyarilar: ozelUyarilariUret(instantFishList, lang'));
 ol('kesilmemiş listeden üretiliyor', !src.includes('ozelUyarilariUret(instantData.fishList'));
 ol('_gonder yolunda kapı var', src.includes('ozelUyariKapisi(listeyiSurumeGoreKes(data, _istemciSurum), _istemciSurum)'));
 ol('dört dilde de ozelUyari bloğu var', (src.match(/ozelUyari: \{/g) || []).length === 4);
