@@ -6696,6 +6696,38 @@ function applySanitization(data, isProUser) {
         base.oxygen = 0; base.upwelling = 0; base.clarity = 0;
         base.salinity = 0; base.pressure = 0; base.current = 0;
 
+        // ┌─ ÖZEL UYARILAR — PRO KAPISI [2026-09-01] ──────────────────────────┐
+        // │ SIZINTIYDI. `{ ...data.instant }` bir YÜZEYSEL KOPYA; teknik       │
+        // │ metrikler tek tek sıfırlanıyor, fishList kırpılıyor, ama           │
+        // │ `ozelUyarilar` süzgeçten hiç geçmiyordu — ücretsiz kullanıcıya     │
+        // │ olduğu gibi gidiyordu.                                             │
+        // │                                                                    │
+        // │ Bu bir gözden kaçma değil, DEĞİŞEN BİR KARARDI: MainActivity'deki  │
+        // │ not "Yalnız ETİKET. Kapı değil — özellik ücretsiz kullanıcıda da   │
+        // │ çalışıyor" diyor, yani başta bilerek serbestti. Sahibi artık PRO'ya│
+        // │ almak istiyor.                                                     │
+        // │                                                                    │
+        // │ SAHADA GÖRÜNEN: denemesi bitmiş kullanıcı panelleri "görmüyor"     │
+        // │ sanıyordu çünkü panel ekranın altında kalıyor; ama skorun          │
+        // │ üstündeki uyarı rozetine basınca sayfa oraya kayıyor ve paneller   │
+        // │ açılıyordu.                                                        │
+        // │                                                                    │
+        // │ ⚠ TEHLIKE_ZEMIN DIŞARIDA BIRAKILDI — BİLEREK.                      │
+        // │ O bir av avantajı değil, GÜVENLİK uyarısı: sığ kumda trakonyaya    │
+        // │ basma riski. Zehirli hayvan uyarısını ödeme duvarının arkasına     │
+        // │ koymak yanlış olurdu. Ücretli olan "yemini kim alacak" bilgisi.    │
+        // │                                                                    │
+        // │ ESKİ İSTEMCİLER GÜVENDE: alan SİLİNMİYOR, SÜZÜLÜYOR. Boş dizi de   │
+        // │ null da istemcide aynı yola gidiyor (ozelUyarilariCiz: liste boşsa │
+        // │ bölüm GONE + rozet temizlenir). v47 öncesi zaten `ozelUyariKapisi` │
+        // │ ile bu alanı hiç almıyor.                                          │
+        // └────────────────────────────────────────────────────────────────────┘
+        const UCRETSIZ_UYARI_TIPLERI = new Set(['TEHLIKE_ZEMIN']);
+        if (Array.isArray(base.ozelUyarilar)) {
+            base.ozelUyarilar = base.ozelUyarilar.filter(
+                u => u && UCRETSIZ_UYARI_TIPLERI.has(u.tip));
+        }
+
         base.fishList = data.instant.fishList.slice(0, 3).map(f => ({
             key: f.key, name: f.name, icon: f.icon, score: f.score, // Balık skorunu göster
             category: f.category, reason: f.reason,
