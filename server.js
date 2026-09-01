@@ -4864,7 +4864,9 @@ const AV_DEGERI = {
     nz_piper: 0.15,           // Hyporhamphus ihi — yem balığı
     nz_blue_warehou: 0.45,    // Seriolella brama — ticari tür, olta hedefi değil
     nz_gemfish: 0.45,         // Rexea solandri
-    nz_red_cod: 0.45,         // Pseudophycis bachus — eti yumuşak, düşük değer
+    // nz_red_cod (Pseudophycis bachus) ÇIKARILDI [2026-09-01] — 7/7 oybirliği.
+    // Eski gerekçem "eti yumuşak, düşük değer"di; NZ amatör balıkçısı bu türü
+    // alıp yiyor. Tablodan düşen anahtar 1.0 → hedef tür.
     nz_scorp: 0.45,           // Scorpaena papillosa — dikenli, tesadüfi
     nz_sea_perch: 0.45,       // Helicolenus percoides
     nz_seven_gill: 0.45,      // Notorynchus cepedianus — çoğu bırakılır
@@ -4896,7 +4898,9 @@ const AV_DEGERI = {
     // bir yemek balığı ve peşine düşülüyor. Anahtarlar ayrı olduğu için aynı
     // tür iki bölgede farklı sınıflanabiliyor — kasıtlı.
     sa_blacktail: 0.45,       // Diplodus capensis — "dassie", yemi soyar ama yenir
-    sa_zebra: 0.45,           // Diplodus hottentotus — küçük sparid
+    // sa_zebra (Diplodus hottentotus) ÇIKARILDI [2026-09-01] — 7/7 oybirliği.
+    // "Küçük sparid" diye 0.45 vermiştim; Güney Afrika'da kayadan avlanan
+    // hedef sparidlerden. Tablodan düşen anahtar 1.0 → hedef tür.
 
     // ══ UAE / PERSIAN_GULF — kaba geçiş [2026-08-31] ══════════════════════
     // Dört türün ikisi resif balığı, olta hedefi değil. Diğer ikisi
