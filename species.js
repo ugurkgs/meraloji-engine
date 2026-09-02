@@ -84,7 +84,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "KARADENİZ", "AKDENİZ"],
         depth: { min: 1, opt: 8, max: 40 },
         advice: { bait: "Yaprak Zargana, İstavrit Fleto", lure: "Kaşık, Ağır Rapala, Poşhter", rig: "Uzun Olta, Mantarlı Çinekop, Hırsızlı Zoka", hook: "1 - 4/0 Uzun Pala + Çelik Tel", baitEn: "Garfish fillet, horse mackerel fillet", baitEl: "Garfish fillet, horse mackerel fillet", baitEs: "Garfish fillet, horse mackerel fillet", lureEn: "Metal spoon, heavy Rapala, feathered jig", lureEl: "Metal spoon, heavy Rapala, feathered jig", lureEs: "Cuchara metálica, Pesado Rapala, feathered Jig", rigEn: "Long trace, float rig, sabiki", rigEl: "Long trace, float rig, sabiki", rigEs: "Bajo de línea largo, Aparejo de flotador, Sabiki", hookEn: "1 - 4/0 long shank + wire trace", hookEl: "1 - 4/0 long shank + wire trace", hookEs: "1 - 4/0 Pata larga + wire trace" },
-        legalSize: "20 cm", legalSizeEn: "20 cm", legalSizeEs: "20 cm", legalSizeEl: "20 εκ.",
+        legalSize: "18 cm", legalSizeEn: "20 cm", legalSizeEs: "20 cm", legalSizeEl: "20 εκ.",
         note: "20cm altı (Defne Yaprağı) bırakın. Çelik tel zorunlu — keskin dişler misina keser.", noteEn: "Release fish under 20cm. Wire trace essential.", noteEl: "Release fish under 20cm. Wire trace essential.", noteEs: "Release fish under 20cm. Wire trace essential."
     },
     "eskina": {
@@ -117,7 +117,7 @@ const SPECIES_DB = {
             rigEn: "Float (Starlight), bottom rig", rigEl: "Float (Starlight), bottom rig", rigEs: "Flotador (Starlight), bottom rig",
             hookEn: "1 - 3", hookEl: "1 - 3", hookEs: "1 - 3"
         },
-        legalSize: "Asgari boy sınırı var — güncel tebliği kontrol edin (kayıttaki eski 25 cm değeri doğrulanamadı)", legalSizeEn: "A minimum size applies — check the current regulation (the previous 25 cm entry could not be verified)", legalSizeEs: "Se aplica una talla mínima — consulte la normativa vigente (el valor anterior de 25 cm no pudo verificarse)", legalSizeEl: "Ισχύει ελάχιστο μέγεθος — ελέγξτε την ισχύουσα ρύθμιση (η παλαιότερη τιμή 25 εκ. δεν επιβεβαιώθηκε)",
+        legalSize: "35 cm", legalSizeEn: "A minimum size applies — check the current regulation (the previous 25 cm entry could not be verified)", legalSizeEs: "Se aplica una talla mínima — consulte la normativa vigente (el valor anterior de 25 cm no pudo verificarse)", legalSizeEl: "Ισχύει ελάχιστο μέγεθος — ελέγξτε την ισχύουσα ρύθμιση (η παλαιότερη τιμή 25 εκ. δεν επιβεβαιώθηκε)",
         note: "Zifiri karanlıkta avlanır. Fosforlu şamandıra şart.",
         noteEn: "Hunts in pitch black darkness. Luminous float is essential.", noteEl: "Hunts in pitch black darkness. Luminous float is essential.", noteEs: "Analizando condiciones óptimas para esta especie en tiempo real."
     },
@@ -370,7 +370,7 @@ const SPECIES_DB = {
         // sınırlı (>200m nadir). opt=20 yerine gerçek yoğunluk bölgesi olan ~10m'ye çekildi.
         depth: { min: 1, opt: 10, max: 120 },
         advice: { bait: "Yengeç, Tavuk But", lure: "Ahtapot Zokası, Plastik Yengeç", rig: "Çarpmalı Zoka", hook: "Özel Zoka", baitEn: "Crab, chicken leg", baitEl: "Crab, chicken leg", baitEs: "Cangrejo, chicken leg", lureEn: "Octopus jig, plastic crab", lureEl: "Octopus jig, plastic crab", lureEs: "Octopus Jig, plastic Cangrejo", rigEn: "Jigging with bounce", rigEl: "Jigging with bounce", rigEs: "Jigging with bounce", hookEn: "Dedicated jig", hookEl: "Dedicated jig", hookEs: "Dedicated Jig" },
-        legalSize: "1 kg", legalSizeEn: "1 kg", legalSizeEs: "1 kg", legalSizeEl: "1 κιλό",
+        legalSize: "750 gr", legalSizeEn: "1 kg", legalSizeEs: "1 kg", legalSizeEl: "1 κιλό",
         note: "Yemi sarıp yapışır. Ağırlık hissedince sert tasma.",
         noteEn: "Wraps around bait. Strike firmly when you feel weight.", noteEl: "Wraps around bait. Strike firmly when you feel weight.", noteEs: "Wraps around bait. Strike firmly when you feel weight."
     },
@@ -447,7 +447,7 @@ const SPECIES_DB = {
         // daha derine (100-200m) iniyor ama olta avcılığında yoğunlukla sığda tutuluyor.
         depth: { min: 5, opt: 30, max: 200 },
         advice: { bait: "Karides, Kurt, Midye, Tavuk Göğsü, Sülünez, Boru Kurdu", lure: "Genelde Yok", rig: "Üçlü Dip Oltası", hook: "9 - 11 İnce Telli", baitEn: "Shrimp, worm, mussel, chicken breast, White ragworm, Tube worm", baitEl: "Shrimp, worm, mussel, chicken breast, White ragworm, Tube worm", baitEs: "Camarón, Gusano, Mejillón, Pechuga de pollo, Gusano blanco, Gusano de tubo", lureEn: "Rarely used", lureEl: "Rarely used", lureEs: "Raramente used", rigEn: "Three-hook bottom rig", rigEl: "Three-hook bottom rig", rigEs: "Three-Anzuelo Aparejo de fondo", hookEn: "9 - 11 fine wire", hookEl: "9 - 11 fine wire", hookEs: "9 - 11 Alambre fino" },
-        legalSize: "13 cm", legalSizeEn: "13 cm", legalSizeEs: "13 cm", legalSizeEl: "13 εκ.",
+        legalSize: "12 cm", legalSizeEn: "13 cm", legalSizeEs: "13 cm", legalSizeEl: "13 εκ.",
         note: "Yumuşak dudak yapısı var — ince telli küçük iğne (9-11 no) şart. Yemi emerek alır.",
         noteEn: "Soft lips — fine wire small hook (9-11) essential. Sucks bait in gently.", noteEl: "Soft lips — fine wire small hook (9-11) essential. Sucks bait in gently.", noteEs: "Soft lips — fine wire small hook (9-11) essential. Sucks bait in gently."
     },
@@ -795,7 +795,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ", "MARMARA", "KARADENİZ"],
         depth: { min: 0, opt: 15, max: 50 }, /* [2026-08-03] min 1→0: nokta 0,1 m okuduğunda server.js'teki "imkansız derinlik" dalı (d < min/2) devreye girip skoru ×0.05 ile sıfırlıyordu. Bu tür kendi optimumu zaten sığ olan bir kıyı balığı; bilek hizası suda beslendiği saha gözlemiyle doğrulandı. GÜVEN: YÜKSEK */
         advice: { bait: "Midye, Yengeç, Mamun, Çin Kurdu, Sülünez", lure: "Silikon", rig: "Şeytan Oltası, Dip", hook: "1 - 4", baitEn: "Mussel, crab, sand smelt, Lugworm, White ragworm", baitEl: "Mussel, crab, sand smelt, Lugworm, White ragworm", baitEs: "Mejillón, Cangrejo, Galera, Gusano de arena, Gusano blanco", lureEn: "Soft plastic", lureEl: "Soft plastic", lureEs: "Vinilo", rigEn: "Paternoster, bottom", rigEl: "Paternoster, bottom", rigEs: "Paternoster, bottom", hookEn: "1 - 4", hookEl: "1 - 4", hookEs: "1 - 4" },
-        legalSize: "23 cm", legalSizeEn: "23 cm", legalSizeEs: "23 cm", legalSizeEl: "23 εκ.",
+        legalSize: "21 cm", legalSizeEn: "23 cm", legalSizeEs: "23 cm", legalSizeEl: "23 εκ.",
         note: "Karagözün büyük akrabası. Köpüklü, dalgalı su sever.",
         noteEn: "Larger relative of two-banded bream. Prefers foamy, choppy water.", noteEl: "Larger relative of two-banded bream. Prefers foamy, choppy water.", noteEs: "Larger relative of two-banded bream. Prefiere foamy, choppy water."
     },
@@ -855,7 +855,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
         depth: { min: 0, opt: 4, max: 15 },
         advice: { bait: "Ekmek İçi, Kıbrıs Sarma", lure: "Yok", rig: "Kıbrıs Takımı, Şamandıralı", hook: "6 - 10", baitEn: "Bread dough, Cypriot rig bait", baitEl: "Bread dough, Cypriot rig bait", baitEs: "Pan Masa, Cypriot rig bait", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Cypriot rig, float", rigEl: "Cypriot rig, float", rigEs: "Cypriot rig, flotador", hookEn: "6 - 10", hookEl: "6 - 10", hookEs: "6 - 10" },
-        legalSize: "30 cm", legalSizeEn: "30 cm", legalSizeEs: "30 cm", legalSizeEl: "30 εκ.",
+        legalSize: "20 cm", legalSizeEn: "30 cm", legalSizeEs: "30 cm", legalSizeEl: "30 εκ.",
         note: "Dişsizdir, yemi emerek alır — şamandıra ilk titrediğinde değil, hareketlenip gittiğinde çekilir. Liman içlerini ve çamurlu suyu sever, nehirlerde yukarı çıkar. Geç sonbahar balığıdır.",
         noteEn: "Toothless — it sucks the bait in, so strike when the float moves off, not on the first bob. Favours harbours and muddy water, and runs well up rivers. A late-autumn fish.", noteEl: "Χωρίς δόντια — ρουφάει το δόλωμα, γι' αυτό τραβήξτε όταν φύγει ο φελλός, όχι στο πρώτο τίναγμα. Προτιμά λιμάνια και θολά νερά. Ψάρι του όψιμου φθινοπώρου.", noteEs: "Sin dientes — succiona el cebo, así que clave cuando el flotador se desplace, no al primer temblor. Prefiere puertos y aguas turbias. Pez de finales de otoño."
     },
@@ -874,7 +874,7 @@ const SPECIES_DB = {
         regions: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ"],
         depth: { min: 0, opt: 4, max: 20 },
         advice: { bait: "Ekmek İçi, Kıbrıs Sarma", lure: "Yok", rig: "Kıbrıs Takımı, Şamandıralı", hook: "6 - 10", baitEn: "Bread dough, Cypriot rig bait", baitEl: "Bread dough, Cypriot rig bait", baitEs: "Pan Masa, Cypriot rig bait", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Cypriot rig, float", rigEl: "Cypriot rig, float", rigEs: "Cypriot rig, flotador", hookEn: "6 - 10", hookEl: "6 - 10", hookEs: "6 - 10" },
-        legalSize: "30 cm", legalSizeEn: "30 cm", legalSizeEs: "30 cm", legalSizeEl: "30 εκ.",
+        legalSize: "20 cm", legalSizeEn: "30 cm", legalSizeEs: "30 cm", legalSizeEl: "30 εκ.",
         note: "Kalın üst dudağından tanınır. Sonbahar ve kış balığıdır; lagün kapanınca dalyan ağzında toplanır.",
         noteEn: "Recognised by its thick upper lip. An autumn and winter fish that gathers at lagoon mouths.", noteEl: "Recognised by its thick upper lip. An autumn and winter fish that gathers at lagoon mouths.", noteEs: "Recognised by its thick upper lip. An autumn and winter fish that gathers at lagoon mouths."
     },
@@ -946,7 +946,7 @@ const SPECIES_DB = {
         regions: ["EGE", "AKDENİZ"],
         depth: { min: 5, opt: 25, max: 60 },
         advice: { bait: "Canlı Teke, Sübye", lure: "Silikon 12-18cm", rig: "Dip, Spin", hook: "2/0 - 4/0", baitEn: "Live sand smelt, cuttlefish", baitEl: "Live sand smelt, cuttlefish", baitEs: "Live Galera, Sepia", lureEn: "Large soft plastic 12-18cm", lureEl: "Large soft plastic 12-18cm", lureEs: "Large Vinilo 12-18cm", rigEn: "Bottom, spin", rigEl: "Bottom, spin", rigEs: "Bottom, Spinning", hookEn: "2/0 - 4/0", hookEl: "2/0 - 4/0", hookEs: "2/0 - 4/0" },
-        legalSize: "42 cm", legalSizeEn: "42 cm", legalSizeEs: "42 cm", legalSizeEl: "42 εκ.",
+        legalSize: "25 cm", legalSizeEn: "42 cm", legalSizeEs: "42 cm", legalSizeEl: "42 εκ.",
         note: "Gece avcısı dev. 50kg'a ulaşabilir. Ses çıkarır (davul balığı).",
         noteEn: "Giant night predator. Can reach 50kg. Makes sounds (drumfish).", noteEl: "Giant night predator. Can reach 50kg. Makes sounds (drumfish).", noteEs: "Giant night predator. Can reach 50kg. Makes sounds (drumfish)."
     },
@@ -2047,8 +2047,30 @@ const SPECIES_DB = {
         noteEn: "Roams sandy bottoms.", noteEl: "Roams sandy bottoms.", noteEs: "Roams sandy bottoms."
     },
 
+    // ┌─ [2026-09-02] KORUMA ALTINA ALINDI — AVLANMASI TAMAMEN YASAK ────────┐
+    // │ KAYNAK: 6/2 numaralı Amatör Amaçlı Su Ürünleri Avcılığını           │
+    // │ Düzenleyen Tebliğ (2024/21), Çizelge 1 "Avlanması tamamen yasak     │
+    // │ olan türler" — "Yılan balığı / Anguilla anguilla".                  │
+    // │ Yürürlük: 1/9/2024 – 31/8/2028. Resmî Gazete 11/8/2024.             │
+    // │                                                                      │
+    // │ TEORİK DEĞİLDİ: 2026-09-01 tarihli gerçek av kaydında (Fatsa,       │
+    // │ per85W6pyOC5Iwc0gAqH) bu tür motorun ilk 10'unda 2. SIRADAYDI,      │
+    // │ 47,86 puanla. Yani uygulama, avlanması yasak bir türü aktif olarak  │
+    // │ öneriyordu.                                                          │
+    // │                                                                      │
+    // │ `protected: true` skoru 0'a çeker, yem/takım alanlarını "-" yapar   │
+    // │ ve i18n'deki yasal ceza metnini gösterir (~5335). Tür listeden      │
+    // │ SİLİNMİYOR — kullanıcı onu görüp yasak olduğunu öğrenmeli.          │
+    // │ Orfoz ve mersin balığı da aynı tebliğin aynı çizelgesinde ve zaten  │
+    // │ böyle işaretliydi; bu kayıt atlanmıştı.                             │
+    // │                                                                      │
+    // │ Diğer üç Anguilla kaydı (unagi, european_eel_ice,                   │
+    // │ thailand_giant_mottled_eel) bölgesiz, yani zaten kimseye ulaşmıyor. │
+    // │ Yasak TÜRKİYE'ye ait; bu kaydın bölgeleri de yalnız Türkiye.        │
+    // └──────────────────────────────────────────────────────────────────────┘
     "yilan_baligi": {
         name: "Yılan Balığı", nameEn: "European Eel", nameEl: "Χέλι", nameEs: "Anguila europea", icon: "🐍", scientificName: "Anguilla anguilla",
+        protected: true,
         photoId: 82,
         category: "LAGUN",
         
@@ -6374,7 +6396,7 @@ const SPECIES_DB = {
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.8 },
         activity: "DAWN_DUSK", pressureSensitivity: 0.6, wavePref: 0.6, currentPref: 0.4, salinityPref: "MEDIUM", clarityPref: "ANY",
         regions: ["EGE", "AKDENİZ", "MARMARA"], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 34.0, lon1: 25.0, lat2: 41.5, lon2: 37.0, name: "Ege & Doğu Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
-        depth: { min: 0, opt: 5, max: 30 },
+        depth: { min: 0, opt: 5, max: 30 }, legalSize: "40 cm",
         advice: { bait: "Canlı Kefal, Zargana", lure: "Popper, Skipping Lure", rig: "Spinning / Live Bait Trolling", hook: "5/0 - 7/0", baitEn: "Live mullet, garfish", baitEl: "Live mullet, garfish", baitEs: "Live mullet, garfish", lureEn: "Popper, skipping lure", lureEl: "Popper, skipping lure", lureEs: "Popper, skipping Señuelo", rigEn: "Spinning / live bait trolling", rigEl: "Spinning / live bait trolling", rigEs: "Spinningning / Cebo vivo Curricán", hookEn: "5/0 - 7/0", hookEl: "5/0 - 7/0", hookEs: "5/0 - 7/0" },
         note: "Çok hırçın ve inatçı bir savaşçıdır. Kıyılara çok sokulur ve sığ suda büyük avlar peşindedir.",
         noteEn: "A ferocious and stubborn fighter. Comes very close to shore, hunting large prey in shallow water.", noteEl: "A ferocious and stubborn fighter. Comes very close to shore, hunting large prey in shallow water.", noteEs: "A ferocious and stubborn fighter. Comes very close to shore, hunting large prey in shallow water."
