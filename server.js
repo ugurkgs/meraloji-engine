@@ -12484,8 +12484,31 @@ app.post('/api/catch-report', async (req, res) => {
             freeText: note,
 
             conditionsSource: src ? 'server-cache' : 'miss',
+            // ┌─ [2026-09-02] airTemp ve timeMode EKLENDİ ─────────────────────┐
+            // │ Av günlüğü ekranı (GOZLEM-TOPLAMA-PLANI aşama 4) kullanıcıya    │
+            // │ kendi kaydını geri gösterecek. Sahibin kuralı: orada YALNIZ     │
+            // │ kullanıcının FİZİKEN algılayabildiği koşullar yazsın — hava,    │
+            // │ su, rüzgâr, dalga, ay, gökyüzü. Klorofil, termoklin, tuzluluk   │
+            // │ ve görüş mesafesi kullanıcının doğrulayamayacağı sayılar;       │
+            // │ kayıtta kalır ama ekrana çıkmaz.                                │
+            // │                                                                 │
+            // │ Bu listede EN TEMEL olan hava sıcaklığı saklanmıyordu. Veride   │
+            // │ vardı (instantData.airTemp, ~8247) ama conditions'a hiç         │
+            // │ girmemişti — balıkçının en çok baktığı iki sayıdan biri.        │
+            // │ timeMode de eklendi: sabah/gündüz/akşam/gece, kullanıcının      │
+            // │ desen kurarken en çok kullanacağı ayrım.                        │
+            // │                                                                 │
+            // │ moonPhaseName ve weatherSummary BİLEREK EKLENMEDİ: ikisi de     │
+            // │ DİLE BAĞLI metin. Kayda dil gömmek analizi kirletir ve dört     │
+            // │ dilde dört ayrı değer üretir. Makine değerleri (moonPhase,      │
+            // │ weatherCode) zaten saklanıyor; adları istemci üretir.           │
+            // │                                                                 │
+            // │ GERİYE DÖNMEZ: bugünden önceki kayıtlarda bu iki alan yok.      │
+            // │ Ekran onları eksik gösterebilmeli (null kontrolü).              │
+            // └─────────────────────────────────────────────────────────────────┘
             conditions: src ? {
-                tempWater: pick('temp'), wave: pick('wave'), wavePeriod: pick('wavePeriod'),
+                tempWater: pick('temp'), airTemp: pick('airTemp'), timeMode: pick('timeMode'),
+                wave: pick('wave'), wavePeriod: pick('wavePeriod'),
                 windSpeed: pick('wind'), windDir: pick('windDirection'), windGust: pick('windGust'),
                 pressure: pick('pressure'), pressureTrend: pick('pressureTrend'),
                 clarity: pick('clarity'), cloud: pick('cloud'), rain: pick('rain'),
