@@ -12527,8 +12527,25 @@ app.post('/api/catch-report', async (req, res) => {
             // conditions'tan yeniden puanlanarak yapılır. Yanıt yalnız ilk 10'u
             // taşıyor; 10 dışından tutulan balık en değerli sinyaldir, çünkü
             // motorun onu düşük sıraladığını gösterir.
+            // ┌─ 10 → 30 [2026-09-02] ─────────────────────────────────────────┐
+            // │ Sıralama öğrenmek (learning-to-rank) TAM aday listesi ister.   │
+            // │ 10'da kırpılınca 11+ sıradaki tür görünmüyor ve iki ayrı durum │
+            // │ ayırt edilemiyor: "motor 0,2 puan verdi" ile "motor bu türü    │
+            // │ hiç değerlendirmedi". Model için bunlar farklı bilgiler.       │
+            // │                                                                │
+            // │ ŞİMDİ genişletiliyor çünkü ALAN SONRADAN EKLENEMİYOR: dün      │
+            // │ airTemp'te aynısını yaşadık, eski kayıtlarda o alan yok ve     │
+            // │ geriye dönük doldurulamıyor (koşullar o ana ait).              │
+            // │                                                                │
+            // │ 30 neden yeterli: bir bölgede listelenebilen Türkiye türü ~77, │
+            // │ ama 30. sıradan sonrası zaten sıfıra yakın puan alıyor.        │
+            // │ Maliyet kayıt başına ~1 KB — Firestore için önemsiz.           │
+            // │                                                                │
+            // │ İSTEMCİYE GİTMİYOR: bu alan yalnız Firestore'a yazılıyor,      │
+            // │ yanıt gövdesi değişmiyor, APK etkilenmiyor.                    │
+            // └────────────────────────────────────────────────────────────────┘
             predicted: Array.isArray(listeKaynagi?.fishList)
-                ? listeKaynagi.fishList.slice(0, 10).map(x => ({ key: x.key, score: x.score, cls: x.targetClass }))
+                ? listeKaynagi.fishList.slice(0, 30).map(x => ({ key: x.key, score: x.score, cls: x.targetClass }))
                 : [],
             predictedOutOfList: valid.filter(k => !(listeKaynagi?.fishList || []).some(x => x.key === k)),
 
