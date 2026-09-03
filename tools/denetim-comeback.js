@@ -10,10 +10,12 @@
  * SORU: 3 günlük geri dönüş denemesi verilen kaç kişi abone oldu?
  *
  * VERİ KAYNAKLARI
+ *   users/{uid}.comebackTrialCampaign → damganın ait olduğu kampanya kimliği.
+ *   users/{uid}.comebackTrialCount    → kaçıncı hediye (tekrarlıysa >1).
  *   users/{uid}.comebackTrialStart  → damga (ms). server.js:2229'da yazılıyor,
  *                                     YALNIZCA /api/forecast isteğinde ve
  *                                     yalnızca PRO OLMAYAN + denemesi DOLMUŞ
- *                                     kullanıcıya, TEK SEFER.
+ *                                     kullanıcıya, KAMPANYA BAŞINA bir kez.
  *   subscriptions/{uid}             → status / expiresAt / startedAt
  *   users/{uid}.isPro, proExpiresAt → ikinci abonelik kaynağı (server.js:2139)
  *
@@ -80,7 +82,11 @@ const saat = ms => (ms / 3600000).toFixed(1) + ' sa';
         const u = d.data();
         const st = u.comebackTrialStart;
         if (typeof st !== 'number' || !(st > 0)) return;
-        damgali.push({ uid: d.id, u, stamp: st });
+        damgali.push({
+            uid: d.id, u, stamp: st,
+            kampanya: u.comebackTrialCampaign || '',
+            kacinci: u.comebackTrialCount || 1
+        });
     });
     damgali.sort((a, b) => a.stamp - b.stamp);
 
@@ -115,6 +121,24 @@ const saat = ms => (ms / 3600000).toFixed(1) + ' sa';
         + '  (dönüşüm %' + (kararVeren ? (100 * alanKararli / kararVeren).toFixed(1) : '—') + ')');
     console.log('   ilk damga                      : ' + tarih(damgali[0].stamp));
     console.log('   son damga                      : ' + tarih(damgali[damgali.length - 1].stamp) + '\n');
+
+    // ⚠ TEKRARLI HEDİYE [2026-09-03]. `comebackTrialStart` yeni kampanyada
+    // ÜZERİNE YAZILIYOR — yukarıdaki ilk/son damga, birden çok hediye almış
+    // kullanıcıda SON hediyenin tarihidir. Kaçıncı olduğu comebackTrialCount'ta.
+    const tekrarli = damgali.filter(r => r.kacinci > 1);
+    if (tekrarli.length) {
+        console.log('   ⚠ BİRDEN ÇOK hediye almış      : ' + tekrarli.length
+            + '  → bunlarda damga SON hediyenin tarihi, attribüsyonu ona göre oku');
+    }
+    const kampanyalar = {};
+    for (const r of damgali) {
+        const k = r.kampanya || '(kimliksiz — kampanya kimliği eklenmeden önce)';
+        kampanyalar[k] = (kampanyalar[k] || 0) + 1;
+    }
+    console.log('   kampanyaya göre dağılım:');
+    for (const [k, n] of Object.entries(kampanyalar)) {
+        console.log('     ' + String(n).padStart(4) + '  ' + k);
+    }
 
     // ── B) ATTRİBÜSYON — satın alma damgadan SONRA mı? ────────────────────
     console.log('── B) ATTRİBÜSYON (satın alma damgadan sonra mı?) ──');

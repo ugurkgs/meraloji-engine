@@ -2392,6 +2392,25 @@ if (Number.isNaN(COMEBACK_CAMPAIGN_END)) {
     console.log(`[COMEBACK] Kampanya bitişi: ${new Date(COMEBACK_CAMPAIGN_END).toISOString()}`);
 }
 
+// ── KAMPANYA KİMLİĞİ [2026-09-03] ────────────────────────────────────────
+// Damga eskiden "bu kullanıcı hediyesini aldı" diyordu ve KALICIYDI: bir kez
+// damgalanan bir daha hiçbir kampanyaya giremiyordu. Artık damga bir
+// KAMPANYAYA ait — kimlik değişince kullanıcı yeniden hak kazanır.
+//
+// BOŞSA ESKİ DAVRANIŞ: env girilmediği sürece hiçbir damga sıfırlanmaz,
+// kod bu değişiklikten öncekiyle birebir aynı çalışır. Yeniden hak verme
+// bilinçli bir jesttir, deploy'un yan etkisi değil.
+//
+// Değeri kısa ve sıralanabilir tut: "2026-09", "2026-09-av-gunlugu" gibi.
+// Aynı değeri ikinci kez kullanma — o kampanyada damgalananlar tekrar
+// hak kazanmaz.
+const COMEBACK_CAMPAIGN_ID = String(process.env.COMEBACK_CAMPAIGN_ID || '').trim();
+if (COMEBACK_CAMPAIGN_ID) {
+    console.log(`[COMEBACK] Kampanya kimliği: ${COMEBACK_CAMPAIGN_ID} — başka kampanyanın damgası yeniden hak kazandırır`);
+} else {
+    console.log('[COMEBACK] Kampanya kimliği YOK — damga tek seferlik (eski davranış)');
+}
+
 // Firebase Auth createdAt cache — her kullanıcı için 24 saat cache'le
 const userCreationCache = new NodeCache({ stdTTL: 86400 });
 const subscriptionCache = new NodeCache({ stdTTL: 180 }); // 3 dakika TTL
@@ -2718,23 +2737,40 @@ async function verifyAuth(req, res, next) {
                 // uygulama açılışındaki /api/subscription-status çağrısı 72 saati
                 // başlatır ve kullanıcı hiçbir yeniliği görmeden süresi yanar.
                 const isAnalysisRequest = req.originalUrl.startsWith('/api/forecast');
-                let stamp = comebackTrialCache.get(uid);
+                // Anahtara kampanya kimliği giriyor: yalnız uid olsaydı kimlik
+                // değiştiğinde eski damga 24 saat cache'ten gelir ve değişiklik
+                // "çalışmıyor" görünürdü.
+                const cbCacheKey = `${uid}_${COMEBACK_CAMPAIGN_ID}`;
+                let stamp = comebackTrialCache.get(cbCacheKey);
 
                 // 1) Damgayı öğren (cache boşsa Firestore'dan oku)
                 if (stamp === undefined) {
                     const cbDoc = await db.collection('users').doc(uid).get();
                     const raw = cbDoc.exists ? cbDoc.data().comebackTrialStart : null;
+                    const rawKampanya = cbDoc.exists ? (cbDoc.data().comebackTrialCampaign || '') : '';
                     // [GÜVENLİK] GELECEK tarihli damga geçersiz sayılır (0'a düşürülür).
                     // Aksi halde damga geleceğe yazılırsa `Date.now() - stamp` NEGATİF olur,
                     // negatif her zaman 72 saatten küçüktür → kalıcı bedava PRO. Asıl koruma
                     // firestore_rules.txt'te (istemci bu alana yazamaz); bu ikinci katman,
                     // kural deploy'u gecikse veya ileride gevşetilse bile açığı kapatır.
                     stamp = (typeof raw === 'number' && raw > 0 && raw <= Date.now()) ? raw : 0;
+
+                    // BAŞKA KAMPANYANIN DAMGASI → yeniden hak kazanır.
+                    // `eskiHediyeBitti` koşulu ŞART: hâlâ 72 saatinin içinde olan
+                    // birini sıfırlarsak, analiz yapana kadar erişimi kesilir.
+                    // Süresi dolmuş damga sıfırlanır, kullanıcı ilk analizinde
+                    // yeniden damgalanır ve taze 72 saat alır.
+                    if (COMEBACK_CAMPAIGN_ID && stamp > 0 &&
+                        rawKampanya !== COMEBACK_CAMPAIGN_ID &&
+                        (Date.now() - stamp) >= COMEBACK_TRIAL_MS) {
+                        console.log(`[COMEBACK] ♻ ${uid} → "${rawKampanya || 'kimliksiz'}" damgası eski, "${COMEBACK_CAMPAIGN_ID}" için yeniden hak kazandı`);
+                        stamp = 0;
+                    }
                     // "Damgası yok" (0) durumunu ancak kampanya kapandıysa kalıcı
                     // cache'le; kampanya açıkken kullanıcı analiz yapınca
                     // damgalanabilmeli, bayat 0 bunu engellerdi.
                     if (stamp > 0 || !(Date.now() < COMEBACK_CAMPAIGN_END)) {
-                        comebackTrialCache.set(uid, stamp);
+                        comebackTrialCache.set(cbCacheKey, stamp);
                     }
                 }
 
@@ -2745,11 +2781,20 @@ async function verifyAuth(req, res, next) {
                 // onurlandırma) bu bayraktan bilinçli olarak BAĞIMSIZDIR.
                 if (stamp === 0 && accountAgeKnown && isAnalysisRequest && Date.now() < COMEBACK_CAMPAIGN_END) {
                     stamp = Date.now();
+                    // `comebackTrialCampaign` damganın hangi kampanyaya ait
+                    // olduğunu tutar; bir sonraki kampanya bunu görüp yeniden
+                    // hak tanıyacak. `comebackTrialCount` kaçıncı hediye
+                    // olduğunu sayar — denetim-comeback.js tekrarlı hediyeyi
+                    // ayırt edebilsin diye (ilk damga tarihi üzerine yazılıyor).
                     await db.collection('users').doc(uid).set(
-                        { comebackTrialStart: stamp }, { merge: true }
+                        {
+                            comebackTrialStart: stamp,
+                            comebackTrialCampaign: COMEBACK_CAMPAIGN_ID,
+                            comebackTrialCount: admin.firestore.FieldValue.increment(1)
+                        }, { merge: true }
                     );
-                    comebackTrialCache.set(uid, stamp);
-                    console.log(`[COMEBACK] 🎁 ${uid} → 3 günlük geri dönüş denemesi başladı`);
+                    comebackTrialCache.set(cbCacheKey, stamp);
+                    console.log(`[COMEBACK] 🎁 ${uid} → 3 günlük geri dönüş denemesi başladı (kampanya: ${COMEBACK_CAMPAIGN_ID || 'kimliksiz'})`);
                 }
 
                 // 3) 72 saat içindeyse tam erişim. Yalnızca isGracePeriod EKLENİR;

@@ -32,6 +32,18 @@ if (!admin.apps.length) {
     admin.initializeApp({ credential: admin.credential.cert(JSON.parse(raw)) });
 }
 const db = admin.firestore();
+
+const KAMPANYA_ID = String(process.env.COMEBACK_CAMPAIGN_ID || '').trim();
+// Damga artık kampanyaya bağlı (server.js COMEBACK_CAMPAIGN_ID). Elenmesi
+// gereken yalnız BU kampanyada damgalanmış olan; önceki kampanyanınki
+// yeniden hak kazanır. KAMPANYA_ID boşsa eski davranış: damgalı = elenir.
+function buKampanyadaDamgali(u) {
+    const st = u.comebackTrialStart;
+    if (!(typeof st === 'number' && st > 0)) return false;
+    if (!KAMPANYA_ID) return true;
+    return (u.comebackTrialCampaign || '') === KAMPANYA_ID;
+}
+
 const GERCEK = process.argv.includes('--gercek');
 
 const NOW = Date.now();
@@ -90,7 +102,7 @@ const METIN = {
         if (!dg) { elenen.tarihYok++; return; }
         if (dg + graceGunSayisi(dg) * 86400000 > NOW) { elenen.denemeSuruyor++; return; }
         if (!u.fcmToken) { elenen.tokenYok++; return; }
-        if (typeof u.comebackTrialStart === 'number' && u.comebackTrialStart > 0) { elenen.damgali++; return; }
+        if (buKampanyadaDamgali(u)) { elenen.damgali++; return; }
 
         hedef.push({ uid, token: u.fcmToken, lang: METIN[u.lang] ? u.lang : 'tr' });
     });

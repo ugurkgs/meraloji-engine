@@ -19,7 +19,7 @@
  *   hesap TRIAL_SHORT_FROM'dan SONRA açıldıysa 7 gün, önce açıldıysa 14 gün.
  *   Tarih Firebase Auth `metadata.creationTime`'dan gelir (Firestore'da yok).
  *
- * ⚠️ `comebackTrialStart` alanı olanlar hediyelerini ZATEN ALDI. Damga tek
+ * ⚠️ `comebackTrialStart` alanı olanlar BU kampanyada hediyelerini aldıysa
  *    seferlik ve yenilenmiyor (server.js:2227 `stamp === 0` koşulu) — yani
  *    onlara tekrar bildirim atmak yeni bir 3 gün AÇMAZ. Liste bu yüzden ikiye
  *    ayrılıyor; yeni kampanyada "henüz damgalanmamış" grubu hedefleyin.
@@ -36,6 +36,18 @@ if (!admin.apps.length) {
     admin.initializeApp({ credential: admin.credential.cert(JSON.parse(raw)) });
 }
 const db = admin.firestore();
+
+const KAMPANYA_ID = String(process.env.COMEBACK_CAMPAIGN_ID || '').trim();
+// Damga artık kampanyaya bağlı (server.js COMEBACK_CAMPAIGN_ID). Elenmesi
+// gereken yalnız BU kampanyada damgalanmış olan; önceki kampanyanınki
+// yeniden hak kazanır. KAMPANYA_ID boşsa eski davranış: damgalı = elenir.
+function buKampanyadaDamgali(u) {
+    const st = u.comebackTrialStart;
+    if (!(typeof st === 'number' && st > 0)) return false;
+    if (!KAMPANYA_ID) return true;
+    return (u.comebackTrialCampaign || '') === KAMPANYA_ID;
+}
+
 const TOKEN_YAZ = process.argv.includes('--token');
 
 const NOW = Date.now();
@@ -102,7 +114,7 @@ function graceGunSayisi(createdAtMs) {           // server.js:1941 ile aynı
         if (!u.fcmToken) { elenen.tokenYok++; return; }
 
         const kayit = { uid, kayitTarihi: dg, gun, denemeBitis, lang: u.lang || 'tr', token: u.fcmToken };
-        if (typeof u.comebackTrialStart === 'number' && u.comebackTrialStart > 0) {
+        if (buKampanyadaDamgali(u)) {
             kayit.damga = u.comebackTrialStart;
             damgali.push(kayit);
         } else {
