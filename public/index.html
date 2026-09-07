@@ -17,7 +17,7 @@
 
     <!-- SEO Meta Tags -->
     <meta name="description"
-        content="Türkiye kıyılarında 83+ balık türü için gerçek zamanlı avlanma tahmini. Su sıcaklığı, dalga, basınç, ay fazı ve 22 çevresel parametreyle bilimsel skor hesaplama. Nerede, ne zaman, hangi balık?">
+        content="Türkiye kıyılarında 80 balık türü için gerçek zamanlı avlanma tahmini. Su sıcaklığı, dalga, basınç, ay fazı ve 22 çevresel parametreyle bilimsel skor hesaplama. Nerede, ne zaman, hangi balık?">
     <meta name="keywords"
         content="balıkçılık, balık tahmini, olta, deniz durumu, meraloji, fishing forecast, türkiye balıkçılık, levrek, lüfer, çipura, balık avı, solunar, dalga tahmini">
     <meta name="author" content="MERALOJİ F.I.S.H Engine">
@@ -28,7 +28,7 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="MERALOJİ — Akıllı Balıkçılık Tahmin Sistemi">
     <meta property="og:description"
-        content="83+ balık türü, 22 çevresel parametre, gerçek zamanlı skor. Haritada tıkla, hangi balığın nerede aktif olduğunu öğren.">
+        content="80 balık türü, 22 çevresel parametre, gerçek zamanlı skor. Haritada tıkla, hangi balığın nerede aktif olduğunu öğren.">
     <meta property="og:url" content="https://meraloji.com/">
     <meta property="og:site_name" content="MERALOJİ">
     <meta property="og:locale" content="tr_TR">
@@ -40,7 +40,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="MERALOJİ — Akıllı Balıkçılık Tahmin Sistemi">
     <meta name="twitter:description"
-        content="83+ balık türü, 22 çevresel parametre, gerçek zamanlı skor. Nerede, ne zaman, hangi balık?">
+        content="80 balık türü, 22 çevresel parametre, gerçek zamanlı skor. Nerede, ne zaman, hangi balık?">
     <meta name="twitter:image" content="https://meraloji.com/icons/og-image.png">
 
     <!-- Favicon -->
@@ -64,23 +64,72 @@
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
-        "@type": "WebApplication",
+        "@type": "MobileApplication",
+        "@id": "https://meraloji.com/#uygulama",
         "name": "MERALOJİ F.I.S.H. System",
-        "description": "Türkiye kıyılarında 83+ balık türü için gerçek zamanlı avlanma tahmini. Su sıcaklığı, dalga, basınç, ay fazı ve 22 çevresel parametreyle bilimsel skor hesaplama.",
+        "alternateName": ["Meraloji", "Meraloji Balık Tahmini"],
+        "description": "Türkiye kıyılarında 80 balık türü için gerçek zamanlı avlanma tahmini. Haritada denizde herhangi bir noktaya dokunun; su sıcaklığı, dalga, akıntı, basınç, ay fazı ve 22 çevresel parametreden tür bazlı aktiflik skoru hesaplanır.",
         "url": "https://meraloji.com",
+        "sameAs": [
+            "https://play.google.com/store/apps/details?id=com.meraloji.fish",
+            "https://www.instagram.com/meraloji_fish_system/"
+        ],
+        "installUrl": "https://play.google.com/store/apps/details?id=com.meraloji.fish",
+        "downloadUrl": "https://play.google.com/store/apps/details?id=com.meraloji.fish",
         "applicationCategory": "SportsApplication",
-        "operatingSystem": "Android, Web",
+        "applicationSubCategory": "Balıkçılık tahmini",
+        "operatingSystem": "Android 7.0+, Web",
+        "softwareVersion": "4.5.1",
+        "inLanguage": ["tr", "en", "es", "el"],
+        "isAccessibleForFree": true,
+        "featureList": [
+            "Haritada herhangi bir deniz noktası için tür bazlı avlanma skoru",
+            "80 balık türü — Ege, Akdeniz, Marmara ve Karadeniz",
+            "22 çevresel parametre: su sıcaklığı, dalga, akıntı, basınç, ay fazı, plankton, termoklin, görüş mesafesi",
+            "Uydu su sıcaklığı (NOAA) ile model verisinin füzyonu",
+            "Deniz tabanı derinlik ve dip yapısı (EMODnet, GEBCO)",
+            "Nehir ağzı tuzluluk etkisi",
+            "Bölge tarama — yarıçap içindeki en yüksek skorlu noktalar",
+            "Av Modu — 6 saat boyunca değişen koşullarda saat aralıklı uyarı",
+            "Av Günlüğü — tutulan balık, o anın konumu ve koşullarıyla birlikte",
+            "Saatlik skor grafiği ve 7 günlük tahmin",
+            "Amatör avcılık yasal boy sınırları ve koruma dönemleri"
+        ],
         "offers": {
-            "@type": "Offer",
-            "price": "0",
+            "@type": "AggregateOffer",
             "priceCurrency": "TRY",
-            "description": "Ücretsiz deneme, Premium abonelik mevcut"
+            "lowPrice": "0",
+            "highPrice": "199.99",
+            "offerCount": "3",
+            "url": "https://meraloji.com/pricing.html"
         },
         "author": {
             "@type": "Organization",
-            "name": "MERALOJİ F.I.S.H Engine"
+            "@id": "https://meraloji.com/#kurulus"
         },
-        "inLanguage": ["tr", "en"]
+        "publisher": {
+            "@type": "Organization",
+            "@id": "https://meraloji.com/#kurulus"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "@id": "https://meraloji.com/#kurulus",
+        "name": "MERALOJİ F.I.S.H. Engine",
+        "url": "https://meraloji.com",
+        "logo": "https://meraloji.com/logo.png",
+        "sameAs": [
+            "https://play.google.com/store/apps/details?id=com.meraloji.fish",
+            "https://www.instagram.com/meraloji_fish_system/"
+        ],
+        "email": "meralojifishsystem@gmail.com",
+        "areaServed": {
+            "@type": "Country",
+            "name": "Türkiye"
+        }
     }
     </script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -3395,7 +3444,7 @@
                     <span style="color:#00ffcc;">✓</span> Sınırsız mera analizi ve bölge tarama
                 </div>
                 <div style="display:flex; align-items:center; gap:8px; padding:5px 0; color:#c8d0dc; font-size:12px;">
-                    <span style="color:#00ffcc;">✓</span> 83+ balık türü — tam liste ve av taktikleri
+                    <span style="color:#00ffcc;">✓</span> 80 balık türü — tam liste ve av taktikleri
                 </div>
                 <div style="display:flex; align-items:center; gap:8px; padding:5px 0; color:#c8d0dc; font-size:12px;">
                     <span style="color:#00ffcc;">✓</span> Saatlik skor grafiği + 7 günlük tahmin
@@ -9943,7 +9992,7 @@
                 subtitle.textContent = 'PRO ile sınırsız bölge taraması yapın';
             } else if (reason === 'list') {
                 title.textContent = 'Daha Fazla Balık Görmek İçin';
-                subtitle.textContent = '83+ balık türünün tamamını PRO ile keşfedin';
+                subtitle.textContent = '80 balık türünün tamamını PRO ile keşfedin';
             } else if (reason === 'forecast') {
                 title.textContent = '7 Günlük Tahmin';
                 subtitle.textContent = 'Önümüzdeki 7 günün tahminini PRO ile görün';
@@ -10044,7 +10093,7 @@
                 <div style="font-size:0.78rem; font-weight:700; color:#00ffcc; margin-bottom:8px;">✨ PRO ile neler kazanırsınız?</div>
                 <div style="font-size:0.75rem; color:#c8d0dc; line-height:1.8;">
                     ✓ Sınırsız mera analizi ve bölge tarama<br>
-                    ✓ 83+ balık türü — tam liste ve av taktikleri<br>
+                    ✓ 80 balık türü — tam liste ve av taktikleri<br>
                     ✓ Saatlik skor grafiği + 7 günlük tahmin<br>
                     ✓ Detaylı skor analizi (22 çevresel parametre)
                 </div>
