@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fiyatlandırma — MERALOJİ F.I.S.H. System</title>
-<meta name="description" content="MERALOJİ PRO ile sınırsız balıkçılık tahmini. Aylık ₺29,99 veya yıllık ₺199,99.">
+<meta name="description" content="MERALOJİ PRO ile sınırsız balıkçılık tahmini. Aylık ₺49,99 veya yıllık ₺299,99.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
@@ -206,12 +206,6 @@ nav {
 .banner-t.red    { color: #ff6464; }
 .banner-b { color: var(--text-secondary); }
 .banner-b strong { color: var(--text-primary); }
-.slots-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-.slots-n { font-size: 18px; font-weight: 700; color: #ff4444; font-family: var(--font-mono); }
-.slots-tot { font-size: 11px; color: var(--text-muted); }
-.slots-bar-w { margin-top: 4px; background: rgba(0,0,0,0.3); border-radius: 3px; height: 3px; overflow: hidden; }
-.slots-bar { height: 100%; background: linear-gradient(90deg,#ff4444,var(--orange)); width: 30%; transition: width 0.8s; }
-
 /* COMPARE TABLE */
 .compare-section { max-width: 780px; margin: 0 auto; padding: 0 20px 100px; animation: fadeUp 0.6s 0.15s both; }
 .sec-hd { text-align: center; margin-bottom: 36px; }
@@ -307,18 +301,34 @@ footer a:hover { color: var(--cyan); }
         {
             "@type": "Offer",
             "name": "MERALOJİ PRO — Aylık",
-            "price": "29.99",
+            "price": "49.99",
             "priceCurrency": "TRY",
             "availability": "https://schema.org/InStock",
-            "description": "60 günlük lansman fiyatı. Kampanya sonrası ₺59/ay."
+            "eligibleRegion": { "@type": "Country", "name": "TR" }
         },
         {
             "@type": "Offer",
             "name": "MERALOJİ PRO — Yıllık",
-            "price": "199.99",
+            "price": "299.99",
             "priceCurrency": "TRY",
             "availability": "https://schema.org/InStock",
-            "description": "İlk 200 kişiye özel lansman fiyatı. Sonrasında ₺449/yıl."
+            "eligibleRegion": { "@type": "Country", "name": "TR" },
+            "description": "Aylık plana göre %50 tasarruf."
+        },
+        {
+            "@type": "Offer",
+            "name": "MERALOJİ PRO — Monthly",
+            "price": "4.99",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock"
+        },
+        {
+            "@type": "Offer",
+            "name": "MERALOJİ PRO — Yearly",
+            "price": "29.99",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock",
+            "description": "Saves 50% compared with the monthly plan."
         }
     ]
 }
@@ -343,7 +353,7 @@ footer a:hover { color: var(--cyan); }
   <div class="billing-wrap">
     <div class="billing-toggle">
       <button class="bt-btn" id="btn-monthly" onclick="setBilling('monthly')">AYLIK</button>
-      <button class="bt-btn active" id="btn-yearly" onclick="setBilling('yearly')">YILLIK <span class="bt-save">%73 TASARRUF</span></button>
+      <button class="bt-btn active" id="btn-yearly" onclick="setBilling('yearly')">YILLIK <span class="bt-save">%50 TASARRUF</span></button>
     </div>
   </div>
 </section>
@@ -380,14 +390,10 @@ footer a:hover { color: var(--cyan); }
 
     <div class="price-main">
       <span class="price-cur">₺</span>
-      <span class="price-amt" id="p-amt">199,99</span>
+      <span class="price-amt" id="p-amt">299,99</span>
       <span class="price-period" id="p-period">/yıl</span>
     </div>
-    <div id="n-ysave" class="price-note green">~₺16/ay · %73 tasarruf</div>
-    <div id="n-ylaunch" class="price-note orange">🎯 İlk 200 kişiye özel fiyat</div>
-    <div id="n-yafter" class="price-note strike" style="margin-bottom:20px;">Sonra ₺449/yıl</div>
-    <div id="n-mlaunch" class="price-note orange" style="display:none;">⏳ 60 günlük lansman fiyatı</div>
-    <div id="n-mafter" class="price-note strike" style="display:none;margin-bottom:20px;">Sonra ₺59/ay</div>
+    <div id="n-ysave" class="price-note green" style="margin-bottom:20px;">~₺25/ay · %50 tasarruf</div>
 
     <div class="divider"></div>
     <ul class="features">
@@ -405,22 +411,6 @@ footer a:hover { color: var(--cyan); }
 </div>
 
 <!-- LAUNCH BANNERS -->
-<div class="banners">
-  <div class="banner orange">
-    <div class="banner-t orange">⏳ AYLIK FİYAT — 60 GÜNLÜK LANSMAN KAMPANYASI</div>
-    <div class="banner-b">Kampanya bittikten sonra aylık plan <strong>₺59</strong> olacak.</div>
-  </div>
-  <div class="banner red">
-    <div class="banner-t red">🎯 YILLIK PLAN — İLK 200 KİŞİYE ÖZEL</div>
-    <div class="banner-b">Kontenjan dolunca yıllık plan <strong>₺449</strong> olacak.</div>
-    <div class="slots-row">
-      <div class="slots-n" id="slots-n">...</div>
-      <div class="slots-tot">/ 200 kişi kaldı</div>
-    </div>
-    <div class="slots-bar-w"><div class="slots-bar" id="slots-bar-el"></div></div>
-  </div>
-</div>
-
 <!-- COMPARE -->
 <section class="compare-section">
   <div class="sec-hd">
@@ -458,10 +448,6 @@ footer a:hover { color: var(--cyan); }
     <div class="faq-a">Evet, planınızı dilediğiniz zaman iptal edebilirsiniz. İptal sonrası mevcut dönemin sonuna kadar tüm PRO özellikleriniz aktif kalır. Ek ücret veya ceza uygulanmaz.</div>
   </div>
   <div class="faq-item">
-    <button class="faq-q" onclick="toggleFaq(this)">Lansman kampanyası ne zaman bitiyor?<span class="faq-ico">+</span></button>
-    <div class="faq-a">Aylık plan için 60 günlük lansman kampanyası geçerli; süre dolunca aylık fiyat ₺59'a yükselecek. Yıllık plan içinse ilk 200 kontenjan dolduğunda ₺449'a çıkacak. Şu anki fiyatı kilitlemenin en iyi yolu hemen abone olmak.</div>
-  </div>
-  <div class="faq-item">
     <button class="faq-q" onclick="toggleFaq(this)">Bölge taraması nasıl çalışıyor?<span class="faq-ico">+</span></button>
     <div class="faq-a">Seçtiğiniz merkez nokta etrafında 1–5 km yarıçapında onlarca noktayı otomatik tarar, anlık balık skorunu hesaplar ve harita üzerinde en yüksek puanlı alanları işaretler. Ücretsizde günlük 1 tarama; PRO'da sınırsız.</div>
   </div>
@@ -479,7 +465,7 @@ footer a:hover { color: var(--cyan); }
 <section class="cta-band">
   <div class="cta-box">
     <h2>Balığın yerini biliyor musun?</h2>
-    <p>MERALOJİ PRO ile doğru zamanı, doğru noktayı ve doğru balığı bulun.<br>Şu an sadece <strong style="color:var(--cyan)">₺29,99/ay</strong> — lansman fiyatı.</p>
+    <p>MERALOJİ PRO ile doğru zamanı, doğru noktayı ve doğru balığı bulun.<br>Aylık <strong style="color:var(--cyan)">₺49,99</strong>, yıllık <strong style="color:var(--cyan)">₺299,99</strong>.</p>
     <div class="cta-btns">
       <a class="btn-p" href="https://meraloji.com">PRO'ya Yükselt</a>
       <a class="btn-s" href="https://meraloji.com">Ücretsiz Dene</a>
@@ -500,28 +486,16 @@ footer a:hover { color: var(--cyan); }
     document.getElementById('btn-monthly').classList.toggle('active', type === 'monthly');
     document.getElementById('btn-yearly').classList.toggle('active',  type === 'yearly');
     const isY = type === 'yearly';
-    document.getElementById('p-amt').textContent    = isY ? '199,99' : '29,99';
+    document.getElementById('p-amt').textContent    = isY ? '299,99' : '49,99';
     document.getElementById('p-period').textContent = isY ? '/yıl'   : '/ay';
-    ['n-ysave','n-ylaunch','n-yafter'].forEach(id => document.getElementById(id).style.display = isY ? '' : 'none');
-    ['n-mlaunch','n-mafter'].forEach(id => document.getElementById(id).style.display = isY ? 'none' : '');
+    // Yıllık tasarruf notu yalnız yıllık planda görünür.
+    document.getElementById('n-ysave').style.display = isY ? '' : 'none';
   }
   setBilling('yearly');
 
   function toggleFaq(btn) { btn.parentElement.classList.toggle('open'); }
 
-  // Canlı slot sayısı
-  fetch('https://meraloji.com/api/pro-slots')
-    .then(r => r.json())
-    .then(d => {
-      const rem = d.remaining ?? d.slots ?? null;
-      if (rem !== null) {
-        document.getElementById('slots-n').textContent = rem;
-        document.getElementById('slots-n').style.color = rem < 50 ? '#ff2222' : rem < 100 ? '#ff851b' : '#ff4444';
-        const pct = Math.min(100, Math.round((500 - rem) / 5));
-        document.getElementById('slots-bar-el').style.width = pct + '%';
-      }
-    })
-    .catch(() => { document.getElementById('slots-n').textContent = '—'; });
+
 </script>
 </body>
 </html>
