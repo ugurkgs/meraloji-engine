@@ -91,24 +91,6 @@ nav {
 }
 .hero-sub { font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 40px; }
 
-/* BILLING TOGGLE */
-.billing-wrap { display: flex; justify-content: center; margin-bottom: 52px; }
-.billing-toggle {
-  display: inline-flex; background: rgba(8,24,48,0.9);
-  border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden;
-}
-.bt-btn {
-  padding: 10px 22px; cursor: pointer; border: none; background: transparent;
-  font-family: var(--font-display); font-size: 13px; font-weight: 600;
-  letter-spacing: 0.5px; color: var(--text-muted); transition: all 0.2s;
-}
-.bt-btn.active { background: rgba(0,212,255,0.12); color: var(--cyan); }
-.bt-save {
-  display: inline-block; background: rgba(0,255,136,0.15); color: var(--green);
-  font-family: var(--font-mono); font-size: 9px; font-weight: 700;
-  letter-spacing: 1px; padding: 2px 7px; border-radius: 10px; margin-left: 6px;
-}
-
 /* PLANS */
 .plans {
   max-width: 880px; margin: 0 auto; padding: 0 20px 80px;
@@ -148,6 +130,22 @@ nav {
 .plan-name.cyan { color: var(--cyan); }
 .plan-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-bottom: 20px; }
 
+/* İkili fiyat — aylık ve yıllık yan yana. Anahtar kaldırıldı: iki planı
+   karşılaştırmak için tıklamak gerekiyordu; ikisi de görünürken karar
+   tek bakışta veriliyor. */
+.ikili-fiyat { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.if-kutu { border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 13px; min-width: 0; }
+.if-kutu.one { border-color: var(--cyan); background: rgba(0,212,255,0.06); }
+.if-etiket { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 1.2px;
+             color: var(--text-muted); margin-bottom: 7px; white-space: nowrap; }
+.if-kutu.one .if-etiket { color: var(--cyan); }
+.if-rozet { display: inline-block; background: rgba(0,212,255,0.16); color: var(--cyan);
+            font-size: 8px; padding: 1px 5px; border-radius: 3px; margin-left: 3px; }
+.if-tutar { font-family: var(--font-mono); font-size: 23px; font-weight: 700; line-height: 1.1; }
+.if-donem { font-family: var(--font-display); font-size: 11px; font-weight: 400;
+            color: var(--text-muted); margin-left: 2px; }
+.if-alt { font-size: 10.5px; color: var(--text-muted); margin-top: 4px; }
+@media (max-width: 430px) { .ikili-fiyat { grid-template-columns: 1fr; } }
 /* price */
 .price-main { display: flex; align-items: baseline; gap: 4px; margin-bottom: 6px; }
 .price-cur { font-size: 18px; font-weight: 700; color: var(--text-secondary); }
@@ -340,22 +338,17 @@ footer a:hover { color: var(--cyan); }
 <nav>
   <a class="logo" href="https://meraloji.com">⚓ MERALOJİ</a>
   <div class="nav-right">
-    <a class="nav-link" href="https://meraloji.com">Harita</a>
+    <a class="nav-link" href="https://meraloji.com">Ana sayfa</a>
     <a class="nav-link active" href="#">Fiyatlar</a>
-    <a class="nav-btn" href="https://meraloji.com">Uygulamayı Aç</a>
+    <a class="nav-btn" href="https://play.google.com/store/apps/details?id=com.meraloji.fish">Google Play</a>
   </div>
 </nav>
 
 <section class="hero">
   <div class="hero-badge">⚡ F.I.S.H. SYSTEM — PLANLAR</div>
   <h1>Balık nerede,<br><span class="grad">şimdi öğren.</span></h1>
-  <p class="hero-sub">80 balık türü, 22 çevresel parametre, gerçek zamanlı skor.<br>PRO ile sınırsız analiz, bölge tarama ve 7 günlük tahmin.</p>
-  <div class="billing-wrap">
-    <div class="billing-toggle">
-      <button class="bt-btn" id="btn-monthly" onclick="setBilling('monthly')">AYLIK</button>
-      <button class="bt-btn active" id="btn-yearly" onclick="setBilling('yearly')">YILLIK <span class="bt-save">%50 TASARRUF</span></button>
-    </div>
-  </div>
+  <p class="hero-sub">80+ balık türü, 22 çevresel parametre, gerçek zamanlı skor.<br>PRO ile sınırsız analiz, bölge tarama ve 7 günlük tahmin.</p>
+  
 </section>
 
 <div class="plans">
@@ -373,12 +366,13 @@ footer a:hover { color: var(--cyan); }
       <li><span class="fi c">✓</span><span>Dalga, rüzgar &amp; basınç tahminleri</span></li>
       <li><span class="fi c">✓</span><span>Ay fazı &amp; gel-git takvimi</span></li>
       <li><span class="fi c">✓</span><span>Temel balık türü bilgileri</span></li>
+      <li><span class="fi c">✓</span><span><strong>Av Günlüğü</strong> ve özel uyarılar</span></li>
       <li><span class="fi no">—</span><span class="feat-muted">Saatlik skor grafiği</span></li>
       <li><span class="fi no">—</span><span class="feat-muted">7 günlük tahmin</span></li>
       <li><span class="fi no">—</span><span class="feat-muted">22 parametre detaylı analizi</span></li>
       <li><span class="fi no">—</span><span class="feat-muted">Fırtına &amp; frenzy bildirimleri</span></li>
     </ul>
-    <a class="cta cta-outline" href="https://meraloji.com">Ücretsiz Başla</a>
+    <a class="cta cta-outline" href="https://play.google.com/store/apps/details?id=com.meraloji.fish">Ücretsiz Başla</a>
   </div>
 
   <!-- PRO -->
@@ -388,25 +382,31 @@ footer a:hover { color: var(--cyan); }
     <div class="plan-name cyan">MERALOJİ PRO</div>
     <div class="plan-desc">Sınırsız analiz — tam güç, tam veri</div>
 
-    <div class="price-main">
-      <span class="price-cur">₺</span>
-      <span class="price-amt" id="p-amt">299,99</span>
-      <span class="price-period" id="p-period">/yıl</span>
+    <div class="ikili-fiyat">
+      <div class="if-kutu">
+        <div class="if-etiket">AYLIK</div>
+        <div class="if-tutar">₺49,99<span class="if-donem">/ay</span></div>
+      </div>
+      <div class="if-kutu one">
+        <div class="if-etiket">YILLIK <span class="if-rozet">%50 TASARRUF</span></div>
+        <div class="if-tutar">₺299,99<span class="if-donem">/yıl</span></div>
+        <div class="if-alt">~₺25/ay</div>
+      </div>
     </div>
-    <div id="n-ysave" class="price-note green" style="margin-bottom:20px;">~₺25/ay · %50 tasarruf</div>
 
     <div class="divider"></div>
     <ul class="features">
       <li><span class="fi g">✓</span><span><strong>Sınırsız</strong> konum analizi</span></li>
       <li><span class="fi g">✓</span><span><strong>Sınırsız</strong> bölge taraması</span></li>
-      <li><span class="fi g">✓</span><span>80 balık türü — tam liste &amp; av taktikleri</span></li>
+      <li><span class="fi g">✓</span><span>80+ balık türü — tam liste &amp; av taktikleri</span></li>
       <li><span class="fi g">✓</span><span>Saatlik skor grafiği + 7 günlük tahmin</span></li>
       <li><span class="fi g">✓</span><span>Detaylı skor analizi <span class="feat-tag">22 PARAMETRE</span></span></li>
       <li><span class="fi g">✓</span><span>Dip yapısı (substrat) haritası</span></li>
       <li><span class="fi g">✓</span><span>Uydu su sıcaklığı (SST)</span></li>
+      <li><span class="fi g">✓</span><span><strong>Av Modu</strong> — 6 saatlik canlı takip</span></li>
       <li><span class="fi g">✓</span><span>🔔 Fırtına &amp; Feeding Frenzy bildirimleri</span></li>
     </ul>
-    <a class="cta cta-glow" href="https://meraloji.com">PRO'ya Yükselt</a>
+    <a class="cta cta-glow" href="https://play.google.com/store/apps/details?id=com.meraloji.fish">PRO'ya Yükselt</a>
   </div>
 </div>
 
@@ -432,8 +432,12 @@ footer a:hover { color: var(--cyan); }
     <div class="tbl-row"><div class="tbl-lbl">Dip yapısı (substrat) haritası</div><div class="tbl-v"><span class="no">—</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
     <div class="tbl-row"><div class="tbl-lbl">Uydu su sıcaklığı (SST)</div><div class="tbl-v"><span class="no">—</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
     <div class="tbl-grp">🐟 BALIK VERİTABANI</div>
-    <div class="tbl-row"><div class="tbl-lbl">Balık türü sayısı</div><div class="tbl-v"><span class="yc">80</span></div><div class="tbl-v"><span class="yg">80</span></div></div>
+    <div class="tbl-row"><div class="tbl-lbl">Analizde gösterilen tür</div><div class="tbl-v"><span class="yc">İlk 3</span></div><div class="tbl-v"><span class="yg">Tam liste · 80+</span></div></div>
     <div class="tbl-row"><div class="tbl-lbl">Tam av taktikleri &amp; mevsim bilgisi</div><div class="tbl-v"><span class="no">—</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
+    <div class="tbl-grp">🎣 SAHADA</div>
+    <div class="tbl-row"><div class="tbl-lbl">Av Modu — 6 saatlik canlı takip</div><div class="tbl-v"><span class="no">—</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
+    <div class="tbl-row"><div class="tbl-lbl">Av Günlüğü — tuttuğun balık + koşullar</div><div class="tbl-v"><span class="yc">✓</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
+    <div class="tbl-row"><div class="tbl-lbl">Özel uyarılar — yem hırsızı, canlı yem</div><div class="tbl-v"><span class="yc">✓</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
     <div class="tbl-grp">🔔 BİLDİRİMLER</div>
     <div class="tbl-row"><div class="tbl-lbl">Fırtına &amp; Feeding Frenzy bildirimi</div><div class="tbl-v"><span class="no">—</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
     <div class="tbl-row"><div class="tbl-lbl">Ani basınç düşüşü uyarısı</div><div class="tbl-v"><span class="no">—</span></div><div class="tbl-v"><span class="yg">✓</span></div></div>
@@ -449,11 +453,11 @@ footer a:hover { color: var(--cyan); }
   </div>
   <div class="faq-item">
     <button class="faq-q" onclick="toggleFaq(this)">Bölge taraması nasıl çalışıyor?<span class="faq-ico">+</span></button>
-    <div class="faq-a">Seçtiğiniz merkez nokta etrafında 1–5 km yarıçapında onlarca noktayı otomatik tarar, anlık balık skorunu hesaplar ve harita üzerinde en yüksek puanlı alanları işaretler. Ücretsizde günlük 1 tarama; PRO'da sınırsız.</div>
+    <div class="faq-a">Seçtiğiniz merkez nokta etrafında 3–20 km yarıçapında onlarca noktayı otomatik tarar, anlık balık skorunu hesaplar ve harita üzerinde en yüksek puanlı alanları işaretler. Ücretsizde günlük 1 tarama; PRO'da sınırsız.</div>
   </div>
   <div class="faq-item">
     <button class="faq-q" onclick="toggleFaq(this)">Ödeme güvenli mi?<span class="faq-ico">+</span></button>
-    <div class="faq-a">Tüm ödemeler Paddle altyapısı üzerinden işlenir. Kart bilgileriniz MERALOJİ sunucularına asla iletilmez; PCI DSS uyumlu Paddle sistemi tarafından şifreli olarak saklanır.</div>
+    <div class="faq-a">Tüm ödemeler Google Play üzerinden işlenir. Kart bilgileriniz MERALOJİ sunucularına asla iletilmez; ödeme ve faturalama tamamen Google Play tarafından yürütülür. Aboneliğinizi Google Play hesabınızdan yönetebilir ve dilediğiniz zaman iptal edebilirsiniz.</div>
   </div>
   <div class="faq-item">
     <button class="faq-q" onclick="toggleFaq(this)">22 çevresel parametre neler?<span class="faq-ico">+</span></button>
@@ -467,31 +471,20 @@ footer a:hover { color: var(--cyan); }
     <h2>Balığın yerini biliyor musun?</h2>
     <p>MERALOJİ PRO ile doğru zamanı, doğru noktayı ve doğru balığı bulun.<br>Aylık <strong style="color:var(--cyan)">₺49,99</strong>, yıllık <strong style="color:var(--cyan)">₺299,99</strong>.</p>
     <div class="cta-btns">
-      <a class="btn-p" href="https://meraloji.com">PRO'ya Yükselt</a>
-      <a class="btn-s" href="https://meraloji.com">Ücretsiz Dene</a>
+      <a class="btn-p" href="https://play.google.com/store/apps/details?id=com.meraloji.fish">PRO'ya Yükselt</a>
+      <a class="btn-s" href="https://play.google.com/store/apps/details?id=com.meraloji.fish">Ücretsiz Dene</a>
     </div>
   </div>
 </section>
 
 <footer>
-  © 2025 MERALOJİ — Uğur Kögüs &nbsp;·&nbsp;
+  © 2026 MERALOJİ — Uğur Kögüs &nbsp;·&nbsp;
   <a href="/privacy">Gizlilik Politikası</a> &nbsp;·&nbsp;
-  <a href="/terms">Kullanım Şartları</a> &nbsp;·&nbsp;
   meraloji.com
 </footer>
 
 </div>
 <script>
-  function setBilling(type) {
-    document.getElementById('btn-monthly').classList.toggle('active', type === 'monthly');
-    document.getElementById('btn-yearly').classList.toggle('active',  type === 'yearly');
-    const isY = type === 'yearly';
-    document.getElementById('p-amt').textContent    = isY ? '299,99' : '49,99';
-    document.getElementById('p-period').textContent = isY ? '/yıl'   : '/ay';
-    // Yıllık tasarruf notu yalnız yıllık planda görünür.
-    document.getElementById('n-ysave').style.display = isY ? '' : 'none';
-  }
-  setBilling('yearly');
 
   function toggleFaq(btn) { btn.parentElement.classList.toggle('open'); }
 
