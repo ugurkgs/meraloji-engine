@@ -1,5 +1,5 @@
-// MERALOJİ F.I.S.H. Service Worker v3.2
-const CACHE_NAME = 'meraloji-v3.2';
+// MERALOJİ F.I.S.H. Service Worker v4.0
+const CACHE_NAME = 'meraloji-v4.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
