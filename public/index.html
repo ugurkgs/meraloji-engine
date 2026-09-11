@@ -52,10 +52,20 @@
             "downloadUrl": "https://play.google.com/store/apps/details?id=com.meraloji.fish",
             "applicationCategory": "SportsApplication",
             "applicationSubCategory": "Balıkçılık tahmini",
-            "operatingSystem": "Android 7.0+, Web",
+            "operatingSystem": "Android 7.0+",
             "softwareVersion": "4.5.1",
             "inLanguage": ["tr", "en", "es", "el"],
             "isAccessibleForFree": true,
+            "screenshot": [
+                "https://meraloji.com/ekran/tur-listesi.webp",
+                "https://meraloji.com/ekran/skor.webp",
+                "https://meraloji.com/ekran/skor-analizi.webp",
+                "https://meraloji.com/ekran/termoklin.webp",
+                "https://meraloji.com/ekran/gelgit.webp",
+                "https://meraloji.com/ekran/basinc.webp",
+                "https://meraloji.com/ekran/hava.webp",
+                "https://meraloji.com/ekran/parametreler.webp"
+            ],
             "featureList": [
                 "Haritada herhangi bir deniz noktası için tür bazlı avlanma skoru",
                 "80 balık türü — Ege, Akdeniz, Marmara ve Karadeniz",
@@ -123,7 +133,8 @@
    ikiye indi — cyan iyi, turuncu dikkat.
 
    FORMÜLLER UYDURMA DEĞİL. Hepsi server.js'teki gerçek motordan alındı:
-   bileşen tavanları (22/28/18/20/12), Gauss eğrisi ve ACCLIM sabitleri.
+   Gauss eğrisi ve ACCLIM sabitleri. BİLEŞEN TAVANLARI BİLEREK YOK — çubuk
+   genişlikleri de eşit, oran da sızmasın (11 Eyl 2026).
    Motor değişirse bu sayfa da değişmeli.
    ═══════════════════════════════════════════════════════════════════════ */
 
@@ -209,29 +220,41 @@ a:hover{text-decoration:underline}
 .rozetler{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px}
 .rozetler span{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-3)}
 
-/* ── analiz paneli ───────────────────────────────────────────────────── */
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
-.p-ust{padding:15px 18px;border-bottom:1px solid var(--line-soft);
-       display:flex;justify-content:space-between;align-items:center;gap:12px;background:#0C2438}
-.p-koord{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--cyan);letter-spacing:.02em}
-.p-yer{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-3);margin-top:3px;letter-spacing:.08em}
-.p-derinlik{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-2)}
-
-/* Üç sütun: ad · çubuk · skor. Çubuk TEK sütunda duruyor — önceki sürümde
-   grid-column:2/4 ile iki sütuna yayılıyordu ve skoru alt satıra düşürüp
-   kartı gereksiz uzatıyordu. */
-.tur{display:grid;grid-template-columns:1fr 84px 42px;align-items:center;gap:13px;
-     padding:10px 18px;border-bottom:1px solid var(--line-soft)}
-.tur-ad{font-size:14.5px;font-weight:600;letter-spacing:-.01em}
-.tur-lat{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--ink-3);
-         margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tur-ray{height:5px;background:#0B2C3C;border-radius:3px;overflow:hidden}
-.tur-sk{font-family:"IBM Plex Mono",monospace;font-size:16.5px;font-weight:600;text-align:right}
+/* çubuk — "Aynı nokta, iki farklı gün" (#skor) bölümündeki bileşen çubukları */
 .bar{display:block;height:100%;border-radius:3px}
-.egri-kutu{padding:15px 18px 11px;border-top:1px solid var(--line-soft);background:#08202F}
-.egri-bas{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px;gap:10px;flex-wrap:wrap}
-svg.egri{display:block;width:100%;height:auto}
 
+/* ── gerçek ekran görüntüleri [2026-09-11] ─────────────────────────────── */
+/* Telefon çerçevesi CSS ile: görüntü dosyaları sade kalsın, çerçeve temayla
+   birlikte değişebilsin. Görüntüler 600×1159 — 2× ekranda ~300 px genişlik. */
+.telefonlar{margin:0;min-width:0;display:flex;justify-content:center;align-items:flex-start;
+  flex-wrap:wrap;padding-top:6px}
+.tel{position:relative;margin:0;padding:6px;border-radius:30px;background:#0B1C2C;
+  border:1px solid var(--line);box-shadow:0 34px 60px -24px #000d,inset 0 0 0 1px #ffffff0a}
+.tel img{display:block;width:100%;height:auto;border-radius:24px}
+.tel-on{width:min(272px,58%);z-index:2;transform:rotate(-2deg)}
+.tel-arka{width:min(236px,50%);margin:52px 0 0 -12%;z-index:1;transform:rotate(3.5deg)}
+.telefonlar figcaption{flex-basis:100%;text-align:center;margin-top:22px;
+  font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3);letter-spacing:.04em}
+
+/* Galeri kendi içinde kayar — sayfa gövdesi yana kaymamalı (min-width:0). */
+.galeri{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(196px,226px);gap:22px;
+  overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;
+  margin-top:30px;padding:8px 2px 20px;min-width:0;scrollbar-width:thin;
+  scrollbar-color:var(--line) transparent}
+.galeri:focus-visible{outline:2px solid var(--cyan);outline-offset:4px;border-radius:12px}
+.g-kart{margin:0;scroll-snap-align:start}
+.g-kart .tel{border-radius:26px;padding:5px}
+.g-kart .tel img{border-radius:21px}
+.g-kart figcaption{margin-top:14px}
+.g-kart figcaption b{display:block;font-size:15px;font-weight:700;letter-spacing:-.01em}
+.g-kart figcaption span{display:block;font-size:13.5px;line-height:1.45;color:var(--ink-2);margin-top:4px}
+.pro-etiket{position:absolute;top:14px;right:14px;z-index:2;padding:3px 9px;border-radius:999px;
+  background:var(--tur);color:#1A0E03;font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  font-weight:600;letter-spacing:.08em;box-shadow:0 4px 12px -4px #000a}
+/* Masaüstünde 6 kart tek satıra sığıyor; kaydırma yalnız dar ekranda. */
+@media(min-width:1000px){.galeri{grid-auto-flow:row;grid-template-columns:repeat(6,1fr);
+  overflow:visible;gap:18px}}
+@media(prefers-reduced-motion:reduce){.tel-on,.tel-arka{transform:none}}
 /* ── bölüm ───────────────────────────────────────────────────────────── */
 section{padding:62px 0;border-top:1px solid var(--line-soft)}
 h2.b{font-size:clamp(25px,3.4vw,35px);font-weight:900;letter-spacing:-.03em;line-height:1.08}
@@ -244,7 +267,7 @@ h2.b{font-size:clamp(25px,3.4vw,35px);font-weight:900;letter-spacing:-.03em;line
 .bb{display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;
     font-size:12.5px;font-weight:600;color:#08202F;border-right:1px solid #061726}
 .bb:last-child{border-right:0}
-.butce-ad{display:grid;grid-template-columns:28fr 22fr 20fr 18fr 12fr;gap:6px;margin-top:9px}
+.butce-ad{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:9px}
 .butce-ad div{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-3);
               text-align:center;line-height:1.35}
 @media(max-width:760px){
@@ -369,7 +392,7 @@ footer{border-top:1px solid var(--line-soft);padding:34px 0 40px}
     </span>
   </a>
   <nav>
-    <a href="#motor">Motor</a><a href="#skor">Skor</a><a href="#veri">Veri</a>
+    <a href="#ekranlar">Ekranlar</a><a href="#motor">Motor</a><a href="#skor">Skor</a><a href="#veri">Veri</a>
     <a href="#uygulama">Uygulama</a><a href="/balik/">Türler</a>
   </nav>
 </div></div>
@@ -405,62 +428,69 @@ footer{border-top:1px solid var(--line-soft);padding:34px 0 40px}
       </div>
     </div>
 
-    <div class="panel">
-      <div class="p-ust">
-        <div>
-          <div class="p-koord">40.9978, 29.0167</div>
-          <div class="p-yer">MARMARA · KIŞ · 07:20</div>
-        </div>
-        <div class="p-derinlik">⬇ 18 m</div>
+    <figure class="telefonlar">
+      <div class="tel tel-on">
+        <img src="/ekran/tur-listesi.webp" width="600" height="1159" fetchpriority="high"
+             alt="Meraloji analiz ekranı: Karaburun açıklarında türlerin habitat uyum skorları — İskatarya %71, Sübye %69, Eşkina %69, Kalamar %64">
       </div>
-
-      <div class="tur">
-        <div><div class="tur-ad">Levrek</div><div class="tur-lat">Dicentrarchus labrax</div></div>
-        <div class="tur-ray"><span class="bar" style="width:85%;background:var(--cyan)"></span></div>
-        <div class="tur-sk" style="color:var(--cyan)">85</div>
+      <div class="tel tel-arka">
+        <img src="/ekran/skor.webp" width="600" height="1159"
+             alt="Aynı noktanın anlık uyum skoru göstergesi: %70,1, veri kalitesi %95">
       </div>
-      <div class="tur">
-        <div><div class="tur-ad">Mezgit</div><div class="tur-lat">Merlangius merlangus</div></div>
-        <div class="tur-ray"><span class="bar" style="width:74%;background:var(--cyan)"></span></div>
-        <div class="tur-sk" style="color:var(--cyan)">74</div>
-      </div>
-      <div class="tur">
-        <div><div class="tur-ad">Karagöz</div><div class="tur-lat">Diplodus vulgaris</div></div>
-        <div class="tur-ray"><span class="bar" style="width:61%;background:var(--cyan)"></span></div>
-        <div class="tur-sk" style="color:var(--cyan)">61</div>
-      </div>
-      <div class="tur" style="border-bottom:0">
-        <div><div class="tur-ad">Çipura</div><div class="tur-lat">Sparus aurata</div></div>
-        <div class="tur-ray"><span class="bar" style="width:38%;background:var(--tur)"></span></div>
-        <div class="tur-sk" style="color:var(--tur)">38</div>
-      </div>
-
-      <div class="egri-kutu">
-        <div class="egri-bas">
-          <span class="kicik">Levrek · bugün saat saat</span>
-          <span class="m" style="font-size:11px;color:var(--ink-3)">şafak 07:12 · batım 17:34</span>
-        </div>
-        <svg class="egri" viewBox="0 0 480 108" role="img"
-             aria-label="Levrek skoru saat saat: gece 40 civarı, şafakta 85'e çıkıyor, öğlen 42'ye düşüyor, gün batımında 88 ile zirve yapıyor.">
-          <rect x="128" y="8" width="34" height="74" fill="#35c8c914"/>
-          <rect x="336" y="8" width="34" height="74" fill="#35c8c914"/>
-          <line x1="0" y1="82" x2="480" y2="82" stroke="#153450" stroke-width="1"/>
-          <line x1="0" y1="45" x2="480" y2="45" stroke="#123047" stroke-width="1" stroke-dasharray="3 5"/>
-          <path fill="#35c8c91f" d="M0,58 L20,61 40,63 60,62 80,58 100,50 120,38 140,25 160,28 180,40 200,49 220,54 240,57 260,58 280,55 300,50 320,38 340,27 360,21 380,31 400,42 420,49 440,54 460,57 480,58 L480,82 L0,82 Z"/>
-          <polyline fill="none" stroke="#35C8C9" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"
-            points="0,58 20,61 40,63 60,62 80,58 100,50 120,38 140,25 160,28 180,40 200,49 220,54 240,57 260,58 280,55 300,50 320,38 340,27 360,21 380,31 400,42 420,49 440,54 460,57 480,58"/>
-          <circle cx="360" cy="21" r="4" fill="#F59A3E"/>
-          <text x="360" y="12" fill="#F59A3E" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="600" text-anchor="middle">88</text>
-          <text x="4"   y="102" fill="#5D7A95" font-family="IBM Plex Mono,monospace" font-size="9.5">00</text>
-          <text x="140" y="102" fill="#5D7A95" font-family="IBM Plex Mono,monospace" font-size="9.5" text-anchor="middle">07</text>
-          <text x="240" y="102" fill="#5D7A95" font-family="IBM Plex Mono,monospace" font-size="9.5" text-anchor="middle">12</text>
-          <text x="352" y="102" fill="#5D7A95" font-family="IBM Plex Mono,monospace" font-size="9.5" text-anchor="middle">17</text>
-          <text x="476" y="102" fill="#5D7A95" font-family="IBM Plex Mono,monospace" font-size="9.5" text-anchor="end">23</text>
-        </svg>
-      </div>
-    </div>
+      <figcaption>Gerçek ekran · Karaburun açıkları · 11 Eylül 2026</figcaption>
+    </figure>
   </div>
 
+
+  <!-- ═══ EKRANLAR — gerçek ekran görüntüleri [2026-09-11] ══════════════ -->
+  <!-- Hepsi PRO ekranı (MainActivity: simülasyonlar modeSelector'da,
+       metrik detayları setupMetricClick'te PRO kapılı). Etiketsiz gösterirsek
+       ücretsiz kullanıcı "bunu göremiyorum" der — o yüzden her kart etiketli. -->
+  <section id="ekranlar">
+    <p class="kicik">Uygulamanın içi</p>
+    <h2 class="b">Bir noktaya dokun, denizi oku</h2>
+    <p class="ac">Hepsi aynı analizin ekranları: Karaburun açıkları, tek dokunuş.
+       Ücretsiz sürümde skor ve ilk 3 tür açık; aşağıdakiler <b>PRO</b>.
+       <b>Yeni hesaplarda ilk 7 gün hepsi ücretsiz.</b></p>
+    <div class="galeri" tabindex="0" role="region" aria-label="Uygulama ekranları — yatay kaydırın">
+      <figure class="g-kart">
+        <div class="tel"><span class="pro-etiket">PRO</span>
+          <img src="/ekran/skor-analizi.webp" width="600" height="1159" loading="lazy" decoding="async"
+               alt="Skor analizi ekranı: saatlik skor eğrisi, mevsimsel 90, termal 86, biyoritim 100 puanlı radar grafiği ve parametre çubukları"></div>
+        <figcaption><b>Skor nasıl oluştu</b><span>Gün boyu skor eğrisi, en iyi saat ve beş bileşenin payı ayrı ayrı.</span></figcaption>
+      </figure>
+      <figure class="g-kart">
+        <div class="tel"><span class="pro-etiket">PRO</span>
+          <img src="/ekran/termoklin.webp" width="600" height="1159" loading="lazy" decoding="async"
+               alt="Termoklin simülasyonu: 40 metrede termoklin, 38,0 PSU tuzluluk, derinliğe göre sıcaklık profili"></div>
+        <figcaption><b>Su kolonu</b><span>Termoklin derinliği ve tuzluluk: balığın hangi katmanda durduğu.</span></figcaption>
+      </figure>
+      <figure class="g-kart">
+        <div class="tel"><span class="pro-etiket">PRO</span>
+          <img src="/ekran/gelgit.webp" width="600" height="1159" loading="lazy" decoding="async"
+               alt="Gelgit simülasyonu: su yükseliyor, sonraki yüksek su 02:00"></div>
+        <figcaption><b>Gelgit</b><span>Su yükseliyor mu, alçalıyor mu; bir sonraki yüksek su saati.</span></figcaption>
+      </figure>
+      <figure class="g-kart">
+        <div class="tel"><span class="pro-etiket">PRO</span>
+          <img src="/ekran/basinc.webp" width="600" height="1159" loading="lazy" decoding="async"
+               alt="Basınç simülasyonu: 1015 hPa, 3 saatte −1,0 hPa düşüş, balık aktif uyarısı"></div>
+        <figcaption><b>Basınç</b><span>Basınç düşerken balık yüzeye yakın beslenir; son 3 saatteki değişim.</span></figcaption>
+      </figure>
+      <figure class="g-kart">
+        <div class="tel"><span class="pro-etiket">PRO</span>
+          <img src="/ekran/hava.webp" width="600" height="1159" loading="lazy" decoding="async"
+               alt="Hava simülasyonu: 29 °C açık gökyüzü, güneşin azimutu ve yüksekliği, anlık su sıcaklığı 23,7 °C"></div>
+        <figcaption><b>Güneş ve ışık</b><span>Güneşin açısı ve yüksekliği, hava ve su sıcaklığı.</span></figcaption>
+      </figure>
+      <figure class="g-kart">
+        <div class="tel"><span class="pro-etiket">PRO</span>
+          <img src="/ekran/parametreler.webp" width="600" height="1159" loading="lazy" decoding="async"
+               alt="Parametre tablosu: su sıcaklığı 22,6 °C, hava 24 °C, dalga 0,3 m, basınç 1015 hPa, tuzluluk 38 PSU, oksijen 5,0 mg/L"></div>
+        <figcaption><b>Bütün veriler tek ekranda</b><span>Sıcaklık, dalga, rüzgâr, akıntı, tuzluluk, oksijen, klorofil ve fazlası.</span></figcaption>
+      </figure>
+    </div>
+  </section>
 
   <!-- ═══ MOTOR ══════════════════════════════════════════════════════ -->
   <section id="motor">
@@ -472,11 +502,11 @@ footer{border-top:1px solid var(--line-soft);padding:34px 0 40px}
 
     <div class="butce">
       <div class="butce-bar">
-        <div class="bb" style="flex:1 1 28%;background:#35C8C9">Sıcaklık 28</div>
-        <div class="bb" style="flex:1 1 22%;background:#2FB4B5">Mevsim 22</div>
-        <div class="bb" style="flex:1 1 20%;background:#29A0A1">Aktivite 20</div>
-        <div class="bb" style="flex:1 1 18%;background:#238C8D">Çevresel 18</div>
-        <div class="bb" style="flex:1 1 12%;background:#F59A3E">±12</div>
+        <div class="bb" style="flex:1 1 0;background:#35C8C9">Sıcaklık</div>
+        <div class="bb" style="flex:1 1 0;background:#2FB4B5">Mevsim</div>
+        <div class="bb" style="flex:1 1 0;background:#29A0A1">Aktivite</div>
+        <div class="bb" style="flex:1 1 0;background:#238C8D">Çevresel</div>
+        <div class="bb" style="flex:1 1 0;background:#F59A3E">Tetikleyici</div>
       </div>
       <div class="butce-ad">
         <div>Tür özgü Gauss eğrisi<br>+ termal uyum</div>
@@ -489,7 +519,7 @@ footer{border-top:1px solid var(--line-soft);padding:34px 0 40px}
 
     <div class="formuller">
       <div class="fm">
-        <div class="rol">Sıcaklık · 28 puan</div>
+        <div class="rol">Sıcaklık</div>
         <h3>Türe özgü Gauss eğrisi</h3>
         <p>Her balığın optimum sıcaklığı var. Su o değerden uzaklaştıkça puan çan
            eğrisiyle düşer — ama <b>düşüş hızı türün kendi toleransına bağlı</b>.
@@ -554,11 +584,11 @@ taban f = 0.10 · sınır dışında 0.03</span></div>
           </div>
         </div>
         <div class="satirlar">
-          <div class="st"><span class="st-ad">Mevsim</span><div class="st-ray"><span class="bar" style="width:100%;background:var(--cyan)"></span></div><span class="st-n">22/22</span></div>
-          <div class="st"><span class="st-ad">Sıcaklık</span><div class="st-ray"><span class="bar" style="width:82%;background:var(--cyan)"></span></div><span class="st-n">23/28 · 16,2°</span></div>
-          <div class="st"><span class="st-ad">Aktivite</span><div class="st-ray"><span class="bar" style="width:90%;background:var(--cyan)"></span></div><span class="st-n">18/20 · şafak</span></div>
-          <div class="st"><span class="st-ad">Çevresel</span><div class="st-ray"><span class="bar" style="width:67%;background:var(--cyan)"></span></div><span class="st-n">12/18 · 0,4 m</span></div>
-          <div class="st"><span class="st-ad">Tetikleyici</span><div class="st-ray"><span class="bar" style="width:83%;background:var(--tur)"></span></div><span class="st-n">+10 · basınç ↓</span></div>
+          <div class="st"><span class="st-ad">Mevsim</span><div class="st-ray"><span class="bar" style="width:100%;background:var(--cyan)"></span></div><span class="st-n">tam</span></div>
+          <div class="st"><span class="st-ad">Sıcaklık</span><div class="st-ray"><span class="bar" style="width:82%;background:var(--cyan)"></span></div><span class="st-n">16,2°</span></div>
+          <div class="st"><span class="st-ad">Aktivite</span><div class="st-ray"><span class="bar" style="width:90%;background:var(--cyan)"></span></div><span class="st-n">şafak</span></div>
+          <div class="st"><span class="st-ad">Çevresel</span><div class="st-ray"><span class="bar" style="width:67%;background:var(--cyan)"></span></div><span class="st-n">0,4 m dalga</span></div>
+          <div class="st"><span class="st-ad">Tetikleyici</span><div class="st-ray"><span class="bar" style="width:83%;background:var(--tur)"></span></div><span class="st-n">basınç ↓</span></div>
         </div>
         <div class="gun-son">Şafak penceresi açık, basınç düşüyor, hafif çalkantı var —
            levrek için aranan gün.</div>
@@ -576,11 +606,11 @@ taban f = 0.10 · sınır dışında 0.03</span></div>
           </div>
         </div>
         <div class="satirlar">
-          <div class="st"><span class="st-ad">Mevsim</span><div class="st-ray"><span class="bar" style="width:100%;background:var(--cyan)"></span></div><span class="st-n">22/22</span></div>
-          <div class="st"><span class="st-ad">Sıcaklık</span><div class="st-ray"><span class="bar" style="width:39%;background:var(--tur)"></span></div><span class="st-n">11/28 · 13,4°</span></div>
-          <div class="st"><span class="st-ad">Aktivite</span><div class="st-ray"><span class="bar" style="width:45%;background:var(--tur)"></span></div><span class="st-n">9/20</span></div>
-          <div class="st"><span class="st-ad">Çevresel</span><div class="st-ray"><span class="bar" style="width:11%;background:var(--tur)"></span></div><span class="st-n">2/18 · 2,1 m</span></div>
-          <div class="st"><span class="st-ad">Tetikleyici</span><div class="st-ray"><span class="bar" style="width:33%;background:var(--tur)"></span></div><span class="st-n">−4 · basınç ↑</span></div>
+          <div class="st"><span class="st-ad">Mevsim</span><div class="st-ray"><span class="bar" style="width:100%;background:var(--cyan)"></span></div><span class="st-n">tam</span></div>
+          <div class="st"><span class="st-ad">Sıcaklık</span><div class="st-ray"><span class="bar" style="width:39%;background:var(--tur)"></span></div><span class="st-n">13,4°</span></div>
+          <div class="st"><span class="st-ad">Aktivite</span><div class="st-ray"><span class="bar" style="width:45%;background:var(--tur)"></span></div><span class="st-n">zayıf</span></div>
+          <div class="st"><span class="st-ad">Çevresel</span><div class="st-ray"><span class="bar" style="width:11%;background:var(--tur)"></span></div><span class="st-n">2,1 m dalga</span></div>
+          <div class="st"><span class="st-ad">Tetikleyici</span><div class="st-ray"><span class="bar" style="width:33%;background:var(--tur)"></span></div><span class="st-n">basınç ↑</span></div>
         </div>
         <div class="gun-son">Mevsim hâlâ tam puan — ama 2,1 m dalga görüşü kapatmış,
            basınç yükseliyor. Boşuna yol yapma.</div>
