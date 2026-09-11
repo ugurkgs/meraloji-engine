@@ -26,6 +26,10 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Yalnız GET. Cache API POST'u saklayamaz — put() reddedilir ve konsola
+  // hata düşer. Site sayacı (POST /api/site-olay) gibi istekler doğrudan
+  // tarayıcıya bırakılır. [2026-09-11]
+  if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
 
   // API — network first, sadece başarılı response'ları cache'le

@@ -715,6 +715,59 @@ taban f = 0.10 · sınır dışında 0.03</span></div>
 
 
 <script>
+    // ── SİTE SAYACI + PLAY KAYNAK ETİKETİ [2026-09-11] ───────────────────
+    // 1) Reklam bağlantısı ?utm_source=…&utm_campaign=… taşıyorsa değerler
+    //    Google Play bağlantılarına `referrer` olarak aktarılır; Play Console
+    //    kurulumu o kaynağa yazar. Etiket yoksa utm_source=meraloji.com —
+    //    siteden gelen kurulumlar yine diğer kaynaklardan ayrışır.
+    // 2) Ziyaret (oturum başına BİR kez) ve Play tıklaması /api/site-olay'a
+    //    gider. Yalnız sayı: çerez yok, kimlik yok (bkz. server.js SİTE SAYACI).
+    // fetch keepalive: Play'e geçerken sayfa kapansa da istek tamamlanır.
+    // sendBeacon KULLANILMADI — JSON gövdeli beacon Chrome'da reddediliyor.
+    // Her şey try içinde: ölçüm bozulsa bile butonlar çalışmaya devam eder.
+    (function () {
+        var PLAY = 'https://play.google.com/store/apps/details?id=com.meraloji.fish';
+        var temiz = function (v) { return String(v || '').replace(/[^A-Za-z0-9._-]/g, '').slice(0, 40); };
+        var utm = {};
+        try {
+            var q = new URLSearchParams(location.search);
+            ['utm_source', 'utm_medium', 'utm_campaign'].forEach(function (k) {
+                var v = temiz(q.get(k));
+                if (v) utm[k] = v;
+            });
+            // Play'den geri dönen ya da sayfa içinde gezen ziyaretçi etiketini kaybetmesin
+            if (utm.utm_source) sessionStorage.setItem('mrj_utm', JSON.stringify(utm));
+            else utm = JSON.parse(sessionStorage.getItem('mrj_utm') || '{}');
+        } catch (e) { }
+
+        function olay(tur) {
+            try {
+                fetch('/api/site-olay', {
+                    method: 'POST', keepalive: true,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ olay: tur, kaynak: utm.utm_source || '', kampanya: utm.utm_campaign || '' })
+                }).catch(function () { });
+            } catch (e) { }
+        }
+
+        var ref = 'utm_source=' + (utm.utm_source || 'meraloji.com')
+                + '&utm_medium=' + (utm.utm_medium || 'site')
+                + (utm.utm_campaign ? '&utm_campaign=' + utm.utm_campaign : '');
+        document.querySelectorAll('a[href="' + PLAY + '"]').forEach(function (a) {
+            a.href = PLAY + '&referrer=' + encodeURIComponent(ref);
+            a.addEventListener('click', function () { olay('play'); });
+        });
+
+        try {
+            if (!sessionStorage.getItem('mrj_ziyaret')) {
+                sessionStorage.setItem('mrj_ziyaret', '1');
+                olay('ziyaret');
+            }
+        } catch (e) { olay('ziyaret'); }
+    })();
+</script>
+
+<script>
     // Servis çalışanı kaydı — KORUNMALI. Kayıt kalkarsa güncellenmiş sw.js
     // hiç kurulmaz; eski kullanıcı eski önbellekteki sayfayı görmeye devam eder.
     if ('serviceWorker' in navigator) {

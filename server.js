@@ -1291,6 +1291,143 @@ const publicPath = path.join(__dirname, 'public');
 // hâlihazırda çalışan hiçbir yol etkilenmez.
 app.use(express.static(publicPath, { extensions: ['html'] }));
 
+// ═══════════════════════════════════════════════════════════════════════════
+// SİTE SAYACI — meraloji.com ziyaret ve Google Play tıklaması  [2026-09-11]
+// ═══════════════════════════════════════════════════════════════════════════
+// NEDEN: 11 Eyl'de ilk ücretli reklam siteye yönlendirildi ve "reklam → site
+// → Play butonu → kurulum" zincirinin ortası karanlıktı. Sayfada hiçbir
+// ölçüm yoktu; aşağıdaki API günlüğü yalnız /api/ isteklerini yazıyor, sayfa
+// ziyaretleri hiçbir yerde kalmıyordu. Soru tek: gelenlerin yüzde kaçı
+// Play butonuna basıyor?
+//
+// NE SAYILIYOR: yalnız GÜNLÜK TOPLAMLAR. Çerez yok, IP saklanmıyor, kişiye
+// bağlanabilecek hiçbir şey yazılmıyor. Kayıt: stats/site_<TR tarihi>
+//     ziyaret, play                  → toplam
+//     kaynak.<utm_source>.{ziyaret,play}
+//     kampanya.<utm_campaign>.{ziyaret,play}
+//     saat.<00-23>                   → ziyaretlerin Türkiye saatine dağılımı
+// Okumak için: node tools/site-sayac.js
+//
+// NEDEN LİMİTER'IN ÖNÜNDE: /api/ limiter'ı (IP başına 15 dk'da 100) uygulamanın
+// kendi istekleriyle PAYLAŞILIYOR. Paylaşımlı mobil IP (CGNAT) arkasında
+// reklamdan gelen ziyaretçiler o kovayı tüketip gerçek kullanıcının
+// analizini kesebilirdi. Sayacın kendi, daha dar tavanı var (aşağıda).
+// verifyAuth ve API günlüğü de bu yüzden devreye girmiyor — jeton yok,
+// her ziyaret için ayrı bir "anonim" satırı da istenmiyor.
+//
+// NEDEN BELLEKTE BİRİKTİRİLİP 5 DAKİKADA BİR YAZILIYOR: her olayı ayrı
+// Firestore yazımı yapmak, uç açık olduğu için sayacı şişirmek isteyene
+// yazım başına para ödetirdi. Birikimle yazım sayısı olay sayısından
+// bağımsız: gün başına en fazla ~288. BEDELİ: deploy/yeniden başlatmada son
+// ≤5 dakikanın sayısı kaybolur. Pazarlama sayacı için kabul edilebilir.
+//
+// ŞİŞİRMEYE KARŞI: IP başına günde 20 olay; fazlası sessizce 204 alır ve
+// sayılmaz. Tarayıcı ziyareti oturum başına bir kez gönderiyor, yani gerçek
+// bir ziyaretçi bu tavana yaklaşmaz. Tarayıcı taklidi yapan bot adları
+// (bot, crawl, spider, headless…) hiç sayılmıyor.
+//
+// Kaynak/kampanya adları süzülüyor (küçük harf, [a-z0-9_-], ≤32) ve günde
+// en fazla 40 farklı ad tutuluyor, fazlası "diger"e düşüyor — rastgele
+// utm_source gönderip dokümanı şişirmek mümkün olmasın.
+const siteSayacIpCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
+const SITE_SAYAC_IP_GUNLUK = 20;
+const SITE_SAYAC_AD_TAVANI = 40;
+const SITE_SAYAC_BOT = /bot|crawl|spider|slurp|headless|lighthouse|preview|facebookexternalhit|embedly|curl|wget|python-requests/i;
+let siteSayacTampon = {};   // { '2026-09-11': { ziyaret, play, kaynak:{}, kampanya:{}, saat:{} } }
+
+function siteSayacTrZaman() {
+    // Türkiye yaz/kış saati uygulamıyor (2016'dan beri sabit UTC+3).
+    const d = new Date(Date.now() + 3 * 3600000);
+    return { gun: d.toISOString().slice(0, 10), saat: String(d.getUTCHours()).padStart(2, '0') };
+}
+
+function siteSayacAd(ham, varsayilan) {
+    const s = String(ham || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 32);
+    return s || varsayilan;
+}
+
+// IP: anonFree tavanındaki mantığın AYNISI (bkz. /api/forecast içindeki
+// `cf-connecting-ip` bloğu ve oradaki gerekçe). O blok canlı güvenlik kodu
+// olduğu ve tools/kontrol-ip-tavani.js onu metin olarak aradığı için bir
+// fonksiyona çıkarılmadı; burada kopyası var. Biri değişirse öteki de.
+function siteSayacIp(req) {
+    const cf = req.headers['cf-connecting-ip'];
+    if (typeof cf === 'string' && cf.trim()) return cf.trim();
+    const fwd = req.headers['x-forwarded-for'];
+    const zincir = (typeof fwd === 'string' && fwd.length)
+        ? fwd.split(',').map(s => s.trim()).filter(Boolean) : [];
+    return zincir.length >= 2 ? zincir[zincir.length - 2]
+        : zincir.length === 1 ? zincir[0] : (req.ip || 'unknown');
+}
+
+app.post('/api/site-olay', (req, res) => {
+    // Her durumda 204: sayfa cevabı beklemiyor, hata bile ziyaretçiyi etkilemesin.
+    res.status(204).end();
+    try {
+        const olay = req.body && req.body.olay;
+        if (olay !== 'ziyaret' && olay !== 'play') return;
+        if (SITE_SAYAC_BOT.test(String(req.headers['user-agent'] || ''))) return;
+
+        const { gun, saat } = siteSayacTrZaman();
+        const ipAnahtar = `so_${siteSayacIp(req)}_${gun}`;
+        const kullanilan = siteSayacIpCache.get(ipAnahtar) || 0;
+        if (kullanilan >= SITE_SAYAC_IP_GUNLUK) return;
+        siteSayacIpCache.set(ipAnahtar, kullanilan + 1);
+
+        const t = siteSayacTampon[gun] || (siteSayacTampon[gun] =
+            { ziyaret: 0, play: 0, kaynak: {}, kampanya: {}, saat: {} });
+        const adSec = (harita, ad) => (ad in harita || Object.keys(harita).length < SITE_SAYAC_AD_TAVANI)
+            ? ad : 'diger';
+        const kaynak   = adSec(t.kaynak,   siteSayacAd(req.body.kaynak, 'dogrudan'));
+        const kampanya = adSec(t.kampanya, siteSayacAd(req.body.kampanya, 'yok'));
+
+        t[olay]++;
+        (t.kaynak[kaynak]     || (t.kaynak[kaynak]     = { ziyaret: 0, play: 0 }))[olay]++;
+        (t.kampanya[kampanya] || (t.kampanya[kampanya] = { ziyaret: 0, play: 0 }))[olay]++;
+        if (olay === 'ziyaret') t.saat[saat] = (t.saat[saat] || 0) + 1;
+
+        console.log(`[SITE] ${olay === 'play' ? '▶ play   ' : '👁 ziyaret'}  ${kaynak}/${kampanya}  TR ${saat}:00`);
+    } catch (e) { /* sayaç asla hata fırlatmasın */ }
+});
+
+async function siteSayacYaz() {
+    const tampon = siteSayacTampon;
+    siteSayacTampon = {};
+    if (!db || !admin) return;   // Firestore yoksa sayı günlükte kalır
+    const inc = admin.firestore.FieldValue.increment;
+    for (const [gun, t] of Object.entries(tampon)) {
+        const artir = (h) => Object.fromEntries(Object.entries(h).map(([k, v]) =>
+            [k, (typeof v === 'number') ? inc(v)
+                : Object.fromEntries(Object.entries(v).filter(([, n]) => n > 0).map(([a, n]) => [a, inc(n)]))]));
+        const belge = { guncelleme: Date.now() };
+        // BOŞ HARİTA GÖNDERİLMEZ: merge:true boş bir haritayı "yaprak alan" sayıp
+        // mevcut haritanın YERİNE koyar. Dilimde yalnız play olduysa `saat: {}`
+        // o günün bütün saat dağılımını silerdi.
+        for (const alan of ['kaynak', 'kampanya', 'saat']) {
+            const a = artir(t[alan]);
+            if (Object.keys(a).length) belge[alan] = a;
+        }
+        if (t.ziyaret) belge.ziyaret = inc(t.ziyaret);
+        if (t.play)    belge.play    = inc(t.play);
+        try {
+            await db.collection('stats').doc('site_' + gun).set(belge, { merge: true });
+        } catch (e) {
+            // Yazılamayan günü tampona geri koy; bir sonraki turda tekrar denenir.
+            const g = siteSayacTampon[gun] || (siteSayacTampon[gun] =
+                { ziyaret: 0, play: 0, kaynak: {}, kampanya: {}, saat: {} });
+            g.ziyaret += t.ziyaret; g.play += t.play;
+            for (const alan of ['kaynak', 'kampanya'])
+                for (const [a, v] of Object.entries(t[alan])) {
+                    const h = g[alan][a] || (g[alan][a] = { ziyaret: 0, play: 0 });
+                    h.ziyaret += v.ziyaret; h.play += v.play;
+                }
+            for (const [s, n] of Object.entries(t.saat)) g.saat[s] = (g.saat[s] || 0) + n;
+            console.log(`[SITE] ⚠️ ${gun} yazılamadı, sonraki tura kaldı: ${e.message}`);
+        }
+    }
+}
+setInterval(() => { siteSayacYaz().catch(() => {}); }, 5 * 60 * 1000).unref();
+
 // .well-known (TWA Digital Asset Links)
 app.use('/.well-known', express.static(path.join(publicPath, '.well-known'), {
     setHeaders: (res) => { res.setHeader('Content-Type', 'application/json'); }
