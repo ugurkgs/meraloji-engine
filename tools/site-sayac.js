@@ -40,6 +40,9 @@ const db = admin.firestore();
 const trGun = (ms) => new Date(ms + 3 * 3600000).toISOString().slice(0, 10);
 const oran = (p, z) => z ? (100 * p / z).toFixed(1).padStart(5) + '%' : '    —';
 const cubuk = (n, enb, en = 24) => enb ? '█'.repeat(Math.round(n / enb * en)) : '';
+// Node'un console.log'u %7d gibi GENİŞLİK belirtecini tanımıyor, olduğu gibi basıyor
+// (ilk canlı çalıştırmada tablo "%7d  %5d" diye çıktı). Hizalama elle yapılıyor.
+const sag = (n, en) => String(n).padStart(en);
 
 (async () => {
     const gunler = [];
@@ -58,7 +61,7 @@ const cubuk = (n, enb, en = 24) => enb ? '█'.repeat(Math.round(n / enb * en)) 
     for (const { gun, v } of veri) {
         const z = (v && v.ziyaret) || 0, p = (v && v.play) || 0;
         tz += z; tp += p;
-        console.log('   %s  %7d  %5d  %s  %s', gun, z, p, oran(p, z), cubuk(z, enb));
+        console.log('   ' + gun + '  ' + sag(z, 7) + '  ' + sag(p, 5) + '  ' + oran(p, z) + '  ' + cubuk(z, enb));
         if (!v) continue;
         for (const [ad, h] of Object.entries(v.kaynak || {})) {
             const k = kaynak[ad] || (kaynak[ad] = { ziyaret: 0, play: 0 });
@@ -71,14 +74,14 @@ const cubuk = (n, enb, en = 24) => enb ? '█'.repeat(Math.round(n / enb * en)) 
         for (const [s, n] of Object.entries(v.saat || {})) saat[parseInt(s, 10)] += n || 0;
     }
     console.log('   ' + '─'.repeat(52));
-    console.log('   TOPLAM      %7d  %5d  %s\n', tz, tp, oran(tp, tz));
+    console.log('   TOPLAM      ' + sag(tz, 7) + '  ' + sag(tp, 5) + '  ' + oran(tp, tz) + '\n');
 
     const tablo = (baslik, h) => {
         const satir = Object.entries(h).sort((a, b) => b[1].ziyaret - a[1].ziyaret);
         if (!satir.length) return;
         console.log('   %s', baslik);
         for (const [ad, x] of satir)
-            console.log('     %s %6d  %5d  %s', ad.padEnd(22), x.ziyaret, x.play, oran(x.play, x.ziyaret));
+            console.log('     ' + ad.padEnd(22) + ' ' + sag(x.ziyaret, 6) + '  ' + sag(x.play, 5) + '  ' + oran(x.play, x.ziyaret));
         console.log('');
     };
     tablo('KAYNAĞA GÖRE (utm_source · "dogrudan" = etiketsiz)', kaynak);
