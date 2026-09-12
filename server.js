@@ -1220,6 +1220,45 @@ try {
 // --- API USAGE TRACKER ---
 let apiUsageBuffer = {};
 
+// [2026-09-12] AGIRLIKLI SAYIM. `total` giden HTTP ISTEGINI sayar, FATURAYI DEGIL.
+// Open-Meteo cagriyi konum ve degisken sayisina gore agirliklandiriyor; tarama
+// istegimiz 10 koordinati TEK URL'de gonderdigi icin (GRID_WX_CHUNK) sayac 1
+// derken fatura 10+ diyordu. Olcum (14 Agu-12 Eyl): kendi sayac 49.150, Open-Meteo
+// paneli 447.244 -> 9,1 kat. Bu fark disariya yanlis rakam yazdirdi.
+//
+// Kural (open-meteo.com/en/pricing): >10 degisken oranla, >14 gun oranla, model
+// sayisi ve konum sayisi ile carpilir. Taban 1,0/konum -> 10 degiskenin ALTINA
+// inmenin faydasi YOKTUR.
+//
+// `weighted` AYRI alana yazilir; `total` ve `days.*` aynen durur ki gecmisle
+// karsilastirilabilirlik bozulmasin. FIRESTORE MALIYETI DEGISMEZ: ayni dokumana,
+// ayni toplu yazmada iki alan daha ekleniyor. Firestore dokuman basina
+// ucretlendirir, alan basina degil -> gunde ~336 yazma, oncekiyle ayni.
+let apiWeightBuffer = {};
+
+function omCallWeight(url) {
+    try {
+        const soru = url.indexOf('?');
+        if (soru < 0) return 1;
+        const p = new URLSearchParams(url.slice(soru + 1));
+        const say = (ad) => {
+            const v = p.get(ad);
+            return v ? v.split(',').filter(s => s.length).length : 0;
+        };
+        const konum    = Math.max(1, say('latitude'));
+        const model    = Math.max(1, say('models'));
+        const degisken = say('hourly') + say('daily') + say('current') + say('minutely_15');
+        const gun      = (parseInt(p.get('past_days') || '0', 10) || 0)
+                       + (parseInt(p.get('forecast_days') || '7', 10) || 7);
+        const w = konum * model
+                * Math.max(1, degisken / 10)
+                * Math.max(1, gun / 14);
+        return (isFinite(w) && w > 0) ? w : 1;
+    } catch (e) {
+        return 1;   // ayristiramadiysak en az bir cagri oldugu kesin
+    }
+}
+
 function trackApiUsage(url) {
     if (!url || typeof url !== 'string') return;
     
@@ -1240,6 +1279,10 @@ function trackApiUsage(url) {
     if (serviceName) {
         if (!apiUsageBuffer[serviceName]) apiUsageBuffer[serviceName] = 0;
         apiUsageBuffer[serviceName]++;
+        if (serviceName.indexOf('open_meteo') === 0) {
+            if (!apiWeightBuffer[serviceName]) apiWeightBuffer[serviceName] = 0;
+            apiWeightBuffer[serviceName] += omCallWeight(url);
+        }
     }
 }
 
@@ -1251,6 +1294,8 @@ setInterval(() => {
     // Snapshot current counts and reset buffer immediately
     const flushData = { ...apiUsageBuffer };
     apiUsageBuffer = {};
+    const flushWeight = { ...apiWeightBuffer };
+    apiWeightBuffer = {};
 
     const now = new Date();
     // Use UTC for consistent month/day rollover
@@ -1263,10 +1308,17 @@ setInterval(() => {
         const count = flushData[service];
         if (count > 0) {
             const docRef = db.collection('api_usage').doc(`${service}_${year}_${month}`);
-            batch.set(docRef, {
+            const alanlar = {
                 total: admin.firestore.FieldValue.increment(count),
                 [`days.${day}`]: admin.firestore.FieldValue.increment(count)
-            }, { merge: true });
+            };
+            const agirlik = flushWeight[service];
+            if (agirlik > 0) {
+                const yuvarli = Math.round(agirlik * 100) / 100;
+                alanlar.weighted = admin.firestore.FieldValue.increment(yuvarli);
+                alanlar[`wdays.${day}`] = admin.firestore.FieldValue.increment(yuvarli);
+            }
+            batch.set(docRef, alanlar, { merge: true });
         }
     }
     batch.commit().catch(e => console.error('[API Tracker] Firestore batch error:', e));
