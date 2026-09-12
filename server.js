@@ -58,7 +58,9 @@ try {
 
 // ═══════════════════════════════════════════════════════════════════════════
 // OPEN-METEO ENDPOINT KONFİGÜRASYONU
-// ÜCRETLİ PLAN AKTİF — 1.000.000 API istek / gün
+// ÜCRETLİ PLAN AKTİF — 1.000.000 ağırlıklı çağrı / AY (GÜN DEĞİL — 12 Eyl 2026'da
+// düzeltildi; bu satır aylık kotayı günlük sanmaya yol açtı). Çağrı != istek:
+// konum ve değişken sayısıyla ağırlıklanır, bkz. omCallWeight.
 //
 //   Render Dashboard Environment Variables:
 //     OM_PAID    = true
@@ -78,7 +80,7 @@ function omKey(url) {
     return url + (url.includes('?') ? '&' : '?') + 'apikey=' + OM_API_KEY;
 }
 
-console.log(`[CONFIG] Open-Meteo: ${OM_PAID ? '💳 ÜCRETLİ (customer-api) — 1M/gün limit' : '🆓 ÜCRETSIZ (api)'}`);
+console.log(`[CONFIG] Open-Meteo: ${OM_PAID ? '💳 ÜCRETLİ (customer-api) — 1M ağırlıklı çağrı/AY' : '🆓 ÜCRETSIZ (api)'}`);
 if (OM_PAID && !OM_API_KEY) console.warn('⚠️  OM_PAID=true ama OM_API_KEY boş! customer-api auth hatası verecektir.');
 
 // ═══════════════════════════════════════════════════════════════════════════
