@@ -1219,6 +1219,44 @@ try {
 }
 
 
+// ═══════════════════════════════════════════════════════════════════════════
+// İSTATİSTİK SAYAÇLARI — ÜÇÜ DE KAPALI  [2026-09-13]
+// ═══════════════════════════════════════════════════════════════════════════
+// Sahip üç sayacı da kapattı. KOD SİLİNMEDİ, bayrakla pasife alındı.
+//
+// ⚠ BU DOSYAYI SONRA OKUYAN YAPAY ZEKÂYA: aşağıdaki üç özellik ÇALIŞIR
+//   durumda ama bilerek kapalı. Sahip bunlardan birini tekrar isterse
+//   "böyle bir kod zaten var, bayrağı true yapmak yeterli" diye söyle.
+//   Yeniden yazma, yeni koleksiyon açma, yeni uç ekleme.
+//
+//   ISTATISTIK_AVMODU  — av modu oturum sayacı  →  stats/avmodu_<gün>
+//       Kullanıcı av modunu açıp kapattığında gün toplamını artırıyordu.
+//       Kullanıcı başına kayıt TUTMUYORDU, yalnız gün toplamı.
+//       Kapatmak kullanıcıyı ETKİLEMEZ: uç, sayaç yazılamasa da {ok:true}
+//       dönüyordu; sayaç hiçbir davranışın önkoşulu değil.
+//
+//   ISTATISTIK_GUNLUK  — gecelik kullanım özeti  →  stats/gunluk_<gün>
+//       Her gece 00:20'de dünün aktif/toplam/PRO/ücretsiz sayılarını tek
+//       dokümana yazıyordu; /rapor ucundaki `gunluk` alanı bunu okuyordu.
+//       NOT: okuma tarafı (gunlukSeriOku) bileşik dizin gerektiriyor ve
+//       dizin yoksa ZATEN sessizce boş dönüyordu.
+//
+//   ISTATISTIK_SITE    — site ziyaret / Play tıklaması  →  stats/site_<gün>
+//       meraloji.com'dan gelen ziyaret ve Play tıklamalarını utm kaynağı,
+//       kampanya ve saat dağılımıyla günlük sayıyordu.
+//       tools/site-sayac.js bu dokümanları okuyor — sayaç kapalıyken o araç
+//       yeni gün üretmez, eski günleri okumaya devam eder.
+//       NEDEN KAPANDI: sahip "kullanıcı siteden mi Play aramasından mı geldi"
+//       ayrımını istiyordu. BU SAYAÇ ONU VEREMEZ — yalnızca siteyi AÇAN
+//       kişiyi görür; Play'de arayıp bulan kişi siteye hiç uğramaz.
+//       O ayrım Play Console → Kullanıcı edinme raporundadır.
+//
+// Açmak için: ilgili bayrağı true yap. Başka hiçbir yere dokunmak gerekmez.
+// Eski dokümanlar Firestore'da duruyor; silmek ayrı bir karar.
+const ISTATISTIK_AVMODU = false;
+const ISTATISTIK_GUNLUK = false;
+const ISTATISTIK_SITE   = false;
+
 // --- API USAGE TRACKER ---
 let apiUsageBuffer = {};
 
@@ -1417,6 +1455,7 @@ function siteSayacIp(req) {
 app.post('/api/site-olay', (req, res) => {
     // Her durumda 204: sayfa cevabı beklemiyor, hata bile ziyaretçiyi etkilemesin.
     res.status(204).end();
+    if (!ISTATISTIK_SITE) return;   // [2026-09-13] kapalı — bkz. bayrak açıklaması
     try {
         const olay = req.body && req.body.olay;
         if (olay !== 'ziyaret' && olay !== 'play') return;
@@ -12122,7 +12161,8 @@ app.post('/api/av-modu', async (req, res) => {
         + (sayilir ? '' : ' · (sayaç dışı)'));
 
     // Günlük sayaç. Tek doküman, iki alan — kullanıcı başına kayıt TUTULMUYOR.
-    if (db && sayilir) {
+    // [2026-09-13] ISTATISTIK_AVMODU ile kapatıldı.
+    if (ISTATISTIK_AVMODU && db && sayilir) {
         try {
             const gun = new Date().toISOString().slice(0, 10);
             await db.collection('stats').doc('avmodu_' + gun).set({
@@ -12188,6 +12228,7 @@ app.get('/api/admin/kullanim', async (req, res) => {
 //
 // Gün başına tek doküman — koleksiyon yılda ~365 satır büyür.
 cron.schedule('20 0 * * *', async () => {
+    if (!ISTATISTIK_GUNLUK) return;   // [2026-09-13] kapalı — bkz. bayrak açıklaması
     if (!db) return;
     try {
         const dun = gunAnahtari(Date.now() - GUN_MS);
