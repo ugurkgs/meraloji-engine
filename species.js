@@ -249,8 +249,44 @@ const SPECIES_DB = {
             "EGE": { months: [9, 10, 11], bonus: 0.25, tempMin: 18, tempMax: 22 },
             "AKDENİZ": { months: [10, 11, 0], bonus: 0.2, tempMin: 19, tempMax: 23 }
         },
-        note: "Yemi önce ezer, hemen tasmalama yapma.",
-        noteEn: "Crush the bait first; don't strike immediately.", noteEl: "Crush the bait first; don't strike immediately.", noteEs: "Crush the bait first; don't strike immediately."
+        note: "Yemi önce ezer, hemen tasmalama yapma. Küçüğü lidaki, irisi altınbaş, daha irisi irsof.",
+        noteEn: "Crush the bait first; don't strike immediately. The smaller stage is called lidaki; the larger ones altınbaş and irsof.", noteEl: "Πρώτα λιώνει το δόλωμα· μην τραβήξετε αμέσως. Το μικρότερο στάδιο λέγεται lidaki· τα μεγαλύτερα altınbaş και irsof.", noteEs: "Primero tritura el cebo; no claves de inmediato. La talla menor se llama lidaki; las mayores, altınbaş e irsof."
+    },
+    // [2026-09-13] LİDAKİ — çipuranın (Sparus aurata) yavru evresi, ≈250 g altı.
+    // AYRI KAYIT ÇÜNKÜ: yavru çipura lagün ve haliçlerde yaşar, erişkin açık kıyıda.
+    // ÖLÇÜLDÜ (tools/motor.js, 6 nokta, 13 Eyl 2026): acı suda çipurayı +2,9 puan
+    // geçiyor, açık denizde 11-40 puan geride kalıyor. Köyceğiz kanalında (4 m,
+    // 22 ppt) 9. sırayla ilk 10'a giriyor, Karaburun'da (22 m, 38 ppt) 47. sıraya
+    // düşüyor. Yani ayrım gerçekten çalışıyor, isim için eklenmiş bir kayıt değil.
+    // scientificName'deki "(juv.)" ŞART: server.js o alanı dedüplikasyon anahtarı
+    // olarak kullanıyor (8001 · 8372 · 8999). Çipurayla aynı dizge olsaydı biri
+    // listeden sessizce düşerdi. Aynı kalıp çinekop/lüferde de var.
+    // Çipuradan yalnız DÖRT alan farklı: category, depth, salinityPref, seasons.
+    // spawningBonus BİLEREK YOK — yavru evre yumurtlamaz.
+    // Boy merdiveni: lidaki (≤250 g) → çipura → altınbaş (1,5-4 kg) → irsof (4 kg+).
+    // Altınbaş ve irsof AYRI KAYIT YAPILMADI: ölçümde irsof altı noktanın altısında
+    // da ilk 10'a giriyordu (lagünde bile), çünkü motorda "nadirlik" boyutu yok —
+    // 4 kiloluk balık habitat uyuyorsa 300 gramlıkla eşit yarışıyor. Sahip eklememe
+    // kararı verdi; iki isim de not alanlarında yaşıyor.
+    "lidaki": {
+        name: "Lidaki", nameEn: "Gilthead Seabream (juvenile)", nameEl: "Τσιπούρα (νεαρή)", nameEs: "Dorada (juvenil)", icon: "🐠", scientificName: "Sparus aurata (juv.)",
+        photoId: 11,
+        category: "LAGUN",
+        huntingMode: "visual",
+        peakHours: "DAY", peakHoursDesc: "Sabah 08:00-11:00, İkindi 15:00-17:00", peakHoursDescEn: "Morning 08:00-11:00, afternoon 15:00-17:00", peakHoursDescEl: "Πρωί 08:00-11:00, απόγευμα 15:00-17:00", peakHoursDescEs: "Mañana 08:00-11:00, tarde 15:00-17:00",
+        tempRange: { min: 14, opt: 20, max: 28 },
+        seasons: { winter: 0.20, spring: 0.85, summer: 0.95, autumn: 0.60 },
+        activity: "DAY",
+        pressureSensitivity: 0.4,
+        wavePref: 0.4, clarityPref: "ANY",
+        currentPref: 0.4,
+        salinityPref: "LOW", // yavru çipura lagün/haliç bağımlısı; erişkinde MEDIUM
+        regions: ["EGE", "AKDENİZ", "MARMARA"],
+        depth: { min: 0, opt: 3, max: 20 },
+        advice: { bait: "Canlı Mamun, Yengeç, Midye, Çin Kurdu, Teke, Sülünez", lure: "Micro Jig", rig: "Hırsızlı Dip Takımı", hook: "Chinu No:4-6", baitEn: "Live shrimp, crab, mussel, ragworm", baitEl: "Live shrimp, crab, mussel, ragworm", baitEs: "Gamba viva, cangrejo, mejillón, gusano", lureEn: "Micro jig", lureEl: "Micro jig", lureEs: "Micro jig", rigEn: "Paternoster bottom rig", rigEl: "Paternoster bottom rig", rigEs: "Aparejo de fondo", hookEn: "Chinu No:4-6", hookEl: "Chinu No:4-6", hookEs: "Chinu No:4-6" },
+        legalSize: "20 cm", legalSizeEn: "20 cm", legalSizeEs: "20 cm", legalSizeEl: "20 εκ.",
+        note: "Çipuranın yavru evresi (≈250 g altı). 20 cm'nin altı yasal boyun altındadır, bırakın. İrisi çipura, daha irisi altınbaş, en irisi irsof.",
+        noteEn: "Juvenile gilthead seabream (under ~250 g). Below 20 cm it is undersized — release it. The larger stages are called çipura, altınbaş and irsof.", noteEl: "Νεαρή τσιπούρα (κάτω από ~250 g). Κάτω από 20 εκ. είναι υπομεγέθης — ελευθερώστε την. Τα μεγαλύτερα στάδια λέγονται çipura, altınbaş και irsof.", noteEs: "Dorada juvenil (menos de ~250 g). Por debajo de 20 cm es de talla ilegal — devuélvela al mar. Las tallas mayores se llaman çipura, altınbaş e irsof."
     },
     "karagoz": {
         name: "Karagöz", nameEn: "Common Two-banded Bream", nameEl: "Σπάρος", nameEs: "Sargo Moarra", icon: "🐟", scientificName: "Diplodus vulgaris",
