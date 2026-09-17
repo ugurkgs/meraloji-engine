@@ -10307,7 +10307,7 @@ async function fetchBathymetry(lat, lon, timeoutMs = 5000) {
 
     // [FUZZY CACHE] 0.01 hassasiyetle (yaklaşık 1.1km) cache key.
     // Farklı kullanıcılar yakın yerlere tıkladığında aynı veriyi paylaşır.
-    const ck = `b_${latNum.toFixed(2)}_${lonNum.toFixed(2)}`;
+    const ck = `b_${latNum.toFixed(4)}_${lonNum.toFixed(4)}`;
     const hit = bathyCache.get(ck);
     if (hit !== undefined) return hit;
 
