@@ -132,16 +132,17 @@ async function proOlanlar() {
 }
 
 /**
- * Kullanıcıyı dört kovadan birine koyar. Ayrım önemli:
- * reklamla gelip hiç AÇMAYAN ile açıp ürünü beğenmeyeni ayırmazsan,
- * reklamın mı ürünün mü zayıf olduğunu bilemezsin.
+ * Kullanıcıyı üç kovaya ayırır. ÖLÇÜT YALNIZ ANALİZDİR.
+ *
+ * ⚠️ Auth'un lastSignInTime'ı BURADA KULLANILMAZ — o alan uygulama açılışında
+ * DEĞİL, yeniden kimlik doğrulamada güncellenir. Oturum kalıcı olduğu için her
+ * gün kullanan biri bile kayıt tarihinde donmuş görünür (kanıt 18 Eyl 2026:
+ * bir kullanıcı 17 Eyl'de analiz yaptı, son_giris hâlâ 11 Eyl'di). Bu yüzden
+ * "uygulamayı açtı mı" sorusunu bu betik CEVAPLAYAMAZ; yalnız "analiz yaptı mı"
+ * sorusunu cevaplar. ANALIZ_YOK, "açmadı" DEĞİL, "hiç analiz etmedi" demektir.
  */
 function durumBul(a) {
-    if (!a.sonAnaliz) {
-        // Auth girişi kayıttan 1 günden fazla sonraysa uygulamayı en az bir kez açmış.
-        const actiMi = a.sonGiris && (a.sonGiris - a.olusturma) > GUN_MS;
-        return actiMi ? 'ACTI_ANALIZ_YOK' : 'HIC_KULLANMADI';
-    }
+    if (!a.sonAnaliz) return 'ANALIZ_YOK';
     return (NOW - a.sonAnaliz) <= SESSIZ_GUN * GUN_MS ? 'AKTIF' : 'SESSIZ';
 }
 
@@ -179,27 +180,41 @@ function durumBul(a) {
     // sütunlara kendiliğinden bölünür. Tarihler GG.AA.YYYY — TR Excel bunu
     // tarih olarak tanır. Sayılarda ondalık yok, virgül/nokta sorunu çıkmaz.
     if (CSV) {
+        // TÜRKİYE SAATİ (kalıcı UTC+3). Sunucu UTC'de koşuyor ama sahip TR saatiyle
+        // düşünüyor; gün sınırı 3 saat kayınca "bugün mü yarın mı" sorusu bozuluyordu.
+        const TR = 3 * 3600000;
+        const p2 = n => String(n).padStart(2, '0');
         const trTarih = ms => {
             if (!ms) return '';
-            const d = new Date(ms);
-            const p = n => String(n).padStart(2, '0');
-            return p(d.getUTCDate()) + '.' + p(d.getUTCMonth() + 1) + '.' + d.getUTCFullYear();
+            const d = new Date(ms + TR);
+            return p2(d.getUTCDate()) + '.' + p2(d.getUTCMonth() + 1) + '.' + d.getUTCFullYear();
+        };
+        // Saat AYRI sütunda: Excel tarih sütununu tarih olarak tanısın, saat metin kalsın.
+        const trSaat = ms => {
+            if (!ms) return '';
+            const d = new Date(ms + TR);
+            return p2(d.getUTCHours()) + ':' + p2(d.getUTCMinutes());
         };
         const kume = argGun ? adaylar.filter(a => a.bitisGun === argGun)
                             : adaylar.filter(a => a.bitis <= NOW + PENCERE * GUN_MS);
-        console.log('uid;eposta;kayit;deneme_gun;bitis;kalan_gun;son_giris;son_analiz;analizsiz_gun;durum');
+        console.log('uid;eposta;kayit;kayit_saat;deneme_gun;bitis;bitis_saat;kalan_saat;'
+                  + 'son_analiz;son_analiz_saat;analizsiz_gun;durum');
         kume.sort((a, b) => a.bitis - b.bitis).forEach(a => {
-            const kalan = Math.ceil((a.bitis - NOW) / GUN_MS);
+            // Kalan SAAT: gün yuvarlaması "bugün son" diyordu ama 23:59'da kaydolan
+            // kullanıcının gece yarısına kadar hakkı var. Saat bunu görünür kılar.
+            const kalanSaat = Math.round((a.bitis - NOW) / 3600000);
             const sessiz = a.sonAnaliz ? Math.floor((NOW - a.sonAnaliz) / GUN_MS) : '';
             console.log([
                 a.uid,
                 a.email || '',
                 trTarih(a.olusturma),
+                trSaat(a.olusturma),
                 a.gun,
                 trTarih(a.bitis),
-                kalan,
-                trTarih(a.sonGiris),
+                trSaat(a.bitis),
+                kalanSaat,
                 trTarih(a.sonAnaliz),
+                trSaat(a.sonAnaliz),
                 sessiz,
                 durumBul(a),
             ].join(';'));
@@ -212,6 +227,9 @@ function durumBul(a) {
         Object.entries(say).sort((x, y) => y[1] - x[1])
               .forEach(([k, v]) => console.error('  ' + String(v).padStart(4) + '  ' + k));
         console.error('  AKTIF = son ' + SESSIZ_GUN + ' günde analiz yapmış');
+        console.error('  ANALIZ_YOK = hiç analiz etmemiş (uygulamayı AÇMADI demek DEĞİL)');
+        console.error('  Tarih/saat sütunları TÜRKİYE saatidir (UTC+3).');
+        console.error('  son_analiz en fazla 6 saat eski olabilir (3 km / 6 saat yazma freni).');
         process.exit(0);
     }
 
