@@ -73,7 +73,12 @@ const TRIAL_SHORT_FROM = (() => {
     return (isNaN(t) || t < Date.parse('2026-01-01')) ? null : t;
 })();
 
-const gunAdi = ms => new Date(ms).toISOString().slice(0, 10);
+// Gün adı TÜRKİYE gününe göre. ÖNEMLİ: CSV sütunları da TR saatinde yazılıyor;
+// bu satır UTC kalırsa SEÇİM (--gun, gruplama) UTC gününe, GÖSTERİM TR gününe
+// göre olur ve gece yarısı civarı kaydolanlarda ikisi bir gün ayrışır.
+// Canlıda görüldü (18 Eyl 2026): 4 kullanıcı UTC'de 11 Eyl, TR'de 12 Eyl.
+const TR_OFS = 3 * 3600000;   // Türkiye kalıcı UTC+3
+const gunAdi = ms => new Date(ms + TR_OFS).toISOString().slice(0, 10);
 const kisa = u => u ? (u.slice(0, 8) + '…') : '—';
 
 function denemeGun(createdMs) {
