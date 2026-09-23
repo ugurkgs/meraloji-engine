@@ -61,6 +61,21 @@ const argGun = (() => {
 })();
 const GECMIS = process.argv.includes('--gecmis');
 const CSV    = process.argv.includes('--csv');    // Excel'e yapıştırılabilir çıktı
+// --kohort=BAS..BIT  (TR günleri, Auth kayıt tarihine göre)
+// Bu kip, öbür kiplerden AYRI bir soru sorar: "şu tarihlerde kaydolanların
+// kaçı abone oldu?" — bu yüzden ABONELERİ ELEMEZ, tam tersine onları işaretler.
+// Normal kip denemede/bitmiş olanları listeler ve aboneleri eler; skorlama için
+// o yanlış paydadır.
+const KOHORT = (() => {
+    const a = process.argv.find(x => x.startsWith('--kohort='));
+    if (!a) return null;
+    const m = a.slice(9).split('..');
+    if (m.length !== 2 || !/^\d{4}-\d{2}-\d{2}$/.test(m[0]) || !/^\d{4}-\d{2}-\d{2}$/.test(m[1])) {
+        console.error('HATA: --kohort=2026-09-11..2026-09-15 biçiminde olmalı.');
+        process.exit(1);
+    }
+    return { bas: m[0], bit: m[1] };
+})();
 // Kaç gün analiz yapılmamışsa "sessiz" sayılsın. 3 gün, 7 günlük denemenin
 // yarısından az — bu süre boyunca hiç analiz yoksa kullanıcı pratikte gitmiştir.
 const SESSIZ_GUN = 3;
@@ -119,12 +134,20 @@ async function proOlanlar() {
     ]);
     const pro = new Set();
     const sonAnaliz = new Map();
+    // Skorlamada "kaç kişi abone OLDU" soruluyor; bugün aktif mi ayrı bir soru.
+    // Bu yüzden subscriptions belgesi VARSA kaydediyoruz, status'e bakmadan.
+    const abone = new Map();   // uid → { yillik, baslangic, durum }
     userSnap.forEach(d => {
         const at = d.data() && d.data().lastSeen && Number(d.data().lastSeen.at);
         if (isFinite(at) && at > 0) sonAnaliz.set(d.id, at);
     });
     subSnap.forEach(d => {
         const s = d.data() || {};
+        abone.set(d.id, {
+            yillik: s.isYearly === true,
+            baslangic: typeof s.startedAt === 'number' ? s.startedAt : null,
+            durum: s.status || '?',
+        });
         if (s.status === 'active' && typeof s.expiresAt === 'number' && s.expiresAt > NOW) pro.add(d.id);
     });
     userSnap.forEach(d => {
@@ -133,7 +156,7 @@ async function proOlanlar() {
         const e = u.proExpiresAt;
         if (e === undefined || e === null || (typeof e === 'number' && e > NOW)) pro.add(d.id);
     });
-    return { pro, sonAnaliz };
+    return { pro, sonAnaliz, abone };
 }
 
 /**
@@ -163,7 +186,62 @@ function durumBul(a) {
     console.log();
 
     const [hesaplar, kayitlar] = await Promise.all([tumHesaplar(), proOlanlar()]);
-    const { pro, sonAnaliz } = kayitlar;
+    const { pro, sonAnaliz, abone } = kayitlar;
+
+    // ── KOHORT KİPİ ──────────────────────────────────────────────────────────
+    // Auth kayıt tarihine göre süzer ve ABONELERİ DE LİSTELER. İddia/kampanya
+    // skorlamasının doğru paydası budur.
+    if (KOHORT) {
+        const TR = 3 * 3600000;
+        const p2 = n => String(n).padStart(2, '0');
+        const trGun = ms => { const d = new Date(ms + TR);
+            return d.getUTCFullYear() + '-' + p2(d.getUTCMonth() + 1) + '-' + p2(d.getUTCDate()); };
+        const trTarih = ms => { if (!ms) return ''; const d = new Date(ms + TR);
+            return p2(d.getUTCDate()) + '.' + p2(d.getUTCMonth() + 1) + '.' + d.getUTCFullYear(); };
+        const trSaat = ms => { if (!ms) return ''; const d = new Date(ms + TR);
+            return p2(d.getUTCHours()) + ':' + p2(d.getUTCMinutes()); };
+
+        const kume = hesaplar.filter(h => {
+            if (!isFinite(h.olusturma)) return false;
+            const g = trGun(h.olusturma);
+            return g >= KOHORT.bas && g <= KOHORT.bit;
+        }).sort((a, b) => a.olusturma - b.olusturma);
+
+        console.log('uid;eposta;kayit;kayit_saat;deneme_bitis;abone;tur;abonelik_baslangic;'
+                  + 'abonelik_durum;son_analiz;durum');
+        let aboneSay = 0, yillik = 0, aylik = 0;
+        for (const h of kume) {
+            const gun = denemeGun(h.olusturma);
+            const bitis = h.olusturma + gun * GUN_MS;
+            const ab = abone.get(h.uid) || null;
+            const sa = sonAnaliz.get(h.uid) || null;
+            if (ab) { aboneSay++; if (ab.yillik) yillik++; else aylik++; }
+            const d = ab ? (ab.yillik ? 'ABONE_YILLIK' : 'ABONE_AYLIK')
+                         : durumBul({ sonAnaliz: sa });
+            console.log([
+                h.uid, h.email || '',
+                trTarih(h.olusturma), trSaat(h.olusturma),
+                trTarih(bitis),
+                ab ? 'EVET' : 'hayir',
+                ab ? (ab.yillik ? 'yillik' : 'aylik') : '',
+                ab ? trTarih(ab.baslangic) : '',
+                ab ? ab.durum : '',
+                trTarih(sa),
+                d,
+            ].join(';'));
+        }
+        console.error('');
+        console.error('KOHORT ' + KOHORT.bas + ' .. ' + KOHORT.bit + '  (TR günü, Auth kayıt tarihi)');
+        console.error('  kohorttaki hesap : ' + kume.length + '   ← PAYDA');
+        console.error('  abone olan       : ' + aboneSay
+            + (kume.length ? '   (%' + (aboneSay / kume.length * 100).toFixed(1) + ')' : ''));
+        console.error('    yıllık         : ' + yillik);
+        console.error('    aylık          : ' + aylik);
+        console.error('');
+        console.error('  NOT: "abone" = subscriptions belgesi VAR demek; bugün aktif olmayabilir.');
+        console.error('       Soru "kaç kişi abone OLDU" olduğu için status\'e bakılmadı.');
+        process.exit(0);
+    }
 
     const adaylar = [];
     let proElendi = 0;
@@ -270,7 +348,7 @@ function durumBul(a) {
         gunler.forEach(g => yaz('BİTİŞ ' + g, yakin.filter(a => a.bitisGun === g)));
         if (GECMIS) yaz('SÜRESİ ÇOKTAN DOLMUŞ', adaylar.filter(a => a.bitis < NOW));
         else console.log('  (süresi çoktan dolmuşlar için: --gecmis · tek gün için: --gun YYYY-MM-DD'
-            + ' · Excel için: --csv)\n');
+            + ' · Excel için: --csv · kohort: --kohort=2026-09-11..2026-09-15)\n');
     }
 
     process.exit(0);
