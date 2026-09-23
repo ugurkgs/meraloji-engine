@@ -7016,6 +7016,23 @@ function ozelUyariKapisi(data, istemciSurumu) {
     return out;
 }
 
+// Derinlik güvenilmezlik bayrağı (depth.uncertain). İstemci "!" uyarısını bu
+// alana bakarak çiziyor. Yalnız TANIYAN sürüme gider — ozelUyariKapisi ile aynı
+// gerekçe ve aynı desen (bkz. yukarısı). Ölçüldü: eski APK alanı sessizce
+// atlıyor (uygulamanın kendi Gson yapılandırması, 18 Eyl); kapı güvenlik için
+// değil, yayını günlerce beklemeden sunucuyu açabilmek için.
+// 49 = uyarıyı çizen ilk istemci.
+const DERINLIK_UYARI_MIN_SURUM = 49;
+
+/** depth.uncertain alanını tanımayan istemciden söker. MUTASYON YOK (sığ kopya). */
+function derinlikUyariKapisi(data, istemciSurumu) {
+    if (!data || !data.depth || data.depth.uncertain === undefined) return data;
+    if (istemciYeter(istemciSurumu, DERINLIK_UYARI_MIN_SURUM)) return data;
+    const out = { ...data, depth: { ...data.depth } };
+    delete out.depth.uncertain;
+    return out;
+}
+
 function applySanitization(data, isProUser) {
     if (isProUser) {
         return { ...data, isPro: true };
@@ -7339,7 +7356,7 @@ app.get('/api/forecast', async (req, res) => {
         const _gonder = (data) => {
             if (!isRetry) retryHakkiAc(_kimlik, _hucre, data);
             const cikti = applySanitization(
-                ozelUyariKapisi(listeyiSurumeGoreKes(data, _istemciSurum), _istemciSurum),
+                derinlikUyariKapisi(ozelUyariKapisi(listeyiSurumeGoreKes(data, _istemciSurum), _istemciSurum), _istemciSurum),
                 isProUser);
             // [2026-08-24] DENEME DURUMU ARTIK İSTEMCİYE BİLDİRİLİYOR.
             //
@@ -8854,7 +8871,9 @@ app.get('/api/forecast', async (req, res) => {
             // gönderiyordu; istemci onu "derinlik" olarak gösterebiliyordu. {avg:null} zaten
             // bugün de oluşan bir durum (bathymetri çekilemediğinde), yani istemci için yeni
             // bir şekil değil — güvenli.
-            depth: elevationM != null ? { avg: null, min: null, max: null } : depthData,
+            // uncertain YALNIZ çelişkide eklenir; normal noktada yanıt şekli aynen kalır.
+            depth: elevationM != null ? { avg: null, min: null, max: null }
+                 : (derinlikCeliskili ? { ...depthData, uncertain: true } : depthData),
             elevation: elevationM,   // kara ise rakım (m), deniz ise null — derinlikle KARIŞTIRILMAZ
             substrate: substrateData, // EMODnet Seabed Habitats dip yapısı
             snapInfo,                // null veya { distanceM, snapLat, snapLon } — kıyı snap bilgisi
