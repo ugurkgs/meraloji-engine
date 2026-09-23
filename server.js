@@ -1574,6 +1574,43 @@ const bathyCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
 // gün içinde değişmediği için bu tekrarın hiçbir karşılığı yok.
 const snapBathyCache = new NodeCache({ stdTTL: 604800, checkperiod: 7200 });
 
+// ── DERİNLİK ÇELİŞKİSİ [2026-09-23] ─────────────────────────────────────────
+// EMODnet bazı noktalarda kendi içinde çelişiyor: ızgara ortalaması (avg) KARA
+// diyor (≥ 0), yumuşatılmış değer (smoothed) kılpayı SU diyor (< 0). Kod
+// smoothed'ı seçtiği için nokta kara sayılmıyor ve sahte bir sığ derinlikle
+// puanlanıyor. Tipik yeri iskele/liman/mendirek.
+//
+// ÖLÇÜLDÜ (Fatsa iskelesi, gerçek 5-7 m, EMODnet 0,43 m; tools/motor.js, 38
+// Karadeniz türü): ortalama sapma 14,3 puan. İstavrit 62,7 → 3,6, kolyoz
+// 61,1 → 3,5, palamut 49,7 → 3,0 — iskeleden en çok tutulan türler "yok"
+// görünüyordu. Sebep: pelajikler "imkânsız derinlik" dalında ×0,05, üstüne
+// kıyı cezası ×0,25.
+//
+// Çelişkide puanlamaya derinlik VERİLMEZ (depthAvg: null). Derinliğe bakan
+// dört kapının dördü de (ışık, berraklık, derinlik çarpanı, kıyı cezası) bu
+// null kontrolünü zaten yapıyor. Sonuç: sapma 14,3 → 9,9; gerçek ilk 10 ile
+// örtüşme 7/10 → 9/10. Kalan sapma YUKARI yönlü (ceza hiç uygulanmıyor).
+//
+// SNAP DEĞİL NULL: aynı kesitte iskeleden 150 m ötede 0,95 m, 300 m ötede
+// 3,98 m. En yakın "güvenilir" noktaya snap istavriti yine 5 m eşiğinin
+// altında bırakıp ezerdi.
+//
+// GERÇEKTEN SIĞ KIYIDA TETİKLENMEZ: orada avg ile smoothed ikisi de negatif,
+// birbirini doğruluyor (ölçüldü: Karataş 1 km 0,35 m; Zeytinköy 250 m 0,89 m).
+//
+// Yanıttaki derinlik DEĞİŞMEZ — kullanıcı 0,4 m görmeye devam eder; yalnız
+// puanlama derinliksiz yapılır. Yanıta yeni alan EKLENMEZ (sıra kuralı).
+//
+// TTL bathyCache (1 gün) ve snapBathyCache (7 gün) değerlerinden UZUN tutuldu:
+// önbellekten gelen sayı, işareti düşmüş hâlde puanlanmasın.
+// Yalnız TRUE yazılır: veri seti durağan, nokta sonradan "düzelmez".
+const derinlikCeliskisi = new NodeCache({ stdTTL: 691200, checkperiod: 7200 });
+function derinlikCeliskiliMi(lat, lon) {
+    const la = parseFloat(lat), lo = parseFloat(lon);
+    if (!isFinite(la) || !isFinite(lo)) return false;
+    return derinlikCeliskisi.get(la.toFixed(4) + '_' + lo.toFixed(4)) === true;
+}
+
 // Uydu SST önbelleği — 3 saat. ESKİDEN HİÇ ÖNBELLEK YOKTU: her analiz isteği
 // NOAA ERDDAP'a gidiyordu, yani hem gecikme hem hata riski her istekte ödeniyordu.
 // nesdisVHNSQsstDaily GÜNLÜK bir üründür; gün içinde aynı hücre için aynı değeri
@@ -7551,6 +7588,9 @@ app.get('/api/forecast', async (req, res) => {
         // SST — paralel fetch sonucu (sstSatPre)
         // ─────────────────────────────────────────────────────────────────────
         let depthData = { avg: null, min: null, max: null };
+        // Çelişkili derinlikte puanlama derinliksiz yapılır — bkz. derinlikCeliskisi.
+        // Snap noktası seçilirse aşağıda yeniden değerlendirilir.
+        let derinlikCeliskili = bathymetryRaw !== null && derinlikCeliskiliMi(lat, lon);
         // bathymetryRaw zaten yukarıda Promise.all ile sayı olarak alındı
         if (bathymetryRaw !== null) {
             const depthValue = Math.abs(bathymetryRaw);
@@ -7652,6 +7692,7 @@ app.get('/api/forecast', async (req, res) => {
                             snapLat: parseFloat(snap.lat),
                             snapLon: parseFloat(snap.lon)
                         };
+                        derinlikCeliskili = derinlikCeliskiliMi(snap.lat, snap.lon);
                         console.log(`[SNAP] [${logUser}] ✅ Kıyı→Deniz: ${snap.distanceM}m açık (${snap.lat},${snap.lon}), derinlik: ${Math.abs(snap.depthRaw).toFixed(1)}m`);
                     } else {
                         console.log(`[SNAP] [${logUser}] ⚠️ Snap noktası (${snap.lat},${snap.lon}) için marine verisi alınamadı`);
@@ -8003,7 +8044,7 @@ app.get('/api/forecast', async (req, res) => {
                     moonPhase: moon.phase,
                     lat: parseFloat(lat),
                     lon: parseFloat(lon),
-                    depthAvg: depthData.avg,
+                    depthAvg: derinlikCeliskili ? null : depthData.avg,
                     salinity,
                     hour: correctedClickHour,
                     cloudCover: cloud,
@@ -8331,7 +8372,7 @@ app.get('/api/forecast', async (req, res) => {
                 targetDate: instantDate, isInstant: true, currentSpeed: i_current,
                 pressureTrend: i_pressureTrend, moonPhase: i_moon.phase,
                 lat: parseFloat(lat), lon: parseFloat(lon),
-                depthAvg: depthData.avg,
+                depthAvg: derinlikCeliskili ? null : depthData.avg,
                 salinity,
                 hour: correctedClickHour,
                 cloudCover: i_cloud,
@@ -9178,6 +9219,8 @@ app.get('/api/fish-search', async (req, res) => {
         clickHour = Math.floor((Date.now() / 1000 + _utcOff) % 86400 / 3600);
 
         let depthAvg = null;
+        // Çelişkili derinlikte puanlama derinliksiz — bkz. derinlikCeliskisi.
+        let derinlikCeliskili = bathymetryRaw !== null && derinlikCeliskiliMi(latF, lonF);
         // bathymetryRaw zaten yukarıda Promise.all ile sayı olarak alındı
         if (bathymetryRaw !== null) {
             depthAvg = Math.abs(bathymetryRaw);
@@ -9212,6 +9255,7 @@ app.get('/api/fish-search', async (req, res) => {
                     if (snapMarine && !snapMarine.error && snapWaves.some(v => v > 0)) {
                         marine = snapMarine;
                         depthAvg = Math.abs(snap.depthRaw);
+                        derinlikCeliskili = derinlikCeliskiliMi(snap.lat, snap.lon);
                         isLand = false;
                         landReason = '';
                         snapInfo = { distanceM: snap.distanceM, snapLat: parseFloat(snap.lat), snapLon: parseFloat(snap.lon) };
@@ -9300,7 +9344,7 @@ app.get('/api/fish-search', async (req, res) => {
             timeMode, solunar, region: regionName, targetDate: now, isInstant: true,
             currentSpeed: currentEst, pressureTrend, moonPhase: moon.phase,
             lat: parseFloat(latF), lon: parseFloat(lonF),
-            depthAvg: depthAvg,
+            depthAvg: derinlikCeliskili ? null : depthAvg,
             salinity,
             hour: clickHour, // fish-search: already corrected above
             cloudCover: cloud,
@@ -9494,7 +9538,7 @@ app.get('/api/fish-search', async (req, res) => {
             reasons: reasons,
             conditions: {
                 region: getCoastalLocality(latF, lonF, lang) || (i18n(lang).regions[regionName] || regionName),
-                depthAvg: depthAvg,
+                depthAvg: derinlikCeliskili ? null : depthAvg,
                 tempWater: tempWater,
                 wave: wave,
                 clarity: clarity,
@@ -10290,6 +10334,9 @@ async function _fetchBathymetryBase(lat, lon, timeoutMs = 5000) {
         } else {
             const b = await res.json();
             if (b && b.avg !== undefined) {
+                // Çelişki işareti — bkz. derinlikCeliskisi. Dönen SAYI değişmiyor.
+                if (b.avg >= 0 && b.smoothed !== undefined && b.smoothed < 0)
+                    derinlikCeliskisi.set(`${latF}_${lonF}`, true);
                 return (b.smoothed !== undefined && b.smoothed < 0) ? b.smoothed : b.avg;
             }
             return null;
