@@ -10642,7 +10642,26 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             // Uygun türler — istilacı/koruma/ticari HARİÇ (bunlar bir merayı temsil eden
             // "başlık balık" olamaz; ör. istilacı aslan balığı bir merayı tanımlayamaz).
             const EXCLUDED_AGG = ['İSTİLACI', 'KORUMA', 'TİCARİ'];
-            const eligibleSorted = sorted.filter(f => f.fish && !EXCLUDED_AGG.includes(f.fish.category));
+
+            // [2026-09-23] YAN-YAKALANAN TÜRLER DE BAŞLIK OLAMAZ.
+            //
+            // Tarama pini "burada ne var" değil "burada NEYİ AVLARIM" sorusuna
+            // cevap vermeli. Müren, vatoz, trakonya, balon balığı gibi türler en
+            // yüksek puanı alsa bile bir merayı tanımlamaz — kullanıcı onları
+            // hedefleyerek gitmez. Ölçüt avSinifi ile AYNI: oltayla hedeflenir mi
+            // (bkz. ~5595; AV_DEGERI < 0.6 veya YEM_HIRSIZI → 'bycatch').
+            //
+            // ÖLÇÜLDÜ (23 Eyl 2026): 878 türün 76'sı (%8,7) bycatch, Türkiye'de 34.
+            // Pin YALNIZ o noktada en yüksek puanlı tür bunlardan biriyse değişir;
+            // o zaman da skor DÜŞER (birinci elenir, ikinci geçer) — asla yükselmez.
+            //
+            // MUAFLAR — sahip kararı (23 Eyl): sürü/yem balıkları hedef sayılır,
+            // çünkü sabiki ile BİLEREK avlanıyorlar ve pinde görünmeleri işe yarar.
+            // hamsi/istavrit/kolyoz zaten 'target', listeye gerek yok.
+            const SURU_MUAF = new Set(['sardalya', 'papalina', 'caca', 'tirsi', 'aterin']);
+            const eligibleSorted = sorted.filter(f =>
+                f.fish && !EXCLUDED_AGG.includes(f.fish.category)
+                && (f.targetClass !== 'bycatch' || SURU_MUAF.has(f.key)));
             const headline = eligibleSorted[0] || null;
             const topFish = eligibleSorted.slice(0, 3).map(f => f.name);
 
