@@ -1814,10 +1814,15 @@ function parseSubstrateFromHtml(html, logUser = null) {
 // null = ilgisiz (substrat skora etki etmez)
 const SUBSTRATE_PREFS = {
     // Kayalık / sert zemin sevenler
-    levrek: ['ROCK', 'MIXED'],
+    // [2026-09-24] levrek NULL (eskiden ['ROCK','MIXED']): levrek her dipte
+    // yaşar — kumsaldan en çok tutulan türlerden. Eski hâlde kumsalda ×0,85
+    // ceza, kayada ×1,15 bonus alıyordu. "Yaşadığı her dibi yaz" denendi:
+    // bonus her yerde → 120 senaryonun 77'sinde ilk 3 (şimdi 33). Dürüst
+    // karşılığı nötr: 33 → 29. Sahip seçti (seçenek A).
+    levrek: null,
     karagoz: ['ROCK', 'SEAGRASS', 'MIXED'],
-    cipura: ['ROCK', 'SEAGRASS'],
-    mercan: ['ROCK'],
+    cipura: ['ROCK', 'SEAGRASS', 'SAND', 'MIXED'],   // [2026-09-24] + kum, karışık
+    mercan: ['ROCK', 'MIXED'],   // [2026-09-24] + karışık (tür notu: "kayalık-kumluk karışık dipte gezer")
     orfoz: ['ROCK'],
     lahoz: ['ROCK'],
     // [4.27] `sinagrit` species.js'te YOK — ama hemen altındaki `sinarit` AYNI
@@ -1825,7 +1830,7 @@ const SUBSTRATE_PREFS = {
     // ki "bu neden burada" sorusu bir daha sorulmasın.
     sinagrit: ['ROCK'],     // ← ölü anahtar (mükerrer; gerçek anahtar: sinarit)
     sinarit: ['ROCK'],
-    fangri: ['ROCK', 'MIXED'],
+    fangri: ['ROCK', 'MIXED', 'SAND'],   // [2026-09-24] + kum (Pagellus erythrinus kum/çakılda da)
     isparoz: ['ROCK', 'SEAGRASS'],
     yayinbaligi: ['MUD', 'MIXED'],
     kirlangic: ['SAND', 'MUD'],
@@ -1842,7 +1847,7 @@ const SUBSTRATE_PREFS = {
     dil_baligi: ['SAND', 'MUD'],
     kalkan: ['SAND', 'MUD', 'MIXED'],
     pisi: ['SAND', 'MUD'],
-    kefal: ['MUD', 'MIXED', 'SEAGRASS'],
+    kefal: ['MUD', 'MIXED', 'SEAGRASS', 'SAND'],   // [2026-09-24] + kum
     // [DÜZELTİLDİ 2026-08-13 — madde 4.27] `altinbas` anahtarı species.js'te YOK;
     // gerçek anahtar `sarikulak` ("Sarıkulak Kefal", Chelon auratus, LAGUN, 0-20 m).
     // "Altınbaş kefal" ve "sarıkulak kefal" AYNI türün iki yaygın adı — kullanıcı
@@ -1865,13 +1870,57 @@ const SUBSTRATE_PREFS = {
     // [4.27] `berlam` (Merluccius merluccius) species.js'te YOK — tür veritabanına
     // hiç girmemiş. Kural boşta duruyor; tür eklenirse anahtar hazır.
     berlam: ['SAND', 'MUD'],   // ← ölü anahtar (tür DB'de yok)
-    izmarit: ['ROCK', 'MIXED'],
+    izmarit: ['ROCK', 'MIXED', 'SEAGRASS'],   // [2026-09-24] + çayır (asıl yeri)
     mirmir: ['SAND'], // [EKLENDİ] Mırmır kumluk uzmanıdır
     // Kafadanbacaklılar
     kalamar: ['SAND', 'MIXED'],
     ahtapot: ['ROCK', 'MIXED'],
     subye: ['SAND', 'MUD'],
     murekkepbal: ['SAND', 'MIXED'],
+};
+
+// ─── YALNIZ CEZA tablosu [2026-09-24] ───────────────────────────────────────
+// Bu türler listedeki diplerden BİRİNDE DEĞİLSE ×0,85; listedeyse DOKUNULMAZ
+// (SUBSTRATE_PREFS gibi +%10/%15 bonus YOK). Dip null ise hiçbir şey olmaz.
+//
+// NEDEN AYRI TABLO: önce aynı türler SUBSTRATE_PREFS'e eklenip ölçüldü
+// (tools/motor.js, 4 bölge × 5 dip × 3 derinlik × gündüz/akşam = 120 senaryo).
+// Bonus trakonyayı ilk 3'e 8 → 32 kez taşıdı (KUM_TABAN "uzman" sayılıp ×1,15
+// alıyor) — zehirli yan av her kumsalda tepede. Yalnız ceza ile: ortalama
+// fark 1,4 puan, hiçbir tür baskınlaşmıyor, trakonya 8 → 1, sargoz 12 → 4
+// (ilk 3 sıklığı; artanlar karagöz 13 → 21, çipura 10 → 18); kayalıkta
+// trakonya, kumda sargoz/sivriburun/eşkina/aslan balığı listeden düşüyor.
+// KAYALIK kategorisi burada YOK — ona ayrı kural var (kum/çamur ×0,70).
+// Pelajikler bilerek yok: dipten bağımsızlar.
+const SUBSTRATE_CEZA = {
+    // Kaya / çayır
+    eskina: ['ROCK', 'SEAGRASS'],
+    iskorpit: ['ROCK', 'SEAGRASS', 'MIXED'],
+    lipsoz: ['ROCK', 'MIXED'],
+    hani: ['ROCK', 'SEAGRASS', 'MIXED'],
+    migri: ['ROCK', 'MIXED'],
+    melanur: ['ROCK', 'SEAGRASS'],
+    sivriburun: ['ROCK', 'MIXED'],
+    sargoz: ['ROCK', 'MIXED'],
+    iskatarya: ['SEAGRASS', 'ROCK', 'MIXED'],
+    tranca: ['ROCK', 'MIXED'],
+    aslan_baligi: ['ROCK', 'MIXED'],
+    mavraki: ['ROCK', 'SEAGRASS', 'MIXED'],
+    // Kum / çamur
+    ustura_baligi: ['SAND'],
+    trakonya: ['SAND', 'MUD'],
+    kurbaga: ['SAND', 'MUD'],
+    vatoz: ['SAND', 'MUD'],
+    fener: ['SAND', 'MUD'],
+    kizil_kirlangic: ['SAND', 'MUD'],
+    minekop: ['SAND', 'MIXED'],
+    lokum: ['SAND'],
+    granyoz: ['SAND', 'MUD'],
+    mirlan: ['SAND', 'MUD'],
+    yilan_baligi: ['MUD'],
+    ceran: ['MUD', 'SAND'],
+    lidaki: ['SEAGRASS', 'SAND', 'MUD'],
+    deniz_ignesi: ['SEAGRASS'],
 };
 
 
@@ -6853,6 +6902,10 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // Tabloya ROCK eklemek YERİNE yalnız ceza: tablo eşleşmede +%10 bonus verir
     // ve horozbina 29 Ağu'da "her yerde çıkıyor" diye zaten aşağı çekilmişti.
     // Dip bilgisi gelmezse (substrate null) dokunulmaz — bilmediğimize ceza yok.
+    // Yalnız ceza tablosu — bkz. SUBSTRATE_CEZA.
+    if (substrate && SUBSTRATE_CEZA[key] && !SUBSTRATE_CEZA[key].includes(substrate)) {
+        rawScore *= 0.85;
+    }
     if (substrate && fish.category === 'KAYALIK' && (substrate === 'SAND' || substrate === 'MUD')) {
         rawScore *= 0.70;
     }
