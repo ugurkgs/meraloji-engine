@@ -29,7 +29,9 @@ const BOLUMLER = [
     ['comeback', 'GERİ DÖNÜŞ KAMPANYASI',            'denetim-comeback.js', []],
     ['deneme',   'DENEMESİ BİTENLER (önümüzdeki 10 gün)', 'deneme-bitenler.js', []],
     ['gozlem',   'GÖZLEM (av kaydı + nokta notu)',   'gozlem-sayim.js',     []],
-    ['site',     'SİTE SAYACI (son 7 gün)',          'site-sayac.js',       ['--gun=7']],
+    // site-sayac.js BİLEREK YOK: sayaç 13 Eyl 2026'dan beri kapalı
+    // (server.js ISTATISTIK_SITE = false), bölüm hep 0 gösterip yanıltıyordu.
+    // Sayaç yeniden açılırsa buraya geri ekle.
     ['duyuru',   'DUYURU DURUMU',                    'duyuru-kontrol.js',   []],
     ['pro',      'PRO ERİŞİM DENETİMİ',              'denetim-pro.js',      []],
 ];
