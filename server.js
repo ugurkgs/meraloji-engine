@@ -56,6 +56,23 @@ try {
     console.error('[RIVER] rivermouth.js yüklenemedi, nehir ağzı düzeltmesi KAPALI:', e.message);
 }
 
+// ── KIYI YAPILARI (iskele/mendirek) — bkz. kiyiyapi.js ───────────────────────
+// [2026-09-26] ŞİMDİLİK YALNIZ ÖLÇÜM: analiz noktası bir yapıya yakınsa
+// [KIYI-YAPI] satırı loglanır; yanıta ve puanlamaya ETKİSİ YOK. Amaç: gerçek
+// kullanıcıların ne sıklıkla iskele/mendirekte analiz yaptığını görmek.
+// Puanlamaya bağlanması sahiple ayrıca kararlaştırılacak (aşırı puanlama riski:
+// derinlik "nötr" verilince istavrit 3,7 → 73,9 — bkz. kiyiyapi.js başlığı).
+// Savunmacı: modül yüklenemezse sunucu ÇÖKMEZ, yalnız log kapanır.
+let yakinYapi = () => null;
+try {
+    const _ky = require('./kiyiyapi');
+    yakinYapi = _ky.yakinYapi;
+    const _m = _ky.kiyiYapiMeta();
+    console.log(`[KIYI-YAPI] ${_m ? _m.adet + ' yapı yüklendi (' + _m.olusturma.slice(0, 10) + ')' : 'veri YOK — kapalı'}`);
+} catch (e) {
+    console.error('[KIYI-YAPI] kiyiyapi.js yüklenemedi, KAPALI:', e.message);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // OPEN-METEO ENDPOINT KONFİGÜRASYONU
 // ÜCRETLİ PLAN AKTİF — 1.000.000 ağırlıklı çağrı / AY (GÜN DEĞİL — 12 Eyl 2026'da
@@ -7626,6 +7643,11 @@ app.get('/api/forecast', async (req, res) => {
                 max: depthValue
             };
         }
+        // [KIYI-YAPI] yalnız ölçüm — hiçbir değişkeni değiştirmez (bkz. kiyiyapi.js).
+        try {
+            const _yapi = yakinYapi(lat, lon, 40);
+            if (_yapi) console.log(`[KIYI-YAPI] [${logUser}] ${_yapi.tur} ${_yapi.mesafeM} m · EMODnet ${bathymetryRaw === null ? 'yok' : (bathymetryRaw >= 0 ? 'KARA' : Math.abs(bathymetryRaw).toFixed(1) + ' m')} · (${(+lat).toFixed(4)},${(+lon).toFixed(4)})`);
+        } catch (_) { /* ölçüm asla analizi bozmasın */ }
 
         // === GELİŞMİŞ KARA TESPİTİ ===
         // 1. Marine API dalga verisi kontrolü (uzak iç bölgeler)
