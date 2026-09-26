@@ -73,6 +73,31 @@ try {
     console.error('[KIYI-YAPI] kiyiyapi.js yüklenemedi, KAPALI:', e.message);
 }
 
+// [2026-09-26] PUANLAMAYA BAĞLANDI — TEMKİNLİ. Sahip: "aşırı puanlamayı önleyelim."
+// Tetik: dokunulan nokta bir yapıya ≤40 m VE EMODnet kara/yok/<3 m diyor.
+// Etki (YALNIZ PUANLAMA; yanıttaki depth/substrate ekrana aynen gider):
+//   · derinlik 3 m alınır — "nötr" DEĞİL. Nötr, istavriti 3,7 → 73,9'a fırlatıyordu;
+//     3 m'de 46-49 (Karadeniz/Ege akşam, tools/motor.js). Levrek ~72, çinekop ~69.
+//   · mendirek/mahmuzda dip = ROCK (dalgakıran taşı). İskelede dokunulmaz — çoğu
+//     kum üstüne beton ayak.
+// EMODnet ≥3 m diyorsa hiçbir şey yapılmaz (ölçüm makulse ölçüme güven).
+const KIYI_YAPI_MESAFE_M = 40;
+const KIYI_YAPI_TAHMINI_DERINLIK = 3;
+function kiyiYapiDuzeltmesi(lat, lon, bathyRaw) {
+    let y = null;
+    try { y = yakinYapi(lat, lon, KIYI_YAPI_MESAFE_M); } catch (_) { return null; }
+    if (!y) return null;
+    const sig = bathyRaw === null || bathyRaw === undefined || bathyRaw >= 0
+             || Math.abs(bathyRaw) < KIYI_YAPI_TAHMINI_DERINLIK;
+    return { ...y, uygulandi: sig,
+             dip: sig && (y.tur === 'mendirek' || y.tur === 'mahmuz') ? 'ROCK' : null };
+}
+/** Puanlamaya giden derinlik: yapıda ve sığ/bilinmiyorsa temkinli tahmin, değilse ölçüm. */
+function kiyiYapiPuanDerinligi(duz, d) {
+    return (duz && duz.uygulandi && (d === null || d === undefined || d < KIYI_YAPI_TAHMINI_DERINLIK))
+        ? KIYI_YAPI_TAHMINI_DERINLIK : d;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // OPEN-METEO ENDPOINT KONFİGÜRASYONU
 // ÜCRETLİ PLAN AKTİF — 1.000.000 ağırlıklı çağrı / AY (GÜN DEĞİL — 12 Eyl 2026'da
@@ -7643,11 +7668,9 @@ app.get('/api/forecast', async (req, res) => {
                 max: depthValue
             };
         }
-        // [KIYI-YAPI] yalnız ölçüm — hiçbir değişkeni değiştirmez (bkz. kiyiyapi.js).
-        try {
-            const _yapi = yakinYapi(lat, lon, 40);
-            if (_yapi) console.log(`[KIYI-YAPI] [${logUser}] ${_yapi.tur} ${_yapi.mesafeM} m · EMODnet ${bathymetryRaw === null ? 'yok' : (bathymetryRaw >= 0 ? 'KARA' : Math.abs(bathymetryRaw).toFixed(1) + ' m')} · (${(+lat).toFixed(4)},${(+lon).toFixed(4)})`);
-        } catch (_) { /* ölçüm asla analizi bozmasın */ }
+        // [KIYI-YAPI] dokunulan noktaya göre (snap'ten ÖNCE) — bkz. kiyiYapiDuzeltmesi.
+        const kiyiDuz = kiyiYapiDuzeltmesi(lat, lon, bathymetryRaw);
+        if (kiyiDuz) console.log(`[KIYI-YAPI] [${logUser}] ${kiyiDuz.tur} ${kiyiDuz.mesafeM} m · EMODnet ${bathymetryRaw === null ? 'yok' : (bathymetryRaw >= 0 ? 'KARA' : Math.abs(bathymetryRaw).toFixed(1) + ' m')} · ${kiyiDuz.uygulandi ? 'puanlama ' + KIYI_YAPI_TAHMINI_DERINLIK + ' m' + (kiyiDuz.dip ? ' + dip ' + kiyiDuz.dip : '') : 'ölçüm makul, dokunulmadı'} · (${(+lat).toFixed(4)},${(+lon).toFixed(4)})`);
 
         // === GELİŞMİŞ KARA TESPİTİ ===
         // 1. Marine API dalga verisi kontrolü (uzak iç bölgeler)
@@ -8091,7 +8114,7 @@ app.get('/api/forecast', async (req, res) => {
                     moonPhase: moon.phase,
                     lat: parseFloat(lat),
                     lon: parseFloat(lon),
-                    depthAvg: depthData.avg,
+                    depthAvg: kiyiYapiPuanDerinligi(kiyiDuz, depthData.avg),
                     salinity,
                     hour: correctedClickHour,
                     cloudCover: cloud,
@@ -8104,7 +8127,7 @@ app.get('/api/forecast', async (req, res) => {
                     thermoclineDepth,
                     moonlightIntensity,
                     isBoat,
-                    substrate: substrateData,
+                    substrate: (kiyiDuz && kiyiDuz.dip) || substrateData,
                     // YENİ (1C)
                     windGust, precipProb, weatherCode, visibility,
                     waveDirection, windWaveHeight, swellPeriod,
@@ -8419,7 +8442,7 @@ app.get('/api/forecast', async (req, res) => {
                 targetDate: instantDate, isInstant: true, currentSpeed: i_current,
                 pressureTrend: i_pressureTrend, moonPhase: i_moon.phase,
                 lat: parseFloat(lat), lon: parseFloat(lon),
-                depthAvg: depthData.avg,
+                depthAvg: kiyiYapiPuanDerinligi(kiyiDuz, depthData.avg),
                 salinity,
                 hour: correctedClickHour,
                 cloudCover: i_cloud,
@@ -8436,7 +8459,7 @@ app.get('/api/forecast', async (req, res) => {
                 // ~4530) ve /api/scan geçiriyor. Bu yüzden SUBSTRATE_PREFS'i olan türlerde
                 // "ŞİMDİ" skoru, aynı yanıttaki 24 saatlik grafiğin ilk saatiyle ve tarama
                 // pinleriyle %10-15 sapıyordu (uyum ×1.10-1.15, uyumsuzluk ×0.85).
-                substrate: substrateData,
+                substrate: (kiyiDuz && kiyiDuz.dip) || substrateData,
                 isBoat,
                 // YENİ (1C) + (V43)
                 windGust: i_windGust, precipProb: i_precipProb, weatherCode: i_weatherCode,
@@ -9382,13 +9405,15 @@ app.get('/api/fish-search', async (req, res) => {
 
         // [YENİ] Kıyı açısı — levrek kıyı-dik dalga bonusu + çeken akıntı riski için
         const shoreBearingInfo = getShoreNormalBearing(latF, lonF);
+        // [KIYI-YAPI] /api/forecast ile aynı kural — bkz. kiyiYapiDuzeltmesi.
+        const kiyiDuzFS = kiyiYapiDuzeltmesi(latF, lonF, bathymetryRaw);
 
         const baseParams = {
             tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
             timeMode, solunar, region: regionName, targetDate: now, isInstant: true,
             currentSpeed: currentEst, pressureTrend, moonPhase: moon.phase,
             lat: parseFloat(latF), lon: parseFloat(lonF),
-            depthAvg: depthAvg,
+            depthAvg: kiyiYapiPuanDerinligi(kiyiDuzFS, depthAvg),
             salinity,
             hour: clickHour, // fish-search: already corrected above
             cloudCover: cloud,
@@ -9398,7 +9423,7 @@ app.get('/api/fish-search', async (req, res) => {
             oceanCurrent,
             tempShock,
             acclimTemp: tempShock.acclimTemp,
-            substrate: substrateData,
+            substrate: (kiyiDuzFS && kiyiDuzFS.dip) || substrateData,
             // YENİ (1C)
             windGust, precipProb, weatherCode, visibility,
             waveDirection, windWaveHeight, swellPeriod,
