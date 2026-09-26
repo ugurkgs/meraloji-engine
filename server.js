@@ -6713,7 +6713,18 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
             // diyordu; bu YANLIŞTI — min=1'de eşik 0.5 m olduğundan 0.1 m okuyan kıyı noktası
             // tam da bu dala düşüyordu. Kıyı türleri için sorun yeni bantla çözüldü, ama
             // PELAJİK kalan lüfer/çinekop hâlâ buraya düşer (bkz. kategori notu).
-            depthScore = 0.05;
+            //
+            // [2026-09-26] UÇURUM YUMUŞATILDI. Eskiden sabit 0.05'ti; hemen üstteki
+            // dal fMin/2'de 0.625 veriyor → iki santimde 12 kat sıçrama. İstavrit
+            // (min 5 m): 2,49 m'de 4 puan, 2,51 m'de 47. Şimdi 0'dan fMin/2'ye rampa;
+            // eşikte 0.05 + 0.575 = 0.625 ile SÜREKLİ, eşik üstü HİÇ değişmez.
+            // Şekil doğrusal ile karesel'in ORTALAMASI (sahip seçti): çok sığda sert
+            // kalır. Ölçüm (tools/motor.js, KD akşam, istavrit): 0,2 m 4→6 · 0,5 m 4→9 ·
+            // 1 m 4→16 · 2 m 4→34 · 2,4 m 4→44. 96 sığ senaryoda (4 bölge · 0,3-2,2 m ·
+            // kum/kaya · 3 saat) derin pelajik ilk 10'a HİÇ girmedi (önce de 0) —
+            // sıralama etkisi sıfır, yalnız tek tek tür puanı düzelir.
+            const _x = d / (effectiveMin * 0.5);
+            depthScore = 0.05 + 0.575 * (_x + _x * _x) / 2;
             penalties.push(i18n(lang).penalties.tooShallowSpot);
         } else if (fMin > 0 && d < fMin) {
             // fMin/2 ile fMin arası — bu dala artık yalnızca PELAJİK türler ulaşır
