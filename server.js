@@ -1863,7 +1863,11 @@ const SUBSTRATE_PREFS = {
     // karşılığı nötr: 33 → 29. Sahip seçti (seçenek A).
     levrek: null,
     karagoz: ['ROCK', 'SEAGRASS', 'MIXED'],
-    cipura: ['ROCK', 'SEAGRASS', 'SAND', 'MIXED'],   // [2026-09-24] + kum, karışık
+    // [2026-09-26] GERİ ALINDI: 24 Eyl'de kum+karışık eklenmişti → 4 dipte +%10
+    // bonus = düz şişirme (levrekte reddettiğimiz desenin aynısı). Sahip Selçuk
+    // kumsalında (37.9756,27.2519) çipurayı 69 ile BİRİNCİ gördü: "oradan çipura
+    // almak zor, mırmır olsa belki." Eski hâlde 51 (8.), mırmır önüne geçiyor.
+    cipura: ['ROCK', 'SEAGRASS'],
     mercan: ['ROCK', 'MIXED'],   // [2026-09-24] + karışık (tür notu: "kayalık-kumluk karışık dipte gezer")
     orfoz: ['ROCK'],
     lahoz: ['ROCK'],
