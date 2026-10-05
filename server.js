@@ -10301,6 +10301,34 @@ function omList(res, expected) {
     return Array.isArray(res) ? res : [res];
 }
 
+/**
+ * Tarama pini radarı için 5 makro eksen (0-100), istemcinin tür detay ekranındaki
+ * formülün BİREBİR aynısı (MainActivity firstRatio/avgRatio): her kalemin score/max
+ * oranı [0,1]'e kırpılır; eksende hiç kalem yoksa genel skor kullanılır.
+ * Çıktı düz sayılar — ScanModels.ScoreDetails {season,thermal,environment,biology,trigger}.
+ */
+function taramaRadarEksenleri(sd, genelSkor) {
+    if (!sd || typeof sd !== 'object') return null;
+    const yedek = Math.max(0, Math.min(1, (Number(genelSkor) || 0) / 100));
+    const oran = d => {
+        if (!d || typeof d !== 'object') return -1;
+        if (typeof d.max === 'number' && d.max > 0 && typeof d.score === 'number')
+            return Math.max(0, Math.min(1, d.score / d.max));
+        if (typeof d.stars === 'number') return Math.max(0, Math.min(1, d.stars / 5));
+        return -1;
+    };
+    const ilk = (...k) => { for (const a of k) { const r = oran(sd[a]); if (r >= 0) return r; } return yedek; };
+    const ort = (...k) => { let t = 0, n = 0; for (const a of k) { const r = oran(sd[a]); if (r >= 0) { t += r; n++; } } return n ? t / n : yedek; };
+    const yuzde = v => Math.round(v * 100);
+    return {
+        season:      yuzde(ilk('season')),
+        thermal:     yuzde(ilk('temp', 'temperature')),
+        environment: yuzde(ort('wave', 'clarity', 'wind', 'current', 'oxygen')),
+        biology:     yuzde(ort('activity', 'moonlight')),
+        trigger:     yuzde(ort('pressure', 'upwelling', 'tide', 'cloud')),
+    };
+}
+
 async function fetchGridWeather(points) {
     const out = new Array(points.length).fill(null);
 
@@ -10716,7 +10744,13 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
 
         const utcOff = weather.utc_offset_seconds || 0;
         const localTimeStr = new Date(Date.now() + (utcOff * 1000)).toISOString().replace('T', ' ').slice(0, 16);
-        const commonResult = { depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal, localTime: localTimeStr, utcOffset: utcOff, oxygen: parseFloat(oxygen.toFixed(1)), upwelling: parseFloat(upwelling.toFixed(2)) };
+        // [2026-10-05] Pin detayı için GERÇEK hava/rüzgâr/ay. Uygulama penceresi bu alanlar
+        // yokken "%68 AY · 22° HAVA · 8kt RÜZGAR" sabitlerini gösteriyordu (cihazda doğrulandı).
+        const _airT = safeNum(weather.hourly?.temperature_2m?.[hourlyIdx], null);
+        const commonResult = { depth: depthVal, zone, tempWater: parseFloat(tempWater.toFixed(1)), substrate: substrateVal, localTime: localTimeStr, utcOffset: utcOff, oxygen: parseFloat(oxygen.toFixed(1)), upwelling: parseFloat(upwelling.toFixed(2)),
+            airTemp: (_airT === null || !isFinite(_airT)) ? null : parseFloat(_airT.toFixed(1)),
+            windSpeed: isFinite(windSpeed) ? Math.round(windSpeed) : null,          // km/s (Open-Meteo varsayılanı)
+            moonIllum: (moon && isFinite(moon.fraction)) ? Math.round(moon.fraction * 100) : null };
 
         if (!fishKey) {
             const resultsMap = new Map();
@@ -11051,7 +11085,17 @@ app.get('/api/scan', async (req, res) => {
                         depth: (result.depth !== undefined && result.depth !== null) ? result.depth : null,
                         zone: result.zone || null,
                         tempWater: result.tempWater || null,
-                        substrate: result.substrate || null
+                        substrate: result.substrate || null,
+                        // [2026-10-05] Pin penceresi bunlar yokken saatlik grafiği SİNÜSLE,
+                        // radarı RASTGELE uyduruyordu. Gerçekleri gönder. scoreDetails ham
+                        // dökümü (iç içe nesne) DEĞİL — istemci düz sayı bekliyor; ham hâli
+                        // Gson'da tarama akışını bütün sürümlerde kırardı.
+                        airTemp: result.airTemp ?? null,
+                        windSpeed: result.windSpeed ?? null,
+                        moonIllum: result.moonIllum ?? null,
+                        hourlyScores: (req.isPremium || req.isGracePeriod) && Array.isArray(result.hourlyScores) && result.hourlyScores.length === 24
+                            ? result.hourlyScores.map(v => (typeof v === 'number' && isFinite(v)) ? parseFloat(v.toFixed(1)) : 0) : null,
+                        scoreDetails: (req.isPremium || req.isGracePeriod) ? taramaRadarEksenleri(result.scoreDetails, score) : null
                     });
                     lastValid = { lat: pt.lat, lon: pt.lon, score, fishName: result.fishName, depth: (result.depth !== undefined && result.depth !== null) ? result.depth : null };
                 }
