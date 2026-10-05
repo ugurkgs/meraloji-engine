@@ -2386,7 +2386,7 @@ const SST_YETERLI_PIKSEL = 9;
  * @param {number} izgaraKm     ızgara düğümünün tıklanan noktaya uzaklığı
  * @returns {{deger:number, sigma:number, uyduAgirlik:number}}
  */
-function sstBirlestir(uydu, omDeger, izgaraKm, logUser = null) {
+function sstBirlestir(uydu, omDeger, izgaraKm, logUser = null, sessiz = false) {
     // Ortalamanın standart hatası — ÖLÇÜLEN belirsizlik, varsayım değil.
     const sem2 = uydu.piksel > 1 ? (uydu.sapma * uydu.sapma) / uydu.piksel : 0;
 
@@ -2408,7 +2408,7 @@ function sstBirlestir(uydu, omDeger, izgaraKm, logUser = null) {
     const uyduAgirlik = wU / (wU + wO);
 
     const u = logUser ? ` [${logUser}]` : '';
-    console.log(`[SST-FÜZE]${u} uydu ${uydu.deger.toFixed(2)}°C (${uydu.piksel}px, ${uydu.gunFark}g, σ${Math.sqrt(varUydu).toFixed(2)}) `
+    if (!sessiz) console.log(`[SST-FÜZE]${u} uydu ${uydu.deger.toFixed(2)}°C (${uydu.piksel}px, ${uydu.gunFark}g, σ${Math.sqrt(varUydu).toFixed(2)}) `
         + `+ OM ${omDeger.toFixed(2)}°C (${(izgaraKm || 0).toFixed(1)}km, σ${Math.sqrt(varOm).toFixed(2)}) `
         + `→ ${deger.toFixed(2)}°C  (uydu payı %${Math.round(uyduAgirlik * 100)})`);
 
@@ -4844,7 +4844,7 @@ function getHourWeight(hour, activityWindows, fishActivity) {
 }
 
 // Günlük ağırlıklı ortalama skor hesapla
-function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, activityWindows, hourlyStartIdx, marineHourlyStartIdx, lang = 'tr') {
+function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, activityWindows, hourlyStartIdx, marineHourlyStartIdx, lang = 'tr', saatlikDokum = null) {
     // marineHourlyStartIdx yoksa hourlyStartIdx'i kullan (geriye dönük uyum: fish-search, scan)
     const mStartIdx = marineHourlyStartIdx !== undefined ? marineHourlyStartIdx : hourlyStartIdx;
     let totalScore = 0;
@@ -4898,6 +4898,9 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
 
         // [YENİ] Saatlik skoru kaydet
         hourlyScores[h] = Math.round(result.finalScore * 10) / 10;
+        // [2026-10-05] Tarama pini radarı saat çubuğuyla birlikte hareket etsin diye
+        // (yalnız istenirse — diğer çağıranlar geçmez, davranış aynı).
+        if (saatlikDokum) saatlikDokum[h] = { sd: result.scoreDetails, skor: result.finalScore };
 
         // En iyi saati takip et
         if (result.finalScore > bestHourScore) {
@@ -10307,6 +10310,41 @@ function omList(res, expected) {
  * oranı [0,1]'e kırpılır; eksende hiç kalem yoksa genel skor kullanılır.
  * Çıktı düz sayılar — ScanModels.ScoreDetails {season,thermal,environment,biology,trigger}.
  */
+/** [2026-10-05] Başlık türün 24 saatlik radar eksenleri — pin penceresinde saat çubuğu
+ *  seçilince radar o saatin GERÇEK dökümüne hareket eder (eskiden Math.random). */
+function taramaSaatlikRadar(fish, key, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang) {
+    try {
+        const dokum = new Array(24).fill(null);
+        calculateWeightedDailyScore(fish, key, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang, dokum);
+        if (dokum.some(d => !d)) return null;
+        return dokum.map(d => taramaRadarEksenleri(d.sd, d.skor));
+    } catch (_) { return null; }
+}
+
+/** Söz verilen değeri en fazla `ms` bekler; hata ya da süre aşımında null. */
+function enFazlaBekle(p, ms) {
+    return Promise.race([Promise.resolve(p).catch(() => null), new Promise(r => setTimeout(() => r(null), ms))]);
+}
+
+/** Analizdeki korunaklı-su dalga tavanının KOPYA üstünde uygulanışı (tarama pinleri
+ *  aynı ızgara nesnesini paylaşabilir; yerinde değiştirmek komşu pini bozardı). */
+function taramaDalgaTavani(weather, marine, yay) {
+    try {
+        if (!yay || !marine?.hourly?.wave_height) return marine;
+        const r = Array.isArray(weather?.daily?.wind_speed_10m_max)
+            ? weather.daily.wind_speed_10m_max.filter(v => typeof v === 'number' && isFinite(v)) : [];
+        if (!r.length) return marine;
+        const tavan = fetchDalgaTavani(yay, Math.max(...r));
+        if (!tavan) return marine;
+        const T = parseFloat(tavan.tavanM.toFixed(2));
+        const hourly = { ...marine.hourly };
+        for (const alan of ['wave_height', 'wind_wave_height', 'swell_wave_height']) {
+            if (Array.isArray(hourly[alan])) hourly[alan] = hourly[alan].map(v => (typeof v === 'number' && v > tavan.tavanM) ? T : v);
+        }
+        return { ...marine, hourly };
+    } catch (_) { return marine; }
+}
+
 function taramaRadarEksenleri(sd, genelSkor) {
     if (!sd || typeof sd !== 'object') return null;
     const yedek = Math.max(0, Math.min(1, (Number(genelSkor) || 0) / 100));
@@ -10612,7 +10650,7 @@ function findTodayIndex(timeArray, utcOffsetSeconds = 0) {
 }
 
 // Paylaşılan hava verisiyle tek nokta skoru hesapla (API çağrısı yok)
-function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey, lang, centerChlorophyll = null) {
+function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey, lang, centerChlorophyll = null, ek = null) {
     if (!weather || !marine || !weather.hourly || !marine.hourly || !marine.hourly.time) return null;
 
     const latF = parseFloat(lat).toFixed(4);
@@ -10644,9 +10682,21 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         const marineHourlyOffset = findTodayIndex(marine.hourly.time, _utcOff);
         const marineHourlyIdx = marineHourlyOffset + correctedClickHour;
 
+        // [2026-10-05] DETAYLI ANALİZLE AYNI GİRDİLER. Sahip bildirdi: pinde "istavrit 62",
+        // aynı noktanın analizinde kalamar 69 · sübye 63 · istavrit 62. Sebep: tarama dip
+        // verisini BEKLEMEDEN puanlıyordu (substrat null → kum seven kalamar/sübyenin
+        // uyum bonusu yok); uydu SST'si, kıyı yapısı, sığ su dalgası, kıyı açısı ve
+        // korunaklı su dalga tavanı da yoktu. `ek` tarama döngüsünde analizle AYNI
+        // önbellek anahtarlarıyla çekiliyor.
+        const depthAvg = bathyRaw !== null ? Math.abs(bathyRaw) : null;
+        const kiyiDuz = kiyiYapiDuzeltmesi(parseFloat(lat), parseFloat(lon), bathyRaw);
         const rawWaterTemp = marine.hourly.sea_surface_temperature?.[marineHourlyIdx];
-        const tempWater = safeWaterTemp(rawWaterTemp, regionName, now.getMonth());
-        const wave = safeNum(marine.hourly.wave_height?.[marineHourlyIdx]);
+        const omTemp = safeWaterTemp(rawWaterTemp, regionName, now.getMonth());
+        const izgaraKm = (marine.latitude && marine.longitude)
+            ? haversineKm(parseFloat(lat), parseFloat(lon), parseFloat(marine.latitude), parseFloat(marine.longitude)) : 0;
+        const tempWater = (ek && ek.sstSat) ? sstBirlestir(ek.sstSat, omTemp, izgaraKm, null, true).deger : omTemp;
+        const wavePeriod = safeNum(marine.hourly?.wave_period?.[marineHourlyIdx]);
+        const wave = applyShoaling(safeNum(marine.hourly.wave_height?.[marineHourlyIdx]), wavePeriod, depthAvg);
         const windSpeed = safeNum(weather.hourly.wind_speed_10m?.[hourlyIdx]);
         const windDir = safeNum(weather.daily?.wind_direction_10m_dominant?.[1]);
         const pressure = safeNum(weather.hourly.surface_pressure?.[hourlyIdx], 1013);
@@ -10672,11 +10722,9 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         const oxygenData = calculateOxygen(tempWater, getSalinity(regionName, latF, lonF), centerChlorophyll, timeMode);
         const oxygen = oxygenData.mgL;
         const upwelling = calculateUpwelling(windSpeed, windDir, regionName);
-        const depthAvg = bathyRaw !== null ? Math.abs(bathyRaw) : null;
         const solunar = getSolunarWindow(now, parseFloat(latF), parseFloat(lonF));
 
         // [YENİ] Marine hourly
-        const wavePeriod = safeNum(marine.hourly?.wave_period?.[marineHourlyIdx]);
         const swellHeight = safeNum(marine.hourly?.swell_wave_height?.[marineHourlyIdx]);
         const oceanCurrent = marine.hourly?.ocean_current_velocity?.[marineHourlyIdx] ?? null;
         const tempShock = calculateTempShock(marine, marineHourlyOffset);
@@ -10688,6 +10736,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         const waveDirection_s = safeNum(marine.hourly?.wave_direction?.[marineHourlyIdx]);
         const windWaveHeight_s = safeNum(marine.hourly?.wind_wave_height?.[marineHourlyIdx]);
         const swellPeriod_s = safeNum(marine.hourly?.swell_wave_period?.[marineHourlyIdx]);
+        const cape_s = safeNum(weather.hourly?.cape?.[hourlyIdx]);
 
         const params = {
             tempWater, wave, windSpeed, windDir, clarity, rain, pressure,
@@ -10707,7 +10756,8 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             moonPhase: moon.phase,
             moonAltitude: moonPos.altitude,
             tideFlow: tideFlow_s,
-            lat: parseFloat(latF), lon: parseFloat(lonF), depthAvg,
+            lat: parseFloat(latF), lon: parseFloat(lonF),
+            depthAvg: kiyiYapiPuanDerinligi(kiyiDuz, depthAvg),
             salinity: getSalinity(regionName, latF, lonF),
             hour: clickHour,
             cloudCover: cloud,
@@ -10725,7 +10775,11 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             // uygulanır (klorofil 3km çapta neredeyse sabittir).
             chlorophyll: centerChlorophyll,
             isBoat: false,
-            substrate: substrateCache.get(`sub_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`) || null,
+            substrate: (kiyiDuz && kiyiDuz.dip) || (ek && ek.substrate)
+                || substrateCache.get(`sub_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`) || null,
+            shoreBearing: (ek && ek.shoreBearing) || null,
+            capeAlert: capeAlertLevel(cape_s, weatherCode_s, precipProb_s, rain),
+            cape: parseFloat(cape_s.toFixed(0)),
             windGust: windGust_s, precipProb: precipProb_s, weatherCode: weatherCode_s,
             visibility: visibility_s, waveDirection: waveDirection_s,
             windWaveHeight: windWaveHeight_s, swellPeriod: swellPeriod_s,
@@ -10832,8 +10886,10 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             // eşleşir. (Aggregasyon/harman yöntemi yalnızca forecast HUD'un "genel skoru"nda
             // kullanılır; harita pini tek-balık tam-eşleşme gösterir.)
             const spotScore = headline ? headline.score : 0;
+            const hourlyRadar = headline
+                ? taramaSaatlikRadar(headline.fish, headline.key, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang) : null;
 
-            return { ...commonResult, score: spotScore, fishName: headline ? headline.name : "", topFish, hourlyScores: headline ? headline.hourlyScores : null, scoreDetails: headline ? headline.scoreDetails : null };
+            return { ...commonResult, score: spotScore, fishName: headline ? headline.name : "", topFish, hourlyScores: headline ? headline.hourlyScores : null, scoreDetails: headline ? headline.scoreDetails : null, hourlyRadar };
         } else {
             const fish = SPECIES_DB[fishKey];
             if (!fish) return null;
@@ -10845,7 +10901,8 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
             // [STANDART] Tek-tür tarama skoru da ANLIK skordur — detay panelinin "ŞİMDİ" sekmesiyle eşleşsin.
             const score = instantResult ? instantResult.finalScore : 0;
             const _n1 = getLoc(fish, "name", lang);
-            return { ...commonResult, score, fishName: _n1, topFish: [_n1], hourlyScores, scoreDetails };
+            const hourlyRadar = taramaSaatlikRadar(fish, fishKey, params, weather, marine, activityWindows, hourlyStartIdx, marineHourlyOffset, lang);
+            return { ...commonResult, score, fishName: _n1, topFish: [_n1], hourlyScores, scoreDetails, hourlyRadar };
         }
     } catch (e) {
         console.log('[SCAN-SCORE] Error:', e.message);
@@ -11061,11 +11118,20 @@ app.get('/api/scan', async (req, res) => {
                     return { pt, result: null };
                 }
 
-                // Substrate'yi de paralel çek — cache'e yazar, calcPointScoreFromWeather cache'den okur
-                fetchSubstrate(pt.lat, pt.lon, true).catch(() => null); // fire-and-forget, cache doldursun
+                // [2026-10-05] Dip, uydu SST ve açık su yayı BEKLENEREK çekiliyor (eskiden
+                // dip "gönder-unut" idi → ilk taramada hep null). Anahtarlar analizle aynı:
+                // pinden "Detaylı Analiz" açılınca aynı değer önbellekten okunur.
+                const [ekSub, ekSst, ekYay] = await Promise.all([
+                    enFazlaBekle(fetchSubstrate(pt.lat, pt.lon, true), 4000),
+                    enFazlaBekle(fetchSatelliteSST(pt.lat, pt.lon, null), 2500),
+                    enFazlaBekle(acikSuYayiGetir(pt.lat, pt.lon), 3000)
+                ]);
+                let shoreBearing = null;
+                try { shoreBearing = kiyiNormaliYaydan(ekYay) || getShoreNormalBearing(pt.lat, pt.lon); } catch (_) { }
+                const ek = { substrate: ekSub, sstSat: ekSst, shoreBearing };
                 let result = null;
                 try {
-                    result = calcPointScoreFromWeather(pt.lat, pt.lon, ptWeather, ptMarine, bathyRaw, fishKey || null, lang, centerChlorophyll);
+                    result = calcPointScoreFromWeather(pt.lat, pt.lon, ptWeather, taramaDalgaTavani(ptWeather, ptMarine, ekYay), bathyRaw, fishKey || null, lang, centerChlorophyll, ek);
                 } catch (e) {
                     console.log('[SCAN] Point error:', pt.lat, pt.lon, e.message);
                 }
@@ -11095,7 +11161,10 @@ app.get('/api/scan', async (req, res) => {
                         moonIllum: result.moonIllum ?? null,
                         hourlyScores: (req.isPremium || req.isGracePeriod) && Array.isArray(result.hourlyScores) && result.hourlyScores.length === 24
                             ? result.hourlyScores.map(v => (typeof v === 'number' && isFinite(v)) ? parseFloat(v.toFixed(1)) : 0) : null,
-                        scoreDetails: (req.isPremium || req.isGracePeriod) ? taramaRadarEksenleri(result.scoreDetails, score) : null
+                        scoreDetails: (req.isPremium || req.isGracePeriod) ? taramaRadarEksenleri(result.scoreDetails, score) : null,
+                        // [2026-10-05] 24 saat × 5 eksen; pin penceresinde radar saat çubuğuyla hareket eder.
+                        hourlyRadar: (req.isPremium || req.isGracePeriod) && Array.isArray(result.hourlyRadar) && result.hourlyRadar.length === 24
+                            ? result.hourlyRadar : null
                     });
                     lastValid = { lat: pt.lat, lon: pt.lon, score, fishName: result.fishName, depth: (result.depth !== undefined && result.depth !== null) ? result.depth : null };
                 }
