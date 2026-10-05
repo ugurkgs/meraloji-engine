@@ -11920,7 +11920,20 @@ cron.schedule('0 * * * *', async () => {
             `&hourly=surface_pressure&past_days=1&forecast_days=1&timezone=auto`;
 
         const omData = await safeFetchJSON(omKey(omUrl), 12000);
-        const pressureHistory = omData?.hourly?.surface_pressure;
+        // [2026-10-06] HATA: dizi past_days=1&forecast_days=1 ile DÜN 00:00 → BUGÜN 23:00
+        // (48 saat, son kısmı TAHMİN). calculatePressureTrend ilk-son farkına baktığı için
+        // trend "dün gece yarısı → bu gece yarısı tahmini" oluyordu: sabah eşik aşılınca
+        // gün boyu FALLING_FAST kalıyordu, o an basınç sabitken bile (sahip bildirdi).
+        // Artık pencere: şu andan geriye 24 saat (analizdeki pressureTrend ile aynı).
+        const _ph = omData?.hourly?.surface_pressure;
+        let pressureHistory = null;
+        if (Array.isArray(_ph)) {
+            const _ofs = omData.utc_offset_seconds || 0;
+            const _bugun = findTodayIndex(omData.hourly.time, _ofs);
+            const _saat = Math.floor((Date.now() / 1000 + _ofs) % 86400 / 3600);
+            const _simdi = (_bugun > 0 ? _bugun : 24) + _saat;
+            pressureHistory = _ph.slice(Math.max(0, _simdi - 24), _simdi + 1);
+        }
 
         if (!pressureHistory || pressureHistory.length < 6) {
             console.warn(`[NOTIFY CRON] Yetersiz basınç verisi: ${lat},${lon}`);
@@ -11974,15 +11987,43 @@ cron.schedule('0 * * * *', async () => {
                 const token = data?.fcmToken;
                 if (token) {
                     const lang = (data?.lang && SERVER_i18n[data.lang]) ? data.lang : 'tr';
-                    tokens.push({ uid, token, lang });
+                    tokens.push({ uid, token, lang, sonGorulme: (data?.lastSeen && data.lastSeen.at) || 0 });
                 }
             } catch (e) {
                 console.warn(`[NOTIFY CRON] Token alınamadı uid=${uid}:`, e.message);
             }
         }));
 
+        // [2026-10-06] AYNI TELEFON, BİRDEN ÇOK HESAP. İstemci token'ı giriş yapan hesaba
+        // yazıyor, eski hesaptan silmiyordu (4.5.2'de düzeltildi). Bu yüzden bir telefon
+        // başka hesabın favori adıyla bildirim alabiliyordu (sahip bildirdi). Aynı
+        // token'dan yalnız EN SON görülen hesap kalır.
+        const tokenBasi = new Map();
+        for (const t of tokens) {
+            const v = tokenBasi.get(t.token);
+            if (!v || t.sonGorulme > v.sonGorulme) tokenBasi.set(t.token, t);
+        }
+        // [2026-10-06] TELEFON BAŞINA 12 SAATTE BİR. Kilit eskiden yalnız 10 km hücreye
+        // bağlıydı: favorileri farklı hücrelerde olan kullanıcı, hücreler farklı saatlerde
+        // eşiği geçince saat başı bildirim alıyordu (sahip: "07'den öğlene her saat").
+        const kilitliDegil = [];
+        for (const t of tokenBasi.values()) {
+            const tk = 'notify_tok_' + require('crypto').createHash('sha1').update(t.token).digest('hex').slice(0, 20);
+            if (cache.get(tk)) continue;
+            try {
+                const kd = await db.collection('systemCache').doc(tk).get();
+                if (kd.exists && kd.data().expiresAt > Date.now()) {
+                    cache.set(tk, true, Math.floor((kd.data().expiresAt - Date.now()) / 1000));
+                    continue;
+                }
+            } catch (e) { console.warn('[NOTIFY CRON] Telefon kilidi okunamadı:', e.message); }
+            kilitliDegil.push({ ...t, tk });
+        }
+        tokens.length = 0;
+        tokens.push(...kilitliDegil);
+
         if (tokens.length === 0) {
-            console.log(`[NOTIFY CRON] Bu grup için geçerli FCM token yok.`);
+            console.log(`[NOTIFY CRON] Bu grup için geçerli (ve kilitli olmayan) FCM token yok.`);
             continue;
         }
 
@@ -12019,6 +12060,15 @@ cron.schedule('0 * * * *', async () => {
         try {
             const fcmResponse = await admin.messaging().sendEach(messages);
             console.log(`[NOTIFY CRON] ✅ ${fcmResponse.successCount}/${tokens.length} kişiselleştirilmiş bildirim gönderildi (${lat},${lon})`);
+
+            // Ulaşan her telefona 12 saat kilit (RAM + DB)
+            fcmResponse.responses.forEach((resp, idx) => {
+                if (!resp.success) return;
+                const tk = tokens[idx].tk;
+                cache.set(tk, true, 12 * 3600);
+                db.collection('systemCache').doc(tk).set({ expiresAt: Date.now() + 12 * 3600 * 1000 })
+                    .catch(e => console.warn('[NOTIFY CRON] Telefon kilidi yazılamadı:', e.message));
+            });
 
             // Başarılı gönderim varsa bu bölge için 12 saat cooldown başlat
             if (fcmResponse.successCount > 0) {
