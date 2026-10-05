@@ -310,7 +310,7 @@ const SPECIES_DB = {
         noteEn: "Rocky, foamy water. Watch for line friction.", noteEl: "Rocky, foamy water. Watch for line friction.", noteEs: "Rocky, foamy water. Watch for line friction."
     },
     "mirmir": {
-        name: "Mırmır", nameEn: "Striped Seabream", nameEl: "Μουρμούρα", nameEs: "Herrera", icon: "🦓", scientificName: "Lithognathus mormyrus",
+        name: "Mırmır", nameEn: "Striped Seabream", nameEl: "Μουρμούρα", nameEs: "Herrera", icon: "🐟", scientificName: "Lithognathus mormyrus",
         photoId: 13,
         category: "KIYI",
         huntingMode: "chemosensory",

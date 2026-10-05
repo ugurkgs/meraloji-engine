@@ -10981,7 +10981,7 @@ app.get('/api/scan', async (req, res) => {
         }
         if (gridPoints.length === 0) {
             console.log(`[SCAN] [${logUser}] tüm ızgara iç bölge çıktı, tarama iptal`);
-            sendEvent({ type: 'error', message: (i18n(lang).scan && i18n(lang).scan.landError) || 'Bu bölgede taranacak deniz alanı bulunamadı.' });
+            sendEvent({ type: 'error', code: 'land', message: (i18n(lang).scan && i18n(lang).scan.landError) || 'Bu bölgede taranacak deniz alanı bulunamadı.' });
             res.end();
             return;
         }
