@@ -8831,12 +8831,9 @@ app.get('/api/forecast', async (req, res) => {
                 const hOxygen = parseFloat(Math.max(3.0, Math.min(12.0, baseO2 - (tempDiff * 0.12))).toFixed(1));
 
                 // Upwelling simülasyonu
-                // [2026-10-06] HATA: `instantData.upwelling || 0.1` anlık değer 0 iken 0,1 UYDURUYOR,
-                // sonra rüzgâr oranıyla ölçekliyordu; 12 km/s eşiği ve yön hiç uygulanmıyordu.
-                // Sahada: rüzgâr 7 km/s, ekranda "0,10 ZAYIF" (olması gereken 0 · YOK).
-                // Artık her saat anlık hesapla AYNI fonksiyondan, o saatin rüzgârıyla. Yön anlıkla
-                // aynı (i_windDir) → "Şimdi" saatinde iki farklı sayı çıkmaz. Skora girmez (yalnız gösterim).
-                const hUpwelling = parseFloat(calculateUpwelling(hWind, i_windDir, regionName).toFixed(2));
+                const baseUp = instantData.upwelling || 0.1;
+                const windRatio = hWind / (instantData.wind || 15 || 1);
+                const hUpwelling = parseFloat(Math.max(0.0, Math.min(5.0, baseUp * windRatio)).toFixed(2));
 
                 const hCode = safeNum(weather.hourly?.weather_code?.[wIdx], 0);
                 const hRain = safeNum(weather.hourly?.precipitation?.[wIdx]);
