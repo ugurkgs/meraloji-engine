@@ -8839,9 +8839,14 @@ app.get('/api/forecast', async (req, res) => {
                 const tideFlow = parseFloat((tideAmp * Math.abs(Math.sin(tidePos.altitude)) * 1.5).toFixed(2));
 
                 // Berraklık (Clarity) simülasyonu
-                const baseClarity = instantData.clarity || 80;
-                const clarityPen = (hWave * 15) + (hWind * 0.5);
-                const hClarity = Math.max(10, Math.min(100, Math.round(baseClarity - clarityPen)));
+                // [2026-10-06] Eskiden anlık berraklıktan (dalga/rüzgâr cezası ZATEN düşülmüş) bir
+                // kez daha ceza düşülüyordu: "Şimdi"de anlık 87, çizelge 77. Artık her saat anlıkla
+                // AYNI fonksiyon (klorofil dahil); h=0 doğrudan anlık değer. hRain bu satırdan SONRA
+                // tanımlı → yağış burada doğrudan okunur (TDZ hatası olmasın).
+                const hClarity = (h === 0 && typeof instantData.clarity === 'number')
+                    ? instantData.clarity
+                    : Math.round(calculateClarity(hWave, hWind, safeNum(weather.hourly?.precipitation?.[wIdx]),
+                        (instantData.chlorophyll && typeof instantData.chlorophyll.value === 'number') ? instantData.chlorophyll.value : null));
 
                 // Oksijen (Oxygen) simülasyonu
                 const baseO2 = instantData.oxygen || 7.5;
@@ -8849,9 +8854,14 @@ app.get('/api/forecast', async (req, res) => {
                 const hOxygen = parseFloat(Math.max(3.0, Math.min(12.0, baseO2 - (tempDiff * 0.12))).toFixed(1));
 
                 // Upwelling simülasyonu
-                const baseUp = instantData.upwelling || 0.1;
-                const windRatio = hWind / (instantData.wind || 15 || 1);
-                const hUpwelling = parseFloat(Math.max(0.0, Math.min(5.0, baseUp * windRatio)).toFixed(2));
+                // [2026-10-06] `instantData.upwelling || 0.1` anlık 0 iken 0,1 UYDURUYORDU (rüzgâr 7 km/s'de
+                // "0,10 ZAYIF"); 12 km/s eşiği ve yön uygulanmıyordu. Artık anlıkla AYNI fonksiyon, o saatin
+                // rüzgârıyla; yön anlıktaki gibi günün baskın yönü. h=0 doğrudan anlık değer.
+                // (43a105f burada kardeş bloktaki i_windDir'i kullanıp canlıyı düşürmüştü — o değişken
+                // bu blokta YOK; regionName 7565'te aynı düzeyde tanımlı, weather blokta kullanılıyor.)
+                const hUpwelling = (h === 0 && typeof instantData.upwelling === 'number')
+                    ? instantData.upwelling
+                    : parseFloat(calculateUpwelling(hWind, safeNum(weather.daily?.wind_direction_10m_dominant?.[1]), regionName).toFixed(2));
 
                 const hCode = safeNum(weather.hourly?.weather_code?.[wIdx], 0);
                 const hRain = safeNum(weather.hourly?.precipitation?.[wIdx]);
