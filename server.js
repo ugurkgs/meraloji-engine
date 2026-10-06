@@ -3709,6 +3709,15 @@ function estimateCurrent(wave, windSpeed, region) {
     return Math.max(0.05, Math.min(2.5, base));
 }
 
+// [AKINTI BİRİMİ 2026-10-07] Open-Meteo Marine ocean_current_velocity birimi km/h
+// (API yanıtındaki hourly_units'ten doğrulandı). Motor (idealCurrent = cp × 1,5),
+// istemci paneli ("m/s") ve Av Modu eşiği (0,5 m/s) m/s bekliyor; eskiden ham km/h
+// veriliyordu → akıntı 3,6 kat hızlı görünüyor, pelajik akıntı bonusu fazla
+// tetikleniyordu. Okunduğu HER yerde bundan geçmeli. estimateCurrent zaten m/s.
+function akintiMs(kmh) {
+    return (typeof kmh === 'number' && !isNaN(kmh)) ? kmh / 3.6 : null;
+}
+
 // [DÜZELTME 4] Basınç Trendi Hesaplama
 // ── TOP 3 ORTALAMA SKOR (İSTİLACI ve KORUMA hariç) ──────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
@@ -4885,7 +4894,7 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
         const hourlyUV = safeNum(weather.hourly?.uv_index?.[wIdx], 0);
         const hourlyWavePeriod = safeNum(marine.hourly?.wave_period?.[mIdx], 0);
         const hourlySwell = safeNum(marine.hourly?.swell_wave_height?.[mIdx], 0);
-        const hourlyOceanCurrent = marine.hourly?.ocean_current_velocity?.[mIdx];
+        const hourlyOceanCurrent = akintiMs(marine.hourly?.ocean_current_velocity?.[mIdx]);
         const hourlyClear = calculateClarity(hourlyWave, hourlyWind, hourlyRain, baseParams.chlorophyll);
 
         // Bu saat için timeMode (SunCalc tekrar çağrılmıyor) — konum ofsetiyle (K2)
@@ -4957,7 +4966,7 @@ function calculate3HourWindowScore(fish, key, baseParams, weather, marine, cente
         const hourlyUV = safeNum(weather.hourly?.uv_index?.[wIdx], 0);
         const hourlyWavePeriod = safeNum(marine.hourly?.wave_period?.[mIdx], 0);
         const hourlySwell = safeNum(marine.hourly?.swell_wave_height?.[mIdx], 0);
-        const hourlyOceanCurrent = marine.hourly?.ocean_current_velocity?.[mIdx];
+        const hourlyOceanCurrent = akintiMs(marine.hourly?.ocean_current_velocity?.[mIdx]);
         const hourlyClear = calculateClarity(hourlyWave, hourlyWind, hourlyRain, baseParams.chlorophyll);
 
         const hourDate = new Date(baseParams.targetDate);
@@ -8094,7 +8103,7 @@ app.get('/api/forecast', async (req, res) => {
             // Sığ su shoaling — derinliğe göre etkin dalga yüksekliğini düzelt
             const wave = isLand ? 0 : applyShoaling(waveRaw, wavePeriod, depthData.avg);
             const swellHeight = isLand ? 0 : safeNum(marine.hourly?.swell_wave_height?.[marineHourlyIdx]);
-            const oceanCurrent = isLand ? null : (marine.hourly?.ocean_current_velocity?.[marineHourlyIdx] ?? null);
+            const oceanCurrent = isLand ? null : akintiMs(marine.hourly?.ocean_current_velocity?.[marineHourlyIdx]);
             // YENİ: Akıntı ve ölü dalga yönleri
             const oceanCurrentDir = isLand ? null : (marine.hourly?.ocean_current_direction?.[marineHourlyIdx] ?? null);
             const swellWaveDir = isLand ? null : (marine.hourly?.swell_wave_direction?.[marineHourlyIdx] ?? null);
@@ -8429,7 +8438,7 @@ app.get('/api/forecast', async (req, res) => {
             const i_moon = SunCalc.getMoonIllumination(instantDate);
 
             const i_swellHeight = safeNum(marine.hourly?.swell_wave_height?.[marineInstantIdx]);
-            const i_oceanCurrent = marine.hourly?.ocean_current_velocity?.[marineInstantIdx] ?? null;
+            const i_oceanCurrent = akintiMs(marine.hourly?.ocean_current_velocity?.[marineInstantIdx]);
             const i_oceanCurrentDir = marine.hourly?.ocean_current_direction?.[marineInstantIdx] ?? null;
             const i_swellWaveDir = marine.hourly?.swell_wave_direction?.[marineInstantIdx] ?? null;
             const i_tempShock = calculateTempShock(marine, marineStartIdx);
@@ -8906,7 +8915,7 @@ app.get('/api/forecast', async (req, res) => {
                     swellHeight: parseFloat(safeNum(marine.hourly?.swell_wave_height?.[mIdx]).toFixed(2)),
                     swellPeriod: parseFloat(safeNum(marine.hourly?.swell_wave_period?.[mIdx]).toFixed(1)),
                     swellDirection: safeNum(marine.hourly?.swell_wave_direction?.[mIdx]),
-                    current: parseFloat(safeNum(marine.hourly?.ocean_current_velocity?.[mIdx]).toFixed(2)),
+                    current: parseFloat(safeNum(akintiMs(marine.hourly?.ocean_current_velocity?.[mIdx])).toFixed(2)),
                     currentDirection: safeNum(marine.hourly?.ocean_current_direction?.[mIdx]),
                     tide: tideFlow,
                     clarity: hClarity,
@@ -9416,7 +9425,7 @@ app.get('/api/fish-search', async (req, res) => {
         // [YENİ] Marine hourly
         const wavePeriod = safeNum(marine.hourly?.wave_period?.[marineHourlyIdx]);
         const swellHeight = safeNum(marine.hourly?.swell_wave_height?.[marineHourlyIdx]);
-        const oceanCurrent = marine.hourly?.ocean_current_velocity?.[marineHourlyIdx] ?? null;
+        const oceanCurrent = akintiMs(marine.hourly?.ocean_current_velocity?.[marineHourlyIdx]);
         const tempShock = calculateTempShock(marine, marineHourlyOffset);
         // YENİ (1C)
         const windGust = safeNum(weather.hourly?.wind_gusts_10m?.[hourlyIdx]);
@@ -10754,7 +10763,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
 
         // [YENİ] Marine hourly
         const swellHeight = safeNum(marine.hourly?.swell_wave_height?.[marineHourlyIdx]);
-        const oceanCurrent = marine.hourly?.ocean_current_velocity?.[marineHourlyIdx] ?? null;
+        const oceanCurrent = akintiMs(marine.hourly?.ocean_current_velocity?.[marineHourlyIdx]);
         const tempShock = calculateTempShock(marine, marineHourlyOffset);
         // YENİ (1C)
         const windGust_s = safeNum(weather.hourly?.wind_gusts_10m?.[hourlyIdx]);
