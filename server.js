@@ -3551,8 +3551,23 @@ function calculateWindScore(direction, speed, region, lat, lon) {
 }
 
 // Su Berraklığı
-function calculateClarity(wave, windSpeed, rain) {
+/**
+ * [2026-10-06] Klorofilin berraklığa etkisi (puan, 0-55). Fitoplankton suyu yeşertir ve
+ * bulandırır; Secchi derinliği klorofille log-doğrusal azalır. 0,5 mg/m³ altı ceza yok.
+ * Örnek: 1→9 · 2→18 · 5→30 · 14→43. Ölçüldü (tools/olcum-berraklik-klorofil.js, 10 nokta):
+ * açık deniz 0, Çanakkale/Karadeniz/Mersin ±2-3 puan, yalnız İzmir iç körfez belirgin.
+ * Sahip seçti ("A"). Sebep: klorofil ekranı "alg patlaması / su çok bulanık" derken
+ * berraklık %82 "berrak" diyordu.
+ */
+function klorofilBerraklikCezasi(chl) {
+    const c = parseFloat(chl);
+    if (!isFinite(c) || c <= 0.5) return 0;
+    return Math.min(55, 30 * Math.log10(c / 0.5));
+}
+
+function calculateClarity(wave, windSpeed, rain, chlorophyll = null) {
     let clarity = 100;
+    clarity -= klorofilBerraklikCezasi(chlorophyll);
     clarity -= (safeNum(wave) * 15);
     clarity -= (safeNum(windSpeed) * 0.8);
     clarity -= (safeNum(rain) * 5);
@@ -4871,7 +4886,7 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
         const hourlyWavePeriod = safeNum(marine.hourly?.wave_period?.[mIdx], 0);
         const hourlySwell = safeNum(marine.hourly?.swell_wave_height?.[mIdx], 0);
         const hourlyOceanCurrent = marine.hourly?.ocean_current_velocity?.[mIdx];
-        const hourlyClear = calculateClarity(hourlyWave, hourlyWind, hourlyRain);
+        const hourlyClear = calculateClarity(hourlyWave, hourlyWind, hourlyRain, baseParams.chlorophyll);
 
         // Bu saat için timeMode (SunCalc tekrar çağrılmıyor) — konum ofsetiyle (K2)
         const timeMode = getTimeOfDay(h, sunTimes, baseParams.utcOffsetSeconds || 0);
@@ -4943,7 +4958,7 @@ function calculate3HourWindowScore(fish, key, baseParams, weather, marine, cente
         const hourlyWavePeriod = safeNum(marine.hourly?.wave_period?.[mIdx], 0);
         const hourlySwell = safeNum(marine.hourly?.swell_wave_height?.[mIdx], 0);
         const hourlyOceanCurrent = marine.hourly?.ocean_current_velocity?.[mIdx];
-        const hourlyClear = calculateClarity(hourlyWave, hourlyWind, hourlyRain);
+        const hourlyClear = calculateClarity(hourlyWave, hourlyWind, hourlyRain, baseParams.chlorophyll);
 
         const hourDate = new Date(baseParams.targetDate);
         hourDate.setHours(h, 0, 0, 0);
@@ -6936,7 +6951,10 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // TEKNİĞİN büsbütün çalışmadığı koşulları temsil eder.
     if (fish.hardLimits) {
         const hl = fish.hardLimits;
-        if (hl.clarityMin !== undefined && clarity < hl.clarityMin) {
+        // [2026-10-06] Klorofil cezası bu kapıdan HARİÇ: sahibin kalamar için saha bilgisi yok,
+        // kanıtsız yeni sert ceza (ölçüm: körfezde kalamar 44,8→12,7) istenmedi. Kapı eskisi
+        // gibi yalnız dalga/rüzgâr/yağış berraklığına bakar.
+        if (hl.clarityMin !== undefined && clarity + klorofilBerraklikCezasi(chlorophyll) < hl.clarityMin) {
             rawScore *= hl.clarityMult;
             penalties.push(i18n(lang).penalties.murkyWater);
         }
@@ -8104,7 +8122,7 @@ app.get('/api/forecast', async (req, res) => {
             const activityWindows = calculateActivityWindows(targetDate, lat, lon, utcOffsetSeconds);
 
             const currentEst = isLand ? 0 : estimateCurrent(wave, windSpeed, regionName);
-            const clarity = isLand ? 0 : calculateClarity(wave, windSpeed, rain);
+            const clarity = isLand ? 0 : calculateClarity(wave, windSpeed, rain, chlorophyll);
             const oxygenData = isLand ? { mgL: 0 } : calculateOxygen(tempWater, salinity, chlorophyll, timeMode);
             const oxygen = oxygenData.mgL;
             const upwelling = isLand ? 0 : calculateUpwelling(windSpeed, windDir, regionName);
@@ -8402,7 +8420,7 @@ app.get('/api/forecast', async (req, res) => {
             const i_wavePeriod = safeNum(marine.hourly?.wave_period?.[marineInstantIdx]);
             // Sığ su shoaling — instant için de uygula (i_clarity/i_current'tan önce tanımlanmalı)
             const i_wave = applyShoaling(i_waveRaw, i_wavePeriod, depthData.avg);
-            const i_clarity = calculateClarity(i_wave, i_wind, i_rain);
+            const i_clarity = calculateClarity(i_wave, i_wind, i_rain, chlorophyll);
             const i_current = estimateCurrent(i_wave, i_wind, regionName);
             const i_windDir = safeNum(weather.daily?.wind_direction_10m_dominant?.[1]);
             const i_oxygenData = calculateOxygen(i_tempWater, salinity, chlorophyll, i_timeMode);
@@ -10703,7 +10721,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         const rain = safeNum(weather.hourly.precipitation?.[hourlyIdx]);
         const cloud = safeNum(weather.hourly.cloud_cover?.[hourlyIdx], 50);
         const uv = safeNum(weather.hourly.uv_index?.[hourlyIdx], 0);
-        const clarity = calculateClarity(wave, windSpeed, rain);
+        const clarity = calculateClarity(wave, windSpeed, rain, centerChlorophyll);
         const currentEst = estimateCurrent(wave, windSpeed, regionName);
         const sunTimes = SunCalc.getTimes(now, parseFloat(latF), parseFloat(lonF));
         const timeMode = getTimeOfDay(clickHour, sunTimes, _utcOff); // K2
