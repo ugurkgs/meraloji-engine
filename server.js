@@ -3718,6 +3718,35 @@ function akintiMs(kmh) {
     return (typeof kmh === 'number' && !isNaN(kmh)) ? kmh / 3.6 : null;
 }
 
+// [GELGİT 2026-10-07] Gerçek deniz seviyesi (Open-Meteo Marine sea_level_height_msl, metre).
+// Eskiden gelgit = (1..1,5) × |sin(ay yüksekliği)| × 1,5 endeksiydi; 12 kıyı noktasında ölçüldü:
+// gerçek akışla (saatlik seviye değişimi) ilişkisi YOK (r −0,41…+0,18), Kuzey Ege'de tepeleri
+// gerçek yüksek sudan 5 saat kayık; güneyde seviyeyi izliyor → 'akış bonusu' durgun suya düşüyordu.
+// Puan girdisi (B, ölçüldü: ilk-10 değerli 298 → 302): |Δh| cm/sa × 0,25, tavan 2,25 (9 cm/sa).
+// Karadeniz/Boğaz'da gelgit 3-7 cm → ~0 (doğru). Veri yoksa null → çağıran eski endekse düşer.
+function gelgitAkisi(marine, idx) {
+    const s = marine?.hourly?.sea_level_height_msl;
+    if (!s || !(idx >= 1)) return null;
+    const h1 = s[idx], h0 = s[idx - 1];
+    if (typeof h1 !== 'number' || typeof h0 !== 'number') return null;
+    return Math.min(2.25, Math.abs(h1 - h0) * 100 * 0.25);
+}
+/** O saatteki deniz seviyesi (m); yoksa null. Gelgit grafiği (hourlyTimeline.tide) bunu çizer. */
+function denizSeviyesi(marine, idx) {
+    const v = marine?.hourly?.sea_level_height_msl?.[idx];
+    return typeof v === 'number' ? v : null;
+}
+/** ±12 saatlik pencerede gelgit farkı (m, metin); yoksa null. İstemci "Gelgit" kutusu "X m" yazar. */
+function gelgitFarkiMetni(marine, idx) {
+    const s = marine?.hourly?.sea_level_height_msl;
+    if (!s || typeof idx !== 'number') return null;
+    let mn = Infinity, mx = -Infinity, n = 0;
+    for (let i = Math.max(0, idx - 12); i <= Math.min(s.length - 1, idx + 12); i++) {
+        if (typeof s[i] === 'number') { mn = Math.min(mn, s[i]); mx = Math.max(mx, s[i]); n++; }
+    }
+    return n >= 12 ? (mx - mn).toFixed(2) : null;
+}
+
 // [DÜZELTME 4] Basınç Trendi Hesaplama
 // ── TOP 3 ORTALAMA SKOR (İSTİLACI ve KORUMA hariç) ──────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
@@ -7576,8 +7605,8 @@ app.get('/api/forecast', async (req, res) => {
 
         const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,cloud_cover,precipitation,precipitation_probability,weather_code,visibility,uv_index,cape&past_days=1&timezone=auto`);
         const weatherUrlFallback = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,surface_pressure,cloud_cover,precipitation,uv_index,cape,wind_gusts_10m,precipitation_probability,weather_code,visibility&past_days=1&timezone=auto`);
-        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,ocean_current_velocity,ocean_current_direction,sea_surface_temperature&past_days=7&timezone=auto`);
-        const marineUrlFallback = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature,ocean_current_velocity,ocean_current_direction,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction&past_days=7&timezone=auto`);
+        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=sea_level_height_msl,wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,ocean_current_velocity,ocean_current_direction,sea_surface_temperature&past_days=7&timezone=auto`);
+        const marineUrlFallback = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&hourly=sea_level_height_msl,wave_height,sea_surface_temperature,ocean_current_velocity,ocean_current_direction,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction&past_days=7&timezone=auto`);
 
         // EMODnet Bathymetry API - Derinlik verisi (SEA ise atlanır)
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lon} ${lat})`;
@@ -7788,7 +7817,7 @@ app.get('/api/forecast', async (req, res) => {
                 const snap = await findNearestSeaPoint(lat, lon);
                 if (snap) {
                     // Snap noktasının marine verisini çek — past_days=7 (tempShock için)
-                    const snapMarineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&past_days=7&timezone=auto`);
+                    const snapMarineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=sea_level_height_msl,wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&past_days=7&timezone=auto`);
                     const snapMarine = await safeFetchJSON(snapMarineUrl, 10000);
 
                     // Marine verisi geçerliyse snap'i uygula
@@ -8139,7 +8168,7 @@ app.get('/api/forecast', async (req, res) => {
             const tide = SunCalc.getMoonPosition(targetDate, lat, lon);
             const tideAmplitude = 1.0 + Math.abs(Math.cos(moon.phase * Math.PI * 2)) * 0.5;
             const tideAltitudeFactor = Math.abs(Math.sin(tide.altitude));
-            const tideFlow = tideAmplitude * tideAltitudeFactor * 1.5;
+            const tideFlow = gelgitAkisi(marine, marineHourlyIdx) ?? (tideAmplitude * tideAltitudeFactor * 1.5);
             const moonAltitude = tide.altitude;
 
             // GÜN ÖZETİ (İkonlu Hava Durumu)
@@ -8314,7 +8343,7 @@ app.get('/api/forecast', async (req, res) => {
                 windDirection: Math.round(windDir), // analiz saatindeki yön (rüzgar hızıyla tutarlı)
                 clarity: Math.round(clarity),
                 pressure: Math.round(pressure), pressureTrend: pressureTrend.trend,
-                cloud: cloud + "%", rain: rain, salinity, tide: tideFlow.toFixed(1),
+                cloud: cloud + "%", rain: rain, salinity, tide: gelgitFarkiMetni(marine, marineHourlyIdx),   // günlük gerçek gelgit farkı (m); yoksa null → "—"
                 current: oceanCurrent !== null ? oceanCurrent.toFixed(3) : currentEst.toFixed(2),
                 currentIsReal: oceanCurrent !== null,
                 upwelling: parseFloat(upwelling.toFixed(2)),
@@ -8475,7 +8504,7 @@ app.get('/api/forecast', async (req, res) => {
 
             const i_tide = SunCalc.getMoonPosition(instantDate, lat, lon);
             const i_tideAmplitude = 1.0 + Math.abs(Math.cos(i_moon.phase * Math.PI * 2)) * 0.5;
-            const i_tideFlow = i_tideAmplitude * Math.abs(Math.sin(i_tide.altitude)) * 1.5;
+            const i_tideFlow = gelgitAkisi(marine, marineInstantIdx) ?? (i_tideAmplitude * Math.abs(Math.sin(i_tide.altitude)) * 1.5);
 
             // Base params (calculate3HourWindowScore için)
             const baseParams = {
@@ -8699,7 +8728,7 @@ app.get('/api/forecast', async (req, res) => {
                 currentIsReal: i_oceanCurrent !== null,
                 oxygen: parseFloat(i_oxygen.toFixed(1)),
                 upwelling: parseFloat(i_upwelling.toFixed(2)),
-                tide: i_tideFlow.toFixed(1),
+                tide: gelgitFarkiMetni(marine, marineInstantIdx),   // günlük gerçek gelgit farkı (m); yoksa null → "—"
                 salinity: salinity,
                 wavePeriod: parseFloat(i_wavePeriod.toFixed(1)),
                 swellHeight: parseFloat(i_swellHeight.toFixed(2)),
@@ -8917,7 +8946,7 @@ app.get('/api/forecast', async (req, res) => {
                     swellDirection: safeNum(marine.hourly?.swell_wave_direction?.[mIdx]),
                     current: parseFloat(safeNum(akintiMs(marine.hourly?.ocean_current_velocity?.[mIdx])).toFixed(2)),
                     currentDirection: safeNum(marine.hourly?.ocean_current_direction?.[mIdx]),
-                    tide: tideFlow,
+                    tide: denizSeviyesi(marine, mIdx),   // gerçek deniz seviyesi (m); yoksa null → istemci "veri yok"
                     clarity: hClarity,
                     oxygen: hOxygen,
                     upwelling: hUpwelling,
@@ -9305,7 +9334,7 @@ app.get('/api/fish-search', async (req, res) => {
         const { gLat, gLon } = snapToGrid(latF, lonF);
 
         const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,cloud_cover,precipitation,precipitation_probability,weather_code,visibility,uv_index,cape&past_days=1&timezone=auto`);
-        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,ocean_current_velocity,ocean_current_direction,sea_surface_temperature&past_days=1&timezone=auto`);
+        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=sea_level_height_msl,wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,ocean_current_velocity,ocean_current_direction,sea_surface_temperature&past_days=1&timezone=auto`);
         const bathymetryUrl = `https://rest.emodnet-bathymetry.eu/depth_sample?geom=POINT(${lonF} ${latF})`;
 
         // [CACHE] forecast endpoint daha önce aynı noktayı çektiyse ham veriyi kullan — OM'a gitme
@@ -9319,7 +9348,7 @@ app.get('/api/fish-search', async (req, res) => {
             weather = await safeFetchJSON(omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,surface_pressure,cloud_cover,precipitation&past_days=1&timezone=auto`));
         }
         if (!marine || marine.error) {
-            marine = await safeFetchJSON(omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`));
+            marine = await safeFetchJSON(omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=sea_level_height_msl,wave_height,sea_surface_temperature,ocean_current_velocity&past_days=7&timezone=auto`));
         }
         if (!weather) return res.status(503).json({ error: 'API_UNAVAILABLE' });
         if (!marine) {
@@ -9372,7 +9401,7 @@ app.get('/api/fish-search', async (req, res) => {
             try {
                 const snap = await findNearestSeaPoint(latF, lonF);
                 if (snap) {
-                    const snapMarineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&past_days=1&timezone=auto`);
+                    const snapMarineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${snap.lat}&longitude=${snap.lon}&daily=wave_height_max&hourly=sea_level_height_msl,wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&past_days=1&timezone=auto`);
                     const snapMarine = await safeFetchJSON(snapMarineUrl, 10000);
                     const snapWaves = snapMarine?.hourly?.wave_height?.filter(v => v !== null && v !== undefined) || [];
                     if (snapMarine && !snapMarine.error && snapWaves.some(v => v > 0)) {
@@ -9456,7 +9485,7 @@ app.get('/api/fish-search', async (req, res) => {
 
         const s_tide = SunCalc.getMoonPosition(now, parseFloat(latF), parseFloat(lonF));
         const s_tideAmplitude = 1.0 + Math.abs(Math.cos(moon.phase * Math.PI * 2)) * 0.5;
-        const s_tideFlow = s_tideAmplitude * Math.abs(Math.sin(s_tide.altitude)) * 1.5;
+        const s_tideFlow = gelgitAkisi(marine, marineHourlyIdx) ?? (s_tideAmplitude * Math.abs(Math.sin(s_tide.altitude)) * 1.5);
 
         // [YENİ] Kıyı açısı — levrek kıyı-dik dalga bonusu + çeken akıntı riski için
         const shoreBearingInfo = getShoreNormalBearing(latF, lonF);
@@ -10307,7 +10336,7 @@ async function fetchCenterWeather(lat, lon) {
     const latF = parseFloat(lat).toFixed(4);
     const lonF = parseFloat(lon).toFixed(4);
     const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,cloud_cover,precipitation,precipitation_probability,weather_code,visibility,uv_index,cape&past_days=1&timezone=auto`);
-    const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&past_days=7&timezone=auto`);
+    const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=sea_level_height_msl,wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&past_days=7&timezone=auto`);
 
     let [weather, marine] = await Promise.all([queuedFetch(weatherUrl), queuedFetch(marineUrl)]);
 
@@ -10315,7 +10344,7 @@ async function fetchCenterWeather(lat, lon) {
         weather = await safeFetchJSON(omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,surface_pressure,cloud_cover,precipitation,uv_index,cape,wind_gusts_10m,precipitation_probability,weather_code,visibility&past_days=1&timezone=auto`));
     }
     if (!marine || marine.error) {
-        marine = await safeFetchJSON(omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&past_days=7&timezone=auto`));
+        marine = await safeFetchJSON(omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=sea_level_height_msl,wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&past_days=7&timezone=auto`));
     }
 
     if (!weather || !marine) throw new Error('API_UNAVAILABLE');
@@ -10421,7 +10450,7 @@ async function fetchGridWeather(points) {
         // Parametre listeleri fetchCenterWeather ile birebir aynı olmalı — aksi halde
         // calcPointScoreFromWeather bazı alanları bulamaz.
         const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${lats}&longitude=${lons}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,cloud_cover,precipitation,precipitation_probability,weather_code,visibility,uv_index,cape&past_days=1&timezone=auto`);
-        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lats}&longitude=${lons}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&past_days=7&timezone=auto`);
+        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lats}&longitude=${lons}&daily=wave_height_max&hourly=sea_level_height_msl,wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&past_days=7&timezone=auto`);
 
         let wRes = null, mRes = null;
         try {
@@ -10754,7 +10783,7 @@ function calcPointScoreFromWeather(lat, lon, weather, marine, bathyRaw, fishKey,
         // pinlerinde her zaman sessizce atlanıyordu — aynı balık/an için forecast skorundan
         // sistematik olarak düşük çıkabiliyordu.
         const tideAmplitude_s = 1.0 + Math.abs(Math.cos(moon.phase * Math.PI * 2)) * 0.5;
-        const tideFlow_s = tideAmplitude_s * Math.abs(Math.sin(moonPos.altitude)) * 1.5;
+        const tideFlow_s = gelgitAkisi(marine, marineHourlyIdx) ?? (tideAmplitude_s * Math.abs(Math.sin(moonPos.altitude)) * 1.5);
 
         const oxygenData = calculateOxygen(tempWater, getSalinity(regionName, latF, lonF), centerChlorophyll, timeMode);
         const oxygen = oxygenData.mgL;
@@ -11639,7 +11668,7 @@ async function warmCacheForSpot(lat, lon) {
 
     try {
         const weatherUrl = omKey(`https://${OM_HOST}/v1/forecast?latitude=${latF}&longitude=${lonF}&daily=temperature_2m_max,wind_speed_10m_max,wind_direction_10m_dominant&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,surface_pressure,cloud_cover,precipitation,uv_index,cape,wind_gusts_10m,precipitation_probability,weather_code,visibility&past_days=1&timezone=auto`);
-        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&past_days=7&timezone=auto`);
+        const marineUrl = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${latF}&longitude=${lonF}&daily=wave_height_max&hourly=sea_level_height_msl,wave_height,wave_period,wave_direction,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&past_days=7&timezone=auto`);
 
         const [weather, marine] = await Promise.all([
             queuedFetch(weatherUrl, 12000),
