@@ -92,6 +92,20 @@ function planTipi(sub, user) {
     return null;
 }
 
+/**
+ * Kaç kez yenilendi? 0 = ilk satın alma dönemi, null = bilinmiyor.
+ * Kaynak: sunucunun yazdığı `yenileme` alanı; yoksa Google sipariş numarasından
+ * (server.js yenilemeSayisi ile AYNI kural: "GPA.x" → 0, "GPA.x..0" → 1, "..1" → 2).
+ * İkisi de yoksa TAHMİN EDİLMEZ — eski kayıtlar bu alanları taşımıyor olabilir.
+ */
+function yenilemeSayisi(sub) {
+    if (sub && typeof sub.yenileme === 'number') return sub.yenileme;
+    const o = sub && sub.latestOrderId;
+    if (typeof o !== 'string' || !o) return null;
+    const m = o.match(/\.\.(\d+)$/);
+    return m ? parseInt(m[1], 10) + 1 : 0;
+}
+
 (async () => {
     console.log('\n═══════════════════════════════════════════════════════════');
     console.log('  ABONE SAYIMI          ' + new Date(NOW).toISOString().slice(0, 16).replace('T', ' '));
@@ -143,6 +157,7 @@ function planTipi(sub, user) {
                 email:   (sub && sub.email) || null,
                 baslama: sub ? sub.startedAt : null,
                 bitis:   (sub && sub.expiresAt) || (user && user.proExpiresAt) || null,
+                yenileme: yenilemeSayisi(sub),
                 aDal, bDal, bSuresiz
             };
             (tip === 'yearly' ? aktif.yearly : tip === 'monthly' ? aktif.monthly : aktif.bilinmiyor)
@@ -154,7 +169,8 @@ function planTipi(sub, user) {
         } else if (sub && sub.expiresAt) {
             dolmus.push({
                 uid, tip: planTipi(sub, user), email: sub.email || null,
-                bitis: sub.expiresAt, durum: sub.status || '—'
+                bitis: sub.expiresAt, durum: sub.status || '—',
+                yenileme: yenilemeSayisi(sub)
             });
         }
     }
@@ -180,6 +196,40 @@ function planTipi(sub, user) {
         const yOran = Math.round(100 * aktif.yearly.length / topAktif);
         console.log(`  Yıllık oranı: %${yOran}  ·  Aylık oranı: %${100 - yOran}\n`);
     }
+
+    // ── 1b) KIRILIM — ilk dönem / yenileyen / biten ───────────────────────
+    // [2026-10-08] Sahip istedi: "yıllık, aylık devam eden, aylık yenileyen,
+    // biten" ayrımı. stats/pro_count bunu veremiyor (kümülatif + geç doğrulanan
+    // yenilemeyi yeni abone sayıyor). Burada kayıtların kendisinden çıkarılıyor.
+    //
+    // ⚠️ "BİTTİ" KESİN DEĞİL: sunucu yenilemeyi ancak kullanıcı uygulamayı
+    // açınca Google'a soruyor. Son 7 günde bitmiş görünen aylık abone büyük
+    // ihtimalle yenilemiş ama henüz uygulamayı açmamış olabilir → ayrı satır.
+    const ilkDonem   = arr => arr.filter(k => k.yenileme === 0).length;
+    const yenilemis  = arr => arr.filter(k => typeof k.yenileme === 'number' && k.yenileme >= 1).length;
+    const yenBilinmz = arr => arr.filter(k => k.yenileme === null || k.yenileme === undefined).length;
+    const dolY = dolmus.filter(k => k.tip === 'yearly');
+    const dolA = dolmus.filter(k => k.tip !== 'yearly');
+    const dolAYeni  = dolA.filter(k => typeof k.bitis === 'number' && k.bitis > NOW - 7 * GUN);
+    const dolAEski  = dolA.length - dolAYeni.length;
+
+    console.log('┌─ KIRILIM ' + '─'.repeat(IC - 10) + '┐');
+    satirKutu('  YILLIK aktif                         ' + sayi(aktif.yearly.length));
+    satirKutu('  AYLIK aktif — ilk ayında             ' + sayi(ilkDonem(aktif.monthly)));
+    satirKutu('  AYLIK aktif — en az 1 kez yenilemiş  ' + sayi(yenilemis(aktif.monthly)));
+    if (yenBilinmz(aktif.monthly)) {
+        satirKutu('  AYLIK aktif — yenileme bilinmiyor    ' + sayi(yenBilinmz(aktif.monthly)) + '  eski kayıt');
+    }
+    console.log('├' + '─'.repeat(IC) + '┤');
+    satirKutu('  BİTEN — aylık, son 7 gün (bkz. not)  ' + sayi(dolAYeni.length));
+    satirKutu('  BİTEN — aylık, 7 günden eski         ' + sayi(dolAEski));
+    satirKutu('  BİTEN — yıllık                       ' + sayi(dolY.length));
+    console.log('├' + '─'.repeat(IC) + '┤');
+    satirKutu('  HİÇ ABONE OLMUŞ KİŞİ (tekil)         ' + sayi(topAktif + dolmus.length));
+    console.log('└' + '─'.repeat(IC) + '┘');
+    console.log('  "Son 7 günde biten" aylıklar kesin kayıp değil: yenileme ancak');
+    console.log('  kullanıcı uygulamayı açınca görünür. Kesin cevap: Play Console →');
+    console.log('  Sipariş yönetimi (sipariş no. sonu ..0/..1 = yenileme).\n');
 
     // ── 2) ZAMAN KIRILIMI ─────────────────────────────────────────────────
     const yeni = (gun) => [...aktif.yearly, ...aktif.monthly, ...aktif.bilinmiyor]
@@ -238,6 +288,7 @@ function planTipi(sub, user) {
                 console.log('  ' + kisaUid(k.uid) + '  ' + dal +
                     '  başlangıç ' + tarih(k.baslama) +
                     '  bitiş ' + (k.bSuresiz ? 'SÜRESİZ   ' : tarih(k.bitis)) +
+                    '  ' + (k.yenileme === 0 ? 'ilk dönem'.padEnd(11) : typeof k.yenileme === 'number' ? (k.yenileme + '. yenileme').padEnd(11) : '?'.padEnd(11)) +
                     '  ' + (k.email || '—'));
             });
             console.log();
@@ -254,6 +305,7 @@ function planTipi(sub, user) {
                 '  ' + (k.tip || 'bilinmiyor').padEnd(10) +
                 '  bitti ' + tarih(k.bitis) +
                 '  durum=' + k.durum +
+                '  ' + (typeof k.yenileme === 'number' ? (k.yenileme === 0 ? 'hiç yenilemedi' : k.yenileme + ' kez yeniledi') : '') +
                 '  ' + (k.email || '—'));
         });
         console.log();
