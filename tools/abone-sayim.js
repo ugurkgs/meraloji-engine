@@ -79,6 +79,28 @@ function suresiGecerli(ms) {
     return ms > NOW;
 }
 
+/**
+ * Kaç kez yenilendi? 0 = ilk satın alma dönemi, null = bilinmiyor.
+ * Kaynak: sunucunun yazdığı `yenileme` alanı; yoksa Google sipariş numarasından
+ * (server.js yenilemeSayisi ile AYNI kural: "GPA.x" → 0, "GPA.x..0" → 1, "..1" → 2).
+ * İkisi de yoksa TAHMİN EDİLMEZ — eski kayıtlar bu alanları taşımıyor olabilir.
+ */
+function yenilemeSayisi(sub, yillik) {
+    if (sub && typeof sub.yenileme === 'number') return sub.yenileme;
+    const o = sub && sub.latestOrderId;
+    if (typeof o === 'string' && o) {
+        const m = o.match(/\.\.(\d+)$/);
+        return m ? parseInt(m[1], 10) + 1 : 0;
+    }
+    // Sipariş bilgisi yok (eski kayıt): başlangıç→bitiş süresinden. server.js
+    // _aboneYenileme ile AYNI kural — stats/abone_ozet ile aynı sayıyı versin.
+    if (sub && typeof sub.startedAt === 'number' && typeof sub.expiresAt === 'number' && sub.expiresAt > sub.startedAt) {
+        const donem = (yillik ? 365.25 : 30.44) * GUN;
+        return Math.max(0, Math.round((sub.expiresAt - sub.startedAt) / donem) - 1);
+    }
+    return null;
+}
+
 /** Plan tipini belirle: 'yearly' | 'monthly' | null (bilinmiyor). */
 function planTipi(sub, user) {
     if (sub && typeof sub.isYearly === 'boolean') return sub.isYearly ? 'yearly' : 'monthly';
@@ -90,20 +112,6 @@ function planTipi(sub, user) {
         }
     }
     return null;
-}
-
-/**
- * Kaç kez yenilendi? 0 = ilk satın alma dönemi, null = bilinmiyor.
- * Kaynak: sunucunun yazdığı `yenileme` alanı; yoksa Google sipariş numarasından
- * (server.js yenilemeSayisi ile AYNI kural: "GPA.x" → 0, "GPA.x..0" → 1, "..1" → 2).
- * İkisi de yoksa TAHMİN EDİLMEZ — eski kayıtlar bu alanları taşımıyor olabilir.
- */
-function yenilemeSayisi(sub) {
-    if (sub && typeof sub.yenileme === 'number') return sub.yenileme;
-    const o = sub && sub.latestOrderId;
-    if (typeof o !== 'string' || !o) return null;
-    const m = o.match(/\.\.(\d+)$/);
-    return m ? parseInt(m[1], 10) + 1 : 0;
 }
 
 (async () => {
@@ -157,7 +165,7 @@ function yenilemeSayisi(sub) {
                 email:   (sub && sub.email) || null,
                 baslama: sub ? sub.startedAt : null,
                 bitis:   (sub && sub.expiresAt) || (user && user.proExpiresAt) || null,
-                yenileme: yenilemeSayisi(sub),
+                yenileme: yenilemeSayisi(sub, tip === 'yearly'),
                 aDal, bDal, bSuresiz
             };
             (tip === 'yearly' ? aktif.yearly : tip === 'monthly' ? aktif.monthly : aktif.bilinmiyor)
@@ -170,7 +178,7 @@ function yenilemeSayisi(sub) {
             dolmus.push({
                 uid, tip: planTipi(sub, user), email: sub.email || null,
                 bitis: sub.expiresAt, durum: sub.status || '—',
-                yenileme: yenilemeSayisi(sub)
+                yenileme: yenilemeSayisi(sub, planTipi(sub, user) === 'yearly')
             });
         }
     }

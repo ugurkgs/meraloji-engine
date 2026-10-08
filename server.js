@@ -10011,6 +10011,107 @@ function yenilemeSayisi(orderId) {
     return m ? parseInt(m[1], 10) + 1 : 0;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ABONE ÖZETİ — stats/abone_ozet   [2026-10-08]
+// ═══════════════════════════════════════════════════════════════════════════
+// Sahip Firestore'da "yıllık / aylık ilk ayında / aylık yenilemiş / biten"
+// kırılımını görmek istedi. stats/pro_count bunu veremiyor: kümülatif ve
+// geç doğrulanan yenilemeyi de "yeni abone" sayıyor (8 Eki: berkeguven06'nın
+// 1. yenilemesi sayacı 54→55 yaptı — isNewPro = status !== 'active').
+//
+// Bu doküman SAYAÇ DEĞİL, ANLIK FOTOĞRAF: her turda koleksiyonlar baştan
+// sayılır, üzerine yazılır. Yanlış bir artış birikemez. tools/abone-sayim.js
+// ile AYNI kurallar (aktiflik = subscriptions(A) ∪ users.isPro(B)).
+// Yalnız sayı yazılır; e-posta/uid YOK. stats kuralı istemciye kapalı.
+//
+// ⚠️ "Biten aylık, son 7 gün" kesin kayıp değil: sunucu yenilemeyi ancak
+// kullanıcı uygulamayı açınca Google'a soruyor.
+//
+// Ne zaman: açılıştan 90 sn sonra, sonra 6 saatte bir; ayrıca yeni PRO
+// doğrulandığında 60 sn içinde (birleştirilmiş tek tur).
+// Maliyet: subscriptions tamamı + users'ta yalnız isPro==true olanlar.
+function _aboneYenileme(sub, yillik) {
+    if (!sub) return null;
+    if (typeof sub.yenileme === 'number') return sub.yenileme;
+    if (typeof sub.latestOrderId === 'string' && sub.latestOrderId) return yenilemeSayisi(sub.latestOrderId);
+    // Sipariş bilgisi olmayan eski kayıt: başlangıç→bitiş süresinden (startedAt
+    // 4 Ağu'dan beri korunuyor, bitiş Google'ın verdiği). Yoksa bilinmiyor.
+    if (typeof sub.startedAt === 'number' && typeof sub.expiresAt === 'number' && sub.expiresAt > sub.startedAt) {
+        const donem = yillik ? 365.25 * 86400000 : 30.44 * 86400000;
+        return Math.max(0, Math.round((sub.expiresAt - sub.startedAt) / donem) - 1);
+    }
+    return null;
+}
+
+async function aboneOzetiYaz() {
+    if (!db) return;
+    const simdi = Date.now(), GUN = 86400000;
+    const [subSnap, userSnap] = await Promise.all([
+        db.collection('subscriptions').get(),
+        db.collection('users').where('isPro', '==', true).select('isPro', 'proExpiresAt', 'proPlan').get()
+    ]);
+    const subs = new Map(), users = new Map();
+    subSnap.forEach(d => subs.set(d.id, d.data()));
+    userSnap.forEach(d => users.set(d.id, d.data()));
+
+    const planTipi = (sub, user) => {
+        if (sub && typeof sub.isYearly === 'boolean') return sub.isYearly ? 'yearly' : 'monthly';
+        for (const k of [sub && sub.subscriptionId, user && user.proPlan]) {
+            if (typeof k === 'string' && k) {
+                if (k.includes('yearly')) return 'yearly';
+                if (k.includes('monthly')) return 'monthly';
+            }
+        }
+        return null;
+    };
+    const o = {
+        yillikAktif: 0, aylikIlkAyinda: 0, aylikYenilemis: 0, aylikYenilemeBilinmiyor: 0,
+        planBilinmiyorAktif: 0, toplamAktif: 0,
+        bitenAylikSon7Gun: 0, bitenAylikEski: 0, bitenYillik: 0, bitenPlanBilinmiyor: 0,
+        hicAboneOlmus: 0
+    };
+    for (const uid of new Set([...subs.keys(), ...users.keys()])) {
+        const sub = subs.get(uid) || null, user = users.get(uid) || null;
+        const aDal = !!(sub && sub.status === 'active' && typeof sub.expiresAt === 'number' && sub.expiresAt > simdi);
+        const bDal = !!(user && user.isPro === true &&
+            (user.proExpiresAt === undefined || user.proExpiresAt === null ||
+             (typeof user.proExpiresAt === 'number' && user.proExpiresAt > simdi)));
+        const tip = planTipi(sub, user);
+        if (aDal || bDal) {
+            o.toplamAktif++;
+            if (tip === 'yearly') o.yillikAktif++;
+            else if (tip === 'monthly') {
+                const y = _aboneYenileme(sub, false);
+                if (y === null) o.aylikYenilemeBilinmiyor++;
+                else if (y === 0) o.aylikIlkAyinda++;
+                else o.aylikYenilemis++;
+            } else o.planBilinmiyorAktif++;
+        } else if (sub && sub.expiresAt) {
+            if (tip === 'yearly') o.bitenYillik++;
+            else if (tip === 'monthly') {
+                if (typeof sub.expiresAt === 'number' && sub.expiresAt > simdi - 7 * GUN) o.bitenAylikSon7Gun++;
+                else o.bitenAylikEski++;
+            } else o.bitenPlanBilinmiyor++;
+        }
+    }
+    o.hicAboneOlmus = o.toplamAktif + o.bitenAylikSon7Gun + o.bitenAylikEski + o.bitenYillik + o.bitenPlanBilinmiyor;
+    o.guncellendi = admin.firestore.Timestamp.fromMillis(simdi);
+    o.not = 'Anlık fotoğraf, 6 saatte bir baştan sayılır. "bitenAylikSon7Gun" kesin kayıp değil: yenileme kullanıcı uygulamayı açınca görünür.';
+    await db.collection('stats').doc('abone_ozet').set(o);
+    console.log(`[ABONE-OZET] ✅ aktif ${o.toplamAktif} (yıllık ${o.yillikAktif} · aylık ilk ay ${o.aylikIlkAyinda} · aylık yenilemiş ${o.aylikYenilemis}) · biten ${o.hicAboneOlmus - o.toplamAktif}`);
+}
+let _aboneOzetZamanlayici = null;
+function aboneOzetiTazele(gecikmeMs = 60_000) {
+    if (_aboneOzetZamanlayici) return;   // zaten sırada — tek tura birleştir
+    _aboneOzetZamanlayici = setTimeout(() => {
+        _aboneOzetZamanlayici = null;
+        aboneOzetiYaz().catch(e => console.log('[ABONE-OZET] ⚠️', e.message));
+    }, gecikmeMs);
+    if (_aboneOzetZamanlayici.unref) _aboneOzetZamanlayici.unref();
+}
+aboneOzetiTazele(90_000);
+setInterval(() => aboneOzetiTazele(0), 6 * 60 * 60 * 1000).unref();
+
 app.post('/api/verify-subscription', async (req, res) => {
     const lang = getLang(req);
     if (!req.user) return res.status(401).json({ error: i18n(lang).errors.authRequired });
@@ -10260,6 +10361,7 @@ app.post('/api/verify-subscription', async (req, res) => {
                     count: admin.firestore.FieldValue.increment(1),
                     [isYearly ? 'yearlyCount' : 'monthlyCount']: admin.firestore.FieldValue.increment(1)
                 }, { merge: true });
+                aboneOzetiTazele();   // stats/abone_ozet 60 sn içinde güncellensin
             }
         }
         // Cache'i temizle — bir sonraki istekte taze veri çekilsin
