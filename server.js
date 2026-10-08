@@ -1601,7 +1601,11 @@ const cache = new NodeCache({ stdTTL: 10800, checkperiod: 600 }); // 3 saat — 
 // tutuldu), species.js'te 4 türün `activity`si ve sarıkulak/ceran/mavraki'nin
 // `seasons` değerleri (29 Ağu, İzmir av takvimi). Üçü de calculateFishScore'u
 // besliyor, yani kuralın tam kapsamında.
-const ENGINE_VERSION = '2026-09-01';
+// [2026-10-09] 1. aşama (12 uzman denetimi): forecast'a acclimTemp, saatlik döngüde
+// hamle/yön/görüş/yağış olasılığı/dalga yönü/gelgit/basınç/solunar/ay ışığı saatlik +
+// füzyonlu SST; günlük dalga doğru günden. Ayrıca 24 Eyl KAYALIK ×0,70, 26 Eyl pelajik
+// rampa, 6 Eki kalamar sert kapısı damgasız canlıya çıkmıştı — bu tarih onları da kapsar.
+const ENGINE_VERSION = '2026-10-09';
 
 // Bathymetry sonuçlarını 24 saat cache'le — aynı bölgede tekrar taramada API çağrısı yok
 const bathyCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
@@ -4897,6 +4901,61 @@ function getHourWeight(hour, activityWindows, fishActivity) {
 }
 
 // Günlük ağırlıklı ortalama skor hesapla
+// ═══════════════════════════════════════════════════════════════════════════
+// SAATLİK BAĞLAM  [2026-10-09 — motor denetimi, 12 uzman]
+// ═══════════════════════════════════════════════════════════════════════════
+// Günlük döngü yalnız sıcaklık/dalga/rüzgâr/yağış/bulut/UV/periyot/akıntıyı saatlik
+// alıyordu; hamle, rüzgâr yönü, görüş, yağış olasılığı, dalga yönü, rüzgâr dalgası,
+// swell periyodu, gelgit, basınç trendi, solunar ve ay ışığı ANALİZ SAATİNİN değeriyle
+// 24 saate kopyalanıyordu → günlük skor kullanıcının tıkladığı saate bağlıydı
+// (levrek ±4, kefal ±5) ve planlayıcı solunar saatini hiç gösteremiyordu.
+// Veri zaten çekiliyor; burada saat başına okunur. Saat başına BİR KEZ hesaplanır
+// (türler arasında paylaşılır) — weather nesnesine bağlı WeakMap, istek bitince düşer.
+// Değer yoksa eski davranış: baseParams'taki değer.
+const _saatBaglamOnbellek = new WeakMap();
+function saatBaglami(weather, marine, wIdx, mIdx, baseParams) {
+    let harita = _saatBaglamOnbellek.get(weather);
+    if (!harita) { harita = new Map(); _saatBaglamOnbellek.set(weather, harita); }
+    const anahtar = wIdx + '|' + mIdx + '|' + baseParams.lat + '|' + baseParams.lon;
+    const onceki = harita.get(anahtar);
+    if (onceki) return onceki;
+
+    const wh = (weather && weather.hourly) || {};
+    const mh = (marine && marine.hourly) || {};
+    const lat = Number(baseParams.lat), lon = Number(baseParams.lon);
+    const ofs = typeof weather.utc_offset_seconds === 'number' ? weather.utc_offset_seconds
+        : (baseParams.utcOffsetSeconds || 0);
+    const t = wh.time && wh.time[wIdx];
+    const tarih = (typeof t === 'string' && isFinite(lat) && isFinite(lon))
+        ? new Date(Date.parse(t + 'Z') - ofs * 1000) : null;
+    const tarihGecerli = tarih && !isNaN(tarih.getTime());
+
+    let pressureTrend = baseParams.pressureTrend;
+    const ps = wh.surface_pressure;
+    if (Array.isArray(ps) && wIdx >= 1) {
+        const pencere = ps.slice(Math.max(0, wIdx - 24), wIdx + 1);
+        if (pencere.filter(v => typeof v === 'number').length >= 2) pressureTrend = calculatePressureTrend(pencere);
+    }
+    const gelgit = gelgitAkisi(marine, mIdx);
+    const b = {
+        windGust:       safeNum(wh.wind_gusts_10m?.[wIdx], baseParams.windGust),
+        windDir:        safeNum(wh.wind_direction_10m?.[wIdx], baseParams.windDir),
+        visibility:     safeNum(wh.visibility?.[wIdx], baseParams.visibility),
+        precipProb:     safeNum(wh.precipitation_probability?.[wIdx], baseParams.precipProb),
+        waveDirection:  safeNum(mh.wave_direction?.[mIdx], baseParams.waveDirection),
+        windWaveHeight: safeNum(mh.wind_wave_height?.[mIdx], baseParams.windWaveHeight),
+        swellPeriod:    safeNum(mh.swell_wave_period?.[mIdx], baseParams.swellPeriod),
+        tideFlow:       gelgit ?? baseParams.tideFlow,
+        pressureTrend,
+        solunar:        tarihGecerli ? getSolunarWindow(tarih, lat, lon) : baseParams.solunar,
+        moonlightIntensity: tarihGecerli
+            ? calculateMoonlightIntensity(tarih, lat, lon, safeNum(wh.cloud_cover?.[wIdx], 50))
+            : baseParams.moonlightIntensity
+    };
+    harita.set(anahtar, b);
+    return b;
+}
+
 function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, activityWindows, hourlyStartIdx, marineHourlyStartIdx, lang = 'tr', saatlikDokum = null) {
     // marineHourlyStartIdx yoksa hourlyStartIdx'i kullan (geriye dönük uyum: fish-search, scan)
     const mStartIdx = marineHourlyStartIdx !== undefined ? marineHourlyStartIdx : hourlyStartIdx;
@@ -4909,13 +4968,21 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
     // SunCalc'ı döngü dışında bir kez hesapla (performans)
     const sunTimes = SunCalc.getTimes(baseParams.targetDate, baseParams.lat, baseParams.lon);
 
+    // [2026-10-09] Uydu füzyonu + sağlama (safeWaterTemp) baseParams.tempWater'a uygulanıyor,
+    // saatlik döngü ise HAM OM SST okuyordu → füzyon günlük skora hiç girmiyordu. Analiz
+    // saatindeki fark (tempWater − ham) saatlik ham değerlere ofset olarak taşınır.
+    const _hamSimdi = marine.hourly?.sea_surface_temperature?.[mStartIdx + (Number(baseParams.hour) || 0)];
+    const _sstSapma = (typeof _hamSimdi === 'number' && typeof baseParams.tempWater === 'number')
+        ? baseParams.tempWater - _hamSimdi : 0;
+
     // 24 saat için hesapla
     for (let h = 0; h < 24; h++) {
         const wIdx = hourlyStartIdx + h;    // weather indeksi
         const mIdx = mStartIdx + h;         // marine indeksi
 
         // Bu saat için verileri al — marine ve weather ayrı offset'lerle
-        const hourlyTemp = safeNum(marine.hourly?.sea_surface_temperature?.[mIdx], baseParams.tempWater);
+        const _hamSst = marine.hourly?.sea_surface_temperature?.[mIdx];
+        const hourlyTemp = (typeof _hamSst === 'number') ? _hamSst + _sstSapma : baseParams.tempWater;
         const hourlyWave = safeNum(marine.hourly?.wave_height?.[mIdx], baseParams.wave);
         const hourlyWind = safeNum(weather.hourly?.wind_speed_10m?.[wIdx], baseParams.windSpeed);
         const hourlyRain = safeNum(weather.hourly?.precipitation?.[wIdx], baseParams.rain);
@@ -4932,6 +4999,7 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
         // Parametreleri güncelle
         const hourParams = {
             ...baseParams,
+            ...saatBaglami(weather, marine, wIdx, mIdx, baseParams),   // [2026-10-09] saatlik bağlam
             tempWater: hourlyTemp,
             wave: hourlyWave,
             windSpeed: hourlyWind,
@@ -8107,7 +8175,14 @@ app.get('/api/forecast', async (req, res) => {
                 tempWater = 4.5; // Grönland/Arktik için maksimum gerçekçi yaz sonu sıcaklığı
             }
 
-            const waveRaw = isLand ? 0 : safeNum(marine.daily?.wave_height_max?.[dailyIdx]);
+            // [2026-10-09] HATA DÜZELTMESİ: marine isteği past_days=7 → marine.daily[0] 7 gün
+            // önce; dailyIdx (= i+1) hava verisine göre (past_days=1) hesaplanmış. Eskiden
+            // gösterilen günlük dalga 6 GÜN ÖNCESİNİNdi (canlıda forecast[6].wave = bugünün azamisi).
+            // Günün azamisi artık o günün saatlik diziden (zaten kapalı-su tavanıyla kırpılmış).
+            const _gunDalgasi = isLand ? [] : (marine.hourly?.wave_height || [])
+                .slice(marineHourlyStartIdx, marineHourlyStartIdx + 24).filter(v => typeof v === 'number');
+            const waveRaw = isLand ? 0 : (_gunDalgasi.length ? Math.max(..._gunDalgasi)
+                : safeNum(marine.daily?.wave_height_max?.[dailyIdx]));
             const tempAir = safeNum(weather.hourly?.temperature_2m?.[hourlyIdx]);
             // [madde 3] tempAir ANALİZ SAATİNİN sıcaklığı — öyle kalıyor, çünkü o günün
             // skoru bu saate göre hesaplanıyor ve alanı değiştirmek skoru kaydırırdı.
@@ -8207,7 +8282,11 @@ app.get('/api/forecast', async (req, res) => {
                     waveDirection, windWaveHeight, swellPeriod,
                     tideFlow, moonAltitude, oxygen, upwelling,
                     shoreBearing: shoreBearingInfo,  // [YENİ] levrek kıyı-dik dalga bonusu için
-                    utcOffsetSeconds                 // K2: saatlik timeMode konum-yerel hesaplansın
+                    utcOffsetSeconds,                // K2: saatlik timeMode konum-yerel hesaplansın
+                    // [2026-10-09] Termal uyum. instant (8528), fish-search ve scan veriyordu,
+                    // forecast VERMİYORDU → 7 günlük liste + saatlik planlayıcı uyumsuz puanlanıyor,
+                    // "Şimdi" ile "Bugün" listesi sistematik ayrışıyordu (çipura 27 °C: 42,2 vs 51,7).
+                    acclimTemp: tempShock.acclimTemp
                 };
 
                 const resultsMap = new Map();
