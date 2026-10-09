@@ -6635,15 +6635,17 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
      */
     if (visibility < 20000) {
         const isVisualPredator = fish.huntingMode === 'visual';
-        const visMod = isDeepBottom ? 0.2 : (isVisualPredator ? 1.5 : (fish.clarityPref === 'CLEAR' ? 1.0 : 0.5));
 
+        // [2026-10-09] SİS ≠ SU BULANIKLIĞI (motor denetimi, uzman 04/11, ACIK-ISLER 4.25).
+        // Eskiden atmosferik görüş, sudaki bulanıklık (NTU) gibi cezalanıyordu: sıradan
+        // pus (1-5 km) görsel avcıda ham −6 → tetikleyici katmanının %86'sı (levrek
+        // 6000 m 55,1 → 4000 m 46,1). Hava görüşü sudaki görme mesafesini ölçmez; pus
+        // yalnız IŞIĞI biraz azaltır (bulut gibi). Artık: pus cezası YOK; yoğun siste
+        // (< 1 km) yalnız GÜNDÜZ küçük ışık etkisi (bulut katmanıyla aynı ölçek).
+        // "Yoğun sis" etiketi bilgi/güvenlik için kalıyor.
         if (visibility < 1000) {
-            // [DÜZELTİLDİ: V2.2] — Baz ceza 15'ten 8'e düşürüldü (1.5x ile 12 puan - Sınırı taşırmaz)
-            s_trigger -= (isVisualPredator ? 8 : 4) * visMod;
-            if (visMod > 0) activeTriggers.push(i18n(lang).triggers.denseFog);
-        } else if (visibility < 5000) {
-            s_trigger -= (isVisualPredator ? 4 : 2) * visMod;
-            if (visMod > 0) activeTriggers.push(i18n(lang).triggers.reducedVis);
+            if (timeMode === 'DAY' && !isDeepBottom) s_trigger -= isVisualPredator ? 1.5 : 0.5;
+            activeTriggers.push(i18n(lang).triggers.denseFog);
         }
         scoreDetails.visibility = { value: visibility, km: parseFloat((visibility / 1000).toFixed(1)), isVisualPredator };
     }
