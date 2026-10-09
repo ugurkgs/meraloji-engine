@@ -6963,13 +6963,30 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     if (!isBoat && depthAvg !== undefined && depthAvg !== null) {
         const strictOffshoreCategories = ['PELAJIK', 'AVCI', 'DIP_DERIN', 'SÜRÜ'];
         if (strictOffshoreCategories.includes(fish.category)) {
-            const mToUse = (fish.isGlobal && params.lat < 0) ? (targetDate.getMonth() + 6) % 12 : targetDate.getMonth();
-            const comesToShore = fish.shoreMonths && fish.shoreMonths.includes(mToUse);
-            if (!comesToShore && depthAvg < 25) {
-                const shorePenalty = depthAvg < 10 ? 0.25 : 0.60;
+            // [2026-10-09] SEZON GEÇİŞİ KADEMELİ. Eskiden ay listesi aç-kapa çalışıyordu:
+            // palamut kıyıda 31 Ağu 15,8 → 1 Eyl 67,3 (+51), 30 Kas 72,2 → 1 Ara 15,8 (−56);
+            // 2.844 tür-bölge-ay sınırının 84'ünde 20+ puanlık sıçrama, en büyükleri hep bu
+            // kural (çinekop, lüfer, barakuda, istavrit). Göç/kıyıya geliş haftalara yayılır.
+            // Artık günün ±15 gün çevresindeki 31 günün kaçı "kıyı ayı" ise ceza o oranda
+            // kalkar: sezon ortası ve sezon dışı ortası ESKİSİYLE AYNI, yalnız sınır ~1 aya
+            // yayılır. Boşluklu listeler (kolyoz) ve yıl dönümü (hamsi Kas→Şub) kendiliğinden.
+            let kiyiPayi = 0;
+            if (Array.isArray(fish.shoreMonths) && fish.shoreMonths.length && targetDate instanceof Date) {
+                const guneyde = fish.isGlobal && params.lat < 0;
+                const t0 = targetDate.getTime();
+                let say = 0;
+                for (let o = -15; o <= 15; o++) {
+                    const ay = new Date(t0 + o * 86400000).getMonth();
+                    if (fish.shoreMonths.includes(guneyde ? (ay + 6) % 12 : ay)) say++;
+                }
+                kiyiPayi = say / 31;
+            }
+            if (kiyiPayi < 1 && depthAvg < 25) {
+                const tamCeza = depthAvg < 10 ? 0.25 : 0.60;
+                const shorePenalty = 1 - (1 - tamCeza) * (1 - kiyiPayi);
                 rawScore *= shorePenalty;
                 penalties.push(i18n(lang).penalties.hardToReach);
-                scoreDetails.shore = { multiplier: shorePenalty, msg: i18n(lang).penalties.openWaterType, depthAvg };
+                scoreDetails.shore = { multiplier: parseFloat(shorePenalty.toFixed(2)), msg: i18n(lang).penalties.openWaterType, depthAvg };
             }
         }
     }
