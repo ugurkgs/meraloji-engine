@@ -5902,8 +5902,21 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         monthToUse = (currentMonth + 6) % 12;
     }
 
+    // [2026-10-09] MEVSİM GEÇİŞİ KADEMELİ. Değer eskiden ayın/mevsimin 1'inde basamakla
+    // değişiyordu (kalamar 1 Eyl +12,7, lidaki 1 Mar +13). Artık günün ±15 gün çevresindeki
+    // 31 günün ortalaması: ay/mevsim ORTASI eskisiyle aynı, sınır ~1 aya yayılır. Kıyı
+    // sezonu rampasıyla (3a19a5e) aynı yöntem. Göç/üreme bonusu da aynı pencereyle.
+    const _pencereAylari = [];
+    {
+        const _t0 = targetDate.getTime();
+        for (let o = -15; o <= 15; o++) _pencereAylari.push(new Date(_t0 + o * 86400000).getMonth());
+    }
+    const _ayOrtalamasi = (fn) => _pencereAylari.reduce((t, ay) => t + fn(ay), 0) / _pencereAylari.length;
+    const _ayPayi = (aylar) => _pencereAylari.filter(ay => aylar.includes(ay)).length / _pencereAylari.length;
+
     if (fish.monthlyActivity && fish.monthlyActivity.length === 12) {
-        seasonalEff = fish.monthlyActivity[monthToUse];
+        const _guney = fish.isGlobal && params.lat < 0;
+        seasonalEff = _ayOrtalamasi(ay => fish.monthlyActivity[_guney ? (ay + 6) % 12 : ay]);
     } else {
         // [DÜZELTME 2026-08-03] `|| 0.3` yerine `?? 0.3`. Eskisi MEŞRU SIFIRI eziyordu:
         // seasons.summer === 0 ("bu türü yazın hiç arama") yazan bir kayıt 0.3'e yükseliyor,
@@ -5911,20 +5924,21 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
         // alan gerçekten yoksa/null ise devreye girer. Şu an canlı bir türü etkilemiyor
         // (sıfır mevsimli orfoz/mersin `protected` olduğu için zaten 0 döner, lahoz'un ise
         // monthlyActivity'si var → bu dal hiç çalışmaz), ama tek düzenlemeyle canlanabilirdi.
-        seasonalEff = fish.seasons[season] ?? 0.3;
+        seasonalEff = _ayOrtalamasi(ay => fish.seasons[getSeason(ay, params.lat)] ?? 0.3);
     }
 
     // Göç bonusu — tür + bölge + ay uyumuysa ekle
     if (fish.migrationBonus && fish.migrationBonus[region]) {
         const mb = fish.migrationBonus[region];
-        if (mb.months.includes(currentMonth)) {
+        const _gocPayi = _ayPayi(mb.months);
+        if (_gocPayi > 0) {
             // Opsiyonel sıcaklık tetikleyici (örneğin göç sadece su ısınınca başlar)
             const tempMatch = (mb.tempMin === undefined || tempWater >= mb.tempMin) &&
                 (mb.tempMax === undefined || tempWater <= mb.tempMax);
             if (tempMatch) {
-                seasonalEff = Math.min(1.0, seasonalEff + mb.bonus);
+                seasonalEff = Math.min(1.0, seasonalEff + mb.bonus * _gocPayi);
                 const localizedRegion = getLocalizedRegionName(region, lang);
-                activeTriggers.push(i18n(lang).triggers.migrationSeason(localizedRegion));
+                if (_gocPayi >= 0.5) activeTriggers.push(i18n(lang).triggers.migrationSeason(localizedRegion));
             }
         }
     }
@@ -5932,14 +5946,15 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // Üreme bonusu — tür + bölge + ay uyumuysa ekle
     if (fish.spawningBonus && fish.spawningBonus[region]) {
         const sb = fish.spawningBonus[region];
-        if (sb.months.includes(currentMonth)) {
+        const _uremePayi = _ayPayi(sb.months);
+        if (_uremePayi > 0) {
             // Üreme genellikle çok dar bir sıcaklık bandında gerçekleşir
             const tempMatch = (sb.tempMin === undefined || tempWater >= sb.tempMin) &&
                 (sb.tempMax === undefined || tempWater <= sb.tempMax);
             if (tempMatch) {
-                seasonalEff = Math.min(1.0, seasonalEff + sb.bonus);
+                seasonalEff = Math.min(1.0, seasonalEff + sb.bonus * _uremePayi);
                 const localizedRegion = getLocalizedRegionName(region, lang);
-                activeTriggers.push(i18n(lang).triggers.spawningSeason(localizedRegion));
+                if (_uremePayi >= 0.5) activeTriggers.push(i18n(lang).triggers.spawningSeason(localizedRegion));
             }
         }
     }
