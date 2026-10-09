@@ -3582,8 +3582,16 @@ function calculateClarity(wave, windSpeed, rain, chlorophyll = null) {
 function calculateOxygen(temp, salinity, chlorophyll, timeMode) {
     const s = salinity || 36;
 
-    // 1. O sıcaklık ve tuzluluktaki teorik maksimum çözünürlük (Henry Yasası bazlı)
-    const baseSolubility = (14.6 - (0.45 * temp) + (0.005 * temp * temp)) * (1 - 0.006 * s);
+    // 1. O sıcaklık ve tuzluluktaki doymuş çözünürlük (mg/L) — APHA 4500-O / Benson & Krause.
+    // [2026-10-09] Eski yaklaşık polinom (14,6 − 0,45T + 0,005T²)(1 − 0,006S) sıcak suda
+    // 1,5-2 mg/L DÜŞÜK veriyordu (26 °C/38 PSU: 4,9; doğrusu ~6,5) → yazın Ege/Akdeniz'de
+    // her nokta sahte "düşük oksijen" cezası alıyordu (motor denetimi, uzman 06/10/11).
+    // İstemci simülasyonu (WaveSimulationView.oksijenDoygunlukYuzde) aynı bağıntıyı kullanıyor.
+    const Tk = temp + 273.15;
+    const lnC = -139.34411 + 1.575701e5 / Tk - 6.642308e7 / (Tk * Tk)
+        + 1.243800e10 / (Tk * Tk * Tk) - 8.621949e11 / (Tk * Tk * Tk * Tk)
+        - s * (1.7674e-2 - 10.754 / Tk + 2140.7 / (Tk * Tk));
+    const baseSolubility = Math.exp(lnC);
 
     // 2. Tahmini mg/L (Baz çözünürlük üzerinden fotosentez/respirasyon eklenir)
     let mgL = baseSolubility;
