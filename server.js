@@ -39,6 +39,20 @@ try {
     console.error('[SPECIES] species.js yüklenemedi:', e.message);
 }
 
+// ── AÇILIŞ GÜNLÜĞÜ [2026-10-14] ──────────────────────────────────────────────
+// Açılış satırları tek biçimde: "[AÇILIŞ] ✓ Konu ........ ayrıntı" (⚠ uyarı,
+// ✗ kapalı/hata). Eskiden her modül kendi biçimini kullanıyordu (kimi simgeli,
+// kimi [ETİKET]'li, kutu hizasız ve "v3.0 / 85+ taktik" gibi bayat bilgili),
+// açılışın nerede başlayıp bittiği görünmüyordu. Başlık burada, "HAZIR" kutusu
+// app.listen'da. Çalışma zamanı günlüklerine ([FETCH], [VERIFY]…) DOKUNULMADI.
+const _ACILIS_KONU = 24;
+function acilisLog(durum, konu, ayrinti) {
+    const isaret = durum === 'ok' ? '✓' : (durum === 'uyari' ? '⚠' : '✗');
+    const satir = `[AÇILIŞ] ${isaret} ${(konu + ' ').padEnd(_ACILIS_KONU, '.')} ${ayrinti}`;
+    if (durum === 'ok') console.log(satir); else if (durum === 'uyari') console.warn(satir); else console.error(satir);
+}
+console.log('════════════════════ MERALOJİ SUNUCU AÇILIYOR ════════════════════');
+
 // ── NEHİR AĞZI ETKİSİ — bkz. rivermouth.js ───────────────────────────────────
 // Savunmacı yükleme: dosya eksik/bozuksa sunucu ÇÖKMEZ, yalnızca nehir ağzı
 // düzeltmesi kapanır ve tuzluluk eski bölgesel sabit davranışına döner.
@@ -48,12 +62,12 @@ try {
     const _rm = require('./rivermouth');
     if (typeof _rm.riverInfluence === 'function') {
         riverInfluence = _rm.riverInfluence;
-        console.log(`[RIVER] Nehir ağzı tablosu yüklendi: ${_rm.RIVER_MOUTHS.length} isimli + ${_rm.MINOR_MOUTHS.length} küçük ağız`);
+        acilisLog('ok', 'Nehir ağızları', `${_rm.RIVER_MOUTHS.length} isimli + ${_rm.MINOR_MOUTHS.length} küçük ağız`);
     } else {
-        console.error('[RIVER] rivermouth.js riverInfluence dışa aktarmıyor — düzeltme KAPALI');
+        acilisLog('hata', 'Nehir ağızları', 'rivermouth.js riverInfluence dışa aktarmıyor — düzeltme KAPALI');
     }
 } catch (e) {
-    console.error('[RIVER] rivermouth.js yüklenemedi, nehir ağzı düzeltmesi KAPALI:', e.message);
+    acilisLog('hata', 'Nehir ağızları', 'rivermouth.js yüklenemedi, düzeltme KAPALI: ' + e.message);
 }
 
 // ── KIYI YAPILARI (iskele/mendirek) — bkz. kiyiyapi.js ───────────────────────
@@ -68,9 +82,10 @@ try {
     const _ky = require('./kiyiyapi');
     yakinYapi = _ky.yakinYapi;
     const _m = _ky.kiyiYapiMeta();
-    console.log(`[KIYI-YAPI] ${_m ? _m.adet + ' yapı yüklendi (' + _m.olusturma.slice(0, 10) + ')' : 'veri YOK — kapalı'}`);
+    if (_m) acilisLog('ok', 'Kıyı yapıları', `${_m.adet} iskele/mendirek (veri ${_m.olusturma.slice(0, 10)})`);
+    else acilisLog('uyari', 'Kıyı yapıları', 'veri YOK — kapalı');
 } catch (e) {
-    console.error('[KIYI-YAPI] kiyiyapi.js yüklenemedi, KAPALI:', e.message);
+    acilisLog('hata', 'Kıyı yapıları', 'kiyiyapi.js yüklenemedi, KAPALI: ' + e.message);
 }
 
 // [2026-09-26] PUANLAMAYA BAĞLANDI — TEMKİNLİ. Sahip: "aşırı puanlamayı önleyelim."
@@ -122,8 +137,8 @@ function omKey(url) {
     return url + (url.includes('?') ? '&' : '?') + 'apikey=' + OM_API_KEY;
 }
 
-console.log(`[CONFIG] Open-Meteo: ${OM_PAID ? '💳 ÜCRETLİ (customer-api) — 1M ağırlıklı çağrı/AY' : '🆓 ÜCRETSIZ (api)'}`);
-if (OM_PAID && !OM_API_KEY) console.warn('⚠️  OM_PAID=true ama OM_API_KEY boş! customer-api auth hatası verecektir.');
+acilisLog('ok', 'Open-Meteo', OM_PAID ? 'ÜCRETLİ (customer-api) — 1M ağırlıklı çağrı/ay' : 'ÜCRETSİZ (api)');
+if (OM_PAID && !OM_API_KEY) acilisLog('uyari', 'Open-Meteo', 'OM_PAID=true ama OM_API_KEY boş — customer-api auth hatası verecek');
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SERVER-SIDE i18n — API'den dönen metinler lang parametresine göre değişir
@@ -1253,9 +1268,9 @@ try {
         admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
     }
     db = admin.firestore();
-    console.log('✅ Firebase Admin SDK initialized');
+    acilisLog('ok', 'Firebase', 'Admin SDK hazır');
 } catch (e) {
-    console.warn('⚠️ Firebase Admin SDK not available — auth disabled');
+    acilisLog('uyari', 'Firebase', 'Admin SDK yok — kimlik doğrulama KAPALI');
     admin = null;
     db = null;
 }
@@ -2015,9 +2030,9 @@ let _cityFeatures = [];
 try {
     const geoRaw = fs.readFileSync(path.join(__dirname, 'tr-cities.json'), 'utf8');
     _cityFeatures = JSON.parse(geoRaw).features;
-    console.log(`✅ Offline harita yüklendi — ${_cityFeatures.length} şehir/bölge`);
+    acilisLog('ok', 'Offline harita', `${_cityFeatures.length} şehir/bölge`);
 } catch (e) {
-    console.warn('⚠️  tr-cities.json bulunamadı — offline konum analizi devre dışı:', e.message);
+    acilisLog('uyari', 'Offline harita', 'tr-cities.json yok — offline konum analizi KAPALI: ' + e.message);
 }
 
 // [YENİ] Kıyı açısı hesaplamaları için: sadece KIYI İLLERİNİN poligon köşelerini düz bir
@@ -2034,9 +2049,9 @@ try {
         const rings = g.type === 'Polygon' ? [g.coordinates[0]] : g.coordinates.map(p => p[0]);
         for (const ring of rings) for (const [lon, lat] of ring) _coastlineVertices.push([lat, lon]);
     }
-    if (_coastlineVertices.length > 0) console.log(`✅ Kıyı hattı köşeleri hazır — ${_coastlineVertices.length} nokta (kıyı açısı hesapları için)`);
+    if (_coastlineVertices.length > 0) acilisLog('ok', 'Kıyı hattı', `${_coastlineVertices.length} köşe (kıyı açısı hesapları)`);
 } catch (e) {
-    console.warn('⚠️  Kıyı hattı köşeleri oluşturulamadı:', e.message);
+    acilisLog('uyari', 'Kıyı hattı', 'köşeler oluşturulamadı: ' + e.message);
 }
 
 // Deniz bölgesi poligonlarını RAM'e yükle (sunucu başlangıcında 1 kez)
@@ -2044,9 +2059,9 @@ let _seaRegionFeatures = [];
 try {
     const seaRaw = fs.readFileSync(path.join(__dirname, 'tr-sea-regions.json'), 'utf8');
     _seaRegionFeatures = JSON.parse(seaRaw).features;
-    console.log(`✅ Deniz bölgeleri yüklendi — ${_seaRegionFeatures.length} bölge`);
+    acilisLog('ok', 'Deniz bölgeleri', `${_seaRegionFeatures.length} bölge`);
 } catch (e) {
-    console.warn('⚠️  tr-sea-regions.json bulunamadı — koordinat kutusu yöntemine düşülüyor:', e.message);
+    acilisLog('uyari', 'Deniz bölgeleri', 'tr-sea-regions.json yok — koordinat kutusuna düşülüyor: ' + e.message);
 }
 
 // [YENİ] Kıyı yerleşim noktalarını RAM'e yükle — SADECE GÖRÜNTÜLEME etiketi için
@@ -2058,9 +2073,9 @@ let _coastalLocalityFeatures = [];
 try {
     const locRaw = fs.readFileSync(path.join(__dirname, 'tr-coastal-localities.json'), 'utf8');
     _coastalLocalityFeatures = JSON.parse(locRaw).features;
-    console.log(`✅ Kıyı yerleşim noktaları yüklendi — ${_coastalLocalityFeatures.length} nokta`);
+    acilisLog('ok', 'Kıyı yerleşimleri', `${_coastalLocalityFeatures.length} nokta`);
 } catch (e) {
-    console.warn('⚠️  tr-coastal-localities.json bulunamadı — yerel isim etiketleme devre dışı:', e.message);
+    acilisLog('uyari', 'Kıyı yerleşimleri', 'tr-coastal-localities.json yok — yerel isim etiketi KAPALI: ' + e.message);
 }
 
 // Global bölgeleri (habitatBboxes) RAM'e yükle
@@ -2077,9 +2092,9 @@ function _loadGlobalBboxFeatures() {
                 });
             }
         });
-        console.log(`✅ Global bölgeler yüklendi — ${_globalBboxFeatures.length} bölge`);
+        acilisLog('ok', 'Global bölgeler', `${_globalBboxFeatures.length} bölge`);
     } catch (e) {
-        console.warn('⚠️ Global bölgeler yüklenirken hata oluştu:', e.message);
+        acilisLog('uyari', 'Global bölgeler', 'yüklenemedi: ' + e.message);
     }
 }
 // Hemen dene; dairesel bağımlılık nedeniyle SPECIES_DB null ise bir sonraki tick'te tekrar dene
@@ -2090,7 +2105,7 @@ try {
         process.nextTick(() => _loadGlobalBboxFeatures());
     }
 } catch (e) {
-    console.warn('⚠️ Global bölgeler yüklenirken hata oluştu:', e.message);
+    acilisLog('uyari', 'Global bölgeler', 'yüklenemedi: ' + e.message);
 }
 
 /**
@@ -2137,9 +2152,9 @@ try {
         }
         f._bb = [a, b, c, d];
     }
-    console.log(`✅ Göller yüklendi — ${_lakeFeatures.length} göl/baraj` + (LAKE_ENABLED ? '' : '  (LAKE_ENABLED kapalı — kullanılmıyor)'));
+    acilisLog('ok', 'Göller', `${_lakeFeatures.length} göl/baraj` + (LAKE_ENABLED ? '' : ' (LAKE_ENABLED kapalı — kullanılmıyor)'));
 } catch (e) {
-    console.log('⚠️  tr-lakes.json yüklenemedi:', e.message);
+    acilisLog('uyari', 'Göller', 'tr-lakes.json yüklenemedi: ' + e.message);
 }
 
 // Nokta bir gölün içinde mi? Değilse null.
@@ -2653,7 +2668,7 @@ const TRIAL_SHORT_FROM = (() => {
     // Boş/kurulmamış = özellik KAPALI. Açılış logunda açıkça söyleniyor ki
     // operatör "değişkeni yazdım, tuttu mu?" sorusunu log'dan cevaplayabilsin.
     if (!raw) {
-        console.log('ℹ️  Deneme süresi: ' + GRACE_PERIOD_DAYS
+        acilisLog('ok', 'Deneme süresi', GRACE_PERIOD_DAYS
             + ' gün (TRIAL_SHORT_FROM kurulu değil — kısaltma KAPALI)');
         return null;
     }
@@ -2662,21 +2677,21 @@ const TRIAL_SHORT_FROM = (() => {
     // env'e 7 yazan biri kesimi geçmişe kurar ve HERKESİN denemesini geriye
     // dönük 7'ye düşürürdü. Serbest tarih ayrıştırmasına güvenilmez.
     if (!/^\d{4}-\d{2}-\d{2}([T ].*)?$/.test(raw)) {
-        console.warn('⚠️  TRIAL_SHORT_FROM biçimi YYYY-MM-DD olmalı — yok sayıldı, deneme 14 kalıyor:', raw);
+        acilisLog('uyari', 'Deneme süresi', 'TRIAL_SHORT_FROM biçimi YYYY-MM-DD olmalı — yok sayıldı, 14 gün kalıyor: ' + raw);
         return null;
     }
     const t = Date.parse(raw);
-    if (isNaN(t)) { console.warn('⚠️  TRIAL_SHORT_FROM okunamadı, deneme süresi 14 kalıyor:', raw); return null; }
+    if (isNaN(t)) { acilisLog('uyari', 'Deneme süresi', 'TRIAL_SHORT_FROM okunamadı, 14 gün kalıyor: ' + raw); return null; }
     // Uygulama 2026'da yayında; daha eski bir kesim yazım hatasıdır ve mevcut
     // kullanıcıların denemesini toptan keser. Kabul etme.
     if (t < Date.parse('2026-01-01')) {
-        console.warn('⚠️  TRIAL_SHORT_FROM 2026 öncesi — yazım hatası sayıldı, deneme 14 kalıyor:', raw);
+        acilisLog('uyari', 'Deneme süresi', 'TRIAL_SHORT_FROM 2026 öncesi — yazım hatası sayıldı, 14 gün kalıyor: ' + raw);
         return null;
     }
     const g = new Date(t).toISOString().split('T')[0];
-    console.log('✅ Deneme süresi kesimi: ' + g + ' — bu tarihten SONRA açılan hesaplar '
-        + GRACE_PERIOD_DAYS_NEW + ' gün, önce açılanlar ' + GRACE_PERIOD_DAYS + ' gün alır'
-        + (t > Date.now() ? '  (kesim henüz GELMEDİ, şu an herkes ' + GRACE_PERIOD_DAYS + ' gün alıyor)' : ''));
+    acilisLog('ok', 'Deneme süresi', 'kesim ' + g + ' — sonra açılan hesap '
+        + GRACE_PERIOD_DAYS_NEW + ' gün, önce açılan ' + GRACE_PERIOD_DAYS + ' gün'
+        + (t > Date.now() ? ' (kesim henüz GELMEDİ, şu an herkes ' + GRACE_PERIOD_DAYS + ' gün)' : ''));
     return t;
 })();
 
@@ -2716,9 +2731,10 @@ const COMEBACK_TRIAL_MS = 3 * 24 * 60 * 60 * 1000;   // 72 saat — kullanıcı 
 const COMEBACK_CAMPAIGN_END = Date.parse(process.env.COMEBACK_CAMPAIGN_END || '2026-08-27T00:00:00Z');
 if (Number.isNaN(COMEBACK_CAMPAIGN_END)) {
     // Bozuk env → kampanya KAPALI sayılır (fail-safe: kimseye yeni damga yazılmaz).
-    console.warn('[COMEBACK] ⚠️ COMEBACK_CAMPAIGN_END geçersiz, kampanya kapalı kabul ediliyor.');
+    acilisLog('uyari', 'Geri dönüş kampanyası', 'COMEBACK_CAMPAIGN_END geçersiz — kampanya KAPALI');
 } else {
-    console.log(`[COMEBACK] Kampanya bitişi: ${new Date(COMEBACK_CAMPAIGN_END).toISOString()}`);
+    acilisLog('ok', 'Geri dönüş kampanyası', `bitiş ${new Date(COMEBACK_CAMPAIGN_END).toISOString()}`
+        + (COMEBACK_CAMPAIGN_END < Date.now() ? ' (SÜRESİ DOLMUŞ — yeni damga yok)' : ''));
 }
 
 // ── KAMPANYA KİMLİĞİ [2026-09-03] ────────────────────────────────────────
@@ -2735,9 +2751,9 @@ if (Number.isNaN(COMEBACK_CAMPAIGN_END)) {
 // hak kazanmaz.
 const COMEBACK_CAMPAIGN_ID = String(process.env.COMEBACK_CAMPAIGN_ID || '').trim();
 if (COMEBACK_CAMPAIGN_ID) {
-    console.log(`[COMEBACK] Kampanya kimliği: ${COMEBACK_CAMPAIGN_ID} — başka kampanyanın damgası yeniden hak kazandırır`);
+    acilisLog('ok', 'Geri dönüş kimliği', `${COMEBACK_CAMPAIGN_ID} (başka kampanyanın damgası yeniden hak kazandırır)`);
 } else {
-    console.log('[COMEBACK] Kampanya kimliği YOK — damga tek seferlik (eski davranış)');
+    acilisLog('ok', 'Geri dönüş kimliği', 'YOK — damga tek seferlik (eski davranış)');
 }
 
 // Firebase Auth createdAt cache — her kullanıcı için 24 saat cache'le
@@ -10078,7 +10094,7 @@ async function getPlayAuthClient() {
         if (process.env.GOOGLE_PLAY_KEY_JSON) {
             try {
                 authOpts.credentials = JSON.parse(process.env.GOOGLE_PLAY_KEY_JSON);
-                console.log('[PLAY-AUTH] GOOGLE_PLAY_KEY_JSON kullanılıyor');
+                acilisLog('ok', 'Google Play anahtarı', 'GOOGLE_PLAY_KEY_JSON');
             } catch (parseErr) {
                 console.warn('[PLAY-AUTH] GOOGLE_PLAY_KEY_JSON parse hatası, fallback deneniyor:', parseErr.message);
             }
@@ -10088,7 +10104,7 @@ async function getPlayAuthClient() {
         if (!authOpts.credentials && process.env.FIREBASE_SERVICE_ACCOUNT) {
             try {
                 authOpts.credentials = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-                console.log('[PLAY-AUTH] FIREBASE_SERVICE_ACCOUNT kullanılıyor (fallback)');
+                acilisLog('uyari', 'Google Play anahtarı', 'FIREBASE_SERVICE_ACCOUNT (yedek yol)');
             } catch (parseErr) {
                 console.warn('[PLAY-AUTH] FIREBASE_SERVICE_ACCOUNT parse hatası:', parseErr.message);
             }
@@ -10100,10 +10116,10 @@ async function getPlayAuthClient() {
 
         const auth = new GoogleAuth(authOpts);
         _playAuthClient = await auth.getClient();
-        console.log('✅ Google Play API auth client ready');
+        acilisLog('ok', 'Google Play API', 'doğrulama istemcisi hazır');
         return _playAuthClient;
     } catch (e) {
-        console.error('❌ Google Play auth client init failed:', e.message);
+        acilisLog('hata', 'Google Play API', 'istemci kurulamadı: ' + e.message);
         return null;
     }
 }
@@ -12605,7 +12621,7 @@ async function haricUidleriYukle() {
             // hepsi bulunmayabilir. UID ile verilenler zaten etkilenmiyor.
         }
     }
-    console.log(`[İSTATİSTİK] ${_haricUid.size} hesap sayaç dışı (test/geliştirici)`);
+    acilisLog('ok', 'İstatistik', `${_haricUid.size} hesap sayaç dışı (test/geliştirici)`);
 }
 // Auth hazır olduktan sonra, isteklerden bağımsız. UID ile verilenler bu
 // çağrıyı BEKLEMİYOR — sunucu açılır açılmaz sayaç dışındalar.
@@ -13493,7 +13509,8 @@ if (!GOOGLE_PLAY_VERIFY && process.env.ALLOW_UNVERIFIED_PURCHASES !== 'true') {
     const _mb = b => Math.round(b / 1048576);
     const _v8 = require('v8');
     const _tavan = _mb(_v8.getHeapStatistics().heap_size_limit);
-    console.log(`[BELLEK] V8 yığın tavanı ${_tavan} MB · NODE_OPTIONS=${process.env.NODE_OPTIONS || '(yok)'}`);
+    acilisLog(process.env.NODE_OPTIONS ? 'ok' : 'uyari', 'Bellek', `V8 yığın tavanı ${_tavan} MB · NODE_OPTIONS=${process.env.NODE_OPTIONS || '(yok — 512 MB kapsayıcıda OOM riski)'}`);
+    global.__MERALOJI_V8_TAVAN = _tavan;
     const _onbellekler = () => {
         const o = {};
         const ekle = (ad, c) => { try { o[ad] = c instanceof Map ? c.size : (c && typeof c.keys === 'function' ? c.keys().length : undefined); } catch (_) { /* yok say */ } };
@@ -13514,14 +13531,22 @@ if (!GOOGLE_PLAY_VERIFY && process.env.ALLOW_UNVERIFIED_PURCHASES !== 'true') {
 }
 
 app.listen(PORT, () => {
-    console.log(`
-╔═══════════════════════════════════════════════════════════╗
-║         ⚓ MERALOJİ F.I.S.H. v3.0 AKTİF ⚓                ║
-║    ✅ ${SPECIES_DB ? Object.keys(SPECIES_DB).length : 0} Balık | Fotoğraf | Gelişmiş Taktik          ║
-║    📸 Balık Fotoğrafları | 85+ Skor Taktikleri           ║
-║    Port: ${PORT}                                            ║
-╚═══════════════════════════════════════════════════════════╝
-    `);
+    // [2026-10-14] Kutu içerikten ölçülür (sabit boşlukla doldurulunca kenarlar kayıyordu);
+    // içinde simge yok — emoji genişliği terminale göre değişip hizayı bozuyordu.
+    const satirlar = [
+        'MERALOJİ SUNUCU HAZIR',
+        '',
+        `Port .............. ${PORT}`,
+        `Motor sürümü ...... ${ENGINE_VERSION}`,
+        `Tür sayısı ........ ${SPECIES_DB ? Object.keys(SPECIES_DB).length : 0}`,
+        `Open-Meteo ........ ${OM_PAID ? 'ücretli' : 'ücretsiz'}`,
+        `Bellek tavanı ..... ${global.__MERALOJI_V8_TAVAN || '?'} MB`,
+        `Node .............. ${process.version}`
+    ];
+    const gen = Math.max(...satirlar.map(x => x.length)) + 4;
+    console.log('╔' + '═'.repeat(gen) + '╗');
+    for (const x of satirlar) console.log('║  ' + x.padEnd(gen - 2) + '║');
+    console.log('╚' + '═'.repeat(gen) + '╝');
 });
 
 
