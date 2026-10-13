@@ -40,14 +40,15 @@ try {
 }
 
 // ── AÇILIŞ GÜNLÜĞÜ [2026-10-14] ──────────────────────────────────────────────
-// Açılış satırları tek biçimde: "[AÇILIŞ] ✓ Konu ........ ayrıntı" (⚠ uyarı,
-// ✗ kapalı/hata). Eskiden her modül kendi biçimini kullanıyordu (kimi simgeli,
+// Açılış satırları tek biçimde: "[AÇILIŞ] ✅ Konu ........ ayrıntı" (⚠️ uyarı,
+// ❌ kapalı/hata). Eskiden her modül kendi biçimini kullanıyordu (kimi simgeli,
 // kimi [ETİKET]'li, kutu hizasız ve "v3.0 / 85+ taktik" gibi bayat bilgili),
 // açılışın nerede başlayıp bittiği görünmüyordu. Başlık burada, "HAZIR" kutusu
 // app.listen'da. Çalışma zamanı günlüklerine ([FETCH], [VERIFY]…) DOKUNULMADI.
 const _ACILIS_KONU = 24;
 function acilisLog(durum, konu, ayrinti) {
-    const isaret = durum === 'ok' ? '✓' : (durum === 'uyari' ? '⚠' : '✗');
+    // Renkli emoji: Render log ekranında ✓/⚠/✗ siyah-beyaz kalıp ayırt edilmiyordu (sahip, 14 Eki).
+    const isaret = durum === 'ok' ? '✅' : (durum === 'uyari' ? '⚠️' : '❌');
     const satir = `[AÇILIŞ] ${isaret} ${(konu + ' ').padEnd(_ACILIS_KONU, '.')} ${ayrinti}`;
     if (durum === 'ok') console.log(satir); else if (durum === 'uyari') console.warn(satir); else console.error(satir);
 }
