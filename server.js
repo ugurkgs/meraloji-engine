@@ -13480,6 +13480,39 @@ if (!GOOGLE_PLAY_VERIFY && process.env.ALLOW_UNVERIFIED_PURCHASES !== 'true') {
     process.exit(1);
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// BELLEK GÜNLÜĞÜ  [2026-10-14 — salt teşhis, davranış DEĞİŞMEZ]
+// ═══════════════════════════════════════════════════════════════════════════
+// 12 Eki 21:14 Render "Ran out of memory (used over 512MB)". Metrics: 9 Eki deploy'undan
+// sonra bellek basamak basamak hiç inmeden 100 → 460 MB, sonra çöküş; yeniden başlayınca
+// aynı tırmanış. İki aday: (a) V8 kapsayıcı sınırını bilmeden geç temizliyor →
+// NODE_OPTIONS=--max-old-space-size=384 (Render env, 14 Eki) ile çözülür; (b) sınırsız
+// önbellekler (hiçbir NodeCache'te maxKeys yok) gerçekten büyüyor. Bu günlük ikisini
+// ayırır: rss ↔ heapUsed ↔ önbellek anahtar sayıları. MEM_LOG_DK ile aralık değişir.
+{
+    const _mb = b => Math.round(b / 1048576);
+    const _v8 = require('v8');
+    const _tavan = _mb(_v8.getHeapStatistics().heap_size_limit);
+    console.log(`[BELLEK] V8 yığın tavanı ${_tavan} MB · NODE_OPTIONS=${process.env.NODE_OPTIONS || '(yok)'}`);
+    const _onbellekler = () => {
+        const o = {};
+        const ekle = (ad, c) => { try { o[ad] = c instanceof Map ? c.size : (c && typeof c.keys === 'function' ? c.keys().length : undefined); } catch (_) { /* yok say */ } };
+        ekle('cache', cache); ekle('bathy', bathyCache); ekle('snapBathy', snapBathyCache);
+        ekle('sstSat', sstSatCache); ekle('substrate', substrateCache); ekle('plankton', planktonMemoryCache);
+        ekle('acikSu', acikSuCache); ekle('utcOfset', utcOfsetCache); ekle('lastSeen', lastSeenCache);
+        ekle('userCreation', userCreationCache); ekle('anonIp', anonFreeIpCache); ekle('siteIp', siteSayacIpCache);
+        ekle('inFlight', _inFlightFetches);
+        return Object.entries(o).map(([k, v]) => `${k}=${v}`).join(' ');
+    };
+    const _yaz = () => {
+        const m = process.memoryUsage();
+        console.log(`[BELLEK] rss ${_mb(m.rss)} MB · heap ${_mb(m.heapUsed)}/${_mb(m.heapTotal)} MB (tavan ${_tavan}) · external ${_mb(m.external)} MB · arrayBuffers ${_mb(m.arrayBuffers)} MB | ${_onbellekler()}`);
+    };
+    const _dk = Number(process.env.MEM_LOG_DK) > 0 ? Number(process.env.MEM_LOG_DK) : 30;
+    setTimeout(_yaz, 60000).unref();
+    setInterval(_yaz, _dk * 60000).unref();
+}
+
 app.listen(PORT, () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════════╗
