@@ -1645,6 +1645,35 @@ const sstSatCache = new NodeCache({ stdTTL: 10800, checkperiod: 600 });
 
 // Substrat sonuçlarını 24 saat cache'le — dip yapısı değişmez
 const substrateCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
+
+// [2026-10-15] DİP YAPISI SİGORTASI. EMODnet Seabed Habitats çöktüğünde (15 Eki:
+// 25-40 sn'de bile yanıt yok) her yeni noktadaki analiz 10 sn zaman aşımını
+// bekliyordu — log'da yeni analizlerin neredeyse hepsi 10,1-10,8 sn, kara noktaları
+// dahil. Önbellek anahtarı ~100 m olduğu için 100 m ötedeki tıklama yine bekliyordu.
+// Art arda DIP_SIGORTA_ESIK ağ hatası/zaman aşımından sonra 15 dk hiç sorulmaz
+// (null döner, ÖNBELLEĞE YAZILMAZ — servis dönünce nokta gerçek veriyi alsın),
+// sonra tek bir deneme yapılır. Servis sağlıklıyken hiçbir davranış değişmez:
+// sayaç ilk başarılı yanıtta sıfırlanır. HTTP hata kodu (4xx/5xx) hızlı geldiği
+// için sayılmaz — sigortanın derdi beklemek, hata değil.
+const DIP_SIGORTA_ESIK = 3;
+const DIP_SIGORTA_MS = 15 * 60 * 1000;
+const DIP_SIGORTA_DENEME_MS = 12000;   // deneme sürerken gelen istekler beklemesin
+const _dipSigorta = { ardisik: 0, acikBitis: 0 };
+function _dipSigortaHata(e) {
+    _dipSigorta.ardisik++;
+    if (_dipSigorta.ardisik >= DIP_SIGORTA_ESIK) {
+        _dipSigorta.acikBitis = Date.now() + DIP_SIGORTA_MS;
+        // _origConsoleLog: "[SUBSTRATE]" öneki gürültü süzgecinde (_NOISY_LOG), console.log yutar.
+        _origConsoleLog(`[SUBSTRATE] ⚡ SİGORTA ATTI — EMODnet art arda ${_dipSigorta.ardisik} kez yanıt vermedi `
+            + `(${e && e.message}); dip yapısı 15 dk sorulmayacak, analizler beklemeyecek.`);
+    }
+}
+function _dipSigortaBasari() {
+    if (_dipSigorta.ardisik >= DIP_SIGORTA_ESIK) {
+        _origConsoleLog('[SUBSTRATE] ✅ SİGORTA KAPANDI — EMODnet yeniden yanıt veriyor.');
+    }
+    _dipSigorta.ardisik = 0;
+}
 const planktonMemoryCache = new NodeCache({ stdTTL: 10800, checkperiod: 600 }); // Plankton RAM Önbelleği (3 Saat)
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1737,6 +1766,13 @@ async function fetchSubstrate(lat, lon, silent = false, logUser = null) {
     const isUS = parseFloat(lonR) < -60;
     let wmsUrl = "";
 
+    // Sigorta atıksa sorma (yukarıdaki DIP_SIGORTA açıklaması). Süre dolunca ilk
+    // gelen istek deneme yapar; o sürerken diğerleri yine beklemeden geçer.
+    if (!isUS && _dipSigorta.ardisik >= DIP_SIGORTA_ESIK) {
+        if (Date.now() < _dipSigorta.acikBitis) return null;
+        _dipSigorta.acikBitis = Date.now() + DIP_SIGORTA_DENEME_MS;
+    }
+
     if (isUS) {
         // 🇺🇸 NOAA ArcGIS REST API (Hassas Florida/US Ayarı)
         wmsUrl = `https://gis.ngdc.noaa.gov/arcgis/rest/services/web_mercator/nos_seabed_dynamic/MapServer/0/query` +
@@ -1756,6 +1792,7 @@ async function fetchSubstrate(lat, lon, silent = false, logUser = null) {
 
     try {
         const res = await fetchWithTimeout(wmsUrl, 10000);
+        if (!isUS) _dipSigortaBasari();
         if (!res.ok) {
             console.log(`[SUBSTRATE] HTTP ${res.status} — (${latR},${lonR})`);
             substrateCache.set(ck, null);
@@ -1788,6 +1825,7 @@ async function fetchSubstrate(lat, lon, silent = false, logUser = null) {
         return substrate;
 
     } catch (e) {
+        if (!isUS) _dipSigortaHata(e);
         if (!silent) {
             const u = logUser ? ` [${logUser}]` : '';
             console.log(`[SUBSTRATE]${u} fetch fail (${latR},${lonR}): ${e.message}`);
@@ -8150,8 +8188,10 @@ app.get('/api/forecast', async (req, res) => {
                 // satırı, olmayan teşhis satırıdır.
                 const toplamSaat = marine.hourly.wave_height.length;
                 console.log(`[DALGA-SINIRI] [${logUser}] (${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}) `
-                    + `korunaklı koy: 16 yönden ${fetchTavan.acikYon} tanesi açık denize bakıyor, `
-                    + `o yönde su üzerinde ${fetchTavan.fetchKm} km mesafe var. `
+                    + (fetchTavan.acikYon === 0
+                        ? `korunaklı koy: 16 yönün hiçbiri açık denize bakmıyor, `
+                        : `korunaklı koy: 16 yönden ${fetchTavan.acikYon} tanesi açık denize bakıyor, `)
+                    + `rüzgârın su üzerinde esebildiği en uzun mesafe ${fetchTavan.fetchKm} km. `
                     + `${azamiRuzgar.toFixed(0)} km/h rüzgâr bu mesafede en çok ${T.toFixed(2)} m dalga büyütebilir. `
                     + (kirpilan > 0
                         ? `Model ${enBuyukOnce.toFixed(2)} m'ye kadar çıkıyordu → ${kirpilan}/${toplamSaat} saat ${T.toFixed(2)} m'ye çekildi.`
