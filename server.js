@@ -2347,15 +2347,106 @@ async function _chlKumedenCek(kume, lat, lon, timeoutMs) {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// [2026-10-22] KLOROFİL YEDEĞİ — Copernicus Marine WMTS (hesapsız, GetFeatureInfo)
+//
+// NEDEN: NOAA'nın TÜM günlük klorofil kümeleri (S3A, S3B, VIIRS SNPP/NOAA-20,
+// boşluk doldurulmuş sürüm) 16 Eki'de durdu; coastwatch.noaa.gov 502 veriyor.
+// Kod 14 güne kadar geriye baktığı için ~30 Eki'de klorofil tamamen null olurdu.
+//
+// ÜRÜN: L4 boşluksuz, çok-sensörlü 1 km, günlük (Akdeniz 009_142 / Karadeniz 009_152).
+// Ölçüldü (22 Eki, 11 kıyı noktası): son veri 21 Eki, tek sorgu 50-360 ms; tek
+// pikselde 11 noktanın 9'u dolu — kıyı pikseli kara maskesine düşebildiği için
+// 3×3 ızgara (±0,02°) sorulup geçerlilerin ortalaması alınıyor.
+// Karadeniz ürünü Marmara'yı da kapsıyor (Tekirdağ/İzmit dolu döndü). Nokta bir
+// ürünün kutusundaysa ama değer çıkmazsa (ör. Saros/Kuzey Ege sınırı) diğer
+// ürün de denenir.
+//
+// ⚠ BU KATMAN SÜRÜMÜNÜN EMEKLİLİK TARİHİ 2027-01-12 (WMTS capabilities,
+// admp_retired_date). Sonrası yeni sürüm kimliği gerekecek; o gün bu kaynak
+// sessizce null döner ve NOAA'ya (varsa) düşülür. Takvimde hatırlatma var.
+// ═══════════════════════════════════════════════════════════════════════════
+const CMEMS_CHL = [
+    { ad: 'CMEMS-BLK', kutu: [26.507, 40.005, 41.993, 47.995],
+      katman: 'OCEANCOLOUR_BLK_BGC_L4_NRT_009_152/cmems_obs-oc_blk_bgc-plankton_nrt_l4-gapfree-multi-1km_P1D_202207/CHL' },
+    { ad: 'CMEMS-MED', kutu: [-5.994, 30.005, 36.494, 45.995],
+      katman: 'OCEANCOLOUR_MED_BGC_L4_NRT_009_142/cmems_obs-oc_med_bgc-plankton_nrt_l4-gapfree-multi-1km_P1D_202207/CHL' },
+];
+const CMEMS_ZOOM = 12;   // EPSG:3857 karo seviyesi — piksel ~30 m, 1 km ürün için fazlasıyla ince
+
+/** WMTS karo + karo içi piksel (EPSG:3857). */
+function _cmemsKaro(lat, lon) {
+    const n = Math.pow(2, CMEMS_ZOOM);
+    const x = (lon + 180) / 360 * n;
+    const r = lat * Math.PI / 180;
+    const y = (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * n;
+    return { col: Math.floor(x), row: Math.floor(y), i: Math.floor((x % 1) * 256), j: Math.floor((y % 1) * 256) };
+}
+
+async function _cmemsNokta(katman, lat, lon, gun, timeoutMs) {
+    const k = _cmemsKaro(lat, lon);
+    const url = 'https://wmts.marine.copernicus.eu/teroWmts?SERVICE=WMTS&REQUEST=GetFeatureInfo&VERSION=1.0.0'
+        + `&LAYER=${encodeURIComponent(katman)}&STYLE=cmap:algae&FORMAT=image/png&TILEMATRIXSET=EPSG:3857`
+        + `&TILEMATRIX=${CMEMS_ZOOM}&TILEROW=${k.row}&TILECOL=${k.col}&I=${k.i}&J=${k.j}`
+        + `&INFOFORMAT=application/json&TIME=${gun}T00:00:00Z`;
+    try {
+        const res = await fetchWithTimeout(url, timeoutMs);
+        if (!res.ok) return null;
+        const j = await res.json();
+        const v = j?.features?.[0]?.properties?.value;   // yalnız `value` — lat/lon da sayı, karıştırma
+        return (typeof v === 'number' && isFinite(v) && v > 0) ? v : null;
+    } catch (e) { return null; }
+}
+
+/** Copernicus'tan klorofil. Başarısızsa null — asla fırlatmaz. Dönüş biçimi _chlKumedenCek ile aynı. */
+async function _chlCmemsCek(lat, lon, timeoutMs) {
+    const la = parseFloat(lat), lo = parseFloat(lon);
+    if (!isFinite(la) || !isFinite(lo)) return null;
+    const bitis = Date.now() + timeoutMs;
+    const urunler = CMEMS_CHL.filter(u => lo >= u.kutu[0] && la >= u.kutu[1] && lo <= u.kutu[2] && la <= u.kutu[3]);
+    if (!urunler.length) return null;
+    const ADIM = 0.02;
+    const izgara = [];
+    for (const dy of [-1, 0, 1]) for (const dx of [-1, 0, 1]) izgara.push([la + dy * ADIM, lo + dx * ADIM]);
+
+    // L4 genelde 1 gün gecikmeli; dünden başla, en çok 3 gün geriye bak.
+    for (const u of urunler) {
+        for (let g = 1; g <= 3; g++) {
+            const kalan = bitis - Date.now();
+            if (kalan < 250) return null;
+            const gun = new Date(Date.now() - g * 86400000).toISOString().split('T')[0];
+            const vals = (await Promise.all(izgara.map(([a, b]) => _cmemsNokta(u.katman, a, b, gun, kalan))))
+                .filter(v => v !== null);
+            if (!vals.length) continue;
+            const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+            const daysAgoVal = Math.round((Date.now() - new Date(gun)) / 86400000);
+            return {
+                chlorophyll: parseFloat(avg.toFixed(3)),
+                chlorophyll_monthly_avg: parseFloat(avg.toFixed(3)),   // okunmuyor (bkz. _chlKumedenCek); biçim aynı kalsın
+                date: gun,
+                valid_pixels: vals.length,
+                daysAgo: daysAgoVal,
+                stale: daysAgoVal >= 7,
+                kaynak: u.ad,
+            };
+        }
+    }
+    return null;
+}
+
 /**
  * Iki Sentinel-3 kumesini PARALEL sorgular, en TAZE gecerli sonucu dondurur.
  * Ikisi de bos donerse null — bu "olculmus sifir" degil "bilinmiyor" demektir
  * ve cagiran taraf null'i oyle yorumluyor.
  */
 async function fetchChlorophyll(lat, lon, timeoutMs = 2000) {
-    const sonuclar = await Promise.all(
-        CHL_KUMELERI.map(k => _chlKumedenCek(k, lat, lon, timeoutMs))
-    );
+    // [2026-10-22] Copernicus da AYNI ANDA soruluyor ve aşağıdaki "en taze kazanır"
+    // kuralına katılıyor (bkz. _chlCmemsCek). Diziye EN SONA konuldu: sort kararlı,
+    // tazelik eşitse NOAA önde kalır → NOAA düzelince eski davranış kendiliğinden döner.
+    const sonuclar = await Promise.all([
+        ...CHL_KUMELERI.map(k => _chlKumedenCek(k, lat, lon, timeoutMs)),
+        _chlCmemsCek(lat, lon, timeoutMs).catch(() => null),
+    ]);
     const gecerli = sonuclar.filter(Boolean);
     if (gecerli.length === 0) return null;
 
@@ -2559,17 +2650,88 @@ async function _fetchSatelliteSSTBase(lat, lon, logUser = null, timeoutMs = 2000
     // ZAMAN AŞIMINA DOKUNULMADI: sorun yavaşlık değildi. Satır içi çağrı bilerek
     // 2 sn (kullanıcıyı bekletmemek için) ve arka plan tazelemesi 12 sn ile aynı
     // veriyi tekrar deniyor — o tasarım zaten doğruydu, yalnız adres ölüydü.
-    const url = `https://coastwatch.pfeg.noaa.gov/erddap/griddap/nesdisVHNsstDaily.json` +
-        `?sea_surface_temperature[(${start}):(last)][(0)][(${latMin}):(${latMax})][(${lonMin}):(${lonMax})]`;
+    // [2026-10-22] KAYNAK ZİNCİRİ. VIIRS (nesdisVHNsstDaily) 14 Eki'de öldü: zaman
+    // ekseni 2021-05-30'da bitiyor, her sorgu 404/503. Ölçüldü (22 Eki, 7 kıyı
+    // noktası, ±0,05°, 10 gün) — sıra bu ölçümden:
+    //   MUR   jplMURSST41      0,01° boşluksuz analiz · 10 günün 10'u · 48-121 px · OM'dan −0,1…−0,8
+    //   MODIS erdMH1…NRTMasked 4 km, bulut boşluklu · 10 günün 3-7'si · 3-13 px
+    //   OISST ncdcOisst21Nrt…  0,25° · 1-2 px · İzmir −1,3 / Antalya −1,5 — en kaba, en son
+    // VIIRS yine BAŞTA: NOAA düzeltirse kendiliğinden geri gelir. Ölüyken zaman
+    // yemesin diye her kaynağın kendi sigortası var (_sstSigorta). Toplam süre
+    // yine timeoutMs ile sınırlı — zincir kullanıcıyı 2 sn'den fazla bekletmez.
+    // Az pikselli kaba kaynak füzyonda zaten düşük ağırlık alır (sstBirlestir
+    // piksel cezası), yani OISST'nin tek pikseli Open-Meteo'yu ezmez.
+    const bitis = Date.now() + timeoutMs;
+    for (const k of SST_KAYNAKLARI) {
+        const kalan = bitis - Date.now();
+        if (kalan < 300) break;
+        const sg = _sstSigorta[k.ad];
+        if (sg.ardisik >= SST_SIGORTA_ESIK && Date.now() < sg.acikBitis) continue;
+        const sonuc = await _sstKaynaktanCek(k, start, latMin, latMax, lonMin, lonMax, kalan, logUser);
+        if (sonuc) return sonuc;
+    }
+    return null;
+}
+
+/** Uydu SST kaynakları — sıra = öncelik. `alt`: boyutlarda altitude/zlev var. */
+const SST_KAYNAKLARI = [
+    { ad: 'VIIRS', id: 'nesdisVHNsstDaily',             degisken: 'sea_surface_temperature', alt: true },
+    { ad: 'MUR',   id: 'jplMURSST41',                   degisken: 'analysed_sst',            alt: false },
+    { ad: 'MODIS', id: 'erdMH1sstd1day_R2022NRTMasked', degisken: 'sstMasked',               alt: false },
+    { ad: 'OISST', id: 'ncdcOisst21NrtAgg',             degisken: 'sst',                     alt: true },
+];
+/** Kaynak başına sigorta: art arda bu kadar başarısızlıktan sonra 30 dk atlanır. */
+const SST_SIGORTA_ESIK = 3;
+const SST_SIGORTA_MS = 30 * 60 * 1000;
+const _sstSigorta = Object.fromEntries(SST_KAYNAKLARI.map(k => [k.ad, { ardisik: 0, acikBitis: 0 }]));
+
+/**
+ * Tek kaynaktan SST çek. Başarısızsa null — asla fırlatmaz.
+ * "Başarısız" = ağ/HTTP hatası ya da veri kümesinin bize hiç cevap verememesi;
+ * sağlıklı yanıtta geçerli piksel çıkmaması (bulut, kara) sigortayı ATTIRMAZ.
+ */
+async function _sstKaynaktanCek(k, start, latMin, latMax, lonMin, lonMax, timeoutMs, logUser) {
+    const sg = _sstSigorta[k.ad];
+    const u = logUser ? ` [${logUser}]` : '';
+    const url = `https://coastwatch.pfeg.noaa.gov/erddap/griddap/${k.id}.json` +
+        `?${k.degisken}[(${start}):(last)]${k.alt ? '[(0)]' : ''}[(${latMin}):(${latMax})][(${lonMin}):(${lonMax})]`;
+    const hata = (neden) => {
+        sg.ardisik++;
+        if (sg.ardisik === SST_SIGORTA_ESIK) {
+            sg.acikBitis = Date.now() + SST_SIGORTA_MS;
+            _origConsoleLog(`[SST-SAT] ⚡ ${k.ad} SİGORTASI ATTI — art arda ${sg.ardisik} başarısız (${neden}); 30 dk atlanacak, sıradaki kaynak kullanılacak.`);
+        } else if (sg.ardisik > SST_SIGORTA_ESIK) {
+            sg.acikBitis = Date.now() + SST_SIGORTA_MS;   // deneme de başarısız → yeniden 30 dk
+        }
+        return null;
+    };
 
     try {
         const res = await fetchWithTimeout(url, timeoutMs);
-        if (!res.ok) return null;
+        // 404 "Your query produced no matching results" = sağlıklı sunucu, o pencerede veri yok
+        // (bulut). Veri kümesi ölü ise (VIIRS: "axis maximum") de 404 gelir — ikisini ayırmak
+        // için gövdeye bakılır.
+        if (!res.ok) {
+            const govde = await res.text().catch(() => '');
+            if (res.status === 404 && /no matching results/i.test(govde) && !/axis maximum/i.test(govde)) {
+                if (sg.ardisik >= SST_SIGORTA_ESIK) _origConsoleLog(`[SST-SAT] ✅ ${k.ad} SİGORTASI KAPANDI`);
+                sg.ardisik = 0;
+                return null;
+            }
+            return hata(`HTTP ${res.status}`);
+        }
         const json = await res.json();
-        if (!json?.table?.rows) return null;
+        if (!json?.table?.rows) return hata('boş yanıt');
+        if (sg.ardisik >= SST_SIGORTA_ESIK) _origConsoleLog(`[SST-SAT] ✅ ${k.ad} SİGORTASI KAPANDI`);
+        sg.ardisik = 0;
 
+        // Değer sütunu adla bulunur: VIIRS/OISST'de altitude/zlev sütunu var, MUR/MODIS'te yok.
+        const vi = json.table.columnNames.indexOf(k.degisken);
+        if (vi < 0) return null;
         // Null olmayan değerleri filtrele, en son geçerli günü al
-        const rows = json.table.rows.filter(r => r[4] !== null && r[4] > -2 && r[4] < 40);
+        const rows = json.table.rows
+            .map(r => [r[0], 0, 0, 0, r[vi]])
+            .filter(r => r[4] !== null && r[4] > -2 && r[4] < 40);
         if (rows.length === 0) return null;
 
         // En son tarihe göre sırala
@@ -2595,15 +2757,14 @@ async function _fetchSatelliteSSTBase(lat, lon, logUser = null, timeoutMs = 2000
         const gunFark = Math.max(0,
             Math.round((Date.now() - new Date(latestDate + 'T12:00:00Z').getTime()) / 86400000));
 
-        const u = logUser ? ` [${logUser}]` : '';
-        console.log(`[SST-SAT]${u} ${latestDate}: ${avg.toFixed(2)}°C (${values.length} piksel, sapma ${sapma.toFixed(2)}, ${gunFark} gün önce)`);
+        console.log(`[SST-SAT]${u} ${k.ad} ${latestDate}: ${avg.toFixed(2)}°C (${values.length} piksel, sapma ${sapma.toFixed(2)}, ${gunFark} gün önce)`);
         // NESNE dönüyor, sayı değil. Tüketiciler `.deger` okuyor; null kontrolleri
-        // aynen çalışıyor (null ya da nesne).
-        return { deger: parseFloat(avg.toFixed(2)), piksel: values.length, sapma, gunFark };
+        // aynen çalışıyor (null ya da nesne). `kaynak` yalnız log/teşhis içindir,
+        // istemciye gitmez (yanıtta yalnız dataQuality.satelliteSst boolean'ı var).
+        return { deger: parseFloat(avg.toFixed(2)), piksel: values.length, sapma, gunFark, kaynak: k.ad };
     } catch (e) {
-        const u = logUser ? ` [${logUser}]` : '';
-        console.log(`[SST-SAT]${u} NOAA fetch failed:`, e.message);
-        return null;
+        console.log(`[SST-SAT]${u} ${k.ad} fetch failed:`, e.message);
+        return hata(e.message);
     }
 }
 
