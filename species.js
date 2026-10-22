@@ -6447,7 +6447,7 @@ const SPECIES_DB = {
         seasons: { winter: 0.2, spring: 0.5, summer: 0.9, autumn: 0.8 },
         activity: "NIGHT", pressureSensitivity: 0.8, wavePref: 0.4, currentPref: 0.9, salinityPref: "HIGH", clarityPref: "CLEAR",
         regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
-        depth: { min: 0, opt: 50, max: 800 },
+        depth: { min: 40, opt: 50, max: 800 }, // [2026-10-22] min 0 → 40: tekne türü (trolling/big game); min 0 iken Tanca'da 4,7 m kıyı noktasında ilk 10'a giriyordu. Ölçüm: kıyıda ilk10 açık deniz türü 4→0, 80/200 m değişmez, Türkiye 45/45 aynı.
         advice: { bait: "Kalamar, Uskumru", lure: "Yok", rig: "Heavy Duty Trolling / Deep Drop", hook: "9/0 - 12/0", baitEn: "Squid, mackerel", baitEl: "Squid, mackerel", baitEs: "Calamar, mackerel", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Heavy duty trolling / deep drop", rigEl: "Heavy duty trolling / deep drop", rigEs: "Pesado duty Curricán / deep drop", hookEn: "9/0 - 12/0", hookEl: "9/0 - 12/0", hookEs: "9/0 - 12/0" },
         note: "Adını üst çenesinin kılıç şeklindeki uzantısından alır. Gece suyun üst tabakalarına çıkarak avlanır.",
         noteEn: "Named for its sword-like bill. Migrates to upper layers at night to hunt.", noteEl: "Named for its sword-like bill. Migrates to upper layers at night to hunt.", noteEs: "Named for its sword-like bill. Migrates to upper layers at night to hunt."
@@ -6461,7 +6461,7 @@ const SPECIES_DB = {
         seasons: { winter: 0.3, spring: 0.8, summer: 0.7, autumn: 0.5 },
         activity: "DAY", pressureSensitivity: 0.7, wavePref: 0.4, currentPref: 0.9, salinityPref: "HIGH", clarityPref: "CLEAR",
         regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
-        depth: { min: 0, opt: 30, max: 500 },
+        depth: { min: 25, opt: 30, max: 500 }, // [2026-10-22] min 0 → 25: tekne türü (trolling/big game); min 0 iken Tanca'da 4,7 m kıyı noktasında ilk 10'a giriyordu. Ölçüm: kıyıda ilk10 açık deniz türü 4→0, 80/200 m değişmez, Türkiye 45/45 aynı.
         advice: { bait: "Sardalya (Chumming)", lure: "Popper, Stickbait, Jig", rig: "Heavy Game Spinning", hook: "8/0 - 12/0", baitEn: "Sardine (chumming)", baitEl: "Sardine (chumming)", baitEs: "Sardina (chumming)", lureEn: "Popper, stickbait, jig", lureEl: "Popper, stickbait, jig", lureEs: "Popper, Stickbait, Jig", rigEn: "Heavy game spinning", rigEl: "Heavy game spinning", rigEs: "Pesado game Spinningning", hookEn: "8/0 - 12/0", hookEl: "8/0 - 12/0", hookEs: "8/0 - 12/0" },
         note: "Denizlerin gerçek devidir. 600 kg'a kadar büyüyebilir. Akdeniz bu türün en önemli üreme alanıdır.",
         noteEn: "The true giant of the seas, reaching up to 600 kg. The Mediterranean is a key spawning ground.", noteEl: "The true giant of the seas, reaching up to 600 kg. The Mediterranean is a key spawning ground.", noteEs: "The true giant of the seas, reaching up to 600 kg. The Mediterranean is a key desove ground."
@@ -6475,7 +6475,7 @@ const SPECIES_DB = {
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.7 },
         activity: "DAY", pressureSensitivity: 0.6, wavePref: 0.4, currentPref: 0.9, salinityPref: "HIGH", clarityPref: "CLEAR",
         regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
-        depth: { min: 0, opt: 40, max: 300 },
+        depth: { min: 35, opt: 40, max: 300 }, // [2026-10-22] min 0 → 35: tekne türü (trolling/big game); min 0 iken Tanca'da 4,7 m kıyı noktasında ilk 10'a giriyordu. Ölçüm: kıyıda ilk10 açık deniz türü 4→0, 80/200 m değişmez, Türkiye 45/45 aynı.
         advice: { bait: "Sardalya", lure: "Trolling Feather, Spoon", rig: "Trolling", hook: "4/0 - 6/0", baitEn: "Sardine", baitEl: "Sardine", baitEs: "Sardina", lureEn: "Trolling feather, spoon", lureEl: "Trolling feather, spoon", lureEs: "Curricán feather, spoon", rigEn: "Trolling", rigEl: "Trolling", rigEs: "Curricán", hookEn: "4/0 - 6/0", hookEl: "4/0 - 6/0", hookEs: "4/0 - 6/0" },
         note: "Çok uzun göğüs yüzgeçleriyle tanınır. Eti beyazdır ve konservesi çok meşhurdur.",
         noteEn: "Recognized by its exceptionally long pectoral fins. Famous for its high-quality white meat.", noteEl: "Recognized by its exceptionally long pectoral fins. Famous for its high-quality white meat.", noteEs: "Recognized by its exceptionally long pectoral fins. Famous for its high-quality white meat."
@@ -6715,7 +6715,7 @@ const SPECIES_DB = {
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.7 },
         activity: "DAY", pressureSensitivity: 0.7, wavePref: 0.4, currentPref: 0.9, salinityPref: "HIGH", clarityPref: "CLEAR",
         regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }],
-        depth: { min: 0, opt: 30, max: 200 },
+        depth: { min: 25, opt: 30, max: 200 }, // [2026-10-22] min 0 → 25: tekne türü (trolling/big game); min 0 iken Tanca'da 4,7 m kıyı noktasında ilk 10'a giriyordu. Ölçüm: kıyıda ilk10 açık deniz türü 4→0, 80/200 m değişmez, Türkiye 45/45 aynı.
         advice: { bait: "Kalamar, Uskumru", lure: "Trolling Lure", rig: "Light Trolling", hook: "6/0 - 8/0", baitEn: "Squid, mackerel", baitEl: "Squid, mackerel", baitEs: "Calamar, mackerel", lureEn: "Trolling lure", lureEl: "Trolling lure", lureEs: "Curricán Señuelo", rigEn: "Light trolling", rigEl: "Light trolling", rigEs: "Ligero Curricán", hookEn: "6/0 - 8/0", hookEl: "6/0 - 8/0", hookEs: "6/0 - 8/0" },
         note: "Akdeniz'e özgü endemik bir mızrak balığı türüdür. Çok hızlı ve sportif bir balıktır.",
         noteEn: "Endemic to the Mediterranean. An extremely fast and prestigious sport fish.", noteEl: "Endemic to the Mediterranean. An extremely fast and prestigious sport fish.", noteEs: "Endemic to the Mediterranean. An extremely fast and prestigious sport fish."
@@ -6941,7 +6941,7 @@ const SPECIES_DB = {
         seasons: { winter: 0.4, spring: 0.7, summer: 0.8, autumn: 0.6 },
         activity: "DAY", pressureSensitivity: 0.6, wavePref: 0.4, currentPref: 0.7, salinityPref: "HIGH", clarityPref: "CLEAR",
         regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
-        depth: { min: 0, opt: 30, max: 400 },
+        depth: { min: 25, opt: 30, max: 400 }, // [2026-10-22] min 0 → 25: tekne türü (trolling/big game); min 0 iken Tanca'da 4,7 m kıyı noktasında ilk 10'a giriyordu. Ölçüm: kıyıda ilk10 açık deniz türü 4→0, 80/200 m değişmez, Türkiye 45/45 aynı.
         advice: { bait: "Balık Parçası, Kanlı Yem", lure: "Trolling Lure", rig: "Heavy Wire Trace", hook: "8/0 - 10/0", baitEn: "Fish chunk, bloody bait", baitEl: "Fish chunk, bloody bait", baitEs: "Fish chunk, bloody bait", lureEn: "Trolling lure", lureEl: "Trolling lure", lureEs: "Curricán Señuelo", rigEn: "Heavy wire trace", rigEl: "Heavy wire trace", rigEs: "Pesado wire trace", hookEn: "8/0 - 10/0", hookEl: "8/0 - 10/0", hookEs: "8/0 - 10/0" },
         note: "Akdeniz'in en yaygın pelajik köpekbalığıdır. İndigo mavisi rengiyle muhteşem görünür.",
         noteEn: "The most common pelagic shark in the Mediterranean. Stunning indigo-blue color.", noteEl: "The most common pelagic shark in the Mediterranean. Stunning indigo-blue color.", noteEs: "The most common pelagic shark in the Mediterranean. Stunning indigo-blue color."
