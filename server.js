@@ -3968,12 +3968,33 @@ function akintiMs(kmh) {
 // gerçek yüksek sudan 5 saat kayık; güneyde seviyeyi izliyor → 'akış bonusu' durgun suya düşüyordu.
 // Puan girdisi (B, ölçüldü: ilk-10 değerli 298 → 302): |Δh| cm/sa × 0,25, tavan 2,25 (9 cm/sa).
 // Karadeniz/Boğaz'da gelgit 3-7 cm → ~0 (doğru). Veri yoksa null → çağıran eski endekse düşer.
+// [2026-10-22] YEREL ÖLÇEK — YALNIZ BÜYÜK GELGİTTE. Sabit 9 cm/sa tavanı Türkiye gelgitine göre
+// konmuştu; Atlantik'te (Tanca, Rabat, Kazablanka) saatlerin %68-85'i tavanda kalıyor, akış
+// saatleri birbirinden ayrılmıyordu. ±12 sa penceredeki en büyük |Δh| (E) ALT eşiği aşarsa
+// bölen 9'dan kademeli büyür, ÜST eşikte E'ye eşit olur (en güçlü akış 2,25, durgun su ~0).
+// E ≤ ALT iken ESKİ formül aynen çalışır. Kademe şart: tek eşikte Tanca'da E 20 civarında
+// dolaşınca akış saat saat tavan↔ölçekli sıçrıyordu (ölçüldü). ALT 13: Türkiye'de 40 kıyı
+// noktası × 14 gün (22 Eki) en büyük 12 cm/sa (Doğu Akdeniz: Alanya–İskenderun). Türkiye etkilenmez.
+const GELGIT_TAVAN_CM = 9;
+const GELGIT_OLCEK_ALT_CM = 13;
+const GELGIT_OLCEK_UST_CM = 20;
 function gelgitAkisi(marine, idx) {
     const s = marine?.hourly?.sea_level_height_msl;
     if (!s || !(idx >= 1)) return null;
     const h1 = s[idx], h0 = s[idx - 1];
     if (typeof h1 !== 'number' || typeof h0 !== 'number') return null;
-    return Math.min(2.25, Math.abs(h1 - h0) * 100 * 0.25);
+    const dh = Math.abs(h1 - h0) * 100;
+    let enBuyuk = GELGIT_TAVAN_CM;
+    for (let i = Math.max(1, idx - 12); i <= Math.min(s.length - 1, idx + 12); i++) {
+        if (typeof s[i] === 'number' && typeof s[i - 1] === 'number') {
+            const d = Math.abs(s[i] - s[i - 1]) * 100;
+            if (d > enBuyuk) enBuyuk = d;
+        }
+    }
+    if (enBuyuk <= GELGIT_OLCEK_ALT_CM) return Math.min(2.25, Math.abs(h1 - h0) * 100 * 0.25);   // eski ifade, bit düzeyinde aynı
+    const k = Math.min(1, (enBuyuk - GELGIT_OLCEK_ALT_CM) / (GELGIT_OLCEK_UST_CM - GELGIT_OLCEK_ALT_CM));
+    const bolen = GELGIT_TAVAN_CM + k * (Math.max(GELGIT_OLCEK_UST_CM, enBuyuk) - GELGIT_TAVAN_CM);
+    return Math.min(2.25, 2.25 * dh / bolen);
 }
 /** O saatteki deniz seviyesi (m); yoksa null. Gelgit grafiği (hourlyTimeline.tide) bunu çizer. */
 function denizSeviyesi(marine, idx) {
