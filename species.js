@@ -6223,7 +6223,7 @@ const SPECIES_DB = {
         tempRange: { min: 10, opt: 18, max: 25 },
         seasons: { winter: 0.9, spring: 0.7, summer: 0.3, autumn: 0.8 },
         activity: "DAWN_DUSK", pressureSensitivity: 0.6, wavePref: 0.8, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: GBIF Fas 10
         depth: { min: 0, opt: 3, max: 15 },
         advice: { bait: "Canlı Karides, Küçük Balık", lure: "Popper, Floating Minnow", rig: "Spinning", hook: "2 - 2/0", baitEn: "Live shrimp, small fish", baitEl: "Live shrimp, small fish", baitEs: "Live Camarón, small fish", lureEn: "Popper, floating minnow", lureEl: "Popper, floating minnow", lureEs: "Popper, floating minnow", rigEn: "Spinning", rigEl: "Spinning", rigEs: "Spinningning", hookEn: "2 - 2/0", hookEl: "2 - 2/0", hookEs: "2 - 2/0" },
         note: "Akdeniz'in gümüş prensidir. Sert havaları ve dalgalı kıyıları sever. Zekasıyla balıkçıları her zaman şaşırtır.",
@@ -6237,7 +6237,7 @@ const SPECIES_DB = {
         tempRange: { min: 14, opt: 22, max: 28 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.8, autumn: 0.9 },
         activity: "DAY", pressureSensitivity: 0.5, wavePref: 0.3, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 1, opt: 10, max: 30 },
         advice: { bait: "Yengeç, Sülünez, Madadya", lure: "Yok", rig: "Sliding Sink Rig", hook: "4 - 1", baitEn: "Crab, razor clam, bibi", baitEl: "Crab, razor clam, bibi", baitEs: "Cangrejo, Navaja, bibi", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Sliding sinker rig", rigEl: "Sliding sinker rig", rigEs: "Sliding sinker rig", hookEn: "4 - 1", hookEl: "4 - 1", hookEs: "4 - 1" },
         note: "Gözlerinin arasındaki altın bandıyla tanınır. Güçlü çenesiyle sert kabukluları kolayca kırar.",
@@ -6265,7 +6265,7 @@ const SPECIES_DB = {
         tempRange: { min: 13, opt: 19, max: 24 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.7, autumn: 0.9 },
         activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.2, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 10, opt: 40, max: 150 },
         advice: { bait: "Karides, Kurt", lure: "Yok", rig: "Bottom Rig", hook: "6 - 2", baitEn: "Shrimp, worm", baitEl: "Shrimp, worm", baitEs: "Camarón, Gusano", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "6 - 2", hookEl: "6 - 2", hookEs: "6 - 2" },
         note: "Gül kurusu rengiyle tanınan, sofralık değeri çok yüksek bir türdür.",
@@ -6279,7 +6279,7 @@ const SPECIES_DB = {
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
         activity: "NIGHT", pressureSensitivity: 0.4, wavePref: 0.2, currentPref: 0.2, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 5, opt: 30, max: 200 },
         advice: { bait: "Balık Parçası, Karides", lure: "Small Soft Plastic", rig: "Bottom Rig", hook: "1/0 - 3/0", baitEn: "Fish chunk, shrimp", baitEl: "Fish chunk, shrimp", baitEs: "Fish chunk, Camarón", lureEn: "Small soft plastic", lureEl: "Small soft plastic", lureEs: "Small Vinilo", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "1/0 - 3/0", hookEl: "1/0 - 3/0", hookEs: "1/0 - 3/0" },
         note: "Zehirli dikenlerine rağmen eti çok lezzetlidir. Akdeniz mutfağında çorbası meşhurdur.",
@@ -6293,7 +6293,7 @@ const SPECIES_DB = {
         tempRange: { min: 14, opt: 21, max: 27 },
         seasons: { winter: 0.4, spring: 0.8, summer: 0.9, autumn: 0.7 },
         activity: "DAWN_DUSK", pressureSensitivity: 0.5, wavePref: 0.7, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "MODERATE",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 0.5, opt: 5, max: 40 },
         advice: { bait: "Karides, Midye, Hamur", lure: "Small Jig, Soft Plastic", rig: "Light Bottom / Float", hook: "6 - 2", baitEn: "Shrimp, mussel, dough", baitEl: "Shrimp, mussel, dough", baitEs: "Camarón, Mejillón, Masa", lureEn: "Small jig, soft plastic", lureEl: "Small jig, soft plastic", lureEs: "Small Jig, Vinilo", rigEn: "Light bottom / float", rigEl: "Light bottom / float", rigEs: "Ligero bottom / float", hookEn: "6 - 2", hookEl: "6 - 2", hookEs: "6 - 2" },
         note: "Gövdesindeki dikey siyah çizgilerle tanınır. Çok ürkektir ve köpüklü suları sever.",
@@ -6307,7 +6307,7 @@ const SPECIES_DB = {
         tempRange: { min: 13, opt: 19, max: 25 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.4, autumn: 0.6 },
         activity: "NIGHT", pressureSensitivity: 0.4, wavePref: 0.3, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 1, opt: 15, max: 60 },
         advice: { bait: "Karides, Boru Kurdu", lure: "Yok", rig: "Bottom Rig", hook: "6 - 2", baitEn: "Shrimp, tube worm", baitEl: "Shrimp, tube worm", baitEs: "Camarón, Gusano de tubo", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "6 - 2", hookEl: "6 - 2", hookEs: "6 - 2" },
         note: "Başının ve kuyruğunun üzerindeki iki belirgin siyah bant ile kolayca tanınır.",
@@ -6321,7 +6321,7 @@ const SPECIES_DB = {
         tempRange: { min: 15, opt: 22, max: 28 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.7 },
         activity: "DAY", pressureSensitivity: 0.5, wavePref: 0.4, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 0.5, opt: 5, max: 30 },
         advice: { bait: "Karides, Midye", lure: "Yok", rig: "Light Bottom Rig", hook: "6 - 2", baitEn: "Shrimp, mussel", baitEl: "Shrimp, mussel", baitEs: "Camarón, Mejillón", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Light bottom rig", rigEl: "Light bottom rig", rigEs: "Ligero Aparejo de fondo", hookEn: "6 - 2", hookEl: "6 - 2", hookEs: "6 - 2" },
         note: "Sivri burnu ve dikey siyah şeritleriyle karakteristiktir. Genellikle sığ sularda beslenir.",
@@ -6335,7 +6335,7 @@ const SPECIES_DB = {
         tempRange: { min: 16, opt: 23, max: 28 },
         seasons: { winter: 0.2, spring: 0.5, summer: 0.9, autumn: 0.8 },
         activity: "DAWN_DUSK", pressureSensitivity: 0.7, wavePref: 0.4, currentPref: 0.7, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 10, opt: 40, max: 200 },
         advice: { bait: "Canlı Kalamar, Zargana", lure: "Popper, Vertical Jig", rig: "Trolling / Jigging", hook: "6/0 - 9/0", baitEn: "Live squid, garfish", baitEl: "Live squid, garfish", baitEs: "Live Calamar, garfish", lureEn: "Popper, vertical jig", lureEl: "Popper, vertical jig", lureEs: "Popper, vertical Jig", rigEn: "Trolling / jigging", rigEl: "Trolling / jigging", rigEs: "Curricán / Jigging", hookEn: "6/0 - 9/0", hookEl: "6/0 - 9/0", hookEs: "6/0 - 9/0" },
         note: "Akdeniz'in en güçlü savaşçılarından biridir. İtalya'da 'Ricciola' olarak bilinir ve efsanevi boylara ulaşabilir.",
@@ -6350,7 +6350,7 @@ const SPECIES_DB = {
         tempRange: { min: 12, opt: 19, max: 26 },
         seasons: { winter: 0.2, spring: 0.6, summer: 0.8, autumn: 0.95 },
         activity: "DAWN_DUSK", pressureSensitivity: 0.6, wavePref: 0.6, currentPref: 0.7, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 0, opt: 5, max: 40 },
         advice: { bait: "Yemli Mantarlı Olta (Sardalya)", lure: "Popper, Slim Minnow", rig: "Spinning / Surf Casting", hook: "2/0 - 4/0", baitEn: "Floated bait (sardine)", baitEl: "Floated bait (sardine)", baitEs: "Floated bait (Sardina)", lureEn: "Popper, slim minnow", lureEl: "Popper, slim minnow", lureEs: "Popper, slim minnow", rigEn: "Spinning / surf casting", rigEl: "Spinning / surf casting", rigEs: "Spinningning / Surfcasting", hookEn: "2/0 - 4/0", hookEl: "2/0 - 4/0", hookEs: "2/0 - 4/0" },
         note: "Keskin dişleri ve saldırganlığıyla tanınır. Göç dönemlerinde Akdeniz kıyılarında büyük heyecan yaratır.",
@@ -6365,7 +6365,7 @@ const SPECIES_DB = {
         tempRange: { min: 16, opt: 22, max: 27 },
         seasons: { winter: 0.2, spring: 0.5, summer: 0.9, autumn: 0.8 },
         activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.2, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 10, opt: 30, max: 150 },
         advice: { bait: "Canlı Ahtapot, Kalamar, Yengeç", lure: "Vertical Jig", rig: "Heavy Bottom / Jigging", hook: "6/0 - 8/0", baitEn: "Live octopus, squid, crab", baitEl: "Live octopus, squid, crab", baitEs: "Live octopus, Calamar, Cangrejo", lureEn: "Vertical jig", lureEl: "Vertical jig", lureEs: "Vertical Jig", rigEn: "Heavy bottom / jigging", rigEl: "Heavy bottom / jigging", rigEs: "Pesado bottom / Jigging", hookEn: "6/0 - 8/0", hookEl: "6/0 - 8/0", hookEs: "6/0 - 8/0" },
         note: "Akdeniz'in en heybetli sakinidir. Meraklı ama çok güçlüdür. Çoğu bölgede koruma altındadır.",
@@ -6379,7 +6379,7 @@ const SPECIES_DB = {
         tempRange: { min: 18, opt: 24, max: 28 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.7 },
         activity: "DAY", pressureSensitivity: 0.5, wavePref: 0.2, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 15, opt: 40, max: 200 },
         advice: { bait: "Canlı Karides, Küçük Balık", lure: "Slow Jig, Inchiku", rig: "Jigging / Trolling", hook: "5/0 - 7/0", baitEn: "Live shrimp, small fish", baitEl: "Live shrimp, small fish", baitEs: "Live Camarón, small fish", lureEn: "Slow jig, inchiku", lureEl: "Slow jig, inchiku", lureEs: "Slow Jig, inchiku", rigEn: "Jigging / trolling", rigEl: "Jigging / trolling", rigEs: "Jigging / Curricán", hookEn: "5/0 - 7/0", hookEl: "5/0 - 7/0", hookEs: "5/0 - 7/0" },
         note: "Vücudundaki sarı leke ve çizgilerle tanınır. Eti en kaliteli ve pahalı balıklardan biridir.",
@@ -6431,7 +6431,7 @@ const SPECIES_DB = {
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.8 },
         activity: "DAWN_DUSK", pressureSensitivity: 0.6, wavePref: 0.6, currentPref: 0.4, salinityPref: "MEDIUM", clarityPref: "ANY",
-        regions: ["EGE", "AKDENİZ", "MARMARA"], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 34.0, lon1: 25.0, lat2: 41.5, lon2: 37.0, name: "Ege & Doğu Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: ["EGE", "AKDENİZ", "MARMARA"], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 34.0, lon1: 25.0, lat2: 41.5, lon2: 37.0, name: "Ege & Doğu Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 0, opt: 5, max: 30 }, legalSize: "40 cm",
         advice: { bait: "Canlı Kefal, Zargana", lure: "Popper, Skipping Lure", rig: "Spinning / Live Bait Trolling", hook: "5/0 - 7/0", baitEn: "Live mullet, garfish", baitEl: "Live mullet, garfish", baitEs: "Live mullet, garfish", lureEn: "Popper, skipping lure", lureEl: "Popper, skipping lure", lureEs: "Popper, skipping Señuelo", rigEn: "Spinning / live bait trolling", rigEl: "Spinning / live bait trolling", rigEs: "Spinningning / Cebo vivo Curricán", hookEn: "5/0 - 7/0", hookEl: "5/0 - 7/0", hookEs: "5/0 - 7/0" },
         note: "Çok hırçın ve inatçı bir savaşçıdır. Kıyılara çok sokulur ve sığ suda büyük avlar peşindedir.",
@@ -6446,7 +6446,7 @@ const SPECIES_DB = {
         tempRange: { min: 14, opt: 19, max: 25 },
         seasons: { winter: 0.2, spring: 0.5, summer: 0.9, autumn: 0.8 },
         activity: "NIGHT", pressureSensitivity: 0.8, wavePref: 0.4, currentPref: 0.9, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 40, opt: 50, max: 800 }, // [2026-10-22] min 0 → 40: tekne türü (trolling/big game); min 0 iken Tanca'da 4,7 m kıyı noktasında ilk 10'a giriyordu. Ölçüm: kıyıda ilk10 açık deniz türü 4→0, 80/200 m değişmez, Türkiye 45/45 aynı.
         advice: { bait: "Kalamar, Uskumru", lure: "Yok", rig: "Heavy Duty Trolling / Deep Drop", hook: "9/0 - 12/0", baitEn: "Squid, mackerel", baitEl: "Squid, mackerel", baitEs: "Calamar, mackerel", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Heavy duty trolling / deep drop", rigEl: "Heavy duty trolling / deep drop", rigEs: "Pesado duty Curricán / deep drop", hookEn: "9/0 - 12/0", hookEl: "9/0 - 12/0", hookEs: "9/0 - 12/0" },
         note: "Adını üst çenesinin kılıç şeklindeki uzantısından alır. Gece suyun üst tabakalarına çıkarak avlanır.",
@@ -6460,7 +6460,7 @@ const SPECIES_DB = {
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.3, spring: 0.8, summer: 0.7, autumn: 0.5 },
         activity: "DAY", pressureSensitivity: 0.7, wavePref: 0.4, currentPref: 0.9, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 25, opt: 30, max: 500 }, // [2026-10-22] min 0 → 25: tekne türü (trolling/big game); min 0 iken Tanca'da 4,7 m kıyı noktasında ilk 10'a giriyordu. Ölçüm: kıyıda ilk10 açık deniz türü 4→0, 80/200 m değişmez, Türkiye 45/45 aynı.
         advice: { bait: "Sardalya (Chumming)", lure: "Popper, Stickbait, Jig", rig: "Heavy Game Spinning", hook: "8/0 - 12/0", baitEn: "Sardine (chumming)", baitEl: "Sardine (chumming)", baitEs: "Sardina (chumming)", lureEn: "Popper, stickbait, jig", lureEl: "Popper, stickbait, jig", lureEs: "Popper, Stickbait, Jig", rigEn: "Heavy game spinning", rigEl: "Heavy game spinning", rigEs: "Pesado game Spinningning", hookEn: "8/0 - 12/0", hookEl: "8/0 - 12/0", hookEs: "8/0 - 12/0" },
         note: "Denizlerin gerçek devidir. 600 kg'a kadar büyüyebilir. Akdeniz bu türün en önemli üreme alanıdır.",
@@ -6474,7 +6474,7 @@ const SPECIES_DB = {
         tempRange: { min: 14, opt: 19, max: 24 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.7 },
         activity: "DAY", pressureSensitivity: 0.6, wavePref: 0.4, currentPref: 0.9, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 35, opt: 40, max: 300 }, // [2026-10-22] min 0 → 35: tekne türü (trolling/big game); min 0 iken Tanca'da 4,7 m kıyı noktasında ilk 10'a giriyordu. Ölçüm: kıyıda ilk10 açık deniz türü 4→0, 80/200 m değişmez, Türkiye 45/45 aynı.
         advice: { bait: "Sardalya", lure: "Trolling Feather, Spoon", rig: "Trolling", hook: "4/0 - 6/0", baitEn: "Sardine", baitEl: "Sardine", baitEs: "Sardina", lureEn: "Trolling feather, spoon", lureEl: "Trolling feather, spoon", lureEs: "Curricán feather, spoon", rigEn: "Trolling", rigEl: "Trolling", rigEs: "Curricán", hookEn: "4/0 - 6/0", hookEl: "4/0 - 6/0", hookEs: "4/0 - 6/0" },
         note: "Çok uzun göğüs yüzgeçleriyle tanınır. Eti beyazdır ve konservesi çok meşhurdur.",
@@ -6488,7 +6488,7 @@ const SPECIES_DB = {
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.1, spring: 0.6, summer: 0.9, autumn: 0.8 },
         activity: "DAY", pressureSensitivity: 0.5, wavePref: 0.5, currentPref: 0.8, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 0, opt: 10, max: 100 },
         advice: { bait: "Yok", lure: "Jig, Skipping Lure", rig: "Spinning", hook: "2/0 - 4/0", baitEn: "None", baitEl: "None", baitEs: "Ninguno", lureEn: "Jig, skipping lure", lureEl: "Jig, skipping lure", lureEs: "Jig, skipping Señuelo", rigEn: "Spinning", rigEl: "Spinning", rigEs: "Spinningning", hookEn: "2/0 - 4/0", hookEl: "2/0 - 4/0", hookEs: "2/0 - 4/0" },
         note: "Sırtındaki dalgalı siyah 'yazı' desenleriyle tanınır. Çok hızlıdır ve sürüler halinde avlanır.",
@@ -6502,7 +6502,7 @@ const SPECIES_DB = {
         tempRange: { min: 14, opt: 19, max: 24 },
         seasons: { winter: 0.2, spring: 0.5, summer: 0.4, autumn: 0.95 },
         activity: "DAWN_DUSK", pressureSensitivity: 0.5, wavePref: 0.4, currentPref: 0.8, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 0, opt: 5, max: 50 },
         advice: { bait: "Hamsi, Gümüş", lure: "Rapala, Kaşık", rig: "Spinning / Çapari", hook: "2 - 2/0", baitEn: "Anchovy, silverside", baitEl: "Anchovy, silverside", baitEs: "Boquerón, silverside", lureEn: "Minnow, spoon", lureEl: "Minnow, spoon", lureEs: "Minnow, spoon", rigEn: "Spinning / sabiki", rigEl: "Spinning / sabiki", rigEs: "Spinningning / Sabiki", hookEn: "2 - 2/0", hookEl: "2 - 2/0", hookEs: "2 - 2/0" },
         note: "Gövdesindeki dikey siyah çizgilerle tanınır. Akdeniz balıkçılığının en bereketli ve beklenen balığıdır.",
@@ -6516,7 +6516,7 @@ const SPECIES_DB = {
         tempRange: { min: 13, opt: 18, max: 24 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.9, autumn: 0.6 },
         activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.3, currentPref: 0.8, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 5, opt: 30, max: 150 },
         advice: { bait: "Hamsi Parçası, Karides", lure: "Çapari", rig: "Sabiki Rig", hook: "8 - 4", baitEn: "Anchovy chunk, shrimp", baitEl: "Anchovy chunk, shrimp", baitEs: "Boquerón chunk, Camarón", lureEn: "Sabiki", lureEl: "Sabiki", lureEs: "Sabiki", rigEn: "Sabiki rig", rigEl: "Sabiki rig", rigEs: "Sabiki rig", hookEn: "8 - 4", hookEl: "8 - 4", hookEs: "8 - 4" },
         note: "Uskumruya çok benzer ama gözleri daha büyük ve üzerindeki desenler daha beneklidir.",
@@ -6531,7 +6531,7 @@ const SPECIES_DB = {
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.9, autumn: 0.7 },
         activity: "DAY", pressureSensitivity: 0.5, wavePref: 0.2, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 10, opt: 40, max: 200 },
         advice: { bait: "Karides, Kalamar", lure: "Tai Rubber, Slow Jig", rig: "Bottom Rig / Jigging", hook: "2/0 - 5/0", baitEn: "Shrimp, squid", baitEl: "Shrimp, squid", baitEs: "Camarón, Calamar", lureEn: "Tai rubber, slow jig", lureEl: "Tai rubber, slow jig", lureEs: "Tai rubber, slow Jig", rigEn: "Bottom rig / jigging", rigEl: "Bottom rig / jigging", rigEs: "Aparejo de fondo / Jigging", hookEn: "2/0 - 5/0", hookEl: "2/0 - 5/0", hookEs: "2/0 - 5/0" },
         note: "Pembe rengi ve alnındaki hafif mavi beneklerle tanınır. Mercan ailesinin en heybetli üyelerinden biridir.",
@@ -6545,7 +6545,7 @@ const SPECIES_DB = {
         tempRange: { min: 12, opt: 17, max: 22 },
         seasons: { winter: 0.8, spring: 0.7, summer: 0.3, autumn: 0.6 },
         activity: "DAY", pressureSensitivity: 0.6, wavePref: 0.1, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 100, opt: 300, max: 700 },
         advice: { bait: "Karides, Kalamar, Balık Eti", lure: "Yok", rig: "Deep Sea Paternoster", hook: "1/0 - 3/0", baitEn: "Shrimp, squid, fish chunk", baitEl: "Shrimp, squid, fish chunk", baitEs: "Camarón, Calamar, fish chunk", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Deep sea paternoster", rigEl: "Deep sea paternoster", rigEs: "Deep sea Paternoster", hookEn: "1/0 - 3/0", hookEl: "1/0 - 3/0", hookEs: "1/0 - 3/0" },
         note: "Operkulum başlangıcındaki belirgin siyah leke ve devasa gözleriyle tanınır. Çok lezzetlidir.",
@@ -6559,7 +6559,7 @@ const SPECIES_DB = {
         tempRange: { min: 16, opt: 21, max: 26 },
         seasons: { winter: 0.3, spring: 0.5, summer: 0.9, autumn: 0.7 },
         activity: "DAY", pressureSensitivity: 0.5, wavePref: 0.3, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 5, opt: 25, max: 100 },
         advice: { bait: "Yengeç, Karides, Kalamar", lure: "Small Jig", rig: "Bottom Rig", hook: "1/0 - 3/0", baitEn: "Crab, shrimp, squid", baitEl: "Crab, shrimp, squid", baitEs: "Cangrejo, Camarón, Calamar", lureEn: "Small jig", lureEl: "Small jig", lureEs: "Small Jig", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "1/0 - 3/0", hookEl: "1/0 - 3/0", hookEs: "1/0 - 3/0" },
         note: "Gövdesindeki dikey kırmızı-pembe bantlarla tanınır. Sinarit ile aynı habitatı paylaşır.",
@@ -6573,7 +6573,7 @@ const SPECIES_DB = {
         tempRange: { min: 15, opt: 20, max: 26 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.9, autumn: 0.7 },
         activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.5, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 1, opt: 10, max: 50 },
         advice: { bait: "Karides, Midye", lure: "Yok", rig: "Bottom Rig", hook: "4 - 1", baitEn: "Shrimp, mussel", baitEl: "Shrimp, mussel", baitEs: "Camarón, Mejillón", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "4 - 1", hookEl: "4 - 1", hookEs: "4 - 1" },
         note: "Kalın siyah bantları ve belirgin dudaklarıyla tanınır. Karagöz ailesinin en büyüklerinden biridir.",
@@ -6601,7 +6601,7 @@ const SPECIES_DB = {
         tempRange: { min: 15, opt: 22, max: 28 },
         seasons: { winter: 0.3, spring: 0.7, summer: 0.9, autumn: 0.6 },
         activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.6, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 0, opt: 3, max: 20 },
         advice: { bait: "Ekmek, Hamur, Yosun", lure: "Yok", rig: "Float Rig", hook: "8 - 6", baitEn: "Bread, dough, algae", baitEl: "Bread, dough, algae", baitEs: "Pan, Masa, algae", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Float rig", rigEl: "Float rig", rigEs: "Aparejo de flotador", hookEn: "8 - 6", hookEl: "8 - 6", hookEs: "8 - 6" },
         note: "Gövdesindeki altın sarısı yatay çizgilerle tanınır. Sadece yosunla beslenir. Bazen halüsinojenik etki yapabilir.",
@@ -6615,7 +6615,7 @@ const SPECIES_DB = {
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.4, autumn: 0.6 },
         activity: "NIGHT", pressureSensitivity: 0.4, wavePref: 0.1, currentPref: 0.2, salinityPref: "MEDIUM", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: GBIF Fas 6
         depth: { min: 1, opt: 10, max: 50 },
         advice: { bait: "Boru Kurdu, Karides", lure: "Yok", rig: "Bottom Rig", hook: "4 - 1", baitEn: "Tube worm, shrimp", baitEl: "Tube worm, shrimp", baitEs: "Gusano de tubo, Camarón", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "4 - 1", hookEl: "4 - 1", hookEs: "4 - 1" },
         note: "Kumluk diplerin kamufle ustasıdır. Akdeniz'in en değerli yassı balıklarından biridir.",
@@ -6629,7 +6629,7 @@ const SPECIES_DB = {
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.8, spring: 0.7, summer: 0.2, autumn: 0.6 },
         activity: "DAY", pressureSensitivity: 0.5, wavePref: 0.4, currentPref: 0.2, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: GBIF Fas 5
         depth: { min: 10, opt: 40, max: 100 },
         advice: { bait: "Bütün Hamsi, İstavrit", lure: "Silikon Balık", rig: "Bottom Rig", hook: "1/0 - 4/0", baitEn: "Whole anchovy, scad", baitEl: "Whole anchovy, scad", baitEs: "Whole Boquerón, scad", lureEn: "Soft plastic swim bait", lureEl: "Soft plastic swim bait", lureEs: "Vinilo swim bait", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "1/0 - 4/0", hookEl: "1/0 - 4/0", hookEs: "1/0 - 4/0" },
         note: "Daire şeklindeki gövdesi ve üzerindeki sert düğmeciklerle (tüberkül) tanınır. Çok prestijli bir türdür.",
@@ -6643,7 +6643,7 @@ const SPECIES_DB = {
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.4, spring: 0.8, summer: 0.9, autumn: 0.7 },
         activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.2, currentPref: 0.3, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 5, opt: 20, max: 100 },
         advice: { bait: "Kurt, Karides Parçası", lure: "Yok", rig: "Bottom Rig", hook: "8 - 4", baitEn: "Worm, shrimp chunk", baitEl: "Worm, shrimp chunk", baitEs: "Gusano, Camarón chunk", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "8 - 4", hookEl: "8 - 4", hookEs: "8 - 4" },
         note: "Burnu daha küt ve gövdesindeki sarı şeritler daha belirgindir. Barbunya ile sıkça karıştırılır.",
@@ -6657,7 +6657,7 @@ const SPECIES_DB = {
         tempRange: { min: 14, opt: 19, max: 25 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.8 },
         activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.2, currentPref: 0.3, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: GBIF Fas 7
         depth: { min: 10, opt: 30, max: 300 },
         advice: { bait: "Kurt, Karides", lure: "Yok", rig: "Bottom Rig", hook: "8 - 4", baitEn: "Worm, shrimp", baitEl: "Worm, shrimp", baitEs: "Gusano, Camarón", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "8 - 4", hookEl: "8 - 4", hookEs: "8 - 4" },
         note: "Tekire göre daha dik bir kafası ve daha kırmızı bir rengi vardır. Akdeniz'in en sevilen gurme balıklarındandır.",
@@ -6672,7 +6672,7 @@ const SPECIES_DB = {
         tempRange: { min: 12, opt: 17, max: 22 },
         seasons: { winter: 0.8, spring: 0.6, summer: 0.3, autumn: 0.7 },
         activity: "NIGHT", pressureSensitivity: 0.5, wavePref: 0.1, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 100, opt: 300, max: 600 },
         advice: { bait: "Sardalya, Kalamar", lure: "Glow Jig", rig: "Deep Sea Rig", hook: "3/0 - 5/0", baitEn: "Sardine, squid", baitEl: "Sardine, squid", baitEs: "Sardina, Calamar", lureEn: "Glow jig", lureEl: "Glow jig", lureEs: "Glow Jig", rigEn: "Deep sea rig", rigEl: "Deep sea rig", rigEs: "Deep sea rig", hookEn: "3/0 - 5/0", hookEl: "3/0 - 5/0", hookEs: "3/0 - 5/0" },
         note: "Vücudu tamamen gümüş rengidir ve bir şeridi andırır. Çok keskin dişleri vardır.",
@@ -6700,7 +6700,7 @@ const SPECIES_DB = {
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.8 },
         activity: "NIGHT", pressureSensitivity: 0.5, wavePref: 0.3, currentPref: 0.7, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 0, opt: 5, max: 30 },
         advice: { bait: "Canlı Zargana", lure: "Slim Minnow, Popper", rig: "Spinning", hook: "1/0 - 3/0", baitEn: "Live garfish", baitEl: "Live garfish", baitEs: "Live garfish", lureEn: "Slim minnow, popper", lureEl: "Slim minnow, popper", lureEs: "Slim minnow, Popper", rigEn: "Spinning", rigEl: "Spinning", rigEs: "Spinningning", hookEn: "1/0 - 3/0", hookEl: "1/0 - 3/0", hookEs: "1/0 - 3/0" },
         note: "Akdeniz'in kurt balığıdır. Geceleri çok daha aktiftir ve sürüler halinde avlanır.",
@@ -6728,7 +6728,7 @@ const SPECIES_DB = {
         tempRange: { min: 10, opt: 16, max: 22 },
         seasons: { winter: 0.7, spring: 0.6, summer: 0.4, autumn: 0.8 },
         activity: "NIGHT", pressureSensitivity: 0.5, wavePref: 0.2, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 100, opt: 400, max: 800 },
         advice: { bait: "Balık Parçası", lure: "Yok", rig: "Deep Sea Rig", hook: "4/0 - 6/0", baitEn: "Fish chunk", baitEl: "Fish chunk", baitEs: "Fish chunk", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Deep sea rig", rigEl: "Deep sea rig", rigEs: "Deep sea rig", hookEn: "4/0 - 6/0", hookEl: "4/0 - 6/0", hookEs: "4/0 - 6/0" },
         note: "Eti çok yağlıdır. Fazla tüketilmesi sindirim sorunlarına yol açabilir.",
@@ -6742,7 +6742,7 @@ const SPECIES_DB = {
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.6, spring: 0.7, summer: 0.5, autumn: 0.8 },
         activity: "NIGHT", pressureSensitivity: 0.6, wavePref: 0.2, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 100, opt: 300, max: 1000 },
         advice: { bait: "Kalamar, Balık Eti", lure: "Yok", rig: "Deep Sea Rig", hook: "5/0 - 7/0", baitEn: "Squid, fish meat", baitEl: "Squid, fish meat", baitEs: "Calamar, fish meat", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Deep sea rig", rigEl: "Deep sea rig", rigEs: "Deep sea rig", hookEn: "5/0 - 7/0", hookEl: "5/0 - 7/0", hookEs: "5/0 - 7/0" },
         note: "Siyah rengi ve parlayan gözleriyle tanınır. Yağ balığına benzer özellikler taşır.",
@@ -6756,7 +6756,7 @@ const SPECIES_DB = {
         tempRange: { min: 16, opt: 22, max: 27 },
         seasons: { winter: 0.3, spring: 0.6, summer: 0.9, autumn: 0.8 },
         activity: "DAWN_DUSK", pressureSensitivity: 0.7, wavePref: 0.4, currentPref: 0.7, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 20, opt: 60, max: 300 },
         advice: { bait: "Canlı Lüfer, Orkinos", lure: "Heavy Vertical Jig", rig: "Heavy Duty Jigging", hook: "9/0 - 12/0", baitEn: "Live bluefish, small tuna", baitEl: "Live bluefish, small tuna", baitEs: "Live bluefish, small tuna", lureEn: "Heavy vertical jig", lureEl: "Heavy vertical jig", lureEs: "Pesado vertical Jig", rigEn: "Heavy duty jigging", rigEl: "Heavy duty jigging", rigEs: "Pesado duty Jigging", hookEn: "9/0 - 12/0", hookEl: "9/0 - 12/0", hookEs: "9/0 - 12/0" },
         note: "Akdeniz'de 50kg+ ağırlığa ulaşabilen dev bireylerdir. Olta balıkçılığının zirvesidir.",
@@ -6784,7 +6784,7 @@ const SPECIES_DB = {
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.2, spring: 0.6, summer: 0.9, autumn: 0.7 },
         activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.6, currentPref: 0.7, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 0, opt: 2, max: 15 },
         advice: { bait: "Karides, Küçük Balık", lure: "Small Jig, Spinner", rig: "Light Spinning", hook: "6 - 2", baitEn: "Shrimp, small fish", baitEl: "Shrimp, small fish", baitEs: "Camarón, small fish", lureEn: "Small jig, spinner", lureEl: "Small jig, spinner", lureEs: "Small Jig, Spinningner", rigEn: "Light spinning", rigEl: "Light spinning", rigEs: "Ligero Spinningning", hookEn: "6 - 2", hookEl: "6 - 2", hookEs: "6 - 2" },
         note: "Çok hızlı ve çeviktir. Çatal şeklindeki kuyruğu ve gövdesindeki siyah noktalarla tanınır.",
@@ -6798,7 +6798,7 @@ const SPECIES_DB = {
         tempRange: { min: 18, opt: 24, max: 29 },
         seasons: { winter: 0.1, spring: 0.4, summer: 0.9, autumn: 0.7 },
         activity: "DAY", pressureSensitivity: 0.5, wavePref: 0.4, currentPref: 0.7, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 0, opt: 10, max: 50 },
         advice: { bait: "Karides, Balık Parçası", lure: "Jig, Spoon", rig: "Light Spinning / Sabiki", hook: "4 - 1/0", baitEn: "Shrimp, fish chunk", baitEl: "Shrimp, fish chunk", baitEs: "Camarón, fish chunk", lureEn: "Jig, spoon", lureEl: "Jig, spoon", lureEs: "Jig, spoon", rigEn: "Light spinning / sabiki", rigEl: "Light spinning / sabiki", rigEs: "Ligero Spinningning / Sabiki", hookEn: "4 - 1/0", hookEl: "4 - 1/0", hookEs: "4 - 1/0" },
         note: "Çok kavgacı bir türdür. Kızıldeniz'den gelerek Akdeniz'e adapte olmuştur.",
@@ -6813,7 +6813,7 @@ const SPECIES_DB = {
         tempRange: { min: 14, opt: 20, max: 26 },
         seasons: { winter: 0.2, spring: 0.6, summer: 0.9, autumn: 0.8 },
         activity: "NIGHT", pressureSensitivity: 0.6, wavePref: 0.4, currentPref: 0.3, salinityPref: "MEDIUM", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 2, opt: 15, max: 50 },
         advice: { bait: "Canlı Karides, Sübye", lure: "Large Soft Plastic, Minnow", rig: "Spinning / Bottom Rig", hook: "3/0 - 6/0", baitEn: "Live shrimp, cuttlefish", baitEl: "Live shrimp, cuttlefish", baitEs: "Live Camarón, Sepia", lureEn: "Large soft plastic, minnow", lureEl: "Large soft plastic, minnow", lureEs: "Large Vinilo, minnow", rigEn: "Spinning / bottom rig", rigEl: "Spinning / bottom rig", rigEs: "Spinningning / Aparejo de fondo", hookEn: "3/0 - 6/0", hookEl: "3/0 - 6/0", hookEs: "3/0 - 6/0" },
         note: "Ağzının içindeki sarı renk sebebiyle 'Sarıağız' olarak bilinir. Çok büyük boyutlara ulaşabilir ve taş çıkarabilir.",
@@ -6855,7 +6855,7 @@ const SPECIES_DB = {
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.7, spring: 0.8, summer: 0.4, autumn: 0.6 },
         activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.2, currentPref: 0.3, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: GBIF Fas 13
         depth: { min: 10, opt: 40, max: 150 },
         advice: { bait: "Küçük Balık, Karides", lure: "Inchiciku, Soft Plastic", rig: "Bottom Rig / Slow Jigging", hook: "1/0 - 3/0", baitEn: "Small fish, shrimp", baitEl: "Small fish, shrimp", baitEs: "Small fish, Camarón", lureEn: "Inchiciku, soft plastic", lureEl: "Inchiciku, soft plastic", lureEs: "Inchiciku, Vinilo", rigEn: "Bottom rig / slow jigging", rigEl: "Bottom rig / slow jigging", rigEs: "Aparejo de fondo / slow Jigging", hookEn: "1/0 - 3/0", hookEl: "1/0 - 3/0", hookEs: "1/0 - 3/0" },
         note: "Görkemli pektoral yüzgeçleri kanat gibi açılır. Deniz tabanında parmak benzeri uzantılarıyla yürür.",
@@ -6869,7 +6869,7 @@ const SPECIES_DB = {
         tempRange: { min: 14, opt: 20, max: 27 },
         seasons: { winter: 0.5, spring: 0.7, summer: 0.9, autumn: 0.6 },
         activity: "NIGHT", pressureSensitivity: 0.4, wavePref: 0.1, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 1, opt: 15, max: 50 },
         advice: { bait: "Balık Parçası, Karides", lure: "Yok", rig: "Bottom Rig", hook: "4 - 1", baitEn: "Fish chunk, shrimp", baitEl: "Fish chunk, shrimp", baitEs: "Fish chunk, Camarón", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "4 - 1", hookEl: "4 - 1", hookEs: "4 - 1" },
         note: "Kendini tamamen kuma gömer, sadece yukarı bakan gözleri dışarıda kalır. Elektrik şoku üretebilir.",
@@ -6897,7 +6897,7 @@ const SPECIES_DB = {
         tempRange: { min: 14, opt: 19, max: 24 },
         seasons: { winter: 0.6, spring: 0.8, summer: 0.5, autumn: 0.7 },
         activity: "DAY", pressureSensitivity: 0.4, wavePref: 0.2, currentPref: 0.3, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 20, opt: 50, max: 150 },
         advice: { bait: "Canlı Gümüş, Karides", lure: "Slow Jig, Inchiku", rig: "Bottom Rig / Light Jigging", hook: "1/0 - 3/0", baitEn: "Live silverside, shrimp", baitEl: "Live silverside, shrimp", baitEs: "Live silverside, Camarón", lureEn: "Slow jig, inchiku", lureEl: "Slow jig, inchiku", lureEs: "Slow Jig, inchiku", rigEn: "Bottom rig / light jigging", rigEl: "Bottom rig / light jigging", rigEs: "Aparejo de fondo / Ligero Jigging", hookEn: "1/0 - 3/0", hookEl: "1/0 - 3/0", hookEs: "1/0 - 3/0" },
         note: "Gövdesindeki siyah leke Aziz Petrus'un parmak izi olarak efsaneleşmiştir. Çok asil bir görüntüsü vardır.",
@@ -6911,7 +6911,7 @@ const SPECIES_DB = {
         tempRange: { min: 13, opt: 18, max: 24 },
         seasons: { winter: 0.7, spring: 0.6, summer: 0.5, autumn: 0.8 },
         activity: "NIGHT", pressureSensitivity: 0.4, wavePref: 0.3, currentPref: 0.2, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 5, opt: 30, max: 200 },
         advice: { bait: "Balık Kafası, Kalamar", lure: "Yok", rig: "Heavy Bottom Rig / Wire Trace", hook: "6/0 - 9/0", baitEn: "Fish head, squid", baitEl: "Fish head, squid", baitEs: "Fish head, Calamar", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Heavy bottom rig / wire trace", rigEl: "Heavy bottom rig / wire trace", rigEs: "Pesado Aparejo de fondo / wire trace", hookEn: "6/0 - 9/0", hookEl: "6/0 - 9/0", hookEs: "6/0 - 9/0" },
         note: "Çok güçlü ve devasa boyutlara ulaşabilen bir yılan balığı türüdür. Gece avlanır.",
@@ -6925,7 +6925,7 @@ const SPECIES_DB = {
         tempRange: { min: 16, opt: 22, max: 28 },
         seasons: { winter: 0.4, spring: 0.6, summer: 0.9, autumn: 0.7 },
         activity: "NIGHT", pressureSensitivity: 0.4, wavePref: 0.2, currentPref: 0.2, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 1, opt: 15, max: 60 },
         advice: { bait: "Balık Parçası, Kalamar", lure: "Yok", rig: "Bottom Rig / Wire Trace", hook: "4/0 - 6/0", baitEn: "Fish chunk, squid", baitEl: "Fish chunk, squid", baitEs: "Fish chunk, Calamar", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom rig / wire trace", rigEl: "Bottom rig / wire trace", rigEs: "Aparejo de fondo / wire trace", hookEn: "4/0 - 6/0", hookEl: "4/0 - 6/0", hookEs: "4/0 - 6/0" },
         note: "Desenli derisi ve keskin dişleriyle tanınır. Kayalıkların karanlık köşelerinde pusu kurar.",
@@ -6940,7 +6940,7 @@ const SPECIES_DB = {
         tempRange: { min: 12, opt: 18, max: 24 },
         seasons: { winter: 0.4, spring: 0.7, summer: 0.8, autumn: 0.6 },
         activity: "DAY", pressureSensitivity: 0.6, wavePref: 0.4, currentPref: 0.7, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 25, opt: 30, max: 400 }, // [2026-10-22] min 0 → 25: tekne türü (trolling/big game); min 0 iken Tanca'da 4,7 m kıyı noktasında ilk 10'a giriyordu. Ölçüm: kıyıda ilk10 açık deniz türü 4→0, 80/200 m değişmez, Türkiye 45/45 aynı.
         advice: { bait: "Balık Parçası, Kanlı Yem", lure: "Trolling Lure", rig: "Heavy Wire Trace", hook: "8/0 - 10/0", baitEn: "Fish chunk, bloody bait", baitEl: "Fish chunk, bloody bait", baitEs: "Fish chunk, bloody bait", lureEn: "Trolling lure", lureEl: "Trolling lure", lureEs: "Curricán Señuelo", rigEn: "Heavy wire trace", rigEl: "Heavy wire trace", rigEs: "Pesado wire trace", hookEn: "8/0 - 10/0", hookEl: "8/0 - 10/0", hookEs: "8/0 - 10/0" },
         note: "Akdeniz'in en yaygın pelajik köpekbalığıdır. İndigo mavisi rengiyle muhteşem görünür.",
@@ -6960,7 +6960,7 @@ const SPECIES_DB = {
         tempRange: { min: 8, opt: 13, max: 20 },
         seasons: { winter: 0.9, spring: 0.85, summer: 0.75, autumn: 0.9 },
         activity: "NIGHT", pressureSensitivity: 0.45, wavePref: 0.4, currentPref: 0.55, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: GBIF Fas 25
         depth: { min: 20, opt: 150, max: 600 },
         advice: { bait: "Canlı Sardalya, Kalamar", lure: "Ağır Jig, Silikon", rig: "Dip Paraketa / Jigging", hook: "3/0 - 6/0", baitEn: "Live sardine, squid", baitEl: "Live sardine, squid", baitEs: "Sardina viva, calamar", lureEn: "Heavy jig, soft plastic", lureEl: "Heavy jig, soft plastic", lureEs: "Jig pesado, vinilo", rigEn: "Bottom longline / jigging", rigEl: "Bottom longline / jigging", rigEs: "Palangre de fondo / jigging", hookEn: "3/0 - 6/0", hookEl: "3/0 - 6/0", hookEs: "3/0 - 6/0" },
         note: "İspanya'nın en çok tüketilen balığıdır. Gündüz derinde durur, gece beslenmek için yamaç boyunca yükselir.",
@@ -6973,7 +6973,7 @@ const SPECIES_DB = {
         tempRange: { min: 10, opt: 18, max: 26 },
         seasons: { winter: 0.85, spring: 0.9, summer: 0.85, autumn: 0.95 },
         activity: "NIGHT", pressureSensitivity: 0.3, wavePref: 0.3, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 0, opt: 20, max: 150 },
         advice: { bait: "Yengeç, Beyaz Bez", lure: "Ahtapot Zokası (Pulpera)", rig: "Zoka At-Çek / Nasa", hook: "Özel Ahtapot Zokası", baitEn: "Crab, white cloth", baitEl: "Crab, white cloth", baitEs: "Cangrejo, trapo blanco", lureEn: "Octopus jig (pulpera)", lureEl: "Octopus jig (pulpera)", lureEs: "Pulpera", rigEn: "Jig and retrieve / pot", rigEl: "Jig and retrieve / pot", rigEs: "Pulpera al lance / nasa", hookEn: "Dedicated octopus jig", hookEl: "Dedicated octopus jig", hookEs: "Pulpera específica" },
         note: "Galiçya'nın simge ürünü — pulpo á feira'nın balığı. Kayalık diplerde kovuk tutar, geceleri avlanmaya çıkar.",
@@ -6986,7 +6986,7 @@ const SPECIES_DB = {
         tempRange: { min: 10, opt: 16, max: 24 },
         seasons: { winter: 0.7, spring: 0.9, summer: 0.95, autumn: 0.9 },
         activity: "NIGHT", pressureSensitivity: 0.4, wavePref: 0.4, currentPref: 0.5, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 0, opt: 30, max: 100 },
         advice: { bait: "Küçük Karides Parçası", lure: "Sabiki Takımı", rig: "Sabiki / Çapari", hook: "12 - 16 Sabiki", baitEn: "Small shrimp pieces", baitEl: "Small shrimp pieces", baitEs: "Trozos de camarón", lureEn: "Sabiki rig", lureEl: "Sabiki rig", lureEs: "Bajo de sabiki", rigEn: "Sabiki / feather string", rigEl: "Sabiki / feather string", rigEs: "Sabiki / cacea de plumas", hookEn: "12 - 16 sabiki", hookEl: "12 - 16 sabiki", hookEs: "12 - 16 sabiki" },
         note: "Kuzey İspanya'nın yaz balığı; Bilbao ve Santander'de ızgarada tüketilir. Işığa gelir, gece teknelerinin ana hedefidir.",
@@ -6999,7 +6999,7 @@ const SPECIES_DB = {
         tempRange: { min: 9, opt: 16, max: 24 },
         seasons: { winter: 0.7, spring: 0.95, summer: 0.9, autumn: 0.85 },
         activity: "NIGHT", pressureSensitivity: 0.4, wavePref: 0.4, currentPref: 0.5, salinityPref: "MEDIUM", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: GBIF Fas 22
         depth: { min: 0, opt: 25, max: 100 },
         advice: { bait: "Küçük Karides Parçası", lure: "İnce Sabiki", rig: "Sabiki / Çapari", hook: "14 - 18 Sabiki", baitEn: "Small shrimp pieces", baitEl: "Small shrimp pieces", baitEs: "Trozos de camarón", lureEn: "Fine sabiki", lureEl: "Fine sabiki", lureEs: "Sabiki fino", rigEn: "Sabiki / feather string", rigEl: "Sabiki / feather string", rigEs: "Sabiki / cacea de plumas", hookEn: "14 - 18 sabiki", hookEl: "14 - 18 sabiki", hookEs: "14 - 18 sabiki" },
         note: "Kantabrik'in bahar seferi (costera de la anchoa) bu tür üzerinedir. Sirkeli boquerón ve tuzlanmış anchoa aynı balıktır.",
@@ -7012,7 +7012,7 @@ const SPECIES_DB = {
         tempRange: { min: 8, opt: 15, max: 24 },
         seasons: { winter: 0.85, spring: 0.9, summer: 0.9, autumn: 0.95 },
         activity: "DAWN_DUSK", pressureSensitivity: 0.4, wavePref: 0.45, currentPref: 0.6, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 0, opt: 50, max: 200 },
         advice: { bait: "Karides, Balık Parçası", lure: "Sabiki, Küçük Jig", rig: "Sabiki / Hafif Spinning", hook: "8 - 12", baitEn: "Shrimp, fish strip", baitEl: "Shrimp, fish strip", baitEs: "Camarón, tira de pescado", lureEn: "Sabiki, small jig", lureEl: "Sabiki, small jig", lureEs: "Sabiki, jig pequeño", rigEn: "Sabiki / light spinning", rigEl: "Sabiki / light spinning", rigEs: "Sabiki / spinning ligero", hookEn: "8 - 12", hookEl: "8 - 12", hookEs: "8 - 12" },
         note: "Kanarya'da chicharro denir ve ada mutfağının temelidir. Liman ışıklarının altında gece boyunca tutulur.",
@@ -7025,7 +7025,7 @@ const SPECIES_DB = {
         tempRange: { min: 7, opt: 13, max: 20 },
         seasons: { winter: 0.75, spring: 0.95, summer: 0.9, autumn: 0.85 },
         activity: "DAWN_DUSK", pressureSensitivity: 0.45, wavePref: 0.45, currentPref: 0.6, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 35.5, lon1: -6.0, lat2: 36.3, lon2: -5.0, name: "Cebelitarık Boğazı" }], // [2026-10-22] Boğaz kutusu: Boğaz'da gözlem kaydı OBIS 32 · GBIF 18 (kontrol: çipura 3·4, levrek 1·6, morina 0·0)
+        regions: [], habitatBboxes: [{ lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 35.5, lon1: -6.0, lat2: 36.3, lon2: -5.0, name: "Cebelitarık Boğazı" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Boğaz kutusu: Boğaz'da gözlem kaydı OBIS 32 · GBIF 18 (kontrol: çipura 3·4, levrek 1·6, morina 0·0)
         depth: { min: 0, opt: 40, max: 200 },
         advice: { bait: "Balık Şeridi", lure: "Sabiki, Kaşık, Küçük Jig", rig: "Sabiki / Spinning", hook: "6 - 10", baitEn: "Fish strip", baitEl: "Fish strip", baitEs: "Tira de pescado", lureEn: "Sabiki, spoon, small jig", lureEl: "Sabiki, spoon, small jig", lureEs: "Sabiki, cuchara, jig pequeño", rigEn: "Sabiki / spinning", rigEl: "Sabiki / spinning", rigEs: "Sabiki / spinning", hookEn: "6 - 10", hookEl: "6 - 10", hookEs: "6 - 10" },
         note: "Biskay'ın ilkbahar balığı. Akdeniz'deki kolyozdan (estornino) ayrıdır: sırt desenleri daha keskin, karnı lekesizdir.",
@@ -7038,7 +7038,7 @@ const SPECIES_DB = {
         tempRange: { min: 10, opt: 18, max: 25 },
         seasons: { winter: 0.9, spring: 0.95, summer: 0.75, autumn: 0.85 },
         activity: "DAWN_DUSK", pressureSensitivity: 0.3, wavePref: 0.3, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: GBIF Fas 29
         depth: { min: 0, opt: 25, max: 150 },
         advice: { bait: "Canlı Karides", lure: "Sepia Zokası (Egi)", rig: "Eging / Hafif Spinning", hook: "2.5 - 3.5 Egi", baitEn: "Live shrimp", baitEl: "Live shrimp", baitEs: "Camarón vivo", lureEn: "Cuttlefish jig (egi)", lureEl: "Cuttlefish jig (egi)", lureEs: "Jibionera / egi", rigEn: "Eging / light spinning", rigEl: "Eging / light spinning", rigEs: "Eging / spinning ligero", hookEn: "2.5 - 3.5 egi", hookEl: "2.5 - 3.5 egi", hookEs: "2.5 - 3.5 egi" },
         note: "Cádiz'de choco adıyla bilinir ve kızartması yöresel klasiktir. İlkbaharda yumurtlamak için sığ çayırlara gelir.",
@@ -7051,7 +7051,7 @@ const SPECIES_DB = {
         tempRange: { min: 10, opt: 17, max: 24 },
         seasons: { winter: 0.95, spring: 0.85, summer: 0.7, autumn: 0.9 },
         activity: "NIGHT", pressureSensitivity: 0.35, wavePref: 0.3, currentPref: 0.45, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 2, opt: 40, max: 250 },
         advice: { bait: "Yok", lure: "Kalamar Zokası (Fosforlu)", rig: "Zoka At-Çek (Eging)", hook: "Özel Zoka İğnesi", baitEn: "None", baitEl: "None", baitEs: "Ninguno", lureEn: "Squid jig (phosphorescent)", lureEl: "Squid jig (phosphorescent)", lureEs: "Poteras fosforescentes", rigEn: "Eging (cast and retrieve)", rigEl: "Eging (cast and retrieve)", rigEs: "Eging (lance y recogida)", hookEn: "Dedicated squid jig", hookEl: "Dedicated squid jig", hookEs: "Potera específica" },
         note: "Kış ayları en verimli dönemdir. Berrak su ve ay ışığı ister, bulanık suda zokayı seçemez.",
@@ -7072,7 +7072,7 @@ const SPECIES_DB = {
         tempRange: { min: 9, opt: 17, max: 27 },
         seasons: { winter: 0.8, spring: 0.95, summer: 0.85, autumn: 0.85 },
         activity: "DAY", pressureSensitivity: 0.35, wavePref: 0.35, currentPref: 0.45, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 0, opt: 30, max: 120 },
         advice: { bait: "Deniz Kurdu, Karides, Midye", lure: "Küçük Silikon", rig: "Dip Takımı / Hafif Bottom", hook: "4 - 8", baitEn: "Marine worm, shrimp, mussel", baitEl: "Marine worm, shrimp, mussel", baitEs: "Gusano de mar, camarón, mejillón", lureEn: "Small soft plastic", lureEl: "Small soft plastic", lureEs: "Vinilo pequeño", rigEn: "Bottom rig / light bottom", rigEl: "Bottom rig / light bottom", rigEs: "Aparejo de fondo / fondo ligero", hookEn: "4 - 8", hookEl: "4 - 8", hookEs: "4 - 8" },
         note: "Kıyıdan en sık yakalanan mercangillerden. İlkbaharda kumda yuva kazıp yumurta bekler, o dönemde çok saldırgandır.",
@@ -7085,7 +7085,7 @@ const SPECIES_DB = {
         tempRange: { min: 12, opt: 20, max: 28 },
         seasons: { winter: 0.6, spring: 0.85, summer: 0.95, autumn: 0.85 },
         activity: "NIGHT", pressureSensitivity: 0.3, wavePref: 0.35, currentPref: 0.4, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }],
+        regions: [], habitatBboxes: [{ lat1: 30.0, lon1: -6.0, lat2: 45.0, lon2: 20.0, name: "Batı/Orta Akdeniz" }, { lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 27.0, lon1: -18.5, lat2: 30.0, lon2: -13.0, name: "Kanarya Adaları" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Fas Atlantik: Kanarya yayılımı
         depth: { min: 0, opt: 15, max: 80 },
         advice: { bait: "Deniz Kurdu, Karides, Kum Böceği", lure: "Yok", rig: "İnce Dip Takımı (Surfcasting)", hook: "6 - 10", baitEn: "Marine worm, shrimp, sand flea", baitEl: "Marine worm, shrimp, sand flea", baitEs: "Gusano de mar, camarón, pulga de mar", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Fine bottom rig (surfcasting)", rigEl: "Fine bottom rig (surfcasting)", rigEs: "Aparejo fino de fondo (surfcasting)", hookEn: "6 - 10", hookEl: "6 - 10", hookEs: "6 - 10" },
         note: "Kumsal atışının klasik hedefi. Dalganın kumu karıştırdığı köpüklü şeritte, çoğunlukla gece beslenir.",
@@ -7124,7 +7124,7 @@ const SPECIES_DB = {
         tempRange: { min: 6, opt: 12, max: 18 },
         seasons: { winter: 0.9, spring: 0.9, summer: 0.8, autumn: 0.9 },
         activity: "NIGHT", pressureSensitivity: 0.35, wavePref: 0.35, currentPref: 0.45, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 35.5, lon1: -6.0, lat2: 36.3, lon2: -5.0, name: "Cebelitarık Boğazı" }], // [2026-10-22] Boğaz kutusu: Boğaz'da gözlem kaydı OBIS 3 · GBIF 3 (kontrol: çipura 3·4, levrek 1·6, morina 0·0)
+        regions: [], habitatBboxes: [{ lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 35.5, lon1: -6.0, lat2: 36.3, lon2: -5.0, name: "Cebelitarık Boğazı" }, { lat1: 33.4, lon1: -8.2, lat2: 35.85, lon2: -5.85, name: "Fas Atlantik Kıyısı" }], // [2026-10-22] Boğaz kutusu: Boğaz'da gözlem kaydı OBIS 3 · GBIF 3 (kontrol: çipura 3·4, levrek 1·6, morina 0·0)
         depth: { min: 3, opt: 40, max: 150 },
         advice: { bait: "Deniz Kurdu, Karides, Balık Parçası", lure: "Yok", rig: "Dip Takımı", hook: "4 - 8", baitEn: "Marine worm, shrimp, fish strip", baitEl: "Marine worm, shrimp, fish strip", baitEs: "Gusano de mar, camarón, tira de pescado", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "4 - 8", hookEl: "4 - 8", hookEs: "4 - 8" },
         note: "Batık ve iskele ayaklarının etrafında sürü hâlinde bulunur. Eti çabuk bozulur, avlandığı gün tüketilmelidir.",

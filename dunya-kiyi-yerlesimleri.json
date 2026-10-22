@@ -1,6 +1,6 @@
 {
  "type": "FeatureCollection",
- "_aciklama": "Türkiye dışı kıyı yerleşimleri — yalnız GÖRÜNTÜ etiketi (getCoastalLocality). Koordinatlar OSM Nominatim, 2026-10-22. ilce=Türkçe ad; en/es/el=dil karşılıkları. İlk kapsam: Cebelitarık Boğazı + Kuzey Fas (ilk yabancı abone, Tanca).",
+ "_aciklama": "Türkiye dışı kıyı yerleşimleri — yalnız GÖRÜNTÜ etiketi (getCoastalLocality). Koordinatlar OSM Nominatim, 2026-10-22. ilce=Türkçe ad; en/es/el=dil karşılıkları. İlk kapsam: Cebelitarık Boğazı + Kuzey Fas + Fas Atlantik (Kazablanka–Spartel) (ilk yabancı abone, Tanca).",
  "features": [
   {
    "type": "Feature",
@@ -341,6 +341,132 @@
     "coordinates": [
      -5.14685,
      36.42681
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Mehdia",
+    "en": "Mehdia",
+    "es": "Mehdía",
+    "el": "Μεχντία",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -6.67206,
+     34.25649
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Kenitra",
+    "en": "Kenitra",
+    "es": "Kenitra",
+    "el": "Κενίτρα",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -6.57017,
+     34.26457
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Rabat",
+    "en": "Rabat",
+    "es": "Rabat",
+    "el": "Ραμπάτ",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -6.84089,
+     34.02185
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Skhirat",
+    "en": "Skhirat",
+    "es": "Skhirat",
+    "el": "Σχιράτ",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -7.02803,
+     33.85067
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Mohammedia",
+    "en": "Mohammedia",
+    "es": "Mohammedia",
+    "el": "Μοχαμεντία",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -7.38933,
+     33.69584
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Kazablanka",
+    "en": "Casablanca",
+    "es": "Casablanca",
+    "el": "Καζαμπλάνκα",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -7.62003,
+     33.59451
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Moulay Bousselham",
+    "en": "Moulay Bousselham",
+    "es": "Mulay Busselham",
+    "el": "Μουλάι Μπουσελάμ",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -6.29408,
+     34.87801
     ]
    }
   }
