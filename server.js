@@ -184,6 +184,7 @@ const SERVER_i18n = {
             // eskiden beri ölü bir kayıt, sözlük kutulardan sapmış. Silmedim, zararsız.
             'Batı/Orta Akdeniz': 'Batı/Orta Akdeniz',
             'İber Atlantiği & Biskay': 'İber Atlantiği & Biskay',
+            'Cebelitarık Boğazı': 'Cebelitarık Boğazı',
             'Kanarya Adaları': 'Kanarya Adaları',
             'İzlanda': 'İzlanda',
             'California': 'Kaliforniya',
@@ -385,6 +386,7 @@ const SERVER_i18n = {
             // eskiden beri ölü bir kayıt, sözlük kutulardan sapmış. Silmedim, zararsız.
             'Batı/Orta Akdeniz': 'Western/Central Mediterranean',
             'İber Atlantiği & Biskay': 'Iberian Atlantic & Bay of Biscay',
+            'Cebelitarık Boğazı': 'Strait of Gibraltar',
             'Kanarya Adaları': 'Canary Islands',
             'İzlanda': 'Iceland',
             'California': 'California',
@@ -586,6 +588,7 @@ const SERVER_i18n = {
             // eskiden beri ölü bir kayıt, sözlük kutulardan sapmış. Silmedim, zararsız.
             'Batı/Orta Akdeniz': 'Mediterráneo occidental y central',
             'İber Atlantiği & Biskay': 'Atlántico ibérico y golfo de Vizcaya',
+            'Cebelitarık Boğazı': 'Estrecho de Gibraltar',
             'Kanarya Adaları': 'Islas Canarias',
             'İzlanda': 'Islandia',
             'California': 'California',
@@ -787,6 +790,7 @@ const SERVER_i18n = {
             // eskiden beri ölü bir kayıt, sözlük kutulardan sapmış. Silmedim, zararsız.
             'Batı/Orta Akdeniz': 'Δυτική/Κεντρική Μεσόγειος',
             'İber Atlantiği & Biskay': 'Ιβηρικός Ατλαντικός & Βισκαϊκός Κόλπος',
+            'Cebelitarık Boğazı': 'Στενά του Γιβραλτάρ',
             'Kanarya Adaları': 'Κανάρια Νησιά',
             'İzlanda': 'Ισλανδία',
             'California': 'Καλιφόρνια',
@@ -2112,6 +2116,14 @@ let _coastalLocalityFeatures = [];
 try {
     const locRaw = fs.readFileSync(path.join(__dirname, 'tr-coastal-localities.json'), 'utf8');
     _coastalLocalityFeatures = JSON.parse(locRaw).features;
+    // [2026-10-22] Türkiye dışı yerleşimler ayrı dosyada (dunya-kiyi-yerlesimleri.json) —
+    // ilk yabancı abone Tanca'da "Western/Central Mediterranean" görüyordu. Yalnız GÖRÜNTÜ
+    // etiketi; en yakın nokta aranır, Türkiye'den >2.000 km uzak olduğu için Türkiye
+    // etiketleri değişmez. Dosya yoksa sessizce Türkiye listesiyle devam edilir.
+    try {
+        const dunya = JSON.parse(fs.readFileSync(path.join(__dirname, 'dunya-kiyi-yerlesimleri.json'), 'utf8')).features || [];
+        _coastalLocalityFeatures = _coastalLocalityFeatures.concat(dunya);
+    } catch (e) { /* isteğe bağlı dosya */ }
     acilisLog('ok', 'Kıyı yerleşimleri', `${_coastalLocalityFeatures.length} nokta`);
 } catch (e) {
     acilisLog('uyari', 'Kıyı yerleşimleri', 'tr-coastal-localities.json yok — yerel isim etiketi KAPALI: ' + e.message);
@@ -4419,7 +4431,10 @@ function getCoastalLocality(lat, lon, lang = 'tr') {
     }
     if (!nearest || nearestDist > COASTAL_LABEL_FAR_KM) return null;
 
-    const ilce = nearest.properties.ilce;
+    // Yurt dışı noktalarda dile göre ad (Tanca → Tangier / Tánger); Türkiye kayıtlarında
+    // en/es/el alanı yok → eskisi gibi `ilce`.
+    const pr = nearest.properties;
+    const ilce = (lang === 'en' && pr.en) || (lang === 'es' && pr.es) || (lang === 'el' && pr.el) || pr.ilce;
     const near = nearestDist <= COASTAL_LABEL_NEAR_KM;
     if (lang === 'en') return `${ilce} ${near ? 'Coast' : 'Offshore'}`;
     if (lang === 'es') return `${near ? 'Costa de' : 'Frente a'} ${ilce}`;

@@ -1,0 +1,348 @@
+{
+ "type": "FeatureCollection",
+ "_aciklama": "Türkiye dışı kıyı yerleşimleri — yalnız GÖRÜNTÜ etiketi (getCoastalLocality). Koordinatlar OSM Nominatim, 2026-10-22. ilce=Türkçe ad; en/es/el=dil karşılıkları. İlk kapsam: Cebelitarık Boğazı + Kuzey Fas (ilk yabancı abone, Tanca).",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Tanca",
+    "en": "Tangier",
+    "es": "Tánger",
+    "el": "Ταγγέρη",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -5.80447,
+     35.76949
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Asilah",
+    "en": "Asilah",
+    "es": "Arcila",
+    "el": "Ασίλα",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -5.92169,
+     35.45557
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Larache",
+    "en": "Larache",
+    "es": "Larache",
+    "el": "Λαράς",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -6.15403,
+     35.19509
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Ksar es-Seghir",
+    "en": "Ksar es-Seghir",
+    "es": "Alcazarseguir",
+    "el": "Κσαρ ες-Σεγίρ",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -5.55855,
+     35.84275
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Fnideq",
+    "en": "Fnideq",
+    "es": "Castillejos",
+    "el": "Φνιντέκ",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -5.36142,
+     35.83921
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "M'diq",
+    "en": "M'diq",
+    "es": "Rincón",
+    "el": "Μντικ",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -5.32322,
+     35.68336
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Martil",
+    "en": "Martil",
+    "es": "Río Martín",
+    "el": "Μαρτίλ",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -5.27415,
+     35.61744
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Oued Laou",
+    "en": "Oued Laou",
+    "es": "Uad Lau",
+    "el": "Ουέντ Λάου",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -5.09303,
+     35.45049
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "El Jebha",
+    "en": "El Jebha",
+    "es": "El Jebha",
+    "el": "Ελ Τζέμπα",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -4.66606,
+     35.20711
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Al Hoceima",
+    "en": "Al Hoceima",
+    "es": "Alhucemas",
+    "el": "Αλ Χοσέιμα",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -3.9313,
+     35.24497
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Nador",
+    "en": "Nador",
+    "es": "Nador",
+    "el": "Ναντόρ",
+    "ulke": "MA",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -2.93684,
+     35.17364
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Septe",
+    "en": "Ceuta",
+    "es": "Ceuta",
+    "el": "Θέουτα",
+    "ulke": "ES",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -5.35582,
+     35.89442
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Melilla",
+    "en": "Melilla",
+    "es": "Melilla",
+    "el": "Μελίγια",
+    "ulke": "ES",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -2.9409,
+     35.29187
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Cebelitarık",
+    "en": "Gibraltar",
+    "es": "Gibraltar",
+    "el": "Γιβραλτάρ",
+    "ulke": "GI",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -5.34748,
+     36.12859
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Tarifa",
+    "en": "Tarifa",
+    "es": "Tarifa",
+    "el": "Ταρίφα",
+    "ulke": "ES",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -5.60502,
+     36.01291
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Algeciras",
+    "en": "Algeciras",
+    "es": "Algeciras",
+    "el": "Αλχεθίρας",
+    "ulke": "ES",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -5.4474,
+     36.13117
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "La Línea",
+    "en": "La Línea",
+    "es": "La Línea",
+    "el": "Λα Λίνεα",
+    "ulke": "ES",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -5.34824,
+     36.16779
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Barbate",
+    "en": "Barbate",
+    "es": "Barbate",
+    "el": "Μπαρμπάτε",
+    "ulke": "ES",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -5.91928,
+     36.1924
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ilce": "Estepona",
+    "en": "Estepona",
+    "es": "Estepona",
+    "el": "Εστεπόνα",
+    "ulke": "ES",
+    "kaynak": "OSM Nominatim"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -5.14685,
+     36.42681
+    ]
+   }
+  }
+ ]
+}

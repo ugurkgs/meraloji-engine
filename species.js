@@ -7025,7 +7025,7 @@ const SPECIES_DB = {
         tempRange: { min: 7, opt: 13, max: 20 },
         seasons: { winter: 0.75, spring: 0.95, summer: 0.9, autumn: 0.85 },
         activity: "DAWN_DUSK", pressureSensitivity: 0.45, wavePref: 0.45, currentPref: 0.6, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }],
+        regions: [], habitatBboxes: [{ lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 35.5, lon1: -6.0, lat2: 36.3, lon2: -5.0, name: "Cebelitarık Boğazı" }], // [2026-10-22] Boğaz kutusu: Boğaz'da gözlem kaydı OBIS 32 · GBIF 18 (kontrol: çipura 3·4, levrek 1·6, morina 0·0)
         depth: { min: 0, opt: 40, max: 200 },
         advice: { bait: "Balık Şeridi", lure: "Sabiki, Kaşık, Küçük Jig", rig: "Sabiki / Spinning", hook: "6 - 10", baitEn: "Fish strip", baitEl: "Fish strip", baitEs: "Tira de pescado", lureEn: "Sabiki, spoon, small jig", lureEl: "Sabiki, spoon, small jig", lureEs: "Sabiki, cuchara, jig pequeño", rigEn: "Sabiki / spinning", rigEl: "Sabiki / spinning", rigEs: "Sabiki / spinning", hookEn: "6 - 10", hookEl: "6 - 10", hookEs: "6 - 10" },
         note: "Biskay'ın ilkbahar balığı. Akdeniz'deki kolyozdan (estornino) ayrıdır: sırt desenleri daha keskin, karnı lekesizdir.",
@@ -7111,7 +7111,7 @@ const SPECIES_DB = {
         tempRange: { min: 6, opt: 13, max: 20 },
         seasons: { winter: 0.85, spring: 0.9, summer: 0.9, autumn: 0.9 },
         activity: "DAY", pressureSensitivity: 0.3, wavePref: 0.4, currentPref: 0.45, salinityPref: "HIGH", clarityPref: "CLEAR",
-        regions: [], habitatBboxes: [{ lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }],
+        regions: [], habitatBboxes: [{ lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 35.5, lon1: -6.0, lat2: 36.3, lon2: -5.0, name: "Cebelitarık Boğazı" }], // [2026-10-22] Boğaz kutusu: Boğaz'da gözlem kaydı OBIS 9 · GBIF 12 (kontrol: çipura 3·4, levrek 1·6, morina 0·0)
         depth: { min: 0, opt: 20, max: 50 },
         advice: { bait: "Yengeç, Midye, Deniz Kurdu", lure: "Silikon Yengeç", rig: "Kayalık Dip Takımı", hook: "1/0 - 4/0", baitEn: "Crab, mussel, marine worm", baitEl: "Crab, mussel, marine worm", baitEs: "Cangrejo, mejillón, gusano de mar", lureEn: "Soft plastic crab", lureEl: "Soft plastic crab", lureEs: "Cangrejo de vinilo", rigEn: "Rock bottom rig", rigEl: "Rock bottom rig", rigEs: "Aparejo de fondo en roca", hookEn: "1/0 - 4/0", hookEl: "1/0 - 4/0", hookEs: "1/0 - 4/0" },
         note: "Kantabrik kayalığının en yaygın iri balığı. Güçlü çene dişleriyle midye ve yengeç kırar, takımı hemen kayaya sokar.",
@@ -7124,7 +7124,7 @@ const SPECIES_DB = {
         tempRange: { min: 6, opt: 12, max: 18 },
         seasons: { winter: 0.9, spring: 0.9, summer: 0.8, autumn: 0.9 },
         activity: "NIGHT", pressureSensitivity: 0.35, wavePref: 0.35, currentPref: 0.45, salinityPref: "HIGH", clarityPref: "ANY",
-        regions: [], habitatBboxes: [{ lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }],
+        regions: [], habitatBboxes: [{ lat1: 36.0, lon1: -10.0, lat2: 46.0, lon2: -1.0, name: "İber Atlantiği & Biskay" }, { lat1: 35.5, lon1: -6.0, lat2: 36.3, lon2: -5.0, name: "Cebelitarık Boğazı" }], // [2026-10-22] Boğaz kutusu: Boğaz'da gözlem kaydı OBIS 3 · GBIF 3 (kontrol: çipura 3·4, levrek 1·6, morina 0·0)
         depth: { min: 3, opt: 40, max: 150 },
         advice: { bait: "Deniz Kurdu, Karides, Balık Parçası", lure: "Yok", rig: "Dip Takımı", hook: "4 - 8", baitEn: "Marine worm, shrimp, fish strip", baitEl: "Marine worm, shrimp, fish strip", baitEs: "Gusano de mar, camarón, tira de pescado", lureEn: "None", lureEl: "None", lureEs: "Ninguno", rigEn: "Bottom rig", rigEl: "Bottom rig", rigEs: "Aparejo de fondo", hookEn: "4 - 8", hookEl: "4 - 8", hookEs: "4 - 8" },
         note: "Batık ve iskele ayaklarının etrafında sürü hâlinde bulunur. Eti çabuk bozulur, avlandığı gün tüketilmelidir.",
