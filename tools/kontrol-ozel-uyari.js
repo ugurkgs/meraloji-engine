@@ -48,6 +48,17 @@ const PARCA = [
     // Parametre listesi artık aranmıyor — imza yine değişirse araç ölmesin.
     sok('function ozelUyarilariUret(', '\r\n}'),
     sok('const OZEL_UYARI_MIN_SURUM', '\r\n'),
+    // [2026-10-24] YATISMA uyarısı eklendi; kapı ve üretim bu üçünü kullanıyor.
+    sok('const YATISMA_MIN_SURUM', '\r\n'),
+    sok('const YATISMA_TURLERI', '\r\n'),
+    sok('const YATISMA_TUR_ESIK', '\r\n'),
+    // `kosul` verilince trakonya bloğu da çalışıyor; araç bugüne kadar kosul'suz
+    // çağırdığı için bu sabitler hiç sökülmemişti.
+    sok('const OZEL_UYARI_TRAKONYA_ESIK', '\r\n'),
+    sok('const OZEL_UYARI_TRAKONYA_DERINLIK_M', '\r\n'),
+    sok('const OZEL_UYARI_TRAKONYA_BERRAKLIK', '\r\n'),
+    sok('const OZEL_UYARI_TRAKONYA_DALGA_M', '\r\n'),
+    sok('const OZEL_UYARI_TRAKONYA_ZEMIN', '\r\n'),
     sok('function istemciYeter(surum, enAz) {', '\r\n}'),
     sok('function ozelUyariKapisi(data, istemciSurumu) {', '\r\n}'),
 ].join('\n');
@@ -267,6 +278,35 @@ console.log('\n── sürüm kapısı ─────────────�
     // isteğinden sonra BÜTÜN yeni istemciler uyarısız kalır.
     ol('önbellekteki gövde MUTASYONA UĞRAMADI',
         Array.isArray(g.orijinal.instant.ozelUyarilar));
+}
+
+// ── YATIŞMA [2026-10-24] ────────────────────────────────────────────────────
+console.log('\n── fırtına sonrası yatışma ────────────────────────────────');
+{
+    const y = `{ acikMi: true, tepeM: 2.4, simdiM: 0.7, basM: 0.7, tepeZaman: '2026-10-14T12:00',
+                 simdiZaman: '2026-10-15T18:00', basZaman: '2026-10-15T18:00', bitZaman: '2026-10-16T00:00' }`;
+    const g = kos(`
+        const l = ${liste(['levrek', 'Levrek', 62], ['izmarit', 'İzmarit', 40], ['sargoz', 'Sargoz', 38])};
+        globalThis.tr = ozelUyarilariUret(l, 'tr', { yatisma: ${y} });
+        globalThis.en = ozelUyarilariUret(l, 'en', { yatisma: ${y} });
+        globalThis.yok = ozelUyarilariUret(l, 'tr', { yatisma: null });
+        const govde = { instant: { ozelUyarilar: [{ tip: 'YEM_HIRSIZI' }, { tip: 'YATISMA' }], fishList: [] }, forecast: [] };
+        globalThis.v51 = ozelUyariKapisi(govde, 51);
+        globalThis.v52 = ozelUyariKapisi(govde, 52);
+        globalThis.orijinal = govde;
+    `);
+    const ytr = g.tr.find(u => u.tip === 'YATISMA');
+    ol('pencere varsa YATISMA uyarısı üretildi', !!ytr);
+    ol('seviye "bilgi"', ytr && ytr.seviye === 'bilgi');
+    ol('TR metinde virgüllü ondalık ve "yarın 00:00"', ytr && ytr.metin.includes('2,4 m') && ytr.metin.includes('yarın 00:00'));
+    ol('EN metinde noktalı ondalık', (g.en.find(u => u.tip === 'YATISMA') || {}).metin?.includes('2.4 m'));
+    ol('yalnız eşiği geçen yatışma türü rozet (levrek var, sargoz 38 yok)',
+        ytr && ytr.turler.length === 1 && ytr.turler[0].key === 'levrek');
+    ol('pencere yoksa YATISMA yok', !g.yok.some(u => u.tip === 'YATISMA'));
+    ol('v51 → YATISMA süzüldü, diğer uyarı duruyor',
+        g.v51.instant.ozelUyarilar.length === 1 && g.v51.instant.ozelUyarilar[0].tip === 'YEM_HIRSIZI');
+    ol('v52 → YATISMA duruyor', g.v52.instant.ozelUyarilar.some(u => u.tip === 'YATISMA'));
+    ol('süzme önbellekteki gövdeyi BOZMADI', g.orijinal.instant.ozelUyarilar.length === 2);
 }
 
 // ── 13) POZİTİF KONTROLLER ──────────────────────────────────────────────────

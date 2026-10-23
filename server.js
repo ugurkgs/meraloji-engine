@@ -257,6 +257,12 @@ const SERVER_i18n = {
                 baslikYemGider: 'Haramiler yemi tüketebilir',
                 baslikFirsat: 'Canlı yem fırsatı',
                 baslikTrakonya: 'Trakonya: basma riski',
+                baslikYatisma: 'Fırtına sonrası yatışma',
+                yatismaSaat: (yarin, hhmm) => (yarin ? 'yarın ' : '') + hhmm,
+                yatismaAcik: (tepe, simdi, bitis) =>
+                    `Dalga ${tepe} m'ye çıkmıştı, şimdi ${simdi} m. Fırtına arkası pencere açık: dip karışık, su bulanık; kıyıya yakın beslenme artabilir. Pencere ${bitis} civarına kadar sürüyor.`,
+                yatismaYakinda: (tepe, basDalga, bas) =>
+                    `Fırtına dalgası en çok ${tepe} m; ${bas} civarı ${basDalga} m'ye iniyor. Fırtına arkası pencere o saatte açılıyor: dip karışık, su bulanık olacak.`,
                 trakonyaMetin: (skor) =>
                     `Trakonya %${skor} aktif. Kumlu sığ zemin ve bulanık su — üzerine basma riski artıyor.`,
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
@@ -460,6 +466,12 @@ const SERVER_i18n = {
                 baslikYemGider: 'Thieves may strip your bait',
                 baslikFirsat: 'Live bait opportunity',
                 baslikTrakonya: 'Weever fish: step risk',
+                baslikYatisma: 'After-storm window',
+                yatismaSaat: (yarin, hhmm) => (yarin ? 'tomorrow ' : '') + hhmm,
+                yatismaAcik: (tepe, simdi, bitis) =>
+                    `Waves reached ${tepe} m and are now ${simdi} m. The after-storm window is open: the bottom is stirred up and the water murky, so feeding close to shore can pick up. It lasts until about ${bitis}.`,
+                yatismaYakinda: (tepe, basDalga, bas) =>
+                    `Storm waves peak at ${tepe} m and drop to ${basDalga} m around ${bas}. The after-storm window opens then: stirred-up bottom, murky water.`,
                 trakonyaMetin: (skor) =>
                     `Weever ${skor}% active. Sandy shallows and murky water raise the risk of stepping on one.`,
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
@@ -663,6 +675,12 @@ const SERVER_i18n = {
                 baslikYemGider: 'Los ladrones pueden acabar el cebo',
                 baslikFirsat: 'Oportunidad de cebo vivo',
                 baslikTrakonya: 'Araña: riesgo de pisarla',
+                baslikYatisma: 'Ventana tras el temporal',
+                yatismaSaat: (yarin, hhmm) => (yarin ? 'mañana a las ' : 'las ') + hhmm,
+                yatismaAcik: (tepe, simdi, bitis) =>
+                    `El oleaje llegó a ${tepe} m y ahora está en ${simdi} m. La ventana tras el temporal está abierta: el fondo está removido y el agua turbia, así que la actividad cerca de la orilla puede aumentar. Dura hasta ${bitis} aproximadamente.`,
+                yatismaYakinda: (tepe, basDalga, bas) =>
+                    `El oleaje del temporal llega a ${tepe} m y baja a ${basDalga} m hacia ${bas}. Entonces se abre la ventana tras el temporal: fondo removido, agua turbia.`,
                 trakonyaMetin: (skor) =>
                     `Araña ${skor}% activa. Fondo arenoso poco profundo y agua turbia aumentan el riesgo.`,
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
@@ -866,6 +884,12 @@ const SERVER_i18n = {
                 baslikYemGider: 'Οι κλέφτες μπορεί να φάνε το δόλωμα',
                 baslikFirsat: 'Ευκαιρία για ζωντανό δόλωμα',
                 baslikTrakonya: 'Δράκαινα: κίνδυνος',
+                baslikYatisma: 'Παράθυρο μετά την κακοκαιρία',
+                yatismaSaat: (yarin, hhmm) => (yarin ? 'αύριο ' : '') + hhmm,
+                yatismaAcik: (tepe, simdi, bitis) =>
+                    `Το κύμα έφτασε τα ${tepe} m και τώρα είναι ${simdi} m. Το παράθυρο μετά την κακοκαιρία είναι ανοιχτό: ο βυθός είναι ανακατεμένος και το νερό θολό, οπότε το τάισμα κοντά στην ακτή μπορεί να αυξηθεί. Διαρκεί περίπου έως ${bitis}.`,
+                yatismaYakinda: (tepe, basDalga, bas) =>
+                    `Το κύμα της κακοκαιρίας φτάνει τα ${tepe} m και πέφτει στα ${basDalga} m (${bas}). Τότε ανοίγει το παράθυρο μετά την κακοκαιρία: ανακατεμένος βυθός, θολό νερό.`,
                 trakonyaMetin: (skor) =>
                     `Δράκαινα ${skor}% ενεργή. Αμμώδη ρηχά και θολό νερό αυξάνουν τον κίνδυνο να την πατήσετε.`,
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
@@ -6020,6 +6044,65 @@ const HIRSIZ_MEKANIZMA = {
  * Boş dizi döner — null değil. İstemcide `isEmpty()` tek kontrolle bölümü
  * gizler; null denetimi ayrıca gerekmez.
  */
+// ── FIRTINA SONRASI YATIŞMA PENCERESİ  [2026-10-24] ─────────────────────
+// Usta kıyı balıkçısının "fırtına arkası" avı: deniz patladıktan sonra dalga
+// avlanılabilir seviyeye indiğinde, dip hâlâ karışık ve su bulanıkken levrek
+// gibi türler kıyıya yakın beslenir. Bilgi balıkçı bilgisidir; PUANA GİRMEZ —
+// yalnız özel uyarı olarak söylenir (sahip: "önce rozet, ölçmeden puana yok").
+//
+// Veri ek çağrı istemiyor: marine zaten past_days=7 ile geliyor. Dizi, fetch
+// tavanı uygulanmış hâliyle okunur — kapalı koyda "fırtına" uydurulmasın.
+const YATISMA_TEPE_M          = 1.2;   // son 48 saatte en az bu dalga (fırtına sayılır)
+const YATISMA_ORAN            = 0.5;   // pencere: dalga tepenin en çok yarısı…
+const YATISMA_AVLANIR_M       = 0.8;   // …ve kıyıdan avlanılabilir seviyede
+const YATISMA_TEPE_SONRA_SAAT = 36;    // tepeden bu kadar saat sonra su durulur, pencere kapanır
+const YATISMA_ILERI_SAAT      = 24;    // pencere en çok bu kadar ileride aranır
+
+/**
+ * dalgalar: saatlik dalga yüksekliği (m), zamanlar: aynı indeksli yerel saat dizisi,
+ * simdi: "şu an"ın indeksi. Pencere yoksa null.
+ */
+function yatismaPenceresi(dalgalar, zamanlar, simdi) {
+    if (!Array.isArray(dalgalar) || !Number.isInteger(simdi) || simdi < 0 || simdi >= dalgalar.length) return null;
+    const n = dalgalar.length;
+    const d = (i) => (typeof dalgalar[i] === 'number' && isFinite(dalgalar[i])) ? dalgalar[i] : null;
+
+    // Tepe: son 48 saat + önümüzdeki 12 saat (fırtına henüz bitmemiş olabilir).
+    let tepe = -1, tepeIdx = -1;
+    for (let i = Math.max(0, simdi - 48); i <= Math.min(n - 1, simdi + 12); i++) {
+        const v = d(i);
+        if (v !== null && v > tepe) { tepe = v; tepeIdx = i; }
+    }
+    if (tepe < YATISMA_TEPE_M) return null;
+
+    const esik = Math.min(YATISMA_AVLANIR_M, tepe * YATISMA_ORAN);
+    let bas = -1, bit = -1;
+    for (let i = Math.max(simdi, tepeIdx + 1); i <= Math.min(n - 1, simdi + YATISMA_ILERI_SAAT); i++) {
+        const v = d(i);
+        if (v === null) break;
+        const uygun = v <= esik && (i - tepeIdx) <= YATISMA_TEPE_SONRA_SAAT;
+        if (uygun) { if (bas < 0) bas = i; bit = i; }
+        else if (bas >= 0) break;          // ilk kesintisiz pencere
+    }
+    if (bas < 0) return null;
+    return {
+        basIdx: bas, bitIdx: bit, tepeIdx,
+        tepeM: tepe, simdiM: d(simdi),
+        basZaman: Array.isArray(zamanlar) ? (zamanlar[bas] || null) : null,
+        bitZaman: Array.isArray(zamanlar) ? (zamanlar[bit] || null) : null,
+        tepeZaman: Array.isArray(zamanlar) ? (zamanlar[tepeIdx] || null) : null,
+        simdiZaman: Array.isArray(zamanlar) ? (zamanlar[simdi] || null) : null,
+        basM: d(bas),
+        acikMi: bas === simdi,
+    };
+}
+
+// Fırtına arkası beslenmesiyle bilinen kıyı türleri (balıkçı bilgisi). Uyarıda
+// yalnız bu listeden o noktada aktif olanlar rozet olarak gösterilir; liste boşsa
+// (ör. yurt dışı bölge anahtarları) uyarı yine çıkar, rozet olmaz.
+const YATISMA_TURLERI = ['levrek', 'sargoz', 'karagoz', 'cipura', 'mirmir'];
+const YATISMA_TUR_ESIK = 40;
+
 function ozelUyarilariUret(fishList, lang, kosul) {
     if (!Array.isArray(fishList) || fishList.length === 0) return [];
     const t = i18n(lang).ozelUyari;
@@ -6085,6 +6168,40 @@ function ozelUyarilariUret(fishList, lang, kosul) {
             tavsiyeler: [],
             turler: [{ key: enYem.key, ad: enYem.name, skor: yuvarla(enYem.score) }],
         });
+    }
+
+    // ── FIRTINA SONRASI YATIŞMA ──────────────────────────────────────────
+    // Gerekçe ve eşikler: YATISMA_* tanımlarının üstünde. Ölçüldü (24 Eki,
+    // 13 kıyı × 92 gün): anların %1,6'sında açık; 14-15 Eki fırtınasını
+    // Bozcaada/Bandırma/Karaburun'da yakaladı, sakin kıyılarda hiç çalmadı.
+    if (kosul && kosul.yatisma && t.baslikYatisma) {
+        const y = kosul.yatisma;
+        const ondalik = (x) => {
+            const s = (Number(x) || 0).toFixed(1);
+            return lang === 'en' ? s : s.replace('.', ',');
+        };
+        // Saat yerel ("2026-10-24T18:00"); gün "şimdi"den farklıysa "yarın".
+        const saat = (z) => {
+            if (!z || typeof z !== 'string' || z.length < 16) return '';
+            const yarin = !!(y.simdiZaman && z.slice(0, 10) !== y.simdiZaman.slice(0, 10));
+            return t.yatismaSaat(yarin, z.slice(11, 16));
+        };
+        const turler = fishList
+            .filter(f => f && YATISMA_TURLERI.includes(f.key) && Number(f.score) >= YATISMA_TUR_ESIK)
+            .slice(0, 3)
+            .map(f => ({ key: f.key, ad: f.name, skor: yuvarla(f.score) }));
+        uyarilar.push({
+            tip: 'YATISMA',
+            seviye: 'bilgi',
+            baslik: t.baslikYatisma,
+            metin: y.acikMi
+                ? t.yatismaAcik(ondalik(y.tepeM), ondalik(y.simdiM), saat(y.bitZaman))
+                : t.yatismaYakinda(ondalik(y.tepeM), ondalik(y.basM), saat(y.basZaman)),
+            tavsiyeler: [],
+            turler,
+        });
+        console.log(`[YATISMA] ${y.acikMi ? 'AÇIK' : 'yakında'} — tepe ${y.tepeM} m (${y.tepeZaman}), `
+            + `şimdi ${y.simdiM} m, pencere ${y.basZaman} → ${y.bitZaman}, tür ${turler.length}`);
     }
 
     // ── TRAKONYA + BULANIK SU ────────────────────────────────────────────
@@ -7566,9 +7683,20 @@ const OZEL_UYARI_MIN_SURUM = 47;
  * yapılsaydı bir sonraki YENİ istemci de uyarısız kalırdı. Sığ kopya.
  * Sürüm bilinmiyorsa ESKİ sayılır — bilinmeyeni yeni saymak çökertir.
  */
+// [2026-10-24] YATISMA uyarısı yeni APK ile gelir. Eski istemci (47-51) bilinmeyen
+// tipi çökmeden çizerdi ama ikon seçimi tipe bağlı — fırtına kartına karides 🦐
+// basardı. Sahip açarsa bu sayıyı 47'ye indirmek uyarıyı herkese açar.
+const YATISMA_MIN_SURUM = 52;
+
 function ozelUyariKapisi(data, istemciSurumu) {
     if (!data || !data.instant || data.instant.ozelUyarilar === undefined) return data;
-    if (istemciYeter(istemciSurumu, OZEL_UYARI_MIN_SURUM)) return data;
+    if (istemciYeter(istemciSurumu, YATISMA_MIN_SURUM)) return data;
+    if (istemciYeter(istemciSurumu, OZEL_UYARI_MIN_SURUM)) {
+        // Bölüm tanınıyor ama YATISMA tipi bu sürüme gitmez. MUTASYON YOK.
+        const liste = data.instant.ozelUyarilar;
+        if (!Array.isArray(liste) || !liste.some(u => u && u.tip === 'YATISMA')) return data;
+        return { ...data, instant: { ...data.instant, ozelUyarilar: liste.filter(u => !u || u.tip !== 'YATISMA') } };
+    }
     const out = { ...data, instant: { ...data.instant } };
     delete out.instant.ozelUyarilar;
     return out;
@@ -9152,6 +9280,10 @@ app.get('/api/forecast', async (req, res) => {
                     zemin: substrateData,
                     berraklik: i_clarity,
                     dalga: i_wave,
+                    // Fetch tavanı uygulanmış dizi (yukarıda yerinde kırpıldı) —
+                    // kapalı koyda Karadeniz'in fırtınası uydurulmaz.
+                    yatisma: isLand ? null
+                        : yatismaPenceresi(marine.hourly?.wave_height, marine.hourly?.time, marineInstantIdx),
                 }),
                 temp: i_tempWater,
                 wave: parseFloat(i_wave.toFixed(2)),
