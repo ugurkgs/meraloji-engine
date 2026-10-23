@@ -4696,6 +4696,53 @@ function fetchDalgaTavani(yay, ruzgarKmh) {
     return { tavanM: hs, fetchKm: enUzunKm, acikYon };
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// RÜZGÂR KALKANI  [2026-10-23]
+// ═══════════════════════════════════════════════════════════════════════════
+// Kullanıcının sorusu: "rüzgâr 25 km/s yazıyor ama bu kıyı rüzgâra kapalı mı?"
+// Cevabın geometrisi ZATEN elimizde: acikSuYayiGetir her noktada 16 yönde
+// karanın kaç km'de başladığını ölçüyor (fetchKm). Şimdiye kadar yalnız dalga
+// tavanı için kullanılıyordu; burada saat saat RÜZGÂRIN GELDİĞİ yöne bakılıyor.
+//
+// Open-Meteo wind_direction_10m rüzgârın GELDİĞİ yöndür; fetchKm[b] de noktadan
+// b yönüne doğru ölçülüyor — yani rüzgâr üstü mesafe doğrudan fetchKm[yön].
+//
+// Yön ±1 sektör (±22,5°) genişletilip EN UZUN mesafe alınıyor: rüzgâr yönü
+// verisi sapabilir, "korunaklı" demek hata yaparsa insanı açık suya yollar.
+// Yanılma yönü bilerek "açık" tarafında — fetchDalgaTavani ile aynı ilke.
+//
+// dalgaM YALNIZ RÜZGÂRIN o kıyıda kabartabileceği dalgadır (JONSWAP fetch-
+// sınırlı, fetchDalgaTavani ile aynı bağıntı). Açık denizden gelen ölü dalga
+// BU HESAPTA YOK; istemci kartın altında bunu ayrıca söylüyor.
+//
+// Eski istemciler bu alanı hiç almıyor: bkz. ruzgarKalkaniKapisi.
+const KALKAN_SAKIN_KMH = 6;      // bunun altında rüzgâr dalga kabartmaz → 'SAKIN'
+const KALKAN_KORUNAKLI_KM = 1;   // rüzgâr üstünde kara ≤1 km → 'KORUNAKLI'
+
+function ruzgarKalkaniSaati(yay, ruzgarKmh, ruzgarYonu) {
+    if (!yay || !yay.fetchKm) return null;                  // geometri yok → iddia yok
+    if (typeof ruzgarKmh !== 'number' || !isFinite(ruzgarKmh) || ruzgarKmh < 0) return null;
+    if (ruzgarKmh < KALKAN_SAKIN_KMH) return { d: 'SAKIN', km: null, dalgaM: null };
+    if (typeof ruzgarYonu !== 'number' || !isFinite(ruzgarYonu)) return null;
+
+    const adim = 360 / ACIK_SU_SEKTOR;
+    const merkez = Math.round((((ruzgarYonu % 360) + 360) % 360) / adim) % ACIK_SU_SEKTOR;
+    let enUzun = 0;
+    for (const k of [-1, 0, 1]) {
+        const v = yay.fetchKm[((merkez + k + ACIK_SU_SEKTOR) % ACIK_SU_SEKTOR) * adim];
+        if (v === undefined) return null;                   // beklenmeyen biçim → dokunma
+        if (v === null) return { d: 'ACIK', km: null, dalgaM: null };   // 8 km'de hâlâ deniz
+        if (v > enUzun) enUzun = v;
+    }
+    const U = ruzgarKmh / 3.6;
+    const hs = 0.0016 * U * Math.sqrt(enUzun * 1000 / 9.81);
+    return {
+        d: enUzun <= KALKAN_KORUNAKLI_KM ? 'KORUNAKLI' : 'YARI',
+        km: enUzun,
+        dalgaM: parseFloat(hs.toFixed(2))
+    };
+}
+
 // En yakın karanın yönü (yoksa null).
 function _enYakinKaraYonu(yay) {
     if (!yay || !yay.karaKm) return null;
@@ -7527,6 +7574,25 @@ function ozelUyariKapisi(data, istemciSurumu) {
     return out;
 }
 
+// Rüzgâr Kalkanı istemcide YENİ bir kart. Yayındaki APK (51) alanı tanımıyor;
+// Gson yok sayardı ama DEVIR-17 §1.1 dersi: yeni alan, daha önce hiç çalışmamış
+// istemci yollarını açar. Alan yalnız tanıyan sürüme gider.
+// 52 = kartı çizen ilk istemci (4.5.3 = 51'den sonraki ilk versionCode).
+const KALKAN_MIN_SURUM = 52;
+
+/**
+ * Rüzgâr Kalkanı'nı TANIMAYAN istemciden alanı kaldırır.
+ * MUTASYON YOK: gövde önbellekten geliyor ve eski/yeni istemciler arasında
+ * paylaşılıyor. Sürüm bilinmiyorsa ESKİ sayılır.
+ */
+function ruzgarKalkaniKapisi(data, istemciSurumu) {
+    if (!data || !data.instant || data.instant.ruzgarKalkani === undefined) return data;
+    if (istemciYeter(istemciSurumu, KALKAN_MIN_SURUM)) return data;
+    const out = { ...data, instant: { ...data.instant } };
+    delete out.instant.ruzgarKalkani;
+    return out;
+}
+
 function applySanitization(data, isProUser) {
     if (isProUser) {
         return { ...data, isPro: true };
@@ -7850,7 +7916,7 @@ app.get('/api/forecast', async (req, res) => {
         const _gonder = (data) => {
             if (!isRetry) retryHakkiAc(_kimlik, _hucre, data);
             const cikti = applySanitization(
-                ozelUyariKapisi(listeyiSurumeGoreKes(data, _istemciSurum), _istemciSurum),
+                ruzgarKalkaniKapisi(ozelUyariKapisi(listeyiSurumeGoreKes(data, _istemciSurum), _istemciSurum), _istemciSurum),
                 isProUser);
             // [2026-08-24] DENEME DURUMU ARTIK İSTEMCİYE BİLDİRİLİYOR.
             //
@@ -9181,6 +9247,8 @@ app.get('/api/forecast', async (req, res) => {
             const instantDate = now;
             const i_moon = SunCalc.getMoonIllumination(instantDate);
             const hourlyTimeline = [];
+            // Rüzgâr Kalkanı — hourlyTimeline ile AYNI indeks (hourOffset).
+            const kalkanSaatleri = [];
 
             for (let h = 0; h < 24; h++) {
                 // [DÜZELTME 4.11] Eskiden sabit 24 idi. Bu rotanın her yerinde
@@ -9366,8 +9434,16 @@ app.get('/api/forecast', async (req, res) => {
                         hRain),
                     hasActiveFish: hHasActiveFish
                 });
+                // Ham diziden okunuyor, safeNum'dan DEĞİL: safeNum eksik yönü 0'a
+                // (kuzey) çevirir ve kart kuzeye bakan kıyıyı uydururdu.
+                kalkanSaatleri.push(ruzgarKalkaniSaati(acikSuYayi,
+                    weather.hourly?.wind_speed_10m?.[wIdx],
+                    weather.hourly?.wind_direction_10m?.[wIdx]));
             }
             instantData.hourlyTimeline = hourlyTimeline;
+            // Yalnız en az bir saat hesaplanabildiyse gönderilir; yoksa alan HİÇ
+            // olmaz (istemci kartı gizler). Karada acikSuYayi zaten null.
+            if (kalkanSaatleri.some(x => x)) instantData.ruzgarKalkani = { saatler: kalkanSaatleri };
         }
 
 
