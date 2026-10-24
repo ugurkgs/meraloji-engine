@@ -5340,7 +5340,7 @@ function saatBaglami(weather, marine, wIdx, mIdx, baseParams) {
     return b;
 }
 
-function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, activityWindows, hourlyStartIdx, marineHourlyStartIdx, lang = 'tr', saatlikDokum = null) {
+function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, activityWindows, hourlyStartIdx, marineHourlyStartIdx, lang = 'tr', saatlikDokum = null, saatParamlari = null) {
     // marineHourlyStartIdx yoksa hourlyStartIdx'i kullan (geriye dönük uyum: fish-search, scan)
     const mStartIdx = marineHourlyStartIdx !== undefined ? marineHourlyStartIdx : hourlyStartIdx;
     let totalScore = 0;
@@ -5406,6 +5406,7 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
         // [2026-10-05] Tarama pini radarı saat çubuğuyla birlikte hareket etsin diye
         // (yalnız istenirse — diğer çağıranlar geçmez, davranış aynı).
         if (saatlikDokum) saatlikDokum[h] = { sd: result.scoreDetails, skor: result.finalScore };
+        if (saatParamlari) saatParamlari[h] = hourParams;   // [2026-10-24] saatlik "neden" (saatlikNedenler)
 
         // En iyi saati takip et
         if (result.finalScore > bestHourScore) {
@@ -5422,6 +5423,81 @@ function calculateWeightedDailyScore(fish, key, baseParams, weather, marine, act
 
     const avgScore = totalWeight > 0 ? totalScore / totalWeight : 0;
     return { score: avgScore, bestHour, bestHourScore, hourlyScores };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SAATLİK "NEDEN"  [2026-10-24 — yol haritası md. 4, sahip onaylı]
+// ═══════════════════════════════════════════════════════════════════════════
+// Her saat için o saati GÜNÜN TİPİK SAATİNE GÖRE en çok yükselten ve en çok
+// düşüren etken. Karşı-olgusal: etken grubunun o saatteki değerleri, günün tipik
+// (medyan) saatinin değerleriyle değiştirilip motor YENİDEN koşulur; fark o
+// etkenin payıdır. Motor çarpımsal olduğu için puan "parçalara bölünemez" — bu
+// yöntem bölmeye çalışmaz, yalnız "bu etken olmasaydı" sorusunu sorar.
+// Puana DOKUNMAZ; yalnız açıklama üretir. Eşik altı fark → null (gürültü gösterilmez).
+const NEDEN_GRUPLARI = {
+    SAAT:      ['timeMode', 'hour', 'uvIndex'],
+    SU:        ['tempWater'],
+    DALGA:     ['wave', 'wavePeriod', 'swellHeight', 'windWaveHeight', 'swellPeriod', 'waveDirection'],
+    RUZGAR:    ['windSpeed', 'windDir', 'windGust'],
+    BERRAKLIK: ['clarity', 'visibility'],
+    GELGIT:    ['tideFlow'],
+    BASINC:    ['pressureTrend'],
+    AY:        ['moonlightIntensity', 'solunar'],
+    YAGIS:     ['rain', 'precipProb', 'cloudCover']
+};
+// Grubun tipik saatini seçen sayısal ölçü (medyan bu ölçüyle bulunur).
+const NEDEN_OLCU = {
+    SU: p => p.tempWater, DALGA: p => p.wave, RUZGAR: p => p.windSpeed,
+    BERRAKLIK: p => p.clarity, GELGIT: p => p.tideFlow,
+    BASINC: p => (p.pressureTrend && typeof p.pressureTrend.change === 'number') ? p.pressureTrend.change : null,
+    AY: p => (typeof p.moonlightIntensity === 'number' ? p.moonlightIntensity : 0) + (p.solunar && p.solunar.isMajor ? 2 : p.solunar && p.solunar.isMinor ? 1 : 0),
+    YAGIS: p => (Number(p.rain) || 0) * 10 + (Number(p.cloudCover) || 0) / 100
+};
+const NEDEN_ESIK = 3;   // puan — altı gösterilmez
+
+function saatlikNedenler(fish, key, saatParamlari, hourlyScores) {
+    try {
+        if (!Array.isArray(saatParamlari) || saatParamlari.length !== 24 || saatParamlari.some(p => !p)) return null;
+        if (!Array.isArray(hourlyScores) || hourlyScores.length !== 24) return null;
+        // Her grup için tipik saat
+        const tipik = {};
+        for (const g of Object.keys(NEDEN_GRUPLARI)) {
+            if (g === 'SAAT') {
+                // En sık görülen gün dilimi; öğle (11-15) dışından bir saat tercih edilir.
+                const say = {};
+                for (const p of saatParamlari) say[p.timeMode] = (say[p.timeMode] || 0) + 1;
+                const mod = Object.keys(say).sort((a, b) => say[b] - say[a])[0];
+                let r = saatParamlari.findIndex((p, h) => p.timeMode === mod && (h < 11 || h > 15));
+                if (r < 0) r = saatParamlari.findIndex(p => p.timeMode === mod);
+                tipik[g] = r;
+                continue;
+            }
+            const olcu = saatParamlari.map((p, h) => ({ h, v: NEDEN_OLCU[g](p) })).filter(x => typeof x.v === 'number' && isFinite(x.v));
+            if (olcu.length < 12) { tipik[g] = -1; continue; }
+            olcu.sort((a, b) => a.v - b.v);
+            tipik[g] = olcu[Math.floor(olcu.length / 2)].h;
+        }
+        const sonuc = new Array(24).fill(null);
+        for (let h = 0; h < 24; h++) {
+            const p = saatParamlari[h];
+            const temel = calculateFishScore(fish, key, p).finalScore;
+            let enArti = null, enEksi = null;
+            for (const [g, alanlar] of Object.entries(NEDEN_GRUPLARI)) {
+                const r = tipik[g];
+                if (r < 0 || r === h) continue;
+                const ref = saatParamlari[r];
+                let ayni = true;
+                const yeni = { ...p };
+                for (const a of alanlar) { if (yeni[a] !== ref[a]) ayni = false; yeni[a] = ref[a]; }
+                if (ayni) continue;
+                const fark = temel - calculateFishScore(fish, key, yeni).finalScore;
+                if (fark >= NEDEN_ESIK && (!enArti || fark > enArti.f)) enArti = { g, f: fark };
+                if (fark <= -NEDEN_ESIK && (!enEksi || fark < enEksi.f)) enEksi = { g, f: fark };
+            }
+            if (enArti || enEksi) sonuc[h] = [enArti ? enArti.g : null, enEksi ? enEksi.g : null];
+        }
+        return sonuc;
+    } catch (_) { return null; }
 }
 
 // 3 saatlik pencere ortalaması (anlık için)
@@ -7779,6 +7855,22 @@ function ruzgarKalkaniKapisi(data, istemciSurumu) {
     return out;
 }
 
+/**
+ * [2026-10-24] Saatlik "neden" (forecast[].fishList[].hourlyWhy) yalnız v52+'ya.
+ * Sıra kuralı: yeni alan önce istemci yayınlanınca gider. MUTASYON YOK (önbellek paylaşılıyor).
+ */
+function saatNedenKapisi(data, istemciSurumu) {
+    if (!data || !Array.isArray(data.forecast)) return data;
+    if (istemciYeter(istemciSurumu, KALKAN_MIN_SURUM)) return data;
+    if (!data.forecast.some(d => d && Array.isArray(d.fishList) && d.fishList.some(f => f && f.hourlyWhy))) return data;
+    return {
+        ...data,
+        forecast: data.forecast.map(d => (d && Array.isArray(d.fishList))
+            ? { ...d, fishList: d.fishList.map(f => { if (!f || !f.hourlyWhy) return f; const { hourlyWhy, ...kalan } = f; return kalan; }) }
+            : d)
+    };
+}
+
 function applySanitization(data, isProUser) {
     if (isProUser) {
         return { ...data, isPro: true };
@@ -8102,7 +8194,7 @@ app.get('/api/forecast', async (req, res) => {
         const _gonder = (data) => {
             if (!isRetry) retryHakkiAc(_kimlik, _hucre, data);
             const cikti = applySanitization(
-                ruzgarKalkaniKapisi(ozelUyariKapisi(listeyiSurumeGoreKes(data, _istemciSurum), _istemciSurum), _istemciSurum),
+                saatNedenKapisi(ruzgarKalkaniKapisi(ozelUyariKapisi(listeyiSurumeGoreKes(data, _istemciSurum), _istemciSurum), _istemciSurum), _istemciSurum),
                 isProUser);
             // [2026-08-24] DENEME DURUMU ARTIK İSTEMCİYE BİLDİRİLİYOR.
             //
@@ -8925,6 +9017,22 @@ app.get('/api/forecast', async (req, res) => {
                 // SAF SKORA göre sırala — sıra ile gösterilen sayı birebir tutarlı
                 // olsun. Hedef/yan-yakalanan ayrımı `targetClass` etiketiyle taşınır.
                 fishList.sort((a, b) => b.score - a.score);
+                // [2026-10-24] Saatlik "neden" — yalnız ilk 10 (PRO detayı bunları açıyor; ücretsiz gövde
+                // applySanitization'da beyaz listeyle kurulduğu için alan oraya hiç geçmez). v<52'ye saatNedenKapisi süzer.
+                // Bugün + yarın: istemci çizelgesi 24 saati bu iki günden kuruyor. Saat parametreleri BELLEK için
+                // tüm türlerde saklanmaz; yalnız ilk 10 için günlük döngü bir kez daha koşulur (24 çağrı/tür).
+                if (i <= 1) {
+                    const _sn = Date.now();
+                    for (const f of fishList.slice(0, 10)) {
+                        const fish = SPECIES_DB[f.key];
+                        if (!fish) continue;
+                        const sp = new Array(24);
+                        calculateWeightedDailyScore(fish, f.key, baseParams, weather, marine, activityWindows, hourlyStartIdx, marineHourlyStartIdx, 'tr', null, sp);
+                        const n = saatlikNedenler(fish, f.key, sp, f.hourlyScores);
+                        if (n) f.hourlyWhy = n;
+                    }
+                    if (i === 0) console.log(`[NEDEN] ${Date.now() - _sn} ms (${Math.min(10, fishList.length)} tür)`);
+                }
             }
 
             // GELİŞMİŞ TAKTİK SİSTEMİ
