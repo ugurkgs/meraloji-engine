@@ -7878,6 +7878,39 @@ function saatNedenKapisi(data, istemciSurumu) {
     };
 }
 
+/**
+ * [2026-10-25] Yanıttaki `dataSources`: su sıcaklığı ve klorofilin kaynağı + yaşı.
+ *   sst: { src: 'MUR'|'VIIRS'|'MODIS'|'OISST'|…, days, satShare (0-100) }  ya da  { src: 'MODEL' }
+ *   chl: { src: 'CMEMS'|'NOAA'|…, days }  ya da  null (alınamadı)
+ * Kaynak adı bilinmiyorsa src null (istemci "uydu" der). Hata asla analizi düşürmez.
+ */
+function veriKaynaklari(sstSat, sstUyduPayi, chl) {
+    try {
+        const sayi = v => (typeof v === 'number' && isFinite(v)) ? v : null;
+        const sst = sstSat
+            ? { src: sstSat.kaynak || null, days: sayi(sstSat.gunFark),
+                satShare: sayi(sstUyduPayi) !== null ? Math.round(sstUyduPayi * 100) : null }
+            : { src: 'MODEL' };
+        let chlOut = null;
+        if (chl) {
+            // Önbellekten (planktonCache, 6 sa) gelen kayıtta daysAgo kayıt anınındır → tarihten yeniden say.
+            let days = sayi(chl.daysAgo);
+            const t = chl.date ? Date.parse(chl.date) : NaN;
+            if (isFinite(t)) days = Math.max(0, Math.floor((Date.now() - t) / 86400000));
+            chlOut = { src: chl.kaynak || null, days };
+        }
+        return { sst, chl: chlOut };
+    } catch (_) { return null; }
+}
+
+/** [2026-10-25] dataSources yalnız v52+'ya (sıra kuralı). MUTASYON YOK (önbellek paylaşılıyor). */
+function veriKaynagiKapisi(data, istemciSurumu) {
+    if (!data || data.dataSources === undefined) return data;
+    if (istemciYeter(istemciSurumu, KALKAN_MIN_SURUM)) return data;
+    const { dataSources, ...kalan } = data;
+    return kalan;
+}
+
 function applySanitization(data, isProUser) {
     if (isProUser) {
         return { ...data, isPro: true };
@@ -8201,7 +8234,7 @@ app.get('/api/forecast', async (req, res) => {
         const _gonder = (data) => {
             if (!isRetry) retryHakkiAc(_kimlik, _hucre, data);
             const cikti = applySanitization(
-                saatNedenKapisi(ruzgarKalkaniKapisi(ozelUyariKapisi(listeyiSurumeGoreKes(data, _istemciSurum), _istemciSurum), _istemciSurum), _istemciSurum),
+                veriKaynagiKapisi(saatNedenKapisi(ruzgarKalkaniKapisi(ozelUyariKapisi(listeyiSurumeGoreKes(data, _istemciSurum), _istemciSurum), _istemciSurum), _istemciSurum), _istemciSurum),
                 isProUser);
             // [2026-08-24] DENEME DURUMU ARTIK İSTEMCİYE BİLDİRİLİYOR.
             //
@@ -8594,6 +8627,7 @@ app.get('/api/forecast', async (req, res) => {
         // [FÜZYON] Bugün ölçülen uydu-model farkı. i===0'da doldurulur, sonraki
         // günlerde sönerek uygulanır. Uydu yoksa 0 kalır → eski davranış.
         let sstFuzeSapma = 0;
+        let sstUyduPayi = null;   // [2026-10-25] bugünkü füzyonda uydunun ağırlığı (0-1) — yalnız dataSources için
 
         const forecast = [];
 
@@ -8821,6 +8855,7 @@ app.get('/api/forecast', async (req, res) => {
                     const fuze = sstBirlestir(sstSat, omDeger, gridDistanceKm, logUser);
                     tempWater = fuze.deger;
                     sstFuzeSapma = fuze.deger - omDeger;
+                    sstUyduPayi = fuze.uyduAgirlik;
                 } else {
                     tempWater = parseFloat(
                         (omDeger + sstFuzeSapma * Math.pow(SST_SAPMA_SONUMU, i)).toFixed(2));
@@ -9844,6 +9879,10 @@ app.get('/api/forecast', async (req, res) => {
                 satelliteSst: sstSat !== null,      // false → Open-Meteo SST kullanıldı
                 chlorophyll: chlorophyllData != null // false → klorofil katmanı yok
             },
+            // [2026-10-25] Yol haritası md. 6 — Veri kalitesi penceresindeki "VERİ KAYNAKLARI".
+            // Sunucu kaynağı ve yaşı zaten biliyordu, istemciye yalnız boolean gidiyordu.
+            // Ek çağrı YOK. Yalnız v52+ (veriKaynagiKapisi). Kara noktada null.
+            dataSources: isLand ? null : veriKaynaklari(sstSat, sstUyduPayi, chlorophyllData),
             isPro: true              // Ham veri her zaman "Tam/Açık" veridir.
         };
 
