@@ -13747,6 +13747,28 @@ const HEDIYE_BILDIRIM = {
           genel: (g, b) => `Δώρο ${g} ημερών Meraloji PRO για σένα! Λήξη: ${b}` },
 };
 
+// Sahibin kullanıcıya atacağı mail (sayfa kopyalanabilir metin olarak gösterir;
+// mailto açmaz — sahip: "mail atmak için pencere açmasın, yazıyı versin").
+// İmza: "Uğur Kögüs / Meraloji" (soyadında ğ/ş yok).
+const HEDIYE_MAIL = {
+    tr: { konu: 'Meraloji PRO hediyen', selam: (a) => a ? `Merhaba ${a},` : 'Merhaba,',
+          yorum: (g, b) => `Meraloji'ye Google Play'de bıraktığın yorum için çok teşekkür ederim. Küçük bir teşekkür olarak hesabına ${g} günlük PRO erişim tanımladım; ${b} tarihine kadar uygulamanın bütün özelliklerini kullanabilirsin.`,
+          genel: (g, b) => `Hesabına ${g} günlük Meraloji PRO erişimi tanımladım; ${b} tarihine kadar uygulamanın bütün özelliklerini kullanabilirsin.`,
+          not: 'Uygulamayı açman yeterli, başka bir şey yapmana gerek yok.', son: 'İyi avlar,' },
+    en: { konu: 'Your Meraloji PRO gift', selam: (a) => a ? `Hi ${a},` : 'Hi,',
+          yorum: (g, b) => `Thank you so much for your review of Meraloji on Google Play. As a small thank-you I have added ${g} days of PRO access to your account; you can use every feature of the app until ${b}.`,
+          genel: (g, b) => `I have added ${g} days of Meraloji PRO access to your account; you can use every feature of the app until ${b}.`,
+          not: 'Just open the app, there is nothing else you need to do.', son: 'Tight lines,' },
+    es: { konu: 'Tu regalo de Meraloji PRO', selam: (a) => a ? `Hola ${a}:` : 'Hola:',
+          yorum: (g, b) => `Muchas gracias por tu reseña de Meraloji en Google Play. Como pequeño agradecimiento he añadido ${g} días de acceso PRO a tu cuenta; puedes usar todas las funciones de la aplicación hasta el ${b}.`,
+          genel: (g, b) => `He añadido ${g} días de acceso a Meraloji PRO a tu cuenta; puedes usar todas las funciones de la aplicación hasta el ${b}.`,
+          not: 'Solo tienes que abrir la aplicación, no hace falta hacer nada más.', son: '¡Buena pesca!' },
+    el: { konu: 'Το δώρο σου Meraloji PRO', selam: (a) => a ? `Γεια σου ${a},` : 'Γεια σου,',
+          yorum: (g, b) => `Σε ευχαριστώ πολύ για την κριτική σου για το Meraloji στο Google Play. Ως ένα μικρό ευχαριστώ πρόσθεσα ${g} ημέρες πρόσβασης PRO στον λογαριασμό σου· μπορείς να χρησιμοποιείς όλες τις λειτουργίες της εφαρμογής έως ${b}.`,
+          genel: (g, b) => `Πρόσθεσα ${g} ημέρες πρόσβασης Meraloji PRO στον λογαριασμό σου· μπορείς να χρησιμοποιείς όλες τις λειτουργίες της εφαρμογής έως ${b}.`,
+          not: 'Αρκεί να ανοίξεις την εφαρμογή, δεν χρειάζεται να κάνεις τίποτε άλλο.', son: 'Καλές ψαριές,' },
+};
+
 /** Kullanıcının yerel saatiyle "31.10.2026 08:15" (ofset users.utcOffsetSec; yoksa TR). */
 function hediyeTarihi(ms, ofsetSn) {
     const ofs = (typeof ofsetSn === 'number' && isFinite(ofsetSn)) ? ofsetSn : 10800;
@@ -13796,7 +13818,10 @@ app.post('/api/yonetim/hediye', async (req, res) => {
     const kul = await hediyeHedefiniBul(req.body?.hedef);
     if (!kul) return res.status(404).json({ hata: 'kullanıcı bulunamadı (e-posta ya da uid)' });
     const uid = kul.uid;
-    if (await aktifAboneMi(uid)) return res.json({ durum: 'zaten-abone', uid, email: kul.email || null });
+    // Geliştirici hesabı PRO'yu abonelikten değil DEVELOPER_UIDS'ten alıyor;
+    // aktifAboneMi onu görmez (sahip kendi hesabıyla denediğinde hediye yazıldı).
+    if (DEVELOPER_UIDS.includes(uid) || await aktifAboneMi(uid))
+        return res.json({ durum: 'zaten-abone', uid, email: kul.email || null });
 
     const simdi = Date.now();
     const bitis = simdi + gun * 86400000;
@@ -13841,7 +13866,15 @@ app.post('/api/yonetim/hediye', async (req, res) => {
     res.json({
         durum: 'verildi', uid, email: kul.email || null, ad: kul.displayName || null,
         gun, bitis, bitisMetni, bildirim, lang,
-        mail: { konu: t.baslik.replace(/^\S+\s/, ''), metin: govde },
+        mail: (() => {
+            const m = HEDIYE_MAIL[lang];
+            const ilkAd = (kul.displayName || '').trim().split(/\s+/)[0] || '';
+            return {
+                alici: kul.email || '',
+                konu: m.konu,
+                metin: [m.selam(ilkAd), '', m[neden](gun, bitisMetni), '', m.not, '', m.son, 'Uğur Kögüs', 'Meraloji'].join('\n'),
+            };
+        })(),
     });
 });
 

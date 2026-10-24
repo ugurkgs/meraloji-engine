@@ -40,6 +40,10 @@
   .sonuc.uyari { display: block; background: rgba(255,213,0,.08); border: 1px solid rgba(255,213,0,.35); }
   .sonuc.kotu { display: block; background: rgba(255,85,114,.08); border: 1px solid rgba(255,85,114,.35); }
   .sonuc a { color: var(--sari); font-weight: 700; }
+  .mailKutu { display: grid; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--kenar); }
+  .mailAlan { display: grid; gap: 6px; }
+  textarea { background: var(--zemin); border: 1px solid var(--kenar); color: var(--yazi); border-radius: 10px;
+             padding: 10px 12px; font: 14px/1.5 system-ui, sans-serif; width: 100%; resize: vertical; }
   .liste { display: grid; gap: 8px; }
   .hediye { display: flex; gap: 10px; justify-content: space-between; align-items: center;
             border-top: 1px solid var(--kenar); padding-top: 8px; }
@@ -122,6 +126,31 @@ async function api(yol, govde) {
 
 const tarih = (ms) => new Date(ms).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
+// Kopyalanabilir mail: alıcı, konu, metin — her birinin yanında "Kopyala".
+function mailKutusu(m) {
+  if (!m) return '';
+  const alan = (etiket, deger, cok) => `
+    <div class="mailAlan">
+      <div class="satir" style="justify-content:space-between">
+        <span class="etiket" style="color:var(--sari)">${etiket}</span>
+        <button class="ikinci kopyala" type="button" style="padding:5px 10px;font-size:12px">Kopyala</button>
+      </div>
+      ${cok ? `<textarea readonly rows="9">${kacis(deger)}</textarea>`
+            : `<input type="text" readonly value="${kacis(deger)}">`}
+    </div>`;
+  return `<div class="mailKutu">${alan('ALICI', m.alici, false)}${alan('KONU', m.konu, false)}${alan('MAİL METNİ', m.metin, true)}</div>`;
+}
+
+function kopyaDugmeleriniBagla() {
+  document.querySelectorAll('#sonuc .kopyala').forEach(b => b.onclick = async () => {
+    const kutu = b.closest('.mailAlan').querySelector('input, textarea');
+    try { await navigator.clipboard.writeText(kutu.value); }
+    catch (e) { kutu.select(); document.execCommand('copy'); }
+    const eski = b.textContent; b.textContent = 'Kopyalandı ✓';
+    setTimeout(() => { b.textContent = eski; }, 1500);
+  });
+}
+
 function sonucYaz(sinif, html) { const s = $('sonuc'); s.className = 'sonuc ' + sinif; s.innerHTML = html; }
 const kacis = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -167,15 +196,16 @@ $('btnVer').onclick = async () => {
     if (kod === 200 && j.durum === 'verildi') {
       const kim = kacis(j.ad ? `${j.ad} (${j.email || j.uid})` : (j.email || j.uid));
       let html = `🎁 <b>${kim}</b> → ${j.gun} gün, bitiş <b>${kacis(j.bitisMetni)}</b> (kullanıcının saatiyle).<br>`;
+      // Mail metni HER hediyede gösterilir; sahip kopyalayıp kendi mailinden atar
+      // (sahip: "mail atmak için pencere açmasın, mailde yazılacak yazıyı versin").
       if (j.bildirim === 'gonderildi') {
-        sonucYaz('iyi', html + '✅ Bildirim yalnız bu kullanıcının telefonuna gönderildi.');
+        sonucYaz('iyi', html + '✅ Bildirim yalnız bu kullanıcının telefonuna gönderildi.' + mailKutusu(j.mail));
       } else {
-        const mailto = j.email ? `mailto:${encodeURIComponent(j.email)}?subject=${encodeURIComponent(j.mail.konu)}&body=${encodeURIComponent(j.mail.metin + '\n\nUğur Kögüs\nMeraloji')}` : null;
         const neden = j.bildirim === 'token-yok' ? 'kullanıcının bildirim adresi kayıtlı değil'
                     : j.bildirim === 'token-olu' ? 'kayıtlı bildirim adresi artık geçersiz' : j.bildirim;
-        sonucYaz('uyari', html + `⚠️ Bildirim gitmedi (${kacis(neden)}). Hediye yine de açık.` +
-          (mailto ? `<br><a href="${mailto}">Mail taslağını aç</a>` : ''));
+        sonucYaz('uyari', html + `⚠️ Bildirim gitmedi (${kacis(neden)}). Hediye yine de açık; aşağıdaki maili gönder.` + mailKutusu(j.mail));
       }
+      kopyaDugmeleriniBagla();
       $('hedef').value = '';
       listele();
     } else if (j.durum === 'zaten-abone') {
