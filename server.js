@@ -1782,12 +1782,100 @@ function eunisCategoryToSubstrate(code) {
     return null; // bilinmiyor — null dönünce dip yapısı gösterilmez
 }
 
-async function fetchSubstrate(lat, lon, silent = false, logUser = null) {
+// ═══════════════════════════════════════════════════════════════════════════
+// YEREL DİP IZGARASI — HAZIR AMA KAPALI  [2026-10-25, sahip kararı]
+// ═══════════════════════════════════════════════════════════════════════════
+// SORUN
+//   Dip yapısı (kum/çamur/kaya) aşağıdaki fetchSubstrate ile EMODnet Seabed
+//   Habitats WMS'inden (katman eusm2025_subs_full) okunuyordu. O katman ~14 Eki
+//   2026'dan beri YOK: servis "Could not find layer" diyor, aynı bilgiyi taşıyan
+//   diğer habitat katmanları (msfd/eunis _full, _200) 25 sn+ zaman aşımına düşüyor.
+//   Sonuç: o tarihten beri TÜM analizlerde substrate = null → dip çarpanları
+//   (KAYALIK ×0,70, SUBSTRATE_CEZA ×0,85, SUBSTRATE_PREFS ×1,10-1,15) çalışmıyor.
+//   Analiz yavaşlamıyor (DIP_SİGORTA beklemeyi kesiyor), yalnız dip etkisi yok.
+//
+// NE YAPILDI
+//   O haritanın substrat girdisi zaten EMODnet GEOLOGY'den geliyor ve o servis
+//   çalışıyor. Türkiye çevresi (lon 22-42, lat 34-47) bir kez indirildi:
+//   tools/dip-izgara-uret.js → dip-yapisi.bin (32 KB, bellekte 2,5 MB, 0,01° ≈ 1 km)
+//   + dip-yapisi.meta.json (kaynak, CC-BY 4.0 lisans, sınıflar). Canlı WMS'le
+//   15 kıyı noktasında 15/15 aynı (boş hücrede ≤2 hücre en yakın komşuya bakılarak).
+//
+// NEDEN KAPALI (ölçüm, 14 kıyı, aynı hava verisiyle üç kip)
+//   İlk 10'daki hedef tür: kapalı 86 · tam 103 · temkinli 100 → liste ölçütü LEHTE.
+//   Pamucak kumsalında horozbina düşüyor — DOĞRU (sahibin 24 Eyl Selçuk örneği).
+//   AMA ızgara kaba: dolu hücrelerin %90,5'i çamur, kaya yalnız %0,1. 1 km'lik
+//   ızgara kıyıdaki kayalık şeridi göremiyor; kayalık kıyıda "çamur" deyince kaya
+//   türleri haksız düşüyor: Kaş müren 6.→liste dışı, Mersin müren 2.→25.,
+//   Şile gelincik 3.→19., Bodrum horozbina 6.→24. Kullanıcı bildiği yerde yanlış
+//   liste görür; etiketi gizlemek çözmez (etki sıralamadan görünür).
+//   Sahip: "bu veriye ne kadar güveniyoruz emin değilim" → KAPALI kalsın, veri hazır dursun.
+//
+// NE ZAMAN / NASIL AÇILIR
+//   1) Önce EMODnet'i yokla (~8 Kas 2026). Katman dönerse HİÇBİR ŞEY yapma:
+//      kapalıyken fetchSubstrate eski WMS yolunu kullanır, kendiliğinden düzelir.
+//   2) Dönmezse aday çözüm: KAYALIK ×0,70 cezasını yalnız derin/açık noktalarda
+//      (ör. >20 m) uygula, sığ kıyıda harita kayalığı göremediği için uygulama.
+//      Ölç (olcum skili; yerelde ?dipKip=tam|temkinli ile, aşağıda), sahibe sun.
+//   3) Açmak: Render ortam değişkeni DIP_IZGARA=tam ya da temkinli. Kod değişmez.
+//
+// KİPLER: 'kapali' (VARSAYILAN, bugünkü davranış) · 'tam' (ızgara ne derse) ·
+//   'temkinli' (kaba 1:1M ölçeğin "çamur" dediği hücreyi bilinmiyor say).
+// Folk5 → motor: 1 MUD · 2 SAND · 3 iri taneli → SAND (eunisCategoryToSubstrate ile aynı) · 4 MIXED · 5 ROCK
+// Izgara kutusu dışında (ör. Fas) her kipte eski WMS yolu kullanılır.
+// ═══════════════════════════════════════════════════════════════════════════
+const DIP_IZGARA = process.env.DIP_IZGARA || 'kapali';
+let _dipIzgara;   // undefined = yüklenmedi · null = yok/bozuk · { meta, veri }
+function _dipIzgaraYukle() {
+    if (_dipIzgara !== undefined) return _dipIzgara;
+    try {
+        const meta = JSON.parse(fs.readFileSync(path.join(__dirname, 'dip-yapisi.meta.json'), 'utf8'));
+        const veri = require('zlib').gunzipSync(fs.readFileSync(path.join(__dirname, 'dip-yapisi.bin')));
+        if (veri.length !== meta.genislik * meta.yukseklik) throw new Error('boyut uyuşmuyor');
+        _dipIzgara = { meta, veri };
+        _origConsoleLog(`[DIP-IZGARA] yüklendi (${DIP_IZGARA}) ${meta.genislik}×${meta.yukseklik}, ${meta.doluHucre} dolu hücre`);
+    } catch (e) {
+        _dipIzgara = null;
+        _origConsoleLog(`[DIP-IZGARA] yüklenemedi: ${e.message} — EMODnet WMS yoluna düşülecek`);
+    }
+    return _dipIzgara;
+}
+const _FOLK_MOTOR = [null, 'MUD', 'SAND', 'SAND', 'MIXED', 'ROCK'];
+/** undefined = kutu dışı/ızgara yok (eski yola düş) · null = veri yok · 'MUD'|'SAND'|'MIXED'|'ROCK' */
+function dipIzgaradan(lat, lon, kip = DIP_IZGARA) {
+    const iz = _dipIzgaraYukle();
+    if (!iz) return undefined;
+    const { meta, veri } = iz;
+    const x = Math.floor((lon - meta.kutu.lon0) / meta.adim), y = Math.floor((lat - meta.kutu.lat0) / meta.adim);
+    if (!(x >= 0 && y >= 0 && x < meta.genislik && y < meta.yukseklik)) return undefined;
+    let v = veri[y * meta.genislik + x];
+    for (let r = 1; !v && r <= 2; r++) {
+        let enD = 1e9;
+        for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+            const yy = y + dy, xx = x + dx;
+            if (yy < 0 || xx < 0 || yy >= meta.yukseklik || xx >= meta.genislik) continue;
+            const w = veri[yy * meta.genislik + xx], d = dx * dx + dy * dy;
+            if (w && d < enD) { enD = d; v = w; }
+        }
+    }
+    if (!v) return null;
+    const folk = v & 15, olcek = v >> 4;
+    if (kip === 'temkinli' && folk === 1 && olcek === 1) return null;
+    return _FOLK_MOTOR[folk] || null;
+}
+
+async function fetchSubstrate(lat, lon, silent = false, logUser = null, testKipi = null) {
     const latR = parseFloat(lat).toFixed(4);
     const lonR = parseFloat(lon).toFixed(4);
-    const ck = `sub_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}`;
+    const kip = testKipi || DIP_IZGARA;   // testKipi yalnız yerel ölçüm (bkz. _dipKip)
+    const ck = `sub_${parseFloat(lat).toFixed(3)}_${parseFloat(lon).toFixed(3)}` + (testKipi ? `_${testKipi}` : '');
     const hit = substrateCache.get(ck);
     if (hit !== undefined) return hit;
+
+    if (kip !== 'kapali') {
+        const iz = dipIzgaradan(parseFloat(lat), parseFloat(lon), kip);
+        if (iz !== undefined) { substrateCache.set(ck, iz); return iz; }
+    }
 
     // ═══════════════════════════════════════════════════════════════════════
     // EMODnet Seabed Habitats — WMS GetFeatureInfo
@@ -8138,7 +8226,12 @@ app.get('/api/forecast', async (req, res) => {
 
         // Izgara snap — 0.01° ≈ 1.1km hücre, derinlik hassasiyeti artırıldı
         const { gLat, gLon } = snapToGrid(lat, lon);
-        const cacheKey = `forecast_v24_${gLat}_${gLon}_h${clickHour}`;
+        // [2026-10-25] Dip ızgarası ÖLÇÜMÜ için kip seçimi — YALNIZ yerel test sunucusunda
+        // (ALLOW_UNVERIFIED_PURCHASES, Render'da hiç açılmaz). Aynı süreçte dört kip aynı
+        // hava/uydu verisiyle karşılaştırılsın diye; önbellek anahtarı kipe göre ayrılır.
+        const _dipKip = (process.env.ALLOW_UNVERIFIED_PURCHASES === 'true'
+            && ['kapali', 'tam', 'temkinli'].includes(req.query.dipKip)) ? req.query.dipKip : null;
+        const cacheKey = `forecast_v24_${gLat}_${gLon}_h${clickHour}` + (_dipKip ? `_dip${_dipKip}` : '');
         const cachedData = cache.get(cacheKey);
 
         // [GÜVENLİK - Y1] anonFree yalnızca GERÇEKTEN anonim (giriş yapmamış) istemcide
@@ -8393,7 +8486,7 @@ app.get('/api/forecast', async (req, res) => {
             skipBathymetry ? Promise.resolve(null) : fetchBathymetry(lat, lon, 4500).catch(() => null),
             chlFromCache ? Promise.resolve(chlFromCache) : fetchChlorophyll(lat, lon).catch(() => null),
             fetchSatelliteSST(lat, lon, logUser).catch(() => null),
-            fetchSubstrate(lat, lon, false, logUser).catch(() => null)
+            fetchSubstrate(lat, lon, false, logUser, _dipKip).catch(() => null)
         ]);
 
         // Fallback: gelişmiş URL başarısızsa basit URL dene
