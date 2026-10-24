@@ -6211,6 +6211,11 @@ function ozelUyarilariUret(fishList, lang, kosul) {
                     : t.yatismaAcik(ondalik(y.tepeM), ondalik(y.simdiM), saat(y.bitZaman))),
             tavsiyeler: [],
             turler,
+            // [2026-10-24] Sahip: kart zaman çubuğunda pencere bitince kaybolsun
+            // ve aralığı açıkça göstersin. Yerel saat ("2026-10-19T18:00"); bitiş
+            // DAHİL — o saat hâlâ penceredir. Yalnız v52+ alır (YATISMA kapısı).
+            basZaman: y.basZaman || null,
+            bitZaman: y.bitZaman || null,
         });
         console.log(`[YATISMA] ${y.acikMi ? 'AÇIK' : 'yakında'} — tepe ${y.tepeM} m (${y.tepeZaman}), `
             + `şimdi ${y.simdiM} m, pencere ${y.basZaman} → ${y.bitZaman}, tür ${turler.length}`);
@@ -13690,12 +13695,20 @@ app.get('/api/yatisma-test', async (req, res) => {
         const simdi = t.findIndex(x => typeof x === 'string' && x.slice(0, 13) === yerelSimdi);
         if (simdi < 0) return res.status(500).json({ error: 'şu an indeksi bulunamadı' });
         const idx = simdi - geri;
-        const y = yatismaPenceresi(w, t, idx);
+        // Saatler `geri` kadar İLERİ kaydırılır: kart, telefondaki zaman çubuğuyla
+        // (bugünün saatleri) aynı saat ekseninde görünsün — yoksa aralık 5 gün
+        // öncesini gösterir ve kart hep "geçmiş" sayılıp gizlenirdi.
+        const kaydir = (z) => {
+            if (typeof z !== 'string' || z.length < 16) return z;
+            const d = new Date(z + ':00Z'); d.setUTCHours(d.getUTCHours() + geri);
+            return d.toISOString().slice(0, 16);
+        };
+        const y = yatismaPenceresi(w, t.map(kaydir), idx);
         // ozelUyarilariUret boş listede hiç çalışmıyor; rozetsiz bir yer tutucu.
         const uyari = (ozelUyarilariUret([{ key: '_test', name: '', score: 0 }], lang, { yatisma: y }) || [])
             .find(u => u && u.tip === 'YATISMA') || null;
         console.log(`[YATISMA-TEST] ${req.user.uid.slice(0, 6)} ${lat.toFixed(3)},${lon.toFixed(3)} geri ${geri}s → ${uyari ? 'kart' : 'yok'}`);
-        res.json({ testSimdi: t[idx] || null, dalga: w[idx] ?? null, yatisma: y, uyari });
+        res.json({ testSimdi: t[idx] || null, saatEkseni: 'bugüne kaydırıldı', dalga: w[idx] ?? null, yatisma: y, uyari });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

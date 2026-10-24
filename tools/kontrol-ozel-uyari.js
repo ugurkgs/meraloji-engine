@@ -299,6 +299,8 @@ console.log('\n── fırtına sonrası yatışma ─────────�
     const ytr = g.tr.find(u => u.tip === 'YATISMA');
     ol('pencere varsa YATISMA uyarısı üretildi', !!ytr);
     ol('seviye "bilgi"', ytr && ytr.seviye === 'bilgi');
+    ol('pencere aralığı alan olarak gidiyor (istemci kaydırıcıda gizlesin diye)',
+        ytr && ytr.basZaman === '2026-10-15T18:00' && ytr.bitZaman === '2026-10-16T00:00');
     ol('TR metinde virgüllü ondalık ve "yarın 00:00"', ytr && ytr.metin.includes('2,4 m') && ytr.metin.includes('yarın 00:00'));
     ol('EN metinde noktalı ondalık', (g.en.find(u => u.tip === 'YATISMA') || {}).metin?.includes('2.4 m'));
     ol('yalnız eşiği geçen yatışma türü rozet (levrek var, sargoz 38 yok)',
