@@ -167,13 +167,20 @@ async function listele() {
       </div>
       <div class="satir" style="gap:8px">
         <span class="rozet ${h.aktif ? 'aktif' : 'bitti'}">${h.aktif ? 'AKTİF' : 'BİTTİ'}</span>
-        ${h.aktif ? `<button class="tehlike" data-uid="${kacis(h.uid)}">Bitir</button>` : ''}
+        ${h.aktif ? `<button class="tehlike" data-bitir="${kacis(h.uid)}">Bitir</button>` : ''}
+        <button class="tehlike" data-sil="${kacis(h.uid)}">Sil</button>
       </div>
     </div>`).join('');
-  l.querySelectorAll('button[data-uid]').forEach(b => b.onclick = async () => {
-    if (!confirm('Bu hediyeyi şimdi bitirmek istiyor musun?')) return;
+  l.querySelectorAll('button[data-bitir]').forEach(b => b.onclick = async () => {
+    if (!confirm('Bu hediyeyi şimdi bitirmek istiyor musun? Kullanıcıya "hediye sona erdi" bildirimi gider.')) return;
     b.disabled = true;
-    await api('/api/yonetim/hediye-bitir', { uid: b.dataset.uid });
+    await api('/api/yonetim/hediye-bitir', { uid: b.dataset.bitir });
+    listele();
+  });
+  l.querySelectorAll('button[data-sil]').forEach(b => b.onclick = async () => {
+    if (!confirm('Kayıt tamamen silinsin mi? Hediye hemen biter, bildirim GİTMEZ, kişi hiç hediye almamış gibi olur.')) return;
+    b.disabled = true;
+    await api('/api/yonetim/hediye-sil', { uid: b.dataset.sil });
     listele();
   });
 }

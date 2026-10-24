@@ -8127,6 +8127,13 @@ app.get('/api/forecast', async (req, res) => {
             //      (true||false → true||true). Davranış farkı YOK.
             cikti.isGracePeriod = req.isGracePeriod === true;
             cikti.graceDaysLeft = (typeof req.graceDaysLeft === 'number') ? req.graceDaysLeft : null;
+            // [2026-10-24] Kişiye özel hediye — yeni APK menüde "Hediye · N gün"
+            // yazar ve başlayınca/bitince kullanıcıya söyler. YALNIZ v52+ (sıra
+            // kuralı); abonelik/deneme alanlarına DOKUNULMAZ.
+            if (istemciYeter(_istemciSurum, KALKAN_MIN_SURUM)) {
+                cikti.isGift = req.isGift === true;
+                cikti.giftEndsAt = (typeof req.giftEndsAt === 'number') ? req.giftEndsAt : null;
+            }
             return cikti;
         };
 
@@ -13747,6 +13754,13 @@ const HEDIYE_BILDIRIM = {
           genel: (g, b) => `Δώρο ${g} ημερών Meraloji PRO για σένα! Λήξη: ${b}` },
 };
 
+const HEDIYE_BITTI_BILDIRIM = {
+    tr: { baslik: 'Hediye PRO süren sona erdi', metin: 'Meraloji\'yi denediğin için teşekkürler! PRO\'ya devam etmek istersen uygulamadan abone olabilirsin.' },
+    en: { baslik: 'Your PRO gift has ended', metin: 'Thanks for trying Meraloji! If you want to keep PRO, you can subscribe in the app.' },
+    es: { baslik: 'Tu regalo PRO ha terminado', metin: '¡Gracias por probar Meraloji! Si quieres seguir con PRO, puedes suscribirte en la aplicación.' },
+    el: { baslik: 'Το δώρο PRO έληξε', metin: 'Ευχαριστούμε που δοκίμασες το Meraloji! Αν θέλεις να συνεχίσεις με PRO, μπορείς να εγγραφείς από την εφαρμογή.' },
+};
+
 // Sahibin kullanıcıya atacağı mail (sayfa kopyalanabilir metin olarak gösterir;
 // mailto açmaz — sahip: "mail atmak için pencere açmasın, yazıyı versin").
 // İmza: "Uğur Kögüs / Meraloji" (soyadında ğ/ş yok).
@@ -13898,8 +13912,41 @@ app.post('/api/yonetim/hediye-bitir', async (req, res) => {
     if (!uid) return res.status(400).json({ hata: 'uid gerekli' });
     await db.collection('hediyeler').doc(uid).set({ bitis: Date.now(), bitirildi: Date.now() }, { merge: true });
     hediyeCache.del(uid);
-    console.log(`[HEDIYE] ⏹ ${uid} hediyesi sahip tarafından bitirildi`);
-    res.json({ durum: 'bitirildi', uid });
+    // Sahip: "bitir dedikten sonra pro düştü ama bunu da bilmedi" → bildirim,
+    // yine YALNIZ bu uid'nin kendi token'ına.
+    let bildirim = 'token-yok';
+    try {
+        const uDoc = await db.collection('users').doc(uid).get();
+        const u = uDoc.exists ? uDoc.data() : {};
+        const lang = ['tr', 'en', 'es', 'el'].includes(u.lang) ? u.lang : 'tr';
+        const t = HEDIYE_BITTI_BILDIRIM[lang];
+        if (u.fcmToken) {
+            await admin.messaging().send({
+                token: u.fcmToken,
+                notification: { title: t.baslik, body: t.metin },
+                data: { type: 'hediye_bitti' },
+                android: { priority: 'high', notification: { sound: 'default', channelId: 'meraloji_notifications' } },
+                fcmOptions: { analyticsLabel: 'hediye_bitti' },
+            });
+            bildirim = 'gonderildi';
+        }
+    } catch (e) { bildirim = 'hata: ' + (e.code || e.message); }
+    console.log(`[HEDIYE] ⏹ ${uid} hediyesi sahip tarafından bitirildi · bildirim ${bildirim}`);
+    res.json({ durum: 'bitirildi', uid, bildirim });
+});
+
+// Test kolaylığı (sahip): kaydı TAMAMEN siler — kullanıcı hediyesizmiş gibi
+// olur; aynı kişiye yeniden "ilk hediye" verilebilir. Yalnız hediyeler/{uid};
+// abonelik, deneme ya da users belgesine DOKUNMAZ. Bildirim GİTMEZ.
+app.post('/api/yonetim/hediye-sil', async (req, res) => {
+    if (!yonetimYetkili(req)) return res.status(403).json({ hata: 'yetkisiz' });
+    if (!db) return res.status(503).json({ hata: 'veritabanı hazır değil' });
+    const uid = String(req.body?.uid || '').trim();
+    if (!uid) return res.status(400).json({ hata: 'uid gerekli' });
+    await db.collection('hediyeler').doc(uid).delete();
+    hediyeCache.del(uid);
+    console.log(`[HEDIYE] 🗑 ${uid} hediye kaydı silindi (sahip)`);
+    res.json({ durum: 'silindi', uid });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
