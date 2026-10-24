@@ -5481,7 +5481,9 @@ function saatlikNedenler(fish, key, saatParamlari, hourlyScores) {
         for (let h = 0; h < 24; h++) {
             const p = saatParamlari[h];
             const temel = calculateFishScore(fish, key, p).finalScore;
-            let enArti = null, enEksi = null;
+            // [2026-10-25] Sahip: her yönde en güçlü İKİ etken. Biçim [a1, e1] ya da
+            // [a1, e1, a2, e2] — ilk iki eleman eskisiyle aynı, yeni istemci sonrakini okur.
+            const artilar = [], eksiler = [];
             for (const [g, alanlar] of Object.entries(NEDEN_GRUPLARI)) {
                 const r = tipik[g];
                 if (r < 0 || r === h) continue;
@@ -5491,10 +5493,15 @@ function saatlikNedenler(fish, key, saatParamlari, hourlyScores) {
                 for (const a of alanlar) { if (yeni[a] !== ref[a]) ayni = false; yeni[a] = ref[a]; }
                 if (ayni) continue;
                 const fark = temel - calculateFishScore(fish, key, yeni).finalScore;
-                if (fark >= NEDEN_ESIK && (!enArti || fark > enArti.f)) enArti = { g, f: fark };
-                if (fark <= -NEDEN_ESIK && (!enEksi || fark < enEksi.f)) enEksi = { g, f: fark };
+                if (fark >= NEDEN_ESIK) artilar.push({ g, f: fark });
+                if (fark <= -NEDEN_ESIK) eksiler.push({ g, f: fark });
             }
-            if (enArti || enEksi) sonuc[h] = [enArti ? enArti.g : null, enEksi ? enEksi.g : null];
+            artilar.sort((a, b) => b.f - a.f);
+            eksiler.sort((a, b) => a.f - b.f);
+            const k = (l, i) => l[i] ? l[i].g : null;
+            if (artilar.length || eksiler.length) sonuc[h] = (artilar.length > 1 || eksiler.length > 1)
+                ? [k(artilar, 0), k(eksiler, 0), k(artilar, 1), k(eksiler, 1)]
+                : [k(artilar, 0), k(eksiler, 0)];
         }
         return sonuc;
     } catch (_) { return null; }
