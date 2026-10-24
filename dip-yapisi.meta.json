@@ -1,0 +1,55 @@
+{
+  "aciklama": "Dip yapısı ızgarası (Folk 5 sınıf). Üretici: tools/dip-izgara-uret.js",
+  "kaynak": "EMODnet Geology — Seabed substrate (1:1M, 1:250k, 1:100k), https://emodnet.ec.europa.eu/en/geology",
+  "lisans": "CC-BY 4.0 — kaynak gösterilmeli",
+  "uretildi": "2026-10-24T23:00:12.628Z",
+  "kutu": {
+    "lon0": 22,
+    "lon1": 42,
+    "lat0": 34,
+    "lat1": 47
+  },
+  "adim": 0.01,
+  "genislik": 2000,
+  "yukseklik": 1300,
+  "hucre": "idx = y*genislik + x; x = floor((lon-lon0)/adim), y = floor((lat-lat0)/adim). Bayt: alt 4 bit Folk5 (0 yok), üst 4 bit ölçek (1=1M,2=250k,3=100k)",
+  "siniflar": {
+    "1": "1. Mud to muddy Sand",
+    "2": "2. Sand",
+    "3": "3. Coarse-grained sediment",
+    "4": "4. Mixed sediment",
+    "5": "5. Rock & boulders"
+  },
+  "veriSahipleri": [
+    "Dokuz Eylul University",
+    "EKBAA-IGME",
+    "GSD_MANRE",
+    "GeoEcoMar",
+    "HCMR",
+    "HCMR/IO",
+    "IGME",
+    "IMST",
+    "IO-BAS",
+    "IO-BAS, MOEW",
+    "IO_BAS",
+    "SRDE Geoinform Ukraine, Kyiv"
+  ],
+  "doluHucre": 977374,
+  "boyananHucre": {
+    "1:1": 1757466,
+    "1:4": 118492,
+    "1:3": 44508,
+    "1:2": 30832,
+    "1:5": 1186,
+    "2:4": 20518,
+    "2:1": 78098,
+    "2:5": 745,
+    "2:3": 6512,
+    "2:2": 7231,
+    "3:3": 420,
+    "3:4": 1856,
+    "3:5": 149,
+    "3:2": 1523,
+    "3:1": 50416
+  }
+}
