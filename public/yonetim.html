@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Yönetim sayfası — arama motorlarına KAPALI. Sayfa herkese açık durur ama
+     kendi başına hiçbir şey yapamaz: her işlem sunucuda Google kimliğiyle ve
+     DEVELOPER_UIDS ile doğrulanır (server.js /api/yonetim/*). -->
+<meta name="robots" content="noindex, nofollow">
+<title>Meraloji Yönetim</title>
+<style>
+  :root {
+    --zemin: #040D1A; --kart: #0F2341; --kenar: rgba(0,212,255,.18);
+    --yazi: #FFFFFF; --ikincil: #8BA4C7; --soluk: #5A7193;
+    --camgobegi: #00D4FF; --yesil: #00E676; --sari: #FFD500; --kirmizi: #FF5572;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--zemin); color: var(--yazi);
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 560px; margin: 0 auto; padding: 24px 16px 48px; display: grid; gap: 16px; }
+  h1 { font-size: 20px; margin: 0; letter-spacing: .02em; }
+  h1 span { color: var(--camgobegi); }
+  .kart { background: var(--kart); border: 1px solid var(--kenar); border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
+  .etiket { font-size: 11px; font-weight: 700; letter-spacing: .12em; color: var(--camgobegi); }
+  label { display: grid; gap: 6px; font-size: 13px; color: var(--ikincil); }
+  input[type=text], input[type=number] {
+    background: var(--zemin); border: 1px solid var(--kenar); color: var(--yazi);
+    border-radius: 10px; padding: 11px 12px; font-size: 15px; width: 100%; }
+  input:focus-visible, button:focus-visible { outline: 2px solid var(--camgobegi); outline-offset: 2px; }
+  .satir { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .secim { display: flex; gap: 8px; align-items: center; color: var(--yazi); font-size: 14px; }
+  button { border: 0; border-radius: 10px; padding: 12px 16px; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .ana { background: var(--camgobegi); color: var(--zemin); }
+  .ikinci { background: var(--zemin); color: var(--ikincil); border: 1px solid var(--kenar); }
+  .tehlike { background: transparent; color: var(--kirmizi); border: 1px solid rgba(255,85,114,.4); padding: 6px 10px; font-size: 13px; }
+  button:disabled { opacity: .5; cursor: default; }
+  .sonuc { border-radius: 10px; padding: 12px; font-size: 14px; display: none; }
+  .sonuc.iyi { display: block; background: rgba(0,230,118,.08); border: 1px solid rgba(0,230,118,.35); }
+  .sonuc.uyari { display: block; background: rgba(255,213,0,.08); border: 1px solid rgba(255,213,0,.35); }
+  .sonuc.kotu { display: block; background: rgba(255,85,114,.08); border: 1px solid rgba(255,85,114,.35); }
+  .sonuc a { color: var(--sari); font-weight: 700; }
+  .liste { display: grid; gap: 8px; }
+  .hediye { display: flex; gap: 10px; justify-content: space-between; align-items: center;
+            border-top: 1px solid var(--kenar); padding-top: 8px; }
+  .hediye:first-child { border-top: 0; padding-top: 0; }
+  .hediye .kim { font-weight: 600; word-break: break-all; }
+  .hediye .ne { font-size: 13px; color: var(--ikincil); font-variant-numeric: tabular-nums; }
+  .rozet { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; }
+  .rozet.aktif { background: var(--yesil); color: var(--zemin); }
+  .rozet.bitti { background: var(--zemin); color: var(--soluk); border: 1px solid var(--kenar); }
+  .soluk { color: var(--soluk); font-size: 13px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>MERALOJİ <span>· Yönetim</span></h1>
+
+  <section class="kart" id="girisKart">
+    <div class="etiket">GİRİŞ</div>
+    <div id="girisDurum" class="soluk">Bu sayfa yalnız Meraloji yöneticisi içindir.</div>
+    <div class="satir">
+      <button class="ana" id="btnGiris">Google ile giriş</button>
+      <button class="ikinci" id="btnCikis" hidden>Çıkış</button>
+    </div>
+  </section>
+
+  <section class="kart" id="hediyeKart" hidden>
+    <div class="etiket">KİŞİYE ÖZEL HEDİYE</div>
+    <label for="hedef">Kullanıcının e-postası ya da uid'si
+      <input type="text" id="hedef" autocomplete="off" placeholder="ornek@gmail.com">
+    </label>
+    <label for="gun">Kaç gün (1-30) — verdiğin andan itibaren sayılır
+      <input type="number" id="gun" min="1" max="30" value="7">
+    </label>
+    <div class="satir">
+      <label class="secim"><input type="radio" name="neden" value="yorum" checked> Play yorumu için teşekkür</label>
+      <label class="secim"><input type="radio" name="neden" value="genel"> Genel hediye</label>
+    </div>
+    <button class="ana" id="btnVer">Hediye ver</button>
+    <div class="sonuc" id="sonuc" role="status"></div>
+  </section>
+
+  <section class="kart" id="listeKart" hidden>
+    <div class="satir" style="justify-content:space-between">
+      <div class="etiket">HEDİYELER (aktif + son 7 gün)</div>
+      <button class="ikinci" id="btnYenile" style="padding:6px 10px;font-size:13px">Yenile</button>
+    </div>
+    <div class="liste" id="liste"><div class="soluk">Yükleniyor…</div></div>
+  </section>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script>
+// Firebase WEB yapılandırması — tasarım gereği herkese açık (eski web uygulamasında
+// da sitedeydi). Güvenlik burada değil: sunucu her istekte kimliği doğrular.
+firebase.initializeApp({
+  apiKey: "AIzaSyA-6K5xRwe1evEeILksKNG_PeHqAM8doQw",
+  authDomain: "meraloji.firebaseapp.com",
+  projectId: "meraloji",
+  storageBucket: "meraloji.firebasestorage.app",
+  messagingSenderId: "226661585844",
+  appId: "1:226661585844:web:5c379329cdd0399a2d98e1"
+});
+const auth = firebase.auth();
+const $ = (id) => document.getElementById(id);
+
+async function api(yol, govde) {
+  const u = auth.currentUser;
+  if (!u) throw new Error('giriş yok');
+  const tok = await u.getIdToken();
+  const r = await fetch(yol, {
+    method: govde ? 'POST' : 'GET',
+    headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+    body: govde ? JSON.stringify(govde) : undefined,
+  });
+  const j = await r.json().catch(() => ({}));
+  return { kod: r.status, j };
+}
+
+const tarih = (ms) => new Date(ms).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+function sonucYaz(sinif, html) { const s = $('sonuc'); s.className = 'sonuc ' + sinif; s.innerHTML = html; }
+const kacis = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+async function listele() {
+  const { kod, j } = await api('/api/yonetim/hediyeler');
+  const l = $('liste');
+  if (kod !== 200) { l.innerHTML = '<div class="soluk">Liste alınamadı.</div>'; return; }
+  if (!j.liste || !j.liste.length) { l.innerHTML = '<div class="soluk">Henüz hediye yok.</div>'; return; }
+  l.innerHTML = j.liste.map(h => `
+    <div class="hediye">
+      <div>
+        <div class="kim">${kacis(h.email || h.uid)}</div>
+        <div class="ne">${h.gun} gün · ${h.neden === 'genel' ? 'genel' : 'yorum'} · bitiş ${tarih(h.bitis)}</div>
+      </div>
+      <div class="satir" style="gap:8px">
+        <span class="rozet ${h.aktif ? 'aktif' : 'bitti'}">${h.aktif ? 'AKTİF' : 'BİTTİ'}</span>
+        ${h.aktif ? `<button class="tehlike" data-uid="${kacis(h.uid)}">Bitir</button>` : ''}
+      </div>
+    </div>`).join('');
+  l.querySelectorAll('button[data-uid]').forEach(b => b.onclick = async () => {
+    if (!confirm('Bu hediyeyi şimdi bitirmek istiyor musun?')) return;
+    b.disabled = true;
+    await api('/api/yonetim/hediye-bitir', { uid: b.dataset.uid });
+    listele();
+  });
+}
+
+$('btnGiris').onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+  .catch(e => { $('girisDurum').textContent = 'Giriş olmadı: ' + e.message; });
+$('btnCikis').onclick = () => auth.signOut();
+$('btnYenile').onclick = listele;
+
+$('btnVer').onclick = async () => {
+  const hedef = $('hedef').value.trim();
+  const gun = parseInt($('gun').value, 10);
+  const neden = document.querySelector('input[name=neden]:checked').value;
+  if (!hedef) { sonucYaz('kotu', 'E-posta ya da uid yaz.'); return; }
+  if (!(gun >= 1 && gun <= 30)) { sonucYaz('kotu', 'Gün 1 ile 30 arasında olmalı.'); return; }
+  if (!confirm(`${hedef} için ${gun} günlük hediye verilsin mi?`)) return;
+  $('btnVer').disabled = true;
+  try {
+    const { kod, j } = await api('/api/yonetim/hediye', { hedef, gun, neden });
+    if (kod === 200 && j.durum === 'verildi') {
+      const kim = kacis(j.ad ? `${j.ad} (${j.email || j.uid})` : (j.email || j.uid));
+      let html = `🎁 <b>${kim}</b> → ${j.gun} gün, bitiş <b>${kacis(j.bitisMetni)}</b> (kullanıcının saatiyle).<br>`;
+      if (j.bildirim === 'gonderildi') {
+        sonucYaz('iyi', html + '✅ Bildirim yalnız bu kullanıcının telefonuna gönderildi.');
+      } else {
+        const mailto = j.email ? `mailto:${encodeURIComponent(j.email)}?subject=${encodeURIComponent(j.mail.konu)}&body=${encodeURIComponent(j.mail.metin + '\n\nUğur Kögüs\nMeraloji')}` : null;
+        const neden = j.bildirim === 'token-yok' ? 'kullanıcının bildirim adresi kayıtlı değil'
+                    : j.bildirim === 'token-olu' ? 'kayıtlı bildirim adresi artık geçersiz' : j.bildirim;
+        sonucYaz('uyari', html + `⚠️ Bildirim gitmedi (${kacis(neden)}). Hediye yine de açık.` +
+          (mailto ? `<br><a href="${mailto}">Mail taslağını aç</a>` : ''));
+      }
+      $('hedef').value = '';
+      listele();
+    } else if (j.durum === 'zaten-abone') {
+      sonucYaz('uyari', `Bu kullanıcı zaten PRO abone (${kacis(j.email || j.uid)}). Hediye yazılmadı.`);
+    } else if (kod === 403) {
+      sonucYaz('kotu', 'Bu işlem için yetkin yok.');
+    } else {
+      sonucYaz('kotu', 'Olmadı: ' + kacis(j.hata || ('HTTP ' + kod)));
+    }
+  } catch (e) {
+    sonucYaz('kotu', 'Bağlantı hatası: ' + kacis(e.message));
+  } finally {
+    $('btnVer').disabled = false;
+  }
+};
+
+auth.onAuthStateChanged(async (u) => {
+  $('btnGiris').hidden = !!u; $('btnCikis').hidden = !u;
+  $('hediyeKart').hidden = true; $('listeKart').hidden = true;
+  if (!u) { $('girisDurum').textContent = 'Bu sayfa yalnız Meraloji yöneticisi içindir.'; return; }
+  $('girisDurum').textContent = 'Kontrol ediliyor…';
+  const { kod } = await api('/api/yonetim/hediyeler');
+  if (kod === 200) {
+    $('girisDurum').textContent = 'Giriş: ' + (u.email || u.uid);
+    $('hediyeKart').hidden = false; $('listeKart').hidden = false;
+    listele();
+  } else {
+    $('girisDurum').textContent = 'Bu hesabın yönetim yetkisi yok (' + (u.email || u.uid) + ').';
+  }
+});
+</script>
+</body>
+</html>

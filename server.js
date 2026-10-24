@@ -3010,6 +3010,9 @@ const subscriptionCache = new NodeCache({ stdTTL: 180 }); // 3 dakika TTL
 // Comeback damgası değişmez bir değerdir → uzun cache güvenli. Süre kontrolü
 // zaman bazlı yapıldığı için cache bayatlamaz (damga sabit, saat ilerler).
 const comebackTrialCache = new NodeCache({ stdTTL: 86400 });
+// Kişiye özel hediye bitişi (ms; 0 = yok). 10 dk — yönetim sayfası hediye
+// verince ilgili uid'yi bu önbellekten SİLER, değişiklik anında geçerli olur.
+const hediyeCache = new NodeCache({ stdTTL: 600 });
 
 // ── ANONİM TEASER KOTASI (anonFree) ──────────────────────────────────────
 // Giriş yapmamış kullanıcının günün ilk analizinde tam veri görmesi BİLİNÇLİ
@@ -3157,6 +3160,9 @@ async function verifyAuth(req, res, next) {
     if (process.env.DEV_BYPASS_SECRET &&
         req.query.bypassAuth === process.env.DEV_BYPASS_SECRET) {
         req.user = { uid: DEVELOPER_UIDS[0] };
+        // Yönetim uçları bypass ile ÇALIŞMAZ (anahtar adres satırında dolaşır);
+        // yalnız gerçek Google girişi. Bkz. /api/yonetim/*.
+        req.devBypass = true;
         req.isPremium = true;
         req.isGracePeriod = false;
         req.graceDaysLeft = 0;
@@ -3303,6 +3309,41 @@ async function verifyAuth(req, res, next) {
                 }
             } catch (e) {
                 console.log('[AUTH-MW] Grace period check failed:', e.message);
+            }
+        }
+
+        // ── KİŞİYE ÖZEL HEDİYE [2026-10-24] ─────────────────────────────────
+        // Sahip, Play'de 5 yıldız veren ve denemesi bitmiş kullanıcıya elle gün
+        // veriyordu — Firebase Auth hesabını SİLİP yeniden kaydettirerek. Bu
+        // kullanıcının favori/günlük/notlarını yeni uid'den görünmez kılıyor ve
+        // sayaçları iki kez sayıyordu. Artık /yonetim sayfası `hediyeler/{uid}`
+        // belgesine bitiş yazar; burada okunur.
+        //
+        // NEDEN AYRI KOLEKSİYON: users/{uid} belgesine istemci yazabiliyor
+        // (yalnız birkaç alan korunuyor). `hediyeler` için kural yok → istemci
+        // ne okur ne yazar; yalnız Admin SDK. Kendine hediye yazmak imkânsız.
+        //
+        // Deneme gibi davranır (isGracePeriod) — gerçek abone SAYILMAZ, abone
+        // raporları bozulmaz. Geri dönüş denemesinden ÖNCE: hediyesi olan
+        // kullanıcı kampanya hakkını boşa yakmasın.
+        if (!req.isPremium && !req.isGracePeriod && db) {
+            try {
+                let hBitis = hediyeCache.get(decoded.uid);
+                if (hBitis === undefined) {
+                    const hd = await db.collection('hediyeler').doc(decoded.uid).get();
+                    const v = hd.exists ? hd.data().bitis : null;
+                    hBitis = (typeof v === 'number' && isFinite(v)) ? v : 0;
+                    hediyeCache.set(decoded.uid, hBitis);
+                }
+                if (hBitis > Date.now()) {
+                    req.isGracePeriod = true;
+                    req.isGift = true;
+                    req.giftEndsAt = hBitis;
+                    req.graceDaysLeft = Math.max(1, Math.ceil((hBitis - Date.now()) / 86400000));
+                }
+            } catch (e) {
+                // Hediye okunamazsa isteği reddetme — kullanıcı normal moduna düşer.
+                console.log('[HEDIYE] kontrol başarısız:', e.message);
             }
         }
 
@@ -10380,6 +10421,10 @@ app.get('/api/subscription-status', async (req, res) => {
         // Alan EKLEME — yayındaki APK bunları yok sayar, davranışı değişmez.
         isComebackTrial: req.isComebackTrial === true,
         comebackHoursLeft: (typeof req.comebackHoursLeft === 'number') ? req.comebackHoursLeft : null,
+        // [2026-10-24] Kişiye özel hediye (yönetim sayfası). Yeni APK menüde
+        // "Hediye · N gün" gösterir; eski APK yok sayar, deneme olarak görür.
+        isGift: req.isGift === true,
+        giftEndsAt: (typeof req.giftEndsAt === 'number') ? req.giftEndsAt : null,
         // [DENEME 7 GÜN] Deneme süresi artık SUNUCUDAN geliyor. İstemci kendi
         // sabitinden hesaplarsa kesim tarihinin iki yanındaki kullanıcılara
         // yanlış sayı gösterir (eski kayıt 14 gün alır ama yeni APK 7 yazardı).
@@ -13667,6 +13712,163 @@ app.delete('/api/favorites/:id', async (req, res) => {
 // │ yalnız "o gün ne demiştik"in kaydı olarak duruyor, hesabın temeli     │
 // │ değil.                                                                 │
 // └───────────────────────────────────────────────────────────────────────┘
+// ═══════════════════════════════════════════════════════════════════════════
+// YÖNETİM: KİŞİYE ÖZEL HEDİYE  [2026-10-24]
+// ═══════════════════════════════════════════════════════════════════════════
+// Sahip: "süresi bitmiş birinin hesabını tekrar açmak — kişiye özel hediye".
+// Sayfa: public/yonetim.html (Google girişi). Kurallar:
+//   · YALNIZ gerçek Google girişi + DEVELOPER_UIDS. Bypass anahtarı REDDEDİLİR
+//     (anahtar adres satırında/geçmişte dolaşır; sızarsa hediye dağıtılırdı).
+//   · Gün sayısı sahipte: 1-30. Süre VERİLDİĞİ ANDAN sayılır.
+//   · Zaten PRO abone olana yazılmaz ("zaten-abone" döner).
+//   · Bildirim YALNIZ o uid'nin kendi fcmToken'ına (users/{uid}) — başka hiç
+//     kimseye gitmez. Token yoksa/ölüyse sayfa sahibe mail taslağı verir.
+//   · Günde en çok YONETIM_GUNLUK_TAVAN hediye; her işlem loga ve belgeye yazılır.
+const YONETIM_GUNLUK_TAVAN = 20;
+const HEDIYE_AZAMI_GUN = 30;
+const yonetimSayacCache = new NodeCache({ stdTTL: 90000 });
+
+function yonetimYetkili(req) {
+    return !!(req.user && !req.devBypass && DEVELOPER_UIDS.includes(req.user.uid));
+}
+
+const HEDIYE_BILDIRIM = {
+    tr: { baslik: '🎁 Sana bir hediye var!',
+          yorum: (g, b) => `Yorumun için teşekkürler! ${g} gün boyunca Meraloji PRO senin. Bitiş: ${b}`,
+          genel: (g, b) => `Meraloji'den sana ${g} günlük PRO hediye! Bitiş: ${b}` },
+    en: { baslik: '🎁 A gift for you!',
+          yorum: (g, b) => `Thanks for your review! Meraloji PRO is yours for ${g} days. Ends: ${b}`,
+          genel: (g, b) => `A ${g}-day Meraloji PRO gift for you! Ends: ${b}` },
+    es: { baslik: '🎁 ¡Un regalo para ti!',
+          yorum: (g, b) => `¡Gracias por tu reseña! Meraloji PRO es tuyo durante ${g} días. Termina: ${b}`,
+          genel: (g, b) => `¡Un regalo de ${g} días de Meraloji PRO para ti! Termina: ${b}` },
+    el: { baslik: '🎁 Ένα δώρο για σένα!',
+          yorum: (g, b) => `Ευχαριστούμε για την κριτική σου! Το Meraloji PRO είναι δικό σου για ${g} ημέρες. Λήξη: ${b}`,
+          genel: (g, b) => `Δώρο ${g} ημερών Meraloji PRO για σένα! Λήξη: ${b}` },
+};
+
+/** Kullanıcının yerel saatiyle "31.10.2026 08:15" (ofset users.utcOffsetSec; yoksa TR). */
+function hediyeTarihi(ms, ofsetSn) {
+    const ofs = (typeof ofsetSn === 'number' && isFinite(ofsetSn)) ? ofsetSn : 10800;
+    const d = new Date(ms + ofs * 1000).toISOString();
+    return `${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(0, 4)} ${d.slice(11, 16)}`;
+}
+
+async function hediyeHedefiniBul(hedef) {
+    const h = String(hedef || '').trim();
+    if (!h) return null;
+    try {
+        return h.includes('@') ? await admin.auth().getUserByEmail(h) : await admin.auth().getUser(h);
+    } catch (e) { return null; }
+}
+
+async function aktifAboneMi(uid) {
+    try {
+        const [s, u] = await Promise.all([
+            db.collection('subscriptions').doc(uid).get(),
+            db.collection('users').doc(uid).get(),
+        ]);
+        const simdi = Date.now();
+        if (s.exists) {
+            const d = s.data();
+            if (d.status === 'active' && (!d.expiresAt || d.expiresAt > simdi)) return true;
+        }
+        if (u.exists) {
+            const d = u.data();
+            if (d.isPro === true && (!d.proExpiresAt || d.proExpiresAt > simdi)) return true;
+        }
+    } catch (e) { }
+    return false;
+}
+
+app.post('/api/yonetim/hediye', async (req, res) => {
+    if (!yonetimYetkili(req)) return res.status(403).json({ hata: 'yetkisiz' });
+    if (!db || !admin) return res.status(503).json({ hata: 'veritabanı hazır değil' });
+    const gun = parseInt(req.body?.gun, 10);
+    if (!Number.isInteger(gun) || gun < 1 || gun > HEDIYE_AZAMI_GUN)
+        return res.status(400).json({ hata: `gün 1-${HEDIYE_AZAMI_GUN} arası olmalı` });
+    const neden = req.body?.neden === 'genel' ? 'genel' : 'yorum';
+
+    const sayacAnahtar = 'yonetim_' + new Date().toISOString().slice(0, 10);
+    const bugun = yonetimSayacCache.get(sayacAnahtar) || 0;
+    if (bugun >= YONETIM_GUNLUK_TAVAN) return res.status(429).json({ hata: 'günlük hediye tavanı doldu' });
+
+    const kul = await hediyeHedefiniBul(req.body?.hedef);
+    if (!kul) return res.status(404).json({ hata: 'kullanıcı bulunamadı (e-posta ya da uid)' });
+    const uid = kul.uid;
+    if (await aktifAboneMi(uid)) return res.json({ durum: 'zaten-abone', uid, email: kul.email || null });
+
+    const simdi = Date.now();
+    const bitis = simdi + gun * 86400000;
+    const uDoc = await db.collection('users').doc(uid).get().catch(() => null);
+    const u = uDoc && uDoc.exists ? uDoc.data() : {};
+    const lang = ['tr', 'en', 'es', 'el'].includes(u.lang) ? u.lang : 'tr';
+
+    await db.collection('hediyeler').doc(uid).set({
+        bitis, gun, neden, verildi: simdi, email: kul.email || null, ad: kul.displayName || null,
+        veren: req.user.uid, sayi: admin.firestore.FieldValue.increment(1),
+        gecmis: admin.firestore.FieldValue.arrayUnion({ verildi: simdi, gun, neden }),
+    }, { merge: true });
+    hediyeCache.del(uid);                 // bir sonraki istekte hemen geçerli
+    subscriptionCache.del(uid);
+    yonetimSayacCache.set(sayacAnahtar, bugun + 1);
+
+    // Bildirim — YALNIZ bu uid'nin token'ı.
+    const t = HEDIYE_BILDIRIM[lang];
+    const bitisMetni = hediyeTarihi(bitis, u.utcOffsetSec);
+    const govde = t[neden](gun, bitisMetni);
+    let bildirim = 'token-yok';
+    if (u.fcmToken) {
+        try {
+            await admin.messaging().send({
+                token: u.fcmToken,
+                notification: { title: t.baslik, body: govde },
+                data: { type: 'hediye', bitis: String(bitis) },
+                android: { priority: 'high', notification: { sound: 'default', channelId: 'meraloji_notifications' } },
+                fcmOptions: { analyticsLabel: 'hediye' },
+            });
+            bildirim = 'gonderildi';
+        } catch (err) {
+            const kod = err.code || '';
+            bildirim = 'hata: ' + (kod || err.message);
+            if (kod === 'messaging/registration-token-not-registered' || kod === 'messaging/invalid-registration-token') {
+                await db.collection('users').doc(uid).update({ fcmToken: admin.firestore.FieldValue.delete() }).catch(() => { });
+                bildirim = 'token-olu';
+            }
+        }
+    }
+    console.log(`[HEDIYE] 🎁 ${uid} (${kul.email || '?'}) ${gun} gün → ${new Date(bitis).toISOString()} · neden ${neden} · bildirim ${bildirim}`);
+    res.json({
+        durum: 'verildi', uid, email: kul.email || null, ad: kul.displayName || null,
+        gun, bitis, bitisMetni, bildirim, lang,
+        mail: { konu: t.baslik.replace(/^\S+\s/, ''), metin: govde },
+    });
+});
+
+app.get('/api/yonetim/hediyeler', async (req, res) => {
+    if (!yonetimYetkili(req)) return res.status(403).json({ hata: 'yetkisiz' });
+    if (!db) return res.status(503).json({ hata: 'veritabanı hazır değil' });
+    try {
+        const snap = await db.collection('hediyeler').where('bitis', '>', Date.now() - 7 * 86400000).get();
+        const liste = snap.docs.map(d => ({ uid: d.id, ...d.data() }))
+            .map(x => ({ uid: x.uid, email: x.email, ad: x.ad, gun: x.gun, neden: x.neden,
+                         verildi: x.verildi, bitis: x.bitis, aktif: x.bitis > Date.now() }))
+            .sort((a, b) => b.verildi - a.verildi);
+        res.json({ liste });
+    } catch (e) { res.status(500).json({ hata: e.message }); }
+});
+
+app.post('/api/yonetim/hediye-bitir', async (req, res) => {
+    if (!yonetimYetkili(req)) return res.status(403).json({ hata: 'yetkisiz' });
+    if (!db) return res.status(503).json({ hata: 'veritabanı hazır değil' });
+    const uid = String(req.body?.uid || '').trim();
+    if (!uid) return res.status(400).json({ hata: 'uid gerekli' });
+    await db.collection('hediyeler').doc(uid).set({ bitis: Date.now(), bitirildi: Date.now() }, { merge: true });
+    hediyeCache.del(uid);
+    console.log(`[HEDIYE] ⏹ ${uid} hediyesi sahip tarafından bitirildi`);
+    res.json({ durum: 'bitirildi', uid });
+});
+
 // ═══════════════════════════════════════════════════════════════════════════
 // YATIŞMA TEST UCU  [2026-10-24] — YALNIZ GELİŞTİRİCİ
 // ═══════════════════════════════════════════════════════════════════════════
