@@ -263,6 +263,8 @@ const SERVER_i18n = {
                     `Dalga ${tepe} m'ye çıkmıştı, şimdi ${simdi} m. Fırtına arkası pencere açık: dip karışık, su bulanık; kıyıya yakın beslenme artabilir. Pencere ${bitis} civarına kadar sürüyor.`,
                 yatismaYakinda: (tepe, basDalga, bas) =>
                     `Fırtına dalgası en çok ${tepe} m; ${bas} civarı ${basDalga} m'ye iniyor. Fırtına arkası pencere o saatte açılıyor: dip karışık, su bulanık olacak.`,
+                yatismaKapaniyor: (tepe, simdi) =>
+                    `Dalga ${tepe} m'ye çıkmıştı, şimdi ${simdi} m. Fırtına arkası pencerenin son saatleri: su durulmaya başlıyor.`,
                 trakonyaMetin: (skor) =>
                     `Trakonya %${skor} aktif. Kumlu sığ zemin ve bulanık su — üzerine basma riski artıyor.`,
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
@@ -472,6 +474,8 @@ const SERVER_i18n = {
                     `Waves reached ${tepe} m and are now ${simdi} m. The after-storm window is open: the bottom is stirred up and the water murky, so feeding close to shore can pick up. It lasts until about ${bitis}.`,
                 yatismaYakinda: (tepe, basDalga, bas) =>
                     `Storm waves peak at ${tepe} m and drop to ${basDalga} m around ${bas}. The after-storm window opens then: stirred-up bottom, murky water.`,
+                yatismaKapaniyor: (tepe, simdi) =>
+                    `Waves reached ${tepe} m and are now ${simdi} m. These are the last hours of the after-storm window: the water is starting to clear.`,
                 trakonyaMetin: (skor) =>
                     `Weever ${skor}% active. Sandy shallows and murky water raise the risk of stepping on one.`,
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
@@ -681,6 +685,8 @@ const SERVER_i18n = {
                     `El oleaje llegó a ${tepe} m y ahora está en ${simdi} m. La ventana tras el temporal está abierta: el fondo está removido y el agua turbia, así que la actividad cerca de la orilla puede aumentar. Dura hasta ${bitis} aproximadamente.`,
                 yatismaYakinda: (tepe, basDalga, bas) =>
                     `El oleaje del temporal llega a ${tepe} m y baja a ${basDalga} m hacia ${bas}. Entonces se abre la ventana tras el temporal: fondo removido, agua turbia.`,
+                yatismaKapaniyor: (tepe, simdi) =>
+                    `El oleaje llegó a ${tepe} m y ahora está en ${simdi} m. Son las últimas horas de la ventana tras el temporal: el agua empieza a aclararse.`,
                 trakonyaMetin: (skor) =>
                     `Araña ${skor}% activa. Fondo arenoso poco profundo y agua turbia aumentan el riesgo.`,
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
@@ -890,6 +896,8 @@ const SERVER_i18n = {
                     `Το κύμα έφτασε τα ${tepe} m και τώρα είναι ${simdi} m. Το παράθυρο μετά την κακοκαιρία είναι ανοιχτό: ο βυθός είναι ανακατεμένος και το νερό θολό, οπότε το τάισμα κοντά στην ακτή μπορεί να αυξηθεί. Διαρκεί περίπου έως ${bitis}.`,
                 yatismaYakinda: (tepe, basDalga, bas) =>
                     `Το κύμα της κακοκαιρίας φτάνει τα ${tepe} m και πέφτει στα ${basDalga} m (${bas}). Τότε ανοίγει το παράθυρο μετά την κακοκαιρία: ανακατεμένος βυθός, θολό νερό.`,
+                yatismaKapaniyor: (tepe, simdi) =>
+                    `Το κύμα έφτασε τα ${tepe} m και τώρα είναι ${simdi} m. Οι τελευταίες ώρες του παραθύρου μετά την κακοκαιρία: το νερό αρχίζει να καθαρίζει.`,
                 trakonyaMetin: (skor) =>
                     `Δράκαινα ${skor}% ενεργή. Αμμώδη ρηχά και θολό νερό αυξάνουν τον κίνδυνο να την πατήσετε.`,
                 hirsizMetin: (tur, skor, hedef, hedefSkor) =>
@@ -6194,9 +6202,13 @@ function ozelUyarilariUret(fishList, lang, kosul) {
             tip: 'YATISMA',
             seviye: 'bilgi',
             baslik: t.baslikYatisma,
-            metin: y.acikMi
-                ? t.yatismaAcik(ondalik(y.tepeM), ondalik(y.simdiM), saat(y.bitZaman))
-                : t.yatismaYakinda(ondalik(y.tepeM), ondalik(y.basM), saat(y.basZaman)),
+            // Pencere tam bu saatte bitiyorsa "00:00'a kadar sürüyor" (saat 00:00'da)
+            // tuhaf okunuyordu — tekrar oynatmada görüldü (Bozcaada 16 Eki 00:00).
+            metin: !y.acikMi
+                ? t.yatismaYakinda(ondalik(y.tepeM), ondalik(y.basM), saat(y.basZaman))
+                : (y.bitIdx === y.basIdx
+                    ? t.yatismaKapaniyor(ondalik(y.tepeM), ondalik(y.simdiM))
+                    : t.yatismaAcik(ondalik(y.tepeM), ondalik(y.simdiM), saat(y.bitZaman))),
             tavsiyeler: [],
             turler,
         });
@@ -13650,6 +13662,45 @@ app.delete('/api/favorites/:id', async (req, res) => {
 // │ yalnız "o gün ne demiştik"in kaydı olarak duruyor, hesabın temeli     │
 // │ değil.                                                                 │
 // └───────────────────────────────────────────────────────────────────────┘
+// ═══════════════════════════════════════════════════════════════════════════
+// YATIŞMA TEST UCU  [2026-10-24] — YALNIZ GELİŞTİRİCİ
+// ═══════════════════════════════════════════════════════════════════════════
+// Sahip: "kör atış istemiyorum". Fırtına yokken yatışma kartını canlı sunucu
+// koduyla görmenin yolu: "şu an"ı geçmişe kaydır (geri = saat). Marine zaten
+// son 7 günü veriyor; 18-19 Eki Şile fırtınası bu pencerede.
+//
+// GÜVENLİK: yalnız DEVELOPER_UIDS (bypass anahtarı da oraya düşüyor). Önbelleğe
+// YAZMAZ, /api/forecast'a dokunmaz — gerçek kullanıcının yanıtı etkilenmez.
+// Fark: fetch tavanı burada uygulanmıyor (kapalı koy testinde dalga ham gelir)
+// ve tür rozeti yok (gerçek skor listesi hesaplanmıyor).
+app.get('/api/yatisma-test', async (req, res) => {
+    if (!req.user || !DEVELOPER_UIDS.includes(req.user.uid)) return res.status(403).json({ error: 'yalnız geliştirici' });
+    const lat = parseFloat(req.query.lat), lon = parseFloat(req.query.lon);
+    if (!isFinite(lat) || !isFinite(lon)) return res.status(400).json({ error: 'lat, lon gerekli' });
+    const geri = Math.max(0, Math.min(160, parseInt(req.query.geri, 10) || 0));
+    const lang = getLang(req);
+    try {
+        const url = omKey(`https://${OM_MARINE_HOST}/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height&past_days=7&forecast_days=2&timezone=auto`);
+        const r = await fetchWithTimeout(url, 8000);
+        if (!r || !r.ok) return res.status(502).json({ error: 'marine alınamadı' });
+        const j = await r.json();
+        const t = j?.hourly?.time, w = j?.hourly?.wave_height;
+        if (!Array.isArray(t) || !Array.isArray(w)) return res.status(502).json({ error: 'marine biçimi beklenmedik' });
+        const yerelSimdi = new Date(Date.now() + (j.utc_offset_seconds || 0) * 1000).toISOString().slice(0, 13);
+        const simdi = t.findIndex(x => typeof x === 'string' && x.slice(0, 13) === yerelSimdi);
+        if (simdi < 0) return res.status(500).json({ error: 'şu an indeksi bulunamadı' });
+        const idx = simdi - geri;
+        const y = yatismaPenceresi(w, t, idx);
+        // ozelUyarilariUret boş listede hiç çalışmıyor; rozetsiz bir yer tutucu.
+        const uyari = (ozelUyarilariUret([{ key: '_test', name: '', score: 0 }], lang, { yatisma: y }) || [])
+            .find(u => u && u.tip === 'YATISMA') || null;
+        console.log(`[YATISMA-TEST] ${req.user.uid.slice(0, 6)} ${lat.toFixed(3)},${lon.toFixed(3)} geri ${geri}s → ${uyari ? 'kart' : 'yok'}`);
+        res.json({ testSimdi: t[idx] || null, dalga: w[idx] ?? null, yatisma: y, uyari });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 app.post('/api/catch-report', async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Giriş gerekli' });
     if (!db) return res.status(503).json({ error: 'Veritabanı hazır değil' });

@@ -283,13 +283,14 @@ console.log('\n── sürüm kapısı ─────────────�
 // ── YATIŞMA [2026-10-24] ────────────────────────────────────────────────────
 console.log('\n── fırtına sonrası yatışma ────────────────────────────────');
 {
-    const y = `{ acikMi: true, tepeM: 2.4, simdiM: 0.7, basM: 0.7, tepeZaman: '2026-10-14T12:00',
+    const y = `{ acikMi: true, basIdx: 10, bitIdx: 16, tepeM: 2.4, simdiM: 0.7, basM: 0.7, tepeZaman: '2026-10-14T12:00',
                  simdiZaman: '2026-10-15T18:00', basZaman: '2026-10-15T18:00', bitZaman: '2026-10-16T00:00' }`;
     const g = kos(`
         const l = ${liste(['levrek', 'Levrek', 62], ['izmarit', 'İzmarit', 40], ['sargoz', 'Sargoz', 38])};
         globalThis.tr = ozelUyarilariUret(l, 'tr', { yatisma: ${y} });
         globalThis.en = ozelUyarilariUret(l, 'en', { yatisma: ${y} });
         globalThis.yok = ozelUyarilariUret(l, 'tr', { yatisma: null });
+        globalThis.son = ozelUyarilariUret(l, 'tr', { yatisma: { acikMi: true, basIdx: 5, bitIdx: 5, tepeM: 2.4, simdiM: 0.4 } });
         const govde = { instant: { ozelUyarilar: [{ tip: 'YEM_HIRSIZI' }, { tip: 'YATISMA' }], fishList: [] }, forecast: [] };
         globalThis.v51 = ozelUyariKapisi(govde, 51);
         globalThis.v52 = ozelUyariKapisi(govde, 52);
@@ -303,6 +304,8 @@ console.log('\n── fırtına sonrası yatışma ─────────�
     ol('yalnız eşiği geçen yatışma türü rozet (levrek var, sargoz 38 yok)',
         ytr && ytr.turler.length === 1 && ytr.turler[0].key === 'levrek');
     ol('pencere yoksa YATISMA yok', !g.yok.some(u => u.tip === 'YATISMA'));
+    ol('pencere bu saatte bitiyorsa "son saatleri" metni (saat yazmıyor)',
+        (g.son.find(u => u.tip === 'YATISMA') || {}).metin?.includes('son saatleri'));
     ol('v51 → YATISMA süzüldü, diğer uyarı duruyor',
         g.v51.instant.ozelUyarilar.length === 1 && g.v51.instant.ozelUyarilar[0].tip === 'YEM_HIRSIZI');
     ol('v52 → YATISMA duruyor', g.v52.instant.ozelUyarilar.some(u => u.tip === 'YATISMA'));
