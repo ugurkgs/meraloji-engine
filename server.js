@@ -14014,6 +14014,8 @@ app.post('/api/catch-report', async (req, res) => {
     // tempRange.min/max'i yanlış daraltırdı (GOZLEM-TOPLAMA-PLANI §3.1).
     if (outcome !== 'caught' && outcome !== 'empty')
         return res.status(400).json({ error: 'outcome: caught | empty' });
+    // [2026-10-24] Vuruş ayrımı (sahip): 'empty' ikiye ayrıldı — 'some' = vuruş vardı, tutamadı; 'none' = hiç vuruş yok. outcome BİLEREK 'empty' kalır (kalibrasyon anlamı bozulmasın). Eski istemci göndermez → null; geçersiz değer de null, hata değil.
+    const bites = (outcome === 'empty' && (req.body.bites === 'some' || req.body.bites === 'none')) ? req.body.bites : null;
 
     // when: 'now' = bugün, bu koşullarda | 'past' = daha önce (koşul bilinmiyor)
     // 'past' için kabaca ne zaman: week | month | old
@@ -14047,6 +14049,7 @@ app.post('/api/catch-report', async (req, res) => {
                 lat: fLat, lon: fLon,
                 species: valid,
                 outcome,                 // 'caught' | 'empty'
+                bites,                   // 'some' | 'none' | null
                 whenBucket: bucket,      // week | month | old | null
                 freeText: note,
                 engineVersion: ENGINE_VERSION,
@@ -14176,6 +14179,7 @@ app.post('/api/catch-report', async (req, res) => {
             outcome,                                  // 'caught' | 'empty'
             caught: valid,
             wentButEmpty: outcome === 'empty',        // yokluk gözlemi — EN DEĞERLİSİ
+            bites,                                    // 'some' | 'none' | null (yalnız empty'de)
             freeText: note,
 
             conditionsSource: src ? 'server-cache' : 'miss',
