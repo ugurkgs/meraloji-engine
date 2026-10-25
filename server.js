@@ -8018,11 +8018,16 @@ async function fetchModelYayilimi(lat, lon) {
     const url = omKey(`https://${OM_HOST}/v1/forecast?latitude=${gLa}&longitude=${gLo}`
         + `&daily=wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum`
         + `&models=${GUVEN_MODELLER.join(',')}&forecast_days=8&timezone=auto`);
-    const j = await enFazlaBekle(deduplicatedFetch(k, () => safeFetchJSON(url, 4000)), 4500);
-    const d = j && j.daily;
-    const sonuc = (d && Array.isArray(d.time)) ? d : null;
-    modelYayilimCache.set(k, sonuc, sonuc ? 3 * 3600 : 1200);   // başarısızlık 20 dk sonra yeniden denenir
-    return sonuc;
+    // Önbelleğe yazım ÇEKİMİN KENDİSİNE bağlı, beklemeye değil [2026-10-25 denetim]: analiz 4,5 sn
+    // sonra güvensiz devam eder ama geç gelen veri yine saklanır; eskiden zaman aşımı hücreyi
+    // 20 dk "veri yok" diye işaretliyordu. Gerçek başarısızlık (null/hata) 20 dk sonra yeniden denenir.
+    const cek = deduplicatedFetch(k, () => safeFetchJSON(url, 4000)).then(j => {
+        const d = j && j.daily;
+        const s = (d && Array.isArray(d.time)) ? d : null;
+        modelYayilimCache.set(k, s, s ? 3 * 3600 : 1200);
+        return s;
+    });
+    return enFazlaBekle(cek, 4500);
 }
 
 /** { skor, ana: 'RUZGAR'|'YAGIS'|'YON'|null, ruzgarFark, yagisFark, yonFark } ya da null. */
