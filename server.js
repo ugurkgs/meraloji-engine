@@ -7991,6 +7991,75 @@ function veriKaynaklari(sstSat, sstUyduPayi, chl) {
     } catch (_) { return null; }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// TAHMİN GÜVENİ  [2026-10-25, sahip isteği]
+// ═══════════════════════════════════════════════════════════════════════════
+// Sahip: "yarın %90, ertesi gün %70 — bu hep böyle değil; gidişata, havanın
+// durumuna göre her gün farklı puan almalı". Sabit gün-azalması YAZILMADI.
+// Ölçü: üç bağımsız hava modelinin (ECMWF, GFS, ICON) o gün için ne kadar
+// AYRIŞTIĞI. Modeller aynı şeyi söylüyorsa hava belli, ayrışıyorsa belirsiz.
+// Ölçüldü (8 kıyı × 7 gün, 25 Eki): ayrışma günden güne düzensiz (Şile 3. gün
+// rüzgârda ±24 km/s, 4. gün ±10); formülle güven 38–98, medyan 69, ör. Bodrum
+// 5. gün 54 / 6. gün 89 — azalma değil, havaya bağlı.
+//   rüzgâr (günlük en yüksek) ayrışması: 1,4 puan/km/s, en fazla 35
+//   yağış toplamı ayrışması: 7·ln(1+mm), en fazla 20
+//   baskın yön ayrışması: yalnız ort. rüzgâr ≥12 km/s ise (hafif rüzgârda yön gürültü), en fazla 15
+//   bugün ×0,5 · yarın ×0,8 (yakında model farkı çoğunlukla çözünürlük farkı) + gün başına 1,5
+// Skor taban 20 / tavan 98. PUANA DOKUNMAZ — yalnız "bu günün tahmini ne kadar sağlam" der.
+// Maliyet: 0,25° (~25 km) hücre × 3 saat önbellek; 3 model × 1 çağrı. Gelmezse alan yok.
+const GUVEN_MODELLER = ['ecmwf_ifs025', 'gfs_seamless', 'icon_seamless'];
+const modelYayilimCache = new NodeCache({ stdTTL: 3 * 3600, checkperiod: 600 });
+
+async function fetchModelYayilimi(lat, lon) {
+    const gLa = (Math.round(lat * 4) / 4).toFixed(2), gLo = (Math.round(lon * 4) / 4).toFixed(2);
+    const k = `myay_${gLa}_${gLo}`;
+    const hit = modelYayilimCache.get(k);
+    if (hit !== undefined) return hit;
+    const url = omKey(`https://${OM_HOST}/v1/forecast?latitude=${gLa}&longitude=${gLo}`
+        + `&daily=wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum`
+        + `&models=${GUVEN_MODELLER.join(',')}&forecast_days=8&timezone=auto`);
+    const j = await enFazlaBekle(deduplicatedFetch(k, () => safeFetchJSON(url, 4000)), 4500);
+    const d = j && j.daily;
+    const sonuc = (d && Array.isArray(d.time)) ? d : null;
+    modelYayilimCache.set(k, sonuc, sonuc ? 3 * 3600 : 1200);   // başarısızlık 20 dk sonra yeniden denenir
+    return sonuc;
+}
+
+/** { skor, ana: 'RUZGAR'|'YAGIS'|'YON'|null, ruzgarFark, yagisFark, yonFark } ya da null. */
+function tahminGuveni(daily, tarih, gun) {
+    try {
+        if (!daily || !Array.isArray(daily.time)) return null;
+        const g = daily.time.indexOf(tarih);
+        if (g < 0) return null;
+        const al = alan => GUVEN_MODELLER.map(m => daily[`${alan}_${m}`]?.[g]).filter(x => typeof x === 'number' && isFinite(x));
+        const w = al('wind_speed_10m_max'), y = al('precipitation_sum'), yn = al('wind_direction_10m_dominant');
+        if (w.length < 2) return null;   // tek model → ayrışma ölçülemez, iddia yok
+        const wS = Math.max(...w) - Math.min(...w);
+        const yS = y.length > 1 ? Math.max(...y) - Math.min(...y) : 0;
+        const ort = w.reduce((a, b) => a + b, 0) / w.length;
+        let dS = 0;
+        for (let a = 0; a < yn.length; a++) for (let b = a + 1; b < yn.length; b++)
+            dS = Math.max(dS, Math.abs(((yn[a] - yn[b]) % 360 + 540) % 360 - 180));
+        const c = { RUZGAR: Math.min(35, 1.4 * wS), YAGIS: Math.min(20, 7 * Math.log(1 + yS)), YON: ort >= 12 ? Math.min(15, dS / 10) : 0 };
+        const olcek = gun <= 0 ? 0.5 : gun === 1 ? 0.8 : 1;
+        const skor = Math.round(Math.max(20, Math.min(98, 100 - olcek * (c.RUZGAR + c.YAGIS + c.YON) - 1.5 * Math.max(0, gun))));
+        const enBuyuk = Object.entries(c).sort((a, b) => b[1] - a[1])[0];
+        return {
+            skor, ana: enBuyuk[1] * olcek >= 5 ? enBuyuk[0] : null,
+            ruzgarFark: Math.round(wS), yagisFark: parseFloat(yS.toFixed(1)),
+            yonFark: ort >= 12 ? Math.round(dS) : null
+        };
+    } catch (_) { return null; }
+}
+
+/** [2026-10-25] forecast[].guven yalnız v52+'ya. MUTASYON YOK. */
+function guvenKapisi(data, istemciSurumu) {
+    if (!data || !Array.isArray(data.forecast)) return data;
+    if (istemciYeter(istemciSurumu, KALKAN_MIN_SURUM)) return data;
+    if (!data.forecast.some(d => d && d.guven !== undefined)) return data;
+    return { ...data, forecast: data.forecast.map(d => { if (!d || d.guven === undefined) return d; const { guven, ...k } = d; return k; }) };
+}
+
 /** [2026-10-25] dataSources yalnız v52+'ya (sıra kuralı). MUTASYON YOK (önbellek paylaşılıyor). */
 function veriKaynagiKapisi(data, istemciSurumu) {
     if (!data || data.dataSources === undefined) return data;
@@ -8327,7 +8396,7 @@ app.get('/api/forecast', async (req, res) => {
         const _gonder = (data) => {
             if (!isRetry) retryHakkiAc(_kimlik, _hucre, data);
             const cikti = applySanitization(
-                veriKaynagiKapisi(saatNedenKapisi(ruzgarKalkaniKapisi(ozelUyariKapisi(listeyiSurumeGoreKes(data, _istemciSurum), _istemciSurum), _istemciSurum), _istemciSurum), _istemciSurum),
+                guvenKapisi(veriKaynagiKapisi(saatNedenKapisi(ruzgarKalkaniKapisi(ozelUyariKapisi(listeyiSurumeGoreKes(data, _istemciSurum), _istemciSurum), _istemciSurum), _istemciSurum), _istemciSurum), _istemciSurum),
                 isProUser);
             // [2026-08-24] DENEME DURUMU ARTIK İSTEMCİYE BİLDİRİLİYOR.
             //
@@ -8476,7 +8545,7 @@ app.get('/api/forecast', async (req, res) => {
             }
         }
 
-        let [weather, marine, bathymetryRaw, chlorophyllDataPre, sstSatPre, substrateData] = await Promise.all([
+        let [weather, marine, bathymetryRaw, chlorophyllDataPre, sstSatPre, substrateData, modelYayilim] = await Promise.all([
             cache.get(`raw_weather_${gLat}_${gLon}`)
                 ? Promise.resolve(cache.get(`raw_weather_${gLat}_${gLon}`))
                 : deduplicatedFetch(`w_${gLat}_${gLon}`, () => queuedFetch(weatherUrl)),
@@ -8486,7 +8555,8 @@ app.get('/api/forecast', async (req, res) => {
             skipBathymetry ? Promise.resolve(null) : fetchBathymetry(lat, lon, 4500).catch(() => null),
             chlFromCache ? Promise.resolve(chlFromCache) : fetchChlorophyll(lat, lon).catch(() => null),
             fetchSatelliteSST(lat, lon, logUser).catch(() => null),
-            fetchSubstrate(lat, lon, false, logUser, _dipKip).catch(() => null)
+            fetchSubstrate(lat, lon, false, logUser, _dipKip).catch(() => null),
+            fetchModelYayilimi(parseFloat(lat), parseFloat(lon)).catch(() => null)   // [2026-10-25] tahmin güveni
         ]);
 
         // Fallback: gelişmiş URL başarısızsa basit URL dene
@@ -9294,7 +9364,10 @@ app.get('/api/forecast', async (req, res) => {
                 // (analiz saatinin değeri) yerine DEĞİL, ONA EK olarak gidiyor.
                 airTempDayAvg: havaOrt.gunduz,
                 airTempNightAvg: havaOrt.gece,
-                activityWindows: activityWindows
+                activityWindows: activityWindows,
+                // [2026-10-25] Tahmin güveni (modellerin ayrışması) — bkz. tahminGuveni. v52+ (guvenKapisi).
+                guven: tahminGuveni(modelYayilim,
+                    new Date(Date.now() + i * 86400000 + utcOffsetSeconds * 1000).toISOString().slice(0, 10), i)
             });
         }
 
