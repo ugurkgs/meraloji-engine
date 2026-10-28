@@ -5307,6 +5307,39 @@ function calculateActivityWindows(date, lat, lon, utcOff = 0) {
     };
 }
 
+/**
+ * [2026-10-25] ÖĞLE GÜNEŞİ (öğlen bastırması) — YALNIZ GÖSTERİM, puana dokunmaz.
+ * Sahip: "sabah suyu akşam suyu yazıyor ya, birde öğlen bastırması… kışın birşey ifade etmez
+ * ama yazın işe yarar". Pencere güneşin tepe noktasından türetilir: tepe −1 sa → tepe +2,5 sa
+ * (öğleden sonra daha sıcak). Uyarı yalnız GÜÇLÜ GÜNEŞTE döner: penceredeki en yüksek UV ≥ 6
+ * VE ortalama bulut ≤ %50; yoksa null (istemci satırı gizler).
+ * Ölçüm (2026 arşivi; Şile/İzmir/Bodrum/Antalya): Ocak 0, Ekim 0, Nisan 11-15/30, Temmuz 22-31/31 gün.
+ * ⚠ Motorun kendi öğle cezası (middayPenalty, 11-15) mevsime/UV'ye BAKMIYOR — onu buna bağlamak
+ *   ayrı iş, ölçülmeden yapılmaz (hafıza: bekleyen-olcumler "ÖĞLEN BASTIRMASI 2. ADIM").
+ */
+const OGLE_UV_ESIK = 6, OGLE_BULUT_ESIK = 50;
+function ogleGunesiPenceresi(date, lat, lon, utcOff, weather, hourlyStartIdx) {
+    try {
+        const tepe = SunCalc.getTimes(date, lat, lon).solarNoon;
+        if (!tepe || isNaN(tepe.getTime())) return null;
+        const bas = toLocalHour(new Date(tepe.getTime() - 60 * 60 * 1000), utcOff);
+        const bit = toLocalHour(new Date(tepe.getTime() + 150 * 60 * 1000), utcOff);
+        const uvD = weather?.hourly?.uv_index, buD = weather?.hourly?.cloud_cover;
+        if (!Array.isArray(uvD) || !Array.isArray(buD)) return null;
+        let uv = 0, bulutTop = 0, n = 0;
+        for (let h = Math.floor(bas); h <= Math.min(23, Math.floor(bit)); h++) {
+            const k = hourlyStartIdx + h;
+            if (typeof uvD[k] !== 'number' || typeof buD[k] !== 'number') continue;
+            uv = Math.max(uv, uvD[k]); bulutTop += buD[k]; n++;
+        }
+        if (n === 0) return null;
+        const bulut = Math.round(bulutTop / n);
+        if (uv < OGLE_UV_ESIK || bulut > OGLE_BULUT_ESIK) return null;
+        const sa = (x) => { const hh = Math.floor(x), mm = Math.round((x - hh) * 60) % 60; return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`; };
+        return { start: sa(bas), end: sa(bit), uv: Math.round(uv * 10) / 10, bulut };
+    } catch (_) { return null; }
+}
+
 // Saat için ağırlık hesapla
 function getHourWeight(hour, activityWindows, fishActivity) {
     const m = activityWindows.morning;
@@ -8061,8 +8094,9 @@ function tahminGuveni(daily, tarih, gun) {
 function guvenKapisi(data, istemciSurumu) {
     if (!data || !Array.isArray(data.forecast)) return data;
     if (istemciYeter(istemciSurumu, KALKAN_MIN_SURUM)) return data;
-    if (!data.forecast.some(d => d && d.guven !== undefined)) return data;
-    return { ...data, forecast: data.forecast.map(d => { if (!d || d.guven === undefined) return d; const { guven, ...k } = d; return k; }) };
+    // [2026-10-25] ogleGunesi de v52+ alanı — aynı kapıdan süzülür.
+    if (!data.forecast.some(d => d && (d.guven !== undefined || d.ogleGunesi !== undefined))) return data;
+    return { ...data, forecast: data.forecast.map(d => { if (!d || (d.guven === undefined && d.ogleGunesi === undefined)) return d; const { guven, ogleGunesi, ...k } = d; return k; }) };
 }
 
 /** [2026-10-25] dataSources yalnız v52+'ya (sıra kuralı). MUTASYON YOK (önbellek paylaşılıyor). */
@@ -9370,6 +9404,8 @@ app.get('/api/forecast', async (req, res) => {
                 airTempDayAvg: havaOrt.gunduz,
                 airTempNightAvg: havaOrt.gece,
                 activityWindows: activityWindows,
+                // [2026-10-25] Öğle güneşi uyarısı (yalnız gösterim) — bkz. ogleGunesiPenceresi. v52+ (guvenKapisi süzer).
+                ogleGunesi: isLand ? null : ogleGunesiPenceresi(targetDate, lat, lon, utcOffsetSeconds, weather, hourlyStartIdx),
                 // [2026-10-25] Tahmin güveni (modellerin ayrışması) — bkz. tahminGuveni. v52+ (guvenKapisi).
                 guven: tahminGuveni(modelYayilim,
                     new Date(Date.now() + i * 86400000 + utcOffsetSeconds * 1000).toISOString().slice(0, 10), i)
