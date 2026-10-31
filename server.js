@@ -8586,9 +8586,16 @@ app.get('/api/forecast', async (req, res) => {
             }
         }
 
+        // [2026-11-01] Ham hava önbelleği gece yarısını geçtiyse saatlik indeks 48 olur; günlük
+        // indeksler sabit kaldığı için 7. gün dizinin dışına taşıp 0 °C, %0 bulutla puanlanıyordu.
+        // Taze yanıtta bugün her zaman 24. indekstedir (past_days=1). Değilse yeniden çekilir.
+        // Eski kayıt yalnız API yanıt vermezse yedek olarak kullanılır (aşağıda).
+        const _hamHava = cache.get(`raw_weather_${gLat}_${gLon}`);
+        const _hamHavaBugunun = !!_hamHava && findTodayIndex(_hamHava.hourly?.time, _hamHava.utc_offset_seconds) === 24;
+
         let [weather, marine, bathymetryRaw, chlorophyllDataPre, sstSatPre, substrateData, modelYayilim] = await Promise.all([
-            cache.get(`raw_weather_${gLat}_${gLon}`)
-                ? Promise.resolve(cache.get(`raw_weather_${gLat}_${gLon}`))
+            _hamHavaBugunun
+                ? Promise.resolve(_hamHava)
                 : deduplicatedFetch(`w_${gLat}_${gLon}`, () => queuedFetch(weatherUrl)),
             cache.get(`raw_marine_${gLat}_${gLon}`)
                 ? Promise.resolve(cache.get(`raw_marine_${gLat}_${gLon}`))
@@ -8610,6 +8617,7 @@ app.get('/api/forecast', async (req, res) => {
                 weather = await queuedFetch(weatherUrlFallback);
             }
         }
+        if ((!weather || weather.error) && _hamHava) weather = _hamHava;
         if (!marine || marine.error) {
             if (cache && cache.get(_OM_BACKOFF_KEY)) {
                 console.log('[FALLBACK] Marine backoff aktif, fallback atlanıyor');
