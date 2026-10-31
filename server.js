@@ -1661,9 +1661,10 @@ const cache = new NodeCache({ stdTTL: 10800, checkperiod: 600 }); // 3 saat — 
 // hamle/yön/görüş/yağış olasılığı/dalga yönü/gelgit/basınç/solunar/ay ışığı saatlik +
 // füzyonlu SST; günlük dalga doğru günden. Ayrıca 24 Eyl KAYALIK ×0,70, 26 Eyl pelajik
 // rampa, 6 Eki kalamar sert kapısı damgasız canlıya çıkmıştı — bu tarih onları da kapsar.
+// [2026-11-01b] Dalga cezası kademeli; sığ su katsayısı Newton ile ve kırılma sınırı yalnız büyümeyi kesiyor.
 // [2026-11-01] Karadeniz poligonu Rumeli Feneri-Rezve şeridini kapsıyor (tr-sea-regions.json);
 // gün değişince ham hava önbelleği kullanılmıyor (7. gün uydurma veriyle puanlanıyordu).
-const ENGINE_VERSION = '2026-11-01';
+const ENGINE_VERSION = '2026-11-01b';
 
 // Bathymetry sonuçlarını 24 saat cache'le — aynı bölgede tekrar taramada API çağrısı yok
 const bathyCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
@@ -2904,6 +2905,19 @@ async function _sstKaynaktanCek(k, start, latMin, latMax, lonMin, lonMax, timeou
         console.log(`[SST-SAT]${u} ${k.ad} fetch failed:`, e.message);
         return hata(e.message);
     }
+}
+
+// [2026-11-01] Dalga cezası kademeli: 1,5 m'de bir santimde %40 kayıp vardı (levrek 46,7→28,0).
+// Metin eşikleri (calculateFishScore) değişmedi, yalnız çarpan sürekli.
+function dalgaCarpani(wave) {
+    const noktalar = [[1, 1], [1.5, 0.75], [2, 0.5], [2.5, 0.25], [3, 0.15]];
+    if (wave <= 1) return 1;
+    for (let i = 1; i < noktalar.length; i++) {
+        const [x0, y0] = noktalar[i - 1];
+        const [x1, y1] = noktalar[i];
+        if (wave <= x1) return y0 + (y1 - y0) * (wave - x0) / (x1 - x0);
+    }
+    return 0.15;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -7758,9 +7772,10 @@ function calculateFishScore(fish, key, params, lang = 'tr') {
     // Yukarıdaki "Cam Deniz" düzeltmesinde çift ceza kaldırıldı çünkü ORADA ikinci bir eksen
     // yok — cam deniz yalnızca bir tercih uyumsuzluğudur, güvenlik sorunu değil. Bu blok
     // bilinçli olarak korundu; "tutarlılık" adına kaldırılmamalı.
-    if (wave > 2.5) { rawScore *= 0.15; penalties.push(i18n(lang).penalties.dangerWave); activeTriggers = [i18n(lang).penalties.dangerWaveTrigger]; }
-    else if (wave > 2.0) { rawScore *= 0.35; penalties.push(i18n(lang).reasons.highWave); activeTriggers.push(i18n(lang).triggers.highWave); }
-    else if (wave > 1.5) { rawScore *= 0.6; penalties.push(i18n(lang).penalties.wavyWater); }
+    if (wave > 1 && wave <= 1.5) rawScore *= dalgaCarpani(wave);
+    if (wave > 2.5) { rawScore *= dalgaCarpani(wave); penalties.push(i18n(lang).penalties.dangerWave); activeTriggers = [i18n(lang).penalties.dangerWaveTrigger]; }
+    else if (wave > 2.0) { rawScore *= dalgaCarpani(wave); penalties.push(i18n(lang).reasons.highWave); activeTriggers.push(i18n(lang).triggers.highWave); }
+    else if (wave > 1.5) { rawScore *= dalgaCarpani(wave); penalties.push(i18n(lang).penalties.wavyWater); }
 
     if (windSpeed > 40) { rawScore *= 0.2; penalties.push(i18n(lang).penalties.storm); activeTriggers = ["⚠️ " + i18n(lang).penalties.storm.toUpperCase() + "!"]; }
     else if (windSpeed > 35) { rawScore *= 0.35; penalties.push(i18n(lang).penalties.veryWindy); }
