@@ -2922,10 +2922,12 @@ function applyShoaling(waveHeight, wavePeriod, depthM) {
     const g = 9.81;
     const omega = (2 * Math.PI) / wavePeriod;
 
-    // Dalgasayısı k için iteratif çözüm — dispersiyon denklemi: ω² = gk·tanh(kd)
+    // Dalgasayısı k için Newton çözümü — dispersiyon denklemi: ω² = gk·tanh(kd)
+    // [2026-11-01] Eski sabit nokta yinelemesi sığ suda salınıyordu, katsayı %52'ye kadar düşük çıkıyordu.
     let k = (omega * omega) / g; // derin su başlangıç tahmini
     for (let i = 0; i < 8; i++) {
-        k = (omega * omega) / (g * Math.tanh(k * depthM));
+        const t = Math.tanh(k * depthM);
+        k -= (g * k * t - omega * omega) / (g * (t + k * depthM * (1 - t * t)));
     }
 
     const kd = k * depthM;
@@ -2939,7 +2941,10 @@ function applyShoaling(waveHeight, wavePeriod, depthM) {
     const Ks = Math.sqrt(Cg_deep / Cg_shallow);
     const Ks_clamped = Math.max(0.7, Math.min(2.5, Ks)); // fiziksel sınır
 
-    const result = parseFloat((waveHeight * Ks_clamped).toFixed(3));
+    // [2026-11-01] Sığlaşma büyümesi kırılma sınırında (0,78·d) kesilir, ama açık deniz dalgasının
+    // altına inilmez. min(H, 0,78·d) fırtınada sığ noktanın dalga cezasını kaldırıyordu (+23,5 puan)
+    // ve yanlış sığ derinlikte (iskele) bu hata büyüyordu. Dalga cezası "olta atılabilir mi" sorusudur.
+    const result = parseFloat(Math.min(waveHeight * Ks_clamped, Math.max(waveHeight, 0.78 * depthM)).toFixed(3));
     if (depthM < 20) {
         console.log(`[SHOALING] d=${depthM}m T=${wavePeriod}s H=${waveHeight}→${result}m (Ks=${Ks_clamped.toFixed(2)})`);
     }
