@@ -9731,7 +9731,7 @@ app.get('/api/forecast', async (req, res) => {
                 rain: i_rain,
                 cloud: i_cloud + "%",
                 moonPhase: i_moon.phase,
-                moonPhaseName: getMoonPhaseName(i_moon.phase),
+                moonPhaseName: getMoonPhaseName(i_moon.phase, lang),
                 sstTrend: { trend: i_tempShock.trend, direction: i_tempShock.trendDirection },
                 current: i_oceanCurrent !== null ? i_oceanCurrent : i_current,
                 currentIsReal: i_oceanCurrent !== null,
