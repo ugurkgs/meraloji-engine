@@ -1661,7 +1661,9 @@ const cache = new NodeCache({ stdTTL: 10800, checkperiod: 600 }); // 3 saat — 
 // hamle/yön/görüş/yağış olasılığı/dalga yönü/gelgit/basınç/solunar/ay ışığı saatlik +
 // füzyonlu SST; günlük dalga doğru günden. Ayrıca 24 Eyl KAYALIK ×0,70, 26 Eyl pelajik
 // rampa, 6 Eki kalamar sert kapısı damgasız canlıya çıkmıştı — bu tarih onları da kapsar.
-const ENGINE_VERSION = '2026-10-09';
+// [2026-11-01] Karadeniz poligonu Rumeli Feneri-Rezve şeridini kapsıyor (tr-sea-regions.json);
+// gün değişince ham hava önbelleği kullanılmıyor (7. gün uydurma veriyle puanlanıyordu).
+const ENGINE_VERSION = '2026-11-01';
 
 // Bathymetry sonuçlarını 24 saat cache'le — aynı bölgede tekrar taramada API çağrısı yok
 const bathyCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
