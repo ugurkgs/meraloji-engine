@@ -245,7 +245,7 @@ function planTipi(sub, user) {
     satirKutu('  BİTEN — aylık, 7 günden eski         ' + sayi(dolAEski));
     satirKutu('  BİTEN — yıllık                       ' + sayi(dolY.length));
     console.log('├' + '─'.repeat(IC) + '┤');
-    satirKutu('  HİÇ ABONE OLMUŞ KİŞİ (tekil)         ' + sayi(topAktif + dolmus.length));
+    satirKutu('  BUGÜNE KADAR ABONE OLAN KİŞİ         ' + sayi(topAktif + dolmus.length));
     console.log('└' + '─'.repeat(IC) + '┘');
     console.log('  "Son 7 günde biten" aylıklar kesin kayıp değil: yenileme ancak');
     console.log('  kullanıcı uygulamayı açınca görünür. Kesin cevap: Play Console →');
