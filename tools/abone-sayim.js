@@ -6,8 +6,8 @@
  *
  * Çalıştırma (Render → Shell):
  *     node tools/abone-sayim.js              → özet
- *     node tools/abone-sayim.js --liste      → abone satırlarını da yaz (e-posta dahil)
- *     node tools/abone-sayim.js --gecmis     → süresi dolmuşları da listele
+ *     node tools/abone-sayim.js --liste      → abone ve süresi dolmuş satırlarını da yaz (e-posta dahil)
+ *     node tools/abone-sayim.js --gecmis     → yalnız süresi dolmuşları listele
  *
  * ───────────────────────────────────────────────────────────────────────────
  * NEDEN stats/pro_count OKUNMUYOR?
@@ -177,7 +177,7 @@ function planTipi(sub, user) {
         } else if (sub && sub.expiresAt) {
             dolmus.push({
                 uid, tip: planTipi(sub, user), email: sub.email || null,
-                bitis: sub.expiresAt, durum: sub.status || '—',
+                baslama: sub.startedAt, bitis: sub.expiresAt, durum: sub.status || '—',
                 yenileme: yenilemeSayisi(sub, planTipi(sub, user) === 'yearly')
             });
         }
@@ -306,20 +306,37 @@ function planTipi(sub, user) {
         yaz('PLAN TİPİ BİLİNMİYOR', aktif.bilinmiyor);
     }
 
-    if (GECMIS && dolmus.length) {
-        console.log('── SÜRESİ DOLMUŞ (' + dolmus.length + ') ───────────────────────────');
-        dolmus.sort((a, b) => (b.bitis || 0) - (a.bitis || 0)).forEach(k => {
-            console.log('  ' + kisaUid(k.uid) +
-                '  ' + (k.tip || 'bilinmiyor').padEnd(10) +
-                '  bitti ' + tarih(k.bitis) +
-                '  durum=' + k.durum +
-                '  ' + (typeof k.yenileme === 'number' ? (k.yenileme === 0 ? 'hiç yenilemedi' : k.yenileme + ' kez yeniledi') : '') +
-                '  ' + (k.email || '—'));
+    // [2026-11-01] Sahip istedi: bırakanlar da isimle listede görünsün, kaçıncı
+    // yenilemede bıraktığı yazsın. Yenileme sayısı SON BİLİNEN değerdir: sunucu
+    // ancak uygulama açılınca Google'a sorduğu için gerçekte daha fazla olabilir.
+    if ((LISTE || GECMIS) && dolmus.length) {
+        const kiralim = new Map();
+        dolmus.forEach(k => {
+            const a = typeof k.yenileme === 'number' ? k.yenileme : -1;
+            kiralim.set(a, (kiralim.get(a) || 0) + 1);
         });
-        console.log();
+        const ozet = [...kiralim.keys()].sort((a, b) => a - b).map(a =>
+            (a < 0 ? 'bilinmiyor' : a === 0 ? 'hiç yenilemeden' : a + ' yenilemeden sonra') + ': ' + kiralim.get(a));
+
+        console.log('── SÜRESİ DOLMUŞ (' + dolmus.length + ') ───────────────────────────');
+        console.log('  ' + ozet.join('  ·  '));
+        dolmus.sort((a, b) => (b.bitis || 0) - (a.bitis || 0)).forEach(k => {
+            const durumYazi = typeof k.yenileme !== 'number' ? 'yenileme bilinmiyor'
+                : k.yenileme === 0 ? 'hiç yenilemedi'
+                : k.yenileme + ' kez yeniledi, sonra bıraktı';
+            console.log('  ' + kisaUid(k.uid) +
+                '  ' + (k.tip === 'yearly' ? 'yıllık' : k.tip === 'monthly' ? 'aylık' : 'bilinmiyor').padEnd(10) +
+                '  başlangıç ' + tarih(k.baslama) +
+                '  bitti ' + tarih(k.bitis) +
+                '  ' + durumYazi.padEnd(30) +
+                (typeof k.bitis === 'number' && k.bitis > NOW - 7 * GUN ? 'KESİN DEĞİL  ' : '') +
+                (k.email || '—'));
+        });
+        console.log('  Yenileme sayısı son bilinen değerdir; kullanıcı uygulamayı açmadıysa');
+        console.log('  gerçekte daha fazla yenilemiş olabilir. Kesin cevap: Play Console → Sipariş yönetimi.\n');
     }
 
-    if (!LISTE) console.log('  (satır satır görmek için: --liste, eski aboneler için: --gecmis)\n');
+    if (!LISTE) console.log('  (satır satır görmek için: --liste, yalnız eski aboneler için: --gecmis)\n');
 
     process.exit(0);
 })().catch(e => {
