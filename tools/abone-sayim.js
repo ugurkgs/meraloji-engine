@@ -71,6 +71,15 @@ const GUN      = 86400000;
 const tarih = ms => (typeof ms === 'number' && isFinite(ms) && ms > 0)
     ? new Date(ms).toISOString().slice(0, 10) : '—';
 const kisaUid = u => u ? (u.slice(0, 8) + '…') : '—';
+
+// [2026-11-01] Sahibin hesapları sayıma girmez. Liste server.js ISTATISTIK_HARIC
+// ile AYNI env ve AYNI varsayılan; hem UID hem e-posta kabul eder.
+const HARIC = new Set(String(
+    process.env.ISTATISTIK_HARIC
+    || 'zhCzPS20wneS2njZKVGFAwOvc5m2,ugurkogus@gmail.com,meralojifishsystem@gmail.com'
+).split(',').map(x => x.trim().toLowerCase()).filter(Boolean));
+const haricMi = (uid, sub) => HARIC.has(String(uid).toLowerCase())
+    || !!(sub && typeof sub.email === 'string' && HARIC.has(sub.email.trim().toLowerCase()));
 const sayi    = (n, g = 5) => String(n).padStart(g);
 
 /** Süre geçerli mi? Sayı DEĞİLSE karar verilmez — bilinmeyen bilinmiyordur. */
@@ -139,10 +148,13 @@ function planTipi(sub, user) {
     const suresiz  = [];   // users.isPro true ama proExpiresAt yok
 
     const tumUid = new Set([...subs.keys(), ...users.keys()]);
+    let haricSayi = 0;
 
     for (const uid of tumUid) {
         const sub  = subs.get(uid)  || null;
         const user = users.get(uid) || null;
+
+        if (haricMi(uid, sub)) { if (sub) haricSayi++; continue; }
 
         // (A) subscriptions dalı
         const aDal = !!(sub && sub.status === 'active' && suresiGecerli(sub.expiresAt) === true);
@@ -250,7 +262,8 @@ function planTipi(sub, user) {
     console.log('  Son 30 günde başlayan : ' + yeni(30).length);
     console.log('  Önümüzdeki  7 günde bitiyor : ' + bitecek(7).length + '   (yenilenmezse düşer)');
     console.log('  Önümüzdeki 30 günde bitiyor : ' + bitecek(30).length);
-    console.log('  Süresi dolmuş (eski abone)  : ' + dolmus.length + '\n');
+    console.log('  Süresi dolmuş (eski abone)  : ' + dolmus.length);
+    console.log('  Sahip hesabı, sayım dışı    : ' + haricSayi + '\n');
 
     // ── 3) SAYAÇ KARŞILAŞTIRMASI ──────────────────────────────────────────
     let stats = null;
