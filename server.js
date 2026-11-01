@@ -3771,6 +3771,9 @@ function calculateConfidence(params, eksikler) {
 
 function getWeatherIconicDescription(code, lang, rain = 0, wind = 0) {
     const weatherMap = {
+        // [2026-11-02] TR çiseleme ve sağanak metinleri "yağmur" içeriyor: yayındaki istemci
+        // (translateWeather, getWeatherIcon) yalnız bu sözcüğü arıyor, sağanakta gündüz güneş
+        // ikonu, gece "Berrak Gece" gösteriyordu. OM yağışlı saatlerinin %26'sı bu kodlardaydı.
         // [YUNANCA 2026-08-13] `el` HİÇ YOKTU. Aşağıdaki `res[lang] || res.tr`
         // yüzünden Yunan kullanıcı TÜRKÇE hava metni görüyordu — fırtınada değil,
         // HER hava kodunda. Uygulama 4 dil destekliyor ama bu tablo 3 taşıyordu.
@@ -3782,11 +3785,11 @@ function getWeatherIconicDescription(code, lang, rain = 0, wind = 0) {
         3: { tr: "☁️ Bulutlu", en: "☁️ Overcast", es: "☁️ Nublado", el: "☁️ Συννεφιά" },
         45: { tr: "🌫️ Sisli", en: "🌫️ Foggy", es: "🌫️ Niebla", el: "🌫️ Ομίχλη" },
         48: { tr: "🌫️ Kırağılı Sis", en: "🌫️ Depositing Rime Fog", es: "🌫️ Niebla con escarcha", el: "🌫️ Ομίχλη με πάχνη" },
-        51: { tr: "🌦️ Hafif Çiseleme", en: "🌦️ Light Drizzle", es: "🌦️ Llovizna ligera", el: "🌦️ Ασθενές ψιχάλισμα" },
-        53: { tr: "🌦️ Çiseleme", en: "🌦️ Moderate Drizzle", es: "🌦️ Llovizna moderada", el: "🌦️ Ψιχάλισμα" },
-        55: { tr: "🌦️ Şiddetli Çiseleme", en: "🌦️ Dense Drizzle", es: "🌦️ Llovizna intensa", el: "🌦️ Πυκνό ψιχάλισμα" },
-        56: { tr: "🧊 Hafif Dondurucu Çiseleme", en: "🧊 Light Freezing Drizzle", es: "🧊 Llovizna helada ligera", el: "🧊 Ασθενές παγωμένο ψιχάλισμα" },
-        57: { tr: "🧊 Şiddetli Dondurucu Çiseleme", en: "🧊 Dense Freezing Drizzle", es: "🧊 Llovizna helada intensa", el: "🧊 Πυκνό παγωμένο ψιχάλισμα" },
+        51: { tr: "🌦️ Hafif Çiseleyen Yağmur", en: "🌦️ Light Drizzle", es: "🌦️ Llovizna ligera", el: "🌦️ Ασθενές ψιχάλισμα" },
+        53: { tr: "🌦️ Çiseleyen Yağmur", en: "🌦️ Moderate Drizzle", es: "🌦️ Llovizna moderada", el: "🌦️ Ψιχάλισμα" },
+        55: { tr: "🌦️ Yoğun Çiseleyen Yağmur", en: "🌦️ Dense Drizzle", es: "🌦️ Llovizna intensa", el: "🌦️ Πυκνό ψιχάλισμα" },
+        56: { tr: "🧊 Hafif Dondurucu Çiseleyen Yağmur", en: "🧊 Light Freezing Drizzle", es: "🧊 Llovizna helada ligera", el: "🧊 Ασθενές παγωμένο ψιχάλισμα" },
+        57: { tr: "🧊 Yoğun Dondurucu Çiseleyen Yağmur", en: "🧊 Dense Freezing Drizzle", es: "🧊 Llovizna helada intensa", el: "🧊 Πυκνό παγωμένο ψιχάλισμα" },
         61: { tr: "🌧️ Hafif Yağmurlu", en: "🌧️ Slight Rain", es: "🌧️ Lluvia ligera", el: "🌧️ Ασθενής βροχή" },
         63: { tr: "🌧️ Yağmurlu", en: "🌧️ Moderate Rain", es: "🌧️ Lluvia", el: "🌧️ Βροχή" },
         65: { tr: "🌧️ Şiddetli Yağmurlu", en: "🌧️ Heavy Rain", es: "🌧️ Lluvia fuerte", el: "🌧️ Ισχυρή βροχή" },
@@ -3796,9 +3799,9 @@ function getWeatherIconicDescription(code, lang, rain = 0, wind = 0) {
         73: { tr: "🌨️ Kar Yağışlı", en: "🌨️ Moderate Snow", es: "🌨️ Nieve", el: "🌨️ Χιονόπτωση" },
         75: { tr: "🌨️ Şiddetli Kar Yağışlı", en: "🌨️ Heavy Snow", es: "🌨️ Nieve fuerte", el: "🌨️ Ισχυρή χιονόπτωση" },
         77: { tr: "🌨️ Kar Tanecikleri", en: "🌨️ Snow Grains", es: "🌨️ Granos de nieve", el: "🌨️ Κόκκοι χιονιού" },
-        80: { tr: "🌦️ Hafif Sağanak", en: "🌦️ Slight Rain Showers", es: "🌦️ Chubascos ligeros", el: "🌦️ Ασθενείς μπόρες" },
-        81: { tr: "🌦️ Sağanak Yağışlı", en: "🌦️ Rain Showers", es: "🌦️ Chubascos", el: "🌦️ Μπόρες" },
-        82: { tr: "🌦️ Şiddetli Sağanak", en: "🌦️ Violent Rain Showers", es: "🌦️ Chubascos violentos", el: "🌦️ Ισχυρές μπόρες" },
+        80: { tr: "🌦️ Hafif Sağanak Yağmur", en: "🌦️ Slight Rain Showers", es: "🌦️ Chubascos ligeros", el: "🌦️ Ασθενείς μπόρες" },
+        81: { tr: "🌦️ Sağanak Yağmur", en: "🌦️ Rain Showers", es: "🌦️ Chubascos", el: "🌦️ Μπόρες" },
+        82: { tr: "🌦️ Şiddetli Sağanak Yağmur", en: "🌦️ Violent Rain Showers", es: "🌦️ Chubascos violentos", el: "🌦️ Ισχυρές μπόρες" },
         85: { tr: "🌨️ Hafif Kar Sağanağı", en: "🌨️ Slight Snow Showers", es: "🌨️ Chubascos de nieve ligeros", el: "🌨️ Ασθενείς μπόρες χιονιού" },
         86: { tr: "🌨️ Şiddetli Kar Sağanağı", en: "🌨️ Heavy Snow Showers", es: "🌨️ Chubascos de nieve fuertes", el: "🌨️ Ισχυρές μπόρες χιονιού" },
         95: { tr: "⛈️ Gök Gürültülü Fırtına", en: "⛈️ Thunderstorm", es: "⛈️ Tormenta eléctrica", el: "⛈️ Καταιγίδα" },
@@ -3828,6 +3831,27 @@ function getWeatherIconicDescription(code, lang, rain = 0, wind = 0) {
         }
     }
     return desc;
+}
+
+// [2026-11-02] 7 günlük kart yağışı yalnız analiz saatinden alıyordu: ≥1 mm yağışlı günlerde
+// saatlerin %50'sinde "yağış yok" görünürdü. Bu özet YALNIZ gösterim alanlarına gider; skor,
+// berraklık ve capeAlert analiz saatinin değerleriyle kalır. 1 mm altı gün analiz saatinin
+// kodunu korur, tek saatlik 0,1 mm günü "yağmurlu" yapmasın. Fırtına kodu varsa o, yoksa en
+// yağışlı saatin kodu; o saatte kod yağış içermiyorsa (ölçüldü: yağışlı saatlerin %17'si) 61.
+function gunlukYagisOzeti(hourly, baslangic, saatKodu, saatOlasiligi) {
+    let toplam = 0, tepe = 0, tepeKod = null, firtina = null, olasilik = saatOlasiligi;
+    for (let i = baslangic; i < baslangic + 24; i++) {
+        const y = hourly?.precipitation?.[i], k = hourly?.weather_code?.[i], p = hourly?.precipitation_probability?.[i];
+        if (typeof y === 'number') {
+            toplam += y;
+            if (y > tepe) { tepe = y; tepeKod = k; }
+        }
+        if (typeof k === 'number' && k >= 95 && (firtina === null || k > firtina)) firtina = k;
+        if (typeof p === 'number' && p > olasilik) olasilik = p;
+    }
+    let kod = saatKodu;
+    if (toplam >= 1) kod = firtina !== null ? firtina : (typeof tepeKod === 'number' && tepeKod >= 51 ? tepeKod : 61);
+    return { yagis: parseFloat(toplam.toFixed(1)), kod, olasilik };
 }
 
 // İki koordinat arası mesafe (Haversine, km)
@@ -9353,17 +9377,18 @@ app.get('/api/forecast', async (req, res) => {
                 waveDir: waveDirection, shoreBearing: shoreBearingInfo.onshoreBearing
             }) : null;
 
+            const gunYagis = gunlukYagisOzeti(weather.hourly, hourlyStartIdx, weatherCode, precipProb);
             forecast.push({
                 date: targetDate.toISOString(),
                 // ÜST KISIM İÇİN: Net Hava Durumu
-                weatherSummary: getWeatherIconicDescription(weatherCode, lang, rain, windSpeed),
+                weatherSummary: getWeatherIconicDescription(gunYagis.kod, lang, gunYagis.yagis, windSpeed),
                 tacticKey, tacticData,
                 temp: Math.round(tempWater * 10) / 10,
                 wave, wind: Math.round(windSpeed),
                 windDirection: Math.round(windDir), // analiz saatindeki yön (rüzgar hızıyla tutarlı)
                 clarity: Math.round(clarity),
                 pressure: Math.round(pressure), pressureTrend: pressureTrend.trend,
-                cloud: cloud + "%", rain: rain, salinity, tide: gelgitFarkiMetni(marine, marineHourlyIdx),   // günlük gerçek gelgit farkı (m); yoksa null → "—"
+                cloud: cloud + "%", rain: gunYagis.yagis, salinity, tide: gelgitFarkiMetni(marine, marineHourlyIdx),   // günlük gerçek gelgit farkı (m); yoksa null → "—"
                 current: oceanCurrent !== null ? oceanCurrent.toFixed(3) : currentEst.toFixed(2),
                 currentIsReal: oceanCurrent !== null,
                 upwelling: parseFloat(upwelling.toFixed(2)),
@@ -9383,7 +9408,7 @@ app.get('/api/forecast', async (req, res) => {
                 } : null,
                 // YENİ (1F) + (V43)
                 windGust: Math.round(windGust),
-                precipProb: precipProb,
+                precipProb: gunYagis.olasilik,
                 waveDirection: waveDirection,
                 // [DALGA YÖNÜ] waveDirection'a DOKUNULMADI — skoru o besliyor
                 // (headOnWaveBonus, ~4349). Aşağıdaki EK alan yalnız çizim içindir.
@@ -9399,7 +9424,7 @@ app.get('/api/forecast', async (req, res) => {
                 capeAlert: capeAlertLevel(cape, weatherCode, precipProb, rain), // sadece gerçek fırtına kanıtıyla
                 cape: parseFloat(cape.toFixed(0)),
                 visibility: visibility,
-                weatherCode: weatherCode,
+                weatherCode: gunYagis.kod,
                 localTime: new Date(Date.now() + (utcOffsetSeconds * 1000)).toISOString().replace('T', ' ').slice(0, 16),
                 score: parseFloat(topScore.toFixed(1)),
                 hasActiveFish: topScore > 0, // taktik notu için: uygun tür var mı
@@ -9423,7 +9448,7 @@ app.get('/api/forecast', async (req, res) => {
                     // [2026-08-14] Sebebe duyarlı güven — bkz. calculateConfidence
                     basinMismatch: havzaUyusmazligi,
                     waveCapped: !!(fetchTavan && fetchTavan.kirpilanSaat > 0)
-                }), tacticKey, tacticData, weatherSummary,
+                }), tacticKey, tacticData,
                 // BUGÜN (i === 0) uzun gider; 1-6. günler 10'da kalır (payload).
                 // Kesme gönderim anında sürüme göre yeniden yapılıyor — bkz.
                 // listeyiSurumeGoreKes.
