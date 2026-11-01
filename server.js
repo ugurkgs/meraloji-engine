@@ -3833,6 +3833,17 @@ function getWeatherIconicDescription(code, lang, rain = 0, wind = 0) {
     return desc;
 }
 
+// [2026-11-02] Varsayılan model yağışı kaçırabiliyor (Torbalı 1 Kas: gözlemde yağmur, model 0 mm,
+// olasılık %30-33). 16 METAR, 7 gün: başlık yakalaması %52→%68, yağış deyip yanılma %41→%43.
+// Yalnız METİN değişir: weatherCode ve rain gerçek veri kalır, simülasyon ve skor etkilenmez.
+// Yayındaki istemci "yağmur" sözcüğünü görünce başlıkta "Yağmurlu" yazar; "olabilir" ancak
+// APK 53 ile görünür. İç bölge yanıtı (icBolgeYaniti) bilerek dışarıda, o yol APK çökertmişti.
+const YAGMUR_OLABILIR = { tr: "🌦️ Yağmur Olabilir", en: "🌦️ Rain Possible", es: "🌦️ Posible lluvia", el: "🌦️ Πιθανή βροχή" };
+function saatlikHavaOzeti(code, lang, rain, wind, olasilik) {
+    if (olasilik >= 30 && (code === 3 || code === 45 || code === 48)) return YAGMUR_OLABILIR[lang] || YAGMUR_OLABILIR.tr;
+    return getWeatherIconicDescription(code, lang, rain, wind);
+}
+
 // [2026-11-02] 7 günlük kart yağışı yalnız analiz saatinden alıyordu: ≥1 mm yağışlı günlerde
 // saatlerin %50'sinde "yağış yok" görünürdü. Bu özet YALNIZ gösterim alanlarına gider; skor,
 // berraklık ve capeAlert analiz saatinin değerleriyle kalır. 1 mm altı gün analiz saatinin
@@ -9744,7 +9755,7 @@ app.get('/api/forecast', async (req, res) => {
                 score: i_topScore,
                 hasActiveFish: i_topScore > 0, // taktik notu için: uygun tür var mı
                 // ÜST KISIM: Sadece İkonlu TR Hava Durumu (Ham veri gelmez)
-                weatherSummary: getWeatherIconicDescription(i_weatherCode, lang, i_rain, i_wind),
+                weatherSummary: saatlikHavaOzeti(i_weatherCode, lang, i_rain, i_wind, i_precipProb),
                 tacticKey: instantTacticKey, tacticData: instantTacticData,
                 // «Şimdi» listesi uzun gider — süzgeç açıldığında 10 hedef tür
                 // kalabilmesi için. Eski istemciye gönderimde 10'a iniyor.
@@ -9959,7 +9970,7 @@ app.get('/api/forecast', async (req, res) => {
 
                 const hCode = safeNum(weather.hourly?.weather_code?.[wIdx], 0);
                 const hRain = safeNum(weather.hourly?.precipitation?.[wIdx]);
-                const hSummary = getWeatherIconicDescription(hCode, lang, hRain, hWind);
+                const hSummary = saatlikHavaOzeti(hCode, lang, hRain, hWind, safeNum(weather.hourly?.precipitation_probability?.[wIdx]));
 
                 hourlyTimeline.push({
                     hourOffset: h,
