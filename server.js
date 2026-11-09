@@ -1010,7 +1010,11 @@ function i18n(lang) { return SERVER_i18n[lang] || SERVER_i18n.tr; }
 // Her istek sonunda tek satırlık/blok bir "kim, ne yaptı, nerede" özeti basılır.
 // ═══════════════════════════════════════════════════════════════════════════
 const LOG_VERBOSE = process.env.LOG_VERBOSE === '1';
-const _NOISY_LOG = /^\[(SHOALING|GEBCO|GRID|SST|SUBSTRATE|SUBSTRATE-US|OFFLINE|FORECAST|SNAP|BATHYMETRY|NOTIFY CRON|LAND)\]/;
+// [LOG_VERBOSE 2026-11-09] Sahip "tarama yerleri ve hatalar gürültüde kayboluyor" dedi.
+// Eklenenler (SST'den sonraki 10 etiket): SST-FÜZE, SST-SAT, SST-BG, PLANKTON, NEDEN,
+// DALGA-SINIRI, KIYI-YAPI, YATISMA, TRAKONYA, GÖL. Bir tanesini geri açmak için listeden sil;
+// hepsini açmak için Render'da LOG_VERBOSE=1. Sigorta satırları (_origConsoleLog) etkilenmez.
+const _NOISY_LOG = /^\[(SHOALING|GEBCO|GRID|SST|SST-FÜZE|SST-SAT|SST-BG|PLANKTON|NEDEN|DALGA-SINIRI|KIYI-YAPI|YATISMA|TRAKONYA|GÖL|SUBSTRATE|SUBSTRATE-US|OFFLINE|FORECAST|SNAP|BATHYMETRY|NOTIFY CRON|LAND)\]/;
 // Bağımlılıklardan sızan, anlam ifade etmeyen satırlar (örn. "0 services selected:").
 const _NOISY_SUBSTR = /services selected/i;
 const _origConsoleLog = console.log.bind(console);
@@ -1104,7 +1108,7 @@ function printRequestLog(req, timeMs) {
     // için req.ip taklit edilebilir (X-Forwarded-For); socket.remoteAddress edilemez.
     if (req.query && req.query._internal === '1' && _isLoopback(req)) {
         const lat = req.query.lat, lon = req.query.lon;
-        _origConsoleLog(`⚙ [iç çağrı] ${kind || p}  ${(+lat).toFixed(3)},${(+lon).toFixed(3)}  ${ms}ms`);
+        vlog(`⚙ [iç çağrı] ${kind || p}  ${(+lat).toFixed(3)},${(+lon).toFixed(3)}  ${ms}ms`);   // [LOG_VERBOSE 2026-11-09] cron'un kendi analizleri, kullanıcı değil
         return;
     }
 
